@@ -4,7 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "tokens/**", "package.json", "tsconfig*.json", "tsup.config.*"],
+      "inputs": ["src/**", "tokens/**", "package.json", "tsconfig*.json"],
       "outputs": ["dist/**"]
     },
     "build:storybook": {
@@ -23,11 +23,16 @@
       "outputs": []
     },
     "lint": {
-      "inputs": ["src/**", ".oxlintrc.json"],
+      "inputs": ["src/**", "$TURBO_ROOT$/.oxlintrc.json"],
+      "outputs": []
+    },
+    "format:check": {
+      "inputs": ["src/**", "$TURBO_ROOT$/.oxfmtrc.json"],
       "outputs": []
     },
     "format": {
-      "inputs": ["src/**", ".oxfmtrc.json"],
+      "cache": false,
+      "inputs": ["src/**", "$TURBO_ROOT$/.oxfmtrc.json"],
       "outputs": []
     },
     "typecheck": {
