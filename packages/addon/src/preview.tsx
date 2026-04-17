@@ -1,7 +1,7 @@
 import type { Decorator, Preview } from '@storybook/react-vite';
 import { useEffect } from 'react';
 // @ts-expect-error — virtual module resolved by the Vite plugin at preview build time
-import { css as generatedCss, defaultTheme, themes } from 'virtual:swatchbook/tokens';
+import { css as generatedCss, cssVarPrefix, defaultTheme, themes } from 'virtual:swatchbook/tokens';
 import { DATA_THEME_ATTR, GLOBAL_KEY, PARAM_KEY, STYLE_ELEMENT_ID } from '#/constants';
 
 interface ThemeEntry {
@@ -11,16 +11,41 @@ interface ThemeEntry {
 const typedThemes = themes as ThemeEntry[];
 const typedCss = generatedCss as string;
 const typedDefaultTheme = defaultTheme as string | null;
+const typedPrefix = (cssVarPrefix ?? '') as string;
 
+/** CSS var name with the active prefix applied. */
+function v(name: string): string {
+  return typedPrefix ? `--${typedPrefix}-${name}` : `--${name}`;
+}
+
+/**
+ * Inject the per-theme stylesheet plus a tiny `html, body { ... }` block so
+ * the iframe's own chrome (outside any decorator wrapper — Docs mode,
+ * autodocs, empty gutters) also picks up the active theme.
+ */
 function ensureStylesheet(): void {
   if (typeof document === 'undefined') return;
+  const bodyRules = `
+html, body {
+  background: var(${v('color-sys-surface-default')}, Canvas);
+  color: var(${v('color-sys-text-default')}, CanvasText);
+  margin: 0;
+}
+`;
+  const text = `${typedCss}\n${bodyRules}`;
   let style = document.getElementById(STYLE_ELEMENT_ID) as HTMLStyleElement | null;
   if (!style) {
     style = document.createElement('style');
     style.id = STYLE_ELEMENT_ID;
     document.head.appendChild(style);
   }
-  if (style.textContent !== typedCss) style.textContent = typedCss;
+  if (style.textContent !== text) style.textContent = text;
+}
+
+/** Keep <html data-theme=…> in sync so the whole iframe inherits the theme. */
+function setRootTheme(theme: string): void {
+  if (typeof document === 'undefined') return;
+  document.documentElement.setAttribute(DATA_THEME_ATTR, theme);
 }
 
 const decorator: Decorator = (Story, context) => {
@@ -34,12 +59,14 @@ const decorator: Decorator = (Story, context) => {
     ensureStylesheet();
   }, []);
 
+  useEffect(() => {
+    setRootTheme(theme);
+  }, [theme]);
+
   return (
     <div
       {...{ [DATA_THEME_ATTR]: theme }}
       style={{
-        background: 'var(--sb-color-sys-surface-default, white)',
-        color: 'var(--sb-color-sys-text-default, black)',
         padding: '1rem',
         minHeight: '100%',
       }}
