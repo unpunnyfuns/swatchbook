@@ -2,16 +2,18 @@
 
 ## Mission
 
-Make [DTCG](https://www.designtokens.org/) design tokens **easier to understand and author** inside Storybook — specifically for React consumers. Not framework-agnostic; not a general-purpose DTCG toolkit. Post-v0.1.0 versions may add sibling packages for React Native / Vue / Lit. For today: one platform, one spec.
+Make [DTCG](https://www.designtokens.org/) design tokens **easier to understand and author** inside Storybook — specifically for React consumers. Not framework-agnostic; not a general-purpose DTCG toolkit. Sibling packages for React Native / Vue / Lit are possible later but deliberately out of scope for now. For today: one platform, one spec.
 
 The comprehension story is the differentiator: dimensions rendered as visual bars (not just "4px"), colors shown in every color space with contrast scores, shadows and motion previewed live, composite tokens shown as a unit. The authoring story is the companion: theme-aware Storybook controls, multi-axis theme composition, reverse-indexes tying tokens back to the components that use them.
 
-## Scope (v0.1.0)
+## Scope today
 
-- **Storybook 10.3+ on Vite + React.** Other renderers / bundlers are out of scope for v0.1.0.
+- **Storybook 10.3+ on Vite + React.** Other renderers / bundlers out of scope.
 - **DTCG 2025.10 resolver** is the sole theming input. No manifest, no layered shortcut, no migration helpers.
-- **Four doc blocks** cover the basic token types: `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail`. Richer visualizations (comparison, contrast, motion preview) are post-v0.1.0.
-- **Single-axis resolvers** get clean theme names automatically. Multi-axis resolvers use Terrazzo's permutation IDs — documented as a known limitation for v0.1.0.
+- **Four doc blocks** cover the basic token types: `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail`. Richer visualizations (comparison, contrast, motion preview) are scoped as a feature milestone.
+- **Single-axis resolvers** get clean theme names automatically. Multi-axis resolvers use Terrazzo's permutation IDs — a known rough edge, addressed in the multi-axis theming milestone.
+
+**Release cadence: deferred.** Iterating on features takes priority over shipping versions to npm. Packages stay unpublished until we explicitly decide to ship; `@unpunnyfuns/swatchbook-tokens` is iceboxed (see `docs/decisions.md`).
 
 ## Context
 
@@ -21,7 +23,7 @@ Packages published under the `@unpunnyfuns` scope.
 
 Decisions locked in:
 - Monorepo, pnpm workspaces, Turborepo
-- Theming: DTCG 2025.10 resolvers only. The resolver is the sole theming input as of v0.1.0. Earlier iterations carried Tokens Studio `$themes` manifest support and an explicit-layers config shortcut; both were removed pre-release — see `docs/decisions.md`.
+- Theming: DTCG 2025.10 resolvers only. The resolver is the sole theming input. Earlier iterations carried Tokens Studio `$themes` manifest support and an explicit-layers config shortcut; both removed — see `docs/decisions.md`.
 - v1 control: color only (token picker). Control stores `var(--…)` **directly** in args — swatch/label is chrome only, no decorator substitution.
 - Doc blocks: TokenTable, ColorPalette, TypographyScale, TokenDetail
 - Framework: React (CSF3). Vite builder only — no Webpack path in v1.
@@ -442,7 +444,7 @@ Two mechanisms:
 
 Each milestone has a single measurable demo step. Progress is tracked by which milestones are green.
 
-### M0 — Foundation ✅
+### Foundation ✅
 **Goal:** Empty but fully wired monorepo; scope of core is confirmed; governance in place.
 **Work:**
 - Spike: read `@terrazzo/parser` API + source; prototype loading a small DTCG file; verify alias chains, multi-file merge, composite emission, diagnostic surface. Produce `docs/terrazzo-notes.md`.
@@ -455,7 +457,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Exit:** `pnpm install && pnpm turbo run lint typecheck` green on empty packages. CI runs on PR. Terrazzo note committed.
 **Demo:** CI badge green on the scaffold commit.
 
-### M1 — Core (`@unpunnyfuns/swatchbook-core`) ✅
+### Core (`@unpunnyfuns/swatchbook-core`) ✅
 **Goal:** DTCG loading + three-way theming + CSS/types emission, fully tested.
 **Work:**
 - Author `packages/tokens-reference`: ref/sys/cmp/themes + `$themes.manifest.json` + `resolver.json`.
@@ -466,7 +468,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Exit:** `turbo run test --filter core` green; `turbo run build --filter tokens-starter` produces `dist/css/light.css` and `dist/tokens.d.ts`.
 **Demo:** `cat packages/tokens-starter/dist/css/light.css` shows expected CSS vars.
 
-### M2 — Baseline Storybook app ✅
+### Baseline Storybook app ✅
 **Goal:** `apps/storybook` builds and renders demo components styled by real tokens — no swatchbook addon yet.
 **Work:**
 - Scaffold `apps/storybook` on the pinned Storybook version with React-Vite.
@@ -477,7 +479,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Exit:** `turbo run storybook` serves the app; `turbo run build:storybook` produces `storybook-static/`.
 **Demo:** Visit `http://localhost:6006` — Button/Card/Input stories render fully themed.
 
-### M3 — Addon runtime ✅
+### Addon runtime ✅
 **Goal:** Live theme switching in Storybook driven by the swatchbook addon.
 **Work:**
 - `@unpunnyfuns/swatchbook-addon`: preset + Vite virtual module (`virtual:swatchbook/tokens`) + HMR + preview decorator.
@@ -487,7 +489,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Exit:** Toolbar dropdown changes `data-theme`, CSS vars repaint. Editing a token file in `tokens-reference` hot-reloads the preview with new values.
 **Demo:** Pick "Dark · Brand A" in toolbar → demo components reflect the stacked composition instantly.
 
-### M4 — Token browsing + typed hook ✅
+### Token browsing + typed hook ✅
 **Goal:** Authors can introspect tokens and read them from JS with full types.
 **Work:**
 - Panel: **Tokens** tab (searchable, grouped by `$type`, click → copy `var(--…)`) + **Diagnostics** tab (error/warn/info, green OK badge when empty).
@@ -497,7 +499,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Exit:** Panel lists every token from `tokens-reference`; `useToken('color.sys.surface.default')` returns the resolved value with autocomplete; theme switch updates the value.
 **Demo:** Story uses `useToken` and renders its return value as text; Tokens panel search filters down to a single result.
 
-### M5 — Token-aware color control ⏸ Deferred
+### Token-aware color control ⏸ Deferred
 **Goal:** Replace Storybook's default color picker for color-typed args.
 **Work:**
 - `swatchbook-color` argType: searchable popover of color tokens (swatch + path + resolved), writes `var(--…)` directly to args via `updateArgs`.
@@ -508,7 +510,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 
 **Status (deferred):** Storybook 10 has no first-class API for registering new control types; the workable paths (preset-colors / decorator / custom panel) each compromise on the plan's "writes `var(--…)` to args" exit criterion. M6's `TokenDetail` block and the existing Tokens panel cover the "pick a token" UX well enough in the meantime. Revisit after M6 lands, once we see how the blocks shake out and whether Storybook's upstream story on custom controls has evolved. See `docs/decisions.md` entry.
 
-### M6 — Doc blocks
+### Doc blocks
 **Goal:** Rich MDX documentation of tokens.
 **Work:**
 - `@unpunnyfuns/swatchbook-blocks`: `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail`.
@@ -517,7 +519,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Exit:** All four blocks render in MDX; every block reacts to toolbar theme change.
 **Demo:** `/docs/tokens/colors` MDX page shows a full ColorPalette + TokenTable; switching theme updates both live.
 
-### M7 — Interaction tests
+### Interaction tests
 **Goal:** Automated coverage of the addon's Storybook behavior.
 **Work:**
 - Enable `@storybook/addon-vitest`; write `vitest.config.ts` with Storybook project.
@@ -527,7 +529,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Exit:** `turbo run test:storybook` green in CI.
 **Demo:** CI run shows a green Storybook Test job with the expected number of passing tests.
 
-### M8 — Public documentation
+### Public documentation
 **Goal:** A consumer can install swatchbook from npm and find their way.
 **Work:**
 - Root README: install flow, MCP startup order, link to each package. _(done in #92)_
@@ -536,29 +538,26 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Exit:** `npm pack --dry-run` on each published package lists the expected files; cold `pnpm add` install in a throwaway repo works against a hand-rolled tokens folder.
 **Demo:** README flow copy-pasted into a fresh Vite+Storybook app — addon loads, panel lists tokens, theme switcher works.
 
-**Deferred:** Fleshing out `@unpunnyfuns/swatchbook-tokens` (slim pyramid + prebuilt CSS/JSON/types) — see `docs/decisions.md`. Consumers bring their own tokens for v0.1.0; the starter package is post-v0.1.0 polish, not a release blocker.
+**Deferred:** Fleshing out `@unpunnyfuns/swatchbook-tokens` (slim pyramid + prebuilt CSS/JSON/types) — see `docs/decisions.md`. Consumers bring their own tokens; the starter package is parked until there's concrete signal it's needed.
 
-### M9 — v0.1.0 release
-**Goal:** First public release under `@unpunnyfuns`.
+### DTCG spec convergence
+**Goal:** Collapse core's theming surface to a single DTCG 2025.10 resolver input — no Tokens Studio manifest, no explicit-layers shortcut.
 **Work:**
-- Configure Changesets for version bumps + changelogs.
-- Publish workflow in CI (npm token, provenance).
-- Cut `v0.1.0`, tag, release notes.
+- Drop Tokens Studio `$themes` manifest support.
+- Drop explicit-layers config shortcut.
+- Single-axis resolver names cleaned (modifier value used directly; multi-axis keeps the permutation ID).
 
-**Exit:** `@unpunnyfuns/swatchbook-core`, `@unpunnyfuns/swatchbook-addon`, `@unpunnyfuns/swatchbook-blocks`, `@unpunnyfuns/swatchbook-tokens` all on npm at the same version.
-**Demo:** Fresh clone of the demo repo from M8 pins the released versions and installs without workspace links.
+**Exit:** `Config` accepts `{ tokens, resolver, ... }` only; dropping anything else from the public surface is a breaking change documented in changesets.
 
 ### Progress tracking
 
-Create GitHub milestones matching M0–M9. Each PR references its milestone. An "M-status" line in the root README tracks `Current: Mx — <goal>`.
+Each feature milestone has a scope area on GitHub. PRs reference their milestone (body, not title). A "Current:" line in `CLAUDE.md` names the active one. No implied ordering across milestones beyond what's written here — scope areas are parallelizable; pick based on thesis value, not position.
 
-## Post-v0.1.0 roadmap
+## Feature roadmap — comprehension, composition, authoring
 
-Once v0.1.0 ships, the milestones below become the product's next axis — **comprehension first, then authoring ergonomics, then composition UX, then the index that ties tokens to code.** Each milestone deepens the "easier to understand DTCG" thesis rather than broadening the framework surface.
+Beyond spec convergence, four scope areas deepen the "easier to understand DTCG" thesis rather than broadening framework surface. Listed in the order I'd probably reach for them, not a contract:
 
-These sit on GitHub as their own track — numbered M10+ alongside the feature march, so they're visible and orderable but don't block v0.1.0.
-
-### M10 — DTCG comprehension visualizations
+### DTCG comprehension visualizations
 
 **Goal:** Every token type renders in a form that makes its value legible at a glance, not as a number-string.
 
@@ -573,7 +572,7 @@ These sit on GitHub as their own track — numbered M10+ alongside the feature m
 **Exit:** Every DTCG primitive + composite type ships a dedicated block or first-class preview panel inside `TokenDetail`. Storybook interaction tests assert each renders against the reference fixture.
 **Demo:** Docs page showing `space`, `radius`, `shadow`, `motion`, `typography` tokens each rendered *visually* — not just textually.
 
-### M11 — Multi-axis theming UX
+### Multi-axis theming UX
 
 **Goal:** Multi-modifier resolvers stop being a hostile UI surface. Users compose themes axis-by-axis from the toolbar.
 
@@ -587,7 +586,7 @@ These sit on GitHub as their own track — numbered M10+ alongside the feature m
 **Exit:** A resolver with `appearance × brand × density` renders cleanly in the toolbar; each axis is pickable independently; saved combos persist across reloads. Interaction tests cover the composer.
 **Demo:** Toolbar shows three columns; picking "dark × brand-a × compact" repaints the preview.
 
-### M12 — Token-aware controls (revival of M5)
+### Token-aware controls
 
 **Goal:** Storybook `argTypes` can be "a token of this type" — not a raw string — so author-time picking is token-native.
 
@@ -600,7 +599,7 @@ These sit on GitHub as their own track — numbered M10+ alongside the feature m
 
 **Exit:** A Button story has `bg: { control: 'swatchbook-color' }` — picking a token in the Controls panel writes `var(--…)` into the args; the component renders with that value.
 
-### M13 — Component ↔ token reverse index
+### Component ↔ token reverse index
 
 **Goal:** Docs answer "which components consume this token" and "which tokens does this component consume".
 
@@ -613,14 +612,15 @@ These sit on GitHub as their own track — numbered M10+ alongside the feature m
 **Exit:** MDX page `/docs/tokens/color-sys-accent-bg` renders a reverse index; changes to components repopulate the index on HMR.
 **Demo:** Clicking a row in the Tokens panel scrolls to its consumers.
 
-### Beyond M13
+### Further out
 
-Out of scope in named milestones but worth capturing the shape for later:
+Out of scope as named milestones but worth capturing the shape:
 
 - **Multi-framework siblings.** `@unpunnyfuns/swatchbook-addon-rn`, `-vue`, `-lit` as parallel packages; core stays shared.
 - **Write-back from the addon UI.** See `docs/future.md` — token edits from the panel, via Storybook's `experimental_serverChannel`, landing on disk.
 - **Tokens Studio → DTCG migration helper.** A standalone CLI that converts `$themes.manifest.json` + token files to a DTCG `resolver.json`.
 - **Public tokens-starter.** Thaw `@unpunnyfuns/swatchbook-tokens` once there's consumer signal for a canned palette.
+- **Release cadence.** Changesets versioning, publish workflow, tag cutting. Deferred by decision; re-adopt when we're ready to ship.
 
 ## Verification
 
