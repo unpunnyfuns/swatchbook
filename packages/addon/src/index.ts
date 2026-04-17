@@ -1,8 +1,8 @@
 import { definePreviewAddon } from 'storybook/internal/csf';
-import * as previewExports from './preview';
+import * as previewExports from './preview.tsx';
 
-export { ADDON_ID, GLOBAL_KEY, PARAM_KEY, VIRTUAL_MODULE_ID } from '#/constants';
-export type { AddonOptions } from '#/options';
+export { ADDON_ID, GLOBAL_KEY, PARAM_KEY, VIRTUAL_MODULE_ID } from '#/constants.ts';
+export type { AddonOptions } from '#/options.ts';
 
 /**
  * CSF Next factory. Consumers call this inside

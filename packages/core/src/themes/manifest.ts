@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { dirname, isAbsolute, resolve as resolvePath } from 'node:path';
-import type { Theme, ThemeConfig, TokenMap } from '#/types';
-import type { BufferedLogger } from '#/diagnostics';
-import { loadLayeredThemes } from '#/themes/layered';
+import type { Theme, ThemeConfig, TokenMap } from '#/types.ts';
+import type { BufferedLogger } from '#/diagnostics.ts';
+import { loadLayeredThemes } from '#/themes/layered.ts';
 
 interface ManifestEntry {
   name: string;

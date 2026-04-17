@@ -1,6 +1,6 @@
 import type { TokenNormalized } from '@terrazzo/parser';
 import { generateShorthand, makeCSSVar, transformCSSValue } from '@terrazzo/token-tools/css';
-import type { Theme, TokenMap } from '#/types';
+import type { Theme, TokenMap } from '#/types.ts';
 
 export interface EmitCssOptions {
   /** Override the prefix from project config (default: `config.cssVarPrefix ?? ''`). */

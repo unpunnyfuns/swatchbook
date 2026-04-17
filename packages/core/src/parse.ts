@@ -2,7 +2,7 @@ import { globSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { defineConfig as defineTerrazzoConfig, parse, type ParseResult } from '@terrazzo/parser';
-import type { BufferedLogger } from '#/diagnostics';
+import type { BufferedLogger } from '#/diagnostics.ts';
 
 /**
  * Load and parse every DTCG token file matched by the given globs.

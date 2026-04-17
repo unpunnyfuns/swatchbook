@@ -1,9 +1,9 @@
-import type { Config, Theme, TokenMap } from '#/types';
-import type { BufferedLogger } from '#/diagnostics';
-import { resolveThemingMode } from '#/config';
-import { loadLayeredThemes } from '#/themes/layered';
-import { loadManifestThemes } from '#/themes/manifest';
-import { loadResolverThemes } from '#/themes/resolver';
+import type { Config, Theme, TokenMap } from '#/types.ts';
+import type { BufferedLogger } from '#/diagnostics.ts';
+import { resolveThemingMode } from '#/config.ts';
+import { loadLayeredThemes } from '#/themes/layered.ts';
+import { loadManifestThemes } from '#/themes/manifest.ts';
+import { loadResolverThemes } from '#/themes/resolver.ts';
 
 export interface NormalizedThemes {
   themes: Theme[];

@@ -19,10 +19,9 @@
     "verbatimModuleSyntax": true,
     "erasableSyntaxOnly": true,
     "moduleDetection": "force",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
 
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
     "skipLibCheck": true
   }
 }

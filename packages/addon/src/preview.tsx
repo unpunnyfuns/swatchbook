@@ -8,7 +8,13 @@ import {
   themes,
   themingMode,
 } from 'virtual:swatchbook/tokens';
-import { DATA_THEME_ATTR, GLOBAL_KEY, INIT_EVENT, PARAM_KEY, STYLE_ELEMENT_ID } from '#/constants';
+import {
+  DATA_THEME_ATTR,
+  GLOBAL_KEY,
+  INIT_EVENT,
+  PARAM_KEY,
+  STYLE_ELEMENT_ID,
+} from '#/constants.ts';
 
 interface ThemeEntry {
   name: string;

@@ -2,9 +2,9 @@ import { readFile } from 'node:fs/promises';
 import { isAbsolute, resolve as resolvePath } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { defineConfig as defineTerrazzoConfig, loadResolver, parse } from '@terrazzo/parser';
-import type { Theme, TokenMap } from '#/types';
-import type { BufferedLogger } from '#/diagnostics';
-import { collectGlobbedFiles } from '#/themes/util';
+import type { Theme, TokenMap } from '#/types.ts';
+import type { BufferedLogger } from '#/diagnostics.ts';
+import { collectGlobbedFiles } from '#/themes/util.ts';
 
 export interface ResolverLoadResult {
   themes: Theme[];
