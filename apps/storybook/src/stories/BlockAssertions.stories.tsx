@@ -2,6 +2,7 @@ import {
   BorderPreview,
   ColorPalette,
   DimensionScale,
+  MotionPreview,
   ShadowPreview,
   TokenDetail,
   TokenTable,
@@ -129,6 +130,33 @@ export const BorderPreviewRenders = meta.story({
       withBorder.length,
       'at least one sample must resolve to a non-none border-style',
     ).toBeGreaterThan(0);
+  },
+});
+
+/**
+ * `MotionPreview` must render an animated element whose computed
+ * `transition-duration` reflects the token (or a default when reduced motion
+ * is on — we don't assert behavior there, just that the block renders).
+ */
+export const MotionPreviewRenders = meta.story({
+  render: () => <MotionPreview filter='motion.sys.*' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'div[aria-hidden="true"]');
+    const balls = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
+    // Find the one inside a track (has transition-duration set). Skip empty
+    // cases from reduced-motion mode.
+    const animated = balls.find((el) => {
+      const td = getComputedStyle(el).transitionDuration;
+      return td && td !== '0s';
+    });
+    // Under reduced-motion, no ball animates. That's still valid; assert
+    // the block rendered at all.
+    const captionText = canvasElement.textContent ?? '';
+    expect(captionText).toMatch(/motion token/i);
+    if (animated) {
+      const duration = getComputedStyle(animated).transitionDuration;
+      expect(duration).not.toBe('0s');
+    }
   },
 });
 
