@@ -11,19 +11,24 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Current milestone
 
-`Current: M9 — v0.1.0 scope convergence` (M5 deferred, M8 starter iceboxed — see `docs/decisions.md`)
+`Current: DTCG spec convergence` — see `docs/decisions.md` for the deferrals (color control, tokens-starter) carried into this phase.
 
 Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
 
 ### Milestone taxonomy
 
-GitHub milestones split into three tracks:
+GitHub milestones are scope buckets, not a sequence. Originally prefixed `M0`–`M13` when the work was ordered around a v0.1.0 release; prefixes dropped once release was postponed indefinitely (iterating on features > shipping versions).
 
-- **Numbered (M0–M9 = v0.1.0, M10+ = post-v0.1.0 roadmap):** feature march. Each has a concrete scope + exit criteria in `docs/plan.md`. One "current" at a time; the line above names it. M10–M13 are mapped out — comprehension visualizations → multi-axis theming → token-aware controls → component↔token reverse index.
-- **Release** (unnumbered): release plumbing — Changesets versioning, publish workflow, cutting tags. Decoupled from numbered milestones so "what ships" and "how it ships" stay independent.
-- **Maintenance** (unnumbered): hygiene, refactors, CI polish, deferred cleanups. Drained opportunistically; never blocks a numbered milestone.
+Two active tracks:
 
-When filing an issue, pick the track first. "Is this a release blocker?" → numbered milestone. "Does this ship packages?" → Release. Anything else → Maintenance.
+- **Feature milestones** — named scope areas in `docs/plan.md` (*Foundation*, *Core*, *Doc blocks*, *DTCG comprehension visualizations*, *Multi-axis theming UX*, …). Pick one to be "current"; the line above names it. No implied ordering beyond what `docs/plan.md` describes.
+- **Maintenance** — hygiene, refactors, CI polish, deferred cleanups. Drained opportunistically; never blocks a feature milestone.
+
+One dormant track:
+
+- **Release** — Changesets versioning, publish workflow, cutting tags. **On hold** until release timing is explicitly decided. Issues originally scoped here sit unassigned for now.
+
+When filing an issue: feature work → the relevant scope milestone. Repo hygiene → *Maintenance*. Release plumbing → leave unassigned; we'll re-adopt the *Release* milestone when we're ready to ship.
 
 ## Project conventions
 

@@ -190,3 +190,18 @@ Dropped (TS 6 handles by default): `strict`, `module`, `target`, `esModuleIntero
 **Rationale:** We said "let people give sensible names" — the resolver author owns naming, we trust it. Core's job is to load and resolve, not to rewrite identity.
 
 **Plan impact:** `docs/plan.md` context bullet re-shaped to say "DTCG resolvers only". Deeper plan body references to layered mode are historical; the decisions log supersedes them. Root README, core README, and tokens-reference README trimmed to single-input framing. Storybook fixture's `resolver.json` restructured to a single `theme` modifier so the 5 existing named compositions keep working without a name-mangling layer.
+
+---
+
+## 2026-04-17 — Postpone release cadence; drop M-prefix from milestones
+
+**Context:** The original plan organized work as M0–M9 marching toward a v0.1.0 npm release, with M10–M13 as a post-release roadmap. Before pulling the release trigger, the project lead elected to keep iterating on features rather than lock down a public version. The M-prefix served the release-march framing; without a near-term release, the numbers imply an ordering that doesn't match the work anymore.
+
+**Decision:**
+- **Release postponed indefinitely.** Issues originally scoped to the Release milestone (publish workflow, cut v0.1.0) de-milestoned and commented; the Release milestone itself stays as a dormant bucket to reclaim when we decide to ship.
+- **M-prefix dropped from every milestone title** on GitHub. Historical scope names remain (*Foundation*, *Core*, *Doc blocks*, *DTCG spec convergence*, *DTCG comprehension visualizations*, etc.); the number goes away. `docs/plan.md` follows suit — milestone section headers lose the `Mx — ` prefix.
+- **Plan body reshaped:** Mission and Scope sections explicitly name release-deferral; the "Beyond M13" section becomes "Further out" and lists release cadence alongside multi-framework siblings as a post-feature concern.
+
+**Rationale:** The milestone system was two things mashed together — ordered phases on a release path, and scope buckets. Dropping the release pressure makes the ordering imaginary; without ordering, the prefix was misleading cosmetic. Scope buckets still earn their keep.
+
+**Prior-reference preservation:** Old decisions entries ("Defer M5", "Iceboxed starter past v0.1.0", "Drop manifest support") still reference M-prefixed names. The log is append-only; those stay as-written. Readers encountering `M5`, `M8`, etc. in historical entries can cross-reference via GitHub milestone history (titles changed, numbers in commit history unchanged).
