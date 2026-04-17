@@ -12,6 +12,16 @@ Append-only ADR-lite log. Entries capture tactical choices made during execution
 
 ---
 
+## 2026-04-17 — `ignoreDeprecations: "6.0"` in base tsconfig
+
+**Context:** TS 6 deprecated implicit `baseUrl`. tsup 8.5.1 (our build tool) still injects `baseUrl` internally during the DTS pass, which surfaces TS5101 and fails the build.
+
+**Decision:** Add `"ignoreDeprecations": "6.0"` to `tsconfig.base.json`. Revisit when tsup lands a fix (or when we switch to the TS 7 release cycle — the option becomes a hard error then).
+
+**Rationale:** Smallest possible workaround. Keeps us on latest TS without forking tsup.
+
+---
+
 ## 2026-04-17 — Bump GH Actions to latest majors (Node 24 runtimes)
 
 **Context:** GitHub deprecated Node 20 runtimes for JavaScript actions (forced migration 2026-06-02, removal 2026-09-16). The v4 lineup we used on M0 scaffold was flagged at first CI run.

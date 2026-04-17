@@ -1,0 +1,12 @@
+{
+  "radius": {
+    "sys": {
+      "$type": "dimension",
+      "sm":   { "$value": "{size.ref.100}" },
+      "md":   { "$value": "{size.ref.200}" },
+      "lg":   { "$value": "{size.ref.300}" },
+      "xl":   { "$value": "{size.ref.500}" },
+      "pill": { "$value": { "value": 9999, "unit": "px" } }
+    }
+  }
+}

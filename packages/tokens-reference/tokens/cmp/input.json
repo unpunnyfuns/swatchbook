@@ -1,0 +1,18 @@
+{
+  "cmp": {
+    "input": {
+      "$description": "Form input (text field).",
+      "bg":             { "$type": "color", "$value": "{color.sys.surface.default}" },
+      "bg-disabled":    { "$type": "color", "$value": "{color.sys.surface.muted}" },
+      "fg":             { "$type": "color", "$value": "{color.sys.text.default}" },
+      "fg-placeholder": { "$type": "color", "$value": "{color.sys.text.subtle}" },
+      "border":         { "$type": "border", "$value": "{border.sys.default}" },
+      "border-focus":   { "$type": "border", "$value": "{border.sys.focus}" },
+      "border-danger":  { "$type": "color", "$value": "{color.sys.text.danger}" },
+      "radius":         { "$type": "dimension", "$value": "{radius.sys.sm}" },
+      "padding-x":      { "$type": "dimension", "$value": "{space.sys.sm}" },
+      "padding-y":      { "$type": "dimension", "$value": "{space.sys.xs}" },
+      "font":           { "$type": "typography", "$value": "{typography.sys.body}" }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://design-tokens.org/tr/2025/drafts/resolver/",
+  "version": "2025.10",
+  "name": "swatchbook-reference",
+  "description": "DTCG 2025.10 native resolver expressing the same compositions as $themes.manifest.json.",
+  "sets": {
+    "ref": {
+      "description": "Raw primitives (loaded but not emitted).",
+      "sources": [
+        { "$ref": "./ref/color.palette.json" },
+        { "$ref": "./ref/size.scale.json" },
+        { "$ref": "./ref/font.json" },
+        { "$ref": "./ref/motion.json" }
+      ]
+    },
+    "sys": {
+      "description": "Semantic slots.",
+      "sources": [
+        { "$ref": "./sys/color.json" },
+        { "$ref": "./sys/space.json" },
+        { "$ref": "./sys/radius.json" },
+        { "$ref": "./sys/typography.json" },
+        { "$ref": "./sys/shadow.json" },
+        { "$ref": "./sys/border.json" },
+        { "$ref": "./sys/motion.json" }
+      ]
+    },
+    "cmp": {
+      "description": "Component tokens.",
+      "sources": [
+        { "$ref": "./cmp/button.json" },
+        { "$ref": "./cmp/card.json" },
+        { "$ref": "./cmp/input.json" }
+      ]
+    }
+  },
+  "modifiers": {
+    "appearance": {
+      "description": "Light/dark axis.",
+      "contexts": {
+        "light": [{ "$ref": "./themes/light.json" }],
+        "dark":  [{ "$ref": "./themes/dark.json" }],
+        "high-contrast": [{ "$ref": "./themes/high-contrast.json" }]
+      },
+      "default": "light"
+    },
+    "brand": {
+      "description": "Brand axis. Default brand uses sys accents; 'a' overrides with violet.",
+      "contexts": {
+        "default": [],
+        "a":       [{ "$ref": "./themes/brand-a.json" }]
+      },
+      "default": "default"
+    }
+  },
+  "resolutionOrder": [
+    { "$ref": "#/sets/ref" },
+    { "$ref": "#/sets/sys" },
+    { "$ref": "#/sets/cmp" },
+    { "$ref": "#/modifiers/appearance" },
+    { "$ref": "#/modifiers/brand" }
+  ]
+}
