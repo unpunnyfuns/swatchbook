@@ -1,0 +1,68 @@
+{
+  "name": "@unpunnyfuns/swatchbook-addon",
+  "version": "0.0.0",
+  "description": "Storybook addon for DTCG design tokens — toolbar, panel, and useToken hook.",
+  "type": "module",
+  "engines": {
+    "node": ">=24.14.0"
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./preset": {
+      "types": "./dist/preset.d.mts",
+      "import": "./dist/preset.mjs"
+    },
+    "./preview": {
+      "types": "./dist/preview.d.mts",
+      "import": "./dist/preview.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "imports": {
+    "#/*": "./src/*.ts",
+    "#/*.tsx": "./src/*.tsx"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "storybook": {
+    "displayName": "Swatchbook",
+    "icon": "https://raw.githubusercontent.com/unpunnyfuns/swatchbook/main/apps/storybook/public/logo.svg",
+    "supportedFrameworks": ["react"]
+  },
+  "scripts": {
+    "build": "tsdown src/index.ts src/preset.ts src/preview.tsx --format esm --dts --clean --sourcemap",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src",
+    "format": "oxfmt -c ../../.oxfmtrc.json src",
+    "format:check": "oxfmt --check -c ../../.oxfmtrc.json src"
+  },
+  "dependencies": {
+    "@unpunnyfuns/swatchbook-core": "workspace:*",
+    "jiti": "^2.4.0"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "storybook": "^10.3.0"
+  },
+  "devDependencies": {
+    "@storybook/react-vite": "^10.3.5",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "storybook": "^10.3.5",
+    "tsdown": "^0.21.9",
+    "typescript": "^6.0.0",
+    "vite": "^8.0.4"
+  }
+}
