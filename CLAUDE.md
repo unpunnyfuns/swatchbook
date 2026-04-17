@@ -19,7 +19,7 @@ Update this line when a milestone closes. See the matching GitHub milestones for
 
 GitHub milestones split into three tracks:
 
-- **Numbered (M0–M9):** feature march toward v0.1.0. Each has a concrete scope + exit criteria in `docs/plan.md`. One "current" at a time; the line above names it.
+- **Numbered (M0–M9 = v0.1.0, M10+ = post-v0.1.0 roadmap):** feature march. Each has a concrete scope + exit criteria in `docs/plan.md`. One "current" at a time; the line above names it. M10–M13 are mapped out — comprehension visualizations → multi-axis theming → token-aware controls → component↔token reverse index.
 - **Release** (unnumbered): release plumbing — Changesets versioning, publish workflow, cutting tags. Decoupled from numbered milestones so "what ships" and "how it ships" stay independent.
 - **Maintenance** (unnumbered): hygiene, refactors, CI polish, deferred cleanups. Drained opportunistically; never blocks a numbered milestone.
 
