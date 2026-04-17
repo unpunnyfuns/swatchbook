@@ -1,5 +1,18 @@
 # Swatchbook — Storybook addon for DTCG design tokens
 
+## Mission
+
+Make [DTCG](https://www.designtokens.org/) design tokens **easier to understand and author** inside Storybook — specifically for React consumers. Not framework-agnostic; not a general-purpose DTCG toolkit. Post-v0.1.0 versions may add sibling packages for React Native / Vue / Lit. For today: one platform, one spec.
+
+The comprehension story is the differentiator: dimensions rendered as visual bars (not just "4px"), colors shown in every color space with contrast scores, shadows and motion previewed live, composite tokens shown as a unit. The authoring story is the companion: theme-aware Storybook controls, multi-axis theme composition, reverse-indexes tying tokens back to the components that use them.
+
+## Scope (v0.1.0)
+
+- **Storybook 10.3+ on Vite + React.** Other renderers / bundlers are out of scope for v0.1.0.
+- **DTCG 2025.10 resolver** is the sole theming input. No manifest, no layered shortcut, no migration helpers.
+- **Four doc blocks** cover the basic token types: `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail`. Richer visualizations (comparison, contrast, motion preview) are post-v0.1.0.
+- **Single-axis resolvers** get clean theme names automatically. Multi-axis resolvers use Terrazzo's permutation IDs — documented as a known limitation for v0.1.0.
+
 ## Context
 
 `/Users/palnes/src/swatchbook` has been initialized: git repo, root `package.json` (currently `@unpunnyfuns/swatchbook` — to be renamed to `swatchbook-monorepo` private at scaffold; see "Workspace root"), pnpm 10.18.1, MIT, empty `pnpm-lock.yaml`. Goal: a Storybook addon + doc blocks that lets authors browse DTCG design tokens, render them in docs, switch themes from the toolbar, and replace the default color control with a token picker. Must support multi-layer DTCG theming (layered files, DTCG 2025.10 resolvers, and Tokens Studio `$themes` manifests). Terrazzo (`@terrazzo/parser`) is the expected foundation for DTCG parsing/alias resolution — its capability surface is validated in Step 0 before scope is final.
@@ -538,6 +551,76 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 ### Progress tracking
 
 Create GitHub milestones matching M0–M9. Each PR references its milestone. An "M-status" line in the root README tracks `Current: Mx — <goal>`.
+
+## Post-v0.1.0 roadmap
+
+Once v0.1.0 ships, the milestones below become the product's next axis — **comprehension first, then authoring ergonomics, then composition UX, then the index that ties tokens to code.** Each milestone deepens the "easier to understand DTCG" thesis rather than broadening the framework surface.
+
+These sit on GitHub as their own track — numbered M10+ alongside the feature march, so they're visible and orderable but don't block v0.1.0.
+
+### M10 — DTCG comprehension visualizations
+
+**Goal:** Every token type renders in a form that makes its value legible at a glance, not as a number-string.
+
+**Work:**
+- **`DimensionScale` block** — render dimension tokens (`space.*`, `radius.*`, `size.*`, …) as actual drawn bars or boxes at their true pixel size, side-by-side. Caption shows the numeric value. Enables "is `space.sys.md` twice `space.sys.sm`?" at a glance.
+- **`ColorSwatch` variants inside `ColorPalette`** — per swatch, toggle between srgb / oklch / p3 / display-p3 rendering; show WCAG 2 + APCA contrast against `color.sys.text.default` and `color.sys.surface.default`.
+- **`ShadowPreview` block** — apply the shadow token to a sample card and show the effect; list the shadow's own sub-values below.
+- **`BorderPreview` block** — same shape for `border` composites.
+- **`MotionPreview` block** — render duration + cubic-bezier tokens as animated live previews (button hover, translation, fade); expose replay / speed-scrub controls.
+- **`CompositePreview` in `TokenDetail`** — for typography/shadow/border/transition, render the composite as a single applied sample plus a table of its sub-values (already partly present in `TokenDetail`; flesh out for the other composite types).
+
+**Exit:** Every DTCG primitive + composite type ships a dedicated block or first-class preview panel inside `TokenDetail`. Storybook interaction tests assert each renders against the reference fixture.
+**Demo:** Docs page showing `space`, `radius`, `shadow`, `motion`, `typography` tokens each rendered *visually* — not just textually.
+
+### M11 — Multi-axis theming UX
+
+**Goal:** Multi-modifier resolvers stop being a hostile UI surface. Users compose themes axis-by-axis from the toolbar.
+
+**Work:**
+- **Multi-column theme composer toolbar tool** — when the resolver has ≥2 modifiers, the toolbar renders one column per axis (appearance × brand × density × …), each with its contexts as picks. Composition updates `globals.swatchbookTheme` to the full permutation.
+- **Per-axis naming** — the addon reads modifier `description` / `displayName` (extending the DTCG resolver shape in a documented way if needed) to label columns.
+- **Saved compositions (localStorage)** — "Save this combination as…" button; saved combos appear as quick-select pills next to the composer.
+- **Display-name override extension** — a documented `$extensions.swatchbook.displayName` field on modifier contexts that core picks up for friendlier toolbar labels without touching the spec surface.
+- **Toolbar dogfood** — tokens-reference gets a multi-axis variant so the storybook app exercises the composer in CI.
+
+**Exit:** A resolver with `appearance × brand × density` renders cleanly in the toolbar; each axis is pickable independently; saved combos persist across reloads. Interaction tests cover the composer.
+**Demo:** Toolbar shows three columns; picking "dark × brand-a × compact" repaints the preview.
+
+### M12 — Token-aware controls (revival of M5)
+
+**Goal:** Storybook `argTypes` can be "a token of this type" — not a raw string — so author-time picking is token-native.
+
+**Work:**
+- **`swatchbook-color` argType** — popover picker of color tokens, stores `var(--…)` directly in args. Honest with the Args panel.
+- **`swatchbook-dimension` argType** — same pattern for dimension tokens, keyed by path.
+- **`swatchbook-typography` argType** — bundles the composite; writes `var(--…-font-family)`, `…-font-size`, etc. into a ref-object arg or individual args (TBD which reads better).
+- Groundwork lives in an `addon/src/controls/` folder; each control registers through Storybook's `argType` extension point.
+- Decision log entry explains the path chosen (Storybook upstream may have shifted since M5; re-validate before committing).
+
+**Exit:** A Button story has `bg: { control: 'swatchbook-color' }` — picking a token in the Controls panel writes `var(--…)` into the args; the component renders with that value.
+
+### M13 — Component ↔ token reverse index
+
+**Goal:** Docs answer "which components consume this token" and "which tokens does this component consume".
+
+**Work:**
+- **Static analyzer** — scan component CSS / CSS-in-JS / inline styles for `var(--<prefix>-…)` references; emit a path → components map at build time.
+- **`ConsumedBy` block** — `<ConsumedBy path="color.sys.accent.bg" />` lists the components referencing that token.
+- **`Consumes` block** — `<Consumes component="Button" />` lists every token the component reads.
+- **`TokenDetail` augmentation** — show "Used by: Button, Card" under the resolved-value section when the index is available.
+
+**Exit:** MDX page `/docs/tokens/color-sys-accent-bg` renders a reverse index; changes to components repopulate the index on HMR.
+**Demo:** Clicking a row in the Tokens panel scrolls to its consumers.
+
+### Beyond M13
+
+Out of scope in named milestones but worth capturing the shape for later:
+
+- **Multi-framework siblings.** `@unpunnyfuns/swatchbook-addon-rn`, `-vue`, `-lit` as parallel packages; core stays shared.
+- **Write-back from the addon UI.** See `docs/future.md` — token edits from the panel, via Storybook's `experimental_serverChannel`, landing on disk.
+- **Tokens Studio → DTCG migration helper.** A standalone CLI that converts `$themes.manifest.json` + token files to a DTCG `resolver.json`.
+- **Public tokens-starter.** Thaw `@unpunnyfuns/swatchbook-tokens` once there's consumer signal for a canned palette.
 
 ## Verification
 
