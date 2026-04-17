@@ -1,0 +1,37 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { ColorPalette, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
+
+<Meta title='Docs/Colors' />
+
+# Colors
+
+Color tokens span three tiers in the reference pyramid:
+
+- **`color.ref.*`** — raw palette primitives (blues, neutrals, reds, …). No
+  aliases, theme-invariant.
+- **`color.sys.*`** — semantic slots (`surface.default`, `text.muted`,
+  `accent.*`). Every `sys` token aliases into `ref`.
+- **`color.cmp.*`** — component-scoped tokens (`cmp.button.bg`, …). Always
+  alias into `sys`.
+
+## System palette
+
+Groups the semantic color tokens by sub-path (e.g. `color.sys.surface.*`,
+`color.sys.text.*`, `color.sys.accent.*`). Switch the theme in the toolbar
+to see every swatch repaint.
+
+<ColorPalette filter='color.sys.*' groupBy={3} />
+
+## Reference palette
+
+Every primitive color in the reference tier. Use as the source of truth
+when building new `sys` tokens, not when styling components directly.
+
+<ColorPalette filter='color.ref.*' groupBy={4} />
+
+## Raw table
+
+The same tokens as rows with resolved values, types, and CSS var names —
+handy when you know the path you're looking for.
+
+<TokenTable filter='color.sys.*' type='color' />

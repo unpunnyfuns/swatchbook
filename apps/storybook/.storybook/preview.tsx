@@ -13,6 +13,11 @@ export default definePreview({
     },
     a11y: { test: 'error' },
     backgrounds: { disable: true },
+    options: {
+      storySort: {
+        order: ['Docs', ['Introduction', 'Colors', 'Typography', 'Tokens'], '*'],
+      },
+    },
   },
   addons: [addonA11y(), addonDocs(), swatchbookAddon()],
 });

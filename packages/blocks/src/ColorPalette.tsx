@@ -46,8 +46,8 @@ const styles = {
   } satisfies React.CSSProperties,
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-    gap: 12,
+    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+    gap: 8,
   } satisfies React.CSSProperties,
   card: {
     border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.2))',

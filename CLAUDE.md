@@ -40,6 +40,11 @@ Update this line when a milestone closes. See the matching GitHub milestones for
 - **Code style:** functional, avoid classes/singletons. No CSS-in-JS. No inline end-of-line comments.
 - **Lint/format:** `oxlint` + `oxfmt`. Never `npx biome`.
 - **Tests:** Vitest everywhere. Storybook Test (via `@storybook/addon-vitest`) for interaction tests in `apps/storybook`.
+- **Pre-commit checks (always, no exceptions):** before running `git commit`, run
+  ```
+  pnpm -r format && pnpm turbo run lint typecheck test
+  ```
+  Format changes to already-staged files land as noisy follow-up commits; CI fails on lint/typecheck/test regressions. Running all four locally catches every class before the push. If something is too slow, scope with `--filter=<pkg>` — don't skip.
 - **Design tokens:** ref → sys → cmp pyramid. Components never alias ref directly.
 - **TypeScript:** strict, `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, `verbatimModuleSyntax` on.
 - **READMEs:** module name + one-liner; structure table; TypeScript examples with imports; ✅/❌ for do's/don'ts.
@@ -54,6 +59,7 @@ Update this line when a milestone closes. See the matching GitHub milestones for
 - **Register tools via element-returning function**: `render: () => h(ThemeToolbar)` — passing the component function directly (`render: ThemeToolbar`) invokes hooks outside React's render cycle.
 - **Preview ↔ manager comms**: use Storybook's channel (`addons.getChannel()` + `emit`/`on`). The manager can't import preview-side Vite virtual modules.
 - **CSF Next addons**: default-export a factory that returns `definePreviewAddon(previewExports)` (from `storybook/internal/csf`). Consumers opt in via `definePreview({ addons: [swatchbookAddon()] })`.
+- **MDX doc blocks can't use story hooks**: `useGlobals` / `useArgs` / `useChannel` / `useParameter` from `storybook/preview-api` all require the preview HooksContext, which only exists while a story is rendering. Called from an MDX doc block they throw *"Storybook preview hooks can only be called inside decorators and story functions."* For cross-story reactivity in MDX, subscribe to `addons.getChannel()` directly (`globalsUpdated` is the event) and manage state with plain React hooks.
 
 ## Storybook MCP
 

@@ -1,0 +1,40 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { TokenDetail, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
+
+<Meta title='Docs/Tokens' />
+
+# Tokens
+
+The full, unfiltered token graph — every primitive, semantic, and
+component token currently loaded by the addon.
+
+## Component tokens
+
+`cmp.*` tokens alias into `sys`, which in turn aliases into `ref`. Hover
+over any alias in `TokenDetail` below to see the chain resolve.
+
+<TokenTable filter='cmp.button.*' />
+
+## Alias chain spotlights
+
+`cmp.button.bg` resolves through the full pyramid:
+`cmp.button.bg` → `color.sys.accent.bg` → `color.ref.blue.600`.
+
+<TokenDetail path='cmp.button.bg' />
+
+A composite token — `cmp.button.font` bundles family, size, weight, and
+line-height via a single `typography.sys.body-strong` alias.
+
+<TokenDetail path='cmp.button.font' />
+
+A dimension token: `space.sys.md`.
+
+<TokenDetail path='space.sys.md' />
+
+## Spacing scale
+
+<TokenTable filter='space.*' type='dimension' />
+
+## Radii
+
+<TokenTable filter='radius.*' type='dimension' />
