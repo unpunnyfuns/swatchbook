@@ -500,6 +500,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Work:**
 - Enable `@storybook/addon-vitest`; write `vitest.config.ts` with Storybook project.
 - Play-function tests: theme switch, stacked theme composition, token-picker args, each doc block, diagnostics-panel recovery (seed an invalid token, fix it, assert clean).
+- **Multi-theme test fan-out via the addon.** Expose `swatchbookThemeProjects({ configDir })` from `@unpunnyfuns/swatchbook-addon/vitest` — reads the swatchbook config (same path the preset uses), returns one Vitest project per theme with `initialGlobals` set. Consumers drop it into their `vite.config.ts#test.projects` and every story runs under every theme. Turns the a11y gate from Light-only into full-matrix coverage. Explore cleanest injection path (addon-vitest's `initialGlobals` isn't exposed as a plugin option today — may require a setup file that pokes Storybook's globals channel).
 
 **Exit:** `turbo run test:storybook` green in CI.
 **Demo:** CI run shows a green Storybook Test job with the expected number of passing tests.
