@@ -35,6 +35,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@unpunnyfuns/swatchbook-addon": "workspace:*",
+    "@unpunnyfuns/swatchbook-blocks": "workspace:*",
     "@unpunnyfuns/swatchbook-core": "workspace:*",
     "@unpunnyfuns/swatchbook-tokens-reference": "workspace:*",
     "@vitejs/plugin-react": "^6.0.1",
