@@ -1,0 +1,213 @@
+import type { CSSProperties, ReactElement } from 'react';
+import { useMemo } from 'react';
+import { formatValue, globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
+
+export type DimensionKind = 'length' | 'radius' | 'size';
+
+export interface DimensionScaleProps {
+  /**
+   * Token-path filter. Defaults to every `dimension` token. Use e.g.
+   * `"space.sys.*"` to scope to the spacing scale.
+   */
+  filter?: string;
+  /**
+   * Visualization kind:
+   * - `'length'` (default): horizontal bar whose width equals the token's dimension.
+   * - `'radius'`: 56×56 square with the token applied as `border-radius`.
+   * - `'size'`: a square sized to the token's dimension.
+   */
+  kind?: DimensionKind;
+  /** Override the caption. */
+  caption?: string;
+}
+
+const MAX_RENDER_PX = 480;
+
+const styles = {
+  wrapper: {
+    fontFamily: 'var(--sb-typography-sys-body-font-family, system-ui)',
+    fontSize: 'var(--sb-typography-sys-body-font-size, 14px)',
+    color: 'var(--sb-color-sys-text-default, CanvasText)',
+    background: 'var(--sb-color-sys-surface-default, Canvas)',
+    padding: 12,
+    borderRadius: 6,
+  } satisfies CSSProperties,
+  caption: {
+    padding: '4px 0 12px',
+    opacity: 0.7,
+    fontSize: 12,
+  } satisfies CSSProperties,
+  row: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(160px, 220px) 1fr auto',
+    gap: 16,
+    alignItems: 'center',
+    padding: '10px 0',
+    borderBottom: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.2))',
+  } satisfies CSSProperties,
+  meta: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
+    minWidth: 0,
+  } satisfies CSSProperties,
+  path: {
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontSize: 12,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  } satisfies CSSProperties,
+  specs: {
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontSize: 11,
+    opacity: 0.7,
+  } satisfies CSSProperties,
+  visualCell: {
+    display: 'flex',
+    alignItems: 'center',
+    minWidth: 0,
+  } satisfies CSSProperties,
+  bar: {
+    height: 14,
+    background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
+    borderRadius: 2,
+    minWidth: 1,
+  } satisfies CSSProperties,
+  radiusSample: {
+    width: 56,
+    height: 56,
+    background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
+    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.3))',
+  } satisfies CSSProperties,
+  sizeSample: {
+    background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
+    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.3))',
+    minWidth: 1,
+    minHeight: 1,
+  } satisfies CSSProperties,
+  cssVar: {
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontSize: 11,
+    opacity: 0.7,
+    whiteSpace: 'nowrap',
+  } satisfies CSSProperties,
+  empty: {
+    padding: '24px 12px',
+    textAlign: 'center',
+    opacity: 0.6,
+  } satisfies CSSProperties,
+  cap: {
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontSize: 10,
+    opacity: 0.6,
+    marginLeft: 6,
+  } satisfies CSSProperties,
+};
+
+interface Row {
+  path: string;
+  cssVar: string;
+  displayValue: string;
+  pxValue: number;
+  capped: boolean;
+}
+
+/**
+ * Convert a DTCG dimension `$value` (`{ value, unit }`) to pixels for the
+ * purpose of ordering and deciding whether to cap the rendered bar. Returns
+ * `NaN` for units we can't reasonably approximate (ex / ch / %), which the
+ * caller treats as "render at cssVar but don't cap or sort numerically".
+ */
+function toPixels(raw: unknown): number {
+  if (raw == null || typeof raw !== 'object') return Number.NaN;
+  const v = raw as { value?: unknown; unit?: unknown };
+  if (typeof v.value !== 'number' || typeof v.unit !== 'string') return Number.NaN;
+  switch (v.unit) {
+    case 'px':
+      return v.value;
+    case 'rem':
+    case 'em':
+      return v.value * 16;
+    default:
+      return Number.NaN;
+  }
+}
+
+export function DimensionScale({
+  filter = 'dimension',
+  kind = 'length',
+  caption,
+}: DimensionScaleProps): ReactElement {
+  const { resolved, activeTheme, cssVarPrefix } = useProject();
+
+  const rows = useMemo(() => {
+    const collected: Row[] = [];
+    for (const [path, token] of Object.entries(resolved)) {
+      if (token.$type !== 'dimension') continue;
+      if (!globMatch(path, filter)) continue;
+      const pxValue = toPixels(token.$value);
+      collected.push({
+        path,
+        cssVar: makeCssVar(path, cssVarPrefix),
+        displayValue: formatValue(token.$value),
+        pxValue,
+        capped: Number.isFinite(pxValue) && pxValue > MAX_RENDER_PX,
+      });
+    }
+    collected.sort((a, b) => {
+      if (Number.isFinite(a.pxValue) && Number.isFinite(b.pxValue)) return a.pxValue - b.pxValue;
+      return a.path.localeCompare(b.path);
+    });
+    return collected;
+  }, [resolved, filter, cssVarPrefix]);
+
+  const captionText =
+    caption ??
+    `${rows.length} dimension${rows.length === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
+
+  if (rows.length === 0) {
+    return (
+      <div data-theme={activeTheme} style={styles.wrapper}>
+        <div style={styles.empty}>No dimension tokens match this filter.</div>
+      </div>
+    );
+  }
+
+  return (
+    <div data-theme={activeTheme} style={styles.wrapper}>
+      <div style={styles.caption}>{captionText}</div>
+      {rows.map((row) => (
+        <div key={row.path} style={styles.row}>
+          <div style={styles.meta}>
+            <span style={styles.path}>{row.path}</span>
+            <span style={styles.specs}>{row.displayValue}</span>
+          </div>
+          <div style={styles.visualCell}>
+            {renderVisual(row, kind)}
+            {row.capped && <span style={styles.cap}>capped at {MAX_RENDER_PX}px</span>}
+          </div>
+          <span style={styles.cssVar}>{row.cssVar}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderVisual(row: Row, kind: DimensionKind): ReactElement {
+  const cappedValue = row.capped ? `${MAX_RENDER_PX}px` : row.cssVar;
+  switch (kind) {
+    case 'radius':
+      return <div style={{ ...styles.radiusSample, borderRadius: row.cssVar }} aria-hidden />;
+    case 'size':
+      return (
+        <div
+          style={{ ...styles.sizeSample, width: cappedValue, height: cappedValue }}
+          aria-hidden
+        />
+      );
+    case 'length':
+    default:
+      return <div style={{ ...styles.bar, width: cappedValue }} aria-hidden />;
+  }
+}
