@@ -1,6 +1,8 @@
 # Swatchbook
 
-**A comprehensive visual overview of the [DTCG](https://www.designtokens.org/) design tokens (parsed via [Terrazzo](https://terrazzo.app/)) that actually exist in your project — rendered inside Storybook.** Design-system engineers use it to show their token set to feature engineers and stakeholders; everyone else uses it to see what's there without cracking open a token JSON.
+**An addon and tools to help people visualize their future design token projects using Storybook.**
+
+In more detail: a comprehensive visual overview of [DTCG](https://www.designtokens.org/) design tokens (parsed via [Terrazzo](https://terrazzo.app/)) that actually exist in your project — rendered inside Storybook. Design-system engineers use it to show their token set to feature engineers and stakeholders; everyone else uses it to see what's there without cracking open a token JSON.
 
 The guiding principle: **extrapolate what's in the token set, don't invent new analysis.** If Terrazzo surfaces a piece of data, we render it. If we'd have to compute something new, that's Terrazzo's conversation (or someone else's tool) — not ours.
 

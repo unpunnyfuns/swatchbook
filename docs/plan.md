@@ -2,13 +2,16 @@
 
 ## Mission
 
-**Swatchbook is a comprehensive visual overview of the DTCG design tokens (parsed via Terrazzo) that actually exist in your project — rendered inside Storybook.** It's the tool design-system engineers use to show their token set to the rest of the team: feature engineers reading docs, stakeholders verifying that the system composes correctly, anyone who needs to see what's in there without cracking open a token JSON file.
+**An addon and tools to help people visualize their future design token projects using Storybook.**
 
-Three things the mission pins down:
+In more detail: swatchbook is a comprehensive visual overview of the DTCG design tokens (parsed via Terrazzo) that actually exist in your project — rendered inside Storybook. It's the tool design-system engineers use to show their token set to the rest of the team: feature engineers reading docs, stakeholders verifying that the system composes correctly, anyone who needs to see what's in there without cracking open a token JSON file.
+
+Four things the mission pins down:
 
 - **Only DTCG, via Terrazzo.** Not a general doc-tool; not a multi-format gadget. We present what the spec produces through the one parser we trust.
 - **Comprehensive.** Every DTCG type earns a dedicated visual. A type without a rendering is a regression, not a feature gap.
 - **What actually exists within the tokens.** The token set is the subject. Not consumer code. Not authoring tools. Not a Figma bridge. The tokens themselves, in every shape they take.
+- **Audience includes people still defining the spec.** We're not downstream-only. DTCG is a draft that's actively evolving; editors and implementers prototyping against real token sets are part of who swatchbook serves. That's extra weight behind the *extrapolate, don't invent* principle — people evaluating the spec want to see exactly what the spec produces, not what we'd like it to produce.
 
 ## Extrapolate, don't invent
 
