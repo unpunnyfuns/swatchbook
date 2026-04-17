@@ -19,7 +19,7 @@ export interface ProjectData {
   resolved: ResolvedTokens;
   themesResolved: VirtualTokens;
   cssVarPrefix: string;
-  mode: 'layered' | 'resolver' | 'manifest';
+  mode: 'layered' | 'resolver';
 }
 
 const STYLE_ELEMENT_ID = 'swatchbook-tokens';

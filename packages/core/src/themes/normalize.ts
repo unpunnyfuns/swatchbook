@@ -2,20 +2,19 @@ import type { Config, Theme, TokenMap } from '#/types.ts';
 import type { BufferedLogger } from '#/diagnostics.ts';
 import { resolveThemingMode } from '#/config.ts';
 import { loadLayeredThemes } from '#/themes/layered.ts';
-import { loadManifestThemes } from '#/themes/manifest.ts';
 import { loadResolverThemes } from '#/themes/resolver.ts';
 
 export interface NormalizedThemes {
   themes: Theme[];
   resolved: Record<string, TokenMap>;
   defaultThemeName: string;
-  /** Files loaded as `source`-only (manifest mode). Emission filters these out. */
+  /** Files loaded as source-only (not emitted to CSS). Reserved for future use. */
   sourceOnlyFiles: Set<string>;
 }
 
 /**
  * Dispatch to the appropriate theming loader based on what the config
- * specifies. All three paths produce the same downstream shape.
+ * specifies. Both paths produce the same downstream shape.
  */
 export async function normalizeThemes(
   config: Config,
@@ -28,10 +27,6 @@ export async function normalizeThemes(
     case 'layered': {
       const r = await loadLayeredThemes(config.themes ?? [], cwd, logger, config.default);
       return { ...r, sourceOnlyFiles: new Set() };
-    }
-    case 'manifest': {
-      if (!config.manifest) throw new Error('unreachable: manifest mode without manifest path');
-      return loadManifestThemes(config.manifest, cwd, logger, config.default);
     }
     case 'resolver': {
       if (!config.resolver) throw new Error('unreachable: resolver mode without resolver path');

@@ -27,7 +27,7 @@ interface ThemeEntry {
   sources: string[];
 }
 
-type ThemingMode = 'layered' | 'resolver' | 'manifest';
+type ThemingMode = 'layered' | 'resolver';
 
 interface InitPayload {
   themes: ThemeEntry[];
@@ -38,7 +38,6 @@ interface InitPayload {
 const modeBadge: Record<ThemingMode, string> = {
   layered: 'layered',
   resolver: 'DTCG resolver',
-  manifest: '$themes manifest',
 };
 
 const EMPTY_THEMES: ThemeEntry[] = [];

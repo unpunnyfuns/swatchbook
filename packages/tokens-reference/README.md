@@ -13,17 +13,12 @@ Exhaustive DTCG 2025.10 pyramid used as swatchbook's internal test bed. Private 
 
 ## Theming compositions
 
-Two parallel expressions of the same compositions — both must resolve identically:
-
-- `tokens/$themes.manifest.json` — Tokens Studio convention (`$themes[].selectedTokenSets`).
-- `tokens/resolver.json` — DTCG 2025.10 native resolver (`sets` + `modifiers` + `resolutionOrder`).
-
-Compositions: Light, Dark, Light · Brand A, Dark · Brand A, High Contrast.
+`tokens/resolver.json` — a DTCG 2025.10 native resolver (`sets` + `modifiers` + `resolutionOrder`). Enumerates the full permutation cross-product: `appearance` (light/dark/high-contrast) × `brand` (default/a) = 6 themes.
 
 ## Consumption
 
 ```ts
-import { tokensDir, manifestPath, resolverPath } from '@unpunnyfuns/swatchbook-tokens-reference';
+import { tokensDir, resolverPath } from '@unpunnyfuns/swatchbook-tokens-reference';
 ```
 
 ✅ Use the exported path helpers — they're `import.meta`-resolved and survive `node_modules` hoisting.

@@ -164,3 +164,15 @@ Dropped (TS 6 handles by default): `strict`, `module`, `target`, `esModuleIntero
 **Rationale:** Private packages can use any name; `swatchbook` is the obvious one. Hedging for a hypothetical meta-package that we've actively decided against is dead weight.
 
 **Plan impact:** `docs/plan.md` → "Workspace root" section updated; M0 work-bullet referencing the old name is historical and left as-is.
+
+---
+
+## 2026-04-17 — Drop Tokens Studio `$themes` manifest support
+
+**Context:** Core supported three theming inputs: explicit layers, DTCG 2025.10 resolvers, and Tokens Studio `$themes.manifest.json`. Manifest support existed because Tokens Studio predated DTCG's native resolver; modern pipelines either already ship DTCG-shaped tokens or are migrating that way.
+
+**Decision:** Remove `manifest` from core's public API (types, config, normalizer, loader). Delete `packages/core/src/themes/manifest.ts` and the `manifestPath` export from `tokens-reference`. The `$themes.manifest.json` fixture is gone. Two theming inputs remain: DTCG resolver + our explicit-layers shortcut.
+
+**Rationale:** Maintaining a pre-spec workaround alongside the spec itself is scope debt. Anyone with a Tokens Studio manifest can convert it to a DTCG `resolver.json` once (the transformation is mechanical — the fixture's old resolver.json expresses exactly what the old manifest expressed, just in spec form).
+
+**Plan impact:** "Decisions locked in" bullet in `docs/plan.md` updated; deeper plan body references to the manifest path are historical-ish — load-bearing scope lives in `docs/decisions.md` from here on. The README, core README, and tokens-reference README are updated inline. A follow-up issue will drop explicit-layers next, converging on DTCG-spec-only theming input — tracked separately so this change stays small.
