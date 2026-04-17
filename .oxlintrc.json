@@ -9,7 +9,8 @@
   "rules": {
     "no-unused-vars": "warn",
     "typescript/no-explicit-any": "warn",
-    "react/react-in-jsx-scope": "off"
+    "react/react-in-jsx-scope": "off",
+    "import/no-unassigned-import": "off"
   },
   "ignorePatterns": ["dist", "storybook-static", "coverage", ".turbo", ".swatchbook", "node_modules"]
 }
