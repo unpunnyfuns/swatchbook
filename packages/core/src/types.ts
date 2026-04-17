@@ -1,13 +1,17 @@
-import type { Resolver, TokenNormalized } from '@terrazzo/parser';
+import type { TokenNormalized } from '@terrazzo/parser';
 
-/**
- * A single theme composition — the permutation input that hits Terrazzo's
- * `resolver.apply()` to realize its tokens.
- */
+export type TokenMap = Record<string, TokenNormalized>;
+
+/** A single theme composition. */
 export interface Theme {
   name: string;
-  /** Resolver input (e.g. `{ appearance: 'light', brand: 'a' }`). */
+  /**
+   * For DTCG-resolver mode: the resolver input (e.g. `{ appearance: 'light', brand: 'a' }`).
+   * For layered / manifest modes: mirrors `{ theme: name }` for a uniform shape.
+   */
   input: Record<string, string>;
+  /** Ordered layer file paths used to build this theme. Empty for resolver mode. */
+  sources: string[];
 }
 
 /**
@@ -49,21 +53,20 @@ export interface Diagnostic {
 }
 
 /**
- * Loaded swatchbook project — the shape every downstream consumer (addon
- * preset, block renderer, CSS emitter) works against.
+ * Loaded swatchbook project. Themes are eagerly resolved at load time; use
+ * `resolveTheme(project, name)` to fetch one.
  */
 export interface Project {
   config: Config;
-  /** Themes normalized from whichever theming input the config used. */
   themes: Theme[];
-  /** Terrazzo resolver. Use `resolver.apply(theme.input)` to realize tokens. */
-  resolver: Resolver;
-  /** Base (pre-resolution) token set. */
-  graph: Record<string, TokenNormalized>;
+  /** Eagerly-resolved tokens per theme, keyed by `theme.name`. */
+  themesResolved: Record<string, TokenMap>;
+  /** Default theme's resolved tokens — convenience for global views. */
+  graph: TokenMap;
   diagnostics: Diagnostic[];
 }
 
 export interface ResolvedTheme {
   name: string;
-  tokens: Record<string, TokenNormalized>;
+  tokens: TokenMap;
 }

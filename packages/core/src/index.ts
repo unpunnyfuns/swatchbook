@@ -1,4 +1,5 @@
 export { defineSwatchbookConfig } from '#/config';
+export { loadProject, resolveTheme } from '#/load';
 
 export type {
   Config,
@@ -8,4 +9,5 @@ export type {
   ResolvedTheme,
   Theme,
   ThemeConfig,
+  TokenMap,
 } from '#/types';
