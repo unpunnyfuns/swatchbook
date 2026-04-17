@@ -1,0 +1,24 @@
+{
+  "cmp": {
+    "button": {
+      "$description": "Primary button component tokens. Aliases only into sys.",
+      "bg":            { "$type": "color", "$value": "{color.sys.accent.bg}" },
+      "bg-hover":      { "$type": "color", "$value": "{color.sys.accent.bg-hover}" },
+      "fg":            { "$type": "color", "$value": "{color.sys.accent.fg}" },
+      "border":        { "$type": "border", "$value": "{border.sys.default}" },
+      "radius":        { "$type": "dimension", "$value": "{radius.sys.md}" },
+      "padding-x":     { "$type": "dimension", "$value": "{space.sys.md}" },
+      "padding-y":     { "$type": "dimension", "$value": "{space.sys.sm}" },
+      "font":          { "$type": "typography", "$value": "{typography.sys.body-strong}" },
+      "transition":    { "$type": "transition", "$value": "{motion.sys.enter}" },
+      "shadow":        { "$type": "shadow", "$value": "{shadow.sys.sm}" },
+
+      "ghost": {
+        "$description": "Transparent button variant used for low-emphasis actions.",
+        "bg":       { "$type": "color", "$value": "{color.sys.surface.default}" },
+        "bg-hover": { "$type": "color", "$value": "{color.sys.surface.muted}" },
+        "fg":       { "$type": "color", "$value": "{color.sys.text.accent}" }
+      }
+    }
+  }
+}

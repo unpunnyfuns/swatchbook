@@ -1,0 +1,29 @@
+{
+  "motion": {
+    "sys": {
+      "$type": "transition",
+      "$description": "Composite transitions combining duration and easing.",
+      "enter": {
+        "$value": {
+          "duration":       "{duration.ref.normal}",
+          "delay":          "{duration.ref.instant}",
+          "timingFunction": "{easing.ref.decelerated}"
+        }
+      },
+      "exit": {
+        "$value": {
+          "duration":       "{duration.ref.fast}",
+          "delay":          "{duration.ref.instant}",
+          "timingFunction": "{easing.ref.accelerated}"
+        }
+      },
+      "emphasized": {
+        "$value": {
+          "duration":       "{duration.ref.slow}",
+          "delay":          "{duration.ref.instant}",
+          "timingFunction": "{easing.ref.emphasized}"
+        }
+      }
+    }
+  }
+}

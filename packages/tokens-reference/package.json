@@ -1,0 +1,30 @@
+{
+  "name": "@unpunnyfuns/swatchbook-tokens-reference",
+  "version": "0.0.0",
+  "description": "Exhaustive DTCG pyramid used as the swatchbook test bed.",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./tokens/*": "./tokens/*"
+  },
+  "files": [
+    "dist",
+    "tokens"
+  ],
+  "scripts": {
+    "build": "tsup index.ts --format esm --dts --clean --sourcemap",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "tsup": "^8.3.0",
+    "typescript": "^6.0.0"
+  }
+}
