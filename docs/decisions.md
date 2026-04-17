@@ -12,6 +12,24 @@ Append-only ADR-lite log. Entries capture tactical choices made during execution
 
 ---
 
+## 2026-04-17 — Modernize `tsconfig.base.json` for TS 6
+
+**Context:** TS 6 changed several defaults (`strict`, `module: esnext`, `target` = current-year floating, `noUncheckedSideEffectImports: true`, `libReplacement: false`) and added new strictness flags. Our base config was carrying TS 5-era boilerplate that's now redundant or outdated.
+
+**Decision:** Trim the base to overrides-only. Additions beyond `strict`:
+
+- `noFallthroughCasesInSwitch`, `noImplicitReturns`, `noPropertyAccessFromIndexSignature` — catch common correctness bugs.
+- `allowUnreachableCode: false`, `allowUnusedLabels: false` — treat these as errors, not warnings.
+- `erasableSyntaxOnly: true` — bans enums, namespaces, parameter properties, and `import =` / `export =`. Aligns with Node's `--experimental-strip-types` and our ESM-only stance.
+- `moduleDetection: "force"` — every file is a module, no ambient-script mode.
+- `lib` bumped to `ES2025` + added `DOM.AsyncIterable`.
+
+Dropped (TS 6 handles by default): `strict`, `module`, `target`, `esModuleInterop`, `forceConsistentCasingInFileNames`.
+
+**Rationale:** Less config to maintain, stricter correctness guardrails, future-proof against TS 7 where some of these (e.g. `erasableSyntaxOnly` being more strict) become the norm.
+
+---
+
 ## 2026-04-17 — Internal aliasing via `package.json#imports` (with `#/` prefix)
 
 **Context:** Deep relative paths (`../../../foo`) rot on moves, and TypeScript `paths` aliases require bundler cooperation + re-emit of paths at build time. Node 16+ supports package-scoped `imports` natively; TypeScript 5.4+ resolves them without a custom `paths` mapping. Node 24.14 relaxed the subpath grammar to accept a leading `#/`, which reads more naturally as a path than `#foo`.
