@@ -1,0 +1,37 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/Introduction" />
+
+# Swatchbook
+
+A Storybook addon and set of MDX doc blocks for DTCG design tokens. This
+storybook is the integration testbed — it loads the `tokens-reference`
+pyramid (ref → sys → cmp → themes) through the addon and dogfoods every
+block in the library.
+
+## Pages
+
+- **[Colors](?path=/docs/docs-colors--docs)** — `ColorPalette` over the
+  system palette plus a `TokenTable` filtered to `color.*`.
+- **[Typography](?path=/docs/docs-typography--docs)** — `TypographyScale`
+  rendering composite typography tokens with real sub-values.
+- **[Tokens](?path=/docs/docs-tokens--docs)** — full `TokenTable` with
+  `TokenDetail` spotlights for representative tokens including alias
+  chains.
+
+## Live theme switching
+
+The toolbar theme picker (top-right) switches between compositions
+declared in `tokens/$themes.manifest.json`. Every block on every page
+reacts to the active theme.
+
+## Blocks
+
+Four blocks ship from `@unpunnyfuns/swatchbook-blocks`:
+
+| Block               | Purpose                                                    |
+| ------------------- | ---------------------------------------------------------- |
+| `TokenTable`        | Searchable, type-filterable table of tokens with swatches. |
+| `ColorPalette`      | Grouped color swatch grid.                                 |
+| `TypographyScale`   | Rendered sample for each typography token.                 |
+| `TokenDetail`       | Single-token inspector with alias chain and per-theme values. |

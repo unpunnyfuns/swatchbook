@@ -1,0 +1,26 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { TokenDetail, TypographyScale } from '@unpunnyfuns/swatchbook-blocks';
+
+<Meta title="Docs/Typography" />
+
+# Typography
+
+Typography tokens are DTCG composites — each `$value` is an object with
+`fontFamily`, `fontSize`, `fontWeight`, `lineHeight`, and optional
+`letterSpacing`. Every sub-value aliases into the reference tier
+(`font.ref.sans`, `size.ref.*`, `font.ref.weight.*`).
+
+## Scale
+
+Every `typography.*` token rendered as a sample line using its own value.
+
+<TypographyScale filter="typography" />
+
+## Inspect a single token
+
+`TokenDetail` shows the alias chain, per-theme values, and the CSS var
+reference you'd drop into a stylesheet.
+
+<TokenDetail path="typography.sys.body" />
+
+<TokenDetail path="typography.sys.heading" />
