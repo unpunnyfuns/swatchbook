@@ -12,15 +12,14 @@
     "#/*.tsx": "./src/*.tsx"
   },
   "scripts": {
-    "storybook": "pnpm build:tokens-css && storybook dev -p 6006 --no-open",
-    "build:storybook": "pnpm build:tokens-css && storybook build",
-    "test:storybook": "pnpm build:tokens-css && vitest run",
-    "test:storybook:watch": "pnpm build:tokens-css && vitest",
-    "build:tokens-css": "node --no-warnings --experimental-strip-types scripts/build-tokens-css.ts",
+    "storybook": "storybook dev -p 6006 --no-open",
+    "build:storybook": "storybook build",
+    "test:storybook": "vitest run",
+    "test:storybook:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src .storybook scripts",
-    "format": "oxfmt -c ../../.oxfmtrc.json src .storybook scripts",
-    "format:check": "oxfmt --check -c ../../.oxfmtrc.json src .storybook scripts"
+    "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src .storybook swatchbook.config.ts",
+    "format": "oxfmt -c ../../.oxfmtrc.json src .storybook swatchbook.config.ts",
+    "format:check": "oxfmt --check -c ../../.oxfmtrc.json src .storybook swatchbook.config.ts"
   },
   "dependencies": {
     "react": "^19.2.4",
@@ -36,6 +35,7 @@
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@unpunnyfuns/swatchbook-addon": "workspace:*",
     "@unpunnyfuns/swatchbook-core": "workspace:*",
     "@unpunnyfuns/swatchbook-tokens-reference": "workspace:*",
     "@vitejs/plugin-react": "^6.0.1",
