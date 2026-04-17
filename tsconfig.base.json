@@ -5,6 +5,7 @@
     "lib": ["ES2025", "DOM", "DOM.Iterable", "DOM.AsyncIterable"],
     "jsx": "react-jsx",
 
+    "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
