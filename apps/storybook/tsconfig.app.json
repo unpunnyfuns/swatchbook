@@ -8,5 +8,5 @@
     "noUnusedParameters": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo"
   },
-  "include": ["src", ".storybook", "swatchbook.config.ts"]
+  "include": ["src", ".storybook", ".swatchbook/**/*.d.ts", "swatchbook.config.ts"]
 }

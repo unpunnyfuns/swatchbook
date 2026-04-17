@@ -17,6 +17,7 @@ import {
   PARAM_KEY,
   STYLE_ELEMENT_ID,
 } from '#/constants.ts';
+import { ThemeContext } from '#/theme-context.ts';
 
 interface ThemeEntry {
   name: string;
@@ -99,15 +100,17 @@ const themedDecorator: Decorator = (Story, context) => {
   }, [theme]);
 
   return (
-    <div
-      {...{ [DATA_THEME_ATTR]: theme }}
-      style={{
-        padding: '1rem',
-        minHeight: '100%',
-      }}
-    >
-      <Story />
-    </div>
+    <ThemeContext.Provider value={theme}>
+      <div
+        {...{ [DATA_THEME_ATTR]: theme }}
+        style={{
+          padding: '1rem',
+          minHeight: '100%',
+        }}
+      >
+        <Story />
+      </div>
+    </ThemeContext.Provider>
   );
 };
 
