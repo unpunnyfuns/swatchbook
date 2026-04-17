@@ -12,5 +12,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const Disabled: Story = { args: { disabled: true, value: 'Disabled input' } };
-export const Invalid: Story = { args: { invalid: true, value: 'not-a-theme' } };
+export const Disabled: Story = {
+  args: { disabled: true, defaultValue: 'Disabled input' },
+};
+export const Invalid: Story = { args: { invalid: true, defaultValue: 'not-a-theme' } };
