@@ -1,6 +1,8 @@
 import {
+  BorderPreview,
   ColorPalette,
   DimensionScale,
+  ShadowPreview,
   TokenDetail,
   TokenTable,
   TypographyScale,
@@ -86,6 +88,46 @@ export const DimensionScaleRenders = meta.story({
     expect(
       nonZeroWidths.length,
       'at least one bar must resolve to a non-zero width',
+    ).toBeGreaterThan(0);
+  },
+});
+
+/**
+ * `ShadowPreview` must render a sample with a non-empty `box-shadow`
+ * computed style for at least one shadow token.
+ */
+export const ShadowPreviewRenders = meta.story({
+  render: () => <ShadowPreview filter='shadow.sys.*' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'div[aria-hidden="true"]');
+    const samples = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
+    const withShadow = samples.filter((el) => {
+      const bs = getComputedStyle(el).boxShadow;
+      return bs && bs !== 'none';
+    });
+    expect(
+      withShadow.length,
+      'at least one sample must resolve to a non-none box-shadow',
+    ).toBeGreaterThan(0);
+  },
+});
+
+/**
+ * `BorderPreview` must render a sample whose computed `border-style` is not
+ * `none` for at least one border token.
+ */
+export const BorderPreviewRenders = meta.story({
+  render: () => <BorderPreview filter='border.sys.*' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'div[aria-hidden="true"]');
+    const samples = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
+    const withBorder = samples.filter((el) => {
+      const style = getComputedStyle(el).borderTopStyle;
+      return style && style !== 'none';
+    });
+    expect(
+      withBorder.length,
+      'at least one sample must resolve to a non-none border-style',
     ).toBeGreaterThan(0);
   },
 });
