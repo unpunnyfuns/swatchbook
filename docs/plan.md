@@ -342,7 +342,7 @@ Token-loading problems should be *visible*, not silent. Pipeline:
 
 ## Workspace root
 
-Root `package.json` currently uses `"@unpunnyfuns/swatchbook"`. Rename to neutral `"swatchbook-monorepo"` with `"private": true` before scaffold. Keeps the scoped name free for a future published meta-package (or reclaim it later if we want a single-package face).
+Root `package.json` uses `"swatchbook"` with `"private": true` — the plain unscoped name, matching the project's identity and the repo slug. Originally scaffolded as `swatchbook-monorepo` to hedge for a published meta-package; renamed during M9 once it was clear the scoped `@unpunnyfuns/swatchbook-*` package set is the public face and no meta-package is planned. See `docs/decisions.md` (2026-04-17 entry).
 
 ## CI
 
