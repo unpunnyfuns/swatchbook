@@ -14,8 +14,8 @@
   "scripts": {
     "storybook": "pnpm build:tokens-css && storybook dev -p 6006 --no-open",
     "build:storybook": "pnpm build:tokens-css && storybook build",
-    "test:storybook": "vitest run",
-    "test:storybook:watch": "vitest",
+    "test:storybook": "pnpm build:tokens-css && vitest run",
+    "test:storybook:watch": "pnpm build:tokens-css && vitest",
     "build:tokens-css": "node --no-warnings --experimental-strip-types scripts/build-tokens-css.ts",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src .storybook scripts",
