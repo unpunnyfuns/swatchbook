@@ -514,15 +514,16 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Exit:** `turbo run test:storybook` green in CI.
 **Demo:** CI run shows a green Storybook Test job with the expected number of passing tests.
 
-### M8 — Public starter + documentation
-**Goal:** A consumer can install swatchbook from npm and use it.
+### M8 — Public documentation
+**Goal:** A consumer can install swatchbook from npm and find their way.
 **Work:**
-- Flesh out `packages/tokens-starter`: slim ref + sys + 2 themes; prebuilt `dist/themes/*.json`, `dist/css/*.css`, `dist/index.{js,d.ts}`.
+- Root README: install flow, MCP startup order, link to each package. _(done in #92)_
 - READMEs per package (module name + one-liner, structure table, TS examples, ✅/❌ do's/don'ts).
-- Root README: install flow, MCP startup order, link to each package.
 
-**Exit:** `npm pack --dry-run` on each published package lists the expected files; cold `pnpm add` install in a throwaway repo works and CSS renders.
-**Demo:** `pnpm dlx create-vite demo && cd demo && pnpm add @unpunnyfuns/swatchbook-tokens` → import CSS → demo renders styled.
+**Exit:** `npm pack --dry-run` on each published package lists the expected files; cold `pnpm add` install in a throwaway repo works against a hand-rolled tokens folder.
+**Demo:** README flow copy-pasted into a fresh Vite+Storybook app — addon loads, panel lists tokens, theme switcher works.
+
+**Deferred:** Fleshing out `@unpunnyfuns/swatchbook-tokens` (slim pyramid + prebuilt CSS/JSON/types) — see `docs/decisions.md`. Consumers bring their own tokens for v0.1.0; the starter package is post-v0.1.0 polish, not a release blocker.
 
 ### M9 — v0.1.0 release
 **Goal:** First public release under `@unpunnyfuns`.

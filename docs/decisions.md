@@ -140,3 +140,15 @@ Dropped (TS 6 handles by default): `strict`, `module`, `target`, `esModuleIntero
 **Decision:** Apps and peer ranges pin `storybook@^10.3.5` and `@storybook/addon-vitest@^10.3.5`. The MCP addon is `@storybook/addon-mcp@^0.6.0`.
 
 **Rationale:** Latest matching the plan's "MCP support requires 10.3" gate.
+
+---
+
+## 2026-04-17 — Iceboxed `@unpunnyfuns/swatchbook-tokens` starter past v0.1.0
+
+**Context:** M8's original scope bundled three items: root README (#39), per-package READMEs (#38), and fleshing out `packages/tokens-starter` (#37) into a publishable slim pyramid with prebuilt CSS/JSON/types. The starter was positioned as a low-friction entry point — `pnpm add @unpunnyfuns/swatchbook-tokens` → import CSS → done.
+
+**Decision:** Drop #37 from M8. The starter stays in the repo as a build-pipeline smoke test for core, but isn't a v0.1.0 release blocker. Issue #37 de-milestoned (kept open, unassigned).
+
+**Rationale:** Consumers in the primary target audience (design-system teams) bring their own tokens — that's the whole point. The starter is "nice to have for tiny projects", not core value. Shipping it well means curating a defensible tasteful palette, which is effort that competes with getting the addon + blocks out the door. Revisit post-v0.1.0 once there's real signal for whether a starter is wanted at all.
+
+**Plan impact:** `docs/plan.md` → M8 renamed from "Public starter + documentation" to "Public documentation". Starter work explicitly noted as deferred in the M8 body.
