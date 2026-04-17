@@ -118,14 +118,14 @@ export function TokenTable({
 
   if (rows.length === 0) {
     return (
-      <div style={styles.wrapper}>
+      <div data-theme={activeTheme} style={styles.wrapper}>
         <div style={styles.empty}>No tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div style={styles.wrapper}>
+    <div data-theme={activeTheme} style={styles.wrapper}>
       <table style={styles.table}>
         <caption style={styles.caption}>{captionText}</caption>
         <colgroup>
