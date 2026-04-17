@@ -10,7 +10,7 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Current milestone
 
-`Current: M5 — Token-aware color control`
+`Current: M6 — Doc blocks` (M5 deferred — see `docs/decisions.md`)
 
 Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
 

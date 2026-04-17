@@ -484,7 +484,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Exit:** Panel lists every token from `tokens-reference`; `useToken('color.sys.surface.default')` returns the resolved value with autocomplete; theme switch updates the value.
 **Demo:** Story uses `useToken` and renders its return value as text; Tokens panel search filters down to a single result.
 
-### M5 — Token-aware color control
+### M5 — Token-aware color control ⏸ Deferred
 **Goal:** Replace Storybook's default color picker for color-typed args.
 **Work:**
 - `swatchbook-color` argType: searchable popover of color tokens (swatch + path + resolved), writes `var(--…)` directly to args via `updateArgs`.
@@ -492,6 +492,8 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 
 **Exit:** Selecting a token writes `var(--sb-color-…)` to args; component re-renders with that value; Args tab is honest (shows exactly what the component receives).
 **Demo:** Pick a token from the popover → both the rendered component and the Args panel update.
+
+**Status (deferred):** Storybook 10 has no first-class API for registering new control types; the workable paths (preset-colors / decorator / custom panel) each compromise on the plan's "writes `var(--…)` to args" exit criterion. M6's `TokenDetail` block and the existing Tokens panel cover the "pick a token" UX well enough in the meantime. Revisit after M6 lands, once we see how the blocks shake out and whether Storybook's upstream story on custom controls has evolved. See `docs/decisions.md` entry.
 
 ### M6 — Doc blocks
 **Goal:** Rich MDX documentation of tokens.

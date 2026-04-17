@@ -12,6 +12,22 @@ Append-only ADR-lite log. Entries capture tactical choices made during execution
 
 ---
 
+## 2026-04-17 — Defer M5 (token-aware color control) until after M6
+
+**Context:** M5's plan exit criterion is a \`swatchbook-color\` argType that writes \`var(--…)\` directly to the story's args via \`updateArgs\`. Storybook 10 has no first-class API for registering new control types in the Controls panel — the paths available are:
+- Preset-colors on the built-in color picker (writes the raw color, not a var reference).
+- Decorator-based picker above the story (not in the Args panel; works around `useArgs` quirks).
+- Full custom Controls panel replacement (fights Storybook's panel ordering and is fragile across upstream updates).
+
+**Decision:** Defer M5 to after M6. Reasons:
+- M6's \`TokenDetail\` block and the Tokens panel we shipped in M4 already cover the "browse + pick a token" UX for authors.
+- Investing build time in a custom control that the upstream may soon supersede is poor ROI now.
+- Tracked as issue #68. M5 milestone stays open on GitHub; its two seed issues (#26, #27) closed as "not planned".
+
+**Rationale:** The plan isn't a contract; deferring a milestone when the cost/benefit flips is the governance process working. M6 ships the higher-value surface.
+
+---
+
 ## 2026-04-17 — Modernize `tsconfig.base.json` for TS 6
 
 **Context:** TS 6 changed several defaults (`strict`, `module: esnext`, `target` = current-year floating, `noUncheckedSideEffectImports: true`, `libReplacement: false`) and added new strictness flags. Our base config was carrying TS 5-era boilerplate that's now redundant or outdated.
