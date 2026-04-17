@@ -36,12 +36,14 @@
   },
   "peerDependencies": {
     "react": ">=18",
-    "react-dom": ">=18"
+    "react-dom": ">=18",
+    "storybook": "^10.3.5"
   },
   "devDependencies": {
     "@types/react": "^19.2.14",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "storybook": "^10.3.5",
     "tsdown": "^0.21.9",
     "typescript": "^6.0.0"
   }
