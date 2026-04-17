@@ -407,6 +407,7 @@ All work after the M0 scaffold commit flows through PRs. Direct pushes to `main`
   - ❌ `M3: addon preset + virtual module`
   - ❌ `Update addon`
 - Body follows the PR template verbatim. Link related milestone issues with `Closes #N` / `Refs #N`.
+- **Issue-first, always.** Every PR ties to an open GitHub issue under the relevant milestone. If one doesn't exist for the work you're about to start, file it first (`gh issue create --milestone "Mx — …" --title "…"`). The PR body's `Closes #N` line auto-closes the issue on merge; milestones then close themselves when their last issue is done. Chore/infra PRs that don't map to an M-issue still open a tracking issue for the trail.
 - **Merge strategy:** squash-merge by default. Preserve commits only when the history is genuinely useful to future readers.
 - **No self-merge by automation.** Claude (or any agent) opens PRs; the human reviewer merges. This keeps the governance human-in-the-loop.
 - **Branch protection** on `main` is the repo owner's call — the discipline above holds either way, but enabling protection rules (require PR, require status checks, restrict pushes) in GitHub settings makes it enforced rather than norm-based.
@@ -428,7 +429,7 @@ Two mechanisms:
 
 Each milestone has a single measurable demo step. Progress is tracked by which milestones are green.
 
-### M0 — Foundation
+### M0 — Foundation ✅
 **Goal:** Empty but fully wired monorepo; scope of core is confirmed; governance in place.
 **Work:**
 - Spike: read `@terrazzo/parser` API + source; prototype loading a small DTCG file; verify alias chains, multi-file merge, composite emission, diagnostic surface. Produce `docs/terrazzo-notes.md`.
@@ -441,7 +442,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Exit:** `pnpm install && pnpm turbo run lint typecheck` green on empty packages. CI runs on PR. Terrazzo note committed.
 **Demo:** CI badge green on the scaffold commit.
 
-### M1 — Core (`@unpunnyfuns/swatchbook-core`)
+### M1 — Core (`@unpunnyfuns/swatchbook-core`) ✅
 **Goal:** DTCG loading + three-way theming + CSS/types emission, fully tested.
 **Work:**
 - Author `packages/tokens-reference`: ref/sys/cmp/themes + `$themes.manifest.json` + `resolver.json`.
@@ -452,7 +453,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Exit:** `turbo run test --filter core` green; `turbo run build --filter tokens-starter` produces `dist/css/light.css` and `dist/tokens.d.ts`.
 **Demo:** `cat packages/tokens-starter/dist/css/light.css` shows expected CSS vars.
 
-### M2 — Baseline Storybook app
+### M2 — Baseline Storybook app ✅
 **Goal:** `apps/storybook` builds and renders demo components styled by real tokens — no swatchbook addon yet.
 **Work:**
 - Scaffold `apps/storybook` on the pinned Storybook version with React-Vite.
@@ -463,7 +464,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Exit:** `turbo run storybook` serves the app; `turbo run build:storybook` produces `storybook-static/`.
 **Demo:** Visit `http://localhost:6006` — Button/Card/Input stories render fully themed.
 
-### M3 — Addon runtime
+### M3 — Addon runtime ✅
 **Goal:** Live theme switching in Storybook driven by the swatchbook addon.
 **Work:**
 - `@unpunnyfuns/swatchbook-addon`: preset + Vite virtual module (`virtual:swatchbook/tokens`) + HMR + preview decorator.
@@ -473,7 +474,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 **Exit:** Toolbar dropdown changes `data-theme`, CSS vars repaint. Editing a token file in `tokens-reference` hot-reloads the preview with new values.
 **Demo:** Pick "Dark · Brand A" in toolbar → demo components reflect the stacked composition instantly.
 
-### M4 — Token browsing + typed hook
+### M4 — Token browsing + typed hook ✅
 **Goal:** Authors can introspect tokens and read them from JS with full types.
 **Work:**
 - Panel: **Tokens** tab (searchable, grouped by `$type`, click → copy `var(--…)`) + **Diagnostics** tab (error/warn/info, green OK badge when empty).

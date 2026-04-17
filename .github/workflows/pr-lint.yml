@@ -1,0 +1,66 @@
+name: PR lint
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  conventional-title:
+    name: Conventional Commits title
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            chore
+            docs
+            test
+            ci
+            refactor
+            perf
+            build
+            revert
+          scopes: |
+            core
+            addon
+            blocks
+            tokens-reference
+            tokens-starter
+            storybook
+            ci
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The subject "{subject}" must start with a lowercase letter.
+          # Fail if the title has no type prefix.
+          wip: false
+
+  linked-issue:
+    name: Linked issue
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Require Closes / Fixes / Refs #N in body
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [ -z "$BODY" ]; then
+            echo "::error::PR body is empty. Every PR links an issue via 'Closes #N' (or 'Fixes' / 'Resolves')."
+            exit 1
+          fi
+          if echo "$BODY" | grep -qiE '(close[sd]?|fix(e[sd])?|resolve[sd]?|refs?) #[0-9]+'; then
+            echo "Linked-issue reference found."
+            exit 0
+          fi
+          echo "::error::PR body must link an issue — include 'Closes #N', 'Fixes #N', 'Resolves #N', or 'Refs #N'. Open one first if needed: gh issue create --milestone \"Mx — …\" --title \"…\""
+          exit 1
