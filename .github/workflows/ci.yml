@@ -13,6 +13,17 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Pin to match apps/storybook/node_modules/playwright version. Bump in
+    # the same PR as a Playwright upgrade — ships chromium + all system
+    # deps pre-installed, so we skip `apt-get install` entirely.
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-noble
+    env:
+      # The image pre-installs chromium to /ms-playwright, but GH Actions
+      # overrides $HOME to /github/home inside containers so Playwright's
+      # default lookup ($HOME/.cache/ms-playwright) misses. Point it at
+      # the image's install dir explicitly.
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     permissions:
       contents: read
       actions: write
@@ -21,6 +32,14 @@ jobs:
         node: [24]
     steps:
       - uses: actions/checkout@v6
+
+      - name: Trust workspace inside container
+        # Runner UID differs from checkout owner inside containers, which
+        # makes git refuse to read the repo ("dubious ownership"). Turbo
+        # uses git status for its dirty hash; we tell git to trust the
+        # workspace path to silence the warning and restore reliable
+        # cache keys.
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - uses: pnpm/action-setup@v5
         with:
@@ -40,27 +59,6 @@ jobs:
             turbo-${{ matrix.node }}-
 
       - run: pnpm install --frozen-lockfile
-
-      - name: Resolve Playwright version
-        id: playwright
-        run: |
-          version=$(node -p "require('./apps/storybook/node_modules/playwright/package.json').version")
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
-
-      - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm --filter @unpunnyfuns/swatchbook-storybook exec playwright install --with-deps chromium
-
-      - name: Install Playwright system deps on cache hit
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: pnpm --filter @unpunnyfuns/swatchbook-storybook exec playwright install-deps chromium
 
       - run: pnpm turbo run lint format:check typecheck test build
 
