@@ -12,5 +12,14 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
-  external: [/^vite($|\/)/, /^@storybook\//, 'storybook', 'react', 'react-dom'],
+  deps: {
+    neverBundle: [
+      /^vite($|\/)/,
+      /^@storybook\//,
+      /^virtual:/,
+      'storybook',
+      'react',
+      'react-dom',
+    ],
+  },
 });

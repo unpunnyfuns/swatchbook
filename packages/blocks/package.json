@@ -25,7 +25,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown src/index.ts --format esm --dts --clean --sourcemap",
+    "build": "tsdown",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src",
     "format": "oxfmt -c ../../.oxfmtrc.json src",

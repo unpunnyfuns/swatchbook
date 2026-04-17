@@ -2,10 +2,10 @@ import type { Decorator, Preview } from '@storybook/react-vite';
 import { useEffect } from 'react';
 import { addons } from 'storybook/preview-api';
 import {
-  css as generatedCss,
+  css,
   cssVarPrefix,
   defaultTheme,
-  diagnostics as generatedDiagnostics,
+  diagnostics,
   themes,
   themesResolved,
   themingMode,
@@ -19,21 +19,9 @@ import {
 } from '#/constants.ts';
 import { ThemeContext } from '#/theme-context.ts';
 
-interface ThemeEntry {
-  name: string;
-  input: Record<string, string>;
-  sources: string[];
-}
-
-const typedThemes = themes as ThemeEntry[];
-const typedCss = generatedCss as string;
-const typedDefaultTheme = defaultTheme as string | null;
-const typedPrefix = (cssVarPrefix ?? '') as string;
-const typedMode = themingMode as 'layered' | 'resolver' | 'manifest';
-
 /** CSS var name with the active prefix applied. */
 function v(name: string): string {
-  return typedPrefix ? `--${typedPrefix}-${name}` : `--${name}`;
+  return cssVarPrefix ? `--${cssVarPrefix}-${name}` : `--${name}`;
 }
 
 /**
@@ -50,7 +38,7 @@ html, body {
   margin: 0;
 }
 `;
-  const text = `${typedCss}\n${bodyRules}`;
+  const text = `${css}\n${bodyRules}`;
   let style = document.getElementById(STYLE_ELEMENT_ID) as HTMLStyleElement | null;
   if (!style) {
     style = document.createElement('style');
@@ -74,12 +62,12 @@ function setRootTheme(theme: string): void {
 function broadcastInit(): void {
   const channel = addons.getChannel();
   channel.emit(INIT_EVENT, {
-    themes: typedThemes,
-    defaultTheme: typedDefaultTheme,
-    mode: typedMode,
+    themes,
+    defaultTheme,
+    mode: themingMode,
     themesResolved,
-    diagnostics: generatedDiagnostics,
-    cssVarPrefix: typedPrefix,
+    diagnostics,
+    cssVarPrefix,
   });
 }
 
@@ -88,7 +76,7 @@ const themedDecorator: Decorator = (Story, context) => {
   const parameterTheme = (context.parameters as Record<string, Record<string, unknown>>)[
     PARAM_KEY
   ]?.['theme'];
-  const theme = (parameterTheme ?? globalTheme ?? typedDefaultTheme ?? 'Light') as string;
+  const theme = (parameterTheme ?? globalTheme ?? defaultTheme ?? 'Light') as string;
 
   useEffect(() => {
     ensureStylesheet();
@@ -128,5 +116,5 @@ export const globalTypes: NonNullable<Preview['globalTypes']> = {
 };
 
 export const initialGlobals: NonNullable<Preview['initialGlobals']> = {
-  [GLOBAL_KEY]: typedDefaultTheme ?? typedThemes[0]?.name ?? 'Light',
+  [GLOBAL_KEY]: defaultTheme ?? themes[0]?.name ?? 'Light',
 };
