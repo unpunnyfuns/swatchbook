@@ -128,14 +128,14 @@ export function TypographyScale({
 
   if (rows.length === 0) {
     return (
-      <div style={styles.wrapper}>
+      <div data-theme={activeTheme} style={styles.wrapper}>
         <div style={styles.empty}>No typography tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div style={styles.wrapper}>
+    <div data-theme={activeTheme} style={styles.wrapper}>
       <div style={styles.caption}>{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} style={styles.row}>
