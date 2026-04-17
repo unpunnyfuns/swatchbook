@@ -1,0 +1,44 @@
+{
+  "typography": {
+    "sys": {
+      "$type": "typography",
+      "$description": "Composite typography tokens. Each bundles family, size, weight, and line-height.",
+      "body": {
+        "$value": {
+          "fontFamily": "{font.ref.family.sans}",
+          "fontSize":   "{size.ref.rem-400}",
+          "fontWeight": "{font.ref.weight.regular}",
+          "lineHeight": 1.5,
+          "letterSpacing": { "value": 0, "unit": "px" }
+        }
+      },
+      "body-strong": {
+        "$value": {
+          "fontFamily": "{font.ref.family.sans}",
+          "fontSize":   "{size.ref.rem-400}",
+          "fontWeight": "{font.ref.weight.semibold}",
+          "lineHeight": 1.5,
+          "letterSpacing": { "value": 0, "unit": "px" }
+        }
+      },
+      "heading": {
+        "$value": {
+          "fontFamily": "{font.ref.family.sans}",
+          "fontSize":   "{size.ref.rem-700}",
+          "fontWeight": "{font.ref.weight.bold}",
+          "lineHeight": 1.2,
+          "letterSpacing": { "value": -0.5, "unit": "px" }
+        }
+      },
+      "code": {
+        "$value": {
+          "fontFamily": "{font.ref.family.mono}",
+          "fontSize":   "{size.ref.rem-400}",
+          "fontWeight": "{font.ref.weight.regular}",
+          "lineHeight": 1.4,
+          "letterSpacing": { "value": 0, "unit": "px" }
+        }
+      }
+    }
+  }
+}

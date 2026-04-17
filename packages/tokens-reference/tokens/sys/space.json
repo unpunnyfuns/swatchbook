@@ -1,0 +1,17 @@
+{
+  "space": {
+    "sys": {
+      "$type": "dimension",
+      "$description": "Semantic spacing scale used by components.",
+      "none": { "$value": "{size.ref.000}" },
+      "2xs":  { "$value": "{size.ref.050}" },
+      "xs":   { "$value": "{size.ref.100}" },
+      "sm":   { "$value": "{size.ref.200}" },
+      "md":   { "$value": "{size.ref.300}" },
+      "lg":   { "$value": "{size.ref.400}" },
+      "xl":   { "$value": "{size.ref.600}" },
+      "2xl":  { "$value": "{size.ref.800}" },
+      "3xl":  { "$value": "{size.ref.1000}" }
+    }
+  }
+}
