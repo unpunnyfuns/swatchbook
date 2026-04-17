@@ -18,6 +18,9 @@ const styles = {
   wrapper: {
     fontFamily: 'var(--sb-typography-sys-body-font-family, system-ui)',
     color: 'var(--sb-color-sys-text-default, CanvasText)',
+    background: 'var(--sb-color-sys-surface-default, Canvas)',
+    padding: 12,
+    borderRadius: 6,
   } satisfies CSSProperties,
   caption: {
     padding: '4px 0 12px',
