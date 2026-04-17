@@ -25,8 +25,8 @@
         "focus":     { "$value": "{color.ref.blue.500}" }
       },
       "accent": {
-        "bg":        { "$value": "{color.ref.blue.500}" },
-        "bg-hover":  { "$value": "{color.ref.blue.700}" },
+        "bg":        { "$value": "{color.ref.blue.700}" },
+        "bg-hover":  { "$value": "{color.ref.blue.900}" },
         "fg":        { "$value": "{color.ref.neutral.0}" }
       },
       "status": {
