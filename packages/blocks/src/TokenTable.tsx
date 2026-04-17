@@ -21,6 +21,9 @@ const styles = {
     fontFamily: 'var(--sb-typography-sys-body-font-family, system-ui)',
     fontSize: 'var(--sb-typography-sys-body-font-size, 14px)',
     color: 'var(--sb-color-sys-text-default, CanvasText)',
+    background: 'var(--sb-color-sys-surface-default, Canvas)',
+    padding: 12,
+    borderRadius: 6,
   } satisfies React.CSSProperties,
   caption: {
     captionSide: 'top',
