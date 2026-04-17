@@ -92,7 +92,11 @@ function buildRow(path: string, composite: Record<string, unknown>): Row {
   if (lineHeight) sampleStyle.lineHeight = lineHeight;
   if (letterSpacing) sampleStyle.letterSpacing = letterSpacing;
 
-  const parts = [fontSize, fontWeight ? `w${fontWeight}` : undefined, lineHeight ? `lh ${lineHeight}` : undefined]
+  const parts = [
+    fontSize,
+    fontWeight ? `w${fontWeight}` : undefined,
+    lineHeight ? `lh ${lineHeight}` : undefined,
+  ]
     .filter(Boolean)
     .join(' · ');
 
