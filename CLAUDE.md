@@ -38,7 +38,7 @@ Update this line when a milestone closes. See the matching GitHub milestones for
 - **Node baseline:** always the **latest LTS** everywhere — dev, CI matrix, published `engines.node`. Today that's Node 24. When a new LTS lands (typically October of even years), bump engines + CI in a same-day PR. Don't add lower-version compat paths, polyfills, or matrix entries for older Node.
 - **Package manager:** pnpm@10.33.0 (workspaces); orchestration via Turborepo.
 - **Code style:** functional, avoid classes/singletons. No CSS-in-JS. No inline end-of-line comments.
-- **Lint/format:** `oxlint` + `oxfmt`. Never `npx biome`.
+- **Lint/format:** `oxlint` + `oxfmt`. Never `npx biome`. **Always run `pnpm -r format` (or the relevant per-package `format` script) before committing** — the CI "format check" job fails otherwise, and oxfmt changes to already-staged files become a noisy follow-up commit.
 - **Tests:** Vitest everywhere. Storybook Test (via `@storybook/addon-vitest`) for interaction tests in `apps/storybook`.
 - **Design tokens:** ref → sys → cmp pyramid. Components never alias ref directly.
 - **TypeScript:** strict, `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, `verbatimModuleSyntax` on.
