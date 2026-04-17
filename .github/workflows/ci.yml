@@ -16,8 +16,13 @@ jobs:
     # Pin to match apps/storybook/node_modules/playwright version. Bump in
     # the same PR as a Playwright upgrade — ships chromium + all system
     # deps pre-installed, so we skip `apt-get install` entirely.
+    # GHCR mirror of mcr.microsoft.com/playwright:v1.59.1-noble, maintained by
+    # .github/workflows/mirror-playwright.yml. GHCR pulls are ~3-5s on GHA
+    # runners vs ~27s from MCR. On Playwright bump: update the version in
+    # apps/storybook/package.json, dispatch the mirror workflow with the new
+    # tag, then update this line + the CLAUDE.md bullet.
     container:
-      image: mcr.microsoft.com/playwright:v1.59.1-noble
+      image: ghcr.io/${{ github.repository }}/playwright:v1.59.1-noble
     env:
       # The image pre-installs chromium to /ms-playwright, but GH Actions
       # overrides $HOME to /github/home inside containers so Playwright's
