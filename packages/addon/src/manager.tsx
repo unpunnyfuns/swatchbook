@@ -27,25 +27,17 @@ interface ThemeEntry {
   sources: string[];
 }
 
-type ThemingMode = 'layered' | 'resolver';
-
 interface InitPayload {
   themes: ThemeEntry[];
   defaultTheme: string | null;
-  mode: ThemingMode;
 }
-
-const modeBadge: Record<ThemingMode, string> = {
-  layered: 'layered',
-  resolver: 'DTCG resolver',
-};
 
 const EMPTY_THEMES: ThemeEntry[] = [];
 
 /** Split a resolver permutation like `{ appearance: 'light', brand: 'a' }` into display chips. */
 function chipsFor(theme: ThemeEntry): string[] {
   const entries = Object.entries(theme.input);
-  // Layered / manifest modes use a single-key { theme: name } — the name itself is the chip.
+  // Single-modifier resolvers use `{ theme: name }` — the name alone is already the chip.
   if (entries.length === 1 && entries[0]?.[0] === 'theme') return [];
   return entries.map(([key, value]) => `${key}: ${value}`);
 }
@@ -127,7 +119,7 @@ function ThemeToolbar(): ReactElement {
             opacity: 0.6,
           },
         },
-        `Theme${payload?.mode ? ` — ${modeBadge[payload.mode]}` : ''}`,
+        'Theme',
       ),
       h(TooltipLinkList, {
         links: themes.map((theme) => ({

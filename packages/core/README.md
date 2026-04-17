@@ -1,6 +1,6 @@
 # @unpunnyfuns/swatchbook-core
 
-Framework-free DTCG loader. Parses token files (via Terrazzo), resolves aliases, composes themes through a DTCG 2025.10 resolver or explicit file layers, and emits CSS variables + TypeScript types. Both inputs normalize to the same internal shape; a core unit test pins equivalence.
+Framework-free DTCG loader. Parses token files (via Terrazzo), resolves aliases, composes themes through a DTCG 2025.10 resolver, and emits CSS variables + TypeScript types.
 
 ## Install
 
@@ -13,13 +13,12 @@ pnpm add @unpunnyfuns/swatchbook-core
 | Export | Purpose |
 | --- | --- |
 | `defineSwatchbookConfig(config)` | Identity helper for a typed `swatchbook.config.ts`. |
-| `loadProject(config, cwd?)` | Parse + normalize — returns `Project { themes, themesResolved, graph, diagnostics, … }`. |
+| `loadProject(config, cwd?)` | Parse + resolve — returns `Project { themes, themesResolved, graph, diagnostics, … }`. |
 | `resolveTheme(project, name)` | Pick a single composed theme out of a project. |
 | `emitCss(project, options?)` | Concatenated stylesheet, one `[data-theme="…"]` block per theme. |
 | `projectCss(project)` | Same as `emitCss` with project defaults applied. |
 | `emitTypes(project)` | TypeScript source declaring the token-path union + `SwatchbookTokenMap`. |
-| `resolveThemingMode(config)` | `'layered' | 'resolver'` — which branch the config activates. |
-| Types | `Config`, `Theme`, `ThemeConfig`, `Project`, `ResolvedTheme`, `TokenMap`, `Diagnostic`, `DiagnosticSeverity`. |
+| Types | `Config`, `Theme`, `Project`, `ResolvedTheme`, `TokenMap`, `Diagnostic`, `DiagnosticSeverity`. |
 
 ## Minimal config
 
@@ -28,11 +27,13 @@ import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
 
 export default defineSwatchbookConfig({
   tokens: ['tokens/**/*.json'],
-  resolver: 'tokens/resolver.json', // or `themes:` for explicit layers — pick one
+  resolver: 'tokens/resolver.json',
   default: 'Light',
   cssVarPrefix: 'sb',
 });
 ```
+
+The resolver file is the spec-defined document describing how token sets compose into named themes — see [the DTCG 2025.10 resolver draft](https://design-tokens.org/tr/2025/drafts/resolver/).
 
 ## Load + emit
 
@@ -47,27 +48,9 @@ const dts = emitTypes(project);
 
 `project.diagnostics` is always populated — severity is `'error' | 'warn' | 'info'`. The addon surfaces these in its Diagnostics panel; your own pipeline can inspect / `throw` on `severity === 'error'` as fits.
 
-## Two theming idioms, one shape
+## Theme naming
 
-```ts
-// A — DTCG 2025.10 resolver (recommended; native to the spec)
-defineSwatchbookConfig({
-  tokens: ['tokens/**/*.json'],
-  resolver: 'tokens/resolver.json',
-});
-
-// B — explicit layers (our file-glob shortcut; useful when you want
-// to name compositions yourself)
-defineSwatchbookConfig({
-  tokens: ['tokens/**/*.json'],
-  themes: [
-    { name: 'Light', layers: ['ref/**', 'sys/**', 'cmp/**', 'themes/light.json'] },
-    { name: 'Dark',  layers: ['ref/**', 'sys/**', 'cmp/**', 'themes/dark.json'] },
-  ],
-});
-```
-
-Mixing is an error surfaced during `loadProject`.
+Theme names come from the resolver's permutations — core uses the modifier value directly when there's a single modifier axis (so a `theme` modifier with contexts `Light` / `Dark` / `High Contrast` yields those names verbatim), and falls back to Terrazzo's multi-axis permutation ID when the resolver has two or more modifiers. Pick sensible modifier context names in your resolver; what you write is what the toolbar shows.
 
 ## Do / don't
 

@@ -1,24 +1,17 @@
 import { dirname } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { tokensDir } from '@unpunnyfuns/swatchbook-tokens-reference';
+import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens-reference';
 import { projectCss } from '#/emit';
 import { loadProject } from '#/load';
 import type { Project } from '#/types';
 
 const fixtureCwd = dirname(tokensDir);
 
-const LAYER_SETS = {
-  common: ['tokens/ref/**/*.json', 'tokens/sys/**/*.json', 'tokens/cmp/**/*.json'],
-};
-
 async function loadWithPrefix(prefix: string | undefined): Promise<Project> {
   return loadProject(
     {
       tokens: ['tokens/**/*.json'],
-      themes: [
-        { name: 'Light', layers: [...LAYER_SETS.common, 'tokens/themes/light.json'] },
-        { name: 'Dark', layers: [...LAYER_SETS.common, 'tokens/themes/dark.json'] },
-      ],
+      resolver: resolverPath,
       default: 'Light',
       ...(prefix !== undefined && { cssVarPrefix: prefix }),
     },
