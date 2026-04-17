@@ -27,6 +27,7 @@ declare module 'virtual:swatchbook/tokens' {
     $description?: string;
     aliasOf?: string;
     aliasChain?: readonly string[];
+    aliasedBy?: readonly string[];
   }
 
   export const themes: readonly VirtualTheme[];

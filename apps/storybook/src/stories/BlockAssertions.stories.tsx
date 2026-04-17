@@ -231,6 +231,27 @@ export const TokenDetailShadowComposite = meta.story({
 });
 
 /**
+ * `TokenDetail` for a heavily-aliased primitive must render the "Aliased by"
+ * section listing at least one transitive descendant — that's the core
+ * promise of backward alias traversal.
+ */
+export const TokenDetailAliasedBy = meta.story({
+  render: () => <TokenDetail path='color.ref.neutral.0' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const body = canvasElement.textContent ?? '';
+    expect(body, 'must render Aliased by section').toContain('Aliased by');
+    const nodes = [...canvasElement.querySelectorAll('li span')].map((el) =>
+      el.textContent?.trim(),
+    );
+    const hasSys = nodes.some((n) => n?.startsWith('color.sys.'));
+    expect(hasSys, 'tree must include at least one sys descendant').toBe(true);
+    const hasCmp = nodes.some((n) => n?.startsWith('cmp.'));
+    expect(hasCmp, 'tree must include at least one transitive cmp descendant').toBe(true);
+  },
+});
+
+/**
  * `TokenDetail` for a missing path must render its empty state rather than
  * throwing.
  */
