@@ -1,20 +1,26 @@
 import { dirname, resolve } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import {
   manifestPath,
   resolverPath,
   tokensDir,
 } from '@unpunnyfuns/swatchbook-tokens-reference';
 import { loadProject, resolveTheme } from '#/load';
+import type { Project } from '#/types';
 
 const fixtureCwd = dirname(tokensDir);
 
 describe('loadProject — manifest mode', () => {
-  it('loads all 5 named compositions from the Tokens Studio manifest', async () => {
-    const project = await loadProject(
+  let project: Project;
+
+  beforeAll(async () => {
+    project = await loadProject(
       { tokens: ['tokens/**/*.json'], manifest: manifestPath, default: 'Light' },
       fixtureCwd,
     );
+  }, 30_000);
+
+  it('loads all 5 named compositions from the Tokens Studio manifest', () => {
     expect(project.themes.map((t) => t.name)).toEqual([
       'Light',
       'Dark',
@@ -25,22 +31,14 @@ describe('loadProject — manifest mode', () => {
     expect(Object.keys(project.graph).length).toBeGreaterThan(100);
   });
 
-  it('resolves deep alias chains (cmp → sys → ref)', async () => {
-    const project = await loadProject(
-      { tokens: ['tokens/**/*.json'], manifest: manifestPath, default: 'Light' },
-      fixtureCwd,
-    );
+  it('resolves deep alias chains (cmp → sys → ref)', () => {
     const light = resolveTheme(project, 'Light').tokens;
     const buttonBg = light['cmp.button.bg'];
     expect(buttonBg).toBeDefined();
     expect(buttonBg?.$type).toBe('color');
   });
 
-  it('produces different surface values for Light vs Dark', async () => {
-    const project = await loadProject(
-      { tokens: ['tokens/**/*.json'], manifest: manifestPath, default: 'Light' },
-      fixtureCwd,
-    );
+  it('produces different surface values for Light vs Dark', () => {
     const light = resolveTheme(project, 'Light').tokens['color.sys.surface.default'];
     const dark = resolveTheme(project, 'Dark').tokens['color.sys.surface.default'];
     expect(light).toBeDefined();
@@ -48,11 +46,7 @@ describe('loadProject — manifest mode', () => {
     expect(JSON.stringify(light?.$value)).not.toEqual(JSON.stringify(dark?.$value));
   });
 
-  it('throws on unknown theme name', async () => {
-    const project = await loadProject(
-      { tokens: ['tokens/**/*.json'], manifest: manifestPath, default: 'Light' },
-      fixtureCwd,
-    );
+  it('throws on unknown theme name', () => {
     expect(() => resolveTheme(project, 'Nope')).toThrow(/unknown theme/i);
   });
 });
