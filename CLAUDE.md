@@ -11,7 +11,7 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Current milestone
 
-`Current: M8 — Public starter + documentation` (M5 deferred — see `docs/decisions.md`)
+`Current: M8 — Public documentation` (M5 deferred, M8 starter iceboxed — see `docs/decisions.md`)
 
 Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
 
