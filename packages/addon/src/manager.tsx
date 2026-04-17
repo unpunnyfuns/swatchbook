@@ -1,7 +1,15 @@
 import React, { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { IconButton, TooltipLinkList, WithTooltip } from 'storybook/internal/components';
 import { addons, types, useGlobals, useStorybookApi } from 'storybook/manager-api';
-import { ADDON_ID, GLOBAL_KEY, INIT_EVENT, TOOL_ID } from '#/constants.ts';
+import {
+  ADDON_ID,
+  GLOBAL_KEY,
+  INIT_EVENT,
+  PANEL_DIAGNOSTICS_TAB,
+  PANEL_TOKENS_TAB,
+  TOOL_ID,
+} from '#/constants.ts';
+import { DiagnosticsPanel, TokensPanel } from '#/panel.tsx';
 
 /**
  * Use explicit `React.createElement` rather than JSX so the manager bundle
@@ -156,5 +164,19 @@ addons.register(ADDON_ID, () => {
     title: 'Swatchbook theme',
     match: ({ viewMode, tabId }) => !tabId && (viewMode === 'story' || viewMode === 'docs'),
     render: () => h(ThemeToolbar),
+  });
+
+  addons.add(PANEL_TOKENS_TAB, {
+    type: types.PANEL,
+    title: 'Swatchbook tokens',
+    match: ({ viewMode }) => viewMode === 'story',
+    render: ({ active }) => h(TokensPanel, { active: !!active }),
+  });
+
+  addons.add(PANEL_DIAGNOSTICS_TAB, {
+    type: types.PANEL,
+    title: 'Swatchbook diagnostics',
+    match: ({ viewMode }) => viewMode === 'story',
+    render: ({ active }) => h(DiagnosticsPanel, { active: !!active }),
   });
 });

@@ -5,7 +5,9 @@ import {
   css as generatedCss,
   cssVarPrefix,
   defaultTheme,
+  diagnostics as generatedDiagnostics,
   themes,
+  themesResolved,
   themingMode,
 } from 'virtual:swatchbook/tokens';
 import {
@@ -64,16 +66,19 @@ function setRootTheme(theme: string): void {
 }
 
 /**
- * Emit themes to the manager over Storybook's channel so the toolbar tool
- * (in the manager bundle, which can't import our virtual module) gets the
- * theme list, default, and mode.
+ * Emit the full virtual-module payload to the manager over Storybook's
+ * channel so the toolbar + panel (which run in the manager bundle and
+ * can't import our virtual module) can render from it.
  */
-function broadcastThemes(): void {
+function broadcastInit(): void {
   const channel = addons.getChannel();
   channel.emit(INIT_EVENT, {
     themes: typedThemes,
     defaultTheme: typedDefaultTheme,
     mode: typedMode,
+    themesResolved,
+    diagnostics: generatedDiagnostics,
+    cssVarPrefix: typedPrefix,
   });
 }
 
@@ -86,7 +91,7 @@ const themedDecorator: Decorator = (Story, context) => {
 
   useEffect(() => {
     ensureStylesheet();
-    broadcastThemes();
+    broadcastInit();
   }, []);
 
   useEffect(() => {
