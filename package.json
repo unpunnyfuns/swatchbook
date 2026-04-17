@@ -14,12 +14,18 @@
     "test:storybook": "turbo run test:storybook",
     "lint": "turbo run lint",
     "format": "turbo run format",
+    "format:check": "turbo run format:check",
     "typecheck": "turbo run typecheck",
     "storybook": "turbo run storybook",
     "build:storybook": "turbo run build:storybook",
-    "dev": "turbo run storybook"
+    "dev": "turbo run storybook",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.6.0",
+    "@changesets/cli": "^2.30.0",
     "oxfmt": "^0.45.0",
     "oxlint": "^1.60.0",
     "turbo": "^2.9.0",

@@ -517,9 +517,9 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 ### M9 — v0.1.0 release
 **Goal:** First public release under `@unpunnyfuns`.
 **Work:**
-- Configure Changesets for version bumps + changelogs.
-- Publish workflow in CI (npm token, provenance).
-- Cut `v0.1.0`, tag, release notes.
+- ~~Configure Changesets for version bumps + changelogs.~~ Done early — see `docs/decisions.md`.
+- ~~Publish workflow in CI (npm token, provenance).~~ Done early — `.github/workflows/release.yml`.
+- Cut `v0.1.0`: land final changesets, merge the auto-generated release PR, verify `@unpunnyfuns/swatchbook-{core,addon,blocks,tokens}` publish with release notes.
 
 **Exit:** `@unpunnyfuns/swatchbook-core`, `@unpunnyfuns/swatchbook-addon`, `@unpunnyfuns/swatchbook-blocks`, `@unpunnyfuns/swatchbook-tokens` all on npm at the same version.
 **Demo:** Fresh clone of the demo repo from M8 pins the released versions and installs without workspace links.

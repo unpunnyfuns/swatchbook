@@ -30,6 +30,7 @@ Update this line when a milestone closes. See the matching GitHub milestones for
   ```
   TypeScript (5.4+), Vite, and Vitest all honor `package.json#imports` natively — no `tsconfig#paths`, no `resolve.alias`. Don't add them.
 - **Node baseline:** always the **latest LTS** everywhere — dev, CI matrix, published `engines.node`. Today that's Node 24. When a new LTS lands (typically October of even years), bump engines + CI in a same-day PR. Don't add lower-version compat paths, polyfills, or matrix entries for older Node.
+- **Changesets:** every PR that touches a publishable package (`core`, `addon`, `blocks`, `tokens`) includes a changeset. Run `pnpm changeset`, pick packages + semver bump, write a one-line summary. The file lands in `.changeset/`. Chore/infra/docs PRs that don't affect publishable output need no changeset. CI fails if a changeset is missing when one is needed. The four public packages are **fixed** in the config — they version in lockstep.
 - **Package manager:** pnpm@10.33.0 (workspaces); orchestration via Turborepo.
 - **Code style:** functional, avoid classes/singletons. No CSS-in-JS. No inline end-of-line comments.
 - **Lint/format:** `oxlint` + `oxfmt`. Never `npx biome`.

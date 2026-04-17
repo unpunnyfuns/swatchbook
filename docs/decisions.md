@@ -64,6 +64,18 @@ Dropped (TS 6 handles by default): `strict`, `module`, `target`, `esModuleIntero
 
 ---
 
+## 2026-04-17 — Changesets from day one; public packages version in lockstep
+
+**Context:** Plan originally slotted Changesets into M9 (release). The cost of running a changeset per PR now is low; the benefit (running changelog, zero reconstruction at release time) compounds with every merge.
+
+**Decision:** Adopt `@changesets/cli` + `@changesets/changelog-github` immediately. The four public packages (`@unpunnyfuns/swatchbook-{core,addon,blocks,tokens}`) are configured as a **fixed** group in `.changeset/config.json` — they version in lockstep so consumers never hit "`addon@0.3` but `core@0.2`" compat puzzles. `@unpunnyfuns/swatchbook-tokens-reference` is private and listed in `ignore`.
+
+CI runs `changeset status --since=origin/main` on PRs — fails if a changeset is missing when a publishable package changed. `release.yml` on `main` pushes either opens a release PR (when changesets are pending) or publishes (once that PR merges).
+
+**Rationale:** Cheap PR-level ceremony now, no archaeology at release time. Fixed-group versioning aligns the storybook/addon/core/tokens surface that consumers compose from.
+
+---
+
 ## 2026-04-17 — Bump GH Actions to latest majors (Node 24 runtimes)
 
 **Context:** GitHub deprecated Node 20 runtimes for JavaScript actions (forced migration 2026-06-02, removal 2026-09-16). The v4 lineup we used on M0 scaffold was flagged at first CI run.
