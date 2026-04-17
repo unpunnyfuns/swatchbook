@@ -12,13 +12,25 @@ Append-only ADR-lite log. Entries capture tactical choices made during execution
 
 ---
 
-## 2026-04-17 — `ignoreDeprecations: "6.0"` in base tsconfig
+## 2026-04-17 — ESM-only everywhere, no CJS
 
-**Context:** TS 6 deprecated implicit `baseUrl`. tsup 8.5.1 (our build tool) still injects `baseUrl` internally during the DTS pass, which surfaces TS5101 and fails the build.
+**Context:** Greenfield repo targeting Node 24 LTS + modern bundlers. No downstream consumer we care about lacks ESM support. Shipping CJS would force dual-format builds and cost more than it saves.
 
-**Decision:** Add `"ignoreDeprecations": "6.0"` to `tsconfig.base.json`. Revisit when tsup lands a fix (or when we switch to the TS 7 release cycle — the option becomes a hard error then).
+**Decision:** Every package `"type": "module"`. Package builds emit ESM only (`tsdown --format esm`, no `--format cjs`). Captured in `CLAUDE.md` → "Project conventions".
 
-**Rationale:** Smallest possible workaround. Keeps us on latest TS without forking tsup.
+**Rationale:** Cuts output size in half, avoids the dual-package hazard, keeps imports simple. If a consumer needs CJS, their bundler handles it.
+
+---
+
+## 2026-04-17 — Use tsdown instead of tsup for package builds
+
+**Context:** tsup is no longer actively maintained; `tsdown` (same author lineage, rolldown-powered) is the recommended successor. tsup 8.5.1 also tripped TS 6's `baseUrl` deprecation during DTS emit, which required an `ignoreDeprecations` workaround.
+
+**Decision:** All package builds use `tsdown`. Dropped `tsup` devDep, deleted `tsup.config.base.ts`, removed `"ignoreDeprecations": "6.0"` from `tsconfig.base.json` (tsdown doesn't trigger it). Output names are rolldown convention (`index.mjs`, `index.d.mts`) — `package.json` `main`/`types`/`exports` updated to match.
+
+**Rationale:** Falls out of the "latest deps" policy. Kills the workaround.
+
+**Supersedes:** The earlier same-day entry about `ignoreDeprecations` — no longer needed.
 
 ---
 
