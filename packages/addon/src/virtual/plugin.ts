@@ -86,7 +86,6 @@ function collectWatchPaths(config: Config, cwd: string): string[] {
     const base = glob.replace(/\/\*.*$/, '').replace(/\/[^/]*\*.*$/, '');
     paths.push(resolveFromCwd(base, cwd));
   }
-  if (config.manifest) paths.push(resolveFromCwd(config.manifest, cwd));
   if (config.resolver) paths.push(resolveFromCwd(config.resolver, cwd));
   return [...new Set(paths)];
 }

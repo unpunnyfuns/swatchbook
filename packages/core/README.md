@@ -1,6 +1,6 @@
 # @unpunnyfuns/swatchbook-core
 
-Framework-free DTCG loader. Parses token files (via Terrazzo), resolves aliases, composes themes through any of three idioms — explicit layers, DTCG 2025.10 resolvers, or Tokens Studio `$themes` manifests — and emits CSS variables + TypeScript types. All three inputs normalize to the same internal shape; a core unit test pins byte-identical output across them.
+Framework-free DTCG loader. Parses token files (via Terrazzo), resolves aliases, composes themes through a DTCG 2025.10 resolver or explicit file layers, and emits CSS variables + TypeScript types. Both inputs normalize to the same internal shape; a core unit test pins equivalence.
 
 ## Install
 
@@ -18,7 +18,7 @@ pnpm add @unpunnyfuns/swatchbook-core
 | `emitCss(project, options?)` | Concatenated stylesheet, one `[data-theme="…"]` block per theme. |
 | `projectCss(project)` | Same as `emitCss` with project defaults applied. |
 | `emitTypes(project)` | TypeScript source declaring the token-path union + `SwatchbookTokenMap`. |
-| `resolveThemingMode(config)` | `'layered' | 'resolver' | 'manifest'` — which branch the config activates. |
+| `resolveThemingMode(config)` | `'layered' | 'resolver'` — which branch the config activates. |
 | Types | `Config`, `Theme`, `ThemeConfig`, `Project`, `ResolvedTheme`, `TokenMap`, `Diagnostic`, `DiagnosticSeverity`. |
 
 ## Minimal config
@@ -28,7 +28,7 @@ import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
 
 export default defineSwatchbookConfig({
   tokens: ['tokens/**/*.json'],
-  manifest: 'tokens/$themes.manifest.json', // or `themes:` / `resolver:` — pick one
+  resolver: 'tokens/resolver.json', // or `themes:` for explicit layers — pick one
   default: 'Light',
   cssVarPrefix: 'sb',
 });
@@ -47,28 +47,23 @@ const dts = emitTypes(project);
 
 `project.diagnostics` is always populated — severity is `'error' | 'warn' | 'info'`. The addon surfaces these in its Diagnostics panel; your own pipeline can inspect / `throw` on `severity === 'error'` as fits.
 
-## Three theming idioms, one shape
+## Two theming idioms, one shape
 
 ```ts
-// A — explicit layers
+// A — DTCG 2025.10 resolver (recommended; native to the spec)
+defineSwatchbookConfig({
+  tokens: ['tokens/**/*.json'],
+  resolver: 'tokens/resolver.json',
+});
+
+// B — explicit layers (our file-glob shortcut; useful when you want
+// to name compositions yourself)
 defineSwatchbookConfig({
   tokens: ['tokens/**/*.json'],
   themes: [
     { name: 'Light', layers: ['ref/**', 'sys/**', 'cmp/**', 'themes/light.json'] },
     { name: 'Dark',  layers: ['ref/**', 'sys/**', 'cmp/**', 'themes/dark.json'] },
   ],
-});
-
-// B — DTCG 2025.10 resolver
-defineSwatchbookConfig({
-  tokens: ['tokens/**/*.json'],
-  resolver: 'tokens/resolver.json',
-});
-
-// C — Tokens Studio manifest
-defineSwatchbookConfig({
-  tokens: ['tokens/**/*.json'],
-  manifest: 'tokens/$themes.manifest.json',
 });
 ```
 
