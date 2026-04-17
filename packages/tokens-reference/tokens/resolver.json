@@ -2,7 +2,7 @@
   "$schema": "https://design-tokens.org/tr/2025/drafts/resolver/",
   "version": "2025.10",
   "name": "swatchbook-reference",
-  "description": "DTCG 2025.10 native resolver expressing the same compositions as $themes.manifest.json.",
+  "description": "DTCG 2025.10 native resolver. Single `theme` modifier enumerates the five named compositions we care about in the storybook dogfood app.",
   "sets": {
     "ref": {
       "description": "Raw primitives (loaded but not emitted).",
@@ -35,29 +35,28 @@
     }
   },
   "modifiers": {
-    "appearance": {
-      "description": "Light/dark axis.",
+    "theme": {
+      "description": "Named theme compositions.",
       "contexts": {
-        "light": [{ "$ref": "./themes/light.json" }],
-        "dark":  [{ "$ref": "./themes/dark.json" }],
-        "high-contrast": [{ "$ref": "./themes/high-contrast.json" }]
+        "Light": [{ "$ref": "./themes/light.json" }],
+        "Dark": [{ "$ref": "./themes/dark.json" }],
+        "Light · Brand A": [
+          { "$ref": "./themes/light.json" },
+          { "$ref": "./themes/brand-a.json" }
+        ],
+        "Dark · Brand A": [
+          { "$ref": "./themes/dark.json" },
+          { "$ref": "./themes/brand-a.json" }
+        ],
+        "High Contrast": [{ "$ref": "./themes/high-contrast.json" }]
       },
-      "default": "light"
-    },
-    "brand": {
-      "description": "Brand axis. Default brand uses sys accents; 'a' overrides with violet.",
-      "contexts": {
-        "default": [],
-        "a":       [{ "$ref": "./themes/brand-a.json" }]
-      },
-      "default": "default"
+      "default": "Light"
     }
   },
   "resolutionOrder": [
     { "$ref": "#/sets/ref" },
     { "$ref": "#/sets/sys" },
     { "$ref": "#/sets/cmp" },
-    { "$ref": "#/modifiers/appearance" },
-    { "$ref": "#/modifiers/brand" }
+    { "$ref": "#/modifiers/theme" }
   ]
 }

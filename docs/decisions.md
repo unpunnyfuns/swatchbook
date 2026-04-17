@@ -176,3 +176,17 @@ Dropped (TS 6 handles by default): `strict`, `module`, `target`, `esModuleIntero
 **Rationale:** Maintaining a pre-spec workaround alongside the spec itself is scope debt. Anyone with a Tokens Studio manifest can convert it to a DTCG `resolver.json` once (the transformation is mechanical — the fixture's old resolver.json expresses exactly what the old manifest expressed, just in spec form).
 
 **Plan impact:** "Decisions locked in" bullet in `docs/plan.md` updated; deeper plan body references to the manifest path are historical-ish — load-bearing scope lives in `docs/decisions.md` from here on. The README, core README, and tokens-reference README are updated inline. A follow-up issue will drop explicit-layers next, converging on DTCG-spec-only theming input — tracked separately so this change stays small.
+
+---
+
+## 2026-04-17 — Drop explicit-layers theming input; resolver is the sole DTCG-native input
+
+**Context:** After dropping the Tokens Studio manifest, core still exposed two theming inputs — the DTCG 2025.10 resolver and our own "explicit layers" shortcut (`themes: [{ name, layers: [glob, …] }]`). The layered shortcut predated the DTCG resolver's maturity; we kept it because it was a one-line config for simple "file A + file B" compositions. Running the issue to ground: layered is a parallel composition language we invented, and carrying it alongside the spec-native resolver is the same kind of scope debt that killed manifest.
+
+**Decision:** Remove `Config.themes`, the `ThemeConfig` type, `packages/core/src/themes/layered.ts`, and `resolveThemingMode` (no modes to resolve between). The resolver is the only theming input. Core errors at `loadProject` time if `config.resolver` is missing.
+
+**Naming:** Terrazzo's `getPermutationID` emits JSON-stringified input objects (e.g. `{"theme":"Light"}`), which looks hostile in UI. Core applies one narrow unwrapping rule: when a resolver has exactly one modifier axis, the theme name is the modifier value directly (`Light` rather than `{"theme":"Light"}`). Multi-axis resolvers keep the full permutation ID since they genuinely need the keys to disambiguate. No global pretty-name layer — authors pick sensible modifier context names in their resolver, and what they write is what consumers see.
+
+**Rationale:** We said "let people give sensible names" — the resolver author owns naming, we trust it. Core's job is to load and resolve, not to rewrite identity.
+
+**Plan impact:** `docs/plan.md` context bullet re-shaped to say "DTCG resolvers only". Deeper plan body references to layered mode are historical; the decisions log supersedes them. Root README, core README, and tokens-reference README trimmed to single-input framing. Storybook fixture's `resolver.json` restructured to a single `theme` modifier so the 5 existing named compositions keep working without a name-mangling layer.

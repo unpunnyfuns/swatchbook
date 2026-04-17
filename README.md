@@ -57,7 +57,7 @@ import { defineConfig } from '@unpunnyfuns/swatchbook-core';
 
 export default defineConfig({
   tokens: ['tokens/**/*.json'],
-  resolver: 'tokens/resolver.json', // or use `themes:` for explicit layers — pick one
+  resolver: 'tokens/resolver.json',
   default: 'Light',
   cssVarPrefix: 'sb',
 });
@@ -65,12 +65,11 @@ export default defineConfig({
 
 Every `color.sys.surface.default` (and friends) now resolves to `var(--sb-color-sys-surface-default)` at runtime, bound to the active theme via `<html data-theme="…">`.
 
-## Two ways to theme
+## Theming via DTCG resolver
 
-- **DTCG 2025.10 resolver** (`resolver: 'tokens/resolver.json'`) — native to the spec. Recommended.
-- **Explicit layers** (`themes: [{ name, layers: [glob, …] }]`) — our file-glob shortcut when you want to name compositions yourself.
+Swatchbook takes exactly one input for theme composition: a [DTCG 2025.10 resolver](https://design-tokens.org/tr/2025/drafts/resolver/) document. The resolver defines `sets` (raw token files) and `modifiers` (axes like theme/appearance/brand), and `resolutionOrder` combines them into named compositions.
 
-Core normalizes both into the same internal shape. A core unit test pins equivalence: the same logical composition through either path produces the same resolved values.
+Theme names come from the resolver's modifier contexts. For a single-axis resolver (one modifier named `theme` with contexts `Light` / `Dark` / `High Contrast`), those context names are the theme names you'll see in the toolbar. Multi-axis resolvers produce Terrazzo's cross-product permutation IDs — still deterministic, just structured.
 
 See [`docs/plan.md`](./docs/plan.md) for the full design doc.
 

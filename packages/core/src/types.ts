@@ -2,40 +2,27 @@ import type { TokenNormalized } from '@terrazzo/parser';
 
 export type TokenMap = Record<string, TokenNormalized>;
 
-/** A single theme composition. */
+/** A single theme composition resolved from the DTCG 2025.10 resolver. */
 export interface Theme {
   name: string;
-  /**
-   * For DTCG-resolver mode: the resolver input (e.g. `{ appearance: 'light', brand: 'a' }`).
-   * For layered / manifest modes: mirrors `{ theme: name }` for a uniform shape.
-   */
+  /** The resolver input permutation (e.g. `{ theme: 'Light' }` or `{ appearance: 'light', brand: 'a' }`). */
   input: Record<string, string>;
-  /** Ordered layer file paths used to build this theme. Empty for resolver mode. */
+  /** Reserved for future use. Empty for resolver mode. */
   sources: string[];
 }
 
-/**
- * Swatchbook configuration. Accepts exactly one of `themes`, `resolver`, or
- * `manifest` — mixing is an error surfaced during `loadProject`.
- */
+/** Swatchbook configuration. The resolver is the sole theming input. */
 export interface Config {
   /** Glob patterns for DTCG token files. */
   tokens: string[];
-  /** Explicit layered compositions. */
-  themes?: ThemeConfig[];
   /** Path to a DTCG 2025.10 resolver file. */
-  resolver?: string;
+  resolver: string;
   /** Name of the default theme. */
   default?: string;
   /** Prefix for emitted CSS custom properties. */
   cssVarPrefix?: string;
   /** Project-local output directory for codegen artifacts. */
   outDir?: string;
-}
-
-export interface ThemeConfig {
-  name: string;
-  layers: string[];
 }
 
 export type DiagnosticSeverity = 'error' | 'warn' | 'info';

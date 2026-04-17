@@ -18,5 +18,4 @@ declare module 'virtual:swatchbook/tokens' {
   export const diagnostics: unknown[];
   export const css: string;
   export const cssVarPrefix: string;
-  export const themingMode: 'layered' | 'resolver';
 }
