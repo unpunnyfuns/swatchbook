@@ -1,4 +1,4 @@
-import type { Config } from '#/types';
+import type { Config } from '#/types.ts';
 
 /**
  * Identity helper for typed `swatchbook.config.ts`. Consumers write:

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { IconButton, TooltipLinkList, WithTooltip } from 'storybook/internal/components';
 import { addons, types, useGlobals, useStorybookApi } from 'storybook/manager-api';
-import { ADDON_ID, GLOBAL_KEY, INIT_EVENT, TOOL_ID } from '#/constants';
+import { ADDON_ID, GLOBAL_KEY, INIT_EVENT, TOOL_ID } from '#/constants.ts';
 
 /**
  * Use explicit `React.createElement` rather than JSX so the manager bundle

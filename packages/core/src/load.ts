@@ -1,6 +1,6 @@
-import { BufferedLogger, toDiagnostics } from '#/diagnostics';
-import { normalizeThemes } from '#/themes/normalize';
-import type { Config, Project, ResolvedTheme } from '#/types';
+import { BufferedLogger, toDiagnostics } from '#/diagnostics.ts';
+import { normalizeThemes } from '#/themes/normalize.ts';
+import type { Config, Project, ResolvedTheme } from '#/types.ts';
 
 /**
  * Load a swatchbook project from a config. Themes are eagerly resolved,
