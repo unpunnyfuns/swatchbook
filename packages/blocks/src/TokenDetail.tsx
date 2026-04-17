@@ -139,6 +139,16 @@ const styles = {
     background: 'var(--sb-color-sys-surface-raised, transparent)',
     borderRadius: 6,
   } satisfies CSSProperties,
+  fontFamilySample: {
+    padding: '4px 0',
+    fontSize: 22,
+    lineHeight: 1.2,
+  } satisfies CSSProperties,
+  fontWeightSample: {
+    padding: '4px 0',
+    fontSize: 32,
+    lineHeight: 1,
+  } satisfies CSSProperties,
   dimensionTrack: {
     display: 'flex',
     alignItems: 'center',
@@ -359,6 +369,21 @@ function CompositePreview({
     // Synthesize a transition with a neutral easing so the duration is
     // perceptible on its own.
     return <TransitionSample transition={`left ${cssVar} ease`} />;
+  }
+  if (type === 'fontFamily') {
+    return <div style={{ ...styles.fontFamilySample, fontFamily: cssVar }}>{PANGRAM}</div>;
+  }
+  if (type === 'fontWeight') {
+    return (
+      <div
+        style={{
+          ...styles.fontWeightSample,
+          fontWeight: cssVar as unknown as number,
+        }}
+      >
+        Aa
+      </div>
+    );
   }
   if (type === 'cubicBezier') {
     // Synthesize a transition at a fixed duration so the easing curve is
