@@ -11,9 +11,19 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Current milestone
 
-`Current: M9 — v0.1.0 release` (M5 deferred, M8 starter iceboxed — see `docs/decisions.md`)
+`Current: M9 — v0.1.0 scope convergence` (M5 deferred, M8 starter iceboxed — see `docs/decisions.md`)
 
 Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
+
+### Milestone taxonomy
+
+GitHub milestones split into three tracks:
+
+- **Numbered (M0–M9):** feature march toward v0.1.0. Each has a concrete scope + exit criteria in `docs/plan.md`. One "current" at a time; the line above names it.
+- **Release** (unnumbered): release plumbing — Changesets versioning, publish workflow, cutting tags. Decoupled from numbered milestones so "what ships" and "how it ships" stay independent.
+- **Maintenance** (unnumbered): hygiene, refactors, CI polish, deferred cleanups. Drained opportunistically; never blocks a numbered milestone.
+
+When filing an issue, pick the track first. "Is this a release blocker?" → numbered milestone. "Does this ship packages?" → Release. Anything else → Maintenance.
 
 ## Project conventions
 
