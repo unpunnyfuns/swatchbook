@@ -400,7 +400,13 @@ The plan is the **design doc**; GitHub milestones/issues are the **tracker**. Do
 All work after the M0 scaffold commit flows through PRs. Direct pushes to `main` are reserved for the initial scaffold only.
 
 - **Branch per logical chunk**, not per tiny issue. Typical M1 cut: `m1/tokens-reference`, `m1/core-impl`, `m1/core-tests`, `m1/tokens-starter-skel`. Branch names start with the milestone slug (`m1/…`, `docs/…`, `chore/…`).
-- **PR title:** `Mx: <what>`. Body follows the PR template verbatim. Link related milestone issues with `Closes #N` / `Refs #N`.
+- **PR title:** **Conventional Commits** format — `<type>(<scope>): <description>`. Types: `feat`, `fix`, `chore`, `docs`, `test`, `ci`, `refactor`, `perf`, `build`, `revert`. Scope is the package or app slug: `core`, `addon`, `blocks`, `tokens-reference`, `tokens-starter`, `storybook`, `ci`, or omit for repo-wide. The milestone (`M3`) lives in the PR body's `Milestone:` line, never in the title — squash-merge lands the title as the commit on `main`, so keep it machine-parseable for future Changesets / release-notes automation.
+  - ✅ `feat(addon): preset + virtual module + preview decorator`
+  - ✅ `fix(tokens-reference): accent hits WCAG AA against white fg`
+  - ✅ `chore(ci): bump GH Actions to latest majors`
+  - ❌ `M3: addon preset + virtual module`
+  - ❌ `Update addon`
+- Body follows the PR template verbatim. Link related milestone issues with `Closes #N` / `Refs #N`.
 - **Merge strategy:** squash-merge by default. Preserve commits only when the history is genuinely useful to future readers.
 - **No self-merge by automation.** Claude (or any agent) opens PRs; the human reviewer merges. This keeps the governance human-in-the-loop.
 - **Branch protection** on `main` is the repo owner's call — the discipline above holds either way, but enabling protection rules (require PR, require status checks, restrict pushes) in GitHub settings makes it enforced rather than norm-based.

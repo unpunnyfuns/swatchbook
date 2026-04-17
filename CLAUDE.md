@@ -58,3 +58,4 @@ claude
 - Plan body edits → same PR as the change they reflect.
 - Tactical choices that don't change design intent → append to `docs/decisions.md`.
 - PR template (`.github/pull_request_template.md`) requires `Milestone:` and `Plan impact:` lines — don't remove them.
+- **PR titles follow [Conventional Commits](https://www.conventionalcommits.org/)**: `<type>(<scope>): <description>`. Types: `feat` / `fix` / `chore` / `docs` / `test` / `ci` / `refactor` / `perf` / `build` / `revert`. Scope is a package slug (`core`, `addon`, `blocks`, `tokens-reference`, `tokens-starter`, `storybook`, `ci`) or omitted. Milestone goes in the PR body, never the title — squash-merge lands the title on `main`.
