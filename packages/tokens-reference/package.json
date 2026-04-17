@@ -7,27 +7,19 @@
   "engines": {
     "node": ">=24.14.0"
   },
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs"
-    },
+    ".": "./src/index.ts",
     "./tokens/*": "./tokens/*"
   },
   "files": [
-    "dist",
+    "src",
     "tokens"
   ],
   "scripts": {
-    "build": "tsdown src/index.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
-    "tsdown": "^0.21.9",
     "typescript": "^6.0.0"
   }
 }
