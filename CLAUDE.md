@@ -10,7 +10,7 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Current milestone
 
-`Current: M0 — Foundation`
+`Current: M5 — Token-aware color control`
 
 Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
 
@@ -70,5 +70,6 @@ claude
 
 - Plan body edits → same PR as the change they reflect.
 - Tactical choices that don't change design intent → append to `docs/decisions.md`.
-- PR template (`.github/pull_request_template.md`) requires `Milestone:` and `Plan impact:` lines — don't remove them.
+- PR template (`.github/pull_request_template.md`) requires `Milestone:`, `Closes:`, and `Plan impact:` lines — don't remove them.
+- Every PR links an existing GitHub issue. File one first if needed: `gh issue create --milestone "Mx — …" --title "…"`. Merging the PR auto-closes the issue; milestones close automatically when the last issue is done.
 - **PR titles follow [Conventional Commits](https://www.conventionalcommits.org/)**: `<type>(<scope>): <description>`. Types: `feat` / `fix` / `chore` / `docs` / `test` / `ci` / `refactor` / `perf` / `build` / `revert`. Scope is a package slug (`core`, `addon`, `blocks`, `tokens-reference`, `tokens-starter`, `storybook`, `ci`) or omitted. Milestone goes in the PR body, never the title — squash-merge lands the title on `main`.
