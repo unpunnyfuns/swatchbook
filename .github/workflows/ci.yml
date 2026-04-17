@@ -11,13 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20, 22]
+        node: [24]
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 10.18.1
           run_install: false
 
       - uses: actions/setup-node@v4
@@ -39,10 +38,8 @@ jobs:
 
       - name: Build Storybook
         run: pnpm turbo run build:storybook
-        if: matrix.node == '22'
 
       - uses: actions/upload-artifact@v4
-        if: matrix.node == '22'
         with:
           name: storybook-static
           path: apps/storybook/storybook-static
