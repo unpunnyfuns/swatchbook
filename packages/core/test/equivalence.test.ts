@@ -1,7 +1,8 @@
 import { dirname } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { manifestPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens-reference';
 import { loadProject, resolveTheme } from '#/load';
+import type { Project } from '#/types';
 
 /**
  * The plan's "three-way equivalence" promise is that the same logical
@@ -22,8 +23,11 @@ const LAYER_SETS = {
 };
 
 describe('layered ≡ manifest for shared compositions', () => {
-  it.each(['Light', 'Dark'])('%s resolves identically in both modes', async (themeName) => {
-    const [layered, manifest] = await Promise.all([
+  let layered: Project;
+  let manifest: Project;
+
+  beforeAll(async () => {
+    [layered, manifest] = await Promise.all([
       loadProject(
         {
           tokens: ['tokens/**/*.json'],
@@ -40,16 +44,14 @@ describe('layered ≡ manifest for shared compositions', () => {
         },
         fixtureCwd,
       ),
-      loadProject(
-        { tokens: ['tokens/**/*.json'], manifest: manifestPath },
-        fixtureCwd,
-      ),
+      loadProject({ tokens: ['tokens/**/*.json'], manifest: manifestPath }, fixtureCwd),
     ]);
+  }, 30_000);
 
+  it.each(['Light', 'Dark'])('%s resolves identically in both modes', (themeName) => {
     const layeredTokens = resolveTheme(layered, themeName).tokens;
     const manifestTokens = resolveTheme(manifest, themeName).tokens;
 
-    // Compare resolved values for every sys-layer token that both produce.
     const sysKeys = Object.keys(layeredTokens).filter((k) => k.includes('.sys.'));
     expect(sysKeys.length).toBeGreaterThan(20);
 
