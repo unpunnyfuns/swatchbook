@@ -1,0 +1,50 @@
+{
+  "name": "@unpunnyfuns/swatchbook-storybook",
+  "version": "0.0.0",
+  "description": "Swatchbook docs site + integration testbed.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.14.0"
+  },
+  "imports": {
+    "#/*": "./src/*.ts",
+    "#/*.tsx": "./src/*.tsx"
+  },
+  "scripts": {
+    "storybook": "pnpm build:tokens-css && storybook dev -p 6006 --no-open",
+    "build:storybook": "pnpm build:tokens-css && storybook build",
+    "test:storybook": "vitest run",
+    "test:storybook:watch": "vitest",
+    "build:tokens-css": "node --no-warnings --experimental-strip-types scripts/build-tokens-css.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src .storybook scripts",
+    "format": "oxfmt -c ../../.oxfmtrc.json src .storybook scripts",
+    "format:check": "oxfmt --check -c ../../.oxfmtrc.json src .storybook scripts"
+  },
+  "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@chromatic-com/storybook": "^5.1.2",
+    "@storybook/addon-a11y": "^10.3.5",
+    "@storybook/addon-docs": "^10.3.5",
+    "@storybook/addon-mcp": "^0.6.0",
+    "@storybook/addon-vitest": "^10.3.5",
+    "@storybook/react-vite": "^10.3.5",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@unpunnyfuns/swatchbook-core": "workspace:*",
+    "@unpunnyfuns/swatchbook-tokens-reference": "workspace:*",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/browser-playwright": "^4.1.4",
+    "@vitest/coverage-v8": "^4.1.4",
+    "playwright": "^1.59.1",
+    "storybook": "^10.3.5",
+    "typescript": "^6.0.0",
+    "vite": "^8.0.4",
+    "vitest": "^4.1.4"
+  }
+}
