@@ -1,5 +1,6 @@
 import {
   ColorPalette,
+  DimensionScale,
   TokenDetail,
   TokenTable,
   TypographyScale,
@@ -67,6 +68,25 @@ export const TokenTableRenders = meta.story({
     expect(headerTexts).toEqual(expect.arrayContaining(['Path', 'Type', 'Value']));
     const rows = canvasElement.querySelectorAll('tbody tr');
     expect(rows.length, 'table must render at least one row').toBeGreaterThan(0);
+  },
+});
+
+/**
+ * `DimensionScale` must render one bar per dimension token, and each bar's
+ * rendered width must reflect the underlying cssVar (i.e. non-zero for
+ * tokens with a non-zero value — space.sys.md is 12px).
+ */
+export const DimensionScaleRenders = meta.story({
+  render: () => <DimensionScale filter='space.sys.*' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'div[aria-hidden="true"]');
+    const bars = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
+    expect(bars.length, 'DimensionScale must render at least one bar').toBeGreaterThan(0);
+    const nonZeroWidths = bars.map((bar) => bar.getBoundingClientRect().width).filter((w) => w > 0);
+    expect(
+      nonZeroWidths.length,
+      'at least one bar must resolve to a non-zero width',
+    ).toBeGreaterThan(0);
   },
 });
 

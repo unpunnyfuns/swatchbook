@@ -11,7 +11,7 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Current milestone
 
-`Current: DTCG spec convergence` — see `docs/decisions.md` for the deferrals (color control, tokens-starter) carried into this phase.
+`Current: DTCG comprehension visualizations` — every token type earns a block that makes its value legible. Five sibling issues seeded (#108–#113). First pickup: #108 DimensionScale.
 
 Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
 
