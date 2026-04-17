@@ -12,6 +12,16 @@ Append-only ADR-lite log. Entries capture tactical choices made during execution
 
 ---
 
+## 2026-04-17 — Bump GH Actions to latest majors (Node 24 runtimes)
+
+**Context:** GitHub deprecated Node 20 runtimes for JavaScript actions (forced migration 2026-06-02, removal 2026-09-16). The v4 lineup we used on M0 scaffold was flagged at first CI run.
+
+**Decision:** Pin the latest major of every action: `actions/checkout@v6`, `actions/setup-node@v6`, `actions/cache@v5`, `actions/upload-artifact@v7`, `pnpm/action-setup@v5`. All use Node 24 natively.
+
+**Rationale:** Falls out of the "latest deps" policy; no env-var workaround needed.
+
+---
+
 ## 2026-04-17 — Latest deps policy + TS 6 + pnpm 10.33 + Node 24 minimum
 
 **Context:** Repo starts with modern defaults; no legacy to carry. Prefer eager upgrades over drift.
