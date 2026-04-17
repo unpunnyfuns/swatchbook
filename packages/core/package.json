@@ -23,7 +23,9 @@
   "scripts": {
     "build": "tsdown src/index.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit",
-    "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src test",
     "format": "oxfmt -c ../../.oxfmtrc.json src",
     "format:check": "oxfmt --check -c ../../.oxfmtrc.json src"
   },
@@ -33,7 +35,10 @@
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
+    "@unpunnyfuns/swatchbook-tokens-reference": "workspace:*",
+    "@vitest/ui": "^4.1.4",
     "tsdown": "^0.21.9",
-    "typescript": "^6.0.0"
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.4"
   }
 }

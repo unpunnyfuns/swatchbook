@@ -1,0 +1,118 @@
+import { dirname } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { manifestPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens-reference';
+import { projectCss } from '#/emit';
+import { loadProject } from '#/load';
+
+const fixtureCwd = dirname(tokensDir);
+
+async function loadWithPrefix(prefix: string | undefined) {
+  return loadProject(
+    {
+      tokens: ['tokens/**/*.json'],
+      manifest: manifestPath,
+      default: 'Light',
+      ...(prefix !== undefined && { cssVarPrefix: prefix }),
+    },
+    fixtureCwd,
+  );
+}
+
+describe('projectCss — structure', () => {
+  it('emits one [data-theme] block per theme', async () => {
+    const project = await loadWithPrefix('sb');
+    const css = projectCss(project);
+    for (const theme of project.themes) {
+      expect(css).toContain(`[data-theme="${theme.name}"]`);
+    }
+  });
+
+  it('terminates with a trailing newline', async () => {
+    const project = await loadWithPrefix('sb');
+    expect(projectCss(project).endsWith('\n')).toBe(true);
+  });
+});
+
+describe('projectCss — prefix', () => {
+  it('applies the prefix to variable names', async () => {
+    const project = await loadWithPrefix('sb');
+    const css = projectCss(project);
+    expect(css).toContain('--sb-color-sys-surface-default:');
+    expect(css).not.toMatch(/^\s*--color-sys-surface-default:/m);
+  });
+
+  it('applies the prefix to aliased var(…) references inside values', async () => {
+    const project = await loadWithPrefix('sb');
+    const css = projectCss(project);
+    // cmp.button.bg aliases color.sys.accent.bg; both sides of the reference should carry the prefix
+    const line = css.split('\n').find((l) => l.includes('--sb-cmp-button-bg:'));
+    expect(line).toBeDefined();
+    expect(line).toMatch(/var\(--sb-color-sys-accent-bg\)/);
+  });
+
+  it('omits the leading dash when prefix is empty', async () => {
+    const project = await loadWithPrefix('');
+    const css = projectCss(project);
+    expect(css).toContain('--color-sys-surface-default:');
+    expect(css).not.toContain('---color-sys-surface-default:');
+  });
+});
+
+describe('projectCss — DTCG type coverage', () => {
+  it('emits every primitive + composite type covered by the fixture', async () => {
+    const project = await loadWithPrefix('sb');
+    const css = projectCss(project);
+    // color (primitive) — Terrazzo emits modern rgb() with percentage channels
+    expect(css).toMatch(/--sb-color-ref-blue-500:\s*rgb\(/i);
+    // dimension — 4px
+    expect(css).toMatch(/--sb-size-ref-100:\s*4px/);
+    // fontFamily (array → comma list)
+    expect(css).toMatch(/--sb-font-ref-family-sans:/);
+    // fontWeight (number)
+    expect(css).toMatch(/--sb-font-ref-weight-bold:\s*700/);
+    // duration
+    expect(css).toMatch(/--sb-duration-ref-fast:\s*120ms/);
+    // cubicBezier
+    expect(css).toMatch(/--sb-easing-ref-standard:\s*cubic-bezier\(/);
+    // typography — composite emits sub-vars
+    expect(css).toMatch(/--sb-typography-sys-body-font-family:/);
+    expect(css).toMatch(/--sb-typography-sys-body-font-size:/);
+    expect(css).toMatch(/--sb-typography-sys-body-font-weight:/);
+    // shadow — composite, inside the fixture's sys.shadow.md
+    expect(css).toMatch(/--sb-shadow-sys-md/);
+    // border — composite
+    expect(css).toMatch(/--sb-border-sys-default/);
+    // transition — composite
+    expect(css).toMatch(/--sb-motion-sys-enter/);
+  });
+});
+
+describe('projectCss — theme override consistency', () => {
+  it('sparse overrides in Dark theme flip the surface but keep size scale identical', async () => {
+    const project = await loadWithPrefix('sb');
+    const css = projectCss(project);
+    const lightBlock = extractBlock(css, 'Light');
+    const darkBlock = extractBlock(css, 'Dark');
+    expect(lightBlock).toBeTruthy();
+    expect(darkBlock).toBeTruthy();
+    const lightSize = grep(lightBlock, '--sb-size-ref-400:');
+    const darkSize = grep(darkBlock, '--sb-size-ref-400:');
+    expect(lightSize).toEqual(darkSize);
+
+    const lightSurface = grep(lightBlock, '--sb-color-sys-surface-default:');
+    const darkSurface = grep(darkBlock, '--sb-color-sys-surface-default:');
+    expect(lightSurface).not.toEqual(darkSurface);
+  });
+});
+
+function extractBlock(css: string, themeName: string): string {
+  const start = css.indexOf(`[data-theme="${themeName}"]`);
+  if (start < 0) return '';
+  const braceStart = css.indexOf('{', start);
+  const braceEnd = css.indexOf('\n}', braceStart);
+  return css.slice(braceStart + 1, braceEnd);
+}
+
+function grep(block: string, needle: string): string | undefined {
+  return block.split('\n').find((l) => l.includes(needle))?.trim();
+}
