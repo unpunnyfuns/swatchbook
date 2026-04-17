@@ -4,6 +4,10 @@
 
 In more detail: a comprehensive visual overview of [DTCG](https://www.designtokens.org/) design tokens (parsed via [Terrazzo](https://terrazzo.app/)) that actually exist in your project — rendered inside Storybook. Design-system engineers use it to show their token set to feature engineers and stakeholders; everyone else uses it to see what's there without cracking open a token JSON.
 
+Swatchbook is an **exploration vehicle**, not an ecosystem-capture tool. We serve people building DTCG-native projects going forward — including the people still evolving the spec. Legacy-format compatibility is explicitly an anti-goal.
+
+**Not for you if**: you want to build something with existing mature tooling and walk away for a few years. DTCG is a moving draft; we move with it. Pick Style Dictionary or Tokens Studio if you need long-term stability over frontier exploration.
+
 The guiding principle: **extrapolate what's in the token set, don't invent new analysis.** If Terrazzo surfaces a piece of data, we render it. If we'd have to compute something new, that's Terrazzo's conversation (or someone else's tool) — not ours.
 
 Monorepo published under the `@unpunnyfuns` scope.
