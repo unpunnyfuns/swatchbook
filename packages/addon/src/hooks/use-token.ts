@@ -25,12 +25,6 @@ export interface TokenInfo {
   description?: string;
 }
 
-interface ResolvedToken {
-  $value?: unknown;
-  $type?: string;
-  $description?: string;
-}
-
 function makeCssVar(path: string, prefix: string): string {
   const tail = path.replaceAll('.', '-');
   return prefix ? `var(--${prefix}-${tail})` : `var(--${tail})`;
@@ -51,7 +45,7 @@ function makeCssVar(path: string, prefix: string): string {
 export function useToken(path: TokenPath): TokenInfo {
   const contextTheme = useActiveTheme();
   const themeName = contextTheme || (defaultTheme ?? '');
-  const tokens = (themesResolved[themeName] ?? {}) as Record<string, ResolvedToken>;
+  const tokens = themesResolved[themeName] ?? {};
   const token = tokens[path];
   const info: TokenInfo = {
     value: token?.$value,
