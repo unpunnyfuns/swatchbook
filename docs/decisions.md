@@ -12,6 +12,16 @@ Append-only ADR-lite log. Entries capture tactical choices made during execution
 
 ---
 
+## 2026-04-17 — Internal aliasing via `package.json#imports`
+
+**Context:** Deep relative paths (`../../../foo`) rot on moves, and TypeScript `paths` aliases require bundler cooperation + re-emit of paths at build time. Node 16+ supports package-scoped `imports` natively; TypeScript 5.4+ resolves them without a custom `paths` mapping.
+
+**Decision:** Inside any package, internal aliases use the `imports` field in that package's `package.json`. Convention: `#<slug>/*` → `./src/<slug>/*.js`. Never use TS `paths`, never use deep relative imports for cross-module references. Captured in `CLAUDE.md` → "Project conventions".
+
+**Rationale:** One source of truth per package, works at runtime without build-time rewrites, plays nicely with tsdown/rolldown.
+
+---
+
 ## 2026-04-17 — ESM-only everywhere, no CJS
 
 **Context:** Greenfield repo targeting Node 24 LTS + modern bundlers. No downstream consumer we care about lacks ESM support. Shipping CJS would force dual-format builds and cost more than it saves.
