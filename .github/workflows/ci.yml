@@ -49,11 +49,11 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --filter @unpunnyfuns/swatchbook-storybook exec playwright install --with-deps chromium
 
       - name: Install Playwright system deps on cache hit
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: pnpm exec playwright install-deps chromium
+        run: pnpm --filter @unpunnyfuns/swatchbook-storybook exec playwright install-deps chromium
 
       - run: pnpm turbo run lint format:check typecheck test build
 
