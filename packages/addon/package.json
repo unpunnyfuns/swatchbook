@@ -46,7 +46,7 @@
     "supportedFrameworks": ["react"]
   },
   "scripts": {
-    "build": "tsdown src/index.ts src/preset.ts src/preview.tsx src/manager.tsx src/hooks/index.ts --format esm --dts --clean --sourcemap",
+    "build": "tsdown",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src",
     "format": "oxfmt -c ../../.oxfmtrc.json src",

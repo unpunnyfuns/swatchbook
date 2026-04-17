@@ -1,9 +1,8 @@
 /**
  * Typed shape of the addon's `virtual:swatchbook/tokens` module. The runtime
- * payload is produced by the addon's Vite plugin (`swatchbookTokensPlugin`)
+ * payload is produced by this package's Vite plugin (`swatchbookTokensPlugin`)
  * and JSON-serialized, so this declaration describes the plain-data shape
- * consumers read back — a narrow subset of Terrazzo's `TokenNormalized`
- * plus core's `Theme` and `Diagnostic`.
+ * consumers read back.
  */
 declare module 'virtual:swatchbook/tokens' {
   interface VirtualTheme {

@@ -7,17 +7,14 @@ import {
   themingMode,
 } from 'virtual:swatchbook/tokens';
 
-interface ResolvedToken {
-  $type?: string;
-  $value?: unknown;
-  $description?: string;
-}
+type VirtualTokens = typeof themesResolved;
+type ResolvedTokens = VirtualTokens[string];
 
 export interface ProjectData {
   activeTheme: string;
-  themes: readonly { name: string; input: Record<string, string>; sources: string[] }[];
-  resolved: Record<string, ResolvedToken>;
-  themesResolved: Record<string, Record<string, ResolvedToken>>;
+  themes: typeof themes;
+  resolved: ResolvedTokens;
+  themesResolved: VirtualTokens;
   cssVarPrefix: string;
   mode: 'layered' | 'resolver' | 'manifest';
 }
@@ -30,12 +27,11 @@ export interface ProjectData {
 export function useProject(): ProjectData {
   const contextTheme = useActiveTheme();
   const activeTheme = contextTheme || (defaultTheme ?? themes[0]?.name ?? '');
-  const resolvedMap = themesResolved as Record<string, Record<string, ResolvedToken>>;
   return {
     activeTheme,
     themes,
-    themesResolved: resolvedMap,
-    resolved: resolvedMap[activeTheme] ?? {},
+    themesResolved,
+    resolved: themesResolved[activeTheme] ?? {},
     cssVarPrefix,
     mode: themingMode,
   };
