@@ -20,7 +20,8 @@
     "test:storybook": {
       "dependsOn": ["^build"],
       "inputs": ["src/**", "tokens/**", ".storybook/**", "vitest.config.*", "vitest.setup.*"],
-      "outputs": []
+      "outputs": [],
+      "passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"]
     },
     "lint": {
       "inputs": ["src/**", "$TURBO_ROOT$/.oxlintrc.json"],
