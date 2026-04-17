@@ -7,6 +7,7 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 - Design doc: `docs/plan.md` — milestones M0–M9, package responsibilities, decisions locked in.
 - Decision log: `docs/decisions.md` — append-only ADR-lite for changes made during execution.
 - Terrazzo spike: `docs/terrazzo-notes.md` — what `@terrazzo/parser` gives us and what core still owns.
+- Future plans: `docs/future.md` — ideas deliberately deferred past v0.1.0, with the *why* preserved so we don't re-litigate.
 
 ## Current milestone
 
