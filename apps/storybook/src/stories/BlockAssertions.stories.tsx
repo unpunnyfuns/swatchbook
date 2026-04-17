@@ -2,6 +2,8 @@ import {
   BorderPreview,
   ColorPalette,
   DimensionScale,
+  FontFamilySample,
+  FontWeightScale,
   MotionPreview,
   ShadowPreview,
   TokenDetail,
@@ -227,6 +229,87 @@ export const TokenDetailShadowComposite = meta.story({
       withShadow.length,
       'shadow composite must render a sample with non-none box-shadow',
     ).toBeGreaterThan(0);
+  },
+});
+
+/**
+ * `FontFamilySample` must render one row per fontFamily token, and each
+ * sample's computed `font-family` must resolve to a non-empty stack.
+ */
+export const FontFamilySampleRenders = meta.story({
+  render: () => <FontFamilySample filter='font.ref.family.*' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'section, div');
+    const paths = [...canvasElement.querySelectorAll('span')].filter((el) =>
+      el.textContent?.startsWith('font.ref.family.'),
+    );
+    expect(paths.length, 'at least one fontFamily row must render').toBeGreaterThan(0);
+    const samples = [...canvasElement.querySelectorAll<HTMLElement>('div')].filter((el) =>
+      el.textContent?.includes('quick brown fox'),
+    );
+    const resolved = samples.filter((el) => getComputedStyle(el).fontFamily !== '');
+    expect(
+      resolved.length,
+      'at least one sample must resolve to a non-empty font-family',
+    ).toBeGreaterThan(0);
+  },
+});
+
+/**
+ * `FontWeightScale` must render one row per fontWeight token with the
+ * computed `font-weight` reflecting each token's value.
+ */
+export const FontWeightScaleRenders = meta.story({
+  render: () => <FontWeightScale filter='font.ref.weight.*' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'section, div');
+    const samples = [...canvasElement.querySelectorAll<HTMLElement>('div')].filter(
+      (el) => el.textContent === 'Aa',
+    );
+    expect(samples.length, 'at least one fontWeight sample must render').toBeGreaterThan(0);
+    const weights = samples.map((el) => Number.parseInt(getComputedStyle(el).fontWeight, 10));
+    const numeric = weights.filter((w) => Number.isFinite(w));
+    expect(numeric.length).toBeGreaterThan(0);
+    const max = Math.max(...numeric);
+    const min = Math.min(...numeric);
+    expect(max, 'scale must include a weight heavier than the lightest').toBeGreaterThan(min);
+  },
+});
+
+/**
+ * `TokenDetail` for a fontFamily primitive must render sample text whose
+ * computed `font-family` reflects the token's stack.
+ */
+export const TokenDetailFontFamilyPrimitive = meta.story({
+  render: () => <TokenDetail path='font.ref.family.sans' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const sample = [...canvasElement.querySelectorAll<HTMLElement>('div')].find((el) =>
+      el.textContent?.startsWith('Sphinx of black quartz'),
+    );
+    expect(sample, 'fontFamily primitive must render a pangram sample').toBeTruthy();
+    if (sample) {
+      expect(getComputedStyle(sample).fontFamily).not.toBe('');
+    }
+  },
+});
+
+/**
+ * `TokenDetail` for a fontWeight primitive must render sample text whose
+ * computed `font-weight` matches the token value.
+ */
+export const TokenDetailFontWeightPrimitive = meta.story({
+  render: () => <TokenDetail path='font.ref.weight.bold' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const sample = [...canvasElement.querySelectorAll<HTMLElement>('div')].find(
+      (el) => el.textContent === 'Aa',
+    );
+    expect(sample, 'fontWeight primitive must render a sample').toBeTruthy();
+    if (sample) {
+      const w = Number.parseInt(getComputedStyle(sample).fontWeight, 10);
+      expect(w, 'bold sample must compute to weight ≥ 600').toBeGreaterThanOrEqual(600);
+    }
   },
 });
 
