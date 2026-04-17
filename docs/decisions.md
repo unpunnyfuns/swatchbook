@@ -12,13 +12,15 @@ Append-only ADR-lite log. Entries capture tactical choices made during execution
 
 ---
 
-## 2026-04-17 — Internal aliasing via `package.json#imports`
+## 2026-04-17 — Internal aliasing via `package.json#imports` (with `#/` prefix)
 
-**Context:** Deep relative paths (`../../../foo`) rot on moves, and TypeScript `paths` aliases require bundler cooperation + re-emit of paths at build time. Node 16+ supports package-scoped `imports` natively; TypeScript 5.4+ resolves them without a custom `paths` mapping.
+**Context:** Deep relative paths (`../../../foo`) rot on moves, and TypeScript `paths` aliases require bundler cooperation + re-emit of paths at build time. Node 16+ supports package-scoped `imports` natively; TypeScript 5.4+ resolves them without a custom `paths` mapping. Node 24.14 relaxed the subpath grammar to accept a leading `#/`, which reads more naturally as a path than `#foo`.
 
-**Decision:** Inside any package, internal aliases use the `imports` field in that package's `package.json`. Convention: `#<slug>/*` → `./src/<slug>/*.js`. Never use TS `paths`, never use deep relative imports for cross-module references. Captured in `CLAUDE.md` → "Project conventions".
+**Decision:** Inside any package, internal aliases use the `imports` field in that package's `package.json`. Convention: `#/<slug>/*` → `./src/<slug>/*.js`. Never use TS `paths`, never use deep relative imports for cross-module references. Bump `engines.node` to `>=24.14.0` to guarantee the `#/` prefix resolves. Captured in `CLAUDE.md` → "Project conventions".
 
-**Rationale:** One source of truth per package, works at runtime without build-time rewrites, plays nicely with tsdown/rolldown.
+**Rationale:** One source of truth per package, works at runtime without build-time rewrites, plays nicely with tsdown/rolldown, visually distinct from npm-style bare specifiers.
+
+**Side effect:** no alias configuration needed elsewhere. TypeScript (5.4+), Vite, and Vitest all read `package.json#imports` natively, so `tsconfig.json#paths`, `vite.config#resolve.alias`, and `vitest.config#resolve.alias` stay empty for internal aliasing. If you see one of those being added for an internal alias, delete it and use `imports`.
 
 ---
 

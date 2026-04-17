@@ -6,5 +6,5 @@
     "moduleResolution": "Bundler",
     "types": ["node"]
   },
-  "include": ["index.ts"]
+  "include": ["src"]
 }
