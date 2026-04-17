@@ -29,6 +29,9 @@ importers:
       '@terrazzo/parser':
         specifier: ^2.0.3
         version: 2.0.3
+      '@terrazzo/token-tools':
+        specifier: ^2.0.3
+        version: 2.0.3
     devDependencies:
       '@types/node':
         specifier: ^25.6.0
