@@ -1,6 +1,7 @@
-import addonDocs from '@storybook/addon-docs';
 import addonA11y from '@storybook/addon-a11y';
+import addonDocs from '@storybook/addon-docs';
 import { definePreview } from '@storybook/react-vite';
+import swatchbookAddon from '@unpunnyfuns/swatchbook-addon';
 
 export default definePreview({
   parameters: {
@@ -13,6 +14,5 @@ export default definePreview({
     a11y: { test: 'error' },
     backgrounds: { disable: true },
   },
-
-  addons: [addonA11y(), addonDocs()],
+  addons: [addonA11y(), addonDocs(), swatchbookAddon()],
 });
