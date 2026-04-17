@@ -348,7 +348,7 @@ Root `package.json` currently uses `"@unpunnyfuns/swatchbook"`. Rename to neutra
 
 GitHub Actions pipeline (`.github/workflows/ci.yml`):
 
-- Matrix: Node 20 + 22 (Storybook 10.3+ baseline).
+- Matrix: latest Node LTS only (Node 24 today; bump with each LTS). See `docs/decisions.md`.
 - Cache: pnpm store, Turbo local cache, Playwright browsers.
 - Steps: `pnpm install --frozen-lockfile` → `pnpm turbo run lint typecheck test build test:storybook`.
 - Storybook static build (`turbo run build:storybook`) uploaded as artifact; deploy step deferred.

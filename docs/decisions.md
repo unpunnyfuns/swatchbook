@@ -12,6 +12,19 @@ Append-only ADR-lite log. Entries capture tactical choices made during execution
 
 ---
 
+## 2026-04-17 — Latest deps policy + TS 6 + pnpm 10.33 + Node 24 minimum
+
+**Context:** Repo starts with modern defaults; no legacy to carry. Prefer eager upgrades over drift.
+
+**Decision:**
+- Always pin the latest stable major/minor of every third-party dep unless a concrete blocker is logged here.
+- Node baseline is the **latest LTS**, not a fixed version. Today that's Node 24 (active LTS). When a new LTS lands (roughly every October in even years), update `engines.node`, CI matrix, and this decisions entry in the same PR. Never add compat paths or CI entries for older Node.
+- Immediate upgrades: `typescript` → `^6.0.0`, `turbo` → `^2.9.0`, `packageManager` → `pnpm@10.33.0`. CI matrix collapsed to `[24]`. Policy captured in `CLAUDE.md` → "Project conventions" so future sessions inherit it.
+
+**Rationale:** Hitting version-change friction early is cheaper than deferred upgrades across a maturing codebase. No compatibility shims, no `>=` ranges wider than semver requires, no testing against Node versions we don't support.
+
+---
+
 ## 2026-04-17 — Core's public helper is `defineSwatchbookConfig`, not `defineConfig`
 
 **Context:** `@terrazzo/parser` exports its own `defineConfig`. Consumers of `@unpunnyfuns/swatchbook-core` often also import from `@terrazzo/parser` (advanced use cases), so colliding names would force aliasing at every import site.

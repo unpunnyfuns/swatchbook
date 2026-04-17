@@ -16,7 +16,9 @@ Update this line when a milestone closes. See the matching GitHub milestones for
 
 ## Project conventions
 
-- **Package manager:** pnpm@10.18.1 (workspaces); orchestration via Turborepo.
+- **Latest deps policy:** always pin the latest stable major/minor of every third-party dependency unless a concrete blocker is documented in `docs/decisions.md`. When adding a dep, check `npm view <pkg> version` and use that. Default to eager upgrades — we'd rather hit new-version friction early than accumulate a drift debt.
+- **Node baseline:** always the **latest LTS** everywhere — dev, CI matrix, published `engines.node`. Today that's Node 24. When a new LTS lands (typically October of even years), bump engines + CI in a same-day PR. Don't add lower-version compat paths, polyfills, or matrix entries for older Node.
+- **Package manager:** pnpm@10.33.0 (workspaces); orchestration via Turborepo.
 - **Code style:** functional, avoid classes/singletons. No CSS-in-JS. No inline end-of-line comments.
 - **Lint/format:** `oxlint` + `oxfmt`. Never `npx biome`.
 - **Tests:** Vitest everywhere. Storybook Test (via `@storybook/addon-vitest`) for interaction tests in `apps/storybook`.
