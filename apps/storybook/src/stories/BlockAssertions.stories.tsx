@@ -193,6 +193,44 @@ export const TokenDetailRenders = meta.story({
 });
 
 /**
+ * `TokenDetail` for a composite token type renders a live preview of the
+ * composite — typography as a pangram sample, shadow/border as a card with
+ * the effect applied, transition as an animated ball.
+ */
+export const TokenDetailTypographyComposite = meta.story({
+  render: () => <TokenDetail path='typography.sys.heading' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const sample = [...canvasElement.querySelectorAll<HTMLElement>('div')].find((el) =>
+      el.textContent?.startsWith('Sphinx of black quartz'),
+    );
+    expect(sample, 'typography composite must render a pangram sample').toBeTruthy();
+    if (sample) {
+      expect(
+        getComputedStyle(sample).fontFamily,
+        'sample must resolve a concrete font-family',
+      ).not.toBe('');
+    }
+  },
+});
+
+export const TokenDetailShadowComposite = meta.story({
+  render: () => <TokenDetail path='shadow.sys.md' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const samples = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
+    const withShadow = samples.filter((el) => {
+      const bs = getComputedStyle(el).boxShadow;
+      return bs && bs !== 'none';
+    });
+    expect(
+      withShadow.length,
+      'shadow composite must render a sample with non-none box-shadow',
+    ).toBeGreaterThan(0);
+  },
+});
+
+/**
  * `TokenDetail` for a missing path must render its empty state rather than
  * throwing.
  */

@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useEffect, useMemo, useState } from 'react';
+import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export type MotionSpeed = 0.25 | 0.5 | 1 | 2;
@@ -222,19 +223,6 @@ function asEasing(
     }
   }
   return fallback;
-}
-
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReduced(query.matches);
-    const onChange = (e: MediaQueryListEvent): void => setReduced(e.matches);
-    query.addEventListener('change', onChange);
-    return () => query.removeEventListener('change', onChange);
-  }, []);
-  return reduced;
 }
 
 export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactElement {
