@@ -1,0 +1,24 @@
+{
+  "stroke": {
+    "ref": {
+      "style": {
+        "$type": "strokeStyle",
+        "$description": "Raw stroke-style primitives. Includes the DTCG string enum plus one object-form token exercising the { dashArray, lineCap } shape.",
+        "solid":  { "$value": "solid" },
+        "dashed": { "$value": "dashed" },
+        "dotted": { "$value": "dotted" },
+        "double": { "$value": "double" },
+        "custom-dash": {
+          "$description": "Object-form strokeStyle. Consumers that can't express lineCap fall back to the dash array.",
+          "$value": {
+            "dashArray": [
+              { "value": 6, "unit": "px" },
+              { "value": 4, "unit": "px" }
+            ],
+            "lineCap": "round"
+          }
+        }
+      }
+    }
+  }
+}
