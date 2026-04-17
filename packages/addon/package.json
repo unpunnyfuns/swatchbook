@@ -25,6 +25,10 @@
       "types": "./dist/manager.d.mts",
       "import": "./dist/manager.mjs"
     },
+    "./hooks": {
+      "types": "./dist/hooks/index.d.mts",
+      "import": "./dist/hooks/index.mjs"
+    },
     "./package.json": "./package.json"
   },
   "imports": {
@@ -42,7 +46,7 @@
     "supportedFrameworks": ["react"]
   },
   "scripts": {
-    "build": "tsdown src/index.ts src/preset.ts src/preview.tsx src/manager.tsx --format esm --dts --clean --sourcemap",
+    "build": "tsdown src/index.ts src/preset.ts src/preview.tsx src/manager.tsx src/hooks/index.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src",
     "format": "oxfmt -c ../../.oxfmtrc.json src",
