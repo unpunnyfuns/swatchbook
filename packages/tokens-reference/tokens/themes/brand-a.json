@@ -4,8 +4,8 @@
       "$type": "color",
       "$description": "Brand A — swaps the accent from blue to violet. Composable with light/dark.",
       "accent": {
-        "bg":       { "$value": "{color.ref.violet.500}" },
-        "bg-hover": { "$value": "{color.ref.violet.700}" },
+        "bg":       { "$value": "{color.ref.violet.700}" },
+        "bg-hover": { "$value": "{color.ref.violet.900}" },
         "fg":       { "$value": "{color.ref.neutral.0}" }
       },
       "text": {
