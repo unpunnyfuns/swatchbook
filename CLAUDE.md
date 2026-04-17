@@ -36,6 +36,7 @@ Update this line when a milestone closes. See the matching GitHub milestones for
   ```
   The leading slash in `#/` lands cleanly because Node 24.14+ supports `#/`-prefixed subpaths. TypeScript (5.4+), Vite, and Vitest all honor `package.json#imports` natively — no `tsconfig#paths`, no `resolve.alias`. Don't add them.
 - **Node baseline:** always the **latest LTS** everywhere — dev, CI matrix, published `engines.node`. Today that's Node 24. When a new LTS lands (typically October of even years), bump engines + CI in a same-day PR. Don't add lower-version compat paths, polyfills, or matrix entries for older Node.
+- **CI Playwright image:** CI runs inside `mcr.microsoft.com/playwright:vX.Y.Z-noble` (pinned in `.github/workflows/ci.yml`) so chromium + system deps are pre-installed and no `apt-get install` runs. When upgrading `playwright`, bump the image tag in the same PR to match the new version.
 - **Package manager:** pnpm@10.33.0 (workspaces); orchestration via Turborepo.
 - **Code style:** functional, avoid classes/singletons. No CSS-in-JS. No inline end-of-line comments.
 - **Lint/format:** `oxlint` + `oxfmt`. Never `npx biome`.
