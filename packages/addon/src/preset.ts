@@ -1,5 +1,5 @@
 import { dirname, isAbsolute, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { Config } from '@unpunnyfuns/swatchbook-core';
 import { createJiti } from 'jiti';
 import type { InlineConfig } from 'vite';
@@ -26,6 +26,16 @@ export async function viteFinal(
   plugins.push(swatchbookTokensPlugin({ config, cwd }));
 
   return { ...viteConfig, plugins };
+}
+
+/**
+ * Append our preview entry so the decorator + globalTypes ship in the
+ * preview bundle even under CSF Next's `definePreview` pattern, where
+ * consumers don't directly register non-factory addon annotations.
+ */
+export function previewAnnotations(entry: string[] = []): string[] {
+  const previewUrl = import.meta.resolve('@unpunnyfuns/swatchbook-addon/preview');
+  return [...entry, fileURLToPath(previewUrl)];
 }
 
 async function resolveConfig(options: PresetOptions): Promise<{ config: Config; cwd: string }> {
