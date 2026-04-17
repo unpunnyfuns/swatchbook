@@ -1,0 +1,48 @@
+{
+  "name": "@unpunnyfuns/swatchbook-blocks",
+  "version": "0.0.0",
+  "description": "Storybook MDX doc blocks for DTCG design tokens — TokenTable, ColorPalette, TypographyScale, TokenDetail.",
+  "type": "module",
+  "engines": {
+    "node": ">=24.14.0"
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown src/index.ts --format esm --dts --clean --sourcemap",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src",
+    "format": "oxfmt -c ../../.oxfmtrc.json src",
+    "format:check": "oxfmt --check -c ../../.oxfmtrc.json src"
+  },
+  "dependencies": {
+    "@unpunnyfuns/swatchbook-addon": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tsdown": "^0.21.9",
+    "typescript": "^6.0.0"
+  }
+}
