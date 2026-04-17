@@ -1,7 +1,7 @@
-export { defineSwatchbookConfig, resolveThemingMode } from '#/config';
-export { loadProject, resolveTheme } from '#/load';
-export { projectCss, emitTypes } from '#/emit';
-export { emitCss, type EmitCssOptions } from '#/css';
+export { defineSwatchbookConfig, resolveThemingMode } from '#/config.ts';
+export { loadProject, resolveTheme } from '#/load.ts';
+export { projectCss, emitTypes } from '#/emit.ts';
+export { emitCss, type EmitCssOptions } from '#/css.ts';
 
 export type {
   Config,
@@ -12,4 +12,4 @@ export type {
   Theme,
   ThemeConfig,
   TokenMap,
-} from '#/types';
+} from '#/types.ts';

@@ -28,8 +28,7 @@
     "./package.json": "./package.json"
   },
   "imports": {
-    "#/*": "./src/*.ts",
-    "#/*.tsx": "./src/*.tsx"
+    "#/*": "./src/*"
   },
   "files": [
     "dist"

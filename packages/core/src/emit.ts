@@ -1,5 +1,5 @@
-import type { Project } from '#/types';
-import { emitCss, type EmitCssOptions } from '#/css';
+import type { Project } from '#/types.ts';
+import { emitCss, type EmitCssOptions } from '#/css.ts';
 
 /** Emit the full CSS stylesheet for a project. */
 export function projectCss(project: Project, options: EmitCssOptions = {}): string {

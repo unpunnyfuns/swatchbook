@@ -8,8 +8,7 @@
     "node": ">=24.14.0"
   },
   "imports": {
-    "#/*": "./src/*.ts",
-    "#/*.tsx": "./src/*.tsx"
+    "#/*": "./src/*"
   },
   "scripts": {
     "storybook": "storybook dev -p 6006 --no-open",

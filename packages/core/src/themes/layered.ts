@@ -3,8 +3,8 @@ import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { isAbsolute, resolve as resolvePath } from 'node:path';
 import { defineConfig as defineTerrazzoConfig, parse } from '@terrazzo/parser';
-import type { Theme, ThemeConfig, TokenMap } from '#/types';
-import type { BufferedLogger } from '#/diagnostics';
+import type { Theme, ThemeConfig, TokenMap } from '#/types.ts';
+import type { BufferedLogger } from '#/diagnostics.ts';
 
 export interface LayeredLoadResult {
   themes: Theme[];

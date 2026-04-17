@@ -1,7 +1,7 @@
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
 import { loadProject, projectCss, resolveThemingMode } from '@unpunnyfuns/swatchbook-core';
 import type { Plugin } from 'vite';
-import { RESOLVED_VIRTUAL_MODULE_ID, VIRTUAL_MODULE_ID } from '#/constants';
+import { RESOLVED_VIRTUAL_MODULE_ID, VIRTUAL_MODULE_ID } from '#/constants.ts';
 
 export interface SwatchbookPluginOptions {
   config: Config;

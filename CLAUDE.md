@@ -20,15 +20,21 @@ Update this line when a milestone closes. See the matching GitHub milestones for
 - **ESM only.** Every package is `"type": "module"`. No CJS builds, no dual-format outputs, no `require()`-compatible fallbacks. Package builds emit ESM only (`tsdown --format esm`). If a downstream consumer still needs CJS, that's their problem to solve with a bundler.
 - **Bundler:** `tsdown` (rolldown-powered). Never add `tsup` — it's deprecated.
 - **Source layout:** every package keeps its code under `./src/`. Package root holds config only (`package.json`, `tsconfig.json`, `README.md`). Build output goes to `./dist/`.
-- **Internal aliasing: use `package.json#imports` with `#/` prefix.** Inside a package, alias via the `"imports"` field (Node-native). Convention: `#/<slug>/*` maps to `./src/<slug>/*.js`. The leading slash lands cleanly because Node 24.14+ supports `#/`-prefixed subpaths (previously only `#<alnum>` was accepted). Refactors touch one manifest, not every import.
+- **Import specifiers: explicit extensions, always.** Relative and subpath imports both carry the extension that's on disk — `.ts`, `.tsx`, `.css`, `.json`, `.svg`, whatever. `allowImportingTsExtensions + noEmit` in the base tsconfig makes TS happy; Vite, Vitest, tsdown, Node strip-types all resolve `.ts` / `.tsx` specifiers natively. The rule is *what you see is what's imported* — no extension inference, no "fake `.js`".
+- **Internal aliasing: `package.json#imports` with `#/` prefix + extension-agnostic target.** The map is just `"#/*": "./src/*"`; the extension lives on the specifier. One entry handles every filetype.
   ```json
-  { "imports": { "#/core/*": "./src/core/*.js", "#/themes/*": "./src/themes/*.js" } }
+  { "imports": { "#/*": "./src/*" } }
   ```
   ```ts
-  import { emitCss } from '#/core/emit';         // ✅
-  import { emitCss } from '../../core/emit.js';  // ❌
+  import { emitCss } from '#/css.ts';          // ✅
+  import { Button }  from '#/components/Button.tsx'; // ✅
+  import tokens     from '#/tokens/sys/color.json';  // ✅
+  import logo       from '#/assets/logo.svg';        // ✅
+  import './styles.css';                             // ✅
+  import { foo }    from '#/foo';                    // ❌ no extension
+  import { bar }    from '../bar';                   // ❌ no extension
   ```
-  TypeScript (5.4+), Vite, and Vitest all honor `package.json#imports` natively — no `tsconfig#paths`, no `resolve.alias`. Don't add them.
+  The leading slash in `#/` lands cleanly because Node 24.14+ supports `#/`-prefixed subpaths. TypeScript (5.4+), Vite, and Vitest all honor `package.json#imports` natively — no `tsconfig#paths`, no `resolve.alias`. Don't add them.
 - **Node baseline:** always the **latest LTS** everywhere — dev, CI matrix, published `engines.node`. Today that's Node 24. When a new LTS lands (typically October of even years), bump engines + CI in a same-day PR. Don't add lower-version compat paths, polyfills, or matrix entries for older Node.
 - **Package manager:** pnpm@10.33.0 (workspaces); orchestration via Turborepo.
 - **Code style:** functional, avoid classes/singletons. No CSS-in-JS. No inline end-of-line comments.

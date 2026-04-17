@@ -3,8 +3,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { Config } from '@unpunnyfuns/swatchbook-core';
 import { createJiti } from 'jiti';
 import type { InlineConfig } from 'vite';
-import type { AddonOptions } from '#/options';
-import { swatchbookTokensPlugin } from '#/virtual/plugin';
+import type { AddonOptions } from '#/options.ts';
+import { swatchbookTokensPlugin } from '#/virtual/plugin.ts';
 
 interface PresetOptions extends AddonOptions {
   /** Storybook injects this — the `.storybook` directory absolute path. */

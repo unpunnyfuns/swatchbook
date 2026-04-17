@@ -1,5 +1,5 @@
-import preview from '../../.storybook/preview';
-import { Input } from '../components/Input';
+import preview from '../../.storybook/preview.tsx';
+import { Input } from '../components/Input.tsx';
 
 const meta = preview.meta({
   title: 'Components/Input',
