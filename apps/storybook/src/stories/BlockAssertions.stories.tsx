@@ -6,6 +6,7 @@ import {
   FontWeightScale,
   MotionPreview,
   ShadowPreview,
+  StrokeStyleSample,
   TokenDetail,
   TokenTable,
   TypographyScale,
@@ -229,6 +230,30 @@ export const TokenDetailShadowComposite = meta.story({
       withShadow.length,
       'shadow composite must render a sample with non-none box-shadow',
     ).toBeGreaterThan(0);
+  },
+});
+
+/**
+ * `StrokeStyleSample` must render one row per `strokeStyle` token. Rows
+ * with a string value (`solid`, `dashed`, `dotted`, `double`) must resolve
+ * to a non-`none` `border-top-style`; object-form tokens render a textual
+ * fallback, which is acceptable.
+ */
+export const StrokeStyleSampleRenders = meta.story({
+  render: () => <StrokeStyleSample filter='stroke.ref.style.*' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'section, div');
+    const lines = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
+    const styledLines = lines.filter((el) => {
+      const s = getComputedStyle(el).borderTopStyle;
+      return s && s !== 'none';
+    });
+    expect(
+      styledLines.length,
+      'at least one strokeStyle row must resolve to a non-none border-style',
+    ).toBeGreaterThan(0);
+    const text = canvasElement.textContent ?? '';
+    expect(text, 'block must mention the object-form fallback').toMatch(/Object-form/);
   },
 });
 

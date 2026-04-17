@@ -10,7 +10,9 @@
         { "$ref": "./ref/color.palette.json" },
         { "$ref": "./ref/size.scale.json" },
         { "$ref": "./ref/font.json" },
-        { "$ref": "./ref/motion.json" }
+        { "$ref": "./ref/motion.json" },
+        { "$ref": "./ref/stroke.json" },
+        { "$ref": "./ref/number.json" }
       ]
     },
     "sys": {

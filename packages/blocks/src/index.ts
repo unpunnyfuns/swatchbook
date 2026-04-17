@@ -5,6 +5,7 @@ export { FontFamilySample, type FontFamilySampleProps } from '#/FontFamilySample
 export { FontWeightScale, type FontWeightScaleProps } from '#/FontWeightScale.tsx';
 export { MotionPreview, type MotionPreviewProps, type MotionSpeed } from '#/MotionPreview.tsx';
 export { ShadowPreview, type ShadowPreviewProps } from '#/ShadowPreview.tsx';
+export { StrokeStyleSample, type StrokeStyleSampleProps } from '#/StrokeStyleSample.tsx';
 export { TokenDetail, type TokenDetailProps } from '#/TokenDetail.tsx';
 export { TokenTable, type TokenTableProps } from '#/TokenTable.tsx';
 export { TypographyScale, type TypographyScaleProps } from '#/TypographyScale.tsx';
