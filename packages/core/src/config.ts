@@ -24,9 +24,7 @@ export function resolveThemingMode(config: Config): 'layered' | 'resolver' | 'ma
   if (config.manifest) modes.push('manifest');
 
   if (modes.length === 0) {
-    throw new Error(
-      'swatchbook config must specify one of: `themes`, `resolver`, or `manifest`.',
-    );
+    throw new Error('swatchbook config must specify one of: `themes`, `resolver`, or `manifest`.');
   }
   if (modes.length > 1) {
     throw new Error(

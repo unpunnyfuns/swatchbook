@@ -350,7 +350,8 @@ GitHub Actions pipeline (`.github/workflows/ci.yml`):
 
 - Matrix: latest Node LTS only (Node 24 today; bump with each LTS). See `docs/decisions.md`.
 - Cache: pnpm store, Turbo local cache, Playwright browsers.
-- Steps: `pnpm install --frozen-lockfile` → `pnpm turbo run lint typecheck test build test:storybook`.
+- Steps: `pnpm install --frozen-lockfile` → `pnpm turbo run lint format:check typecheck test build` → `pnpm turbo run test:storybook` → `pnpm turbo run build:storybook`.
+- Quality gates per package: `lint` (oxlint), `format:check` (oxfmt), `typecheck` (tsc --noEmit), `test` (Vitest). Turbo task-level inputs reference `$TURBO_ROOT$/.oxlintrc.json` and `$TURBO_ROOT$/.oxfmtrc.json` so cache keys invalidate when the configs change.
 - Storybook static build (`turbo run build:storybook`) uploaded as artifact; deploy step deferred.
 - No Turbo remote cache in v1 (can add `TURBO_TOKEN`/`TURBO_TEAM` env secrets later).
 

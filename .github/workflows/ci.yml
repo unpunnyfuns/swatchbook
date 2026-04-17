@@ -34,7 +34,10 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm turbo run lint typecheck test build
+      - run: pnpm turbo run lint format:check typecheck test build
+
+      - name: Storybook interaction tests
+        run: pnpm turbo run test:storybook
 
       - name: Build Storybook
         run: pnpm turbo run build:storybook

@@ -20,7 +20,10 @@
     "dev": "turbo run storybook"
   },
   "devDependencies": {
+    "oxfmt": "^0.45.0",
+    "oxlint": "^1.60.0",
     "turbo": "^2.9.0",
-    "typescript": "^6.0.0"
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.4"
   }
 }

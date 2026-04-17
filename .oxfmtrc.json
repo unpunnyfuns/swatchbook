@@ -1,8 +1,8 @@
 {
-  "indent_style": "space",
-  "indent_width": 2,
-  "line_width": 100,
-  "quote_style": "single",
-  "trailing_comma": "all",
-  "semicolons": "always"
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "singleQuote": true,
+  "jsxSingleQuote": true,
+  "semi": true,
+  "trailingComma": "all"
 }
