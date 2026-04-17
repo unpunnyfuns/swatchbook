@@ -1,24 +1,27 @@
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { StorybookConfig } from '@storybook/react-vite';
 
-import { dirname } from 'path';
-
-import { fileURLToPath } from 'url';
-
-/**
- * This function is used to resolve the absolute path of a package.
- * It is needed in projects that use Yarn PnP or are set up within a monorepo.
- */
-function getAbsolutePath(value: string) {
-  return dirname(fileURLToPath(import.meta.resolve(`${value}/package.json`)));
+function pkg(name: string): string {
+  return dirname(fileURLToPath(import.meta.resolve(`${name}/package.json`)));
 }
+
 const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(ts|tsx)'],
   addons: [
-    getAbsolutePath('@chromatic-com/storybook'),
-    getAbsolutePath('@storybook/addon-vitest'),
-    getAbsolutePath('@storybook/addon-a11y'),
-    getAbsolutePath('@storybook/addon-docs'),
+    pkg('@chromatic-com/storybook'),
+    pkg('@storybook/addon-vitest'),
+    pkg('@storybook/addon-a11y'),
+    pkg('@storybook/addon-docs'),
+    pkg('@storybook/addon-mcp'),
+    {
+      name: '@unpunnyfuns/swatchbook-addon',
+      options: {
+        configPath: '../swatchbook.config.ts',
+      },
+    },
   ],
-  framework: getAbsolutePath('@storybook/react-vite'),
+  framework: pkg('@storybook/react-vite'),
 };
+
 export default config;
