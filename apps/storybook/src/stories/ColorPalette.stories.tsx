@@ -4,7 +4,6 @@ import preview from '../../.storybook/preview.tsx';
 const meta = preview.meta({
   title: 'Blocks/ColorPalette',
   component: ColorPalette,
-  tags: ['autodocs'],
   argTypes: {
     filter: { control: 'text' },
     groupBy: { control: { type: 'number', min: 1, max: 5, step: 1 } },
