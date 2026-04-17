@@ -32,6 +32,16 @@ Append-only ADR-lite log. Entries capture tactical choices made during execution
 
 ---
 
+## 2026-04-17 — PR-based workflow from M1 onward
+
+**Context:** M0 scaffold was committed directly to `main` to bootstrap the repo. From M1 onward we want the governance rules (plan diff alongside invalidating changes, PR template, decisions log) to have a clear mechanical enforcement point.
+
+**Decision:** Every change after `076c970` flows through a PR. Branch names carry a milestone slug (`m1/…`, `docs/…`, `chore/…`). PRs squash-merge by default. Claude opens PRs, never self-merges — the human reviewer merges. Captured in `docs/plan.md` → "Plan governance" → "Branch & PR workflow".
+
+**Rationale:** Makes "any PR that invalidates the plan must include the plan diff" a reviewable event, not an honor-system norm.
+
+---
+
 ## 2026-04-17 — Pinned `storybook@10.3.5` and `@storybook/addon-mcp@0.6.0`
 
 **Context:** Plan required Storybook 10.3+ for MCP support. Latest-stable check during M0 spike.

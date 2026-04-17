@@ -394,6 +394,16 @@ The plan is the **design doc**; GitHub milestones/issues are the **tracker**. Do
 - One issue per "Work" bullet under each milestone. Each issue links back to the relevant `docs/plan.md` section anchor.
 - Root README carries a one-line `Current: Mx — <goal>` status that updates when a milestone closes.
 
+### Branch & PR workflow
+
+All work after the M0 scaffold commit flows through PRs. Direct pushes to `main` are reserved for the initial scaffold only.
+
+- **Branch per logical chunk**, not per tiny issue. Typical M1 cut: `m1/tokens-reference`, `m1/core-impl`, `m1/core-tests`, `m1/tokens-starter-skel`. Branch names start with the milestone slug (`m1/…`, `docs/…`, `chore/…`).
+- **PR title:** `Mx: <what>`. Body follows the PR template verbatim. Link related milestone issues with `Closes #N` / `Refs #N`.
+- **Merge strategy:** squash-merge by default. Preserve commits only when the history is genuinely useful to future readers.
+- **No self-merge by automation.** Claude (or any agent) opens PRs; the human reviewer merges. This keeps the governance human-in-the-loop.
+- **Branch protection** on `main` is the repo owner's call — the discipline above holds either way, but enabling protection rules (require PR, require status checks, restrict pushes) in GitHub settings makes it enforced rather than norm-based.
+
 ### Keeping the plan honest
 
 Two mechanisms:
