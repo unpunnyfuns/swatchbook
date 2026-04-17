@@ -1,11 +1,8 @@
-import type { Preview } from '@storybook/react-vite';
+import addonDocs from '@storybook/addon-docs';
+import addonA11y from '@storybook/addon-a11y';
+import { definePreview } from '@storybook/react-vite';
 
-/**
- * Swatchbook's preview decorator + theme toolbar come from
- * `@unpunnyfuns/swatchbook-addon` (registered in main.ts). This file carries
- * only app-level parameters.
- */
-const preview: Preview = {
+export default definePreview({
   parameters: {
     controls: {
       matchers: {
@@ -16,6 +13,6 @@ const preview: Preview = {
     a11y: { test: 'error' },
     backgrounds: { disable: true },
   },
-};
 
-export default preview;
+  addons: [addonA11y(), addonDocs()],
+});

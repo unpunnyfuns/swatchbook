@@ -19,6 +19,9 @@ apps/storybook/src/generated
 .vscode
 .idea
 
+# Claude Code session state
+.claude
+
 # Logs
 *.log
 npm-debug.log*
