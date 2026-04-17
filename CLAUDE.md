@@ -42,6 +42,11 @@ Update this line when a milestone closes. See the matching GitHub milestones for
 - **Code style:** functional, avoid classes/singletons. No CSS-in-JS. No inline end-of-line comments.
 - **Lint/format:** `oxlint` + `oxfmt`. Never `npx biome`.
 - **Tests:** Vitest everywhere. Storybook Test (via `@storybook/addon-vitest`) for interaction tests in `apps/storybook`.
+- **Test structure: flat.** Each `it` reads top-to-bottom without scrolling up — per Kent C. Dodds's [Avoid Nesting When You're Testing](https://kentcdodds.com/blog/avoid-nesting-when-youre-testing).
+  - **No nested `describe`.** One `describe` per file at most, as a file-level grouping. If you feel the urge to nest, split files instead.
+  - **No `beforeEach`** for cosmetic shared setup. Write an inline `setup()` helper and have each test call it; duplicating a line or two beats the "what is `user` here?" hunt.
+  - **`beforeAll` is a perf escape hatch**, not a grouping tool. Acceptable only when the shared setup is genuinely expensive (e.g. `loadProject` takes ~1s so running it per-test would blow the timeout) and the alternative would be a meaningful regression. Annotate the reason inline.
+  - Prose over jargon in test names: `` it('resolves deep alias chains (cmp → sys → ref)') `` beats `` it('resolves') `` inside nested describes.
 - **Pre-commit checks (always, no exceptions):** before running `git commit`, run
   ```
   pnpm -r format && pnpm turbo run lint typecheck test
