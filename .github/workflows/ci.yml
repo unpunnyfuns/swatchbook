@@ -18,6 +18,12 @@ jobs:
     # deps pre-installed, so we skip `apt-get install` entirely.
     container:
       image: mcr.microsoft.com/playwright:v1.59.1-noble
+    env:
+      # The image pre-installs chromium to /ms-playwright, but GH Actions
+      # overrides $HOME to /github/home inside containers so Playwright's
+      # default lookup ($HOME/.cache/ms-playwright) misses. Point it at
+      # the image's install dir explicitly.
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     permissions:
       contents: read
       actions: write
