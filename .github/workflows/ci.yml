@@ -34,6 +34,27 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Resolve Playwright version
+        id: playwright
+        run: |
+          version=$(node -p "require('./apps/storybook/node_modules/playwright/package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter @unpunnyfuns/swatchbook-storybook exec playwright install --with-deps chromium
+
+      - name: Install Playwright system deps on cache hit
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm --filter @unpunnyfuns/swatchbook-storybook exec playwright install-deps chromium
+
       - run: pnpm turbo run lint format:check typecheck test build
 
       - name: Storybook interaction tests

@@ -7,6 +7,9 @@ dist
 storybook-static
 coverage
 
+# Generated per-app
+apps/storybook/src/generated
+
 # Tooling
 .turbo
 .swatchbook

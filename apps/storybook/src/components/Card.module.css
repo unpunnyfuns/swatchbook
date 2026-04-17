@@ -1,0 +1,26 @@
+.card {
+  background: var(--sb-cmp-card-bg);
+  color: var(--sb-cmp-card-fg);
+  border: var(--sb-cmp-card-border);
+  border-radius: var(--sb-cmp-card-radius);
+  padding: var(--sb-cmp-card-padding);
+  box-shadow: var(--sb-cmp-card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-cmp-card-gap);
+  max-width: 320px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--sb-typography-sys-heading-font-family);
+  font-size: var(--sb-typography-sys-heading-font-size);
+  font-weight: var(--sb-typography-sys-heading-font-weight);
+  line-height: var(--sb-typography-sys-heading-line-height);
+}
+
+.body {
+  font-family: var(--sb-typography-sys-body-font-family);
+  font-size: var(--sb-typography-sys-body-font-size);
+  line-height: var(--sb-typography-sys-body-line-height);
+}
