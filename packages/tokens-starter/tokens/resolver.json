@@ -1,0 +1,30 @@
+{
+  "$schema": "https://design-tokens.org/tr/2025/drafts/resolver/",
+  "version": "2025.10",
+  "name": "swatchbook-tokens-starter",
+  "description": "Minimal resolver for the starter set — single theme (Light).",
+  "sets": {
+    "ref": {
+      "sources": [
+        { "$ref": "./ref/color.json" },
+        { "$ref": "./ref/size.json" }
+      ]
+    },
+    "sys": {
+      "sources": [{ "$ref": "./sys/color.json" }]
+    }
+  },
+  "modifiers": {
+    "theme": {
+      "contexts": {
+        "Light": [{ "$ref": "./themes/light.json" }]
+      },
+      "default": "Light"
+    }
+  },
+  "resolutionOrder": [
+    { "$ref": "#/sets/ref" },
+    { "$ref": "#/sets/sys" },
+    { "$ref": "#/modifiers/theme" }
+  ]
+}

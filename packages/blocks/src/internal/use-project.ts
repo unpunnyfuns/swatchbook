@@ -7,7 +7,6 @@ import {
   defaultTheme,
   themes,
   themesResolved,
-  themingMode,
 } from 'virtual:swatchbook/tokens';
 
 type VirtualTokens = typeof themesResolved;
@@ -19,7 +18,6 @@ export interface ProjectData {
   resolved: ResolvedTokens;
   themesResolved: VirtualTokens;
   cssVarPrefix: string;
-  mode: 'layered' | 'resolver';
 }
 
 const STYLE_ELEMENT_ID = 'swatchbook-tokens';
@@ -80,7 +78,6 @@ export function useProject(): ProjectData {
     themesResolved,
     resolved: themesResolved[activeTheme] ?? {},
     cssVarPrefix,
-    mode: themingMode,
   };
 }
 

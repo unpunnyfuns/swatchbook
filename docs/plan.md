@@ -8,7 +8,7 @@ Packages published under the `@unpunnyfuns` scope.
 
 Decisions locked in:
 - Monorepo, pnpm workspaces, Turborepo
-- Theming: DTCG 2025.10 resolvers (native spec) + explicit layered compositions (our file-glob shortcut). Core normalizes both to a single internal `Theme[]` shape. Tokens Studio `$themes` manifest support was dropped pre-v0.1.0 — see `docs/decisions.md`. Layered mode is scheduled for removal in a follow-up to converge on DTCG-spec-only input.
+- Theming: DTCG 2025.10 resolvers only. The resolver is the sole theming input as of v0.1.0. Earlier iterations carried Tokens Studio `$themes` manifest support and an explicit-layers config shortcut; both were removed pre-release — see `docs/decisions.md`.
 - v1 control: color only (token picker). Control stores `var(--…)` **directly** in args — swatch/label is chrome only, no decorator substitution.
 - Doc blocks: TokenTable, ColorPalette, TypographyScale, TokenDetail
 - Framework: React (CSF3). Vite builder only — no Webpack path in v1.

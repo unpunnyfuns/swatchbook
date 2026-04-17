@@ -6,30 +6,24 @@ import type { Project } from '#/types';
 
 const fixtureCwd = dirname(tokensDir);
 
-const LAYER_SETS = {
-  common: ['tokens/ref/**/*.json', 'tokens/sys/**/*.json', 'tokens/cmp/**/*.json'],
-};
-
-describe('loadProject — layered mode', () => {
+describe('loadProject — resolver mode', () => {
   let project: Project;
 
   beforeAll(async () => {
     project = await loadProject(
-      {
-        tokens: ['tokens/**/*.json'],
-        themes: [
-          { name: 'Light', layers: [...LAYER_SETS.common, 'tokens/themes/light.json'] },
-          { name: 'Dark', layers: [...LAYER_SETS.common, 'tokens/themes/dark.json'] },
-        ],
-        default: 'Light',
-      },
+      { tokens: ['tokens/**/*.json'], resolver: resolverPath, default: 'Light' },
       fixtureCwd,
     );
   }, 30_000);
 
-  it('loads the explicit themes in order', () => {
-    expect(project.themes.map((t) => t.name)).toEqual(['Light', 'Dark']);
-    expect(project.themes[0]?.sources.length).toBeGreaterThan(10);
+  it('enumerates the 5 named compositions from the resolver', () => {
+    expect(project.themes.map((t) => t.name)).toEqual([
+      'Light',
+      'Dark',
+      'Light · Brand A',
+      'Dark · Brand A',
+      'High Contrast',
+    ]);
     expect(Object.keys(project.graph).length).toBeGreaterThan(100);
   });
 
@@ -53,34 +47,10 @@ describe('loadProject — layered mode', () => {
   });
 });
 
-describe('loadProject — resolver mode', () => {
-  it('enumerates the full permutation cross-product from the DTCG resolver', async () => {
-    const project = await loadProject(
-      { tokens: ['tokens/**/*.json'], resolver: resolverPath },
-      fixtureCwd,
-    );
-    // appearance (3) × brand (2) = 6 permutations
-    expect(project.themes).toHaveLength(6);
-  });
-});
-
 describe('loadProject — validation', () => {
-  it('throws when no theming input is set', async () => {
+  it('throws when resolver is not set', async () => {
     await expect(loadProject({ tokens: [] } as never, fixtureCwd)).rejects.toThrow(
-      /must specify one of/,
+      /must specify `resolver`/,
     );
-  });
-
-  it('throws when multiple theming inputs are set', async () => {
-    await expect(
-      loadProject(
-        {
-          tokens: [],
-          themes: [{ name: 'x', layers: [] }],
-          resolver: 'r.json',
-        } as never,
-        fixtureCwd,
-      ),
-    ).rejects.toThrow(/exactly one theming input/);
   });
 });

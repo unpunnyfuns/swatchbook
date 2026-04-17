@@ -19,8 +19,6 @@ interface VirtualTheme {
   sources: string[];
 }
 
-type ThemingMode = 'layered' | 'resolver';
-
 type DiagnosticSeverity = 'error' | 'warn' | 'info';
 
 interface VirtualDiagnostic {
@@ -35,7 +33,6 @@ interface VirtualDiagnostic {
 interface InitPayload {
   themes: VirtualTheme[];
   defaultTheme: string | null;
-  mode: ThemingMode;
   themesResolved: Record<string, Record<string, VirtualToken>>;
   diagnostics: VirtualDiagnostic[];
   cssVarPrefix: string;

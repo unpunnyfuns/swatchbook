@@ -16,12 +16,7 @@ await mkdir(resolve(dist, 'themes'), { recursive: true });
 const project = await loadProject(
   {
     tokens: ['tokens/**/*.json'],
-    themes: [
-      {
-        name: 'Light',
-        layers: ['tokens/ref/**/*.json', 'tokens/sys/**/*.json', 'tokens/themes/light.json'],
-      },
-    ],
+    resolver: 'tokens/resolver.json',
     default: 'Light',
     cssVarPrefix: CSS_VAR_PREFIX,
   },

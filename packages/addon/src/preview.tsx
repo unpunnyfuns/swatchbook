@@ -8,7 +8,6 @@ import {
   diagnostics,
   themes,
   themesResolved,
-  themingMode,
 } from 'virtual:swatchbook/tokens';
 import {
   DATA_THEME_ATTR,
@@ -64,7 +63,6 @@ function broadcastInit(): void {
   channel.emit(INIT_EVENT, {
     themes,
     defaultTheme,
-    mode: themingMode,
     themesResolved,
     diagnostics,
     cssVarPrefix,
