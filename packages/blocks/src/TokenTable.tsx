@@ -21,6 +21,9 @@ const styles = {
     fontFamily: 'var(--sb-typography-sys-body-font-family, system-ui)',
     fontSize: 'var(--sb-typography-sys-body-font-size, 14px)',
     color: 'var(--sb-color-sys-text-default, CanvasText)',
+    background: 'var(--sb-color-sys-surface-default, Canvas)',
+    padding: 12,
+    borderRadius: 6,
   } satisfies React.CSSProperties,
   caption: {
     captionSide: 'top',
@@ -115,14 +118,14 @@ export function TokenTable({
 
   if (rows.length === 0) {
     return (
-      <div style={styles.wrapper}>
+      <div data-theme={activeTheme} style={styles.wrapper}>
         <div style={styles.empty}>No tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div style={styles.wrapper}>
+    <div data-theme={activeTheme} style={styles.wrapper}>
       <table style={styles.table}>
         <caption style={styles.caption}>{captionText}</caption>
         <colgroup>

@@ -4,7 +4,6 @@ import preview from '../../.storybook/preview.tsx';
 const meta = preview.meta({
   title: 'Blocks/TokenTable',
   component: TokenTable,
-  tags: ['autodocs'],
   argTypes: {
     filter: { control: 'text' },
     type: {
