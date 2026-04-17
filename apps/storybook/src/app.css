@@ -1,0 +1,12 @@
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  background: var(--sb-color-sys-surface-default);
+  color: var(--sb-color-sys-text-default);
+  font-family: var(--sb-typography-sys-body-font-family);
+  font-size: var(--sb-typography-sys-body-font-size);
+  line-height: var(--sb-typography-sys-body-line-height);
+  margin: 0;
+}

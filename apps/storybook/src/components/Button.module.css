@@ -1,0 +1,32 @@
+.primary,
+.ghost {
+  border-radius: var(--sb-cmp-button-radius);
+  padding: var(--sb-cmp-button-padding-y) var(--sb-cmp-button-padding-x);
+  font-family: var(--sb-cmp-button-font-font-family);
+  font-size: var(--sb-cmp-button-font-font-size);
+  font-weight: var(--sb-cmp-button-font-font-weight);
+  line-height: var(--sb-cmp-button-font-line-height);
+  cursor: pointer;
+  transition-duration: var(--sb-motion-sys-enter-duration);
+  transition-timing-function: var(--sb-motion-sys-enter-timing-function);
+  transition-property: background, color, border-color;
+  border: var(--sb-cmp-button-border);
+}
+
+.primary {
+  background: var(--sb-cmp-button-bg);
+  color: var(--sb-cmp-button-fg);
+}
+
+.primary:hover {
+  background: var(--sb-cmp-button-bg-hover);
+}
+
+.ghost {
+  background: var(--sb-cmp-button-ghost-bg);
+  color: var(--sb-cmp-button-ghost-fg);
+}
+
+.ghost:hover {
+  background: var(--sb-cmp-button-ghost-bg-hover);
+}

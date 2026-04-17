@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/mcp.json",
+  "mcpServers": {
+    "swatchbook-storybook": {
+      "type": "http",
+      "url": "http://localhost:6006/mcp",
+      "description": "Storybook MCP server for swatchbook. Only reachable while `pnpm dev` (turbo run storybook) is running."
+    }
+  }
+}
