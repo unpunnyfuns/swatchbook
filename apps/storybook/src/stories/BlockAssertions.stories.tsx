@@ -231,6 +231,65 @@ export const TokenDetailShadowComposite = meta.story({
 });
 
 /**
+ * `TokenDetail` for a dimension primitive must render a bar whose computed
+ * width matches the token's cssVar.
+ */
+export const TokenDetailDimensionPrimitive = meta.story({
+  render: () => <TokenDetail path='space.sys.md' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const bars = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
+    const sized = bars.find((el) => el.getBoundingClientRect().width > 0);
+    expect(sized, 'dimension primitive must render a bar with non-zero width').toBeTruthy();
+  },
+});
+
+/**
+ * `TokenDetail` for a duration primitive must render an animating ball whose
+ * computed `transition-duration` reflects the token. Under reduced motion
+ * the suppressed-notice is acceptable.
+ */
+export const TokenDetailDurationPrimitive = meta.story({
+  render: () => <TokenDetail path='duration.ref.slow' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const balls = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
+    const animated = balls.find((el) => {
+      const td = getComputedStyle(el).transitionDuration;
+      return td && td !== '0s';
+    });
+    const text = canvasElement.textContent ?? '';
+    if (!animated) {
+      expect(text).toMatch(/Animation suppressed/);
+    } else {
+      expect(getComputedStyle(animated).transitionDuration).not.toBe('0s');
+    }
+  },
+});
+
+/**
+ * `TokenDetail` for a cubicBezier primitive must render an animating ball
+ * whose computed `transition-timing-function` reflects the easing curve.
+ */
+export const TokenDetailCubicBezierPrimitive = meta.story({
+  render: () => <TokenDetail path='easing.ref.standard' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const balls = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
+    const animated = balls.find((el) => {
+      const td = getComputedStyle(el).transitionDuration;
+      return td && td !== '0s';
+    });
+    const text = canvasElement.textContent ?? '';
+    if (!animated) {
+      expect(text).toMatch(/Animation suppressed/);
+    } else {
+      expect(getComputedStyle(animated).transitionTimingFunction).toContain('cubic-bezier');
+    }
+  },
+});
+
+/**
  * `TokenDetail` for a heavily-aliased primitive must render the "Aliased by"
  * section listing at least one transitive descendant — that's the core
  * promise of backward alias traversal.

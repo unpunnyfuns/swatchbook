@@ -139,6 +139,19 @@ const styles = {
     background: 'var(--sb-color-sys-surface-raised, transparent)',
     borderRadius: 6,
   } satisfies CSSProperties,
+  dimensionTrack: {
+    display: 'flex',
+    alignItems: 'center',
+    height: 32,
+    maxWidth: '100%',
+    overflow: 'hidden',
+  } satisfies CSSProperties,
+  dimensionBar: {
+    height: 16,
+    background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
+    borderRadius: 3,
+    maxWidth: '100%',
+  } satisfies CSSProperties,
   motionTrack: {
     position: 'relative',
     height: 32,
@@ -333,12 +346,29 @@ function CompositePreview({
     return <div style={{ ...styles.borderSample, border: cssVar }} aria-hidden />;
   }
   if (type === 'transition') {
-    return <TransitionSample cssVar={cssVar} />;
+    return <TransitionSample transition={cssVar} />;
+  }
+  if (type === 'dimension') {
+    return (
+      <div style={styles.dimensionTrack}>
+        <div style={{ ...styles.dimensionBar, width: cssVar }} aria-hidden />
+      </div>
+    );
+  }
+  if (type === 'duration') {
+    // Synthesize a transition with a neutral easing so the duration is
+    // perceptible on its own.
+    return <TransitionSample transition={`left ${cssVar} ease`} />;
+  }
+  if (type === 'cubicBezier') {
+    // Synthesize a transition at a fixed duration so the easing curve is
+    // perceptible on its own.
+    return <TransitionSample transition={`left 800ms ${cssVar}`} />;
   }
   return null;
 }
 
-function TransitionSample({ cssVar }: { cssVar: string }): ReactElement {
+function TransitionSample({ transition }: { transition: string }): ReactElement {
   const reduced = usePrefersReducedMotion();
   const [phase, setPhase] = useState<0 | 1>(0);
 
@@ -370,7 +400,7 @@ function TransitionSample({ cssVar }: { cssVar: string }): ReactElement {
         style={{
           ...styles.motionBall,
           left: phase === 1 ? 'calc(100% - 28px)' : '4px',
-          transition: cssVar,
+          transition,
         }}
         aria-hidden
       />
