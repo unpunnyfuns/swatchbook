@@ -1,5 +1,22 @@
 node_modules
-
-.DS_store
+.DS_Store
 thumbs.db
 
+# Build outputs
+dist
+storybook-static
+coverage
+
+# Tooling
+.turbo
+.swatchbook
+*.tsbuildinfo
+
+# Editors
+.vscode
+.idea
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "stream",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tokens/**", "package.json", "tsconfig*.json", "tsup.config.*"],
+      "outputs": ["dist/**"]
+    },
+    "build:storybook": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tokens/**", ".storybook/**", "swatchbook.config.ts"],
+      "outputs": ["storybook-static/**"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "test/**", "tokens/**", "vitest.config.*"],
+      "outputs": ["coverage/**"]
+    },
+    "test:storybook": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tokens/**", ".storybook/**", "vitest.config.*", "vitest.setup.*"],
+      "outputs": []
+    },
+    "lint": {
+      "inputs": ["src/**", ".oxlintrc.json"],
+      "outputs": []
+    },
+    "format": {
+      "inputs": ["src/**", ".oxfmtrc.json"],
+      "outputs": []
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tsconfig*.json"],
+      "outputs": []
+    },
+    "storybook": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

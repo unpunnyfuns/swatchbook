@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.1
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ matrix.node }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ matrix.node }}-
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm turbo run lint typecheck test build
+
+      - name: Build Storybook
+        run: pnpm turbo run build:storybook
+        if: matrix.node == '22'
+
+      - uses: actions/upload-artifact@v4
+        if: matrix.node == '22'
+        with:
+          name: storybook-static
+          path: apps/storybook/storybook-static
+          if-no-files-found: ignore
+          retention-days: 7

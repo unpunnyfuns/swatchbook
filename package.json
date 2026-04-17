@@ -1,13 +1,23 @@
 {
-  "name": "@unpunnyfuns/swatchbook",
-  "version": "0.0.1",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
+  "name": "swatchbook-monorepo",
+  "version": "0.0.0",
+  "description": "Storybook addon + doc blocks for DTCG design tokens",
+  "private": true,
   "license": "MIT",
-  "packageManager": "pnpm@10.18.1"
+  "packageManager": "pnpm@10.18.1",
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:storybook": "turbo run test:storybook",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
+    "typecheck": "turbo run typecheck",
+    "storybook": "turbo run storybook",
+    "build:storybook": "turbo run build:storybook",
+    "dev": "turbo run storybook"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0",
+    "typescript": "^5.6.0"
+  }
 }
