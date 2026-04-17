@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { formatValue, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface TokenDetailProps {
@@ -113,6 +114,45 @@ const styles = {
     padding: 12,
     opacity: 0.7,
   } satisfies CSSProperties,
+  typographySample: {
+    padding: '8px 0',
+  } satisfies CSSProperties,
+  shadowSample: {
+    width: 140,
+    height: 56,
+    background: 'var(--sb-color-sys-surface-raised, #fff)',
+    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.15))',
+    borderRadius: 6,
+  } satisfies CSSProperties,
+  borderSample: {
+    width: 140,
+    height: 56,
+    background: 'var(--sb-color-sys-surface-raised, transparent)',
+    borderRadius: 6,
+  } satisfies CSSProperties,
+  motionTrack: {
+    position: 'relative',
+    height: 32,
+    width: '100%',
+    maxWidth: 320,
+    background: 'var(--sb-color-sys-surface-muted, rgba(128,128,128,0.08))',
+    borderRadius: 16,
+    overflow: 'hidden',
+  } satisfies CSSProperties,
+  motionBall: {
+    position: 'absolute',
+    top: '50%',
+    width: 24,
+    height: 24,
+    marginTop: -12,
+    borderRadius: '50%',
+    background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
+  } satisfies CSSProperties,
+  reducedMotion: {
+    fontSize: 11,
+    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    fontStyle: 'italic',
+  } satisfies CSSProperties,
 };
 
 export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
@@ -153,6 +193,7 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
       {token.$description && <p style={styles.description}>{token.$description}</p>}
 
       <div style={styles.sectionHeader}>Resolved value · {activeTheme}</div>
+      <CompositePreview type={token.$type} cssVar={cssVar} />
       <div style={styles.chain}>
         {isColor && <span style={{ ...styles.swatch, background: cssVar }} aria-hidden />}
         <span>{value}</span>
@@ -202,6 +243,87 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
 
       <div style={styles.sectionHeader}>Usage</div>
       <code style={styles.snippet}>{`color: ${cssVar};`}</code>
+    </div>
+  );
+}
+
+const PANGRAM = 'Sphinx of black quartz, judge my vow.';
+
+function CompositePreview({
+  type,
+  cssVar,
+}: {
+  type: string | undefined;
+  cssVar: string;
+}): ReactElement | null {
+  if (type === 'typography') {
+    // cssVar for a composite looks like `var(--…-<path>)`; the emitter also
+    // emits sub-vars named `--…-<path>-font-family`, `-font-size`, etc.
+    // Peel the `var(--…)` wrapping to reuse the base name.
+    const base = cssVar.replace(/^var\(/, '').replace(/\)$/, '');
+    return (
+      <div
+        style={{
+          ...styles.typographySample,
+          fontFamily: `var(${base}-font-family)`,
+          fontSize: `var(${base}-font-size)`,
+          fontWeight: `var(${base}-font-weight)` as unknown as number,
+          lineHeight: `var(${base}-line-height)` as unknown as number,
+          letterSpacing: `var(${base}-letter-spacing)`,
+        }}
+      >
+        {PANGRAM}
+      </div>
+    );
+  }
+  if (type === 'shadow') {
+    return <div style={{ ...styles.shadowSample, boxShadow: cssVar }} aria-hidden />;
+  }
+  if (type === 'border') {
+    return <div style={{ ...styles.borderSample, border: cssVar }} aria-hidden />;
+  }
+  if (type === 'transition') {
+    return <TransitionSample cssVar={cssVar} />;
+  }
+  return null;
+}
+
+function TransitionSample({ cssVar }: { cssVar: string }): ReactElement {
+  const reduced = usePrefersReducedMotion();
+  const [phase, setPhase] = useState<0 | 1>(0);
+
+  useEffect(() => {
+    if (reduced) return;
+    // Loop between 0 and 1 at a fixed cadence a bit slower than the token's
+    // own duration so the easing curve is perceptible.
+    const id = requestAnimationFrame(() => setPhase(1));
+    const loop = window.setInterval(() => {
+      setPhase((p) => (p === 0 ? 1 : 0));
+    }, 1200);
+    return () => {
+      cancelAnimationFrame(id);
+      window.clearInterval(loop);
+    };
+  }, [reduced]);
+
+  if (reduced) {
+    return (
+      <div style={styles.reducedMotion}>
+        Animation suppressed by `prefers-reduced-motion: reduce`.
+      </div>
+    );
+  }
+
+  return (
+    <div style={styles.motionTrack}>
+      <div
+        style={{
+          ...styles.motionBall,
+          left: phase === 1 ? 'calc(100% - 28px)' : '4px',
+          transition: cssVar,
+        }}
+        aria-hidden
+      />
     </div>
   );
 }
