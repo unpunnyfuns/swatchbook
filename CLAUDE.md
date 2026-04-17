@@ -42,6 +42,13 @@ Update this line when a milestone closes. See the matching GitHub milestones for
 
 `.claude/skills/dtcg-tokens/SKILL.md` — reference card for the DTCG 2025.10 spec. Loads automatically when working on token files; consult it before writing or editing `.tokens.json` / `.dtcg.json` content.
 
+## Storybook addon gotchas
+
+- **Manager bundle**: use `React.createElement` (or a local `h` alias), **not JSX**. Storybook's manager page runs React 18 and doesn't expose `react/jsx-runtime`'s React-19 dispatcher — JSX in manager code crashes with *"Cannot read properties of undefined (reading 'recentlyCreatedOwnerStacks')"*. Preview code is fine with JSX (runs on the consumer's React).
+- **Register tools via element-returning function**: `render: () => h(ThemeToolbar)` — passing the component function directly (`render: ThemeToolbar`) invokes hooks outside React's render cycle.
+- **Preview ↔ manager comms**: use Storybook's channel (`addons.getChannel()` + `emit`/`on`). The manager can't import preview-side Vite virtual modules.
+- **CSF Next addons**: default-export a factory that returns `definePreviewAddon(previewExports)` (from `storybook/internal/csf`). Consumers opt in via `definePreview({ addons: [swatchbookAddon()] })`.
+
 ## Storybook MCP
 
 `apps/storybook` runs an MCP server via `@storybook/addon-mcp` at `http://localhost:6006/mcp`. The MCP endpoint only exists while Storybook is running — start it in one terminal before using MCP tools in another.
