@@ -1,5 +1,5 @@
+import { globSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { glob } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { defineConfig as defineTerrazzoConfig, parse, type ParseResult } from '@terrazzo/parser';
 import type { BufferedLogger } from '#/diagnostics';
@@ -17,7 +17,7 @@ export async function parseGlobs(
   cwd: string,
   logger: BufferedLogger,
 ): Promise<ParseResult> {
-  const files = await collectFiles(globs, cwd);
+  const files = collectFiles(globs, cwd);
   const inputs = await Promise.all(
     files.map(async (filename) => ({
       filename: pathToFileURL(filename),
@@ -35,12 +35,12 @@ export async function parseGlobs(
   });
 }
 
-async function collectFiles(globs: string[], cwd: string): Promise<string[]> {
+function collectFiles(globs: string[], cwd: string): string[] {
   const results = new Set<string>();
   for (const pattern of globs) {
-    for await (const match of glob(pattern, { cwd })) {
+    for (const match of globSync(pattern, { cwd })) {
       results.add(match.startsWith('/') ? match : `${cwd}/${match}`);
     }
   }
-  return [...results].sort();
+  return [...results].toSorted();
 }
