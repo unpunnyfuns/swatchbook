@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "lint": "oxlint -c ../../.oxlintrc.json src",
+    "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src",
     "format": "oxfmt -c ../../.oxfmtrc.json src",
     "format:check": "oxfmt --check -c ../../.oxfmtrc.json src"
   },
