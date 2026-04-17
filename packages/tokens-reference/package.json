@@ -4,6 +4,9 @@
   "description": "Exhaustive DTCG pyramid used as the swatchbook test bed.",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=24.14.0"
+  },
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
@@ -19,7 +22,7 @@
     "tokens"
   ],
   "scripts": {
-    "build": "tsdown index.ts --format esm --dts --clean --sourcemap",
+    "build": "tsdown src/index.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
