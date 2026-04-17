@@ -19,6 +19,14 @@ Update this line when a milestone closes. See the matching GitHub milestones for
 - **Latest deps policy:** always pin the latest stable major/minor of every third-party dependency unless a concrete blocker is documented in `docs/decisions.md`. When adding a dep, check `npm view <pkg> version` and use that. Default to eager upgrades — we'd rather hit new-version friction early than accumulate a drift debt.
 - **ESM only.** Every package is `"type": "module"`. No CJS builds, no dual-format outputs, no `require()`-compatible fallbacks. Package builds emit ESM only (`tsdown --format esm`). If a downstream consumer still needs CJS, that's their problem to solve with a bundler.
 - **Bundler:** `tsdown` (rolldown-powered). Never add `tsup` — it's deprecated.
+- **Internal aliasing: use `package.json#imports`.** Inside a package, alias via the `"imports"` field (Node-native, TS 5.4+ understands it) instead of deep relative paths or TS `paths`. Convention: `#<slug>/*` maps to `./src/<slug>/*.js`. Refactors touch one manifest, not every import.
+  ```json
+  { "imports": { "#core/*": "./src/core/*.js", "#themes/*": "./src/themes/*.js" } }
+  ```
+  ```ts
+  import { emitCss } from '#core/emit';          // ✅
+  import { emitCss } from '../../core/emit.js';  // ❌
+  ```
 - **Node baseline:** always the **latest LTS** everywhere — dev, CI matrix, published `engines.node`. Today that's Node 24. When a new LTS lands (typically October of even years), bump engines + CI in a same-day PR. Don't add lower-version compat paths, polyfills, or matrix entries for older Node.
 - **Package manager:** pnpm@10.33.0 (workspaces); orchestration via Turborepo.
 - **Code style:** functional, avoid classes/singletons. No CSS-in-JS. No inline end-of-line comments.
