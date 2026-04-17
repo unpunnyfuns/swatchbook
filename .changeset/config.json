@@ -1,0 +1,21 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.1.3/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [
+    [
+      "@unpunnyfuns/swatchbook-core",
+      "@unpunnyfuns/swatchbook-addon",
+      "@unpunnyfuns/swatchbook-blocks"
+    ]
+  ],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "@unpunnyfuns/swatchbook-storybook",
+    "@unpunnyfuns/swatchbook-tokens-reference",
+    "@unpunnyfuns/swatchbook-tokens"
+  ]
+}

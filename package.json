@@ -17,9 +17,13 @@
     "typecheck": "turbo run typecheck",
     "storybook": "turbo run storybook",
     "build:storybook": "turbo run build:storybook",
-    "dev": "turbo run storybook"
+    "dev": "turbo run storybook",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "turbo run build --filter=@unpunnyfuns/swatchbook-core --filter=@unpunnyfuns/swatchbook-addon --filter=@unpunnyfuns/swatchbook-blocks && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.30.0",
     "oxfmt": "^0.45.0",
     "oxlint": "^1.60.0",
     "turbo": "^2.9.0",
