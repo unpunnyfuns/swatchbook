@@ -1,12 +1,12 @@
+import { defineMain } from '@storybook/react-vite/node';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { StorybookConfig } from '@storybook/react-vite';
 
 function pkg(name: string): string {
   return dirname(fileURLToPath(import.meta.resolve(`${name}/package.json`)));
 }
 
-const config: StorybookConfig = {
+export default defineMain({
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(ts|tsx)'],
   addons: [
     pkg('@chromatic-com/storybook'),
@@ -22,6 +22,4 @@ const config: StorybookConfig = {
     },
   ],
   framework: pkg('@storybook/react-vite'),
-};
-
-export default config;
+});

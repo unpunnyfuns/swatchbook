@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import preview from '../../.storybook/preview';
 import { Button } from '../components/Button';
 
-const meta = {
+const meta = preview.meta({
   title: 'Components/Button',
   component: Button,
   tags: ['autodocs'],
@@ -9,10 +9,7 @@ const meta = {
     variant: { control: 'select', options: ['primary', 'ghost'] },
   },
   args: { children: 'Save changes' },
-} satisfies Meta<typeof Button>;
+});
 
-export default meta;
-type Story = StoryObj<typeof meta>;
-
-export const Primary: Story = { args: { variant: 'primary' } };
-export const Ghost: Story = { args: { variant: 'ghost' } };
+export const Primary = meta.story({ args: { variant: 'primary' } });
+export const Ghost = meta.story({ args: { variant: 'ghost' } });

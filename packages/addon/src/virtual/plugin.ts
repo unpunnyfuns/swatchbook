@@ -1,5 +1,5 @@
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
-import { loadProject, projectCss } from '@unpunnyfuns/swatchbook-core';
+import { loadProject, projectCss, resolveThemingMode } from '@unpunnyfuns/swatchbook-core';
 import type { Plugin } from 'vite';
 import { RESOLVED_VIRTUAL_MODULE_ID, VIRTUAL_MODULE_ID } from '#/constants';
 
@@ -39,6 +39,7 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
     load(id) {
       if (id !== RESOLVED_VIRTUAL_MODULE_ID) return null;
       if (!project) return 'export default null;';
+      const mode = resolveThemingMode(config);
       // Emit a typed ESM module. Values are JSON-stringified for stability.
       return [
         `/* swatchbook virtual module — generated */`,
@@ -48,6 +49,7 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
         `export const diagnostics = ${JSON.stringify(project.diagnostics)};`,
         `export const css = ${JSON.stringify(css)};`,
         `export const cssVarPrefix = ${JSON.stringify(config.cssVarPrefix ?? '')};`,
+        `export const themingMode = ${JSON.stringify(mode)};`,
       ].join('\n');
     },
 
