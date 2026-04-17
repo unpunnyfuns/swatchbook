@@ -1,6 +1,8 @@
 # Swatchbook
 
-Storybook addon + MDX doc blocks for [DTCG](https://www.designtokens.org/) design tokens. Browse tokens, switch themes from the toolbar, render tokens in docs, read typed tokens from JS — all wired to your DTCG source of truth with live HMR.
+**A comprehensive visual overview of the [DTCG](https://www.designtokens.org/) design tokens (parsed via [Terrazzo](https://terrazzo.app/)) that actually exist in your project — rendered inside Storybook.** Design-system engineers use it to show their token set to feature engineers and stakeholders; everyone else uses it to see what's there without cracking open a token JSON.
+
+The guiding principle: **extrapolate what's in the token set, don't invent new analysis.** If Terrazzo surfaces a piece of data, we render it. If we'd have to compute something new, that's Terrazzo's conversation (or someone else's tool) — not ours.
 
 Monorepo published under the `@unpunnyfuns` scope.
 
@@ -8,9 +10,9 @@ Monorepo published under the `@unpunnyfuns` scope.
 
 | Package | Purpose |
 | --- | --- |
-| [`@unpunnyfuns/swatchbook-core`](./packages/core) | Framework-free DTCG loader. Parses token files, resolves aliases, composes themes (explicit layers, DTCG 2025.10 resolvers, or Tokens Studio `$themes` manifests), emits CSS variables + TypeScript types. |
+| [`@unpunnyfuns/swatchbook-core`](./packages/core) | Framework-free DTCG loader. Wraps Terrazzo's parser + DTCG 2025.10 resolver, emits CSS variables + TypeScript types. |
 | [`@unpunnyfuns/swatchbook-addon`](./packages/addon) | Storybook 10 addon. Preset wires core into Vite via a virtual module, the toolbar tool switches themes, the panel browses tokens + diagnostics, `useToken()` gives typed reads from your stories. |
-| [`@unpunnyfuns/swatchbook-blocks`](./packages/blocks) | MDX doc blocks consumed from Storybook docs pages — `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail`. Self-mount the addon's CSS and react to toolbar theme changes. |
+| [`@unpunnyfuns/swatchbook-blocks`](./packages/blocks) | MDX doc blocks consumed from Storybook docs pages. Per-type renderings — color swatches, dimension bars, typography samples, shadow / border / motion previews, per-token detail with full alias chain. Self-mount the addon's CSS and react to toolbar theme changes. |
 | [`@unpunnyfuns/swatchbook-tokens`](./packages/tokens-starter) | Opinionated starter token set. Prebuilt CSS per theme + typed JSON + token-path unions. Install to get something working in five minutes. |
 
 ## Install
