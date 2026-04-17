@@ -4,7 +4,6 @@ import preview from '../../.storybook/preview.tsx';
 const meta = preview.meta({
   title: 'Blocks/TypographyScale',
   component: TypographyScale,
-  tags: ['autodocs'],
   argTypes: {
     filter: { control: 'text' },
     sample: { control: 'text' },
