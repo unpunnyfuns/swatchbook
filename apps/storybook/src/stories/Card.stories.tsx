@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import preview from '../../.storybook/preview';
 import { Card } from '../components/Card';
 
-const meta = {
+const meta = preview.meta({
   title: 'Components/Card',
   component: Card,
   tags: ['autodocs'],
@@ -10,10 +10,7 @@ const meta = {
     children:
       'Every surface, border, radius, and shadow on this card resolves through swatchbook-core from the reference DTCG pyramid.',
   },
-} satisfies Meta<typeof Card>;
+});
 
-export default meta;
-type Story = StoryObj<typeof meta>;
-
-export const Default: Story = {};
-export const Untitled: Story = { args: { title: undefined } };
+export const Default = meta.story();
+export const Untitled = meta.story({ args: { title: undefined } });

@@ -1,4 +1,4 @@
-export { defineSwatchbookConfig } from '#/config';
+export { defineSwatchbookConfig, resolveThemingMode } from '#/config';
 export { loadProject, resolveTheme } from '#/load';
 export { projectCss, emitTypes } from '#/emit';
 export { emitCss, type EmitCssOptions } from '#/css';
