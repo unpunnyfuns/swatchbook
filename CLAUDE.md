@@ -11,7 +11,7 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Current milestone
 
-`Current: M8 — Public documentation` (M5 deferred, M8 starter iceboxed — see `docs/decisions.md`)
+`Current: M9 — v0.1.0 release` (M5 deferred, M8 starter iceboxed — see `docs/decisions.md`)
 
 Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
 
@@ -78,6 +78,12 @@ pnpm dev           # = turbo run storybook
 # Terminal 2
 claude
 ```
+
+## Releases
+
+- **Versioning:** [Changesets](https://github.com/changesets/changesets). Config in `.changeset/config.json`. The three published packages — `@unpunnyfuns/swatchbook-core`, `@unpunnyfuns/swatchbook-addon`, `@unpunnyfuns/swatchbook-blocks` — are grouped as `fixed`: they always carry the same version and release together. Private workspaces (root, `apps/storybook`, `tokens-reference`) and the iceboxed `tokens-starter` are listed under `ignore` so they never appear in bump prompts or get published.
+- **Writing a changeset:** any PR with a user-visible change to the fixed-group packages runs `pnpm changeset` locally, picks the bump type (`patch` / `minor` / `major`), and commits the generated `.changeset/*.md` alongside the change. Purely internal refactors and doc-only PRs can skip it.
+- **Publishing flow:** on `main`, Changesets' GitHub Action opens a "Version Packages" PR that consumes queued `.changeset/*.md` entries, bumps `package.json` versions, and regenerates `CHANGELOG.md`. Merging that PR runs `pnpm release` (builds + `changeset publish`) which pushes tags to GitHub and publishes to npm. See `.github/workflows/release.yml` (to land under M9).
 
 ## Plan governance
 
