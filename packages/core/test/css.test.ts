@@ -1,17 +1,24 @@
 import { dirname } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { manifestPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens-reference';
+import { tokensDir } from '@unpunnyfuns/swatchbook-tokens-reference';
 import { projectCss } from '#/emit';
 import { loadProject } from '#/load';
 import type { Project } from '#/types';
 
 const fixtureCwd = dirname(tokensDir);
 
+const LAYER_SETS = {
+  common: ['tokens/ref/**/*.json', 'tokens/sys/**/*.json', 'tokens/cmp/**/*.json'],
+};
+
 async function loadWithPrefix(prefix: string | undefined): Promise<Project> {
   return loadProject(
     {
       tokens: ['tokens/**/*.json'],
-      manifest: manifestPath,
+      themes: [
+        { name: 'Light', layers: [...LAYER_SETS.common, 'tokens/themes/light.json'] },
+        { name: 'Dark', layers: [...LAYER_SETS.common, 'tokens/themes/dark.json'] },
+      ],
       default: 'Light',
       ...(prefix !== undefined && { cssVarPrefix: prefix }),
     },
@@ -51,27 +58,17 @@ describe('projectCss — with sb prefix', () => {
   });
 
   it('emits every primitive + composite type covered by the fixture', () => {
-    // color (primitive) — Terrazzo emits modern rgb() with percentage channels
     expect(css).toMatch(/--sb-color-ref-blue-500:\s*rgb\(/i);
-    // dimension — 4px
     expect(css).toMatch(/--sb-size-ref-100:\s*4px/);
-    // fontFamily (array → comma list)
     expect(css).toMatch(/--sb-font-ref-family-sans:/);
-    // fontWeight (number)
     expect(css).toMatch(/--sb-font-ref-weight-bold:\s*700/);
-    // duration
     expect(css).toMatch(/--sb-duration-ref-fast:\s*120ms/);
-    // cubicBezier
     expect(css).toMatch(/--sb-easing-ref-standard:\s*cubic-bezier\(/);
-    // typography — composite emits sub-vars
     expect(css).toMatch(/--sb-typography-sys-body-font-family:/);
     expect(css).toMatch(/--sb-typography-sys-body-font-size:/);
     expect(css).toMatch(/--sb-typography-sys-body-font-weight:/);
-    // shadow — composite, inside the fixture's sys.shadow.md
     expect(css).toMatch(/--sb-shadow-sys-md/);
-    // border — composite
     expect(css).toMatch(/--sb-border-sys-default/);
-    // transition — composite
     expect(css).toMatch(/--sb-motion-sys-enter/);
   });
 

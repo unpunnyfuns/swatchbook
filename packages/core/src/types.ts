@@ -25,8 +25,6 @@ export interface Config {
   themes?: ThemeConfig[];
   /** Path to a DTCG 2025.10 resolver file. */
   resolver?: string;
-  /** Path to a Tokens Studio `$themes` manifest. */
-  manifest?: string;
   /** Name of the default theme. */
   default?: string;
   /** Prefix for emitted CSS custom properties. */

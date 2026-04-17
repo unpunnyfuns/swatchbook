@@ -57,7 +57,7 @@ import { defineConfig } from '@unpunnyfuns/swatchbook-core';
 
 export default defineConfig({
   tokens: ['tokens/**/*.json'],
-  manifest: 'tokens/$themes.manifest.json', // or use `themes:` / `resolver:` — pick one
+  resolver: 'tokens/resolver.json', // or use `themes:` for explicit layers — pick one
   default: 'Light',
   cssVarPrefix: 'sb',
 });
@@ -65,13 +65,12 @@ export default defineConfig({
 
 Every `color.sys.surface.default` (and friends) now resolves to `var(--sb-color-sys-surface-default)` at runtime, bound to the active theme via `<html data-theme="…">`.
 
-## Three ways to theme
+## Two ways to theme
 
-- **Explicit layers** (`themes: [{ name, layers: [glob, …] }]`) — config-driven, most flexible.
-- **DTCG 2025.10 resolver** (`resolver: 'tokens/resolver.json'`) — native to the spec.
-- **Tokens Studio manifest** (`manifest: 'tokens/$themes.manifest.json'`) — compatible with the Figma plugin ecosystem.
+- **DTCG 2025.10 resolver** (`resolver: 'tokens/resolver.json'`) — native to the spec. Recommended.
+- **Explicit layers** (`themes: [{ name, layers: [glob, …] }]`) — our file-glob shortcut when you want to name compositions yourself.
 
-Core normalizes all three into the same internal shape. Core's unit tests pin three-way equivalence: the same logical composition through any path produces byte-identical CSS.
+Core normalizes both into the same internal shape. A core unit test pins equivalence: the same logical composition through either path produces the same resolved values.
 
 See [`docs/plan.md`](./docs/plan.md) for the full design doc.
 

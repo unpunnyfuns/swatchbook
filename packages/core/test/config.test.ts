@@ -3,7 +3,7 @@ import { defineSwatchbookConfig, resolveThemingMode } from '#/config';
 
 describe('defineSwatchbookConfig', () => {
   it('returns the config unchanged (identity helper)', () => {
-    const input = { tokens: ['t/**'], manifest: 't/m.json' };
+    const input = { tokens: ['t/**'], resolver: 't/resolver.json' };
     expect(defineSwatchbookConfig(input)).toBe(input);
   });
 });
@@ -22,10 +22,6 @@ describe('resolveThemingMode', () => {
     expect(resolveThemingMode({ tokens: [], resolver: 'r.json' })).toBe('resolver');
   });
 
-  it('returns "manifest" when manifest is set', () => {
-    expect(resolveThemingMode({ tokens: [], manifest: 'm.json' })).toBe('manifest');
-  });
-
   it('throws when no theming input is set', () => {
     expect(() => resolveThemingMode({ tokens: [] })).toThrow(/must specify one of/);
   });
@@ -36,7 +32,11 @@ describe('resolveThemingMode', () => {
 
   it('throws when multiple theming inputs are set', () => {
     expect(() =>
-      resolveThemingMode({ tokens: [], manifest: 'm.json', resolver: 'r.json' }),
+      resolveThemingMode({
+        tokens: [],
+        themes: [{ name: 'light', layers: ['ref/**'] }],
+        resolver: 'r.json',
+      }),
     ).toThrow(/exactly one theming input/);
   });
 });

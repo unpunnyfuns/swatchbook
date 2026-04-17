@@ -19,7 +19,7 @@ interface VirtualTheme {
   sources: string[];
 }
 
-type ThemingMode = 'layered' | 'resolver' | 'manifest';
+type ThemingMode = 'layered' | 'resolver';
 
 type DiagnosticSeverity = 'error' | 'warn' | 'info';
 

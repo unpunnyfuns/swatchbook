@@ -1,33 +1,35 @@
-import { dirname, resolve } from 'node:path';
+import { dirname } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import {
-  manifestPath,
-  resolverPath,
-  tokensDir,
-} from '@unpunnyfuns/swatchbook-tokens-reference';
+import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens-reference';
 import { loadProject, resolveTheme } from '#/load';
 import type { Project } from '#/types';
 
 const fixtureCwd = dirname(tokensDir);
 
-describe('loadProject — manifest mode', () => {
+const LAYER_SETS = {
+  common: ['tokens/ref/**/*.json', 'tokens/sys/**/*.json', 'tokens/cmp/**/*.json'],
+};
+
+describe('loadProject — layered mode', () => {
   let project: Project;
 
   beforeAll(async () => {
     project = await loadProject(
-      { tokens: ['tokens/**/*.json'], manifest: manifestPath, default: 'Light' },
+      {
+        tokens: ['tokens/**/*.json'],
+        themes: [
+          { name: 'Light', layers: [...LAYER_SETS.common, 'tokens/themes/light.json'] },
+          { name: 'Dark', layers: [...LAYER_SETS.common, 'tokens/themes/dark.json'] },
+        ],
+        default: 'Light',
+      },
       fixtureCwd,
     );
   }, 30_000);
 
-  it('loads all 5 named compositions from the Tokens Studio manifest', () => {
-    expect(project.themes.map((t) => t.name)).toEqual([
-      'Light',
-      'Dark',
-      'Light · Brand A',
-      'Dark · Brand A',
-      'High Contrast',
-    ]);
+  it('loads the explicit themes in order', () => {
+    expect(project.themes.map((t) => t.name)).toEqual(['Light', 'Dark']);
+    expect(project.themes[0]?.sources.length).toBeGreaterThan(10);
     expect(Object.keys(project.graph).length).toBeGreaterThan(100);
   });
 
@@ -62,40 +64,6 @@ describe('loadProject — resolver mode', () => {
   });
 });
 
-describe('loadProject — layered mode', () => {
-  it('loads an explicit-layers config', async () => {
-    const project = await loadProject(
-      {
-        tokens: ['tokens/**/*.json'],
-        themes: [
-          {
-            name: 'Light',
-            layers: [
-              'tokens/ref/**/*.json',
-              'tokens/sys/**/*.json',
-              'tokens/cmp/**/*.json',
-              'tokens/themes/light.json',
-            ],
-          },
-          {
-            name: 'Dark',
-            layers: [
-              'tokens/ref/**/*.json',
-              'tokens/sys/**/*.json',
-              'tokens/cmp/**/*.json',
-              'tokens/themes/dark.json',
-            ],
-          },
-        ],
-        default: 'Light',
-      },
-      fixtureCwd,
-    );
-    expect(project.themes.map((t) => t.name)).toEqual(['Light', 'Dark']);
-    expect(project.themes[0]?.sources.length).toBeGreaterThan(10);
-  });
-});
-
 describe('loadProject — validation', () => {
   it('throws when no theming input is set', async () => {
     await expect(loadProject({ tokens: [] } as never, fixtureCwd)).rejects.toThrow(
@@ -106,12 +74,13 @@ describe('loadProject — validation', () => {
   it('throws when multiple theming inputs are set', async () => {
     await expect(
       loadProject(
-        { tokens: [], manifest: 'x', resolver: 'y' } as never,
+        {
+          tokens: [],
+          themes: [{ name: 'x', layers: [] }],
+          resolver: 'r.json',
+        } as never,
         fixtureCwd,
       ),
     ).rejects.toThrow(/exactly one theming input/);
   });
 });
-
-// Referenced to keep the import live — asserted-against in the layered test via path traversal
-void resolve;
