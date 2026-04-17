@@ -1,4 +1,4 @@
-import { glob } from 'node:fs/promises';
+import { globSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { isAbsolute, resolve as resolvePath } from 'node:path';
@@ -27,34 +27,39 @@ export async function loadLayeredThemes(
     throw new Error('swatchbook: `themes` is set but empty.');
   }
 
-  const themes: Theme[] = [];
-  const resolved: Record<string, TokenMap> = {};
-
   const cwdUrl = pathToFileURL(`${cwd}/`);
   const terrazzoConfig = defineTerrazzoConfig({}, { logger, cwd: cwdUrl });
 
-  for (const themeConfig of themeConfigs) {
-    const files = await expandLayers(themeConfig.layers, cwd);
-    const inputs = await Promise.all(
-      files.map(async (filename) => ({
-        filename: pathToFileURL(filename),
-        src: await readFile(filename, 'utf8'),
-      })),
-    );
+  const entries = await Promise.all(
+    themeConfigs.map(async (themeConfig) => {
+      const files = expandLayers(themeConfig.layers, cwd);
+      const inputs = await Promise.all(
+        files.map(async (filename) => ({
+          filename: pathToFileURL(filename),
+          src: await readFile(filename, 'utf8'),
+        })),
+      );
+      const result = await parse(inputs, {
+        logger,
+        config: terrazzoConfig,
+        resolveAliases: true,
+        continueOnError: true,
+      });
+      return {
+        theme: {
+          name: themeConfig.name,
+          input: { theme: themeConfig.name },
+          sources: files,
+        } satisfies Theme,
+        tokens: result.tokens,
+      };
+    }),
+  );
 
-    const result = await parse(inputs, {
-      logger,
-      config: terrazzoConfig,
-      resolveAliases: true,
-      continueOnError: true,
-    });
-
-    resolved[themeConfig.name] = result.tokens;
-    themes.push({
-      name: themeConfig.name,
-      input: { theme: themeConfig.name },
-      sources: files,
-    });
+  const themes: Theme[] = entries.map((e) => e.theme);
+  const resolved: Record<string, TokenMap> = {};
+  for (const { theme, tokens } of entries) {
+    resolved[theme.name] = tokens;
   }
 
   const defaultThemeName =
@@ -64,12 +69,12 @@ export async function loadLayeredThemes(
 }
 
 /** Expand an ordered list of glob patterns into an ordered list of files. */
-async function expandLayers(patterns: string[], cwd: string): Promise<string[]> {
+function expandLayers(patterns: string[], cwd: string): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
   for (const pattern of patterns) {
     const absolute = isAbsolute(pattern) ? pattern : resolvePath(cwd, pattern);
-    for await (const match of glob(pattern, { cwd })) {
+    for (const match of globSync(pattern, { cwd })) {
       const full = isAbsolute(match) ? match : resolvePath(cwd, match);
       if (!seen.has(full)) {
         seen.add(full);
