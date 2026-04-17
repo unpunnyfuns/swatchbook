@@ -2,15 +2,35 @@
 
 ## Mission
 
-Make [DTCG](https://www.designtokens.org/) design tokens **easier to understand and author** inside Storybook — specifically for React consumers. Not framework-agnostic; not a general-purpose DTCG toolkit. Sibling packages for React Native / Vue / Lit are possible later but deliberately out of scope for now. For today: one platform, one spec.
+**An addon and tools to help people visualize their future design token projects using Storybook.**
 
-The comprehension story is the differentiator: dimensions rendered as visual bars (not just "4px"), colors shown in every color space with contrast scores, shadows and motion previewed live, composite tokens shown as a unit. The authoring story is the companion: theme-aware Storybook controls, multi-axis theme composition, reverse-indexes tying tokens back to the components that use them.
+In more detail: swatchbook is a comprehensive visual overview of the DTCG design tokens (parsed via Terrazzo) that actually exist in your project — rendered inside Storybook. It's the tool design-system engineers use to show their token set to the rest of the team: feature engineers reading docs, stakeholders verifying that the system composes correctly, anyone who needs to see what's in there without cracking open a token JSON file.
+
+**We're an exploration vehicle, not an ecosystem-capture tool.** The distinction matters because it shapes every scope call: swatchbook exists to *drive forward* the design-token space — to let people building DTCG-native projects see what they have, iterate on it, and push the frontier — not to absorb whatever the current ecosystem (Tokens Studio, Style Dictionary adapters, format-of-the-week) already does. Closing legacy compatibility (the manifest drop, the layered drop) was this mission choosing itself.
+
+Five things the mission pins down:
+
+- **Only DTCG, via Terrazzo.** Not a general doc-tool; not a multi-format gadget. We present what the spec produces through the one parser we trust.
+- **Exploratory, not archival.** We serve the *future* of design tokens — people evaluating and extending DTCG — not the present ecosystem they might be migrating from. Legacy-format support is an anti-goal.
+- **Comprehensive across DTCG.** Every DTCG type earns a dedicated visual, including draft/new types the spec is still evolving. A type without a rendering is a regression, not a feature gap.
+- **What actually exists within the tokens.** The token set is the subject. Not consumer code. Not authoring tools. Not a Figma bridge. The tokens themselves, in every shape they take.
+- **Audience includes people still defining the spec.** DTCG is a draft that's actively evolving; editors and implementers prototyping against real token sets are part of who swatchbook serves. That's extra weight behind the *extrapolate, don't invent* principle — people evaluating the spec want to see exactly what the spec produces, not what we'd like it to produce.
+
+## Extrapolate, don't invent
+
+The governing principle for scope decisions: **we extrapolate information that's already there. We don't invent new analysis.**
+
+"Already there" means: data produced by Terrazzo during parse + resolve — `$type`, `$value`, `$description`, `aliasChain`, `aliasedBy`, `dependencies`, `group`, diagnostics. Any visualization that projects those fields is in scope, however creative the rendering.
+
+"Invent new" means: analysis swatchbook would have to compute from scratch — orphan detection, duplicate-value flagging, depth distributions, token-graph health scores, external-code scanning for token usage. If any of these turn out to be valuable, they're valuable to every DTCG tool: push them upstream into Terrazzo (or a sibling analysis package), and we'll render whatever they surface. We don't grow the addon into a custom analyzer.
+
+This keeps the addon narrow, keeps the value shareable across the DTCG ecosystem, and avoids re-deriving data the parser already has opinions about.
 
 ## Scope today
 
 - **Storybook 10.3+ on Vite + React.** Other renderers / bundlers out of scope.
 - **DTCG 2025.10 resolver** is the sole theming input. No manifest, no layered shortcut, no migration helpers.
-- **Four doc blocks** cover the basic token types: `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail`. Richer visualizations (comparison, contrast, motion preview) are scoped as a feature milestone.
+- **Rendering blocks** cover DTCG types: `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail` (with composite previews for typography / shadow / border / transition), `DimensionScale`, `ShadowPreview`, `BorderPreview`, `MotionPreview`. Gaps in type coverage are tracked as their own scope bucket.
 - **Single-axis resolvers** get clean theme names automatically. Multi-axis resolvers use Terrazzo's permutation IDs — a known rough edge, addressed in the multi-axis theming milestone.
 
 **Release cadence: deferred.** Iterating on features takes priority over shipping versions to npm. Packages stay unpublished until we explicitly decide to ship; `@unpunnyfuns/swatchbook-tokens` is iceboxed (see `docs/decisions.md`).
@@ -553,7 +573,7 @@ Each milestone has a single measurable demo step. Progress is tracked by which m
 
 Each feature milestone has a scope area on GitHub. PRs reference their milestone (body, not title). A "Current:" line in `CLAUDE.md` names the active one. No implied ordering across milestones beyond what's written here — scope areas are parallelizable; pick based on thesis value, not position.
 
-## Feature roadmap — comprehension, composition, authoring
+## Feature roadmap — overview, composition, topology
 
 Beyond spec convergence, four scope areas deepen the "easier to understand DTCG" thesis rather than broadening framework surface. Listed in the order I'd probably reach for them, not a contract:
 
@@ -586,31 +606,27 @@ Beyond spec convergence, four scope areas deepen the "easier to understand DTCG"
 **Exit:** A resolver with `appearance × brand × density` renders cleanly in the toolbar; each axis is pickable independently; saved combos persist across reloads. Interaction tests cover the composer.
 **Demo:** Toolbar shows three columns; picking "dark × brand-a × compact" repaints the preview.
 
-### Token-aware controls
+### Alias topology
 
-**Goal:** Storybook `argTypes` can be "a token of this type" — not a raw string — so author-time picking is token-native.
-
-**Work:**
-- **`swatchbook-color` argType** — popover picker of color tokens, stores `var(--…)` directly in args. Honest with the Args panel.
-- **`swatchbook-dimension` argType** — same pattern for dimension tokens, keyed by path.
-- **`swatchbook-typography` argType** — bundles the composite; writes `var(--…-font-family)`, `…-font-size`, etc. into a ref-object arg or individual args (TBD which reads better).
-- Groundwork lives in an `addon/src/controls/` folder; each control registers through Storybook's `argType` extension point.
-- Decision log entry explains the path chosen (Storybook upstream may have shifted since M5; re-validate before committing).
-
-**Exit:** A Button story has `bg: { control: 'swatchbook-color' }` — picking a token in the Controls panel writes `var(--…)` into the args; the component renders with that value.
-
-### Component ↔ token reverse index
-
-**Goal:** Docs answer "which components consume this token" and "which tokens does this component consume".
+**Goal:** From any token, show the full forward + backward alias chains so a viewer can trace `cmp.button.bg` ↔ `color.sys.accent.bg` ↔ `color.ref.blue.500` in either direction. Purely Terrazzo's `aliasChain` + `aliasedBy` data — no analysis we'd have to invent.
 
 **Work:**
-- **Static analyzer** — scan component CSS / CSS-in-JS / inline styles for `var(--<prefix>-…)` references; emit a path → components map at build time.
-- **`ConsumedBy` block** — `<ConsumedBy path="color.sys.accent.bg" />` lists the components referencing that token.
-- **`Consumes` block** — `<Consumes component="Button" />` lists every token the component reads.
-- **`TokenDetail` augmentation** — show "Used by: Button, Card" under the resolved-value section when the index is available.
+- **`TokenDetail` gains an "Aliased by" section** — direct references + transitive, walked via `aliasedBy` with a reasonable depth cap. Siblings the existing "Alias chain" (forward) section.
+- Path labels on each hop so consumers see *why* a chain exists, not just that one does.
+- Optionally a standalone `<AliasedBy path="…" />` block for MDX pages that want the reverse index in isolation — defer unless the `TokenDetail` section proves insufficient.
 
-**Exit:** MDX page `/docs/tokens/color-sys-accent-bg` renders a reverse index; changes to components repopulate the index on HMR.
-**Demo:** Clicking a row in the Tokens panel scrolls to its consumers.
+**Exit:** `TokenDetail` for `color.ref.blue.500` lists every token that transitively aliases it in the active theme, through any number of hops.
+
+### DTCG type coverage audit
+
+**Goal:** Every DTCG type — primitive and composite — has a dedicated visual rendering. "Comprehensive" is the completeness bar.
+
+**Work:**
+- Audit `$type` coverage across existing blocks + `TokenDetail`.
+- Likely gaps: primitive `fontFamily` (currently only rendered inside typography composite), primitive `fontWeight` (same), `strokeStyle` (DTCG 2024+ — dashed/dotted/etc.), primitive `number` (rendered as text; may not need more).
+- File a sibling issue per confirmed gap.
+
+**Exit:** A token of any DTCG type has a dedicated visual inside at least one block or `TokenDetail` preview. No fallback-to-text for a type we haven't considered.
 
 ### Further out
 
@@ -620,6 +636,9 @@ Out of scope as named milestones but worth capturing the shape:
 - **Write-back from the addon UI.** See `docs/future.md` — token edits from the panel, via Storybook's `experimental_serverChannel`, landing on disk.
 - **Tokens Studio → DTCG migration helper.** A standalone CLI that converts `$themes.manifest.json` + token files to a DTCG `resolver.json`.
 - **Public tokens-starter.** Thaw `@unpunnyfuns/swatchbook-tokens` once there's consumer signal for a canned palette.
+- **Token-aware Storybook controls** (`swatchbook-color` argType etc.) — originally a planned milestone; dropped after mission tightening (authoring ergonomics, not overview).
+- **Component ↔ token reverse index.** Reads consumer stylesheets to build usage maps. Explicitly external-code analysis — outside our mission line.
+- **Graph analysis** (orphans, duplicate values, depth distributions, health scores) — belongs in Terrazzo, not here. Open a conversation if it's needed; contribute upstream.
 - **Release cadence.** Changesets versioning, publish workflow, tag cutting. Deferred by decision; re-adopt when we're ready to ship.
 
 ## Verification

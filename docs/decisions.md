@@ -205,3 +205,24 @@ Dropped (TS 6 handles by default): `strict`, `module`, `target`, `esModuleIntero
 **Rationale:** The milestone system was two things mashed together — ordered phases on a release path, and scope buckets. Dropping the release pressure makes the ordering imaginary; without ordering, the prefix was misleading cosmetic. Scope buckets still earn their keep.
 
 **Prior-reference preservation:** Old decisions entries ("Defer M5", "Iceboxed starter past v0.1.0", "Drop manifest support") still reference M-prefixed names. The log is append-only; those stay as-written. Readers encountering `M5`, `M8`, etc. in historical entries can cross-reference via GitHub milestone history (titles changed, numbers in commit history unchanged).
+
+---
+
+## 2026-04-18 — Tighten mission: "comprehensive visual overview of DTCG tokens, via Terrazzo"
+
+**Context:** The original mission was "make DTCG tokens easier to understand and author inside Storybook." That framing bundled two products — understanding (presentation) and authoring (ergonomics) — with different users. After running the product to ground through the comprehension milestone, the project lead clarified: swatchbook is for **design-system engineers educating feature engineers and stakeholders**. Education is one-way: the DS engineer curates the surface; the audience reads.
+
+That reframing was tightened further: "we only care about DTCG, via Terrazzo, to provide a comprehensive overview of what actually exists within our tokens." And the governing principle: **extrapolate what's there, don't invent new analysis.**
+
+**Decision:**
+- **Mission statement** in `docs/plan.md` rewritten. Positions swatchbook as *"a comprehensive visual overview of the DTCG design tokens (parsed via Terrazzo) that actually exist in your project — rendered inside Storybook."*
+- **New "Extrapolate, don't invent" section** in the plan captures the governing principle: in-scope = any visualization projected from Terrazzo's `TokenNormalized` fields; out-of-scope = analysis swatchbook would have to invent (orphan detection, duplicate-value flagging, depth distributions, external-code scanning). Anything analytical valuable to the DTCG ecosystem belongs upstream in Terrazzo, not here.
+- **Closed: Token-aware controls milestone.** Authoring ergonomics, not overview. Out.
+- **Closed: Component ↔ token reverse index milestone.** Requires scanning the consumer's external stylesheets; external-code analysis is outside the token set.
+- **Opened: Alias topology milestone.** Surface Terrazzo's `aliasedBy` data so viewers can trace `cmp.button.bg ↔ color.sys.accent.bg ↔ color.ref.blue.500` backwards as well as forwards. Purely extrapolation — Terrazzo already has the data.
+- **Opened: DTCG type coverage milestone.** Ensure every DTCG `$type` has a dedicated visual rendering. "Comprehensive" is the completeness bar.
+- **Root README tagline + core README description** updated to match.
+
+**Rationale:** Two products served one user poorly. One product serves three users (DS engineer as curator; feature engineers + stakeholders as audience) cleanly. The "extrapolate, don't invent" principle keeps scope narrow, pushes shared value upstream, and stops us turning the addon into a custom analyzer.
+
+**Plan impact:** Mission + roadmap sections rewritten. Token-aware controls and reverse-index milestones closed with reasoning. Two new milestones created with seed issues.

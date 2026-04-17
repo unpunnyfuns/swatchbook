@@ -11,7 +11,7 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Current milestone
 
-`Current: DTCG comprehension visualizations` — every token type earns a block that makes its value legible. Five sibling issues seeded (#108–#113). First pickup: #108 DimensionScale.
+`Current: between milestones` — comprehension visualizations milestone closes when #117 lands. After mission tightening (2026-04-18), next active buckets are **Multi-axis theming UX**, **Alias topology** (#118), and **DTCG type coverage** (#119). Token-aware controls and the component reverse-index have been closed — see `docs/plan.md` "Extrapolate, don't invent".
 
 Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
 
