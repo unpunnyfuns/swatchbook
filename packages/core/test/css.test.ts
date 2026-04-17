@@ -1,12 +1,13 @@
 import { dirname } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { manifestPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens-reference';
 import { projectCss } from '#/emit';
 import { loadProject } from '#/load';
+import type { Project } from '#/types';
 
 const fixtureCwd = dirname(tokensDir);
 
-async function loadWithPrefix(prefix: string | undefined) {
+async function loadWithPrefix(prefix: string | undefined): Promise<Project> {
   return loadProject(
     {
       tokens: ['tokens/**/*.json'],
@@ -18,50 +19,38 @@ async function loadWithPrefix(prefix: string | undefined) {
   );
 }
 
-describe('projectCss — structure', () => {
-  it('emits one [data-theme] block per theme', async () => {
-    const project = await loadWithPrefix('sb');
-    const css = projectCss(project);
+describe('projectCss — with sb prefix', () => {
+  let project: Project;
+  let css: string;
+
+  beforeAll(async () => {
+    project = await loadWithPrefix('sb');
+    css = projectCss(project);
+  }, 30_000);
+
+  it('emits one [data-theme] block per theme', () => {
     for (const theme of project.themes) {
       expect(css).toContain(`[data-theme="${theme.name}"]`);
     }
   });
 
-  it('terminates with a trailing newline', async () => {
-    const project = await loadWithPrefix('sb');
-    expect(projectCss(project).endsWith('\n')).toBe(true);
+  it('terminates with a trailing newline', () => {
+    expect(css.endsWith('\n')).toBe(true);
   });
-});
 
-describe('projectCss — prefix', () => {
-  it('applies the prefix to variable names', async () => {
-    const project = await loadWithPrefix('sb');
-    const css = projectCss(project);
+  it('applies the prefix to variable names', () => {
     expect(css).toContain('--sb-color-sys-surface-default:');
     expect(css).not.toMatch(/^\s*--color-sys-surface-default:/m);
   });
 
-  it('applies the prefix to aliased var(…) references inside values', async () => {
-    const project = await loadWithPrefix('sb');
-    const css = projectCss(project);
+  it('applies the prefix to aliased var(…) references inside values', () => {
     // cmp.button.bg aliases color.sys.accent.bg; both sides of the reference should carry the prefix
     const line = css.split('\n').find((l) => l.includes('--sb-cmp-button-bg:'));
     expect(line).toBeDefined();
     expect(line).toMatch(/var\(--sb-color-sys-accent-bg\)/);
   });
 
-  it('omits the leading dash when prefix is empty', async () => {
-    const project = await loadWithPrefix('');
-    const css = projectCss(project);
-    expect(css).toContain('--color-sys-surface-default:');
-    expect(css).not.toContain('---color-sys-surface-default:');
-  });
-});
-
-describe('projectCss — DTCG type coverage', () => {
-  it('emits every primitive + composite type covered by the fixture', async () => {
-    const project = await loadWithPrefix('sb');
-    const css = projectCss(project);
+  it('emits every primitive + composite type covered by the fixture', () => {
     // color (primitive) — Terrazzo emits modern rgb() with percentage channels
     expect(css).toMatch(/--sb-color-ref-blue-500:\s*rgb\(/i);
     // dimension — 4px
@@ -85,12 +74,8 @@ describe('projectCss — DTCG type coverage', () => {
     // transition — composite
     expect(css).toMatch(/--sb-motion-sys-enter/);
   });
-});
 
-describe('projectCss — theme override consistency', () => {
-  it('sparse overrides in Dark theme flip the surface but keep size scale identical', async () => {
-    const project = await loadWithPrefix('sb');
-    const css = projectCss(project);
+  it('sparse overrides in Dark theme flip the surface but keep size scale identical', () => {
     const lightBlock = extractBlock(css, 'Light');
     const darkBlock = extractBlock(css, 'Dark');
     expect(lightBlock).toBeTruthy();
@@ -102,6 +87,15 @@ describe('projectCss — theme override consistency', () => {
     const lightSurface = grep(lightBlock, '--sb-color-sys-surface-default:');
     const darkSurface = grep(darkBlock, '--sb-color-sys-surface-default:');
     expect(lightSurface).not.toEqual(darkSurface);
+  });
+});
+
+describe('projectCss — empty prefix', () => {
+  it('omits the leading dash when prefix is empty', async () => {
+    const project = await loadWithPrefix('');
+    const css = projectCss(project);
+    expect(css).toContain('--color-sys-surface-default:');
+    expect(css).not.toContain('---color-sys-surface-default:');
   });
 });
 
