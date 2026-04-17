@@ -33,6 +33,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Trust workspace inside container
+        # Runner UID differs from checkout owner inside containers, which
+        # makes git refuse to read the repo ("dubious ownership"). Turbo
+        # uses git status for its dirty hash; we tell git to trust the
+        # workspace path to silence the warning and restore reliable
+        # cache keys.
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - uses: pnpm/action-setup@v5
         with:
           run_install: false
