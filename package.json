@@ -1,5 +1,5 @@
 {
-  "name": "swatchbook-monorepo",
+  "name": "swatchbook",
   "version": "0.0.0",
   "description": "Storybook addon + doc blocks for DTCG design tokens",
   "private": true,

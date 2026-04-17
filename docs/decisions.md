@@ -152,3 +152,15 @@ Dropped (TS 6 handles by default): `strict`, `module`, `target`, `esModuleIntero
 **Rationale:** Consumers in the primary target audience (design-system teams) bring their own tokens — that's the whole point. The starter is "nice to have for tiny projects", not core value. Shipping it well means curating a defensible tasteful palette, which is effort that competes with getting the addon + blocks out the door. Revisit post-v0.1.0 once there's real signal for whether a starter is wanted at all.
 
 **Plan impact:** `docs/plan.md` → M8 renamed from "Public starter + documentation" to "Public documentation". Starter work explicitly noted as deferred in the M8 body.
+
+---
+
+## 2026-04-17 — Rename root workspace package to `swatchbook`
+
+**Context:** Root `package.json` was scaffolded as `swatchbook-monorepo` during M0 to keep the unscoped `swatchbook` name free for a potential published meta-package ("single-package face" of the addon set). Through M8 we've confirmed the public surface is the three scoped packages (`@unpunnyfuns/swatchbook-core` / `-addon` / `-blocks`); no meta-package is planned. The `-monorepo` suffix just adds noise.
+
+**Decision:** Rename root `package.json#name` from `swatchbook-monorepo` to `swatchbook`. Stays `"private": true` — it's never published, just the workspace anchor. Matches the repo slug and the project's human identity.
+
+**Rationale:** Private packages can use any name; `swatchbook` is the obvious one. Hedging for a hypothetical meta-package that we've actively decided against is dead weight.
+
+**Plan impact:** `docs/plan.md` → "Workspace root" section updated; M0 work-bullet referencing the old name is historical and left as-is.
