@@ -1,0 +1,51 @@
+name: Mirror Playwright image
+
+# Mirrors mcr.microsoft.com/playwright:<tag> to GHCR so CI can pull from
+# the same network edge as the runner (~3-5s vs ~27s). Trigger manually
+# after bumping the playwright version in apps/storybook/package.json;
+# then update .github/workflows/ci.yml's container tag to match.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Playwright image tag (e.g. v1.59.1-noble). Must match apps/storybook/node_modules/playwright version + image base."
+        required: true
+        default: v1.59.1-noble
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull upstream image
+        run: docker pull mcr.microsoft.com/playwright:${{ inputs.tag }}
+
+      - name: Re-tag for GHCR
+        run: |
+          src="mcr.microsoft.com/playwright:${{ inputs.tag }}"
+          dst="ghcr.io/${{ github.repository }}/playwright:${{ inputs.tag }}"
+          docker tag "$src" "$dst"
+          echo "dst=$dst" >> "$GITHUB_ENV"
+
+      - name: Push to GHCR
+        run: docker push "$dst"
+
+      - name: Summary
+        run: |
+          echo "### Mirrored" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Source: \`mcr.microsoft.com/playwright:${{ inputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Destination: \`$dst\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Update \`.github/workflows/ci.yml\`'s \`container.image\` to the destination tag, and \`CLAUDE.md\`'s CI Playwright image bullet to match." >> "$GITHUB_STEP_SUMMARY"
