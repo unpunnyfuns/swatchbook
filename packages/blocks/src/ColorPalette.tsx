@@ -130,14 +130,14 @@ export function ColorPalette({
 
   if (totalCount === 0) {
     return (
-      <div style={styles.wrapper}>
+      <div data-theme={activeTheme} style={styles.wrapper}>
         <div style={styles.empty}>No color tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div style={styles.wrapper}>
+    <div data-theme={activeTheme} style={styles.wrapper}>
       <div style={styles.caption}>{captionText}</div>
       {groups.map(([group, swatches]) => (
         <section key={group} style={styles.group}>
