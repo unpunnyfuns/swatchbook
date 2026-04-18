@@ -46,7 +46,7 @@ async function bgWhenMounted(el: Element): Promise<string> {
  * Component channels should all be near 255.
  */
 export const Light = meta.story({
-  parameters: { swatchbook: { theme: 'Light · Default' } },
+  parameters: { swatchbook: { axes: { mode: 'Light', brand: 'Default' } } },
   play: async ({ canvasElement }) => {
     const card = canvasElement.querySelector<HTMLElement>('[data-testid="probe-card"]');
     if (!card) throw new Error('probe-card missing');
@@ -64,7 +64,7 @@ export const Light = meta.story({
  * Component channels should all be low.
  */
 export const Dark = meta.story({
-  parameters: { swatchbook: { theme: 'Dark · Default' } },
+  parameters: { swatchbook: { axes: { mode: 'Dark', brand: 'Default' } } },
   play: async ({ canvasElement }) => {
     const card = canvasElement.querySelector<HTMLElement>('[data-testid="probe-card"]');
     if (!card) throw new Error('probe-card missing');
@@ -84,7 +84,7 @@ export const Dark = meta.story({
  * defining property — whereas plain Light/Dark accents are blue-dominant.
  */
 export const LightBrandA = meta.story({
-  parameters: { swatchbook: { theme: 'Light · Brand A' } },
+  parameters: { swatchbook: { axes: { mode: 'Light', brand: 'Brand A' } } },
   play: async ({ canvasElement }) => {
     const button = canvasElement.querySelector<HTMLElement>('[data-testid="probe-button"]');
     if (!button) throw new Error('probe-button missing');
@@ -92,5 +92,23 @@ export const LightBrandA = meta.story({
     const [r, g] = parseRgb(bg);
     // Blue.700 (default accent): r=29 < g=78. Violet.700 (Brand A): r=109 > g=40.
     expect(r, `Brand A accent should be violet (r > g); got rgb(${r}, ${g}, _)`).toBeGreaterThan(g);
+  },
+});
+
+/**
+ * Preview decorator publishes the tuple as per-axis `data-<axis>` attributes
+ * on both `<html>` and the story wrapper. Upcoming toolbar + CSS-emission
+ * work keys on these.
+ */
+export const PerAxisDataAttrs = meta.story({
+  parameters: { swatchbook: { axes: { mode: 'Dark', brand: 'Brand A' } } },
+  play: async ({ canvasElement }) => {
+    const wrapper = canvasElement.querySelector<HTMLElement>('[data-mode]');
+    if (!wrapper) throw new Error('expected story wrapper with data-mode attribute');
+    expect(wrapper.getAttribute('data-mode')).toBe('Dark');
+    expect(wrapper.getAttribute('data-brand')).toBe('Brand A');
+    expect(wrapper.getAttribute('data-theme')).toBe('Dark · Brand A');
+    expect(document.documentElement.getAttribute('data-mode')).toBe('Dark');
+    expect(document.documentElement.getAttribute('data-brand')).toBe('Brand A');
   },
 });
