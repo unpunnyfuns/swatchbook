@@ -178,7 +178,13 @@ const OPTION_PILL_BASE: React.CSSProperties = {
   borderRadius: 4,
   fontSize: 12,
   lineHeight: '18px',
-  border: '1px solid transparent',
+  // Longhand border properties (not the `border` shorthand) so
+  // active → inactive only updates `borderColor`'s value instead of
+  // *removing* the key from inline style. Removing it lets Storybook's
+  // theme paint a stray border-color on the previously-selected pill.
+  borderWidth: 1,
+  borderStyle: 'solid',
+  borderColor: 'transparent',
   background: 'transparent',
   cursor: 'pointer',
   color: 'inherit',
