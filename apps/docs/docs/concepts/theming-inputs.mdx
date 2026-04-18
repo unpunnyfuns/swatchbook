@@ -47,7 +47,7 @@ export default defineSwatchbookConfig({
 **Pick this when**:
 - Your tokens are already published as a DTCG-spec-compliant package, or you want them to be.
 - You want portability: any spec-compliant parser can consume the same file unchanged.
-- You have multiple modifiers (mode, brand, contrast, density, …) and want them independently orthogonal.
+- You have multiple modifiers (mode, brand, contrast, density, …) and want each one switchable independently of the others.
 
 ## Layered (authored)
 
@@ -81,13 +81,13 @@ export default defineSwatchbookConfig({
 **Pick this when**:
 - You haven't adopted the DTCG resolver spec and don't want to.
 - Your layers are shaped as "base + optional override files" without needing spec machinery.
-- You want config lives in TypeScript rather than JSON.
+- You want config to live in TypeScript rather than JSON.
 
 The empty `contexts: { Default: [] }` is legal — it means "no override for this context," which is the baseline for a brand/contrast axis.
 
 ## Same mental model either way
 
-Internally, both inputs produce the same shape: a list of `axes`, each with `contexts` and a `default`. Themes are the cartesian product of contexts across all axes. The rest of the documentation talks about axes generically; whichever input you use, the addon UI is identical.
+Internally, both inputs produce the same shape: a list of `axes`, each with `contexts` and a `default`. Themes are every combination of contexts across all axes (so 2 axes with 2 contexts each yields 4 themes). The rest of the documentation talks about axes generically; whichever input you use, the addon UI is identical.
 
 ## What about Tokens Studio `$themes` manifests?
 

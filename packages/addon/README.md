@@ -1,6 +1,8 @@
 # @unpunnyfuns/swatchbook-addon
 
-Storybook 10 addon for DTCG design tokens. Loads your tokens at config time (via `@unpunnyfuns/swatchbook-core`), exposes the resolved graph to the preview over a virtual module, renders one toolbar dropdown per modifier axis (one control per `mode`, `brand`, …) plus a browser + diagnostics panel, and ships a `useToken()` hook with typed paths.
+Storybook 10 addon for DTCG design tokens. Loads your tokens at config time (via `@unpunnyfuns/swatchbook-core`), exposes the resolved graph to the preview through a virtual module, renders one toolbar dropdown per modifier axis (`mode`, `brand`, and so on) plus tokens and diagnostics panels, and ships a `useToken()` hook with typed paths.
+
+> **Documentation:** [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/). Token parsing powered by [Terrazzo](https://terrazzo.app/) by [Drew Powers](https://github.com/drwpow) via `@unpunnyfuns/swatchbook-core`.
 
 ## Install
 
@@ -105,4 +107,5 @@ export const DarkBrandA = meta.story({
 
 - [`@unpunnyfuns/swatchbook-core`](../core) — the loader this addon wraps. Consume directly if you need DTCG processing outside Storybook.
 - [`@unpunnyfuns/swatchbook-blocks`](../blocks) — MDX doc blocks that build on this addon's virtual module.
-- [Project README](../../README.md) — the full install + wiring flow.
+- [Project README](../../README.md) — install and wiring flow for the whole toolchain.
+- [Documentation](https://unpunnyfuns.github.io/swatchbook/) — concepts, guides, and full API reference.

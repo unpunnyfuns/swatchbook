@@ -6,17 +6,17 @@ sidebar_position: 2
 
 # Axes
 
-An **axis** is one orthogonal dimension of your theming model — `mode`, `brand`, `density`, `contrast`, whatever. Each axis has a set of named **contexts** (one of which is the default) and at any moment exactly one context is selected per axis.
+An **axis** is one independent dimension of your theming model — `mode`, `brand`, `density`, `contrast`, whatever fits your system. Each axis has a set of named **contexts** (one of which is the default), and at any moment exactly one context is selected per axis.
 
 ## Tuples, not strings
 
-The addon's canonical representation of "what theme is active" is a **tuple**: `Record<axisName, contextName>`. For a resolver with `mode × brand`, a tuple looks like:
+The addon's canonical representation of "what theme is active" is a **tuple**: one context selected per axis. For a resolver with `mode` and `brand`, a tuple looks like:
 
 ```ts
 { mode: 'Dark', brand: 'Brand A' }
 ```
 
-Every resolved token, every CSS selector, every panel readout keys on this tuple. The flat composed string (`"Dark · Brand A"`) exists only for back-compat and cosmetic display — downstream code should prefer the tuple.
+Every resolved token, every CSS selector, every panel readout keys on this tuple. The composed string name (`"Dark · Brand A"`) exists for back-compat and display — prefer the tuple in consuming code.
 
 ## Data attributes
 
@@ -40,11 +40,11 @@ CSS emission matches these per-axis attributes with compound selectors:
 }
 ```
 
-Each non-default tuple gets its own flat block (every var redeclared). The `:root` block carries the default tuple. No nested cascading — that would require cross-axis collision analysis we don't own, and the DTCG spec explicitly allows axes to write to the same token path.
+Each non-default tuple gets its own flat block (every var redeclared). The `:root` block carries the default tuple. Nested cascading isn't used because axes are allowed to write to the same token path under the DTCG spec; flat emission avoids the collision-detection work that nesting would require.
 
 ## Independence
 
-Axes are **independent**. Selecting `mode=Dark` does not constrain `brand`; the resolver evaluates each modifier in `resolutionOrder` and each contributes its own layer stack. This is why the toolbar renders one dropdown per axis rather than one flat dropdown listing every combination.
+Axes are independent. Selecting `mode=Dark` does not constrain `brand`; the resolver evaluates each modifier in `resolutionOrder` and each contributes its own layer stack. The toolbar reflects this by rendering one dropdown per axis rather than a single flat dropdown that lists every theme.
 
 ## Where axes come from
 
