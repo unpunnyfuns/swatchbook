@@ -128,6 +128,7 @@ const groupRowStyle: CSSProperties = {
   borderRadius: 4,
   cursor: 'pointer',
   userSelect: 'none',
+  outline: 'none',
 };
 
 const leafRowStyle: CSSProperties = {
@@ -144,6 +145,7 @@ const leafRowStyle: CSSProperties = {
   textAlign: 'left',
   fontFamily: 'inherit',
   fontSize: 'inherit',
+  outline: 'none',
 };
 
 const caretStyle: CSSProperties = {
@@ -435,6 +437,7 @@ export function DesignTokensPanel({ active }: PanelProps): ReactElement | null {
         onChange: (e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value),
       }),
     ),
+    h(DiagnosticsSection, { diagnostics: payload.diagnostics }),
     h(
       ScrollArea,
       { vertical: true },
@@ -458,7 +461,6 @@ export function DesignTokensPanel({ active }: PanelProps): ReactElement | null {
               ),
             ),
           ),
-      h(DiagnosticsSection, { diagnostics: payload.diagnostics }),
     ),
   );
 }
@@ -575,8 +577,7 @@ const severityLabel: Record<DiagnosticSeverity, string> = {
 };
 
 const diagnosticsSectionStyle: CSSProperties = {
-  borderTop: '1px solid rgba(128,128,128,0.2)',
-  marginTop: 8,
+  borderBottom: '1px solid rgba(128,128,128,0.2)',
 };
 
 const diagnosticsSummaryStyle: CSSProperties = {
