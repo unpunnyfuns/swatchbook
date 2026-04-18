@@ -1,6 +1,6 @@
-# @unpunnyfuns/swatchbook-tokens
+# Tokens starter
 
-Minimal DTCG design-token starter set. Drop in for a working baseline; fork and extend.
+Published as `@unpunnyfuns/swatchbook-tokens`. Minimal DTCG design-token starter set. Drop in for a working baseline; fork and extend.
 
 > **Status:** iceboxed past v0.1.0 — see `docs/decisions.md` (2026-04-17 entry). The package currently exists as a build-pipeline smoke test for `@unpunnyfuns/swatchbook-core`, not a public starter. Pin from npm at your own risk until v0.1.0 ships; the shape below is the intent, not yet a contract.
 
