@@ -1,0 +1,87 @@
+---
+id: quickstart
+title: Quickstart
+sidebar_position: 2
+---
+
+# Quickstart
+
+Takes ~5 minutes if you already have a Storybook project.
+
+## Install
+
+```bash
+pnpm add -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
+# if you plan to use the MDX doc blocks:
+pnpm add -D @unpunnyfuns/swatchbook-blocks
+```
+
+Peer requirements: Storybook 10.3+ on the Vite builder, React 18+, Node 24+.
+
+## Configure
+
+Create a `swatchbook.config.ts` at the root of your Storybook project:
+
+```ts title="apps/storybook/swatchbook.config.ts"
+import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
+
+export default defineSwatchbookConfig({
+  tokens: ['tokens/**/*.json'],
+  resolver: 'tokens/resolver.json',
+  cssVarPrefix: 'ds',
+});
+```
+
+Register the addon in your preview:
+
+```ts title=".storybook/preview.ts"
+import { definePreview } from '@storybook/react-vite';
+import swatchbookAddon from '@unpunnyfuns/swatchbook-addon';
+
+export default definePreview({
+  addons: [swatchbookAddon()],
+});
+```
+
+Start Storybook:
+
+```bash
+pnpm storybook
+```
+
+## What you should see
+
+- **Toolbar**: one dropdown per modifier in your resolver. If you've written a single `theme` modifier with `Light`/`Dark` contexts, you get one dropdown; if you have `mode × brand`, you get two.
+- **Tokens panel** (bottom panel): every token your resolver yields, grouped by `$type`, searchable.
+- **Diagnostics panel**: empty with a green "OK" badge if your tokens are clean.
+
+Switch themes from the toolbar; the panel's resolved values update live.
+
+## No resolver yet?
+
+If you haven't written a DTCG 2025.10 resolver, you can use the **layered** config form instead:
+
+```ts
+export default defineSwatchbookConfig({
+  tokens: ['tokens/ref/**/*.json', 'tokens/sys/**/*.json'],
+  axes: [
+    {
+      name: 'mode',
+      contexts: {
+        Light: ['tokens/themes/light.json'],
+        Dark: ['tokens/themes/dark.json'],
+      },
+      default: 'Light',
+    },
+  ],
+  cssVarPrefix: 'ds',
+});
+```
+
+Each context names an ordered list of file paths (or globs) that layer on top of the base `tokens` files for that context. See [theming inputs](./concepts/theming-inputs) for when to pick which.
+
+## Next
+
+- Read [theming inputs](./concepts/theming-inputs) to understand the resolver vs layered trade-off.
+- Embed [doc blocks in MDX stories](./guides/authoring-doc-stories) to build a proper reference page.
+- Poke at the [live Storybook](/swatchbook/storybook/) to see the addon running against a real multi-axis fixture.

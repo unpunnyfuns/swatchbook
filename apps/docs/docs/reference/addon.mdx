@@ -1,0 +1,118 @@
+---
+id: addon
+title: '@unpunnyfuns/swatchbook-addon'
+sidebar_position: 2
+---
+
+# `@unpunnyfuns/swatchbook-addon`
+
+Storybook addon. Loads your config at build time via `@unpunnyfuns/swatchbook-core`, exposes the resolved graph as a virtual module, registers a preview decorator + manager toolbar + panels, and ships a `useToken` hook.
+
+## Install
+
+```bash
+pnpm add -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
+```
+
+Peer requirements: Storybook 10.3+ on the Vite builder, React 18+.
+
+## Registration
+
+The addon is a CSF Next preview addon. Register it in your `preview.ts`:
+
+```ts title=".storybook/preview.ts"
+import { definePreview } from '@storybook/react-vite';
+import swatchbookAddon from '@unpunnyfuns/swatchbook-addon';
+
+export default definePreview({
+  addons: [swatchbookAddon()],
+});
+```
+
+No entry in `main.ts#addons` — the preview annotation is the full registration.
+
+## What it registers
+
+- **Preview decorator** — reads the active axis tuple, writes `data-<axis>="<context>"` attributes on `<html>` + story wrapper, mounts the per-theme CSS, emits `INIT_EVENT` to the manager.
+- **Toolbar tool** — one `IconButton` per axis with contexts as picks, plus preset pills.
+- **Panels** — Tokens (searchable list, grouped by `$type`) and Diagnostics.
+
+## Globals
+
+| Key | Type | Purpose |
+| --- | --- | --- |
+| `swatchbookAxes` | `Record<string, string>` | Active tuple. Preferred input. |
+| `swatchbookTheme` | `string` | Composed permutation ID. Back-compat companion. |
+
+The toolbar writes both in lockstep so legacy consumers keep working.
+
+## Per-story overrides
+
+```ts
+export const DarkBrandA = meta.story({
+  parameters: {
+    swatchbook: {
+      axes: { mode: 'Dark', brand: 'Brand A' },
+    },
+  },
+});
+```
+
+`axes` is a tuple; omitted keys fall back to axis defaults. The legacy `theme: 'Composed Name'` form still works for single-axis projects.
+
+## Hooks
+
+Exposed under `@unpunnyfuns/swatchbook-addon/hooks`.
+
+### `useToken(path)`
+
+Typed lookup. Returns `{ value, cssVar, type, description }` for the given path; reactive to axis changes.
+
+```tsx
+import { useToken } from '@unpunnyfuns/swatchbook-addon/hooks';
+
+function Brand() {
+  const accent = useToken('color.sys.accent.bg');
+  return <span style={{ background: accent.cssVar }}>{accent.description}</span>;
+}
+```
+
+Paths autocomplete from the generated `.swatchbook/tokens.d.ts`. Add `"include": [".swatchbook/**/*.d.ts"]` to your consumer tsconfig.
+
+### `useActiveTheme()`
+
+Returns the current composed permutation ID as a string. Useful for "show the active theme name" UI.
+
+### `useActiveAxes()`
+
+Returns the active tuple as `Readonly<Record<string, string>>`. Use when you need per-axis info rather than the composed name.
+
+## Contexts
+
+Exposed from `@unpunnyfuns/swatchbook-addon`.
+
+- `ThemeContext` — React context carrying the composed permutation ID.
+- `AxesContext` — React context carrying the tuple.
+
+Both are populated by the preview decorator and consumed by `useActiveTheme` / `useActiveAxes`. You can also consume them directly for non-hook call sites.
+
+## Exported constants
+
+```ts
+import {
+  ADDON_ID,
+  AXES_GLOBAL_KEY,
+  GLOBAL_KEY,
+  PARAM_KEY,
+  VIRTUAL_MODULE_ID,
+} from '@unpunnyfuns/swatchbook-addon';
+```
+
+Useful when wiring the addon into custom tooling or writing interaction tests that read the globals directly.
+
+## Do / don't
+
+- ✅ Use `useToken` for typed lookups when you need the resolved value at runtime (aria labels, conditional rendering).
+- ✅ Prefer `var(--…)` in CSS; `useToken().cssVar` gives you the right string programmatically.
+- ❌ Don't import from `virtual:swatchbook/tokens` directly in consumer code. Go through `useToken` / the panel / the doc blocks so the API stays stable.
+- ❌ Don't combine `parameters.swatchbook.theme` *and* the toolbar for the same story — the parameter wins and the toolbar change won't stick.
