@@ -1,7 +1,7 @@
 ---
-'@unpunnyfuns/swatchbook-core': major
-'@unpunnyfuns/swatchbook-addon': major
-'@unpunnyfuns/swatchbook-blocks': major
+'@unpunnyfuns/swatchbook-core': minor
+'@unpunnyfuns/swatchbook-addon': minor
+'@unpunnyfuns/swatchbook-blocks': minor
 ---
 
 Drop the explicit-layers theming input. The DTCG 2025.10 resolver is now the sole theming input — `Config.themes`, the `ThemeConfig` type, and `resolveThemingMode` are all gone. Consumers with a layered config must move to a `resolver.json`.
