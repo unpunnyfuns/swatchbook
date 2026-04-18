@@ -38,7 +38,37 @@ Single-token deep-dive. Renders:
 - Composite preview — for `typography`, `shadow`, `border`, `transition`, `dimension`, `duration`, `cubicBezier`, `fontFamily`, `fontWeight`, `strokeStyle`, `gradient`, `color`.
 - Per-axis variance — values along whichever axes move the token.
 
-Props: `path: string`.
+Props: `path: string`, `heading?: string`.
+
+`TokenDetail` is a composition. Each section is also exported as a standalone block so MDX authors can embed just the piece they need — all take the same `path: string` prop.
+
+### `<TokenHeader path heading? />`
+
+Heading, `$type` pill, cssVar reference, and description. Renders a missing-token empty state if `path` isn't in the active theme.
+
+### `<CompositePreview path />`
+
+Live, type-dispatched preview of the token's resolved value (typography sample, shadow swatch, gradient strip, animating ball for `duration` / `cubicBezier` / `transition`, etc.).
+
+### `<CompositeBreakdown path />`
+
+Labelled sub-value grid for composite token types (`typography`, `border`, `transition`, `shadow`, `gradient`). Renders nothing for primitives.
+
+### `<AliasChain path />`
+
+Forward alias chain (`color.sys.accent.bg → color.ref.blue.700`). Renders nothing for non-aliases.
+
+### `<AliasedBy path />`
+
+Aliased-by tree — every token that transitively aliases this one. Truncates at depth 6 with a note.
+
+### `<AxisVariance path />`
+
+Per-axis value table. Collapses to a single row when the value is constant, a vertical list for one varying axis, or a two-axis matrix when values cross two axes (extra axes are fixed to the active selection).
+
+### `<TokenUsageSnippet path />`
+
+Copy-ready `color: var(--…);` reference snippet.
 
 ### `<TokenTable filter? type? />`
 
