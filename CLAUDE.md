@@ -11,7 +11,7 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Current milestone
 
-`Current: between milestones` — Maintenance and Documentation buckets drained 2026-04-18. Recent landings: `Config.default` as tuple object (#158), `cmp` layer removed in favor of modes on sys (#164 + #165), `Config.tokens` optional when a resolver is set (#160), `docs/plan.md` scrubbed of local filesystem paths (#170), dedicated Config reference page on the docs site (#161). Documentation site live at https://unpunnyfuns.github.io/swatchbook/. No feature milestone is active; open issues sit in Release-on-hold (#41/#42) and `future` (#37 — iceboxed tokens-starter).
+`Current: between milestones` — Full DTCG type parity with Terrazzo closed 2026-04-18 (issues #176, #179, #189, #190 all landed): gradient type shipped with fixture + block + TokenDetail preview; strokeStyle gained a TokenDetail SVG preview; color tokens got a two-surface contrast swatch; composite types (typography/shadow/border/transition/gradient) render a labelled sub-value breakdown. Documentation site live at https://unpunnyfuns.github.io/swatchbook/. Open feature milestones: **Split large doc blocks** (#22 — #174/#175), **Drop package-name prefixes from headers** (#24 — #181), **Three-axis fixture + disable-axis config** (#25 — #182/#183), **Rendered output views** (#27 — #186/#187). Release stays on hold.
 
 Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
 
