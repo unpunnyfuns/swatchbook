@@ -15,8 +15,8 @@ pnpm add @unpunnyfuns/swatchbook-core
 | `defineSwatchbookConfig(config)` | Identity helper for a typed `swatchbook.config.ts`. |
 | `loadProject(config, cwd?)` | Parse + resolve — returns `Project { axes, themes, themesResolved, graph, diagnostics, … }`. |
 | `resolveTheme(project, name)` | Pick a single composed theme out of a project. |
-| `emitCss(project, options?)` | Concatenated stylesheet, one `[data-theme="…"]` block per theme. |
-| `projectCss(project)` | Same as `emitCss` with project defaults applied. |
+| `emitCss(themes, themesResolved, options?)` | Concatenated stylesheet — `:root` for the default tuple plus one compound-selector block per non-default tuple (`[data-mode="Dark"][data-brand="Brand A"] { … }`). Single-axis projects keep the familiar `[data-theme="…"]` shape. |
+| `projectCss(project)` | Same as `emitCss` with project defaults (prefix + axes) applied. |
 | `emitTypes(project)` | TypeScript source declaring the token-path union + `SwatchbookTokenMap`. |
 | `permutationID(input)` | Stringify a tuple (`{ mode: 'Dark', brand: 'Brand A' }` → `"Dark · Brand A"`) to the form used as `Theme.name` and CSS data-attribute values. |
 | Types | `Axis`, `Config`, `Theme`, `Project`, `ResolvedTheme`, `TokenMap`, `Diagnostic`, `DiagnosticSeverity`. |
@@ -54,6 +54,21 @@ const dts = emitTypes(project);
 `Project.axes` surfaces the resolver's modifiers as first-class — one `Axis` per DTCG modifier, each with its `contexts`, `default`, and `description`. Projects loaded without a resolver fall back to a single synthetic axis named `theme`.
 
 Theme names are derived from the axis tuple via `permutationID(input)`: single-axis tuples stringify to the context value alone (`{ theme: 'Light' }` → `"Light"`); multi-axis tuples join context values with ` · ` (`{ mode: 'Dark', brand: 'Brand A' }` → `"Dark · Brand A"`). Pick sensible context names — what you write is what the toolbar shows. Consuming code should prefer `axes` + `themes[].input` over matching names by string.
+
+## CSS emission
+
+Multi-axis projects emit one `:root` block with the default-tuple values, plus one block per non-default cartesian tuple keyed on a compound attribute selector in `Project.axes` order:
+
+```css
+:root { --sb-color-sys-surface-default: rgb(255 255 255); … }
+[data-mode="Dark"][data-brand="Default"] { --sb-color-sys-surface-default: rgb(17 17 17); … }
+[data-mode="Light"][data-brand="Brand A"] { … }
+[data-mode="Dark"][data-brand="Brand A"] { … }
+```
+
+Every var is redeclared inside every block (flat emission). Nested cascading would be smaller but breaks whenever axes collide at the same token path — see `docs/decisions.md` for the rationale. Consumers flip tuples by writing one `data-<axis>="<context>"` attribute per axis on an ancestor (typically `<html>`).
+
+Single-axis projects (one resolver modifier, or the synthetic `theme` axis) keep the familiar `[data-theme="…"]` shape — the compound selector collapses to a single attribute selector anyway, so the simpler form stays readable.
 
 ## Do / don't
 
