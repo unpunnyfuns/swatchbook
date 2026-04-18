@@ -10,7 +10,6 @@ export interface ResolverLoadResult {
   axes: Axis[];
   themes: Theme[];
   resolved: Record<string, TokenMap>;
-  defaultThemeName: string;
 }
 
 /**
@@ -25,7 +24,6 @@ export async function loadResolverThemes(
   tokenGlobs: string[],
   cwd: string,
   logger: BufferedLogger,
-  explicitDefault?: string,
 ): Promise<ResolverLoadResult> {
   const cwdUrl = pathToFileURL(`${cwd}/`);
   const terrazzoConfig = defineTerrazzoConfig({}, { logger, cwd: cwdUrl });
@@ -68,12 +66,11 @@ export async function loadResolverThemes(
       resolveAliases: true,
       continueOnError: true,
     });
-    const name = explicitDefault ?? 'default';
+    const name = 'default';
     return {
       axes: [{ name: 'theme', contexts: [name], default: name, source: 'synthetic' }],
       themes: [{ name, input: { theme: name }, sources: tokenFiles }],
       resolved: { [name]: parsed.tokens },
-      defaultThemeName: name,
     };
   }
 
@@ -98,8 +95,5 @@ export async function loadResolverThemes(
     resolved[id] = tokens;
   }
 
-  const defaultThemeName =
-    explicitDefault && resolved[explicitDefault] ? explicitDefault : (themes[0]?.name ?? '');
-
-  return { axes, themes, resolved, defaultThemeName };
+  return { axes, themes, resolved };
 }

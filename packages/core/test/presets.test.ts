@@ -84,7 +84,7 @@ describe('loadProject — presets', () => {
       {
         tokens: ['tokens/**/*.json'],
         resolver: resolverPath,
-        default: 'Light · Default',
+        default: { mode: 'Light', brand: 'Default' },
         presets: [
           { name: 'Brand A Dark', axes: { mode: 'Dark', brand: 'Brand A' } },
           { name: 'Default Light', axes: { mode: 'Light' } },
@@ -103,7 +103,7 @@ describe('loadProject — presets', () => {
 
   it('defaults to an empty presets array when config.presets is absent', async () => {
     const p = await loadProject(
-      { tokens: ['tokens/**/*.json'], resolver: resolverPath, default: 'Light · Default' },
+      { tokens: ['tokens/**/*.json'], resolver: resolverPath, default: { mode: 'Light', brand: 'Default' } },
       fixtureCwd,
     );
     expect(p.presets).toEqual([]);
