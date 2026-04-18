@@ -10,6 +10,12 @@ Published as `@unpunnyfuns/swatchbook-addon`. Storybook 10 addon for DTCG design
 pnpm add -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
 ```
 
+This gives you the toolbar, tokens + diagnostics panels, preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `SwatchbookProvider`, block-side hooks) live in the sibling package — add it alongside if you want them:
+
+```sh
+pnpm add @unpunnyfuns/swatchbook-blocks
+```
+
 Peer requirements: `storybook@^10.3`, `react` / `react-dom` 18+.
 
 ## Register

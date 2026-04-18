@@ -23,8 +23,16 @@ Monorepo published under the `@unpunnyfuns` scope.
 
 ## Install
 
+Install the addon for the toolbar, tokens + diagnostics panels, preview decorator, and `useToken()` hook:
+
 ```sh
-pnpm add -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-blocks @unpunnyfuns/swatchbook-core
+pnpm add -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
+```
+
+Install the blocks package too if you want the MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `SwatchbookProvider`, and the block-side hooks):
+
+```sh
+pnpm add -D @unpunnyfuns/swatchbook-blocks
 ```
 
 Register the addon in `.storybook/main.ts`:
