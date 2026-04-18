@@ -1,9 +1,14 @@
 import type { CSSProperties, ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
+import {
+  MotionSample,
+  type MotionSpeed,
+  resolveMotionSpec,
+} from '#/motion-preview/MotionSample.tsx';
 
-export type MotionSpeed = 0.25 | 0.5 | 1 | 2;
+export type { MotionSpeed };
 
 export interface MotionPreviewProps {
   /**
@@ -15,8 +20,6 @@ export interface MotionPreviewProps {
   caption?: string;
 }
 
-const DEFAULT_DURATION_MS = 300;
-const DEFAULT_EASING = 'cubic-bezier(0.2, 0, 0, 1)';
 const SPEEDS: MotionSpeed[] = [0.25, 0.5, 1, 2];
 
 const styles = {
@@ -96,22 +99,6 @@ const styles = {
     fontSize: 11,
     color: 'var(--sb-color-sys-text-muted, CanvasText)',
   } satisfies CSSProperties,
-  track: {
-    position: 'relative',
-    height: 36,
-    background: 'var(--sb-color-sys-surface-muted, rgba(128,128,128,0.08))',
-    borderRadius: 18,
-    overflow: 'hidden',
-  } satisfies CSSProperties,
-  ball: {
-    position: 'absolute',
-    top: '50%',
-    width: 28,
-    height: 28,
-    marginTop: -14,
-    borderRadius: '50%',
-    background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
-  } satisfies CSSProperties,
   cssVar: {
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
     fontSize: 11,
@@ -123,11 +110,6 @@ const styles = {
     textAlign: 'center',
     color: 'var(--sb-color-sys-text-muted, CanvasText)',
   } satisfies CSSProperties,
-  reducedMotion: {
-    fontSize: 11,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
-    fontStyle: 'italic',
-  } satisfies CSSProperties,
 };
 
 interface Row {
@@ -138,91 +120,15 @@ interface Row {
   kind: 'transition' | 'duration' | 'cubicBezier';
 }
 
-function extractDurationMs(raw: unknown): number {
-  if (raw == null) return Number.NaN;
-  if (typeof raw === 'object') {
-    const v = raw as { value?: unknown; unit?: unknown };
-    if (typeof v.value === 'number' && typeof v.unit === 'string') {
-      if (v.unit === 'ms') return v.value;
-      if (v.unit === 's') return v.value * 1000;
-    }
+function formatSpec(row: Row): string {
+  switch (row.kind) {
+    case 'transition':
+      return `transition · ${Math.round(row.durationMs)}ms · ${row.easing}`;
+    case 'duration':
+      return `duration · ${Math.round(row.durationMs)}ms`;
+    case 'cubicBezier':
+      return `cubicBezier · ${row.easing}`;
   }
-  return Number.NaN;
-}
-
-function extractCubicBezier(raw: unknown): string | null {
-  if (Array.isArray(raw) && raw.length === 4 && raw.every((n) => typeof n === 'number')) {
-    return `cubic-bezier(${raw.map((n) => Number(n).toFixed(3)).join(', ')})`;
-  }
-  return null;
-}
-
-function resolveSpec(
-  token: { $type?: string; $value?: unknown },
-  themeTokens: Record<string, { $value?: unknown }>,
-): Pick<Row, 'durationMs' | 'easing' | 'kind'> | null {
-  const type = token.$type;
-  if (type === 'transition') {
-    const v = (token.$value ?? {}) as {
-      duration?: unknown;
-      timingFunction?: unknown;
-    };
-    return {
-      kind: 'transition',
-      durationMs: asDuration(v.duration, themeTokens, DEFAULT_DURATION_MS),
-      easing: asEasing(v.timingFunction, themeTokens, DEFAULT_EASING),
-    };
-  }
-  if (type === 'duration') {
-    return {
-      kind: 'duration',
-      durationMs: extractDurationMs(token.$value),
-      easing: DEFAULT_EASING,
-    };
-  }
-  if (type === 'cubicBezier') {
-    const easing = extractCubicBezier(token.$value);
-    if (!easing) return null;
-    return { kind: 'cubicBezier', durationMs: DEFAULT_DURATION_MS, easing };
-  }
-  return null;
-}
-
-function asDuration(
-  raw: unknown,
-  themeTokens: Record<string, { $value?: unknown }>,
-  fallback: number,
-): number {
-  const direct = extractDurationMs(raw);
-  if (Number.isFinite(direct)) return direct;
-  if (typeof raw === 'string') {
-    // Alias strings like "{duration.ref.normal}" resolve to a reference in themeTokens.
-    const match = raw.match(/^\{([^}]+)\}$/);
-    if (match && match[1]) {
-      const referenced = themeTokens[match[1]];
-      const resolved = extractDurationMs(referenced?.$value);
-      if (Number.isFinite(resolved)) return resolved;
-    }
-  }
-  return fallback;
-}
-
-function asEasing(
-  raw: unknown,
-  themeTokens: Record<string, { $value?: unknown }>,
-  fallback: string,
-): string {
-  const direct = extractCubicBezier(raw);
-  if (direct) return direct;
-  if (typeof raw === 'string') {
-    const match = raw.match(/^\{([^}]+)\}$/);
-    if (match && match[1]) {
-      const referenced = themeTokens[match[1]];
-      const resolved = extractCubicBezier(referenced?.$value);
-      if (resolved) return resolved;
-    }
-  }
-  return fallback;
 }
 
 export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactElement {
@@ -238,12 +144,16 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
       if (!filter && !['transition', 'duration', 'cubicBezier'].includes(token.$type ?? '')) {
         continue;
       }
-      const spec = resolveSpec(token, resolved);
+      const kind = token.$type as Row['kind'] | undefined;
+      if (!kind) continue;
+      const spec = resolveMotionSpec(token, resolved);
       if (!spec) continue;
       collected.push({
         path,
         cssVar: makeCssVar(path, cssVarPrefix),
-        ...spec,
+        durationMs: spec.durationMs,
+        easing: spec.easing,
+        kind,
       });
     }
     collected.sort((a, b) => {
@@ -296,67 +206,10 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
             <span style={styles.path}>{row.path}</span>
             <span style={styles.specs}>{formatSpec(row)}</span>
           </div>
-          {reducedMotion ? (
-            <div style={styles.reducedMotion}>
-              Animation suppressed by `prefers-reduced-motion: reduce`.
-            </div>
-          ) : (
-            <MotionTrack row={row} speed={speed} runKey={run} />
-          )}
+          <MotionSample path={row.path} speed={speed} runKey={run} />
           <span style={styles.cssVar}>{row.cssVar}</span>
         </div>
       ))}
-    </div>
-  );
-}
-
-function formatSpec(row: Row): string {
-  switch (row.kind) {
-    case 'transition':
-      return `transition · ${Math.round(row.durationMs)}ms · ${row.easing}`;
-    case 'duration':
-      return `duration · ${Math.round(row.durationMs)}ms`;
-    case 'cubicBezier':
-      return `cubicBezier · ${row.easing}`;
-  }
-}
-
-function MotionTrack({
-  row,
-  speed,
-  runKey,
-}: {
-  row: Row;
-  speed: MotionSpeed;
-  runKey: number;
-}): ReactElement {
-  const [phase, setPhase] = useState<0 | 1>(0);
-  const scaledDuration = Math.max(1, row.durationMs / speed);
-
-  useEffect(() => {
-    // Reset to 0 on replay / speed change, then tick to 1 next frame so the
-    // transition actually plays (going 0 → 1 each cycle).
-    setPhase(0);
-    const id = requestAnimationFrame(() => setPhase(1));
-    const loop = window.setInterval(() => {
-      setPhase((p) => (p === 0 ? 1 : 0));
-    }, scaledDuration * 2);
-    return () => {
-      cancelAnimationFrame(id);
-      window.clearInterval(loop);
-    };
-  }, [scaledDuration, runKey, row.path]);
-
-  return (
-    <div style={styles.track}>
-      <div
-        style={{
-          ...styles.ball,
-          left: phase === 1 ? 'calc(100% - 32px)' : '4px',
-          transition: `left ${scaledDuration}ms ${row.easing}`,
-        }}
-        aria-hidden
-      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
+import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
 
 export interface ShadowPreviewProps {
   /**
@@ -57,13 +58,6 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     height: 96,
-  } satisfies CSSProperties,
-  sample: {
-    width: 120,
-    height: 56,
-    background: 'var(--sb-color-sys-surface-raised, #fff)',
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.15))',
-    borderRadius: 6,
   } satisfies CSSProperties,
   breakdown: {
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
@@ -185,7 +179,7 @@ export function ShadowPreview({ filter = 'shadow', caption }: ShadowPreviewProps
             <span style={styles.cssVar}>{row.cssVar}</span>
           </div>
           <div style={styles.sampleCell}>
-            <div style={{ ...styles.sample, boxShadow: row.cssVar }} aria-hidden />
+            <ShadowSample path={row.path} />
           </div>
           <div style={styles.breakdown}>
             {row.layers.length === 1

@@ -101,6 +101,30 @@ Same "Aa" sample at each `fontWeight` primitive, sorted ascending. Props: `sampl
 
 Border rendered per `strokeStyle` primitive. String-form styles (`solid`, `dashed`, `dotted`, `double`) render as `border-style`; object-form (with `dashArray` / `lineCap`) renders a textual fallback.
 
+### `<MotionSample path speed? runKey? />`
+
+Standalone per-token animated sample (the animated ball + track from `MotionPreview`). Accepts any `transition`, `duration`, or `cubicBezier` token path. Respects `prefers-reduced-motion`.
+
+Props: `path: string`, `speed?: 0.25 | 0.5 | 1 | 2` (default `1`), `runKey?: number` (change to force a restart).
+
+### `<ShadowSample path />`
+
+Standalone per-token shadow sample (the surface rectangle with `box-shadow` from `ShadowPreview`).
+
+Props: `path: string`.
+
+### `<BorderSample path />`
+
+Standalone per-token border sample (the surface rectangle with `border` from `BorderPreview`).
+
+Props: `path: string`.
+
+### `<DimensionBar path kind? />`
+
+Standalone per-token dimension visual (the bar / square / radius sample from `DimensionScale`).
+
+Props: `path: string`, `kind?: 'length' | 'radius' | 'size'` (default `'length'`).
+
 ### `<GradientPalette filter? />`
 
 Wide sample per `gradient` token with the stop list as a sidebar. Samples use `linear-gradient(to right, …)` by default — DTCG gradients are stop arrays, and the gradient function is a rendering choice the consumer makes at use-site. If you want radial/conic previews here, open an issue.
