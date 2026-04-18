@@ -59,7 +59,7 @@ async function textContent(root: Element, testId: string): Promise<string> {
  * strings are theme-invariant; only the resolved `value` should shift.
  */
 export const Light = meta.story({
-  parameters: { swatchbook: { theme: 'Light · Default' } },
+  parameters: { swatchbook: { axes: { mode: 'Light', brand: 'Default' } } },
   play: async ({ canvasElement }) => {
     const surface = parseSrgb(await textContent(canvasElement, 'surface-value'));
     const text = parseSrgb(await textContent(canvasElement, 'text-value'));
@@ -87,7 +87,7 @@ export const Light = meta.story({
  * the toolbar uses at runtime).
  */
 export const Dark = meta.story({
-  parameters: { swatchbook: { theme: 'Dark · Default' } },
+  parameters: { swatchbook: { axes: { mode: 'Dark', brand: 'Default' } } },
   play: async ({ canvasElement }) => {
     const surface = parseSrgb(await textContent(canvasElement, 'surface-value'));
     const text = parseSrgb(await textContent(canvasElement, 'text-value'));

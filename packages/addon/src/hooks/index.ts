@@ -4,4 +4,4 @@ export {
   type TokenInfo,
   type TokenPath,
 } from '#/hooks/use-token.ts';
-export { useActiveTheme } from '#/theme-context.ts';
+export { useActiveAxes, useActiveTheme } from '#/theme-context.ts';

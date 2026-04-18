@@ -70,12 +70,12 @@ Returns `{ value, cssVar, type?, description? }`. `cssVar` is stable across them
 ## Per-story overrides
 
 ```ts
-export const AlwaysDark = meta.story({
-  parameters: { swatchbook: { theme: 'Dark' } },
+export const DarkBrandA = meta.story({
+  parameters: { swatchbook: { axes: { mode: 'Dark', brand: 'Brand A' } } },
 });
 ```
 
-Any valid theme name — including multi-axis permutations like `'Light · Brand A'` — is accepted.
+`axes` is a tuple of `{ axisName: contextName }` entries. Any axis left out falls back to its default; unknown keys or contexts are silently ignored. The legacy `theme: 'Composed Name'` form is still accepted for single-axis overrides.
 
 ## Do / don't
 
