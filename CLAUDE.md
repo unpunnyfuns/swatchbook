@@ -11,7 +11,7 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Current milestone
 
-`Current: between milestones` — Two-layer token model closed 2026-04-18 (issues #164 + #165 landed): reference fixture, demo components, convention, and docs all collapsed to ref + sys, with modes on sys carrying what a `cmp` layer would otherwise specialize. Documentation site live at https://unpunnyfuns.github.io/swatchbook/. Dogfood (Infima overrides) deferred indefinitely. No feature milestone is active; open issues sit in Maintenance (#160), Documentation (#161), Release-on-hold (#41/#42), and `future` (#37).
+`Current: between milestones` — Maintenance and Documentation buckets drained 2026-04-18. Recent landings: `Config.default` as tuple object (#158), `cmp` layer removed in favor of modes on sys (#164 + #165), `Config.tokens` optional when a resolver is set (#160), `docs/plan.md` scrubbed of local filesystem paths (#170), dedicated Config reference page on the docs site (#161). Documentation site live at https://unpunnyfuns.github.io/swatchbook/. No feature milestone is active; open issues sit in Release-on-hold (#41/#42) and `future` (#37 — iceboxed tokens-starter).
 
 Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
 
