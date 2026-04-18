@@ -1,5 +1,5 @@
 import { cssVarPrefix, defaultTheme, themesResolved } from 'virtual:swatchbook/tokens';
-import { useActiveTheme } from '#/theme-context.ts';
+import { useActiveTheme } from '@unpunnyfuns/swatchbook-blocks';
 
 /**
  * Consumers augment this interface (via the addon's generated

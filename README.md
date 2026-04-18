@@ -23,8 +23,16 @@ Monorepo published under the `@unpunnyfuns` scope.
 
 ## Install
 
+Install the addon for the toolbar, tokens + diagnostics panels, preview decorator, and `useToken()` hook:
+
 ```sh
-pnpm add -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-blocks @unpunnyfuns/swatchbook-core
+npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
+```
+
+Install the blocks package too if you want the MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `SwatchbookProvider`, and the block-side hooks):
+
+```sh
+npm install -D @unpunnyfuns/swatchbook-blocks
 ```
 
 Register the addon in `.storybook/main.ts`:
@@ -81,6 +89,8 @@ Swatchbook parses DTCG tokens through [Terrazzo](https://terrazzo.app/) by [Drew
 ## Development
 
 pnpm workspaces + Turborepo. Node 24 (latest LTS). ESM throughout. `tsdown` for package builds.
+
+We use pnpm internally for workspace orchestration; consumers of the published packages can install with any package manager.
 
 ```sh
 pnpm install

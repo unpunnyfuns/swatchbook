@@ -33,9 +33,6 @@
     "format": "oxfmt -c ../../.oxfmtrc.json src test",
     "format:check": "oxfmt --check -c ../../.oxfmtrc.json src test"
   },
-  "dependencies": {
-    "@unpunnyfuns/swatchbook-addon": "workspace:*"
-  },
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18",

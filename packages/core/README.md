@@ -7,7 +7,7 @@ Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses 
 ## Install
 
 ```sh
-pnpm add @unpunnyfuns/swatchbook-core
+npm install @unpunnyfuns/swatchbook-core
 ```
 
 ## Public API
