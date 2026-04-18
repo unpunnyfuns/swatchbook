@@ -1,7 +1,8 @@
 import { BufferedLogger, toDiagnostics } from '#/diagnostics.ts';
 import { validatePresets } from '#/presets.ts';
+import { resolveDefaultTuple } from '#/themes/default.ts';
 import { normalizeThemes } from '#/themes/normalize.ts';
-import type { Config, Project, ResolvedTheme } from '#/types.ts';
+import { permutationID, type Config, type Project, type ResolvedTheme } from '#/types.ts';
 
 /**
  * Load a swatchbook project from a config. Themes are eagerly resolved,
@@ -9,14 +10,23 @@ import type { Config, Project, ResolvedTheme } from '#/types.ts';
  * `project.themesResolved[name]` directly without further I/O.
  *
  * The `cwd` defaults to `process.cwd()`. All relative paths in `config`
- * (token globs, `resolver`, `manifest`, theme layer globs) resolve
- * against this directory.
+ * (token globs, `resolver`, theme layer globs) resolve against this
+ * directory.
  */
 export async function loadProject(config: Config, cwd: string = process.cwd()): Promise<Project> {
   const logger = new BufferedLogger({ level: 'warn' });
   const normalized = await normalizeThemes(config, cwd, logger);
 
-  const graph = normalized.resolved[normalized.defaultThemeName] ?? {};
+  const { tuple: defaultTuple, diagnostics: defaultDiagnostics } = resolveDefaultTuple(
+    config.default,
+    normalized.axes,
+  );
+  const computedDefault = permutationID(defaultTuple);
+  const defaultThemeName = normalized.resolved[computedDefault]
+    ? computedDefault
+    : (normalized.themes[0]?.name ?? '');
+
+  const graph = normalized.resolved[defaultThemeName] ?? {};
 
   const { presets, diagnostics: presetDiagnostics } = validatePresets(
     config.presets,
@@ -30,7 +40,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     themes: normalized.themes,
     themesResolved: normalized.resolved,
     graph,
-    diagnostics: [...toDiagnostics(logger), ...presetDiagnostics],
+    diagnostics: [...toDiagnostics(logger), ...defaultDiagnostics, ...presetDiagnostics],
   };
 }
 

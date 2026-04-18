@@ -17,7 +17,7 @@ const project = await loadProject(
   {
     tokens: ['tokens/**/*.json'],
     resolver: 'tokens/resolver.json',
-    default: 'Light',
+    default: { theme: 'Light' },
     cssVarPrefix: CSS_VAR_PREFIX,
   },
   here,

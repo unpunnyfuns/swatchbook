@@ -58,8 +58,13 @@ export interface Config {
   resolver?: string;
   /** Authored layered axes. Mutually exclusive with `resolver`. */
   axes?: AxisConfig[];
-  /** Name of the default theme. */
-  default?: string;
+  /**
+   * Initial active tuple (`{ axisName: contextName }`). Any axis the tuple
+   * omits falls back to that axis's own `default`. Unknown axis keys or
+   * invalid context values produce `warn` diagnostics and are sanitized.
+   * When absent, the starting tuple is built from each axis's `default`.
+   */
+  default?: Partial<Record<string, string>>;
   /** Prefix for emitted CSS custom properties. */
   cssVarPrefix?: string;
   /** Project-local output directory for codegen artifacts. */
