@@ -1,8 +1,9 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
+import { DimensionBar, type DimensionKind } from '#/dimension-scale/DimensionBar.tsx';
 import { formatValue, globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
-export type DimensionKind = 'length' | 'radius' | 'size';
+export type { DimensionKind };
 
 export interface DimensionScaleProps {
   /**
@@ -68,24 +69,6 @@ const styles = {
     alignItems: 'center',
     minWidth: 0,
   } satisfies CSSProperties,
-  bar: {
-    height: 14,
-    background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
-    borderRadius: 2,
-    minWidth: 1,
-  } satisfies CSSProperties,
-  radiusSample: {
-    width: 56,
-    height: 56,
-    background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.3))',
-  } satisfies CSSProperties,
-  sizeSample: {
-    background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.3))',
-    minWidth: 1,
-    minHeight: 1,
-  } satisfies CSSProperties,
   cssVar: {
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
     fontSize: 11,
@@ -115,9 +98,7 @@ interface Row {
 
 /**
  * Convert a DTCG dimension `$value` (`{ value, unit }`) to pixels for the
- * purpose of ordering and deciding whether to cap the rendered bar. Returns
- * `NaN` for units we can't reasonably approximate (ex / ch / %), which the
- * caller treats as "render at cssVar but don't cap or sort numerically".
+ * purpose of ordering and deciding whether to show a cap indicator.
  */
 function toPixels(raw: unknown): number {
   if (raw == null || typeof raw !== 'object') return Number.NaN;
@@ -184,7 +165,7 @@ export function DimensionScale({
             <span style={styles.specs}>{row.displayValue}</span>
           </div>
           <div style={styles.visualCell}>
-            {renderVisual(row, kind)}
+            <DimensionBar path={row.path} kind={kind} />
             {row.capped && <span style={styles.cap}>capped at {MAX_RENDER_PX}px</span>}
           </div>
           <span style={styles.cssVar}>{row.cssVar}</span>
@@ -192,22 +173,4 @@ export function DimensionScale({
       ))}
     </div>
   );
-}
-
-function renderVisual(row: Row, kind: DimensionKind): ReactElement {
-  const cappedValue = row.capped ? `${MAX_RENDER_PX}px` : row.cssVar;
-  switch (kind) {
-    case 'radius':
-      return <div style={{ ...styles.radiusSample, borderRadius: row.cssVar }} aria-hidden />;
-    case 'size':
-      return (
-        <div
-          style={{ ...styles.sizeSample, width: cappedValue, height: cappedValue }}
-          aria-hidden
-        />
-      );
-    case 'length':
-    default:
-      return <div style={{ ...styles.bar, width: cappedValue }} aria-hidden />;
-  }
 }

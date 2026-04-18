@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
+import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface BorderPreviewProps {
@@ -56,12 +57,6 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-  } satisfies CSSProperties,
-  sample: {
-    width: 120,
-    height: 56,
-    background: 'var(--sb-color-sys-surface-raised, transparent)',
-    borderRadius: 6,
   } satisfies CSSProperties,
   breakdown: {
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
@@ -160,7 +155,7 @@ export function BorderPreview({ filter = 'border', caption }: BorderPreviewProps
             <span style={styles.cssVar}>{row.cssVar}</span>
           </div>
           <div style={styles.sampleCell}>
-            <div style={{ ...styles.sample, border: row.cssVar }} aria-hidden />
+            <BorderSample path={row.path} />
           </div>
           <div style={styles.breakdown}>
             <span style={styles.breakdownKey}>width</span>
