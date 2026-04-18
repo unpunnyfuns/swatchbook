@@ -2,7 +2,7 @@ import { AxisVariance } from '@unpunnyfuns/swatchbook-blocks';
 import preview from '../../../.storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Blocks/TokenDetail/AxisVariance',
+  title: 'Internals/TokenDetail/AxisVariance',
   component: AxisVariance,
   argTypes: {
     path: { control: 'text' },

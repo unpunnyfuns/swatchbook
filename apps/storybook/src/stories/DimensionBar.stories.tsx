@@ -2,7 +2,7 @@ import { DimensionBar } from '@unpunnyfuns/swatchbook-blocks';
 import preview from '../../.storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Blocks/Samples/DimensionBar',
+  title: 'Internals/Samples/DimensionBar',
   component: DimensionBar,
   argTypes: {
     path: { control: 'text' },

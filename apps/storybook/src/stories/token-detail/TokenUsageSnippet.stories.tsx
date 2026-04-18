@@ -2,7 +2,7 @@ import { TokenUsageSnippet } from '@unpunnyfuns/swatchbook-blocks';
 import preview from '../../../.storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Blocks/TokenDetail/TokenUsageSnippet',
+  title: 'Internals/TokenDetail/TokenUsageSnippet',
   component: TokenUsageSnippet,
   argTypes: {
     path: { control: 'text' },
