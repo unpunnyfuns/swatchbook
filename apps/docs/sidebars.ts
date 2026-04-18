@@ -25,7 +25,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Reference',
       collapsed: false,
-      items: ['reference/core', 'reference/addon', 'reference/blocks'],
+      items: ['reference/config', 'reference/core', 'reference/addon', 'reference/blocks'],
     },
   ],
 };

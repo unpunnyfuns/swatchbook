@@ -18,15 +18,14 @@ pnpm add @unpunnyfuns/swatchbook-core
 
 ### `defineSwatchbookConfig(config)`
 
-Identity helper for a typed `swatchbook.config.ts`. No runtime effect — just TypeScript ergonomics.
+Identity helper for a typed `swatchbook.config.ts`. No runtime effect — just TypeScript ergonomics. See the [Config reference](./config) for every field's semantics.
 
 ```ts
 import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
 
 export default defineSwatchbookConfig({
-  tokens: ['tokens/**/*.json'],
   resolver: 'tokens/resolver.json',
-  default: 'Light',
+  default: { mode: 'Light', brand: 'Default' },
   cssVarPrefix: 'ds',
 });
 ```
