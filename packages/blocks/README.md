@@ -38,7 +38,11 @@ Requires `@unpunnyfuns/swatchbook-addon` to be registered in your Storybook conf
 
 Shared: every block accepts a `caption` override and renders against the addon's `var(--<prefix>-…)` output.
 
-## MDX example
+## Usage
+
+### Inside Storybook
+
+The addon's preview decorator wraps every story in a `SwatchbookProvider` for you, so MDX and story authors drop blocks in directly:
 
 ```mdx
 import { TokenTable, ColorPalette, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
@@ -56,6 +60,25 @@ import { TokenTable, ColorPalette, TokenDetail } from '@unpunnyfuns/swatchbook-b
 <TokenDetail path="color.sys.accent.bg" />
 ```
 
+### Outside Storybook
+
+Blocks are pure presentation — given a `ProjectSnapshot` they render without any Storybook or Vite plugin. Mount a `SwatchbookProvider` at the top of your tree:
+
+```tsx
+import { SwatchbookProvider, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
+import snapshot from './tokens-snapshot.json';
+
+export function TokenDocs() {
+  return (
+    <SwatchbookProvider value={snapshot}>
+      <TokenTable filter='color.sys.*' />
+    </SwatchbookProvider>
+  );
+}
+```
+
+`SwatchbookProvider` is the canonical integration point. The `virtual:swatchbook/tokens` module is the Storybook addon's internal wiring, not a public API.
+
 ## Props
 
 ```ts
@@ -69,7 +92,8 @@ import { TokenTable, ColorPalette, TokenDetail } from '@unpunnyfuns/swatchbook-b
 
 - ✅ React to the active swatchbook theme — switching in the toolbar updates resolved values live, even on MDX docs pages.
 - ✅ Compose multiple blocks per MDX page — each mounts independently.
-- ❌ Don't run outside Storybook's preview/docs iframe — blocks rely on the addon's virtual token module.
+- ✅ Render blocks outside Storybook by wrapping them in `SwatchbookProvider` with a hand-built or loaded `ProjectSnapshot`.
+- ❌ Don't import from `virtual:swatchbook/tokens` directly — it's the addon's internal wiring, not a public API. Use `SwatchbookProvider` instead.
 - ❌ Don't use `useGlobals` / `useArgs` from `storybook/preview-api` inside custom blocks you write — those are story-only hooks and throw in docs context. Subscribe to `addons.getChannel()` directly for globals reactivity.
 
 ## See also

@@ -7,6 +7,19 @@ export { FontFamilySample, type FontFamilySampleProps } from '#/FontFamilySample
 export { FontWeightScale, type FontWeightScaleProps } from '#/FontWeightScale.tsx';
 export { GradientPalette, type GradientPaletteProps } from '#/GradientPalette.tsx';
 export { MotionPreview, type MotionPreviewProps, type MotionSpeed } from '#/MotionPreview.tsx';
+export {
+  SwatchbookProvider,
+  type SwatchbookProviderProps,
+  useSwatchbookData,
+} from '#/provider.tsx';
+export type {
+  ProjectSnapshot,
+  VirtualAxis,
+  VirtualDiagnostic,
+  VirtualPreset,
+  VirtualTheme,
+  VirtualToken,
+} from '#/types.ts';
 export { MotionSample, type MotionSampleProps } from '#/motion-preview/MotionSample.tsx';
 export { ShadowPreview, type ShadowPreviewProps } from '#/ShadowPreview.tsx';
 export { ShadowSample, type ShadowSampleProps } from '#/shadow-preview/ShadowSample.tsx';

@@ -18,6 +18,8 @@ The addon must be registered in the same Storybook for the blocks to have data t
 
 ## Usage
 
+### Inside Storybook
+
 ```mdx
 import { ColorPalette, TokenTable, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
 
@@ -25,6 +27,27 @@ import { ColorPalette, TokenTable, TokenDetail } from '@unpunnyfuns/swatchbook-b
 <TokenTable filter="size.sys.*" type="dimension" />
 <TokenDetail path="color.sys.accent.bg" />
 ```
+
+The addon's preview decorator wraps every story and docs render in a `SwatchbookProvider`, so no setup is required on the author's side.
+
+### Using blocks outside Storybook
+
+Blocks are pure presentation. Given a `ProjectSnapshot` — the shape the addon internally publishes into `virtual:swatchbook/tokens` — they render in any React tree: unit tests, standalone docs apps, custom tooling.
+
+```tsx
+import { SwatchbookProvider, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
+import snapshot from './tokens-snapshot.json';
+
+export function TokenDocs() {
+  return (
+    <SwatchbookProvider value={snapshot}>
+      <TokenTable filter='color.sys.*' />
+    </SwatchbookProvider>
+  );
+}
+```
+
+`SwatchbookProvider` is the canonical entry point. The `virtual:swatchbook/tokens` module is the Storybook addon's internal wiring — do not import from it directly in consumer code.
 
 ## Blocks
 

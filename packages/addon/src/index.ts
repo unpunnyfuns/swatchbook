@@ -10,6 +10,16 @@ export {
 } from '#/constants.ts';
 export { AxesContext, ThemeContext, useActiveAxes, useActiveTheme } from '#/theme-context.ts';
 export type { AddonOptions } from '#/options.ts';
+export {
+  type ProjectSnapshot,
+  SwatchbookContext,
+  useOptionalSwatchbookData,
+  type VirtualAxisShape,
+  type VirtualDiagnosticShape,
+  type VirtualPresetShape,
+  type VirtualThemeShape,
+  type VirtualTokenShape,
+} from '#/swatchbook-context.ts';
 
 /**
  * CSF Next factory. Consumers call this inside

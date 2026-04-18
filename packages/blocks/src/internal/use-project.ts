@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { addons } from 'storybook/preview-api';
+import { useOptionalSwatchbookData } from '@unpunnyfuns/swatchbook-addon';
 import { useActiveAxes, useActiveTheme } from '@unpunnyfuns/swatchbook-addon/hooks';
 import {
   axes as virtualAxes,
@@ -9,18 +10,17 @@ import {
   themes,
   themesResolved,
 } from 'virtual:swatchbook/tokens';
+import type { ProjectSnapshot, VirtualAxis, VirtualTheme, VirtualToken } from '#/types.ts';
 
-type VirtualTokens = typeof themesResolved;
-type ResolvedTokens = VirtualTokens[string];
-type VirtualAxes = typeof virtualAxes;
+type ResolvedTokens = Record<string, VirtualToken>;
 
 export interface ProjectData {
   activeTheme: string;
   activeAxes: Record<string, string>;
-  axes: VirtualAxes;
-  themes: typeof themes;
+  axes: readonly VirtualAxis[];
+  themes: readonly VirtualTheme[];
   resolved: ResolvedTokens;
-  themesResolved: VirtualTokens;
+  themesResolved: Record<string, ResolvedTokens>;
   cssVarPrefix: string;
 }
 
@@ -28,7 +28,7 @@ const STYLE_ELEMENT_ID = 'swatchbook-tokens';
 const GLOBAL_KEY = 'swatchbookTheme';
 const AXES_GLOBAL_KEY = 'swatchbookAxes';
 
-function ensureStylesheet(): void {
+function ensureStylesheet(css: string): void {
   if (typeof document === 'undefined') return;
   let style = document.getElementById(STYLE_ELEMENT_ID) as HTMLStyleElement | null;
   if (!style) {
@@ -36,21 +36,24 @@ function ensureStylesheet(): void {
     style.id = STYLE_ELEMENT_ID;
     document.head.appendChild(style);
   }
-  if (style.textContent !== generatedCss) style.textContent = generatedCss;
+  if (style.textContent !== css) style.textContent = css;
 }
 
 interface GlobalsPayload {
   globals?: Record<string, unknown>;
 }
 
-function defaultTuple(): Record<string, string> {
+function defaultTuple(axes: readonly VirtualAxis[]): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const axis of virtualAxes) out[axis.name] = axis.default;
+  for (const axis of axes) out[axis.name] = axis.default;
   return out;
 }
 
-function tupleForName(name: string): Record<string, string> | undefined {
-  const match = themes.find((t) => t.name === name);
+function tupleForName(
+  themesList: readonly VirtualTheme[],
+  name: string,
+): Record<string, string> | undefined {
+  const match = themesList.find((t) => t.name === name);
   return match?.input;
 }
 
@@ -62,32 +65,57 @@ function tuplesEqual(a: Record<string, string>, b: Record<string, string>): bool
   return true;
 }
 
-function nameForTuple(tuple: Record<string, string>): string | undefined {
-  const match = themes.find((t) => tuplesEqual(t.input as Record<string, string>, tuple));
+function nameForTuple(
+  themesList: readonly VirtualTheme[],
+  tuple: Record<string, string>,
+): string | undefined {
+  const match = themesList.find((t) => tuplesEqual(t.input as Record<string, string>, tuple));
   return match?.name;
 }
 
+function snapshotToData(snapshot: ProjectSnapshot): ProjectData {
+  return {
+    activeTheme: snapshot.activeTheme,
+    activeAxes: { ...snapshot.activeAxes },
+    axes: snapshot.axes,
+    themes: snapshot.themes,
+    themesResolved: snapshot.themesResolved,
+    resolved: snapshot.themesResolved[snapshot.activeTheme] ?? {},
+    cssVarPrefix: snapshot.cssVarPrefix,
+  };
+}
+
 /**
- * One-stop hook for block components. Self-mounts the virtual module's
- * per-theme CSS (so blocks work in MDX/autodocs, not just inside a story
- * where the addon's decorator runs) and tracks the active tuple via
- * Storybook's `globalsUpdated` channel event.
+ * Reads project data either from a mounted {@link SwatchbookProvider}
+ * (preferred — the addon's preview decorator installs one around every
+ * story) or — as a back-compat fallback — directly from the virtual
+ * module plus Storybook globals.
  *
- * Can't use `useGlobals` from `storybook/preview-api` — that's a story
- * hook that throws "Storybook preview hooks can only be called inside
- * decorators and story functions" when called from MDX doc blocks.
+ * The fallback path is what makes the hook safe to call from MDX doc
+ * blocks and autodocs renders where no story is active. It self-mounts
+ * the virtual module's per-theme CSS and tracks the active tuple via the
+ * `globalsUpdated` channel event; {@link useGlobals} from
+ * `storybook/preview-api` would throw outside a story render.
  */
 export function useProject(): ProjectData {
+  const snapshot = useOptionalSwatchbookData();
+  const fallback = useVirtualModuleFallback(snapshot === null);
+  return snapshot !== null ? snapshotToData(snapshot) : fallback;
+}
+
+function useVirtualModuleFallback(enabled: boolean): ProjectData {
   const contextTheme = useActiveTheme();
   const contextAxes = useActiveAxes();
   const [channelTheme, setChannelTheme] = useState<string | null>(null);
   const [channelAxes, setChannelAxes] = useState<Record<string, string> | null>(null);
 
   useEffect(() => {
-    ensureStylesheet();
-  }, []);
+    if (!enabled) return;
+    ensureStylesheet(generatedCss);
+  }, [enabled]);
 
   useEffect(() => {
+    if (!enabled) return;
     const channel = addons.getChannel();
     const onGlobals = (payload: GlobalsPayload): void => {
       const nextTheme = payload.globals?.[GLOBAL_KEY];
@@ -103,15 +131,16 @@ export function useProject(): ProjectData {
       channel.off('globalsUpdated', onGlobals);
       channel.off('updateGlobals', onGlobals);
     };
-  }, []);
+  }, [enabled]);
 
   const hasContextAxes = Object.keys(contextAxes).length > 0;
   const activeAxes: Record<string, string> = hasContextAxes
     ? { ...contextAxes }
-    : (channelAxes ?? defaultTuple());
+    : (channelAxes ?? defaultTuple(virtualAxes));
 
-  const derivedName = nameForTuple(activeAxes);
-  const fallbackTupleName = channelTheme && tupleForName(channelTheme) ? channelTheme : null;
+  const derivedName = nameForTuple(themes, activeAxes);
+  const fallbackTupleName =
+    channelTheme && tupleForName(themes, channelTheme) ? channelTheme : null;
   const activeTheme =
     contextTheme ||
     derivedName ||
@@ -140,7 +169,6 @@ export function makeCssVar(path: string, prefix: string): string {
 export function globMatch(path: string, glob: string | undefined): boolean {
   if (!glob) return true;
   if (glob === '*' || glob === '**') return true;
-  // Accept simple `prefix.*` patterns plus exact matches.
   if (glob.endsWith('.*')) return path.startsWith(`${glob.slice(0, -2)}.`);
   if (glob.endsWith('**')) return path.startsWith(glob.slice(0, -2));
   return path === glob || path.startsWith(`${glob}.`);
