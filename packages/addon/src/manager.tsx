@@ -36,13 +36,21 @@ interface ThemeEntry {
   sources: string[];
 }
 
+interface PresetEntry {
+  name: string;
+  axes: Partial<Record<string, string>>;
+  description?: string;
+}
+
 interface InitPayload {
   axes: readonly AxisEntry[];
+  presets: readonly PresetEntry[];
   themes: ThemeEntry[];
   defaultTheme: string | null;
 }
 
 const EMPTY_AXES: readonly AxisEntry[] = [];
+const EMPTY_PRESETS: readonly PresetEntry[] = [];
 const EMPTY_THEMES: ThemeEntry[] = [];
 
 function ThemeIcon(): ReactElement {
@@ -160,6 +168,103 @@ function AxisDropdown({ axis, active, onSelect }: AxisDropdownProps): ReactEleme
   });
 }
 
+/**
+ * Compose a preset's sanitized partial tuple with the axis defaults, so
+ * applying a preset that only names some axes leaves the omitted ones at
+ * their defaults (not blank). Matches the preview decorator's own fallback
+ * logic so what the toolbar sends out is what the decorator honors.
+ */
+function presetTuple(
+  preset: PresetEntry,
+  axes: readonly AxisEntry[],
+  defaults: Readonly<Record<string, string>>,
+): Record<string, string> {
+  const out: Record<string, string> = { ...defaults };
+  for (const axis of axes) {
+    const candidate = preset.axes[axis.name];
+    if (candidate !== undefined && axis.contexts.includes(candidate)) {
+      out[axis.name] = candidate;
+    }
+  }
+  return out;
+}
+
+function tuplesEqual(
+  a: Readonly<Record<string, string>>,
+  b: Readonly<Record<string, string>>,
+  axes: readonly AxisEntry[],
+): boolean {
+  for (const axis of axes) {
+    if (a[axis.name] !== b[axis.name]) return false;
+  }
+  return true;
+}
+
+interface PresetPillsProps {
+  presets: readonly PresetEntry[];
+  axes: readonly AxisEntry[];
+  defaults: Readonly<Record<string, string>>;
+  activeTuple: Readonly<Record<string, string>>;
+  lastApplied: string | null;
+  onApply: (preset: PresetEntry) => void;
+}
+
+function PresetPills({
+  presets,
+  axes,
+  defaults,
+  activeTuple,
+  lastApplied,
+  onApply,
+}: PresetPillsProps): ReactElement {
+  return h(
+    'span',
+    {
+      style: { display: 'inline-flex', alignItems: 'center', gap: 4, marginRight: 4 },
+    },
+    ...presets.map((preset) => {
+      const tuple = presetTuple(preset, axes, defaults);
+      const matches = tuplesEqual(tuple, activeTuple, axes);
+      const modified = !matches && preset.name === lastApplied;
+      const title = preset.description ? `${preset.name} — ${preset.description}` : preset.name;
+      return h(
+        IconButton,
+        {
+          key: `${TOOL_ID}/preset/${preset.name}`,
+          active: matches,
+          title,
+          onClick: () => onApply(preset),
+        },
+        h(
+          'span',
+          {
+            style: {
+              padding: '0 6px',
+              fontWeight: matches ? 600 : 400,
+            },
+          },
+          preset.name,
+          modified
+            ? h('span', {
+                'aria-hidden': true,
+                style: {
+                  display: 'inline-block',
+                  width: 6,
+                  height: 6,
+                  marginLeft: 6,
+                  borderRadius: '50%',
+                  background: 'currentColor',
+                  opacity: 0.6,
+                  verticalAlign: 'middle',
+                },
+              })
+            : null,
+        ),
+      );
+    }),
+  );
+}
+
 function AxesToolbar(): ReactElement {
   const [globals, updateGlobals] = useGlobals();
   const api = useStorybookApi();
@@ -175,8 +280,10 @@ function AxesToolbar(): ReactElement {
   }, []);
 
   const axes = payload?.axes ?? EMPTY_AXES;
+  const presets = payload?.presets ?? EMPTY_PRESETS;
   const themes = payload?.themes ?? EMPTY_THEMES;
   const defaults = useMemo(() => defaultTupleFor(axes), [axes]);
+  const [lastApplied, setLastApplied] = useState<string | null>(null);
   const globalTuple = globals[AXES_GLOBAL_KEY] as Record<string, string> | undefined;
 
   const activeTuple = useMemo<Record<string, string>>(() => {
@@ -200,6 +307,17 @@ function AxesToolbar(): ReactElement {
       updateGlobals({ [AXES_GLOBAL_KEY]: tuple, [GLOBAL_KEY]: composed });
     },
     [activeTuple, themes, payload?.defaultTheme, updateGlobals],
+  );
+
+  const applyPreset = useCallback(
+    (preset: PresetEntry): void => {
+      const tuple = presetTuple(preset, axes, defaults);
+      const fallback = payload?.defaultTheme ?? themes[0]?.name ?? '';
+      const composed = composedNameFor(tuple, themes, fallback);
+      updateGlobals({ [AXES_GLOBAL_KEY]: tuple, [GLOBAL_KEY]: composed });
+      setLastApplied(preset.name);
+    },
+    [axes, defaults, themes, payload?.defaultTheme, updateGlobals],
   );
 
   useEffect(() => {
@@ -239,6 +357,16 @@ function AxesToolbar(): ReactElement {
   return h(
     'span',
     { style: { display: 'inline-flex', alignItems: 'center', gap: 4 } },
+    presets.length > 0
+      ? h(PresetPills, {
+          presets,
+          axes,
+          defaults,
+          activeTuple,
+          lastApplied,
+          onApply: applyPreset,
+        })
+      : null,
     ...axes.map((axis) =>
       h(AxisDropdown, {
         key: axis.name,

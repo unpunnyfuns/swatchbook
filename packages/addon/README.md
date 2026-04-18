@@ -67,6 +67,23 @@ function Card() {
 
 Returns `{ value, cssVar, type?, description? }`. `cssVar` is stable across themes; `value` flips with the active theme. Paths autocomplete from the generated `.swatchbook/tokens.d.ts` once the addon has run against your project.
 
+## Toolbar pills (presets)
+
+Add `presets` to your `swatchbook.config.ts` to surface quick-select pills next to the axis dropdowns:
+
+```ts
+export default defineSwatchbookConfig({
+  tokens: ['tokens/**/*.json'],
+  resolver: 'tokens/resolver.json',
+  presets: [
+    { name: 'Default Light', axes: { mode: 'Light', brand: 'Default' } },
+    { name: 'Brand A Dark', axes: { mode: 'Dark', brand: 'Brand A' }, description: 'Dark + violet accent.' },
+  ],
+});
+```
+
+Clicking a pill writes the full tuple — partial presets fill in omitted axes from each axis's default. The active pill is highlighted when the current tuple matches; if you tweak an axis dropdown after applying a preset, the pill shows a small "modified" dot so you can see that the current tuple has drifted from the named preset. Presets come from config only — there is no in-session "save as".
+
 ## Per-story overrides
 
 ```ts

@@ -37,7 +37,14 @@ declare module 'virtual:swatchbook/tokens' {
     aliasedBy?: readonly string[];
   }
 
+  interface VirtualPreset {
+    name: string;
+    axes: Partial<Record<string, string>>;
+    description?: string;
+  }
+
   export const axes: readonly VirtualAxis[];
+  export const presets: readonly VirtualPreset[];
   export const themes: readonly VirtualTheme[];
   export const defaultTheme: string | null;
   export const themesResolved: Record<string, Record<string, VirtualToken>>;
