@@ -1,6 +1,6 @@
 ---
-'@unpunnyfuns/swatchbook-blocks': minor
-'@unpunnyfuns/swatchbook-addon': minor
+'@unpunnyfuns/swatchbook-blocks': major
+'@unpunnyfuns/swatchbook-addon': major
 ---
 
-Move `SwatchbookProvider`, `SwatchbookContext`, `ThemeContext`, `AxesContext`, `useSwatchbookData`, `useOptionalSwatchbookData`, `useActiveTheme`, and `useActiveAxes` from `@unpunnyfuns/swatchbook-addon` into `@unpunnyfuns/swatchbook-blocks` so the workspace dep graph runs addon → blocks (the direction it was always meant to). The addon re-exports the same names for back-compat with existing `@unpunnyfuns/swatchbook-addon` and `@unpunnyfuns/swatchbook-addon/hooks` imports; new code should import directly from `@unpunnyfuns/swatchbook-blocks`. Closes issue #202.
+**Breaking.** `SwatchbookProvider`, `SwatchbookContext`, `ThemeContext`, `AxesContext`, `useSwatchbookData`, `useOptionalSwatchbookData`, `useActiveTheme`, `useActiveAxes`, and the `Virtual*Shape` / `ProjectSnapshot` types now live exclusively in `@unpunnyfuns/swatchbook-blocks`. They are no longer exported from `@unpunnyfuns/swatchbook-addon` — import them from `@unpunnyfuns/swatchbook-blocks` directly. Workspace dep graph runs addon → blocks, which is the direction it was always meant to. Closes issue #202.

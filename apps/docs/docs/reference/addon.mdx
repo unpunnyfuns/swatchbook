@@ -79,17 +79,13 @@ function Brand() {
 
 Paths autocomplete from the generated `.swatchbook/tokens.d.ts`. Add `"include": [".swatchbook/**/*.d.ts"]` to your consumer tsconfig.
 
-### `useActiveTheme()`
+### `useActiveTheme()` / `useActiveAxes()`
 
-Returns the current composed permutation ID as a string. Useful for "show the active theme name" UI.
-
-### `useActiveAxes()`
-
-Returns the active tuple as `Readonly<Record<string, string>>`. Use when you need per-axis info rather than the composed name.
+Exposed from `@unpunnyfuns/swatchbook-blocks` — see the [blocks reference](./blocks.mdx). `useActiveTheme()` returns the current composed permutation ID as a string; `useActiveAxes()` returns the active tuple as `Readonly<Record<string, string>>`.
 
 ## Contexts
 
-Exposed from `@unpunnyfuns/swatchbook-addon`.
+Exposed from `@unpunnyfuns/swatchbook-blocks`.
 
 - `ThemeContext` — React context carrying the composed permutation ID.
 - `AxesContext` — React context carrying the tuple.
