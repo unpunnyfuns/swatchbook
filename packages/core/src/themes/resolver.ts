@@ -21,38 +21,40 @@ export interface ResolverLoadResult {
  * `resolver.listPermutations()` and realize each with `resolver.apply()`.
  */
 export async function loadResolverThemes(
-  resolverPath: string,
+  resolverPath: string | undefined,
   tokenGlobs: string[],
   cwd: string,
   logger: BufferedLogger,
   explicitDefault?: string,
 ): Promise<ResolverLoadResult> {
-  const absolute = isAbsolute(resolverPath) ? resolverPath : resolvePath(cwd, resolverPath);
   const cwdUrl = pathToFileURL(`${cwd}/`);
   const terrazzoConfig = defineTerrazzoConfig({}, { logger, cwd: cwdUrl });
 
   const tokenFiles = await collectGlobbedFiles(tokenGlobs, cwd);
-
-  // `loadResolver` expects the resolver file alone as input and fetches
-  // referenced token files via `req`. Passing tokens up front triggers
-  // "Resolver must be the only input" errors.
-  const resolverInput = {
-    filename: pathToFileURL(absolute),
-    src: await readFile(absolute, 'utf8'),
-  };
 
   const req = async (url: URL): Promise<string> => {
     const filename = url.protocol === 'file:' ? fileURLToPath(url) : url.toString();
     return readFile(filename, 'utf8');
   };
 
-  const loaded = await loadResolver([resolverInput], {
-    config: terrazzoConfig,
-    logger,
-    req,
-  });
+  let loaded: Awaited<ReturnType<typeof loadResolver>> | undefined;
+  if (resolverPath) {
+    const absolute = isAbsolute(resolverPath) ? resolverPath : resolvePath(cwd, resolverPath);
+    // `loadResolver` expects the resolver file alone as input and fetches
+    // referenced token files via `req`. Passing tokens up front triggers
+    // "Resolver must be the only input" errors.
+    const resolverInput = {
+      filename: pathToFileURL(absolute),
+      src: await readFile(absolute, 'utf8'),
+    };
+    loaded = await loadResolver([resolverInput], {
+      config: terrazzoConfig,
+      logger,
+      req,
+    });
+  }
 
-  if (!loaded.resolver) {
+  if (!loaded?.resolver) {
     // Fall back to plain parse; no resolver found.
     const tokenInputs = await Promise.all(
       tokenFiles.map(async (filename) => ({

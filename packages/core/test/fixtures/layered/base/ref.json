@@ -1,0 +1,19 @@
+{
+  "color": {
+    "ref": {
+      "$type": "color",
+      "white": {
+        "$value": { "colorSpace": "srgb", "components": [1, 1, 1] }
+      },
+      "black": {
+        "$value": { "colorSpace": "srgb", "components": [0, 0, 0] }
+      },
+      "blue": {
+        "$value": { "colorSpace": "srgb", "components": [0.1, 0.3, 0.9] }
+      },
+      "red": {
+        "$value": { "colorSpace": "srgb", "components": [0.9, 0.2, 0.2] }
+      }
+    }
+  }
+}
