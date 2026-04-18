@@ -153,7 +153,7 @@ export function ShadowPreview({ filter = 'shadow', caption }: ShadowPreviewProps
         layers: asLayers(token.$value),
       });
     }
-    collected.sort((a, b) => a.path.localeCompare(b.path));
+    collected.sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true }));
     return collected;
   }, [resolved, filter, cssVarPrefix]);
 
