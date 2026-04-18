@@ -183,15 +183,15 @@ export const TypographyScaleRenders = meta.story({
  * section, and alias chain for a known path.
  */
 export const TokenDetailRenders = meta.story({
-  render: () => <TokenDetail path='cmp.button.bg' />,
+  render: () => <TokenDetail path='color.sys.accent.bg' />,
   play: async ({ canvasElement }) => {
     const heading = await waitForContent(canvasElement, 'h3');
-    expect(heading.textContent).toBe('cmp.button.bg');
+    expect(heading.textContent).toBe('color.sys.accent.bg');
 
     const bodyText = canvasElement.textContent ?? '';
     expect(bodyText, 'must render Resolved value section').toContain('Resolved value');
     expect(bodyText, 'must render Alias chain section').toContain('Alias chain');
-    expect(bodyText, 'must render the cssVar reference').toContain('var(--sb-cmp-button-bg)');
+    expect(bodyText, 'must render the cssVar reference').toContain('var(--sb-color-sys-accent-bg)');
   },
 });
 
@@ -413,8 +413,6 @@ export const TokenDetailAliasedBy = meta.story({
     );
     const hasSys = nodes.some((n) => n?.startsWith('color.sys.'));
     expect(hasSys, 'tree must include at least one sys descendant').toBe(true);
-    const hasCmp = nodes.some((n) => n?.startsWith('cmp.'));
-    expect(hasCmp, 'tree must include at least one transitive cmp descendant').toBe(true);
   },
 });
 

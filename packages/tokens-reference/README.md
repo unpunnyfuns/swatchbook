@@ -8,7 +8,6 @@ Exhaustive DTCG 2025.10 pyramid used as swatchbook's internal test bed. Private 
 | ---------- | ---------------------------------------------------- | ------------- |
 | `ref/`     | Raw primitives (no aliases, no semantics)            | none          |
 | `sys/`     | Semantic slots (theme-neutral shape)                 | → `ref/`      |
-| `cmp/`     | Component-scoped tokens                              | → `sys/`      |
 | `themes/`  | Sparse overrides of `sys/`                           | → `ref/`      |
 
 ## Theming compositions

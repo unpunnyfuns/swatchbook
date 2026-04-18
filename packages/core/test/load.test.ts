@@ -55,11 +55,11 @@ describe('loadProject — resolver mode', () => {
     expect(project.themes.length).toBe(cartesian);
   });
 
-  it('resolves deep alias chains (cmp → sys → ref)', () => {
+  it('resolves alias chains (sys → ref)', () => {
     const light = resolveTheme(project, 'Light · Default').tokens;
-    const buttonBg = light['cmp.button.bg'];
-    expect(buttonBg).toBeDefined();
-    expect(buttonBg?.$type).toBe('color');
+    const accentBg = light['color.sys.accent.bg'];
+    expect(accentBg).toBeDefined();
+    expect(accentBg?.$type).toBe('color');
   });
 
   it('produces different surface values for Light vs Dark at the same brand', () => {

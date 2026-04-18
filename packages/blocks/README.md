@@ -50,7 +50,7 @@ import { TokenTable, ColorPalette, TokenDetail } from '@unpunnyfuns/swatchbook-b
 <TokenTable filter="color.sys.*" type="color" />
 <ColorPalette filter="color.sys.*" groupBy={3} />
 <TypographyScale filter="typography" sample="The quick brown fox" />
-<TokenDetail path="cmp.button.bg" />
+<TokenDetail path="color.sys.accent.bg" />
 ```
 
 ## Do / don't

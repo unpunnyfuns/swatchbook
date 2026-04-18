@@ -31,5 +31,5 @@ export default meta;
 export const All = meta.story();
 export const ColorsOnly = meta.story({ args: { type: 'color' } });
 export const SysColors = meta.story({ args: { filter: 'color.sys.*' } });
-export const ComponentButton = meta.story({ args: { filter: 'cmp.button.*' } });
+export const SysTypography = meta.story({ args: { filter: 'typography.sys.*' } });
 export const DimensionsOnly = meta.story({ args: { type: 'dimension' } });
