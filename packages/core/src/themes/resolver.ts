@@ -80,13 +80,14 @@ export async function loadResolverThemes(
   const resolved: Record<string, TokenMap> = {};
 
   for (const input of permutations) {
-    // For single-axis resolvers the modifier value is itself the unique
-    // identifier — no need for Terrazzo's JSON-encoded `{"theme":"Light"}`.
-    // Multi-axis resolvers keep the full permutation ID since they need it
-    // to disambiguate.
-    const keys = Object.keys(input);
-    const id =
-      keys.length === 1 ? String(input[keys[0] as string]) : resolver.getPermutationID(input);
+    // Single-axis: the modifier value is itself the unique identifier
+    // (`Light` beats `{"theme":"Light"}`). Multi-axis: join the tuple values
+    // with `·` so downstream CSS selectors and toolbar labels stay readable.
+    // Terrazzo's `getPermutationID` would emit JSON here, which is lossless
+    // but hostile as a data-attribute value. A future pass replaces this
+    // stringification entirely once `Project.axes` lands (issue #131).
+    const values = Object.values(input).map(String);
+    const id = values.length === 1 ? (values[0] as string) : values.join(' · ');
     const tokens = resolver.apply(input);
     themes.push({ name: id, input: { ...input }, sources: [] });
     resolved[id] = tokens;
