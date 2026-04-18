@@ -10,7 +10,7 @@ Takes ~5 minutes if you already have a Storybook project.
 
 ## Install
 
-Install the addon for the toolbar, tokens + diagnostics panels, preview decorator, and `useToken()` hook:
+Install the addon for the toolbar, Design Tokens panel (tree + diagnostics), preview decorator, and `useToken()` hook:
 
 ```bash
 npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
@@ -69,8 +69,7 @@ pnpm storybook
 ## What you should see
 
 - **Toolbar**: one dropdown per modifier in your resolver. If you've written a single `theme` modifier with `Light`/`Dark` contexts, you get one dropdown; if you have `mode × brand`, you get two.
-- **Tokens panel** (bottom panel): every token your resolver yields, grouped by `$type`, searchable.
-- **Diagnostics panel**: empty with a green "OK" badge if your tokens are clean.
+- **Design Tokens panel** (bottom panel): hierarchical tree of every token your resolver yields, searchable. A diagnostics section beneath shows a green "OK" badge if your tokens are clean, or auto-expands to list warnings and errors.
 
 Switch themes from the toolbar; the panel's resolved values update live.
 

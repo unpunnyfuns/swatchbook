@@ -88,7 +88,7 @@ const css = projectCss(project);
 const dts = emitTypes(project);
 ```
 
-`project.diagnostics` is always populated — severity is `'error' | 'warn' | 'info'`. The addon surfaces these in its Diagnostics panel; your own pipeline can inspect / `throw` on `severity === 'error'` as fits.
+`project.diagnostics` is always populated — severity is `'error' | 'warn' | 'info'`. The addon surfaces these in its Design Tokens panel (diagnostics section); your own pipeline can inspect / `throw` on `severity === 'error'` as fits.
 
 ## Axes and theme naming
 

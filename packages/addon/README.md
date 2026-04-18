@@ -1,6 +1,6 @@
 # Addon
 
-Published as `@unpunnyfuns/swatchbook-addon`. Storybook 10 addon for DTCG design tokens. Loads your tokens at config time (via `@unpunnyfuns/swatchbook-core`), exposes the resolved graph to the preview through a virtual module, renders one toolbar dropdown per modifier axis (`mode`, `brand`, and so on) plus tokens and diagnostics panels, and ships a `useToken()` hook with typed paths.
+Published as `@unpunnyfuns/swatchbook-addon`. Storybook 10 addon for DTCG design tokens. Loads your tokens at config time (via `@unpunnyfuns/swatchbook-core`), exposes the resolved graph to the preview through a virtual module, renders one toolbar dropdown per modifier axis (`mode`, `brand`, and so on) plus a unified Design Tokens panel (hierarchical tree + diagnostics), and ships a `useToken()` hook with typed paths.
 
 > **Documentation:** [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/). Token parsing powered by [Terrazzo](https://terrazzo.app/) by [Drew Powers](https://github.com/drwpow) via `@unpunnyfuns/swatchbook-core`.
 
@@ -10,7 +10,7 @@ Published as `@unpunnyfuns/swatchbook-addon`. Storybook 10 addon for DTCG design
 npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
 ```
 
-This gives you the toolbar, tokens + diagnostics panels, preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `SwatchbookProvider`, block-side hooks) live in the sibling package — add it alongside if you want them:
+This gives you the toolbar, Design Tokens panel (hierarchical tree view with diagnostics), preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `SwatchbookProvider`, block-side hooks) live in the sibling package — add it alongside if you want them:
 
 ```sh
 npm install @unpunnyfuns/swatchbook-blocks
