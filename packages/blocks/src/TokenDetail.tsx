@@ -139,6 +139,12 @@ const styles = {
     background: 'var(--sb-color-sys-surface-raised, transparent)',
     borderRadius: 6,
   } satisfies CSSProperties,
+  gradientSample: {
+    width: 220,
+    height: 56,
+    borderRadius: 6,
+    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.15))',
+  } satisfies CSSProperties,
   fontFamilySample: {
     padding: '4px 0',
     fontSize: 22,
@@ -372,6 +378,18 @@ function CompositePreview({
     // Synthesize a transition at a fixed duration so the easing curve is
     // perceptible on its own.
     return <TransitionSample transition={`left 800ms ${cssVar}`} />;
+  }
+  if (type === 'gradient') {
+    // Terrazzo emits gradient tokens as a raw stop list (e.g.
+    // `rgb(…) 0%, rgb(…) 100%`) without wrapping them in a gradient
+    // function — consumers pick linear/radial/conic at use-site. Default
+    // to linear-gradient for a preview.
+    return (
+      <div
+        style={{ ...styles.gradientSample, background: `linear-gradient(to right, ${cssVar})` }}
+        aria-hidden
+      />
+    );
   }
   return null;
 }

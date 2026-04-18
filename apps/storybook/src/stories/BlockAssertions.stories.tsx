@@ -4,6 +4,7 @@ import {
   DimensionScale,
   FontFamilySample,
   FontWeightScale,
+  GradientPalette,
   MotionPreview,
   ShadowPreview,
   StrokeStyleSample,
@@ -112,6 +113,27 @@ export const ShadowPreviewRenders = meta.story({
     expect(
       withShadow.length,
       'at least one sample must resolve to a non-none box-shadow',
+    ).toBeGreaterThan(0);
+  },
+});
+
+/**
+ * `GradientPalette` renders gradient tokens with a `linear-gradient`
+ * sample each. At least one sample must resolve to a non-empty background
+ * that includes `gradient` (the computed shorthand).
+ */
+export const GradientPaletteRenders = meta.story({
+  render: () => <GradientPalette filter='gradient.ref.*' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'div[aria-hidden="true"]');
+    const samples = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
+    const withGradient = samples.filter((el) => {
+      const bg = getComputedStyle(el).backgroundImage;
+      return bg && bg.includes('gradient');
+    });
+    expect(
+      withGradient.length,
+      'at least one sample must resolve to a linear-gradient background',
     ).toBeGreaterThan(0);
   },
 });
