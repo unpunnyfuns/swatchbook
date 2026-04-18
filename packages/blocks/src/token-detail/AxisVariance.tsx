@@ -1,5 +1,7 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
+import { type ColorFormat, formatColor } from '#/internal/format-color.ts';
+import { useColorFormat } from '#/internal/use-color-format.ts';
 import { formatValue } from '#/internal/use-project.ts';
 import { styles } from '#/token-detail/styles.ts';
 import {
@@ -21,7 +23,9 @@ interface Variance {
 
 export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
   const { token, cssVar, axes, themes, themesResolved, activeAxes } = useTokenDetailData(path);
+  const colorFormat = useColorFormat();
   const isColor = token?.$type === 'color';
+  const formatFn = (t: DetailToken | undefined): string => valueFor(t, isColor, colorFormat);
 
   const variance = useMemo(
     () => analyzeVariance(path, axes, themes, themesResolved),
@@ -34,7 +38,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
 
   if (variance.kind === 'constant') {
     const anyTheme = themes[0];
-    const value = anyTheme ? themeValue(themesResolved, anyTheme.name, path) : '—';
+    const value = anyTheme ? formatFn(themesResolved[anyTheme.name]?.[path]) : '—';
     return (
       <>
         <div style={styles.sectionHeader}>Values across axes</div>
@@ -70,7 +74,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
       return {
         ctx,
         themeName: name,
-        value: name ? themeValue(themesResolved, name, path) : '—',
+        value: name ? formatFn(themesResolved[name]?.[path]) : '—',
       };
     });
     return (
@@ -133,7 +137,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                   [colAxis.name]: col,
                 };
                 const name = tupleName(themes, target);
-                const value = name ? themeValue(themesResolved, name, path) : '—';
+                const value = name ? formatFn(themesResolved[name]?.[path]) : '—';
                 return (
                   <td key={col} style={styles.themeCell} data-row={row} data-col={col}>
                     {isColor && name && (
@@ -159,6 +163,12 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
       )}
     </>
   );
+}
+
+function valueFor(token: DetailToken | undefined, isColor: boolean, format: ColorFormat): string {
+  if (!token) return '—';
+  if (isColor) return formatColor(token.$value, format).value;
+  return formatValue(token.$value);
 }
 
 function themeValue(

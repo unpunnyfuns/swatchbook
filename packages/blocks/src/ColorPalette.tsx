@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
-import { formatValue, globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
+import { formatColor } from '#/internal/format-color.ts';
+import { useColorFormat } from '#/internal/use-color-format.ts';
+import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface ColorPaletteProps {
   /**
@@ -88,6 +90,7 @@ interface Swatch {
   leaf: string;
   cssVar: string;
   value: string;
+  outOfGamut: boolean;
 }
 
 export function ColorPalette({
@@ -96,6 +99,7 @@ export function ColorPalette({
   caption,
 }: ColorPaletteProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const colorFormat = useColorFormat();
 
   const groups = useMemo(() => {
     const bucket = new Map<string, Swatch[]>();
@@ -111,17 +115,19 @@ export function ColorPalette({
       const groupKey = segments.slice(0, groupBy).join('.');
       const leaf = segments.slice(groupBy).join('.') || segments.at(-1) || path;
       const list = bucket.get(groupKey) ?? [];
+      const formatted = formatColor(token.$value, colorFormat);
       list.push({
         path,
         leaf,
         cssVar: makeCssVar(path, cssVarPrefix),
-        value: formatValue(token.$value),
+        value: formatted.value,
+        outOfGamut: formatted.outOfGamut,
       });
       bucket.set(groupKey, list);
     }
 
     return [...bucket.entries()].toSorted(([a], [b]) => a.localeCompare(b));
-  }, [resolved, filter, groupBy, cssVarPrefix]);
+  }, [resolved, filter, groupBy, cssVarPrefix, colorFormat]);
 
   const totalCount = groups.reduce((acc, [, swatches]) => acc + swatches.length, 0);
   const captionText =
@@ -148,7 +154,19 @@ export function ColorPalette({
                 <div style={{ ...styles.swatch, background: swatch.cssVar }} aria-hidden />
                 <div style={styles.meta}>
                   <span style={styles.leaf}>{swatch.leaf}</span>
-                  <span style={styles.value}>{swatch.value}</span>
+                  <span style={styles.value}>
+                    {swatch.value}
+                    {swatch.outOfGamut && (
+                      <span
+                        title='Out of sRGB gamut for this format'
+                        aria-label='out of gamut'
+                        style={{ marginLeft: 4 }}
+                      >
+                        {' '}
+                        ⚠
+                      </span>
+                    )}
+                  </span>
                 </div>
               </div>
             ))}

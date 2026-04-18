@@ -187,6 +187,10 @@ importers:
         version: 8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1)
 
   packages/blocks:
+    dependencies:
+      colorjs.io:
+        specifier: 0.6.1
+        version: 0.6.1
     devDependencies:
       '@testing-library/react':
         specifier: ^16.3.2

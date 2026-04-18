@@ -20,6 +20,7 @@ import {
 } from '@unpunnyfuns/swatchbook-blocks';
 import {
   AXES_GLOBAL_KEY,
+  COLOR_FORMAT_GLOBAL_KEY,
   DATA_THEME_ATTR,
   GLOBAL_KEY,
   INIT_EVENT,
@@ -260,6 +261,10 @@ export const globalTypes: NonNullable<Preview['globalTypes']> = {
     name: 'Axes',
     description: 'Per-axis context selection. Takes precedence over the composed theme name.',
   },
+  [COLOR_FORMAT_GLOBAL_KEY]: {
+    name: 'Color format',
+    description: 'Display format for color tokens in blocks. Emitted CSS is unaffected.',
+  },
 };
 
 function buildInitialAxes(): Record<string, string> {
@@ -271,4 +276,5 @@ function buildInitialAxes(): Record<string, string> {
 export const initialGlobals: NonNullable<Preview['initialGlobals']> = {
   [GLOBAL_KEY]: defaultTheme ?? themes[0]?.name ?? 'Light',
   [AXES_GLOBAL_KEY]: buildInitialAxes(),
+  [COLOR_FORMAT_GLOBAL_KEY]: 'hex',
 };

@@ -1,5 +1,7 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
+import { formatColor } from '#/internal/format-color.ts';
+import { useColorFormat } from '#/internal/use-color-format.ts';
 import { formatValue, globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface TokenTableProps {
@@ -93,6 +95,7 @@ export function TokenTable({
   caption,
 }: TokenTableProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const colorFormat = useColorFormat();
 
   const rows = useMemo(() => {
     const entries = Object.entries(resolved)
@@ -102,15 +105,20 @@ export function TokenTable({
         return true;
       })
       .toSorted(([a], [b]) => a.localeCompare(b));
-    return entries.map(([path, token]) => ({
-      path,
-      type: token.$type ?? '',
-      value: formatValue(token.$value),
-      description: token.$description ?? '',
-      cssVar: makeCssVar(path, cssVarPrefix),
-      isColor: token.$type === 'color',
-    }));
-  }, [resolved, filter, type, cssVarPrefix]);
+    return entries.map(([path, token]) => {
+      const isColor = token.$type === 'color';
+      const color = isColor ? formatColor(token.$value, colorFormat) : null;
+      return {
+        path,
+        type: token.$type ?? '',
+        value: color ? color.value : formatValue(token.$value),
+        outOfGamut: color?.outOfGamut ?? false,
+        description: token.$description ?? '',
+        cssVar: makeCssVar(path, cssVarPrefix),
+        isColor,
+      };
+    });
+  }, [resolved, filter, type, cssVarPrefix, colorFormat]);
 
   const captionText =
     caption ??
@@ -155,7 +163,16 @@ export function TokenTable({
                 {row.isColor && (
                   <span style={{ ...styles.swatch, background: row.cssVar }} aria-hidden />
                 )}
-                {row.value}
+                <span>{row.value}</span>
+                {row.outOfGamut && (
+                  <span
+                    title='Out of sRGB gamut for this format'
+                    aria-label='out of gamut'
+                    style={{ marginLeft: 6 }}
+                  >
+                    ⚠
+                  </span>
+                )}
               </td>
               {showVar && <td style={{ ...styles.td, ...styles.value }}>{row.cssVar}</td>}
               <td style={styles.td}>{row.description}</td>
