@@ -93,6 +93,16 @@ Per-axis value table. Collapses to a single row when the value is constant, a ve
 
 Copy-ready `color: var(--…);` reference snippet.
 
+### `<TokenNavigator root? initiallyExpanded? onSelect? />`
+
+Expandable tree view of the token graph, keyed on dot-path segments. Complements the flat `TokenTable` and the typed `ColorPalette` with an explorable hierarchy. Each interior group shows its child count; each leaf shows its `$type` pill plus an inline preview (color swatch, dimension bar, shadow / border / motion sample, or a formatted value fallback for types without a preview primitive).
+
+Props:
+
+- `root?: string` — mount at this subtree (e.g. `"color"`, `"typography.sys"`). Omit to show everything.
+- `initiallyExpanded?: number` — depth open on first render. `0` = all collapsed, `1` = top-level groups open (default), `2` = one level deeper, etc.
+- `onSelect?(path: string): void` — receives a leaf's full dot-path on click. When provided, the inline `<TokenDetail>` slide-over is suppressed and the consumer owns the follow-up UI; when omitted, clicking a leaf opens a fixed-position overlay with a full `<TokenDetail>` and a close button.
+
 ### `<TokenTable filter? type? />`
 
 Filterable table. Columns: name, value, resolved, description.

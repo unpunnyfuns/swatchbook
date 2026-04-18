@@ -17,6 +17,7 @@ Blocks read the token graph from a `SwatchbookProvider`. Inside Storybook, regis
 | Block               | What                                                                                |
 | ------------------- | ----------------------------------------------------------------------------------- |
 | `TokenTable`        | Searchable table of tokens, filterable by path glob and `$type`.                    |
+| `TokenNavigator`    | Expandable tree view of the token graph keyed on dot-path segments, with inline per-type previews. |
 | `ColorPalette`      | Swatch grid grouped by sub-path (`groupBy` controls depth).                         |
 | `TypographyScale`   | Each typography composite token rendered as a sample line using its own value.      |
 | `FontFamilySample`  | Pangram rendered per `fontFamily` primitive.                                        |
