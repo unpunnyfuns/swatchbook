@@ -435,6 +435,45 @@ export const TokenDetailMissing = meta.story({
 });
 
 /**
+ * `TokenDetail` for a token that varies only with the `brand` axis must
+ * render a compact 1-axis values table listing each brand context
+ * (Default, Brand A) exactly once — matching the axis-aware view from
+ * issue #136.
+ */
+export const TokenDetailOneAxisBrand = meta.story({
+  render: () => <TokenDetail path='color.sys.accent.bg' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const header = [...canvasElement.querySelectorAll('div')].find((el) =>
+      el.textContent?.trim().startsWith('Varies with brand'),
+    );
+    expect(header, 'must render "Varies with brand" section header').toBeTruthy();
+    const table = await waitForContent(canvasElement, '[data-testid="token-detail-values"]');
+    const rows = table.querySelectorAll('tr[data-axis="brand"]');
+    expect(rows.length, 'must render one row per brand context').toBe(2);
+    const contexts = [...rows].map((r) => r.getAttribute('data-context'));
+    expect(contexts).toEqual(expect.arrayContaining(['Default', 'Brand A']));
+  },
+});
+
+/**
+ * `TokenDetail` for a token that is constant across all axis tuples must
+ * render a single row that notes the value applies to every tuple.
+ */
+export const TokenDetailConstantAcrossAxes = meta.story({
+  render: () => <TokenDetail path='space.sys.md' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const header = [...canvasElement.querySelectorAll('div')].find(
+      (el) => el.textContent?.trim() === 'Values across axes',
+    );
+    expect(header, 'must render "Values across axes" section header').toBeTruthy();
+    const cell = await waitForContent(canvasElement, '[data-testid="token-detail-constant"]');
+    expect(cell.textContent ?? '').toMatch(/same across all/);
+  },
+});
+
+/**
  * The reference fixture is expected to load cleanly — zero errors, zero
  * warnings from the addon's project load. This story pins that baseline;
  * if a token change introduces a diagnostic, this test fails and pokes

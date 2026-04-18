@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { addons, useGlobals } from 'storybook/manager-api';
 import { Placeholder, ScrollArea } from 'storybook/internal/components';
-import { GLOBAL_KEY, INIT_EVENT } from '#/constants.ts';
+import { AXES_GLOBAL_KEY, GLOBAL_KEY, INIT_EVENT } from '#/constants.ts';
 
 /** `React.createElement` alias so the manager bundle avoids `react/jsx-runtime`. */
 const h = React.createElement;
@@ -19,6 +19,14 @@ interface VirtualTheme {
   sources: string[];
 }
 
+interface VirtualAxis {
+  name: string;
+  contexts: readonly string[];
+  default: string;
+  description?: string;
+  source: 'resolver' | 'synthetic';
+}
+
 type DiagnosticSeverity = 'error' | 'warn' | 'info';
 
 interface VirtualDiagnostic {
@@ -31,6 +39,7 @@ interface VirtualDiagnostic {
 }
 
 interface InitPayload {
+  axes: VirtualAxis[];
   themes: VirtualTheme[];
   defaultTheme: string | null;
   themesResolved: Record<string, Record<string, VirtualToken>>;
@@ -107,6 +116,12 @@ const searchBarStyle: React.CSSProperties = {
   padding: '8px 12px',
   borderBottom: '1px solid rgba(128,128,128,0.2)',
 };
+const axisIndicatorStyle: React.CSSProperties = {
+  fontSize: 11,
+  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace',
+  opacity: 0.7,
+  marginBottom: 6,
+};
 const searchInputStyle: React.CSSProperties = {
   width: '100%',
   padding: '4px 8px',
@@ -142,7 +157,41 @@ export function TokensPanel({ active }: PanelProps): ReactElement | null {
   const [globals] = useGlobals();
   const [query, setQuery] = useState('');
 
-  const themeName = (globals[GLOBAL_KEY] as string | undefined) ?? payload?.defaultTheme ?? '';
+  const axes = useMemo(() => payload?.axes ?? [], [payload]);
+  const themes = useMemo(() => payload?.themes ?? [], [payload]);
+  const globalAxes = globals[AXES_GLOBAL_KEY] as Record<string, string> | undefined;
+  const globalTheme = globals[GLOBAL_KEY] as string | undefined;
+
+  const tuple: Record<string, string> = useMemo(() => {
+    const out: Record<string, string> = {};
+    for (const axis of axes) out[axis.name] = axis.default;
+    if (globalAxes && typeof globalAxes === 'object') {
+      for (const axis of axes) {
+        const candidate = globalAxes[axis.name];
+        if (candidate && axis.contexts.includes(candidate)) out[axis.name] = candidate;
+      }
+      return out;
+    }
+    if (globalTheme) {
+      const match = themes.find((t) => t.name === globalTheme);
+      if (match) {
+        for (const axis of axes) {
+          const candidate = match.input[axis.name];
+          if (candidate && axis.contexts.includes(candidate)) out[axis.name] = candidate;
+        }
+      }
+    }
+    return out;
+  }, [axes, themes, globalAxes, globalTheme]);
+
+  const themeName = useMemo(() => {
+    const match = themes.find((t) => {
+      const input = t.input;
+      return Object.keys(input).every((k) => input[k] === tuple[k]);
+    });
+    return match?.name ?? globalTheme ?? payload?.defaultTheme ?? '';
+  }, [themes, tuple, globalTheme, payload]);
+
   const prefix = payload?.cssVarPrefix ?? '';
   const tokens = useMemo(() => payload?.themesResolved[themeName] ?? {}, [payload, themeName]);
   const tokenCount = Object.keys(tokens).length;
@@ -167,12 +216,27 @@ export function TokensPanel({ active }: PanelProps): ReactElement | null {
 
   const totalMatches = [...filtered.values()].reduce((n, l) => n + l.length, 0);
 
+  const showAxisIndicator =
+    axes.length > 1 || (axes.length === 1 && axes[0]?.source !== 'synthetic');
+  const axisIndicatorText = axes
+    .map((axis) => `${axis.name}: ${tuple[axis.name] ?? axis.default}`)
+    .join('  ·  ');
+
   return h(
     'div',
     { style: { display: 'flex', flexDirection: 'column', height: '100%' } },
     h(
       'div',
       { style: searchBarStyle },
+      showAxisIndicator &&
+        h(
+          'div',
+          {
+            style: axisIndicatorStyle,
+            'data-testid': 'tokens-panel-axis-indicator',
+          },
+          axisIndicatorText,
+        ),
       h('input', {
         style: searchInputStyle,
         type: 'search',
