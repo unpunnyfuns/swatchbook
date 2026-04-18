@@ -11,7 +11,7 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Current milestone
 
-`Current: Documentation site` — seeded 2026-04-18 with issues #151 + #152. Public docs at GH Pages: Docusaurus at `/`, Storybook static build at `/storybook`. Docusaurus holds narrative + concepts + reference (no live blocks, no runtime token integration); Storybook is the live DTCG documentation rendered by our own addon. Dogfood (Infima overrides) deferred indefinitely. Prior milestones all closed 2026-04-18–2026-04-19.
+`Current: between milestones` — Documentation site closed 2026-04-18 (issues #151 + #152 landed; first deploy verified green). Site is live at https://unpunnyfuns.github.io/swatchbook/ with Storybook mounted under /storybook/. Dogfood (Infima overrides) deferred indefinitely. Prior milestones all closed 2026-04-18–2026-04-19. No feature milestone is active.
 
 Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
 
