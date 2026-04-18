@@ -1,6 +1,8 @@
 # @unpunnyfuns/swatchbook-core
 
-Framework-free DTCG loader. Parses token files (via Terrazzo), resolves aliases, composes themes through a DTCG 2025.10 resolver, and emits CSS variables + TypeScript types.
+Framework-free DTCG loader. Parses token files via [Terrazzo](https://terrazzo.app/), resolves aliases, composes themes through a DTCG 2025.10 resolver, and emits CSS variables and TypeScript types.
+
+> **Documentation:** [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/).
 
 ## Install
 
@@ -38,7 +40,7 @@ The resolver file is the spec-defined document describing how token sets compose
 
 ### Layered axes (resolver-less)
 
-Projects that don't want to author a DTCG resolver can declare axes inline. Each context names an ordered list of overlay files that layer on top of `tokens` for that context; for every cartesian tuple, Swatchbook parses `[...base, ...overlaysInAxisOrder]` with alias resolution — last write wins on duplicate token paths:
+Projects that don't want to author a DTCG resolver can declare axes inline. Each context names an ordered list of overlay files that layer on top of `tokens` for that context; for every combination of axis contexts, Swatchbook parses `[...base, ...overlaysInAxisOrder]` with alias resolution — last write wins on duplicate token paths:
 
 ```ts
 import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
@@ -108,7 +110,7 @@ Each preset names a partial tuple; any axis the preset omits resolves to that ax
 
 ## CSS emission
 
-Multi-axis projects emit one `:root` block with the default-tuple values, plus one block per non-default cartesian tuple keyed on a compound attribute selector in `Project.axes` order:
+Multi-axis projects emit one `:root` block with the default-tuple values, plus one block per non-default combination of axis contexts keyed on a compound attribute selector in `Project.axes` order:
 
 ```css
 :root { --sb-color-sys-surface-default: rgb(255 255 255); … }
@@ -128,8 +130,13 @@ Single-axis projects (one resolver modifier, or the synthetic `theme` axis) keep
 - ❌ Don't import from `@terrazzo/parser` directly unless you need features core doesn't expose. Stay on the core surface so upgrades don't churn your code.
 - ❌ Don't ship the `Project` object to the browser — it's node-parsed and carries full raw-AST references. Use `emitCss` / `emitTypes` / `themesResolved` projections instead.
 
+## Credits
+
+Token parsing, alias resolution, and DTCG resolver evaluation are provided by [Terrazzo](https://terrazzo.app/) by [Drew Powers](https://github.com/drwpow). This package wraps those APIs into a Swatchbook-shaped project.
+
 ## See also
 
 - [`@unpunnyfuns/swatchbook-addon`](../addon) — the Storybook wrapper. Uses `loadProject` at startup, exposes results over a virtual module.
 - [`@unpunnyfuns/swatchbook-blocks`](../blocks) — React doc blocks consumed from MDX.
 - [Project README](../../README.md) — install + wiring flow for the whole toolchain.
+- [Documentation](https://unpunnyfuns.github.io/swatchbook/) — concepts, guides, and full API reference.
