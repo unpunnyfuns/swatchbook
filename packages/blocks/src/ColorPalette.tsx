@@ -14,7 +14,13 @@ export interface ColorPaletteProps {
   /**
    * Grouping depth. Tokens are grouped by the first `groupBy` dot-segments
    * of their path. `2` yields groups like `color.sys`, `color.ref`; `3`
-   * yields `color.sys.surface`, `color.sys.text`, etc. Defaults to `3`.
+   * yields `color.sys.surface`, `color.sys.text`, etc.
+   *
+   * If omitted, groupBy is derived from the filter: one level below the
+   * filter's fixed prefix (segments before the first `*`), clamped so each
+   * swatch still carries a leaf label. `"color.sys.*"` → groups at
+   * `color.sys.<family>`; `"color.ref.blue.*"` collapses all shades into
+   * one `color.ref.blue` group because the tokens have no deeper level.
    */
   groupBy?: number;
   /** Override the section caption. */
@@ -93,16 +99,30 @@ interface Swatch {
   outOfGamut: boolean;
 }
 
+/**
+ * Count segments in the filter before the first glob (`*` / `**`).
+ * `color.ref.*` → 2; `color.sys.surface.*` → 3; `color` → 1; undefined → 0.
+ */
+function fixedPrefixLength(filter: string | undefined): number {
+  if (!filter) return 0;
+  const segments = filter.split('.');
+  let fixed = 0;
+  for (const seg of segments) {
+    if (seg === '*' || seg === '**') break;
+    fixed += 1;
+  }
+  return fixed;
+}
+
 export function ColorPalette({
   filter = 'color',
-  groupBy = 3,
+  groupBy,
   caption,
 }: ColorPaletteProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
   const colorFormat = useColorFormat();
 
   const groups = useMemo(() => {
-    const bucket = new Map<string, Swatch[]>();
     const entries = Object.entries(resolved)
       .filter(([path, token]) => {
         if (token.$type !== 'color') return false;
@@ -110,10 +130,22 @@ export function ColorPalette({
       })
       .toSorted(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }));
 
+    const maxDepth = entries.reduce((m, [p]) => Math.max(m, p.split('.').length), 0);
+    /**
+     * Auto-derive: group one level below the filter's fixed prefix, but
+     * clamp so each swatch retains at least one leaf segment. A filter
+     * like `color.ref.blue.*` (fixed length 3) with only 4-segment tokens
+     * would try groupBy=4 → one-per-group; clamp to `maxDepth - 1` so the
+     * whole ramp lands in one group with each shade as a leaf.
+     */
+    const effectiveGroupBy =
+      groupBy ?? Math.min(fixedPrefixLength(filter) + 1, Math.max(maxDepth - 1, 1));
+
+    const bucket = new Map<string, Swatch[]>();
     for (const [path, token] of entries) {
       const segments = path.split('.');
-      const groupKey = segments.slice(0, groupBy).join('.');
-      const leaf = segments.slice(groupBy).join('.') || segments.at(-1) || path;
+      const groupKey = segments.slice(0, effectiveGroupBy).join('.');
+      const leaf = segments.slice(effectiveGroupBy).join('.') || segments.at(-1) || path;
       const list = bucket.get(groupKey) ?? [];
       const formatted = formatColor(token.$value, colorFormat);
       list.push({

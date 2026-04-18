@@ -14,5 +14,5 @@ export default meta;
 
 export const All = meta.story();
 export const SysOnly = meta.story({ args: { filter: 'color.sys.*' } });
-export const RefBlue = meta.story({ args: { filter: 'color.ref.blue.*', groupBy: 3 } });
+export const RefBlue = meta.story({ args: { filter: 'color.ref.blue.*' } });
 export const Flat = meta.story({ args: { groupBy: 2 } });
