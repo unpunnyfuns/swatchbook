@@ -31,12 +31,14 @@ import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
 export default defineSwatchbookConfig({
   tokens: ['tokens/**/*.json'],
   resolver: 'tokens/resolver.json',
-  default: 'Light',
+  default: { mode: 'Light', brand: 'Default' },
   cssVarPrefix: 'sb',
 });
 ```
 
 The resolver file is the spec-defined document describing how token sets compose into named themes — see [the DTCG 2025.10 resolver draft](https://design-tokens.org/tr/2025/drafts/resolver/).
+
+`default` is a partial tuple keyed by axis name. Any axis you omit falls back to that axis's own `default`; unknown keys and invalid context values produce `warn` diagnostics and are sanitized out. Omit `default` entirely to start the project in the all-axis-defaults tuple.
 
 ### Layered axes (resolver-less)
 

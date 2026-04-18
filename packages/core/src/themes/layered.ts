@@ -9,7 +9,6 @@ export interface LayeredLoadResult {
   axes: Axis[];
   themes: Theme[];
   resolved: Record<string, TokenMap>;
-  defaultThemeName: string;
 }
 
 /**
@@ -25,7 +24,6 @@ export async function loadLayeredThemes(
   tokenGlobs: string[],
   cwd: string,
   logger: BufferedLogger,
-  explicitDefault?: string,
 ): Promise<LayeredLoadResult> {
   const cwdUrl = pathToFileURL(`${cwd}/`);
   const terrazzoConfig = defineTerrazzoConfig({}, { logger, cwd: cwdUrl });
@@ -92,17 +90,7 @@ export async function loadLayeredThemes(
     resolved[id] = tokens;
   }
 
-  const defaultInput: Record<string, string> = {};
-  for (const ax of axesConfig) defaultInput[ax.name] = ax.default;
-  const defaultByAxes = permutationID(defaultInput);
-  const defaultThemeName =
-    explicitDefault && resolved[explicitDefault]
-      ? explicitDefault
-      : resolved[defaultByAxes]
-        ? defaultByAxes
-        : (themes[0]?.name ?? '');
-
-  return { axes, themes, resolved, defaultThemeName };
+  return { axes, themes, resolved };
 }
 
 function cartesianTuples(axesConfig: AxisConfig[]): Record<string, string>[] {

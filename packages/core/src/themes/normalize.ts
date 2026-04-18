@@ -7,7 +7,6 @@ export interface NormalizedThemes {
   axes: Axis[];
   themes: Theme[];
   resolved: Record<string, TokenMap>;
-  defaultThemeName: string;
   /** Files loaded as source-only (not emitted to CSS). Reserved for future use. */
   sourceOnlyFiles: Set<string>;
 }
@@ -27,10 +26,10 @@ export async function normalizeThemes(
   }
 
   if (config.axes) {
-    const r = await loadLayeredThemes(config.axes, config.tokens, cwd, logger, config.default);
+    const r = await loadLayeredThemes(config.axes, config.tokens, cwd, logger);
     return { ...r, sourceOnlyFiles: new Set() };
   }
 
-  const r = await loadResolverThemes(config.resolver, config.tokens, cwd, logger, config.default);
+  const r = await loadResolverThemes(config.resolver, config.tokens, cwd, logger);
   return { ...r, sourceOnlyFiles: new Set() };
 }

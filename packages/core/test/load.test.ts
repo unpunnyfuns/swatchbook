@@ -11,7 +11,11 @@ describe('loadProject — resolver mode', () => {
 
   beforeAll(async () => {
     project = await loadProject(
-      { tokens: ['tokens/**/*.json'], resolver: resolverPath, default: 'Light · Default' },
+      {
+        tokens: ['tokens/**/*.json'],
+        resolver: resolverPath,
+        default: { mode: 'Light', brand: 'Default' },
+      },
       fixtureCwd,
     );
   }, 30_000);
