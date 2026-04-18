@@ -186,6 +186,36 @@ export const MotionPreviewRenders = meta.story({
 });
 
 /**
+ * `TokenDetail` gains a preview for both strokeStyle shapes: string form
+ * (border-top-style on a line) and object form (SVG stroke with
+ * dasharray). Assert both render a visible element beyond the text value.
+ */
+export const TokenDetailStrokeStyleString = meta.story({
+  render: () => <TokenDetail path='stroke.ref.style.dashed' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const line = canvasElement.querySelector<HTMLElement>('div[aria-hidden="true"]');
+    expect(line, 'string-form strokeStyle must render a bordered line element').not.toBeNull();
+    if (line) {
+      const style = getComputedStyle(line).borderTopStyle;
+      expect(style, 'border-top-style must reflect the token value').toBe('dashed');
+    }
+  },
+});
+
+export const TokenDetailStrokeStyleObject = meta.story({
+  render: () => <TokenDetail path='stroke.ref.style.custom-dash' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const svg = canvasElement.querySelector('svg');
+    expect(svg, 'object-form strokeStyle must render an SVG preview').not.toBeNull();
+    const stroke = svg?.querySelector('line');
+    expect(stroke?.getAttribute('stroke-dasharray')).toBeTruthy();
+    expect(stroke?.getAttribute('stroke-linecap')).toBe('round');
+  },
+});
+
+/**
  * `TypographyScale` must render one row per typography token with the
  * sample text visible.
  */
