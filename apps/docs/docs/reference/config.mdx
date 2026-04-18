@@ -4,9 +4,38 @@ title: Config reference
 sidebar_position: 0
 ---
 
-# `swatchbook.config.ts` reference
+# Config reference
 
 Every field on the `Config` object, with the semantics `loadProject` applies at runtime.
+
+## Two ways to supply it
+
+Inline in `.storybook/main.ts` (recommended):
+
+```ts title=".storybook/main.ts"
+import { defineMain } from '@storybook/react-vite/node';
+
+export default defineMain({
+  framework: '@storybook/react-vite',
+  addons: [
+    {
+      name: '@unpunnyfuns/swatchbook-addon',
+      options: {
+        config: {
+          resolver: 'tokens/resolver.json',
+          default: { mode: 'Dark', brand: 'Brand A' },
+          cssVarPrefix: 'ds',
+          presets: [
+            { name: 'A11y High Contrast', axes: { mode: 'Light', contrast: 'High' } },
+          ],
+        },
+      },
+    },
+  ],
+});
+```
+
+Or in its own file, referenced by path:
 
 ```ts title="swatchbook.config.ts"
 import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
@@ -15,13 +44,17 @@ export default defineSwatchbookConfig({
   resolver: 'tokens/resolver.json',
   default: { mode: 'Dark', brand: 'Brand A' },
   cssVarPrefix: 'ds',
-  presets: [
-    { name: 'A11y High Contrast', axes: { mode: 'Light', contrast: 'High' } },
-  ],
 });
 ```
 
-`defineSwatchbookConfig` is an identity helper — it gives you typed autocomplete on the object you pass in and returns it unchanged.
+```ts title=".storybook/main.ts"
+{
+  name: '@unpunnyfuns/swatchbook-addon',
+  options: { configPath: '../swatchbook.config.ts' },
+}
+```
+
+The separate file path (`configPath`) is useful when the same config is consumed by other tooling — a CLI, a CI lint job, a custom build script. For Storybook-only projects, inline is one less file to track. `defineSwatchbookConfig` is an identity helper — it gives you typed autocomplete on the object you pass in and returns it unchanged.
 
 ## Picking a theming input
 
