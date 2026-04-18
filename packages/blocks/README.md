@@ -23,7 +23,14 @@ Requires `@unpunnyfuns/swatchbook-addon` to be registered in your Storybook conf
 | `FontWeightScale`   | Same sample text rendered at each `fontWeight` primitive, sorted ascending.         |
 | `StrokeStyleSample` | Border rendered per `strokeStyle` primitive.                                        |
 | `GradientPalette`   | Wide swatch per `gradient` token with stop breakdown (linear-gradient default).      |
-| `TokenDetail`       | Single-token inspector — type, value, alias chain, aliased-by tree, per-axis variance, composite preview. |
+| `TokenDetail`       | Single-token inspector — composition of the subcomponents below. |
+| `TokenHeader`       | Heading + `$type` pill + cssVar + `$description`, or a missing-token empty state. |
+| `CompositePreview`  | Type-dispatched live preview (typography, shadow, border, transition, dimension, duration, cubicBezier, fontFamily, fontWeight, strokeStyle, gradient, color). |
+| `CompositeBreakdown`| Labelled sub-value grid for composite types (typography / border / transition / shadow / gradient). |
+| `AliasChain`        | Forward alias chain (`path → alias → …`). Renders nothing for non-aliases. |
+| `AliasedBy`         | Aliased-by tree (backward). Truncates at depth 6. |
+| `AxisVariance`      | Per-axis value table — constant, one-axis, or two-axis matrix view. |
+| `TokenUsageSnippet` | Copy-ready `color: var(--…);` snippet. |
 
 Shared: every block accepts a `caption` override and renders against the addon's `var(--<prefix>-…)` output.
 
