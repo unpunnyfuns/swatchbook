@@ -40,6 +40,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     themes: normalized.themes,
     themesResolved: normalized.resolved,
     graph,
+    sourceFiles: normalized.sourceFiles,
     diagnostics: [...toDiagnostics(logger), ...defaultDiagnostics, ...presetDiagnostics],
   };
 }

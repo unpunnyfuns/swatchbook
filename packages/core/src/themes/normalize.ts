@@ -7,14 +7,16 @@ export interface NormalizedThemes {
   axes: Axis[];
   themes: Theme[];
   resolved: Record<string, TokenMap>;
+  sourceFiles: string[];
   /** Files loaded as source-only (not emitted to CSS). Reserved for future use. */
   sourceOnlyFiles: Set<string>;
 }
 
 /**
  * Realize themes from the config. Exactly one of `resolver` or `axes` may
- * be set; if neither is set, we fall back to a single synthetic axis
- * containing the plain-parsed token files.
+ * be set; when neither is set, we fall back to a single synthetic axis
+ * containing the plain-parsed token files (which then must be supplied
+ * via `config.tokens`).
  */
 export async function normalizeThemes(
   config: Config,
@@ -26,6 +28,11 @@ export async function normalizeThemes(
   }
 
   if (config.axes) {
+    if (!config.tokens || config.tokens.length === 0) {
+      throw new Error(
+        'swatchbook: config with `axes` must also supply `tokens` (the base token files the overlays layer onto).',
+      );
+    }
     const r = await loadLayeredThemes(config.axes, config.tokens, cwd, logger);
     return { ...r, sourceOnlyFiles: new Set() };
   }

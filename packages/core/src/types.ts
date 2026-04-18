@@ -52,8 +52,20 @@ export interface AxisConfig {
 
 /** Swatchbook configuration. Supply either `resolver` or `axes`, not both. */
 export interface Config {
-  /** Glob patterns for base DTCG token files. */
-  tokens: string[];
+  /**
+   * Glob patterns for base DTCG token files.
+   *
+   * Required when neither `resolver` nor `axes` is set (plain-parse mode),
+   * and when `axes` is set (the layered loader needs a base token list).
+   *
+   * Optional when `resolver` is set: the resolver's own `$ref` targets
+   * fully determine which files get loaded, and the addon's Vite plugin
+   * derives HMR watch paths from the resolved source list. Supplying
+   * `tokens` alongside `resolver` overrides the watch path derivation —
+   * useful when you want HMR to watch directories broader than the
+   * resolver references directly.
+   */
+  tokens?: string[];
   /** Path to a DTCG 2025.10 resolver file. Mutually exclusive with `axes`. */
   resolver?: string;
   /** Authored layered axes. Mutually exclusive with `resolver`. */
@@ -99,6 +111,14 @@ export interface Project {
   themesResolved: Record<string, TokenMap>;
   /** Default theme's resolved tokens — convenience for global views. */
   graph: TokenMap;
+  /**
+   * Absolute paths of every file loaded while building the project —
+   * the resolver file (if any), every `$ref` target it pulled in, every
+   * overlay file the layered loader concatenated, or every globbed file
+   * the plain-parse fallback consumed. Consumers use this for file-watching
+   * (the addon's Vite plugin does exactly that).
+   */
+  sourceFiles: string[];
   diagnostics: Diagnostic[];
 }
 
