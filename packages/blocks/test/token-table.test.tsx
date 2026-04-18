@@ -12,6 +12,7 @@ function makeSnapshot(): ProjectSnapshot {
         source: 'resolver',
       },
     ],
+    disabledAxes: [],
     presets: [],
     themes: [
       { name: 'Light', input: { mode: 'light' }, sources: [] },
