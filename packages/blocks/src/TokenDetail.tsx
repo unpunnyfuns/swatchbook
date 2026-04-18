@@ -7,6 +7,7 @@ import { AliasedBy } from '#/token-detail/AliasedBy.tsx';
 import { AxisVariance } from '#/token-detail/AxisVariance.tsx';
 import { CompositeBreakdown } from '#/token-detail/CompositeBreakdown.tsx';
 import { CompositePreview } from '#/token-detail/CompositePreview.tsx';
+import { ConsumerOutput } from '#/token-detail/ConsumerOutput.tsx';
 import { styles } from '#/token-detail/styles.ts';
 import { TokenHeader } from '#/token-detail/TokenHeader.tsx';
 import { TokenUsageSnippet } from '#/token-detail/TokenUsageSnippet.tsx';
@@ -61,8 +62,9 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
 
       <AliasChain path={path} />
       <AliasedBy path={path} />
-      <AxisVariance path={path} />
       <TokenUsageSnippet path={path} />
+      <ConsumerOutput path={path} />
+      <AxisVariance path={path} />
     </div>
   );
 }
