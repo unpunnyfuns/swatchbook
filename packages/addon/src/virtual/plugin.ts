@@ -45,6 +45,7 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
         `/* swatchbook virtual module — generated */`,
         `export const axes = ${JSON.stringify(project.axes)};`,
         `export const presets = ${JSON.stringify(project.presets)};`,
+        `export const disabledAxes = ${JSON.stringify(project.disabledAxes)};`,
         `export const themes = ${JSON.stringify(project.themes)};`,
         `export const defaultTheme = ${JSON.stringify(project.themes[0]?.name ?? null)};`,
         `export const themesResolved = ${JSON.stringify(project.themesResolved)};`,

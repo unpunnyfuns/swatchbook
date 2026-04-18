@@ -44,6 +44,7 @@ declare module 'virtual:swatchbook/tokens' {
   }
 
   export const axes: readonly VirtualAxis[];
+  export const disabledAxes: readonly string[];
   export const presets: readonly VirtualPreset[];
   export const themes: readonly VirtualTheme[];
   export const defaultTheme: string | null;

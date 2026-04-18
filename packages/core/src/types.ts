@@ -83,6 +83,15 @@ export interface Config {
   outDir?: string;
   /** Named tuple presets — rendered as quick-select pills in the toolbar. */
   presets?: Preset[];
+  /**
+   * Axis names to suppress from the toolbar and CSS emission. Each listed
+   * axis is pinned to its `default` context: it disappears from
+   * `Project.axes`, its tuples collapse into the default-context slice, and
+   * emitted CSS drops it from the compound selector. Unknown names produce
+   * `warn` diagnostics (group `swatchbook/disabled-axes`) and are ignored.
+   * Config-level only — no runtime toggle.
+   */
+  disabledAxes?: string[];
 }
 
 export type DiagnosticSeverity = 'error' | 'warn' | 'info';
@@ -104,6 +113,14 @@ export interface Diagnostic {
 export interface Project {
   config: Config;
   axes: Axis[];
+  /**
+   * Axis names suppressed via `config.disabledAxes`. Validated against the
+   * resolver's axis list at load time — unknown names are dropped here and
+   * surface as `warn` diagnostics. Downstream tooling (panels, blocks) can
+   * read this to indicate that a modifier exists in the resolver but is
+   * pinned to its default for this session.
+   */
+  disabledAxes: string[];
   /** Validated + sanitized presets from `config.presets`. Empty if unset. */
   presets: Preset[];
   themes: Theme[];

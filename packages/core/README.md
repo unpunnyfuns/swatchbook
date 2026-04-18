@@ -113,6 +113,21 @@ export default defineSwatchbookConfig({
 
 Each preset names a partial tuple; any axis the preset omits resolves to that axis's `default` when applied. `loadProject` validates presets: unknown axis keys and invalid context values surface as `warn` diagnostics and are sanitized out, but the preset stays in `Project.presets` (an empty preset is still a valid tuple).
 
+## Disabling axes
+
+`config.disabledAxes` suppresses declared axes from the toolbar, CSS emission, and theme enumeration — each listed axis is pinned to its `default` context and drops out of `Project.axes`. Useful when the resolver declares a work-in-progress modifier you don't want surfaced yet, without editing the resolver document.
+
+```ts
+export default defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  disabledAxes: ['contrast'],
+});
+```
+
+- Disabled names land on `Project.disabledAxes` so panels and blocks can still indicate the axis exists but is pinned.
+- Unknown axis names produce `warn` diagnostics (group `swatchbook/disabled-axes`) and are ignored.
+- Config-level only — there's no runtime toggle.
+
 ## CSS emission
 
 Multi-axis projects emit one `:root` block with the default-tuple values, plus one block per non-default combination of axis contexts keyed on a compound attribute selector in `Project.axes` order:
