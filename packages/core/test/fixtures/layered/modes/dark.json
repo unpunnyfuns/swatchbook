@@ -1,0 +1,9 @@
+{
+  "color": {
+    "sys": {
+      "$type": "color",
+      "surface": { "$value": "{color.ref.black}" },
+      "text":    { "$value": "{color.ref.white}" }
+    }
+  }
+}

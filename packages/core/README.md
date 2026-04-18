@@ -19,7 +19,7 @@ pnpm add @unpunnyfuns/swatchbook-core
 | `projectCss(project)` | Same as `emitCss` with project defaults (prefix + axes) applied. |
 | `emitTypes(project)` | TypeScript source declaring the token-path union + `SwatchbookTokenMap`. |
 | `permutationID(input)` | Stringify a tuple (`{ mode: 'Dark', brand: 'Brand A' }` → `"Dark · Brand A"`) to the form used as `Theme.name` and CSS data-attribute values. |
-| Types | `Axis`, `Config`, `Theme`, `Project`, `ResolvedTheme`, `TokenMap`, `Diagnostic`, `DiagnosticSeverity`. |
+| Types | `Axis`, `AxisConfig`, `Config`, `Theme`, `Project`, `ResolvedTheme`, `TokenMap`, `Diagnostic`, `DiagnosticSeverity`. |
 
 ## Minimal config
 
@@ -36,6 +36,40 @@ export default defineSwatchbookConfig({
 
 The resolver file is the spec-defined document describing how token sets compose into named themes — see [the DTCG 2025.10 resolver draft](https://design-tokens.org/tr/2025/drafts/resolver/).
 
+### Layered axes (resolver-less)
+
+Projects that don't want to author a DTCG resolver can declare axes inline. Each context names an ordered list of overlay files that layer on top of `tokens` for that context; for every cartesian tuple, Swatchbook parses `[...base, ...overlaysInAxisOrder]` with alias resolution — last write wins on duplicate token paths:
+
+```ts
+import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
+
+export default defineSwatchbookConfig({
+  tokens: ['tokens/base/**/*.json'],
+  axes: [
+    {
+      name: 'mode',
+      contexts: {
+        Light: [],
+        Dark: ['tokens/modes/dark.json'],
+      },
+      default: 'Light',
+    },
+    {
+      name: 'brand',
+      contexts: {
+        Default: [],
+        'Brand A': ['tokens/brands/brand-a.json'],
+      },
+      default: 'Default',
+    },
+  ],
+});
+```
+
+- ✅ Empty context arrays are legal — they mean "no override" (common for a `Default` context).
+- ❌ Setting both `resolver` and `axes` is an error. Pick one.
+- ❌ Setting neither falls back to a single synthetic `theme` axis (unchanged behavior).
+
 ## Load + emit
 
 ```ts
@@ -51,7 +85,7 @@ const dts = emitTypes(project);
 
 ## Axes and theme naming
 
-`Project.axes` surfaces the resolver's modifiers as first-class — one `Axis` per DTCG modifier, each with its `contexts`, `default`, and `description`. Projects loaded without a resolver fall back to a single synthetic axis named `theme`.
+`Project.axes` surfaces the theming modifiers as first-class — one `Axis` per resolver modifier (`source: 'resolver'`) or per authored layered axis (`source: 'layered'`), each with its `contexts`, `default`, and `description`. Projects loaded with neither a resolver nor `axes` fall back to a single synthetic axis named `theme` (`source: 'synthetic'`).
 
 Theme names are derived from the axis tuple via `permutationID(input)`: single-axis tuples stringify to the context value alone (`{ theme: 'Light' }` → `"Light"`); multi-axis tuples join context values with ` · ` (`{ mode: 'Dark', brand: 'Brand A' }` → `"Dark · Brand A"`). Pick sensible context names — what you write is what the toolbar shows. Consuming code should prefer `axes` + `themes[].input` over matching names by string.
 
