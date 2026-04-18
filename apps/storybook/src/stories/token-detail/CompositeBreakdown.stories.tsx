@@ -2,7 +2,7 @@ import { CompositeBreakdown } from '@unpunnyfuns/swatchbook-blocks';
 import preview from '../../../.storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Blocks/TokenDetail/CompositeBreakdown',
+  title: 'Internals/TokenDetail/CompositeBreakdown',
   component: CompositeBreakdown,
   argTypes: {
     path: { control: 'text' },

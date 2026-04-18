@@ -2,7 +2,7 @@ import { AliasedBy } from '@unpunnyfuns/swatchbook-blocks';
 import preview from '../../../.storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Blocks/TokenDetail/AliasedBy',
+  title: 'Internals/TokenDetail/AliasedBy',
   component: AliasedBy,
   argTypes: {
     path: { control: 'text' },

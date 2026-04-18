@@ -2,7 +2,7 @@ import { TokenHeader } from '@unpunnyfuns/swatchbook-blocks';
 import preview from '../../../.storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Blocks/TokenDetail/TokenHeader',
+  title: 'Internals/TokenDetail/TokenHeader',
   component: TokenHeader,
   argTypes: {
     path: { control: 'text' },
