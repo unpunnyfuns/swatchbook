@@ -226,6 +226,11 @@ function OptionPill({ label, active, title, onClick, trailing }: OptionPillProps
       type: 'button',
       title,
       onClick,
+      // Skip focus on mouse click so Storybook's `:focus` border-color
+      // theming doesn't stick on the previously-clicked pill. Keyboard
+      // tabbing still lands focus normally — preventDefault on mousedown
+      // only blocks the implicit focus-on-click behavior.
+      onMouseDown: (event) => event.preventDefault(),
       style: active ? OPTION_PILL_ACTIVE : OPTION_PILL_BASE,
     },
     label,
