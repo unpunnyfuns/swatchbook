@@ -87,8 +87,8 @@ export default defineSwatchbookConfig({
 
 With the config live:
 
-- **Toolbar** renders two dropdowns: one labelled `mode`, one labelled `brand`. Each lists its contexts. The current selection shows next to the label.
-- **Design Tokens panel** shows a hierarchical tree of every resolved token for the active tuple. Switching the toolbar updates values live.
+- **Toolbar** shows a single Swatchbook icon button. Click it to open a popover containing two dropdowns (one labelled `mode`, one labelled `brand`), preset pills (if configured), and a color-format picker. Each dropdown lists its contexts.
+- **Design Tokens panel** shows a diagnostics summary at the top and a hierarchical tree of every resolved token for the active tuple beneath it. Switching the toolbar updates values live.
 - **CSS emission** generates:
   - `:root` with the default tuple (`Light · Default`).
   - `[data-mode="Dark"][data-brand="Default"] { … }`
@@ -110,7 +110,7 @@ export default defineSwatchbookConfig({
 });
 ```
 
-The toolbar now renders pills next to the dropdowns. Clicking a pill writes the full tuple; the pill highlights when the current state matches.
+The toolbar popover now renders pills above the dropdowns. Clicking a pill writes the full tuple; the pill highlights when the current state matches.
 
 ## 6. A third axis
 

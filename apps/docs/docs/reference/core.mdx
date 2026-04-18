@@ -87,11 +87,15 @@ permutationID({ theme: 'Light' }); // → "Light"
 
 ```ts
 interface Config {
-  tokens: string[];
+  /** Required for plain-parse and layered; optional when `resolver` is set. */
+  tokens?: string[];
   resolver?: string; // mutually exclusive with `axes`
   axes?: AxisConfig[]; // mutually exclusive with `resolver`
   presets?: Preset[];
-  default?: string;
+  /** Partial tuple keyed by axis name — e.g. `{ mode: 'Dark', brand: 'Brand A' }`. Omitted axes fall back to each axis's own `default`. */
+  default?: Partial<Record<string, string>>;
+  /** Axis names to suppress from the toolbar and CSS emission; each is pinned to its default context. */
+  disabledAxes?: string[];
   cssVarPrefix?: string;
   outDir?: string;
 }
@@ -136,10 +140,14 @@ interface Axis {
 interface Project {
   config: Config;
   axes: Axis[];
+  /** Axis names suppressed via `config.disabledAxes` and validated against the resolver. */
+  disabledAxes: string[];
   presets: Preset[];
   themes: Theme[];
   themesResolved: Record<string, TokenMap>;
   graph: TokenMap; // default theme's resolved tokens
+  /** Absolute paths of every file loaded while building the project (resolver + `$ref` targets, overlay files, or globbed plain-parse files). */
+  sourceFiles: string[];
   diagnostics: Diagnostic[];
 }
 ```

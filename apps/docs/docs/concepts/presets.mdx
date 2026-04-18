@@ -6,7 +6,7 @@ sidebar_position: 3
 
 # Presets
 
-A **preset** is a named combination of axis contexts — a shortcut to a useful tuple. Configured in `swatchbook.config.ts`, rendered as a row of pills next to the toolbar's axis dropdowns.
+A **preset** is a named combination of axis contexts — a shortcut to a useful tuple. Configured in `swatchbook.config.ts`, rendered as a row of pills at the top of the toolbar popover, above the axis dropdowns.
 
 ## Why
 
@@ -50,7 +50,7 @@ At load time, each preset is sanitized:
 - Invalid context values (`axes: { mode: 'NotARealContext' }`) produce a diagnostic and the key is dropped.
 - Sanitized presets stay in `Project.presets` — the pill still renders, it just resolves to fewer axis overrides than authored.
 
-The diagnostics show up in the addon's Design Tokens panel (diagnostics section) alongside any token-level issues.
+The diagnostics show up in the Design Tokens panel's diagnostics section (at the top of the panel) alongside any token-level issues.
 
 ## Config over localStorage
 
