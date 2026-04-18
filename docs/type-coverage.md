@@ -17,7 +17,7 @@ Audit last run: 2026-04-18 (refreshed alongside the **Full DTCG type parity with
 | `duration` | ✅ ref only | `MotionPreview` | animated ball ✅ |
 | `cubicBezier` | ✅ ref only | `MotionPreview` | animated ball ✅ |
 | `number` | ✅ ref only | — (text-only, acceptable) | — |
-| `strokeStyle` | ✅ ref only | `StrokeStyleSample` | — (text-only) |
+| `strokeStyle` | ✅ ref only | `StrokeStyleSample` | CSS border-style line for string form; SVG dasharray stroke for object form |
 | `gradient` | ✅ ref only | `GradientPalette` | linear-gradient sample ✅ |
 | `typography` | ✅ sys | `TypographyScale` | pangram sample ✅ |
 | `shadow` | ✅ sys | `ShadowPreview` | box-shadow card ✅ |
@@ -26,7 +26,7 @@ Audit last run: 2026-04-18 (refreshed alongside the **Full DTCG type parity with
 
 ## Status
 
-Every DTCG 2025.10 `$type` has a dedicated block, a `TokenDetail` preview, or both. `number` renders as raw text in `TokenTable` — acceptable because opacities, line-heights, and z-index slots have no meaningful visual beyond the number itself. The `strokeStyle` object form (`{ dashArray, lineCap }`) falls back to a textual notice in `StrokeStyleSample`; SVG stroke rendering is a future-work candidate.
+Every DTCG 2025.10 `$type` has a dedicated block, a `TokenDetail` preview, or both. `number` renders as raw text in `TokenTable` — acceptable because opacities, line-heights, and z-index slots have no meaningful visual beyond the number itself. `strokeStyle` object form (`{ dashArray, lineCap }`) renders faithfully inside `TokenDetail` as an SVG stroke; the standalone `StrokeStyleSample` block still shows a textual notice for object form — future polish.
 
 ## Out-of-scope types (Terrazzo extensions)
 
