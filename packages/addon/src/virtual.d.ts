@@ -5,6 +5,14 @@
  * consumers read back.
  */
 declare module 'virtual:swatchbook/tokens' {
+  interface VirtualAxis {
+    name: string;
+    contexts: readonly string[];
+    default: string;
+    description?: string;
+    source: 'resolver' | 'synthetic';
+  }
+
   interface VirtualTheme {
     name: string;
     input: Record<string, string>;
@@ -29,6 +37,7 @@ declare module 'virtual:swatchbook/tokens' {
     aliasedBy?: readonly string[];
   }
 
+  export const axes: readonly VirtualAxis[];
   export const themes: readonly VirtualTheme[];
   export const defaultTheme: string | null;
   export const themesResolved: Record<string, Record<string, VirtualToken>>;

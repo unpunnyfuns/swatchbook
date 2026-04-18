@@ -42,6 +42,7 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
       // Emit a typed ESM module. Values are JSON-stringified for stability.
       return [
         `/* swatchbook virtual module — generated */`,
+        `export const axes = ${JSON.stringify(project.axes)};`,
         `export const themes = ${JSON.stringify(project.themes)};`,
         `export const defaultTheme = ${JSON.stringify(project.themes[0]?.name ?? null)};`,
         `export const themesResolved = ${JSON.stringify(project.themesResolved)};`,

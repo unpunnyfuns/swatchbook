@@ -26,6 +26,31 @@ describe('loadProject — resolver mode', () => {
     expect(Object.keys(project.graph).length).toBeGreaterThan(100);
   });
 
+  it('surfaces resolver modifiers as independent axes', () => {
+    expect(project.axes).toEqual([
+      {
+        name: 'mode',
+        contexts: ['Light', 'Dark'],
+        default: 'Light',
+        description: 'Light/dark surface + text baseline.',
+        source: 'resolver',
+      },
+      {
+        name: 'brand',
+        contexts: ['Default', 'Brand A'],
+        default: 'Default',
+        description:
+          'Accent palette. `Default` leaves sys alone; `Brand A` overrides the accent scale.',
+        source: 'resolver',
+      },
+    ]);
+  });
+
+  it('cartesian product of axis contexts matches the theme count', () => {
+    const cartesian = project.axes.reduce((n, axis) => n * axis.contexts.length, 1);
+    expect(project.themes.length).toBe(cartesian);
+  });
+
   it('resolves deep alias chains (cmp → sys → ref)', () => {
     const light = resolveTheme(project, 'Light · Default').tokens;
     const buttonBg = light['cmp.button.bg'];
