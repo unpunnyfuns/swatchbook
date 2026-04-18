@@ -11,7 +11,7 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Current milestone
 
-`Current: Multi-axis theming UX` — seeded 2026-04-19 with issues #131–#138. Honors the DTCG resolver N-modifier model end-to-end: `Project.axes`, tuple globals, N-dropdown toolbar, per-tuple CSS emission, axis-aware TokenDetail. Start with #131 (core axes) + #132 (fixture) — they unblock the rest. Prior milestones (DTCG comprehension visualizations, Alias topology, DTCG type coverage) all closed 2026-04-18 through 2026-04-19.
+`Current: between milestones` — Multi-axis theming UX closed 2026-04-19 (issues #131–#138 all landed). The DTCG resolver's N-modifier model is now first-class end-to-end: `Project.axes`, tuple globals, N-dropdown toolbar, per-tuple CSS emission, axis-aware panel + TokenDetail, layered-config axes, and named tuple presets. Prior milestones (DTCG comprehension visualizations, Alias topology, DTCG type coverage) all closed 2026-04-18. No feature milestone is active; pick one from `docs/plan.md` when starting new scope.
 
 Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
 
