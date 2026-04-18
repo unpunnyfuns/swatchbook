@@ -1,11 +1,11 @@
 import { beforeAll, expect, it } from 'vitest';
 import { projectCss } from '#/emit';
 import type { Project } from '#/types';
-import { extractBlock, grep, loadWithPrefix } from './_helpers';
+import { extractBlock, grep, loadWithPrefix, tupleSelector } from './_helpers';
 
 // beforeAll is a perf escape hatch here: loadProject over the reference
 // fixture takes ~1s, so running it per-test would blow the 5s default timeout
-// six-fold. All six tests in this file read from the same projectCss output.
+// six-fold. All tests in this file read from the same projectCss output.
 let project: Project;
 let css: string;
 
@@ -14,9 +14,12 @@ beforeAll(async () => {
   css = projectCss(project);
 }, 30_000);
 
-it('emits one [data-theme] block per theme', () => {
+it('emits :root for the default tuple plus compound selectors for the rest', () => {
+  expect(css).toContain(':root {');
   for (const theme of project.themes) {
-    expect(css).toContain(`[data-theme="${theme.name}"]`);
+    const isDefault = project.axes.every((a) => theme.input[a.name] === a.default);
+    if (isDefault) continue;
+    expect(css).toContain(tupleSelector(theme.input));
   }
 });
 
@@ -51,8 +54,8 @@ it('emits every primitive + composite type covered by the fixture', () => {
 });
 
 it('keeps sparse overrides: Dark flips surface, size scale identical', () => {
-  const lightBlock = extractBlock(css, 'Light · Default');
-  const darkBlock = extractBlock(css, 'Dark · Default');
+  const lightBlock = extractBlock(css, ':root');
+  const darkBlock = extractBlock(css, tupleSelector({ mode: 'Dark', brand: 'Default' }));
   expect(lightBlock).toBeTruthy();
   expect(darkBlock).toBeTruthy();
   const lightSize = grep(lightBlock, '--sb-size-ref-400:');

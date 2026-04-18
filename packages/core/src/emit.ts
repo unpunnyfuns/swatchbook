@@ -7,6 +7,9 @@ export function projectCss(project: Project, options: EmitCssOptions = {}): stri
   if (merged.prefix === undefined && project.config.cssVarPrefix) {
     merged.prefix = project.config.cssVarPrefix;
   }
+  if (merged.axes === undefined) {
+    merged.axes = project.axes;
+  }
   return emitCss(project.themes, project.themesResolved, merged);
 }
 
