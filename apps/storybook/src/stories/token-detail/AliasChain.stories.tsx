@@ -1,0 +1,15 @@
+import { AliasChain } from '@unpunnyfuns/swatchbook-blocks';
+import preview from '../../../.storybook/preview.tsx';
+
+const meta = preview.meta({
+  title: 'Blocks/TokenDetail/AliasChain',
+  component: AliasChain,
+  argTypes: {
+    path: { control: 'text' },
+  },
+});
+
+export default meta;
+
+export const AccentBg = meta.story({ args: { path: 'color.sys.accent.bg' } });
+export const SpaceMd = meta.story({ args: { path: 'space.sys.md' } });
