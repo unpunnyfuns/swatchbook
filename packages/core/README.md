@@ -50,7 +50,7 @@ const dts = emitTypes(project);
 
 ## Theme naming
 
-Theme names come from the resolver's permutations — core uses the modifier value directly when there's a single modifier axis (so a `theme` modifier with contexts `Light` / `Dark` / `High Contrast` yields those names verbatim), and falls back to Terrazzo's multi-axis permutation ID when the resolver has two or more modifiers. Pick sensible modifier context names in your resolver; what you write is what the toolbar shows.
+Theme names come from the resolver's permutations — single-axis resolvers use the modifier value directly (a `theme` modifier with contexts `Light` / `Dark` yields those names verbatim). Multi-axis resolvers join tuple values with ` · `, so a `mode` × `brand` resolver produces `Light · Default`, `Dark · Default`, `Light · Brand A`, `Dark · Brand A`. This stringification is a stopgap until `Project.axes` exposes per-modifier structure directly (issue #131); consuming code should already be tuple-aware where possible. Pick sensible modifier context names — what you write is what the toolbar shows.
 
 ## Do / don't
 

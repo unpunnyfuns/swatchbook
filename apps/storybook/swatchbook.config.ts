@@ -4,6 +4,6 @@ import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens-referenc
 export default defineSwatchbookConfig({
   tokens: [`${tokensDir}/**/*.json`],
   resolver: resolverPath,
-  default: 'Light',
+  default: 'Light · Default',
   cssVarPrefix: 'sb',
 });

@@ -2,7 +2,7 @@
   "$schema": "https://design-tokens.org/tr/2025/drafts/resolver/",
   "version": "2025.10",
   "name": "swatchbook-reference",
-  "description": "DTCG 2025.10 native resolver. Single `theme` modifier enumerates the five named compositions we care about in the storybook dogfood app.",
+  "description": "DTCG 2025.10 native resolver. Two independent modifiers — `mode` (light/dark base) and `brand` (default/Brand A accent) — compose into a 4-permutation cartesian product. High-contrast is deferred pending a proper contrast-orthogonal design; see issue #132.",
   "sets": {
     "ref": {
       "description": "Raw primitives (loaded but not emitted).",
@@ -37,28 +37,28 @@
     }
   },
   "modifiers": {
-    "theme": {
-      "description": "Named theme compositions.",
+    "mode": {
+      "description": "Light/dark surface + text baseline.",
       "contexts": {
         "Light": [{ "$ref": "./themes/light.json" }],
-        "Dark": [{ "$ref": "./themes/dark.json" }],
-        "Light · Brand A": [
-          { "$ref": "./themes/light.json" },
-          { "$ref": "./themes/brand-a.json" }
-        ],
-        "Dark · Brand A": [
-          { "$ref": "./themes/dark.json" },
-          { "$ref": "./themes/brand-a.json" }
-        ],
-        "High Contrast": [{ "$ref": "./themes/high-contrast.json" }]
+        "Dark": [{ "$ref": "./themes/dark.json" }]
       },
       "default": "Light"
+    },
+    "brand": {
+      "description": "Accent palette. `Default` leaves sys alone; `Brand A` overrides the accent scale.",
+      "contexts": {
+        "Default": [],
+        "Brand A": [{ "$ref": "./themes/brand-a.json" }]
+      },
+      "default": "Default"
     }
   },
   "resolutionOrder": [
     { "$ref": "#/sets/ref" },
     { "$ref": "#/sets/sys" },
     { "$ref": "#/sets/cmp" },
-    { "$ref": "#/modifiers/theme" }
+    { "$ref": "#/modifiers/mode" },
+    { "$ref": "#/modifiers/brand" }
   ]
 }

@@ -13,7 +13,7 @@ Exhaustive DTCG 2025.10 pyramid used as swatchbook's internal test bed. Private 
 
 ## Theming compositions
 
-`tokens/resolver.json` — a DTCG 2025.10 native resolver (`sets` + `modifiers` + `resolutionOrder`). Enumerates the full permutation cross-product: `appearance` (light/dark/high-contrast) × `brand` (default/a) = 6 themes.
+`tokens/resolver.json` — a DTCG 2025.10 native resolver (`sets` + `modifiers` + `resolutionOrder`). Two independent modifiers compose into a 4-permutation cartesian product: `mode` (Light/Dark) × `brand` (Default/Brand A).
 
 ## Consumption
 
