@@ -207,7 +207,8 @@ const styles = {
 };
 
 export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
-  const { activeTheme, themesResolved, resolved, cssVarPrefix } = useProject();
+  const { activeTheme, activeAxes, axes, themes, themesResolved, resolved, cssVarPrefix } =
+    useProject();
 
   const token = resolved[path] as DetailToken | undefined;
   const cssVar = makeCssVar(path, cssVarPrefix);
@@ -286,33 +287,15 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
         </>
       )}
 
-      <div style={styles.sectionHeader}>Per-theme values</div>
-      <table style={styles.themeTable}>
-        <tbody>
-          {Object.entries(themesResolved).map(([themeName, tokens]) => {
-            const t = tokens[path] as DetailToken | undefined;
-            const themeValue = t ? formatValue(t.$value) : '—';
-            return (
-              <tr key={themeName} style={styles.themeRow}>
-                <td style={{ ...styles.themeCell, width: '30%' }}>{themeName}</td>
-                <td style={styles.themeCell}>
-                  {isColor && t && (
-                    <span
-                      style={{
-                        ...styles.swatch,
-                        background: cssVar,
-                      }}
-                      data-theme={themeName}
-                      aria-hidden
-                    />
-                  )}
-                  {themeValue}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <AxisVariance
+        path={path}
+        isColor={isColor}
+        cssVar={cssVar}
+        axes={axes}
+        themes={themes}
+        themesResolved={themesResolved}
+        activeAxes={activeAxes}
+      />
 
       <div style={styles.sectionHeader}>Usage</div>
       <code style={styles.snippet}>{`color: ${cssVar};`}</code>
@@ -430,6 +413,250 @@ function TransitionSample({ transition }: { transition: string }): ReactElement 
         aria-hidden
       />
     </div>
+  );
+}
+
+interface VirtualAxisLike {
+  readonly name: string;
+  readonly contexts: readonly string[];
+  readonly default: string;
+  readonly source: 'resolver' | 'synthetic';
+}
+
+interface VirtualThemeLike {
+  readonly name: string;
+  readonly input: Record<string, string>;
+}
+
+function themeValue(
+  themesResolved: Record<string, Record<string, DetailToken>>,
+  themeName: string,
+  path: string,
+): string {
+  const t = themesResolved[themeName]?.[path];
+  return t ? formatValue(t.$value) : '—';
+}
+
+function tupleName(
+  themes: readonly VirtualThemeLike[],
+  tuple: Record<string, string>,
+): string | undefined {
+  const match = themes.find((t) => {
+    const input = t.input;
+    const keys = Object.keys(input);
+    return keys.every((k) => input[k] === tuple[k]);
+  });
+  return match?.name;
+}
+
+/**
+ * Analyze how a token's value moves across axes. Returns:
+ *   - 'constant' — same value under every tuple
+ *   - 'one-axis' — exactly one axis influences the value (the token is
+ *     insensitive to every other axis)
+ *   - 'multi-axis' — two or more axes influence the value
+ */
+interface Variance {
+  kind: 'constant' | 'one-axis' | 'multi-axis';
+  varyingAxes: readonly string[];
+}
+
+function analyzeVariance(
+  path: string,
+  axes: readonly VirtualAxisLike[],
+  themes: readonly VirtualThemeLike[],
+  themesResolved: Record<string, Record<string, DetailToken>>,
+): Variance {
+  const varyingAxes: string[] = [];
+  for (const axis of axes) {
+    // Group themes by all other axes' context values, and see whether the
+    // token's value moves when only this axis changes within each group.
+    const byOthers = new Map<string, Map<string, string>>();
+    for (const theme of themes) {
+      const others = axes
+        .filter((a) => a.name !== axis.name)
+        .map((a) => `${a.name}=${theme.input[a.name] ?? ''}`)
+        .join('|');
+      const ctx = theme.input[axis.name] ?? '';
+      const bucket = byOthers.get(others) ?? new Map<string, string>();
+      bucket.set(ctx, themeValue(themesResolved, theme.name, path));
+      byOthers.set(others, bucket);
+    }
+    let varies = false;
+    for (const bucket of byOthers.values()) {
+      const values = new Set(bucket.values());
+      if (values.size > 1) {
+        varies = true;
+        break;
+      }
+    }
+    if (varies) varyingAxes.push(axis.name);
+  }
+  if (varyingAxes.length === 0) return { kind: 'constant', varyingAxes };
+  if (varyingAxes.length === 1) return { kind: 'one-axis', varyingAxes };
+  return { kind: 'multi-axis', varyingAxes };
+}
+
+interface AxisVarianceProps {
+  path: string;
+  isColor: boolean;
+  cssVar: string;
+  axes: readonly VirtualAxisLike[];
+  themes: readonly VirtualThemeLike[];
+  themesResolved: Record<string, Record<string, DetailToken>>;
+  activeAxes: Record<string, string>;
+}
+
+function AxisVariance({
+  path,
+  isColor,
+  cssVar,
+  axes,
+  themes,
+  themesResolved,
+  activeAxes,
+}: AxisVarianceProps): ReactElement {
+  const variance = useMemo(
+    () => analyzeVariance(path, axes, themes, themesResolved),
+    [path, axes, themes, themesResolved],
+  );
+
+  if (themes.length === 0) {
+    return <></>;
+  }
+
+  if (variance.kind === 'constant') {
+    const anyTheme = themes[0];
+    const value = anyTheme ? themeValue(themesResolved, anyTheme.name, path) : '—';
+    return (
+      <>
+        <div style={styles.sectionHeader}>Values across axes</div>
+        <table style={styles.themeTable} data-testid='token-detail-values'>
+          <tbody>
+            <tr style={styles.themeRow}>
+              <td style={styles.themeCell} data-testid='token-detail-constant'>
+                {isColor && <span style={{ ...styles.swatch, background: cssVar }} aria-hidden />}
+                {value}
+                <span style={{ opacity: 0.6, marginLeft: 8 }}>
+                  same across all {themes.length} tuples
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </>
+    );
+  }
+
+  if (variance.kind === 'one-axis') {
+    const axisName = variance.varyingAxes[0];
+    if (!axisName) return <></>;
+    const axis = axes.find((a) => a.name === axisName);
+    if (!axis) return <></>;
+    // Pick one representative theme per context of the varying axis — the
+    // one whose other-axis contexts match the active tuple, so the displayed
+    // values line up with the rest of the doc block.
+    const contextValues = axis.contexts.map((ctx) => {
+      const target = { ...activeAxes, [axisName]: ctx };
+      const match = themes.find((t) => {
+        const input = t.input;
+        return Object.keys(input).every((k) => input[k] === target[k]);
+      });
+      const name = match?.name ?? '';
+      return {
+        ctx,
+        themeName: name,
+        value: name ? themeValue(themesResolved, name, path) : '—',
+      };
+    });
+    return (
+      <>
+        <div style={styles.sectionHeader}>Varies with {axisName}</div>
+        <table style={styles.themeTable} data-testid='token-detail-values'>
+          <tbody>
+            {contextValues.map((row) => (
+              <tr key={row.ctx} style={styles.themeRow} data-axis={axisName} data-context={row.ctx}>
+                <td style={{ ...styles.themeCell, width: '30%' }}>{row.ctx}</td>
+                <td style={styles.themeCell}>
+                  {isColor && row.themeName && (
+                    <span
+                      style={{ ...styles.swatch, background: cssVar }}
+                      data-theme={row.themeName}
+                      aria-hidden
+                    />
+                  )}
+                  {row.value}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </>
+    );
+  }
+
+  // Multi-axis: render a matrix for the two most-varying axes (by context
+  // count), collapsing further axes to the active tuple and noting their
+  // influence.
+  const varying = variance.varyingAxes
+    .map((name) => axes.find((a) => a.name === name))
+    .filter((a): a is VirtualAxisLike => Boolean(a))
+    .toSorted((a, b) => b.contexts.length - a.contexts.length);
+  const [rowAxis, colAxis, ...extra] = varying;
+  if (!rowAxis || !colAxis) return <></>;
+
+  return (
+    <>
+      <div style={styles.sectionHeader}>Varies with {variance.varyingAxes.join(' × ')}</div>
+      <table style={styles.themeTable} data-testid='token-detail-values'>
+        <thead>
+          <tr style={styles.themeRow}>
+            <th style={{ ...styles.themeCell, textAlign: 'left', opacity: 0.7 }}>
+              {rowAxis.name} \ {colAxis.name}
+            </th>
+            {colAxis.contexts.map((col) => (
+              <th key={col} style={{ ...styles.themeCell, textAlign: 'left', opacity: 0.7 }}>
+                {col}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rowAxis.contexts.map((row) => (
+            <tr key={row} style={styles.themeRow}>
+              <td style={styles.themeCell}>{row}</td>
+              {colAxis.contexts.map((col) => {
+                const target: Record<string, string> = {
+                  ...activeAxes,
+                  [rowAxis.name]: row,
+                  [colAxis.name]: col,
+                };
+                const name = tupleName(themes, target);
+                const value = name ? themeValue(themesResolved, name, path) : '—';
+                return (
+                  <td key={col} style={styles.themeCell} data-row={row} data-col={col}>
+                    {isColor && name && (
+                      <span
+                        style={{ ...styles.swatch, background: cssVar }}
+                        data-theme={name}
+                        aria-hidden
+                      />
+                    )}
+                    {value}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {extra.length > 0 && (
+        <div style={{ ...styles.aliasedByTruncated, marginTop: 6 }}>
+          Values also vary with {extra.map((a) => a.name).join(', ')}; matrix shows the slice for
+          the active selection.
+        </div>
+      )}
+    </>
   );
 }
 

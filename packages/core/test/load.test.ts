@@ -72,9 +72,16 @@ describe('loadProject — resolver mode', () => {
 });
 
 describe('loadProject — validation', () => {
-  it('throws when resolver is not set', async () => {
-    await expect(loadProject({ tokens: [] } as never, fixtureCwd)).rejects.toThrow(
-      /must specify `resolver`/,
-    );
+  it('throws when both `resolver` and `axes` are set', async () => {
+    await expect(
+      loadProject(
+        {
+          tokens: [],
+          resolver: resolverPath,
+          axes: [{ name: 'mode', contexts: { Light: [] }, default: 'Light' }],
+        },
+        fixtureCwd,
+      ),
+    ).rejects.toThrow(/either `resolver` or `axes`, not both/);
   });
 });

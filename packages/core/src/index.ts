@@ -6,6 +6,7 @@ export { permutationID } from '#/types.ts';
 
 export type {
   Axis,
+  AxisConfig,
   Config,
   Diagnostic,
   DiagnosticSeverity,
