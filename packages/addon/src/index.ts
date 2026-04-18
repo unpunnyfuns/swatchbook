@@ -1,7 +1,14 @@
 import { definePreviewAddon } from 'storybook/internal/csf';
 import * as previewExports from './preview.tsx';
 
-export { ADDON_ID, GLOBAL_KEY, PARAM_KEY, VIRTUAL_MODULE_ID } from '#/constants.ts';
+export {
+  ADDON_ID,
+  AXES_GLOBAL_KEY,
+  GLOBAL_KEY,
+  PARAM_KEY,
+  VIRTUAL_MODULE_ID,
+} from '#/constants.ts';
+export { AxesContext, ThemeContext, useActiveAxes, useActiveTheme } from '#/theme-context.ts';
 export type { AddonOptions } from '#/options.ts';
 
 /**
