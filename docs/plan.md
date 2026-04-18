@@ -596,10 +596,10 @@ Beyond spec convergence, four scope areas deepen the "easier to understand DTCG"
 
 **Goal:** Honor the DTCG resolver's N-modifier model end-to-end. Selection state is a tuple `{ axisName: contextName }`; toolbar, preview, CSS emission, and blocks all treat axes as first-class.
 
-**Design premise:** DTCG 2025.10 models theming as ordered `sets` + independent `modifiers`, each modifier contributing one context at resolve time. Our normalization currently flattens that into a single `Theme[]`, which throws away structure resolver authors already wrote. Multi-axis UX = stop flattening.
+**Design premise:** DTCG 2025.10 models theming as ordered `sets` + independent `modifiers`, each modifier contributing one context at resolve time. Our normalization currently flattens resolver output into a single `Theme[]`, which throws away the modifier structure authors already wrote. Multi-axis UX = stop flattening. (Manifest support was removed in the major-version bump — there are now only two theming paths: resolver and layered.)
 
 **Work (issues #131–#137):**
-- **#131 — core axes in Project.** Extend `Project` with `axes: Axis[]`. Resolver path preserves modifiers; manifest + layered paths normalize to a single synthetic `theme` axis.
+- **#131 — core axes in Project.** Extend `Project` with `axes: Axis[]`. Resolver path preserves modifiers; layered path normalizes to a single synthetic `theme` axis (until #137 lets it declare axes explicitly).
 - **#132 — fixture.** `tokens-reference` ships a real multi-modifier resolver (`mode × brand`, maybe `contrast`) replacing the `·`-joined flat form.
 - **#133 — globals tuple.** `globals.swatchbookAxes: Record<axis, context>` replaces `swatchbookTheme`; preview sets one `data-<axis>` attribute per axis.
 - **#134 — N-dropdown toolbar.** One dropdown per axis. Single-axis projects render one dropdown unchanged from today.
