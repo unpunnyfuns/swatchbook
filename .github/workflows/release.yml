@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+# Prevent concurrent release runs — we don't want two Version Packages PRs
+# racing or a publish triggering while another is mid-flight.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    # Skip on the Changesets bot's own commits to avoid recursion; the
+    # changesets/action handles its own re-entry via the Version Packages PR.
+    if: github.repository == 'unpunnyfuns/swatchbook'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      # Required for npm provenance attestation (sigstore).
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v5
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Create Version Packages PR or publish
+        uses: changesets/action@v1
+        with:
+          # `pnpm release` builds the three fixed-group packages and runs
+          # `changeset publish` — see package.json#scripts.
+          publish: pnpm release
+          version: pnpm version
+          commit: 'chore(release): version packages'
+          title: 'chore(release): version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # Opt into npm package provenance so published tarballs carry a
+          # sigstore attestation linking them back to this workflow run.
+          NPM_CONFIG_PROVENANCE: true
