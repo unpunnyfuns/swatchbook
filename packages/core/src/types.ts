@@ -26,6 +26,18 @@ export interface Axis {
 }
 
 /**
+ * A named quick-select combination of axis contexts. Rendered as a pill in
+ * the toolbar. Any axis the preset omits falls back to that axis's
+ * `default` when applied.
+ */
+export interface Preset {
+  name: string;
+  /** axisName → contextName. Unknown keys or invalid values produce diagnostics and are sanitized. */
+  axes: Partial<Record<string, string>>;
+  description?: string;
+}
+
+/**
  * One authored axis for layered configurations. Each context names an
  * ordered list of glob patterns / file paths (relative to cwd) that layer
  * on top of `Config.tokens` for that context. An empty array means "no
@@ -52,6 +64,8 @@ export interface Config {
   cssVarPrefix?: string;
   /** Project-local output directory for codegen artifacts. */
   outDir?: string;
+  /** Named tuple presets — rendered as quick-select pills in the toolbar. */
+  presets?: Preset[];
 }
 
 export type DiagnosticSeverity = 'error' | 'warn' | 'info';
@@ -73,6 +87,8 @@ export interface Diagnostic {
 export interface Project {
   config: Config;
   axes: Axis[];
+  /** Validated + sanitized presets from `config.presets`. Empty if unset. */
+  presets: Preset[];
   themes: Theme[];
   /** Eagerly-resolved tokens per theme, keyed by `theme.name`. */
   themesResolved: Record<string, TokenMap>;

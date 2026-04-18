@@ -1,4 +1,5 @@
 import { BufferedLogger, toDiagnostics } from '#/diagnostics.ts';
+import { validatePresets } from '#/presets.ts';
 import { normalizeThemes } from '#/themes/normalize.ts';
 import type { Config, Project, ResolvedTheme } from '#/types.ts';
 
@@ -17,13 +18,19 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
 
   const graph = normalized.resolved[normalized.defaultThemeName] ?? {};
 
+  const { presets, diagnostics: presetDiagnostics } = validatePresets(
+    config.presets,
+    normalized.axes,
+  );
+
   return {
     config,
     axes: normalized.axes,
+    presets,
     themes: normalized.themes,
     themesResolved: normalized.resolved,
     graph,
-    diagnostics: toDiagnostics(logger),
+    diagnostics: [...toDiagnostics(logger), ...presetDiagnostics],
   };
 }
 

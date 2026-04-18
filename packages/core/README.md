@@ -19,7 +19,7 @@ pnpm add @unpunnyfuns/swatchbook-core
 | `projectCss(project)` | Same as `emitCss` with project defaults (prefix + axes) applied. |
 | `emitTypes(project)` | TypeScript source declaring the token-path union + `SwatchbookTokenMap`. |
 | `permutationID(input)` | Stringify a tuple (`{ mode: 'Dark', brand: 'Brand A' }` → `"Dark · Brand A"`) to the form used as `Theme.name` and CSS data-attribute values. |
-| Types | `Axis`, `AxisConfig`, `Config`, `Theme`, `Project`, `ResolvedTheme`, `TokenMap`, `Diagnostic`, `DiagnosticSeverity`. |
+| Types | `Axis`, `AxisConfig`, `Config`, `Preset`, `Theme`, `Project`, `ResolvedTheme`, `TokenMap`, `Diagnostic`, `DiagnosticSeverity`. |
 
 ## Minimal config
 
@@ -88,6 +88,23 @@ const dts = emitTypes(project);
 `Project.axes` surfaces the theming modifiers as first-class — one `Axis` per resolver modifier (`source: 'resolver'`) or per authored layered axis (`source: 'layered'`), each with its `contexts`, `default`, and `description`. Projects loaded with neither a resolver nor `axes` fall back to a single synthetic axis named `theme` (`source: 'synthetic'`).
 
 Theme names are derived from the axis tuple via `permutationID(input)`: single-axis tuples stringify to the context value alone (`{ theme: 'Light' }` → `"Light"`); multi-axis tuples join context values with ` · ` (`{ mode: 'Dark', brand: 'Brand A' }` → `"Dark · Brand A"`). Pick sensible context names — what you write is what the toolbar shows. Consuming code should prefer `axes` + `themes[].input` over matching names by string.
+
+## Presets
+
+`config.presets` lets you name tuple combinations authors want quick access to — the addon renders them as toolbar pills, and downstream consumers can read them from `Project.presets`.
+
+```ts
+export default defineSwatchbookConfig({
+  tokens: ['tokens/**/*.json'],
+  resolver: 'tokens/resolver.json',
+  presets: [
+    { name: 'Default Light', axes: { mode: 'Light', brand: 'Default' } },
+    { name: 'Brand A Dark', axes: { mode: 'Dark', brand: 'Brand A' }, description: 'Dark + violet accent.' },
+  ],
+});
+```
+
+Each preset names a partial tuple; any axis the preset omits resolves to that axis's `default` when applied. `loadProject` validates presets: unknown axis keys and invalid context values surface as `warn` diagnostics and are sanitized out, but the preset stays in `Project.presets` (an empty preset is still a valid tuple).
 
 ## CSS emission
 
