@@ -1,9 +1,8 @@
 /**
- * Shared data shapes re-exported from `@unpunnyfuns/swatchbook-addon`.
- * The addon owns the canonical declarations (adjacent to the Vite plugin
- * that emits the matching runtime payload); blocks re-exposes them under
- * friendlier names so consumers importing from
- * `@unpunnyfuns/swatchbook-blocks` don't also have to pull from addon.
+ * Shared data shapes for the swatchbook token snapshot. Canonical
+ * declarations live in `#/contexts.ts` next to the React contexts that
+ * carry them; this file re-exposes them under friendlier, consumer-facing
+ * names.
  */
 export {
   type ProjectSnapshot,
@@ -12,4 +11,4 @@ export {
   type VirtualPresetShape as VirtualPreset,
   type VirtualThemeShape as VirtualTheme,
   type VirtualTokenShape as VirtualToken,
-} from '@unpunnyfuns/swatchbook-addon';
+} from '#/contexts.ts';

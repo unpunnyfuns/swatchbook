@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { addons } from 'storybook/preview-api';
-import { useOptionalSwatchbookData } from '@unpunnyfuns/swatchbook-addon';
-import { useActiveAxes, useActiveTheme } from '@unpunnyfuns/swatchbook-addon/hooks';
+import { useActiveAxes, useActiveTheme, useOptionalSwatchbookData } from '#/contexts.ts';
 import {
   axes as virtualAxes,
   css as generatedCss,

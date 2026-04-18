@@ -12,6 +12,12 @@ import {
   themesResolved,
 } from 'virtual:swatchbook/tokens';
 import {
+  AxesContext,
+  type ProjectSnapshot,
+  SwatchbookContext,
+  ThemeContext,
+} from '@unpunnyfuns/swatchbook-blocks';
+import {
   AXES_GLOBAL_KEY,
   DATA_THEME_ATTR,
   GLOBAL_KEY,
@@ -19,8 +25,6 @@ import {
   PARAM_KEY,
   STYLE_ELEMENT_ID,
 } from '#/constants.ts';
-import { type ProjectSnapshot, SwatchbookContext } from '#/swatchbook-context.ts';
-import { AxesContext, ThemeContext } from '#/theme-context.ts';
 
 /** CSS var name with the active prefix applied. */
 function v(name: string): string {

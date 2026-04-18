@@ -1,9 +1,5 @@
 import type { ReactElement, ReactNode } from 'react';
-import {
-  type ProjectSnapshot,
-  SwatchbookContext,
-  useOptionalSwatchbookData,
-} from '@unpunnyfuns/swatchbook-addon';
+import { type ProjectSnapshot, SwatchbookContext, useOptionalSwatchbookData } from '#/contexts.ts';
 
 export type { ProjectSnapshot };
 
@@ -20,10 +16,6 @@ export interface SwatchbookProviderProps {
  * tests, custom React apps, non-Storybook doc sites — consumers construct
  * a {@link ProjectSnapshot} (often imported from a JSON file) and wrap
  * their blocks in this provider.
- *
- * The underlying React context lives in the addon package so the
- * workspace dep graph stays acyclic (blocks already depends on addon;
- * the reverse would break turbo's topological build order).
  */
 export function SwatchbookProvider({ value, children }: SwatchbookProviderProps): ReactElement {
   return <SwatchbookContext.Provider value={value}>{children}</SwatchbookContext.Provider>;

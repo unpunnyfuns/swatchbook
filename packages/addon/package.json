@@ -53,6 +53,7 @@
     "format:check": "oxfmt --check -c ../../.oxfmtrc.json src"
   },
   "dependencies": {
+    "@unpunnyfuns/swatchbook-blocks": "workspace:*",
     "@unpunnyfuns/swatchbook-core": "workspace:*",
     "jiti": "^2.4.0"
   },
