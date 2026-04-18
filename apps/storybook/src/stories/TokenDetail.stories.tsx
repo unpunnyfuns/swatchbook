@@ -18,4 +18,6 @@ export const AccentBg = meta.story({ args: { path: 'color.sys.accent.bg' } });
 export const SpaceMd = meta.story({ args: { path: 'space.sys.md' } });
 export const TypographyBody = meta.story({ args: { path: 'typography.sys.body' } });
 export const Gradient = meta.story({ args: { path: 'gradient.ref.sunrise' } });
+export const StrokeStyleString = meta.story({ args: { path: 'stroke.ref.style.dashed' } });
+export const StrokeStyleObject = meta.story({ args: { path: 'stroke.ref.style.custom-dash' } });
 export const Missing = meta.story({ args: { path: 'color.does.not.exist' } });

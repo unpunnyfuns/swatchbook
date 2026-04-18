@@ -145,6 +145,22 @@ const styles = {
     borderRadius: 6,
     border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.15))',
   } satisfies CSSProperties,
+  strokeStyleLine: {
+    height: 0,
+    borderTopWidth: 4,
+    borderTopColor: 'var(--sb-color-sys-text-default, CanvasText)',
+    width: 220,
+  } satisfies CSSProperties,
+  strokeStyleSvg: {
+    width: 220,
+    height: 24,
+    color: 'var(--sb-color-sys-text-default, CanvasText)',
+  } satisfies CSSProperties,
+  strokeStyleFallback: {
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontSize: 12,
+    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+  } satisfies CSSProperties,
   fontFamilySample: {
     padding: '4px 0',
     fontSize: 22,
@@ -257,7 +273,7 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
       {token.$description && <p style={styles.description}>{token.$description}</p>}
 
       <div style={styles.sectionHeader}>Resolved value · {activeTheme}</div>
-      <CompositePreview type={token.$type} cssVar={cssVar} />
+      <CompositePreview type={token.$type} cssVar={cssVar} rawValue={token.$value} />
       <div style={styles.chain}>
         {isColor && <span style={{ ...styles.swatch, background: cssVar }} aria-hidden />}
         <span>{value}</span>
@@ -314,9 +330,11 @@ const PANGRAM = 'Sphinx of black quartz, judge my vow.';
 function CompositePreview({
   type,
   cssVar,
+  rawValue,
 }: {
   type: string | undefined;
   cssVar: string;
+  rawValue: unknown;
 }): ReactElement | null {
   if (type === 'typography') {
     // cssVar for a composite looks like `var(--…-<path>)`; the emitter also
@@ -391,7 +409,86 @@ function CompositePreview({
       />
     );
   }
+  if (type === 'strokeStyle') {
+    return <StrokeStylePreview value={rawValue} />;
+  }
   return null;
+}
+
+const STROKE_STYLE_STRINGS = new Set([
+  'solid',
+  'dashed',
+  'dotted',
+  'double',
+  'groove',
+  'ridge',
+  'outset',
+  'inset',
+]);
+
+function StrokeStylePreview({ value }: { value: unknown }): ReactElement {
+  if (typeof value === 'string' && STROKE_STYLE_STRINGS.has(value)) {
+    return (
+      <div
+        style={{
+          ...styles.strokeStyleLine,
+          borderTopStyle: value as CSSProperties['borderTopStyle'],
+        }}
+        aria-hidden
+      />
+    );
+  }
+  if (value && typeof value === 'object' && 'dashArray' in value) {
+    const v = value as {
+      dashArray?: unknown;
+      lineCap?: unknown;
+    };
+    const lengths = asDashLengths(v.dashArray);
+    if (lengths.length === 0) {
+      return (
+        <div style={styles.strokeStyleFallback}>
+          Object-form strokeStyle with no resolvable dashArray.
+        </div>
+      );
+    }
+    const cap = typeof v.lineCap === 'string' ? v.lineCap : 'butt';
+    return (
+      <svg
+        style={styles.strokeStyleSvg}
+        viewBox='0 0 220 24'
+        preserveAspectRatio='none'
+        aria-hidden
+      >
+        <line
+          x1='4'
+          y1='12'
+          x2='216'
+          y2='12'
+          stroke='currentColor'
+          strokeWidth='4'
+          strokeDasharray={lengths.join(' ')}
+          strokeLinecap={cap as 'butt' | 'round' | 'square'}
+        />
+      </svg>
+    );
+  }
+  return <div style={styles.strokeStyleFallback}>strokeStyle value could not be previewed.</div>;
+}
+
+function asDashLengths(raw: unknown): number[] {
+  if (!Array.isArray(raw)) return [];
+  const out: number[] = [];
+  for (const entry of raw) {
+    if (typeof entry === 'number') {
+      out.push(entry);
+      continue;
+    }
+    if (entry && typeof entry === 'object') {
+      const e = entry as { value?: unknown };
+      if (typeof e.value === 'number') out.push(e.value);
+    }
+  }
+  return out;
 }
 
 function TransitionSample({ transition }: { transition: string }): ReactElement {
