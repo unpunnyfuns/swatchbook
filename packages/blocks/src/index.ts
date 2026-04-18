@@ -60,5 +60,6 @@ export {
   TokenUsageSnippet,
   type TokenUsageSnippetProps,
 } from '#/token-detail/TokenUsageSnippet.tsx';
+export { TokenNavigator, type TokenNavigatorProps } from '#/TokenNavigator.tsx';
 export { TokenTable, type TokenTableProps } from '#/TokenTable.tsx';
 export { TypographyScale, type TypographyScaleProps } from '#/TypographyScale.tsx';

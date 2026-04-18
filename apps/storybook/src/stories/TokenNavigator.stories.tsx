@@ -1,0 +1,131 @@
+import { TokenNavigator } from '@unpunnyfuns/swatchbook-blocks';
+import { useState } from 'react';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
+import preview from '../../.storybook/preview.tsx';
+
+const meta = preview.meta({
+  title: 'Blocks/TokenNavigator',
+  component: TokenNavigator,
+  argTypes: {
+    root: { control: 'text' },
+    initiallyExpanded: { control: { type: 'number', min: 0, max: 6 } },
+  },
+});
+
+export default meta;
+
+export const Default = meta.story();
+
+export const ColorSubtree = meta.story({ args: { root: 'color' } });
+
+export const FullyCollapsed = meta.story({ args: { initiallyExpanded: 0 } });
+
+export const DeepExpanded = meta.story({ args: { initiallyExpanded: 3, root: 'color.sys' } });
+
+function RecordingNavigator() {
+  const [last, setLast] = useState<string | null>(null);
+  return (
+    <div>
+      <div
+        data-testid='custom-select-record'
+        style={{ padding: 8, fontFamily: 'ui-monospace, monospace', fontSize: 12 }}
+      >
+        Last selected: {last ?? '(none)'}
+      </div>
+      <TokenNavigator root='color.sys' onSelect={(p) => setLast(p)} />
+    </div>
+  );
+}
+
+export const CustomSelect = meta.story({
+  render: () => <RecordingNavigator />,
+});
+
+/**
+ * Play-function smoke test: expand a collapsed group, confirm descendant
+ * leaves render, then click a leaf and confirm the detail overlay opens.
+ */
+export const ExpandAndOpenDetail = meta.story({
+  args: { initiallyExpanded: 0 },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // 1. Expand the "color" top-level group.
+    await waitFor(() => {
+      const group = canvasElement.querySelector<HTMLElement>('[data-path="color"]');
+      if (!group) throw new Error('color group not in DOM yet');
+    });
+    const colorGroup = canvasElement.querySelector<HTMLElement>('[data-path="color"]');
+    expect(colorGroup).not.toBeNull();
+    if (!colorGroup) return;
+    await userEvent.click(colorGroup);
+
+    // 2. Recursively drill into the first unexpanded color.* group until a
+    // leaf appears. The reference fixture nests color tokens several levels
+    // deep, so we drill rather than hard-coding a path.
+    const drill = async (depth: number): Promise<void> => {
+      if (depth <= 0) return;
+      if (canvasElement.querySelector('[data-testid="token-navigator-leaf"]')) return;
+      const collapsed = [
+        ...canvasElement.querySelectorAll<HTMLElement>(
+          '[data-testid="token-navigator-group"][data-path^="color."]',
+        ),
+      ].find(
+        (el) =>
+          el.getAttribute('aria-expanded') !== 'true' && el.textContent?.trim().startsWith('▸'),
+      );
+      if (!collapsed) return;
+      await userEvent.click(collapsed);
+      await drill(depth - 1);
+    };
+    await drill(8);
+
+    await waitFor(() => {
+      const leaf = canvasElement.querySelector<HTMLElement>('[data-testid="token-navigator-leaf"]');
+      if (!leaf) throw new Error('no leaf rendered after expansion');
+    });
+    const leaf = canvasElement.querySelector<HTMLElement>('[data-testid="token-navigator-leaf"]');
+    expect(leaf).not.toBeNull();
+    if (!leaf) return;
+    await userEvent.click(leaf);
+
+    // 3. Overlay opens.
+    const overlay = await canvas.findByTestId('token-navigator-overlay');
+    expect(overlay).toBeDefined();
+
+    // 4. Close via the close button.
+    const close = await canvas.findByTestId('token-navigator-close');
+    await userEvent.click(close);
+
+    await waitFor(() => {
+      const stillThere = canvasElement.querySelector('[data-testid="token-navigator-overlay"]');
+      if (stillThere) throw new Error('overlay did not close');
+    });
+  },
+});
+
+/**
+ * `onSelect` suppresses the overlay and fires with the leaf's full dot-path.
+ */
+export const OnSelectFires = meta.story({
+  render: () => <RecordingNavigator />,
+  play: async ({ canvasElement }) => {
+    await waitFor(() => {
+      const leaf = canvasElement.querySelector('[data-testid="token-navigator-leaf"]');
+      if (!leaf) throw new Error('no leaf rendered');
+    });
+    const leaf = canvasElement.querySelector<HTMLElement>('[data-testid="token-navigator-leaf"]');
+    expect(leaf).not.toBeNull();
+    if (!leaf) return;
+    const leafPath = leaf.getAttribute('data-path');
+    expect(leafPath).toBeTruthy();
+    await userEvent.click(leaf);
+
+    const record = canvasElement.querySelector<HTMLElement>('[data-testid="custom-select-record"]');
+    expect(record?.textContent).toContain(leafPath ?? '');
+
+    // And the overlay must not have opened.
+    const overlay = canvasElement.querySelector('[data-testid="token-navigator-overlay"]');
+    expect(overlay).toBeNull();
+  },
+});
