@@ -54,38 +54,17 @@ const EMPTY_PRESETS: readonly PresetEntry[] = [];
 const EMPTY_THEMES: ThemeEntry[] = [];
 
 /**
- * Root toolbar glyph — a 3-swatch stack chosen to read as "swatchbook"
- * at 14px and to look visually distinct from the previous per-axis chip
- * icon (single circle) so users notice the toolbar change.
+ * Root toolbar glyph — a split-circle ("yinyang") mark: a faint filled
+ * disc for the full-swatch silhouette, with a darker half-and-inset-disc
+ * path reading as a pair of theme variants swapped in place.
  */
 function SwatchbookIcon(): ReactElement {
   return h(
     'svg',
     { width: 14, height: 14, viewBox: '0 0 14 14', 'aria-hidden': true },
-    h('rect', {
-      x: 1,
-      y: 2,
-      width: 9,
-      height: 9,
-      rx: 1.5,
-      fill: 'currentColor',
-      opacity: 0.25,
-    }),
-    h('rect', {
-      x: 2.5,
-      y: 3.5,
-      width: 9,
-      height: 9,
-      rx: 1.5,
-      fill: 'currentColor',
-      opacity: 0.55,
-    }),
-    h('rect', {
-      x: 4,
-      y: 5,
-      width: 9,
-      height: 9,
-      rx: 1.5,
+    h('circle', { cx: 7, cy: 7, r: 6, fill: 'currentColor', opacity: 0.15 }),
+    h('path', {
+      d: 'M7 1a6 6 0 0 0 0 12 3 3 0 0 0 0-6 3 3 0 0 1 0-6Z',
       fill: 'currentColor',
     }),
   );
@@ -203,6 +182,7 @@ const OPTION_PILL_BASE: React.CSSProperties = {
   background: 'transparent',
   cursor: 'pointer',
   color: 'inherit',
+  outline: 'none',
 };
 
 const OPTION_PILL_ACTIVE: React.CSSProperties = {
@@ -554,7 +534,6 @@ function AxesToolbar(): ReactElement {
       onClick: () => setOpen((prev) => !prev),
     },
     h(SwatchbookIcon),
-    h('span', { style: { marginLeft: 6 } }, 'Swatchbook'),
   );
 
   const tooltipBody = h(PopoverBody, {
