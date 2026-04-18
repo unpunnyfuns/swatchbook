@@ -10,7 +10,7 @@ export async function loadWithPrefix(prefix: string | undefined): Promise<Projec
     {
       tokens: ['tokens/**/*.json'],
       resolver: resolverPath,
-      default: { mode: 'Light', brand: 'Default' },
+      default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
       ...(prefix !== undefined && { cssVarPrefix: prefix }),
     },
     fixtureCwd,

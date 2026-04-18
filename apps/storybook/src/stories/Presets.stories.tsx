@@ -44,7 +44,7 @@ export const DefaultLightPreset = meta.story({
     if (!wrapper) throw new Error('story wrapper missing');
     await waitForAttr(wrapper, 'data-mode', 'Light');
     await waitForAttr(wrapper, 'data-brand', 'Default');
-    expect(wrapper.getAttribute('data-theme')).toBe('Light · Default');
+    expect(wrapper.getAttribute('data-theme')).toBe('Light · Default · Normal');
   },
 });
 
@@ -61,6 +61,6 @@ export const BrandADarkPreset = meta.story({
     if (!wrapper) throw new Error('story wrapper missing');
     await waitForAttr(wrapper, 'data-mode', 'Dark');
     await waitForAttr(wrapper, 'data-brand', 'Brand A');
-    expect(wrapper.getAttribute('data-theme')).toBe('Dark · Brand A');
+    expect(wrapper.getAttribute('data-theme')).toBe('Dark · Brand A · Normal');
   },
 });

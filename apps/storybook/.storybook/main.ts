@@ -20,18 +20,23 @@ export default defineMain({
       options: {
         config: {
           resolver: resolverPath,
-          default: { mode: 'Light', brand: 'Default' },
+          default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
           cssVarPrefix: 'sb',
           presets: [
             {
               name: 'Default Light',
-              axes: { mode: 'Light', brand: 'Default' },
+              axes: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
               description: 'Baseline light mode with the stock accent.',
             },
             {
               name: 'Brand A Dark',
-              axes: { mode: 'Dark', brand: 'Brand A' },
+              axes: { mode: 'Dark', brand: 'Brand A', contrast: 'Normal' },
               description: 'Dark surfaces paired with the violet Brand A accent.',
+            },
+            {
+              name: 'A11y High Contrast',
+              axes: { mode: 'Light', contrast: 'High' },
+              description: 'High-contrast borders on the light baseline.',
             },
           ],
         },

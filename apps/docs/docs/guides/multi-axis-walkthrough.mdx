@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # Multi-axis walkthrough
 
-Step-by-step setup of a two-axis theming model — `mode × brand` — using the resolver input. The [live Storybook](/swatchbook/storybook/) runs exactly this fixture; open it in a second tab and cross-reference as you read.
+Step-by-step setup of a multi-axis theming model — `mode × brand × contrast` — using the resolver input. The walkthrough builds it up in stages, starting with `mode × brand` and adding `contrast` at the end. The [live Storybook](/swatchbook/storybook/) runs the full three-axis fixture; open it in a second tab and cross-reference as you read.
 
 ## 1. The token layout
 
@@ -114,7 +114,20 @@ The toolbar now renders pills next to the dropdowns. Clicking a pill writes the 
 
 ## 6. A third axis
 
-Adding a `contrast` modifier is additive — existing axes stay as-is, the total theme count grows from 4 to 8. For contrast to compose cleanly with mode and brand, each contrast override should only touch **contrast-specific** paths (borders, focus rings, text), letting mode handle surfaces and brand handle accents. See [axes](../concepts/axes) on why the CSS emission is flat rather than nested.
+The fixture now has a `contrast` modifier too, composing additively with `mode` and `brand` for a total of 8 themes. The overlay only touches **contrast-specific** paths — borders, focus rings, a couple of text slots — so it composes cleanly with mode (which owns surfaces) and brand (which owns accents):
+
+```json title="tokens/resolver.json"
+"contrast": {
+  "description": "Border + focus emphasis.",
+  "contexts": {
+    "Normal": [],
+    "High": [{ "$ref": "./themes/contrast-high.json" }]
+  },
+  "default": "Normal"
+}
+```
+
+`contrast` is appended to `resolutionOrder` after `brand`, so brand's accent stays dominant and contrast only reinforces where they don't collide. The [live Storybook](/swatchbook/storybook/) includes an **A11y High Contrast** preset that flips `contrast` to `High` on the Light baseline — open the preview and try it alongside the other two presets. See [axes](../concepts/axes) on why the CSS emission is flat rather than nested.
 
 ## See also
 

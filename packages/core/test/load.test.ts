@@ -14,18 +14,22 @@ describe('loadProject — resolver mode', () => {
       {
         tokens: ['tokens/**/*.json'],
         resolver: resolverPath,
-        default: { mode: 'Light', brand: 'Default' },
+        default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
       },
       fixtureCwd,
     );
   }, 30_000);
 
-  it('enumerates the cartesian product of mode × brand', () => {
+  it('enumerates the cartesian product of mode × brand × contrast', () => {
     expect(project.themes.map((t) => t.name)).toEqual([
-      'Light · Default',
-      'Dark · Default',
-      'Light · Brand A',
-      'Dark · Brand A',
+      'Light · Default · Normal',
+      'Dark · Default · Normal',
+      'Light · Brand A · Normal',
+      'Dark · Brand A · Normal',
+      'Light · Default · High',
+      'Dark · Default · High',
+      'Light · Brand A · High',
+      'Dark · Brand A · High',
     ]);
     expect(Object.keys(project.graph).length).toBeGreaterThan(100);
   });
@@ -47,6 +51,14 @@ describe('loadProject — resolver mode', () => {
           'Accent palette. `Default` leaves sys alone; `Brand A` overrides the accent scale.',
         source: 'resolver',
       },
+      {
+        name: 'contrast',
+        contexts: ['Normal', 'High'],
+        default: 'Normal',
+        description:
+          'Border + focus emphasis. `Normal` leaves sys alone; `High` thickens borders and boosts the focus ring.',
+        source: 'resolver',
+      },
     ]);
   });
 
@@ -56,15 +68,15 @@ describe('loadProject — resolver mode', () => {
   });
 
   it('resolves alias chains (sys → ref)', () => {
-    const light = resolveTheme(project, 'Light · Default').tokens;
+    const light = resolveTheme(project, 'Light · Default · Normal').tokens;
     const accentBg = light['color.sys.accent.bg'];
     expect(accentBg).toBeDefined();
     expect(accentBg?.$type).toBe('color');
   });
 
   it('produces different surface values for Light vs Dark at the same brand', () => {
-    const light = resolveTheme(project, 'Light · Default').tokens['color.sys.surface.default'];
-    const dark = resolveTheme(project, 'Dark · Default').tokens['color.sys.surface.default'];
+    const light = resolveTheme(project, 'Light · Default · Normal').tokens['color.sys.surface.default'];
+    const dark = resolveTheme(project, 'Dark · Default · Normal').tokens['color.sys.surface.default'];
     expect(light).toBeDefined();
     expect(dark).toBeDefined();
     expect(JSON.stringify(light?.$value)).not.toEqual(JSON.stringify(dark?.$value));
