@@ -2,11 +2,12 @@ import { readFile } from 'node:fs/promises';
 import { isAbsolute, resolve as resolvePath } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { defineConfig as defineTerrazzoConfig, loadResolver, parse } from '@terrazzo/parser';
-import type { Theme, TokenMap } from '#/types.ts';
+import { permutationID, type Axis, type Theme, type TokenMap } from '#/types.ts';
 import type { BufferedLogger } from '#/diagnostics.ts';
 import { collectGlobbedFiles } from '#/themes/util.ts';
 
 export interface ResolverLoadResult {
+  axes: Axis[];
   themes: Theme[];
   resolved: Record<string, TokenMap>;
   defaultThemeName: string;
@@ -67,6 +68,7 @@ export async function loadResolverThemes(
     });
     const name = explicitDefault ?? 'default';
     return {
+      axes: [{ name: 'theme', contexts: [name], default: name, source: 'synthetic' }],
       themes: [{ name, input: { theme: name }, sources: tokenFiles }],
       resolved: { [name]: parsed.tokens },
       defaultThemeName: name,
@@ -76,18 +78,19 @@ export async function loadResolverThemes(
   const { resolver } = loaded;
   const permutations = resolver.listPermutations();
 
+  const axes: Axis[] = Object.entries(resolver.source.modifiers ?? {}).map(([name, modifier]) => ({
+    name,
+    contexts: Object.keys(modifier.contexts ?? {}),
+    default: modifier.default ?? Object.keys(modifier.contexts ?? {})[0] ?? '',
+    ...(modifier.description !== undefined ? { description: modifier.description } : {}),
+    source: 'resolver' as const,
+  }));
+
   const themes: Theme[] = [];
   const resolved: Record<string, TokenMap> = {};
 
   for (const input of permutations) {
-    // Single-axis: the modifier value is itself the unique identifier
-    // (`Light` beats `{"theme":"Light"}`). Multi-axis: join the tuple values
-    // with `·` so downstream CSS selectors and toolbar labels stay readable.
-    // Terrazzo's `getPermutationID` would emit JSON here, which is lossless
-    // but hostile as a data-attribute value. A future pass replaces this
-    // stringification entirely once `Project.axes` lands (issue #131).
-    const values = Object.values(input).map(String);
-    const id = values.length === 1 ? (values[0] as string) : values.join(' · ');
+    const id = permutationID(input);
     const tokens = resolver.apply(input);
     themes.push({ name: id, input: { ...input }, sources: [] });
     resolved[id] = tokens;
@@ -96,5 +99,5 @@ export async function loadResolverThemes(
   const defaultThemeName =
     explicitDefault && resolved[explicitDefault] ? explicitDefault : (themes[0]?.name ?? '');
 
-  return { themes, resolved, defaultThemeName };
+  return { axes, themes, resolved, defaultThemeName };
 }

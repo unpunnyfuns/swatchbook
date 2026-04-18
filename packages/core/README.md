@@ -13,12 +13,13 @@ pnpm add @unpunnyfuns/swatchbook-core
 | Export | Purpose |
 | --- | --- |
 | `defineSwatchbookConfig(config)` | Identity helper for a typed `swatchbook.config.ts`. |
-| `loadProject(config, cwd?)` | Parse + resolve — returns `Project { themes, themesResolved, graph, diagnostics, … }`. |
+| `loadProject(config, cwd?)` | Parse + resolve — returns `Project { axes, themes, themesResolved, graph, diagnostics, … }`. |
 | `resolveTheme(project, name)` | Pick a single composed theme out of a project. |
 | `emitCss(project, options?)` | Concatenated stylesheet, one `[data-theme="…"]` block per theme. |
 | `projectCss(project)` | Same as `emitCss` with project defaults applied. |
 | `emitTypes(project)` | TypeScript source declaring the token-path union + `SwatchbookTokenMap`. |
-| Types | `Config`, `Theme`, `Project`, `ResolvedTheme`, `TokenMap`, `Diagnostic`, `DiagnosticSeverity`. |
+| `permutationID(input)` | Stringify a tuple (`{ mode: 'Dark', brand: 'Brand A' }` → `"Dark · Brand A"`) to the form used as `Theme.name` and CSS data-attribute values. |
+| Types | `Axis`, `Config`, `Theme`, `Project`, `ResolvedTheme`, `TokenMap`, `Diagnostic`, `DiagnosticSeverity`. |
 
 ## Minimal config
 
@@ -48,9 +49,11 @@ const dts = emitTypes(project);
 
 `project.diagnostics` is always populated — severity is `'error' | 'warn' | 'info'`. The addon surfaces these in its Diagnostics panel; your own pipeline can inspect / `throw` on `severity === 'error'` as fits.
 
-## Theme naming
+## Axes and theme naming
 
-Theme names come from the resolver's permutations — single-axis resolvers use the modifier value directly (a `theme` modifier with contexts `Light` / `Dark` yields those names verbatim). Multi-axis resolvers join tuple values with ` · `, so a `mode` × `brand` resolver produces `Light · Default`, `Dark · Default`, `Light · Brand A`, `Dark · Brand A`. This stringification is a stopgap until `Project.axes` exposes per-modifier structure directly (issue #131); consuming code should already be tuple-aware where possible. Pick sensible modifier context names — what you write is what the toolbar shows.
+`Project.axes` surfaces the resolver's modifiers as first-class — one `Axis` per DTCG modifier, each with its `contexts`, `default`, and `description`. Projects loaded without a resolver fall back to a single synthetic axis named `theme`.
+
+Theme names are derived from the axis tuple via `permutationID(input)`: single-axis tuples stringify to the context value alone (`{ theme: 'Light' }` → `"Light"`); multi-axis tuples join context values with ` · ` (`{ mode: 'Dark', brand: 'Brand A' }` → `"Dark · Brand A"`). Pick sensible context names — what you write is what the toolbar shows. Consuming code should prefer `axes` + `themes[].input` over matching names by string.
 
 ## Do / don't
 

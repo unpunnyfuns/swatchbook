@@ -1,8 +1,9 @@
-import type { Config, Theme, TokenMap } from '#/types.ts';
+import type { Axis, Config, Theme, TokenMap } from '#/types.ts';
 import type { BufferedLogger } from '#/diagnostics.ts';
 import { loadResolverThemes } from '#/themes/resolver.ts';
 
 export interface NormalizedThemes {
+  axes: Axis[];
   themes: Theme[];
   resolved: Record<string, TokenMap>;
   defaultThemeName: string;
