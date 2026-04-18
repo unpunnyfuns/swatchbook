@@ -5,6 +5,8 @@ thumbs.db
 # Build outputs
 dist
 storybook-static
+build
+.docusaurus
 coverage
 
 # Generated per-app

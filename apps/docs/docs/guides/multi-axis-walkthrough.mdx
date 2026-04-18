@@ -1,0 +1,126 @@
+---
+id: multi-axis-walkthrough
+title: Multi-axis walkthrough
+sidebar_position: 1
+---
+
+# Multi-axis walkthrough
+
+Step-by-step setup of a two-axis theming model — `mode × brand` — using the resolver input. The [live Storybook](/swatchbook/storybook/) runs exactly this fixture; open it in a second tab and cross-reference as you read.
+
+## 1. The token layout
+
+```
+tokens/
+  ref/            # raw primitives — color palettes, size scale, font families
+  sys/            # semantic slots — color.sys.surface.default → {color.ref.neutral.0}
+  cmp/            # component-scoped — cmp.button.bg → {color.sys.accent.bg}
+  themes/
+    light.json    # Light mode overrides of sys
+    dark.json     # Dark mode overrides of sys
+    brand-a.json  # Brand A overrides of color.sys.accent.*
+  resolver.json
+```
+
+Ref → sys → cmp is the DTCG pyramid. Components alias sys (never ref directly) so a brand swap at sys propagates through every component that uses the accent.
+
+## 2. The resolver
+
+Two independent modifiers:
+
+```json title="tokens/resolver.json"
+{
+  "$schema": "https://design-tokens.org/tr/2025/drafts/resolver/",
+  "version": "2025.10",
+  "sets": {
+    "ref": { "sources": [{ "$ref": "./ref/color.palette.json" } /* , … */] },
+    "sys": { "sources": [{ "$ref": "./sys/color.json" } /* , … */] },
+    "cmp": { "sources": [{ "$ref": "./cmp/button.json" } /* , … */] }
+  },
+  "modifiers": {
+    "mode": {
+      "description": "Light/dark surface + text baseline.",
+      "contexts": {
+        "Light": [{ "$ref": "./themes/light.json" }],
+        "Dark": [{ "$ref": "./themes/dark.json" }]
+      },
+      "default": "Light"
+    },
+    "brand": {
+      "description": "Accent palette.",
+      "contexts": {
+        "Default": [],
+        "Brand A": [{ "$ref": "./themes/brand-a.json" }]
+      },
+      "default": "Default"
+    }
+  },
+  "resolutionOrder": [
+    { "$ref": "#/sets/ref" },
+    { "$ref": "#/sets/sys" },
+    { "$ref": "#/sets/cmp" },
+    { "$ref": "#/modifiers/mode" },
+    { "$ref": "#/modifiers/brand" }
+  ]
+}
+```
+
+Key points:
+
+- `"Default": []` is a legal context — no override files, just the sys baseline.
+- `resolutionOrder` lists modifiers **after** sets: sys/cmp load first, mode/brand overlay on top.
+- `brand` appears after `mode` in `resolutionOrder`, so if both touch the same token path, brand wins. That's authoring intent — brand-a.json can override light.json for accent-only tweaks.
+
+## 3. Config
+
+```ts title="swatchbook.config.ts"
+import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
+
+export default defineSwatchbookConfig({
+  tokens: ['tokens/**/*.json'],
+  resolver: 'tokens/resolver.json',
+  default: 'Light · Default',
+  cssVarPrefix: 'ds',
+});
+```
+
+The `default` string is the composed tuple name — `<mode> · <brand>` for this project.
+
+## 4. What Storybook shows
+
+With the config live:
+
+- **Toolbar** renders two dropdowns: one labelled `mode`, one labelled `brand`. Each lists its contexts. The current selection shows next to the label.
+- **Tokens panel** lists every resolved token for the active tuple. Switching the toolbar updates values live.
+- **CSS emission** generates:
+  - `:root` with the default tuple (`Light · Default`).
+  - `[data-mode="Dark"][data-brand="Default"] { … }`
+  - `[data-mode="Light"][data-brand="Brand A"] { … }`
+  - `[data-mode="Dark"][data-brand="Brand A"] { … }`
+- **Components** (Button, Card, Input in the reference Storybook) repaint as you switch axes.
+
+## 5. Preset pills
+
+Give common combinations a name:
+
+```ts title="swatchbook.config.ts"
+export default defineSwatchbookConfig({
+  // …as before…
+  presets: [
+    { name: 'Default Light', axes: { mode: 'Light', brand: 'Default' } },
+    { name: 'Brand A Dark', axes: { mode: 'Dark', brand: 'Brand A' } },
+  ],
+});
+```
+
+The toolbar now renders pills next to the dropdowns. Clicking a pill writes the full tuple; the pill highlights when the current state matches.
+
+## 6. A third axis
+
+Adding a `contrast` modifier is additive — existing axes stay as-is, the cartesian product grows from 4 to 8 tuples. For contrast to compose cleanly with mode + brand, each contrast override should only touch **contrast-specific** paths (borders, focus rings, maybe text), letting mode handle surfaces and brand handle accents. See [axes](../concepts/axes) on how the spec lets axes collide at the same path (and why the CSS emission is flat).
+
+## See also
+
+- [Theming inputs](../concepts/theming-inputs) — resolver vs layered trade-off.
+- [Authoring doc stories](./authoring-doc-stories) — documenting this setup in MDX.
+- [Live Storybook](/swatchbook/storybook/) — this exact config, running.

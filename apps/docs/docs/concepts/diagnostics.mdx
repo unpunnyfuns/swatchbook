@@ -1,0 +1,69 @@
+---
+id: diagnostics
+title: Diagnostics
+sidebar_position: 4
+---
+
+# Diagnostics
+
+Every `loadProject()` call returns a `diagnostics: Diagnostic[]` list. The addon surfaces it in a dedicated Storybook panel so token authors can see problems without reading terminal logs.
+
+## The shape
+
+```ts
+interface Diagnostic {
+  severity: 'error' | 'warn' | 'info';
+  group: string;
+  message: string;
+  filename?: string;
+  line?: number;
+  column?: number;
+}
+```
+
+`group` identifies the subsystem that produced the diagnostic:
+
+- `parser` — Terrazzo's token-file parser (malformed JSON, invalid `$value`, wrong `$type`, …).
+- `resolver` — resolver-file issues (missing `$ref`, unknown modifier, context with no files).
+- `swatchbook/presets` — preset validation (unknown axis key, invalid context value).
+- Plugin-originated groups — depends on your setup.
+
+## Severities
+
+- **`error`** — something is structurally broken. Token may be missing from the graph, alias may be unresolved. The addon shows these with a red badge.
+- **`warn`** — something is unusual or probably-a-mistake but the project loaded. Example: a preset with an unknown axis key is dropped and produces a warn.
+- **`info`** — diagnostic for the curious. Rare.
+
+## The panel
+
+The Diagnostics panel shows every diagnostic grouped by severity, with a green **OK** badge when the list is empty. Clicking a diagnostic with a `filename`/`line` jumps to the source if your Storybook has the right URL handler; otherwise it's shown as text.
+
+## Interpreting them
+
+Common patterns:
+
+- **`parser: Could not resolve alias "{color.ref.blue.500}"`** — the alias target doesn't exist in the merged graph. Check for a typo in the path, or a missing ref file that wasn't included in `tokens` globs.
+- **`parser: Invalid token value for $type "color"`** — the `$value` doesn't parse as the declared `$type`. Usually a string missing a unit or a color in the wrong format.
+- **`swatchbook/presets: Preset "X" has unknown axis key "Y"`** — a preset references an axis that doesn't exist on the project. Either the axis name was renamed or the preset predates the resolver change.
+
+## Throwing on errors
+
+By default the addon surfaces diagnostics without failing the Storybook build. If you want CI to fail on `error`-severity diagnostics, check them in a pre-build script:
+
+```ts
+import { loadProject } from '@unpunnyfuns/swatchbook-core';
+import config from './swatchbook.config.ts';
+
+const project = await loadProject(config, process.cwd());
+const errors = project.diagnostics.filter((d) => d.severity === 'error');
+if (errors.length > 0) {
+  console.error(errors);
+  process.exit(1);
+}
+```
+
+Future work may add a `strict` config flag that bakes this in. Track in [issues](https://github.com/unpunnyfuns/swatchbook/issues).
+
+## See also
+
+- [Quickstart](../quickstart) — getting to a clean Diagnostics panel is the first milestone.

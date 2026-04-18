@@ -1,0 +1,99 @@
+---
+id: theming-inputs
+title: Theming inputs
+sidebar_position: 1
+---
+
+# Theming inputs
+
+Swatchbook accepts two ways of declaring how tokens compose into themes: a **DTCG resolver file** or an **authored `axes` config**. Pick one; they're mutually exclusive.
+
+## Resolver (spec-native)
+
+A DTCG 2025.10 resolver document (`resolver.json`) describes sets and modifiers in the spec-defined shape. Terrazzo parses and evaluates it; swatchbook surfaces the result.
+
+```json title="tokens/resolver.json"
+{
+  "$schema": "https://design-tokens.org/tr/2025/drafts/resolver/",
+  "version": "2025.10",
+  "sets": {
+    "ref": { "sources": [{ "$ref": "./ref/color.json" }] },
+    "sys": { "sources": [{ "$ref": "./sys/color.json" }] }
+  },
+  "modifiers": {
+    "mode": {
+      "contexts": {
+        "Light": [{ "$ref": "./themes/light.json" }],
+        "Dark": [{ "$ref": "./themes/dark.json" }]
+      },
+      "default": "Light"
+    }
+  },
+  "resolutionOrder": [
+    { "$ref": "#/sets/ref" },
+    { "$ref": "#/sets/sys" },
+    { "$ref": "#/modifiers/mode" }
+  ]
+}
+```
+
+```ts title="swatchbook.config.ts"
+export default defineSwatchbookConfig({
+  tokens: ['tokens/**/*.json'],
+  resolver: 'tokens/resolver.json',
+});
+```
+
+**Pick this when**:
+- Your tokens are already published as a DTCG-spec-compliant package, or you want them to be.
+- You want portability: any spec-compliant parser can consume the same file unchanged.
+- You have multiple modifiers (mode, brand, contrast, density, …) and want them independently orthogonal.
+
+## Layered (authored)
+
+For projects that don't want to write a resolver file — or whose layers don't fit the resolver shape — declare axes directly in the config:
+
+```ts title="swatchbook.config.ts"
+export default defineSwatchbookConfig({
+  tokens: ['tokens/ref/**/*.json', 'tokens/sys/**/*.json'],
+  axes: [
+    {
+      name: 'mode',
+      description: 'Light/dark surface + text baseline.',
+      contexts: {
+        Light: ['tokens/themes/light.json'],
+        Dark: ['tokens/themes/dark.json'],
+      },
+      default: 'Light',
+    },
+    {
+      name: 'brand',
+      contexts: {
+        Default: [],
+        'Brand A': ['tokens/themes/brand-a.json'],
+      },
+      default: 'Default',
+    },
+  ],
+});
+```
+
+**Pick this when**:
+- You haven't adopted the DTCG resolver spec and don't want to.
+- Your layers are shaped as "base + optional override files" without needing spec machinery.
+- You want config lives in TypeScript rather than JSON.
+
+The empty `contexts: { Default: [] }` is legal — it means "no override for this context," which is the baseline for a brand/contrast axis.
+
+## Same mental model either way
+
+Internally, both inputs produce the same shape: a list of `axes`, each with `contexts` and a `default`. Themes are the cartesian product of contexts across all axes. The rest of the documentation talks about axes generically; whichever input you use, the addon UI is identical.
+
+## What about Tokens Studio `$themes` manifests?
+
+Not supported. Converting a Tokens Studio manifest to a resolver file is mechanical — each named theme becomes a modifier context — and the resolver format is the long-term spec-native path. If this is a blocker for you, [open an issue](https://github.com/unpunnyfuns/swatchbook/issues).
+
+## See also
+
+- [Axes](./axes) — the runtime model for selection.
+- [Presets](./presets) — named quick-select combinations.

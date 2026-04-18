@@ -1,0 +1,82 @@
+---
+id: blocks
+title: '@unpunnyfuns/swatchbook-blocks'
+sidebar_position: 3
+---
+
+# `@unpunnyfuns/swatchbook-blocks`
+
+MDX-embeddable doc blocks. Each block reads the active token graph from the addon's virtual module and reacts to axis changes.
+
+## Install
+
+```bash
+pnpm add -D @unpunnyfuns/swatchbook-blocks
+```
+
+The addon must be registered in the same Storybook for the blocks to have data to read.
+
+## Usage
+
+```mdx
+import { ColorPalette, TokenTable, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
+
+<ColorPalette group="color.sys" />
+<TokenTable filter="size.sys.*" type="dimension" />
+<TokenDetail path="color.sys.accent.bg" />
+```
+
+## Blocks
+
+### `<TokenDetail path />`
+
+Single-token deep-dive. Renders:
+
+- Type + description.
+- Alias chain (forward) — e.g. `cmp.button.bg → color.sys.accent.bg → color.ref.blue.500`.
+- Aliased-by tree (backward) — everything that transitively aliases this token.
+- Composite preview — for `typography`, `shadow`, `border`, `transition`, `dimension`, `duration`, `cubicBezier`, `fontFamily`, `fontWeight`, `strokeStyle`, `color`.
+- Per-axis variance — values along whichever axes move the token.
+
+Props: `path: string`.
+
+### `<TokenTable filter? type? />`
+
+Filterable table. Columns: name, value, resolved, description.
+
+Props:
+
+- `filter?: string` — path glob (`"color.sys.*"`, `"color.sys"`, or exact path).
+- `type?: string` — DTCG `$type` filter.
+
+### `<ColorPalette group? />`
+
+Swatch grid grouped by sub-path.
+
+Props: `group?: string` — path prefix (`"color.ref"`, `"color.sys.surface"`, …).
+
+### `<TypographyScale />`
+
+Renders each `typography` composite token as a sample line using its own value.
+
+### `<FontFamilySample sample? />`
+
+Pangram rendered per `fontFamily` primitive. Props: `sample?: string` (default: the quick brown fox…).
+
+### `<FontWeightScale sample? />`
+
+Same "Aa" sample at each `fontWeight` primitive, sorted ascending. Props: `sample?: string` (default: "Aa").
+
+### `<StrokeStyleSample />`
+
+Border rendered per `strokeStyle` primitive. String-form styles (`solid`, `dashed`, `dotted`, `double`) render as `border-style`; object-form (with `dashArray` / `lineCap`) renders a textual fallback.
+
+## Reactivity
+
+All blocks subscribe to Storybook's `globalsUpdated` channel event and re-render when the active axis tuple changes. This works both inside story renders and inside MDX doc blocks (where the preview HooksContext isn't available — we use the channel directly).
+
+## Do / don't
+
+- ✅ Use blocks in MDX `*.mdx` docs pages for rich token references.
+- ✅ Filter aggressively — `<TokenTable filter="color.sys.*" type="color" />` beats unfiltered tables for browsability.
+- ❌ Don't try to use blocks outside Storybook; they depend on the addon's virtual module. A framework-free variant may arrive later if there's demand.
