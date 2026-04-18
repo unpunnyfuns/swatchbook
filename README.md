@@ -1,37 +1,22 @@
 # Swatchbook
 
-A Storybook addon and supporting packages for documenting [DTCG](https://www.designtokens.org/) design tokens — parsed via [Terrazzo](https://terrazzo.app/) — inside your Storybook. Design-system engineers use it to publish a searchable, interactive reference of their token set; feature engineers and stakeholders use it to see what's available without opening token JSON files.
+A Storybook addon and supporting packages for documenting [DTCG](https://www.designtokens.org/) design tokens — parsed via [Terrazzo](https://terrazzo.app/) — inside your Storybook.
 
 **Documentation:** [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/) (live Storybook at [`/storybook`](https://unpunnyfuns.github.io/swatchbook/storybook/)).
-
-## Scope
-
-Swatchbook focuses on DTCG-native projects — the current 2025.10 draft and onward. The guiding principle: **extrapolate what's in the token set; don't invent new analysis.** If Terrazzo surfaces a piece of data, we render it. If we'd have to compute something new, that's upstream work or a different tool, not ours.
-
-Consider alternatives like Style Dictionary or Tokens Studio if you need long-term stability over the draft spec.
-
-Monorepo published under the `@unpunnyfuns` scope.
 
 ## Packages
 
 | Package | Purpose |
 | --- | --- |
-| [`@unpunnyfuns/swatchbook-core`](./packages/core) | Framework-free DTCG loader. Wraps Terrazzo's parser and DTCG 2025.10 resolver; emits CSS variables and TypeScript types. |
-| [`@unpunnyfuns/swatchbook-addon`](./packages/addon) | Storybook 10 addon. Preset wires core into Vite via a virtual module, the toolbar renders one dropdown per modifier axis, the Design Tokens panel browses the resolved graph with inline diagnostics, and `useToken()` gives typed reads from stories. |
-| [`@unpunnyfuns/swatchbook-blocks`](./packages/blocks) | MDX doc blocks for Storybook docs pages. Per-type rendering — color swatches, dimension bars, typography samples, composite previews, per-token detail with the full alias chain. |
-| [`@unpunnyfuns/swatchbook-tokens`](./packages/tokens-starter) | Minimal DTCG starter set (iceboxed past v0.1.0 — see `docs/decisions.md`). |
+| [`@unpunnyfuns/swatchbook-core`](./packages/core) | Framework-free DTCG loader. Emits CSS variables and TypeScript types. |
+| [`@unpunnyfuns/swatchbook-addon`](./packages/addon) | Storybook 10 addon. Toolbar, Design Tokens panel, preview decorator, `useToken()` hook. |
+| [`@unpunnyfuns/swatchbook-blocks`](./packages/blocks) | MDX doc blocks. Color swatches, dimension bars, typography samples, composite previews, per-token detail. |
 
 ## Install
 
-Install the addon for the toolbar, Design Tokens panel (tree + diagnostics), preview decorator, and `useToken()` hook:
-
 ```sh
 npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
-```
-
-Install the blocks package too if you want the MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `SwatchbookProvider`, and the block-side hooks):
-
-```sh
+# plus blocks if you want MDX doc blocks:
 npm install -D @unpunnyfuns/swatchbook-blocks
 ```
 
@@ -57,7 +42,7 @@ export default defineMain({
 });
 ```
 
-Opt the preview into the addon's annotations (CSF Next):
+Opt the preview into the addon's annotations:
 
 ```ts
 import { definePreview } from '@storybook/react-vite';
@@ -68,38 +53,24 @@ export default definePreview({
 });
 ```
 
-Prefer a separate config file? Write a `swatchbook.config.ts` and point at it with `options.configPath: '../swatchbook.config.ts'`. Useful when the same config is consumed by other tooling outside Storybook.
-
-Every `color.sys.surface.default` (and similar) now resolves to `var(--ds-color-sys-surface-default)` at runtime, bound to the active theme via per-axis `data-*` attributes on `<html>`.
-
 See the [documentation](https://unpunnyfuns.github.io/swatchbook/) for concepts, guides, and the full API reference.
-
-## Theming
-
-Swatchbook accepts a [DTCG 2025.10 resolver](https://design-tokens.org/tr/2025/drafts/resolver/) file as its primary theming input. The resolver declares `sets` (raw token files) and `modifiers` (theming axes such as mode, brand, contrast), and `resolutionOrder` specifies how they combine.
-
-Each modifier surfaces as an independent dropdown in the toolbar. Selecting a context for each modifier determines the active theme — a simple resolver with one `theme` modifier behaves like a traditional theme switcher; a resolver with `mode × brand` presents two dropdowns and repaints as either changes.
-
-Projects that don't want to author a resolver file can declare axes inline via `defineSwatchbookConfig({ axes: [...] })`; see [`@unpunnyfuns/swatchbook-core`](./packages/core) for the shape.
 
 ## Credits
 
-Swatchbook parses DTCG tokens through [Terrazzo](https://terrazzo.app/) by [Drew Powers](https://github.com/drwpow) — its parser, resolver evaluation, and alias resolution are the foundation this project builds on.
+Parses DTCG tokens through [Terrazzo](https://terrazzo.app/) by [Drew Powers](https://github.com/drwpow) — its parser, resolver evaluation, and alias resolution are the foundation this project builds on.
 
 ## Development
 
-pnpm workspaces + Turborepo. Node 24 (latest LTS). ESM throughout. `tsdown` for package builds.
-
-We use pnpm internally for workspace orchestration; consumers of the published packages can install with any package manager.
+pnpm workspaces + Turborepo. Node 24. ESM. `tsdown` for package builds.
 
 ```sh
 pnpm install
-pnpm dev                           # starts apps/storybook on :6006
+pnpm dev                           # apps/storybook on :6006
 pnpm turbo run lint typecheck test build
-pnpm turbo run test:storybook      # Playwright-backed play-function tests
+pnpm turbo run test:storybook
 ```
 
-See [`CLAUDE.md`](./CLAUDE.md) for project conventions and pre-commit checks, and [`docs/plan.md`](./docs/plan.md) for the design doc and milestone history.
+We use pnpm internally for workspace orchestration; consumers can install with any package manager.
 
 ## License
 
