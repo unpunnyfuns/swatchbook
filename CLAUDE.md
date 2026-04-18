@@ -61,13 +61,13 @@ When filing an issue: feature work → the relevant scope milestone. Repo hygien
   - **No nested `describe`.** One `describe` per file at most, as a file-level grouping. If you feel the urge to nest, split files instead.
   - **No `beforeEach`** for cosmetic shared setup. Write an inline `setup()` helper and have each test call it; duplicating a line or two beats the "what is `user` here?" hunt.
   - **`beforeAll` is a perf escape hatch**, not a grouping tool. Acceptable only when the shared setup is genuinely expensive (e.g. `loadProject` takes ~1s so running it per-test would blow the timeout) and the alternative would be a meaningful regression. Annotate the reason inline.
-  - Prose over jargon in test names: `` it('resolves deep alias chains (cmp → sys → ref)') `` beats `` it('resolves') `` inside nested describes.
+  - Prose over jargon in test names: `` it('resolves alias chains (sys → ref)') `` beats `` it('resolves') `` inside nested describes.
 - **Pre-commit checks (always, no exceptions):** before running `git commit`, run
   ```
   pnpm -r format && pnpm turbo run lint typecheck test
   ```
   Format changes to already-staged files land as noisy follow-up commits; CI fails on lint/typecheck/test regressions. Running all four locally catches every class before the push. If something is too slow, scope with `--filter=<pkg>` — don't skip.
-- **Design tokens:** ref → sys → cmp pyramid. Components never alias ref directly.
+- **Design tokens:** ref → sys only. Variation lives in modes on sys (i.e., resolver modifiers like `mode`, `brand`, `contrast`), which already handle the component specialization a `cmp` layer would attempt. Component-layer tokens are an explicit anti-pattern here — they double the token count for every axis without expressive gain; components alias `sys` directly.
 - **TypeScript:** strict, `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, `verbatimModuleSyntax` on.
 - **READMEs:** module name + one-liner; structure table; TypeScript examples with imports; ✅/❌ for do's/don'ts.
 

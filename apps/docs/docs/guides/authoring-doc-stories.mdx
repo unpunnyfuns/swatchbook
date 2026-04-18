@@ -28,8 +28,9 @@ import { ColorPalette, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 
 # Colors
 
-Our color system has three tiers: primitives in `color.ref`, semantic slots in
-`color.sys`, and component-scoped values in `cmp.*.color*`.
+Our color system has two tiers: primitives in `color.ref` and semantic slots
+in `color.sys`. Semantic slots carry mode- and brand-varied values through
+the resolver, so components style themselves against `color.sys.*` directly.
 
 ## Primitive palette
 

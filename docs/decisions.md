@@ -246,3 +246,15 @@ Second, how to emit CSS for N axes: one block per cartesian tuple with compound 
 **Terrazzo already provides the axis primitives.** `Resolver.source.modifiers`, `listPermutations()`, `apply(input)`, and `getPermutationID(input)` model tuples and per-modifier contexts natively. `packages/core/src/themes/resolver.ts` already iterates permutations and stores the tuple on `Theme.input` — we simply never expose the modifier structure to `Project`, so downstream code keys on the flat permutation ID instead of the tuple. The multi-axis work is mostly plumbing: surface what Terrazzo gives us; route preview, toolbar, emission, and blocks through tuples. Not reinventing resolution.
 
 **Plan impact:** `docs/plan.md` Multi-axis section rewritten with concrete issue breakdown (#131–#138). CLAUDE.md current-milestone line updated. Per-context display-name extensions and modifier `description` labels (from the original milestone sketch) demoted to post-milestone follow-ups; saved tuple presets stay in scope as issue #138 but land as config (`defineConfig({ presets })`) rather than localStorage so they're reviewable and shared across teammates.
+
+---
+
+## 2026-04-18 — Two-layer token model: drop the `cmp` layer
+
+**Context:** The reference fixture and our CLAUDE.md convention prescribed a three-layer pyramid — `ref` → `sys` → `cmp`. Components aliased `cmp.*` tokens, which in turn aliased `sys.*`. In practice every `cmp` token in the fixture was a 1:1 pass-through of a `sys` token.
+
+**Decision:** Collapse to two layers (`ref` + `sys`). Components alias `sys` directly. `cmp` is called out as an anti-pattern in the CLAUDE.md convention.
+
+**Rationale:** From Terrazzo's architecture guidance: every token layer is multiplied by every mode (axis × context), so each additional layer compounds the token count exponentially. Atlassian reported hitting 37,000 tokens largely because of component-layer specialization. In our own fixture, modes on `sys` (the resolver's `mode × brand` axes) already carry the variation a `cmp` layer was trying to introduce — a button aliasing `color.sys.accent.bg` picks up each tuple's value for free. The cmp layer paid for complexity it didn't resolve.
+
+**Plan impact:** Milestone #20 (Two-layer token model) split into issues #164 (code: fixture, components, tests) and #165 (convention + docs). CLAUDE.md "Design tokens" line rewritten to name cmp as an anti-pattern explicitly. Docusaurus `multi-axis-walkthrough.mdx` rewritten around the 2-layer layout, linking out to Terrazzo's architecture guide. No package version bumps — `packages/tokens-reference` is private, no published consumer.
