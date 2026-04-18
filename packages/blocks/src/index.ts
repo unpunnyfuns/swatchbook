@@ -55,6 +55,7 @@ export {
   type CompositeBreakdownProps,
 } from '#/token-detail/CompositeBreakdown.tsx';
 export { CompositePreview, type CompositePreviewProps } from '#/token-detail/CompositePreview.tsx';
+export { ConsumerOutput, type ConsumerOutputProps } from '#/token-detail/ConsumerOutput.tsx';
 export { TokenHeader, type TokenHeaderProps } from '#/token-detail/TokenHeader.tsx';
 export {
   TokenUsageSnippet,
