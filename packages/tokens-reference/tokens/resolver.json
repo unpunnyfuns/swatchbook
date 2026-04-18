@@ -12,7 +12,8 @@
         { "$ref": "./ref/font.json" },
         { "$ref": "./ref/motion.json" },
         { "$ref": "./ref/stroke.json" },
-        { "$ref": "./ref/number.json" }
+        { "$ref": "./ref/number.json" },
+        { "$ref": "./ref/gradient.json" }
       ]
     },
     "sys": {

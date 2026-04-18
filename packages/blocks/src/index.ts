@@ -3,6 +3,7 @@ export { ColorPalette, type ColorPaletteProps } from '#/ColorPalette.tsx';
 export { DimensionScale, type DimensionKind, type DimensionScaleProps } from '#/DimensionScale.tsx';
 export { FontFamilySample, type FontFamilySampleProps } from '#/FontFamilySample.tsx';
 export { FontWeightScale, type FontWeightScaleProps } from '#/FontWeightScale.tsx';
+export { GradientPalette, type GradientPaletteProps } from '#/GradientPalette.tsx';
 export { MotionPreview, type MotionPreviewProps, type MotionSpeed } from '#/MotionPreview.tsx';
 export { ShadowPreview, type ShadowPreviewProps } from '#/ShadowPreview.tsx';
 export { StrokeStyleSample, type StrokeStyleSampleProps } from '#/StrokeStyleSample.tsx';
