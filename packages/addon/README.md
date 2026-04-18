@@ -14,7 +14,7 @@ Peer requirements: `storybook@^10.3`, `react` / `react-dom` 18+.
 
 ## Register
 
-`.storybook/main.ts` — CSF Next:
+`.storybook/main.ts` — CSF Next. Inline config is the recommended path; the separate `swatchbook.config.ts` file is an escape hatch for sharing config with other tooling (see below).
 
 ```ts
 import { defineMain } from '@storybook/react-vite/node';
@@ -26,7 +26,11 @@ export default defineMain({
     {
       name: '@unpunnyfuns/swatchbook-addon',
       options: {
-        configPath: '../swatchbook.config.ts',
+        config: {
+          resolver: 'tokens/resolver.json',
+          default: { mode: 'Light' },
+          cssVarPrefix: 'ds',
+        },
       },
     },
   ],
@@ -48,8 +52,8 @@ export default definePreview({
 
 | Option       | Type     | What                                                              |
 | ------------ | -------- | ----------------------------------------------------------------- |
-| `config`     | `Config` | Inline swatchbook config. Mutually exclusive with `configPath`.   |
-| `configPath` | `string` | Path to a config module relative to `.storybook/`. Loaded via jiti so `.ts` / `.mts` / `.js` / `.mjs` all work. |
+| `config`     | `Config` | Inline swatchbook config. Recommended for most projects. Mutually exclusive with `configPath`. |
+| `configPath` | `string` | Path to a config module relative to `.storybook/`. Loaded via jiti so `.ts` / `.mts` / `.js` / `.mjs` all work. Use when the same config is consumed by other tooling (a CLI, CI lint, external build script). |
 
 ## `useToken`
 
