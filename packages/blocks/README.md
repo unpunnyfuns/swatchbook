@@ -22,6 +22,7 @@ Requires `@unpunnyfuns/swatchbook-addon` to be registered in your Storybook conf
 | `FontFamilySample`  | Pangram rendered per `fontFamily` primitive.                                        |
 | `FontWeightScale`   | Same sample text rendered at each `fontWeight` primitive, sorted ascending.         |
 | `StrokeStyleSample` | Border rendered per `strokeStyle` primitive.                                        |
+| `GradientPalette`   | Wide swatch per `gradient` token with stop breakdown (linear-gradient default).      |
 | `TokenDetail`       | Single-token inspector — type, value, alias chain, aliased-by tree, per-axis variance, composite preview. |
 
 Shared: every block accepts a `caption` override and renders against the addon's `var(--<prefix>-…)` output.

@@ -35,7 +35,7 @@ Single-token deep-dive. Renders:
 - Type + description.
 - Alias chain (forward) — e.g. `color.sys.accent.bg → color.ref.blue.700`.
 - Aliased-by tree (backward) — everything that transitively aliases this token.
-- Composite preview — for `typography`, `shadow`, `border`, `transition`, `dimension`, `duration`, `cubicBezier`, `fontFamily`, `fontWeight`, `strokeStyle`, `color`.
+- Composite preview — for `typography`, `shadow`, `border`, `transition`, `dimension`, `duration`, `cubicBezier`, `fontFamily`, `fontWeight`, `strokeStyle`, `gradient`, `color`.
 - Per-axis variance — values along whichever axes move the token.
 
 Props: `path: string`.
@@ -70,6 +70,12 @@ Same "Aa" sample at each `fontWeight` primitive, sorted ascending. Props: `sampl
 ### `<StrokeStyleSample />`
 
 Border rendered per `strokeStyle` primitive. String-form styles (`solid`, `dashed`, `dotted`, `double`) render as `border-style`; object-form (with `dashArray` / `lineCap`) renders a textual fallback.
+
+### `<GradientPalette filter? />`
+
+Wide sample per `gradient` token with the stop list as a sidebar. Samples use `linear-gradient(to right, …)` by default — DTCG gradients are stop arrays, and the gradient function is a rendering choice the consumer makes at use-site. If you want radial/conic previews here, open an issue.
+
+Props: `filter?: string` — path glob (`"gradient.ref.*"`, etc.).
 
 ## Reactivity
 
