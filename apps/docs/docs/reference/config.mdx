@@ -1,0 +1,112 @@
+---
+id: config
+title: Config reference
+sidebar_position: 0
+---
+
+# `swatchbook.config.ts` reference
+
+Every field on the `Config` object, with the semantics `loadProject` applies at runtime.
+
+```ts title="swatchbook.config.ts"
+import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
+
+export default defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  default: { mode: 'Dark', brand: 'Brand A' },
+  cssVarPrefix: 'ds',
+  presets: [
+    { name: 'A11y High Contrast', axes: { mode: 'Light', contrast: 'High' } },
+  ],
+});
+```
+
+`defineSwatchbookConfig` is an identity helper — it gives you typed autocomplete on the object you pass in and returns it unchanged.
+
+## Picking a theming input
+
+Exactly three shapes are legal:
+
+- **Resolver** — `resolver: 'path/to/resolver.json'`. The DTCG-spec-native path; the file declares sets, modifiers, and resolutionOrder, and the modifiers become your axes. Recommended.
+- **Layered** — `axes: [...]` + `tokens: [...]`. For projects without a resolver document. You declare axes inline; each context names overlay files that layer onto the base `tokens`.
+- **Plain parse** — `tokens: [...]` alone. Single synthetic `theme` axis; every token loaded as one tuple. Useful for smoke-testing a token set before adopting a resolver.
+
+Setting `resolver` and `axes` at the same time is an error. Setting none of the three (no `resolver`, no `axes`, no `tokens`) throws at load time.
+
+## Fields
+
+### `tokens?: string[]`
+
+Glob patterns (relative to the config's cwd) for base DTCG token files.
+
+- **Resolver projects (`resolver` set)** — optional. The resolver's own `$ref` targets fully determine which files get loaded, and the addon's Vite plugin derives HMR watch paths from the resolved source list. Supplying `tokens` alongside `resolver` is still valid and unions the watch paths — useful when you want HMR to pick up files the resolver doesn't reference directly.
+- **Layered projects (`axes` set)** — required. The layered loader parses `[...base, ...overlayFilesInAxisOrder]` per tuple; without `tokens` there's nothing to layer onto.
+- **Plain-parse (no resolver, no axes)** — required. Every file matched by the globs gets parsed into the single synthetic theme.
+
+### `resolver?: string`
+
+Path to a [DTCG 2025.10 resolver](https://design-tokens.org/tr/2025/drafts/resolver/) document. Mutually exclusive with `axes`.
+
+Terrazzo normalizes the document, then Swatchbook enumerates permutations via `resolver.listPermutations()` and realizes each with `resolver.apply()`. One `Axis` surfaces per modifier; the resolver file itself and every `$ref` target it pulls in land on `Project.sourceFiles`.
+
+### `axes?: AxisConfig[]`
+
+Authored layered axes, for projects without a resolver. Mutually exclusive with `resolver`. Each `AxisConfig` has:
+
+```ts
+interface AxisConfig {
+  name: string;
+  description?: string;
+  contexts: Record<string, string[]>;
+  default: string;
+}
+```
+
+`contexts` is a map from context name to an ordered list of overlay files (paths or globs, relative to the config's cwd). An empty array is legal — it means "no override," which is the baseline for an axis that introduces nothing by default (`Default: []`).
+
+Themes are every combination of contexts across all axes. Last write wins on duplicate token paths across base + overlays; overlay files listed later in `axes` win over earlier ones.
+
+### `default?: Partial<Record<string, string>>`
+
+Initial active tuple, keyed by axis name. Partial is fine — any axis you omit falls back to that axis's own `default` at load time. Unknown axis keys and invalid context values produce `warn` diagnostics (group `swatchbook/default`) and are sanitized out.
+
+```ts
+// Every axis specified:
+default: { mode: 'Dark', brand: 'Brand A' }
+
+// Partial — omitted axes use their own defaults:
+default: { brand: 'Brand A' }
+
+// Omit entirely — starts in the all-axis-defaults tuple:
+// default: undefined
+```
+
+### `cssVarPrefix?: string`
+
+Prefix prepended to every emitted CSS variable. `color.sys.accent.bg` becomes `var(--<prefix>-color-sys-accent-bg)`; an empty string disables the prefix. Typical values are short and project-specific (`ds`, `sb`, `ui`).
+
+### `outDir?: string`
+
+Project-local directory for codegen artifacts (default `.swatchbook`). The addon preset writes `tokens.d.ts` here — add `"include": [".swatchbook/**/*.d.ts"]` to your tsconfig so `useToken()` autocompletes.
+
+### `presets?: Preset[]`
+
+Named tuple combinations rendered as quick-select pills next to the toolbar's axis dropdowns. Each `Preset` has:
+
+```ts
+interface Preset {
+  name: string;
+  axes: Partial<Record<string, string>>;
+  description?: string;
+}
+```
+
+Partial tuples are legal — omitted axes resolve to the axis's `default` when the preset is applied. `loadProject` validates presets: unknown axis keys and invalid context values surface as `warn` diagnostics (group `swatchbook/presets`) and are sanitized out, but the preset itself stays in `Project.presets` (an empty preset is still a valid tuple — it resolves to all defaults).
+
+See [Presets](../concepts/presets) for the runtime UX.
+
+## See also
+
+- [Theming inputs](../concepts/theming-inputs) — when to pick resolver vs layered.
+- [Axes](../concepts/axes) — the runtime model for selection.
+- [Reference: core](./core) — the loader APIs this config drives.
