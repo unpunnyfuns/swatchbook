@@ -41,10 +41,12 @@ jobs:
       - name: Create Version Packages PR or publish
         uses: changesets/action@v1
         with:
-          # `pnpm release` builds the three fixed-group packages and runs
-          # `changeset publish` — see package.json#scripts.
-          publish: pnpm release
-          version: pnpm version
+          # `pnpm run <script>` disambiguates from pnpm's built-ins
+          # (`pnpm version` would hit the built-in and silently no-op).
+          # `version` → `changeset version`; `release` builds the three
+          # fixed-group packages and runs `changeset publish`.
+          publish: pnpm run release
+          version: pnpm run version
           commit: 'chore(release): version packages'
           title: 'chore(release): version packages'
         env:
