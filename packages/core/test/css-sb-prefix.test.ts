@@ -33,9 +33,9 @@ it('applies the prefix to variable names', () => {
 });
 
 it('applies the prefix to aliased var(…) references inside values', () => {
-  const line = css.split('\n').find((l) => l.includes('--sb-cmp-button-bg:'));
+  const line = css.split('\n').find((l) => l.includes('--sb-color-sys-accent-bg:'));
   expect(line).toBeDefined();
-  expect(line).toMatch(/var\(--sb-color-sys-accent-bg\)/);
+  expect(line).toMatch(/var\(--sb-color-ref-/);
 });
 
 it('emits every primitive + composite type covered by the fixture', () => {

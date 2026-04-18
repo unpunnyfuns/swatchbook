@@ -79,7 +79,7 @@ export const Dark = meta.story({
 
 /**
  * Stacked composition: Brand A overrides `color.sys.accent.bg` from blue to
- * violet. The button (which aliases `cmp.button.bg` → `color.sys.accent.bg`)
+ * violet. The button (whose styles read `var(--sb-color-sys-accent-bg)` directly)
  * must render with a red channel that exceeds the blue channel — violet's
  * defining property — whereas plain Light/Dark accents are blue-dominant.
  */

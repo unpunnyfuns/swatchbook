@@ -5,27 +5,30 @@ import { TokenDetail, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 
 # Tokens
 
-The full, unfiltered token graph — every primitive, semantic, and
-component token currently loaded by the addon.
+The full, unfiltered token graph — every primitive and semantic token
+currently loaded by the addon. Variation is carried by the active
+`mode × brand` tuple (switch from the toolbar); there is no separate
+component-token layer.
 
-## Component tokens
+## Semantic color
 
-`cmp.*` tokens alias into `sys`, which in turn aliases into `ref`. Hover
-over any alias in `TokenDetail` below to see the chain resolve.
+`color.sys.*` tokens alias into `color.ref.*`. Hover any alias in
+`TokenDetail` below to see the chain resolve.
 
-<TokenTable filter='cmp.button.*' />
+<TokenTable filter='color.sys.*' type='color' />
 
 ## Alias chain spotlights
 
-`cmp.button.bg` resolves through the full pyramid:
-`cmp.button.bg` → `color.sys.accent.bg` → `color.ref.blue.600`.
+`color.sys.accent.bg` resolves through the ref layer:
+`color.sys.accent.bg` → `color.ref.blue.700` (`Default` brand) or
+`color.ref.violet.700` (`Brand A`).
 
-<TokenDetail path='cmp.button.bg' />
+<TokenDetail path='color.sys.accent.bg' />
 
-A composite token — `cmp.button.font` bundles family, size, weight, and
-line-height via a single `typography.sys.body-strong` alias.
+A composite token — `typography.sys.body-strong` bundles family, size,
+weight, and line-height.
 
-<TokenDetail path='cmp.button.font' />
+<TokenDetail path='typography.sys.body-strong' />
 
 A dimension token: `space.sys.md`.
 
