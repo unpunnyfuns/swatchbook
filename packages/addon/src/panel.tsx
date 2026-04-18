@@ -40,6 +40,7 @@ interface VirtualDiagnostic {
 
 interface InitPayload {
   axes: VirtualAxis[];
+  disabledAxes: readonly string[];
   themes: VirtualTheme[];
   defaultTheme: string | null;
   themesResolved: Record<string, Record<string, VirtualToken>>;
@@ -221,6 +222,16 @@ export function TokensPanel({ active }: PanelProps): ReactElement | null {
   const axisIndicatorText = axes
     .map((axis) => `${axis.name}: ${tuple[axis.name] ?? axis.default}`)
     .join('  ·  ');
+  const disabledAxes = payload?.disabledAxes ?? [];
+  /**
+   * Disabled axes don't appear in `axes` (filtered at load time) so their
+   * values aren't in `tuple` either. The surviving themes still carry the
+   * pinned value on their `input`, so pick any theme and read it out.
+   */
+  const pinnedSample = themes[0]?.input ?? {};
+  const disabledIndicatorText = disabledAxes
+    .map((name) => `${name}: ${pinnedSample[name] ?? '?'} · pinned`)
+    .join('  ·  ');
 
   return h(
     'div',
@@ -236,6 +247,15 @@ export function TokensPanel({ active }: PanelProps): ReactElement | null {
             'data-testid': 'tokens-panel-axis-indicator',
           },
           axisIndicatorText,
+        ),
+      disabledAxes.length > 0 &&
+        h(
+          'div',
+          {
+            style: { ...axisIndicatorStyle, opacity: 0.5 },
+            'data-testid': 'tokens-panel-disabled-axes-indicator',
+          },
+          disabledIndicatorText,
         ),
       h('input', {
         style: searchInputStyle,

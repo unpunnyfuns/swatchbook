@@ -7,6 +7,7 @@ import {
   cssVarPrefix,
   defaultTheme,
   diagnostics,
+  disabledAxes as virtualDisabledAxes,
   presets as virtualPresets,
   themes,
   themesResolved,
@@ -69,6 +70,19 @@ function setRootAxes(themeName: string, tuple: Readonly<Record<string, string>>)
       root.setAttribute(`data-${axis.name}`, value);
     }
   }
+  /**
+   * Disabled axes aren't in `virtualAxes`, but CSS may still reference their
+   * pinned value on compound selectors in extension code. Read the value
+   * from any surviving theme's `input` — every theme that survived filtering
+   * carries the same pinned context for each disabled axis.
+   */
+  const pinnedSample = themes[0]?.input;
+  if (pinnedSample) {
+    for (const name of virtualDisabledAxes) {
+      const value = pinnedSample[name];
+      if (value !== undefined) root.setAttribute(`data-${name}`, value);
+    }
+  }
 }
 
 /**
@@ -80,6 +94,7 @@ function broadcastInit(): void {
   const channel = addons.getChannel();
   channel.emit(INIT_EVENT, {
     axes: virtualAxes,
+    disabledAxes: virtualDisabledAxes,
     presets: virtualPresets,
     themes,
     defaultTheme,
@@ -183,10 +198,18 @@ const themedDecorator: Decorator = (Story, context) => {
     const value = tuple[axis.name];
     if (value !== undefined) wrapperAttrs[`data-${axis.name}`] = value;
   }
+  const pinnedSample = themes[0]?.input;
+  if (pinnedSample) {
+    for (const name of virtualDisabledAxes) {
+      const value = pinnedSample[name];
+      if (value !== undefined) wrapperAttrs[`data-${name}`] = value;
+    }
+  }
 
   const snapshot = useMemo<ProjectSnapshot>(
     () => ({
       axes: virtualAxes,
+      disabledAxes: virtualDisabledAxes,
       presets: virtualPresets,
       themes,
       themesResolved,

@@ -138,6 +138,20 @@ Partial tuples are legal — omitted axes resolve to the axis's `default` when t
 
 See [Presets](../concepts/presets) for the runtime UX.
 
+### `disabledAxes?: string[]`
+
+Axis names to suppress from this Storybook session. Each listed axis is **pinned to its `default` context**: the toolbar dropdown disappears, the axis drops out of `Project.axes`, non-default tuples fold away, and CSS emission stops including the axis in compound selectors. The tokens panel still shows a small pinned indicator so authors don't forget the modifier is being suppressed.
+
+```ts
+defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  disabledAxes: ['contrast'],
+  cssVarPrefix: 'ds',
+});
+```
+
+Config-level only — there's no runtime toggle. Disabling an axis is the cleanest way to hide a work-in-progress modifier (or an experimental axis you don't want surfaced yet) without editing the resolver document. Unknown axis names produce `warn` diagnostics (group `swatchbook/disabled-axes`) and are ignored; the filtered list lands on `Project.disabledAxes` for downstream tooling.
+
 ## See also
 
 - [Theming inputs](../concepts/theming-inputs) — when to pick resolver vs layered.

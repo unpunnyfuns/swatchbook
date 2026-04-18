@@ -54,6 +54,8 @@ export interface VirtualPresetShape {
  */
 export interface ProjectSnapshot {
   axes: readonly VirtualAxisShape[];
+  /** Axis names suppressed via `config.disabledAxes` — pinned to their defaults, hidden from the toolbar. */
+  disabledAxes: readonly string[];
   presets: readonly VirtualPresetShape[];
   themes: readonly VirtualThemeShape[];
   themesResolved: Record<string, Record<string, VirtualTokenShape>>;
