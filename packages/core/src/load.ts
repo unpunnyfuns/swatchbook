@@ -19,6 +19,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
 
   return {
     config,
+    axes: normalized.axes,
     themes: normalized.themes,
     themesResolved: normalized.resolved,
     graph,
