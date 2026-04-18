@@ -49,5 +49,8 @@
     "tsdown": "^0.21.9",
     "typescript": "^6.0.0",
     "vitest": "^4.1.4"
+  },
+  "dependencies": {
+    "colorjs.io": "0.6.1"
   }
 }

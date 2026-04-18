@@ -1,3 +1,10 @@
+export {
+  COLOR_FORMATS,
+  type ColorFormat,
+  type FormatColorResult,
+  formatColor,
+  type NormalizedColor,
+} from '#/internal/format-color.ts';
 export { BorderPreview, type BorderPreviewProps } from '#/BorderPreview.tsx';
 export { BorderSample, type BorderSampleProps } from '#/border-preview/BorderSample.tsx';
 export { ColorPalette, type ColorPaletteProps } from '#/ColorPalette.tsx';
@@ -9,10 +16,12 @@ export { GradientPalette, type GradientPaletteProps } from '#/GradientPalette.ts
 export { MotionPreview, type MotionPreviewProps, type MotionSpeed } from '#/MotionPreview.tsx';
 export {
   AxesContext,
+  ColorFormatContext,
   SwatchbookContext,
   ThemeContext,
   useActiveAxes,
   useActiveTheme,
+  useColorFormat,
   useOptionalSwatchbookData,
   type VirtualAxisShape,
   type VirtualDiagnosticShape,

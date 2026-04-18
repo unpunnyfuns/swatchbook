@@ -4,6 +4,7 @@ import { addons, types, useGlobals, useStorybookApi } from 'storybook/manager-ap
 import {
   ADDON_ID,
   AXES_GLOBAL_KEY,
+  COLOR_FORMAT_GLOBAL_KEY,
   GLOBAL_KEY,
   INIT_EVENT,
   PANEL_DIAGNOSTICS_TAB,
@@ -265,6 +266,78 @@ function PresetPills({
   );
 }
 
+const COLOR_FORMAT_OPTIONS: readonly { id: string; label: string }[] = [
+  { id: 'hex', label: 'Hex' },
+  { id: 'rgb', label: 'RGB' },
+  { id: 'hsl', label: 'HSL' },
+  { id: 'oklch', label: 'OKLCH' },
+  { id: 'raw', label: 'Raw (JSON)' },
+];
+
+interface ColorFormatDropdownProps {
+  active: string;
+  onSelect: (next: string) => void;
+}
+
+function ColorFormatDropdown({ active, onSelect }: ColorFormatDropdownProps): ReactElement {
+  const activeLabel = COLOR_FORMAT_OPTIONS.find((o) => o.id === active)?.label ?? 'Hex';
+  const tooltip = ({ onHide }: { onHide: () => void }): ReactElement =>
+    h(
+      'div',
+      { style: { minWidth: 200 } },
+      h(
+        'div',
+        {
+          style: {
+            padding: '8px 12px',
+            fontSize: 11,
+            textTransform: 'uppercase',
+            letterSpacing: 0.5,
+            opacity: 0.6,
+          },
+        },
+        'Color format',
+      ),
+      h(
+        'div',
+        {
+          style: { padding: '0 12px 8px', fontSize: 12, opacity: 0.7, lineHeight: 1.4 },
+        },
+        'Display-only. Emitted CSS is unaffected.',
+      ),
+      h(TooltipLinkList, {
+        links: COLOR_FORMAT_OPTIONS.map((opt) => ({
+          id: opt.id,
+          title: opt.label,
+          active: opt.id === active,
+          onClick: () => {
+            onSelect(opt.id);
+            onHide();
+          },
+        })),
+      }),
+    );
+
+  return h(WithTooltip, {
+    placement: 'bottom',
+    trigger: 'click',
+    closeOnOutsideClick: true,
+    tooltip,
+    children: h(
+      IconButton,
+      { key: `${TOOL_ID}/color-format`, title: `Color format: ${activeLabel}` },
+      h(
+        'svg',
+        { width: 14, height: 14, viewBox: '0 0 14 14', 'aria-hidden': true },
+        h('circle', { cx: 4.5, cy: 5.5, r: 3, fill: '#e5484d', opacity: 0.85 }),
+        h('circle', { cx: 9.5, cy: 5.5, r: 3, fill: '#30a46c', opacity: 0.85 }),
+        h('circle', { cx: 7, cy: 9.5, r: 3, fill: '#3e63dd', opacity: 0.85 }),
+      ),
+      h('span', { style: { marginLeft: 6 } }, activeLabel),
+    ),
+  });
+}
+
 function AxesToolbar(): ReactElement {
   const [globals, updateGlobals] = useGlobals();
   const api = useStorybookApi();
@@ -285,6 +358,7 @@ function AxesToolbar(): ReactElement {
   const defaults = useMemo(() => defaultTupleFor(axes), [axes]);
   const [lastApplied, setLastApplied] = useState<string | null>(null);
   const globalTuple = globals[AXES_GLOBAL_KEY] as Record<string, string> | undefined;
+  const activeColorFormat = (globals[COLOR_FORMAT_GLOBAL_KEY] as string | undefined) ?? 'hex';
 
   const activeTuple = useMemo<Record<string, string>>(() => {
     const out: Record<string, string> = { ...defaults };
@@ -375,6 +449,11 @@ function AxesToolbar(): ReactElement {
         onSelect: (next: string) => setAxis(axis.name, next),
       }),
     ),
+    h(ColorFormatDropdown, {
+      key: `${TOOL_ID}/color-format`,
+      active: activeColorFormat,
+      onSelect: (next: string) => updateGlobals({ [COLOR_FORMAT_GLOBAL_KEY]: next }),
+    }),
   );
 }
 
