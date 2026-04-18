@@ -36,7 +36,7 @@ function ProbeGrid() {
     'color.sys.surface.default',
     'color.sys.text.default',
     'color.sys.accent.bg',
-    'cmp.button.radius',
+    'radius.sys.md',
     'typography.sys.heading',
     'shadow.sys.md',
   ] as const;

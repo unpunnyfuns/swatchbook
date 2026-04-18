@@ -1,13 +1,13 @@
 .card {
-  background: var(--sb-cmp-card-bg);
-  color: var(--sb-cmp-card-fg);
-  border: var(--sb-cmp-card-border);
-  border-radius: var(--sb-cmp-card-radius);
-  padding: var(--sb-cmp-card-padding);
-  box-shadow: var(--sb-cmp-card-shadow);
+  background: var(--sb-color-sys-surface-raised);
+  color: var(--sb-color-sys-text-default);
+  border: var(--sb-border-sys-default);
+  border-radius: var(--sb-radius-sys-lg);
+  padding: var(--sb-space-sys-lg);
+  box-shadow: var(--sb-shadow-sys-md);
   display: flex;
   flex-direction: column;
-  gap: var(--sb-cmp-card-gap);
+  gap: var(--sb-space-sys-md);
   max-width: 320px;
 }
 

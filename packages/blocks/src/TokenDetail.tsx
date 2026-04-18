@@ -687,12 +687,12 @@ function walk(
   return { path, children };
 }
 
-const GROUP_RANK: Record<string, number> = { ref: 0, sys: 1, cmp: 2 };
+const GROUP_RANK: Record<string, number> = { ref: 0, sys: 1 };
 
 function sortPaths(paths: readonly string[]): string[] {
   return paths.toSorted((a, b) => {
-    const ra = GROUP_RANK[a.split('.')[0] ?? ''] ?? 3;
-    const rb = GROUP_RANK[b.split('.')[0] ?? ''] ?? 3;
+    const ra = GROUP_RANK[a.split('.')[0] ?? ''] ?? 2;
+    const rb = GROUP_RANK[b.split('.')[0] ?? ''] ?? 2;
     return ra !== rb ? ra - rb : a.localeCompare(b);
   });
 }

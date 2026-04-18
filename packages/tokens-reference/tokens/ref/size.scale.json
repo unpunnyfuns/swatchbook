@@ -2,7 +2,7 @@
   "size": {
     "ref": {
       "$type": "dimension",
-      "$description": "4px-based linear scale. Every dimension token in sys/cmp aliases into here.",
+      "$description": "4px-based linear scale. Every dimension token in sys aliases into here.",
       "000": { "$value": { "value": 0,   "unit": "px" } },
       "050": { "$value": { "value": 2,   "unit": "px" } },
       "100": { "$value": { "value": 4,   "unit": "px" } },

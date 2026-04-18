@@ -5,14 +5,17 @@ import { ColorPalette, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 
 # Colors
 
-Color tokens span three tiers in the reference pyramid:
+Color tokens come in two tiers:
 
 - **`color.ref.*`** — raw palette primitives (blues, neutrals, reds, …). No
   aliases, theme-invariant.
 - **`color.sys.*`** — semantic slots (`surface.default`, `text.muted`,
-  `accent.*`). Every `sys` token aliases into `ref`.
-- **`color.cmp.*`** — component-scoped tokens (`cmp.button.bg`, …). Always
-  alias into `sys`.
+  `accent.*`). Every `sys` token aliases into `ref` and carries
+  mode- and brand-varied values through the resolver.
+
+Component styling reads `color.sys.*` directly — variation is handled by
+the active `mode × brand` tuple, so there's no separate component-token
+layer.
 
 ## System palette
 
