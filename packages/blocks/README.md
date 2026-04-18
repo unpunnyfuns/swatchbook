@@ -7,10 +7,10 @@ Published as `@unpunnyfuns/swatchbook-blocks`. Storybook MDX doc blocks for DTCG
 ## Install
 
 ```sh
-pnpm add @unpunnyfuns/swatchbook-blocks
+npm install @unpunnyfuns/swatchbook-blocks
 ```
 
-Requires `@unpunnyfuns/swatchbook-addon` to be registered in your Storybook config — the blocks consume its virtual token module.
+Blocks read the token graph from a `SwatchbookProvider`. Inside Storybook, register `@unpunnyfuns/swatchbook-addon` alongside these blocks — its preview decorator mounts the provider automatically. Outside Storybook, wrap your tree in `SwatchbookProvider` and pass a `ProjectSnapshot` directly (see [Outside Storybook](#outside-storybook) below).
 
 ## Blocks
 

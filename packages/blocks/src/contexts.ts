@@ -68,14 +68,38 @@ export interface ProjectSnapshot {
 
 /**
  * Context carrying the full {@link ProjectSnapshot}. `null` sentinel lets
- * the blocks-side `useProject()` hook tell "provider present" from "fall
- * back to the virtual module". The context itself lives in the addon
- * package (not blocks) to keep the dependency graph acyclic — blocks
- * already depends on addon; reversing that would break turbo's
- * topological build order.
+ * `useSwatchbookData()` tell "provider present" from "fall back to the
+ * virtual module".
  */
 export const SwatchbookContext = createContext<ProjectSnapshot | null>(null);
 
 export function useOptionalSwatchbookData(): ProjectSnapshot | null {
   return useContext(SwatchbookContext);
+}
+
+/**
+ * Active swatchbook theme for the current story/docs render. Populated by
+ * the addon's preview decorator and consumed by `useToken` + any future
+ * consumer hooks.
+ *
+ * This runs through plain React context rather than Storybook's
+ * `useGlobals` so the same hook works in autodocs / MDX renders where the
+ * preview-hooks context isn't available.
+ */
+export const ThemeContext = createContext<string>('');
+
+export function useActiveTheme(): string {
+  return useContext(ThemeContext);
+}
+
+/**
+ * Active axis tuple for the current story/docs render — `Record<axisName,
+ * contextName>`. Derived from the same input as {@link ThemeContext}; split
+ * out so consumers needing per-axis info (toolbar, panel, tuple-aware
+ * blocks) don't have to reparse the composed permutation ID.
+ */
+export const AxesContext = createContext<Readonly<Record<string, string>>>({});
+
+export function useActiveAxes(): Readonly<Record<string, string>> {
+  return useContext(AxesContext);
 }

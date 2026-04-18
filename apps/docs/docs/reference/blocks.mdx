@@ -11,10 +11,10 @@ Published as `@unpunnyfuns/swatchbook-blocks`. MDX-embeddable doc blocks. Each b
 ## Install
 
 ```bash
-pnpm add -D @unpunnyfuns/swatchbook-blocks
+npm install -D @unpunnyfuns/swatchbook-blocks
 ```
 
-The addon must be registered in the same Storybook for the blocks to have data to read.
+Inside Storybook, register `@unpunnyfuns/swatchbook-addon` alongside these blocks — its preview decorator mounts a `SwatchbookProvider` that the blocks read from. Outside Storybook, wrap your tree in `SwatchbookProvider` and pass a `ProjectSnapshot` directly.
 
 ## Usage
 

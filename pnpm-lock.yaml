@@ -148,6 +148,9 @@ importers:
 
   packages/addon:
     dependencies:
+      '@unpunnyfuns/swatchbook-blocks':
+        specifier: workspace:*
+        version: link:../blocks
       '@unpunnyfuns/swatchbook-core':
         specifier: workspace:*
         version: link:../core
@@ -184,10 +187,6 @@ importers:
         version: 8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1)
 
   packages/blocks:
-    dependencies:
-      '@unpunnyfuns/swatchbook-addon':
-        specifier: workspace:*
-        version: link:../addon
     devDependencies:
       '@testing-library/react':
         specifier: ^16.3.2

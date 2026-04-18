@@ -13,10 +13,10 @@ The doc blocks from `@unpunnyfuns/swatchbook-blocks` are React components that r
 Install the blocks package:
 
 ```bash
-pnpm add -D @unpunnyfuns/swatchbook-blocks
+npm install -D @unpunnyfuns/swatchbook-blocks
 ```
 
-All blocks read project data from the addon's virtual module, so nothing else is needed — as long as the addon preview annotation is registered, the blocks just work.
+The blocks read the active token graph from a `SwatchbookProvider`. The addon's preview decorator mounts that provider for every story, so as long as `@unpunnyfuns/swatchbook-addon` is registered in your Storybook, the blocks just work inside MDX.
 
 ## A minimal docs page
 

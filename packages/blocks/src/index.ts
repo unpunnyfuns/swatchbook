@@ -8,6 +8,19 @@ export { FontWeightScale, type FontWeightScaleProps } from '#/FontWeightScale.ts
 export { GradientPalette, type GradientPaletteProps } from '#/GradientPalette.tsx';
 export { MotionPreview, type MotionPreviewProps, type MotionSpeed } from '#/MotionPreview.tsx';
 export {
+  AxesContext,
+  SwatchbookContext,
+  ThemeContext,
+  useActiveAxes,
+  useActiveTheme,
+  useOptionalSwatchbookData,
+  type VirtualAxisShape,
+  type VirtualDiagnosticShape,
+  type VirtualPresetShape,
+  type VirtualThemeShape,
+  type VirtualTokenShape,
+} from '#/contexts.ts';
+export {
   SwatchbookProvider,
   type SwatchbookProviderProps,
   useSwatchbookData,
