@@ -9,11 +9,11 @@ describe('Config.default tuple resolution', () => {
       {
         tokens: ['tokens/**/*.json'],
         resolver: resolverPath,
-        default: { mode: 'Dark', brand: 'Brand A' },
+        default: { mode: 'Dark', brand: 'Brand A', contrast: 'High' },
       },
       fixtureCwd,
     );
-    expect(project.graph).toBe(project.themesResolved['Dark · Brand A']);
+    expect(project.graph).toBe(project.themesResolved['Dark · Brand A · High']);
   });
 
   it("fills omitted axes from each axis's own default", async () => {
@@ -25,7 +25,7 @@ describe('Config.default tuple resolution', () => {
       },
       fixtureCwd,
     );
-    expect(project.graph).toBe(project.themesResolved['Dark · Default']);
+    expect(project.graph).toBe(project.themesResolved['Dark · Default · Normal']);
   });
 
   it('resolves to the all-axis-defaults tuple when default is absent', async () => {
@@ -33,7 +33,7 @@ describe('Config.default tuple resolution', () => {
       { tokens: ['tokens/**/*.json'], resolver: resolverPath },
       fixtureCwd,
     );
-    expect(project.graph).toBe(project.themesResolved['Light · Default']);
+    expect(project.graph).toBe(project.themesResolved['Light · Default · Normal']);
   });
 
   it('drops unknown axis keys with a warn diagnostic and falls back to the axis default', async () => {
@@ -49,7 +49,7 @@ describe('Config.default tuple resolution', () => {
       (d) => d.group === 'swatchbook/default' && d.message.includes('notAnAxis'),
     );
     expect(warn?.severity).toBe('warn');
-    expect(project.graph).toBe(project.themesResolved['Dark · Default']);
+    expect(project.graph).toBe(project.themesResolved['Dark · Default · Normal']);
   });
 
   it('drops invalid context values with a warn diagnostic and falls back to the axis default', async () => {
@@ -65,6 +65,6 @@ describe('Config.default tuple resolution', () => {
       (d) => d.group === 'swatchbook/default' && d.message.includes('NopeMode'),
     );
     expect(warn?.severity).toBe('warn');
-    expect(project.graph).toBe(project.themesResolved['Light · Default']);
+    expect(project.graph).toBe(project.themesResolved['Light · Default · Normal']);
   });
 });

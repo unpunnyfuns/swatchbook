@@ -33,7 +33,7 @@ it('compound selector order matches Project.axes order', () => {
 
 it('redeclares every var per tuple (flat emission, not nested cascading)', () => {
   const lightDefault = extractBlock(css, ':root');
-  const darkDefault = extractBlock(css, tupleSelector({ mode: 'Dark', brand: 'Default' }));
+  const darkDefault = extractBlock(css, tupleSelector({ mode: 'Dark', brand: 'Default', contrast: 'Normal' }));
   expect(lightDefault).toBeTruthy();
   expect(darkDefault).toBeTruthy();
 
@@ -56,7 +56,7 @@ it('redeclares every var per tuple (flat emission, not nested cascading)', () =>
 
 it('holds brand-invariant tokens stable across mode at the same brand', () => {
   const lightDefault = extractBlock(css, ':root');
-  const darkDefault = extractBlock(css, tupleSelector({ mode: 'Dark', brand: 'Default' }));
+  const darkDefault = extractBlock(css, tupleSelector({ mode: 'Dark', brand: 'Default', contrast: 'Normal' }));
   const lightSize = grep(lightDefault, '--sb-size-ref-400:');
   const darkSize = grep(darkDefault, '--sb-size-ref-400:');
   expect(lightSize).toBeDefined();

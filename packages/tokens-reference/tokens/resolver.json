@@ -2,7 +2,7 @@
   "$schema": "https://design-tokens.org/tr/2025/drafts/resolver/",
   "version": "2025.10",
   "name": "swatchbook-reference",
-  "description": "DTCG 2025.10 native resolver. Two layers (ref and sys) plus two independent modifiers — `mode` (light/dark baseline) and `brand` (default/Brand A accent) — compose into 4 named themes. Component variation is carried by modes on sys; no `cmp` layer.",
+  "description": "DTCG 2025.10 native resolver. Two layers (ref and sys) plus three independent modifiers — `mode` (light/dark baseline), `brand` (default/Brand A accent), and `contrast` (normal/high border + focus emphasis) — compose into 8 named themes. Component variation is carried by modes on sys; no `cmp` layer.",
   "sets": {
     "ref": {
       "description": "Raw primitives (loaded but not emitted).",
@@ -45,12 +45,21 @@
         "Brand A": [{ "$ref": "./themes/brand-a.json" }]
       },
       "default": "Default"
+    },
+    "contrast": {
+      "description": "Border + focus emphasis. `Normal` leaves sys alone; `High` thickens borders and boosts the focus ring.",
+      "contexts": {
+        "Normal": [],
+        "High": [{ "$ref": "./themes/contrast-high.json" }]
+      },
+      "default": "Normal"
     }
   },
   "resolutionOrder": [
     { "$ref": "#/sets/ref" },
     { "$ref": "#/sets/sys" },
     { "$ref": "#/modifiers/mode" },
-    { "$ref": "#/modifiers/brand" }
+    { "$ref": "#/modifiers/brand" },
+    { "$ref": "#/modifiers/contrast" }
   ]
 }

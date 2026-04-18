@@ -20,6 +20,12 @@ const axes: Axis[] = [
     default: 'Default',
     source: 'resolver',
   },
+  {
+    name: 'contrast',
+    contexts: ['Normal', 'High'],
+    default: 'Normal',
+    source: 'resolver',
+  },
 ];
 
 describe('validatePresets', () => {
@@ -84,7 +90,7 @@ describe('loadProject — presets', () => {
       {
         tokens: ['tokens/**/*.json'],
         resolver: resolverPath,
-        default: { mode: 'Light', brand: 'Default' },
+        default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
         presets: [
           { name: 'Brand A Dark', axes: { mode: 'Dark', brand: 'Brand A' } },
           { name: 'Default Light', axes: { mode: 'Light' } },
