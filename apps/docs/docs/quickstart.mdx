@@ -20,19 +20,28 @@ Peer requirements: Storybook 10.3+ on the Vite builder, React 18+, Node 24+.
 
 ## Configure
 
-Create a `swatchbook.config.ts` at the root of your Storybook project:
+Register the addon with an inline config in `.storybook/main.ts`:
 
-```ts title="apps/storybook/swatchbook.config.ts"
-import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
+```ts title=".storybook/main.ts"
+import { defineMain } from '@storybook/react-vite/node';
 
-export default defineSwatchbookConfig({
-  tokens: ['tokens/**/*.json'],
-  resolver: 'tokens/resolver.json',
-  cssVarPrefix: 'ds',
+export default defineMain({
+  framework: '@storybook/react-vite',
+  addons: [
+    {
+      name: '@unpunnyfuns/swatchbook-addon',
+      options: {
+        config: {
+          resolver: 'tokens/resolver.json',
+          cssVarPrefix: 'ds',
+        },
+      },
+    },
+  ],
 });
 ```
 
-Register the addon in your preview:
+Opt the preview into the addon's annotations (decorator, globals, CSS injection):
 
 ```ts title=".storybook/preview.ts"
 import { definePreview } from '@storybook/react-vite';
@@ -42,6 +51,8 @@ export default definePreview({
   addons: [swatchbookAddon()],
 });
 ```
+
+If you'd rather keep the config in its own file (useful when the same config is consumed by a CLI or CI lint outside Storybook), write a `swatchbook.config.ts` and point at it with `options.configPath: '../swatchbook.config.ts'` — see [config reference](./reference/config) for details.
 
 Start Storybook:
 

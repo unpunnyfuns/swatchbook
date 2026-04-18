@@ -38,7 +38,12 @@ export default defineMain({
   addons: [
     {
       name: '@unpunnyfuns/swatchbook-addon',
-      options: { configPath: '../swatchbook.config.ts' },
+      options: {
+        config: {
+          resolver: 'tokens/resolver.json',
+          cssVarPrefix: 'ds',
+        },
+      },
     },
   ],
 });
@@ -55,17 +60,7 @@ export default definePreview({
 });
 ```
 
-Add a `swatchbook.config.ts` at the Storybook root:
-
-```ts
-import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
-
-export default defineSwatchbookConfig({
-  tokens: ['tokens/**/*.json'],
-  resolver: 'tokens/resolver.json',
-  cssVarPrefix: 'ds',
-});
-```
+Prefer a separate config file? Write a `swatchbook.config.ts` and point at it with `options.configPath: '../swatchbook.config.ts'`. Useful when the same config is consumed by other tooling outside Storybook.
 
 Every `color.sys.surface.default` (and similar) now resolves to `var(--ds-color-sys-surface-default)` at runtime, bound to the active theme via per-axis `data-*` attributes on `<html>`.
 
