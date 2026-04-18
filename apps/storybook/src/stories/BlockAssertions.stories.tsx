@@ -216,6 +216,64 @@ export const TokenDetailStrokeStyleObject = meta.story({
 });
 
 /**
+ * `TokenDetail` for a color token renders a two-surface swatch in the
+ * composite preview area (on top of the existing inline swatch + value
+ * line). Assert both swatches exist and carry a non-transparent background.
+ */
+export const TokenDetailColorSwatch = meta.story({
+  render: () => <TokenDetail path='color.sys.accent.bg' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const swatches = [
+      ...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"] > div'),
+    ];
+    expect(
+      swatches.length,
+      'color composite preview must render inner swatch cells',
+    ).toBeGreaterThanOrEqual(2);
+  },
+});
+
+/**
+ * Composite types show a labelled sub-value breakdown alongside the
+ * rendered preview. Typography breakdown lists fontFamily, fontSize,
+ * fontWeight, lineHeight, and optionally letterSpacing.
+ */
+export const TokenDetailCompositeBreakdownTypography = meta.story({
+  render: () => <TokenDetail path='typography.sys.heading' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const body = canvasElement.textContent ?? '';
+    for (const key of ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight']) {
+      expect(body, `breakdown must list ${key}`).toContain(key);
+    }
+  },
+});
+
+export const TokenDetailCompositeBreakdownShadow = meta.story({
+  render: () => <TokenDetail path='shadow.sys.md' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const body = canvasElement.textContent ?? '';
+    for (const key of ['color', 'offsetX', 'offsetY', 'blur']) {
+      expect(body, `shadow breakdown must list ${key}`).toContain(key);
+    }
+  },
+});
+
+export const TokenDetailCompositeBreakdownGradient = meta.story({
+  render: () => <TokenDetail path='gradient.ref.sunrise' />,
+  play: async ({ canvasElement }) => {
+    await waitForContent(canvasElement, 'h3');
+    const body = canvasElement.textContent ?? '';
+    // The fixture's `sunrise` gradient has stops at 0, 0.55, 1.
+    expect(body, 'gradient breakdown must label the 0% stop').toContain('0%');
+    expect(body, 'gradient breakdown must label the 55% stop').toContain('55%');
+    expect(body, 'gradient breakdown must label the 100% stop').toContain('100%');
+  },
+});
+
+/**
  * `TypographyScale` must render one row per typography token with the
  * sample text visible.
  */
