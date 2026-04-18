@@ -10,7 +10,7 @@ Audit last run: 2026-04-18 (refreshed alongside the **Full DTCG type parity with
 
 | `$type` | In `tokens-reference` | Dedicated block | `TokenDetail` preview |
 | --- | --- | --- | --- |
-| `color` | ✅ ref / sys | `ColorPalette` (grid) | swatch + hex |
+| `color` | ✅ ref / sys | `ColorPalette` (grid) | two-surface swatch + hex |
 | `dimension` | ✅ sys | `DimensionScale` (length / radius / size) | bar ✅ |
 | `fontFamily` | ✅ ref only | `FontFamilySample` | sample text ✅ |
 | `fontWeight` | ✅ ref only | `FontWeightScale` | sample text ✅ |
@@ -27,6 +27,8 @@ Audit last run: 2026-04-18 (refreshed alongside the **Full DTCG type parity with
 ## Status
 
 Every DTCG 2025.10 `$type` has a dedicated block, a `TokenDetail` preview, or both. `number` renders as raw text in `TokenTable` — acceptable because opacities, line-heights, and z-index slots have no meaningful visual beyond the number itself. `strokeStyle` object form (`{ dashArray, lineCap }`) renders faithfully inside `TokenDetail` as an SVG stroke; the standalone `StrokeStyleSample` block still shows a textual notice for object form — future polish.
+
+Composite types (`typography`, `shadow`, `border`, `transition`, `gradient`) also render a labelled sub-value breakdown underneath the composite preview in `TokenDetail`, so authors can see each field's resolved value without squinting at the raw object dump.
 
 ## Out-of-scope types (Terrazzo extensions)
 
