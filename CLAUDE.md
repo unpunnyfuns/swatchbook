@@ -4,31 +4,28 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Start here
 
-- Design doc: `docs/plan.md` — milestones M0–M9, package responsibilities, decisions locked in.
+- Design doc: `docs/plan.md` — current state summary, package responsibilities, scope areas, decisions locked in.
 - Decision log: `docs/decisions.md` — append-only ADR-lite for changes made during execution.
 - Terrazzo spike: `docs/terrazzo-notes.md` — what `@terrazzo/parser` gives us and what core still owns.
 - Future plans: `docs/future.md` — ideas deliberately deferred past v0.1.0, with the *why* preserved so we don't re-litigate.
 
 ## Current milestone
 
-`Current: between milestones` — Full DTCG type parity with Terrazzo closed 2026-04-18 (issues #176, #179, #189, #190 all landed): gradient type shipped with fixture + block + TokenDetail preview; strokeStyle gained a TokenDetail SVG preview; color tokens got a two-surface contrast swatch; composite types (typography/shadow/border/transition/gradient) render a labelled sub-value breakdown. Documentation site live at https://unpunnyfuns.github.io/swatchbook/. Open feature milestones: **Split large doc blocks** (#22 — #174/#175), **Drop package-name prefixes from headers** (#24 — #181), **Three-axis fixture + disable-axis config** (#25 — #182/#183), **Rendered output views** (#27 — #186/#187). Release stays on hold.
+`Current: prepping v0.1.0 release` — remaining work tracked in the **Release** milestone: publish workflow in CI with npm token + provenance (issue #41), then cut v0.1.0 with tag + release notes (issue #42). Feature work feeding into the release has already landed: full DTCG type parity with Terrazzo, consolidated toolbar (PR #213) and Design Tokens panel (PR #218), toolbar polish (PR #221), `disabledAxes` config surface (PR #206), `SwatchbookProvider` for framework-free rendering (PR #201), `TokenNavigator` block (PR #210), consumer-output panel (PR #209), color value format switcher (PR #208). Documentation site live at https://unpunnyfuns.github.io/swatchbook/.
 
 Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
 
 ### Milestone taxonomy
 
-GitHub milestones are scope buckets, not a sequence. Originally prefixed `M0`–`M13` when the work was ordered around a v0.1.0 release; prefixes dropped once release was postponed indefinitely (iterating on features > shipping versions).
+GitHub milestones are scope buckets, not a sequence. Originally prefixed `M0`–`M13` when the work was ordered around a v0.1.0 release; prefixes were dropped during the feature push and re-focused now that we're cutting v0.1.0.
 
 Two active tracks:
 
-- **Feature milestones** — named scope areas in `docs/plan.md` (*Foundation*, *Core*, *Doc blocks*, *DTCG comprehension visualizations*, *Multi-axis theming UX*, …). Pick one to be "current"; the line above names it. No implied ordering beyond what `docs/plan.md` describes.
+- **Feature milestones** — named scope areas in `docs/plan.md` (*Foundation*, *Core*, *Doc blocks*, *DTCG comprehension visualizations*, *Multi-axis theming UX*, …). Pick one to be "current" when we're pushing on features; the line above names what's active. No implied ordering beyond what `docs/plan.md` describes.
 - **Maintenance** — hygiene, refactors, CI polish, deferred cleanups. Drained opportunistically; never blocks a feature milestone.
+- **Release** — Changesets versioning, publish workflow, cutting tags. **Active** for v0.1.0 — see the "Current milestone" line.
 
-One dormant track:
-
-- **Release** — Changesets versioning, publish workflow, cutting tags. **On hold** until release timing is explicitly decided. Issues originally scoped here sit unassigned for now.
-
-When filing an issue: feature work → the relevant scope milestone. Repo hygiene → *Maintenance*. Release plumbing → leave unassigned; we'll re-adopt the *Release* milestone when we're ready to ship.
+When filing an issue: feature work → the relevant scope milestone. Repo hygiene → *Maintenance*. Release plumbing → the *Release* milestone.
 
 ## Project conventions
 
@@ -98,7 +95,7 @@ claude
 
 - **Versioning:** [Changesets](https://github.com/changesets/changesets). Config in `.changeset/config.json`. The three published packages — `@unpunnyfuns/swatchbook-core`, `@unpunnyfuns/swatchbook-addon`, `@unpunnyfuns/swatchbook-blocks` — are grouped as `fixed`: they always carry the same version and release together. Private workspaces (root, `apps/storybook`, `tokens-reference`) and the iceboxed `tokens-starter` are listed under `ignore` so they never appear in bump prompts or get published.
 - **Writing a changeset:** any PR with a user-visible change to the fixed-group packages runs `pnpm changeset` locally, picks the bump type (`patch` / `minor` / `major`), and commits the generated `.changeset/*.md` alongside the change. Purely internal refactors and doc-only PRs can skip it.
-- **Publishing flow:** on `main`, Changesets' GitHub Action opens a "Version Packages" PR that consumes queued `.changeset/*.md` entries, bumps `package.json` versions, and regenerates `CHANGELOG.md`. Merging that PR runs `pnpm release` (builds + `changeset publish`) which pushes tags to GitHub and publishes to npm. See `.github/workflows/release.yml` (to land under M9).
+- **Publishing flow:** on `main`, Changesets' GitHub Action opens a "Version Packages" PR that consumes queued `.changeset/*.md` entries, bumps `package.json` versions, and regenerates `CHANGELOG.md`. Merging that PR runs `pnpm release` (builds + `changeset publish`) which pushes tags to GitHub and publishes to npm. See `.github/workflows/release.yml` (lands under the Release milestone via issue #41).
 
 ## Plan governance
 

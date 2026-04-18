@@ -1,5 +1,13 @@
 # Swatchbook — Storybook addon for DTCG design tokens
 
+## Current state
+
+**Prepping v0.1.0 release.** The feature surface targeted for the first public cut has landed: DTCG loading + emission (core), live theme switching with multi-axis resolvers (addon), the full doc-block set (`TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail` with composite previews, `DimensionScale`, `ShadowPreview`, `BorderPreview`, `MotionPreview`, `TokenNavigator`), comprehension visualizations for every DTCG primitive + composite type (including gradient and strokeStyle), Storybook interaction tests, consolidated toolbar + Design Tokens panel, `SwatchbookProvider` for framework-free rendering, consumer-output panel with CSS/JSON/JS/TS tabs, color value format switcher, and `disabledAxes` config surface. Documentation site live at https://unpunnyfuns.github.io/swatchbook/.
+
+**Remaining for v0.1.0:** publish pipeline — Changesets publish workflow in CI (npm token + provenance, issue #41) and cutting the tag + release notes (issue #42). Tracked under the **Release** milestone.
+
+**Feature work past v0.1.0** lives under open feature milestones (Documentation, Rendered output views and human-readable color formats, Presentation/connection split for blocks, Token navigator block) and `docs/future.md`. Live state for every scope bucket: https://github.com/unpunnyfuns/swatchbook/milestones.
+
 ## Mission
 
 **An addon and tools to help people visualize their future design token projects using Storybook.**
@@ -33,7 +41,10 @@ This keeps the addon narrow, keeps the value shareable across the DTCG ecosystem
 - **Rendering blocks** cover DTCG types: `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail` (with composite previews for typography / shadow / border / transition), `DimensionScale`, `ShadowPreview`, `BorderPreview`, `MotionPreview`. Gaps in type coverage are tracked as their own scope bucket.
 - **Single-axis resolvers** get clean theme names automatically. Multi-axis resolvers use Terrazzo's permutation IDs — a known rough edge, addressed in the multi-axis theming milestone.
 
-**Release cadence: deferred.** Iterating on features takes priority over shipping versions to npm. Packages stay unpublished until we explicitly decide to ship; `@unpunnyfuns/swatchbook-tokens` is iceboxed (see `docs/decisions.md`).
+**Release cadence: v0.1.0 in flight.** The three published packages (`@unpunnyfuns/swatchbook-core`, `-addon`, `-blocks`) are grouped as `fixed` under Changesets and will release together. `@unpunnyfuns/swatchbook-tokens` stays iceboxed (see `docs/decisions.md`). Remaining release work is tracked under the Release milestone — see "Current state" above.
+
+<details>
+<summary><strong>Scaffold-era context and repo layout</strong> (historical — decisions captured, current state has moved on)</summary>
 
 ## Context
 
@@ -120,6 +131,8 @@ swatchbook/
       vitest.config.ts              # Storybook Test (project: 'storybook')
       package.json                  # private, not published
 ```
+
+</details>
 
 ## Package responsibilities
 
@@ -216,7 +229,8 @@ Doc blocks consumable from MDX. Each block reads the same virtual token graph.
 
 All blocks are presentational; theme state comes from Storybook globals via `useGlobals()` so they react to the toolbar.
 
-## Critical files to create
+<details>
+<summary><strong>Critical files to create</strong> (scaffold-era — files now exist)</summary>
 
 - `packages/core/src/parse.ts` — glue to `@terrazzo/parser`. Must handle DTCG `$type` inheritance and `{alias}` references through the parser's resolver.
 - `packages/core/src/themes/normalize.ts` — converges layered / DTCG-resolver / Tokens-Studio-manifest inputs into one `Theme[]`. Core's most complex file.
@@ -226,13 +240,15 @@ All blocks are presentational; theme state comes from Storybook globals via `use
 - `packages/addon/src/controls/color.tsx` — study Storybook's built-in `ColorControl` for the registration contract.
 - `packages/blocks/src/TokenTable.tsx` — reference implementation the other blocks follow.
 
+</details>
+
 ## Dependencies
 
 - `@terrazzo/parser` — DTCG parsing, alias resolution, validation
 - `storybook@^10.3` (peer), `@storybook/react` (peer), `@storybook/manager-api`, `@storybook/preview-api`, `@storybook/components`, `@storybook/theming`, `@storybook/icons`
 - `react`, `react-dom` (peer)
 - `apps/storybook` dev deps: `storybook@^10.3`, `@storybook/react-vite`, `@storybook/addon-vitest`, `@storybook/addon-mcp`, `@vitest/browser`, `playwright`, `vite`
-- Root dev deps: `turbo`, `typescript`, `tsup`, `vitest`, `oxlint`, `oxfmt`
+- Root dev deps: `turbo`, `typescript`, `tsdown`, `vitest`, `oxlint`, `oxfmt`
 
 ## Token packages
 
@@ -354,7 +370,7 @@ export default defineConfig({
 
 ## Build / release
 
-- Each publishable package builds with `tsup` (ESM + CJS + `.d.ts`).
+- Each publishable package builds with `tsdown` (rolldown-powered), ESM-only + `.d.ts`. See `CLAUDE.md` project conventions.
 - **Turborepo** handles orchestration and caching:
   - `turbo run build` — topological, with `core` → `blocks`/`addon` → `apps/storybook` dependency graph.
   - `turbo run test` — runs Vitest in every package (unit tests).
@@ -377,7 +393,7 @@ Token-loading problems should be *visible*, not silent. Pipeline:
 
 ## Workspace root
 
-Root `package.json` uses `"swatchbook"` with `"private": true` — the plain unscoped name, matching the project's identity and the repo slug. Originally scaffolded as `swatchbook-monorepo` to hedge for a published meta-package; renamed during M9 once it was clear the scoped `@unpunnyfuns/swatchbook-*` package set is the public face and no meta-package is planned. See `docs/decisions.md` (2026-04-17 entry).
+Root `package.json` uses `"swatchbook"` with `"private": true` — the plain unscoped name, matching the project's identity and the repo slug. Originally scaffolded as `swatchbook-monorepo` to hedge for a published meta-package; renamed once it was clear the scoped `@unpunnyfuns/swatchbook-*` package set is the public face and no meta-package is planned. See `docs/decisions.md` (2026-04-17 entry).
 
 ## CI
 
@@ -426,9 +442,9 @@ The plan is the **design doc**; GitHub milestones/issues are the **tracker**. Do
 
 ### Tracking state
 
-- GitHub milestones **M0–M9** created at scaffold, names matching this plan.
+- GitHub milestones are scope buckets, named to match the sections in this plan (originally prefixed `M0–M13` while the plan was ordered around v0.1.0; prefixes were dropped during the long feature push and re-focused as we cut v0.1.0). See the [milestones page](https://github.com/unpunnyfuns/swatchbook/milestones) for live state.
 - One issue per "Work" bullet under each milestone. Each issue links back to the relevant `docs/plan.md` section anchor.
-- Root README carries a one-line `Current: Mx — <goal>` status that updates when a milestone closes.
+- `CLAUDE.md` carries a one-line `Current: …` status that updates when the active track moves.
 
 ### Branch & PR workflow
 
@@ -460,9 +476,12 @@ Two mechanisms:
 - **Append to `decisions.md`** for: tactical choices that don't change the design intent (e.g. "picked `tsup` over `unbuild` because of X"), post-merge observations, deprecations.
 - **Neither** for: day-to-day implementation details — those live in commit messages and issue comments.
 
-## Milestones
+## Completed milestones
 
-Each milestone has a single measurable demo step. Progress is tracked by which milestones are green.
+Every milestone below has shipped — contents preserved for trail and to keep the original design intent readable. Live state (including the per-issue breakdown) lives on the [GitHub milestones page](https://github.com/unpunnyfuns/swatchbook/milestones?state=closed). Open tracks are summarized in "Current state" at the top of this file.
+
+<details>
+<summary>History</summary>
 
 ### Foundation ✅
 **Goal:** Empty but fully wired monorepo; scope of core is confirmed; governance in place.
@@ -635,7 +654,9 @@ Beyond spec convergence, four scope areas deepen the "easier to understand DTCG"
 
 **Exit:** A token of any DTCG type has a dedicated visual inside at least one block or `TokenDetail` preview. No fallback-to-text for a type we haven't considered.
 
-### Further out
+</details>
+
+## Further out
 
 Out of scope as named milestones but worth capturing the shape:
 
@@ -646,7 +667,6 @@ Out of scope as named milestones but worth capturing the shape:
 - **Token-aware Storybook controls** (`swatchbook-color` argType etc.) — originally a planned milestone; dropped after mission tightening (authoring ergonomics, not overview).
 - **Component ↔ token reverse index.** Reads consumer stylesheets to build usage maps. Explicitly external-code analysis — outside our mission line.
 - **Graph analysis** (orphans, duplicate values, depth distributions, health scores) — belongs in Terrazzo, not here. Open a conversation if it's needed; contribute upstream.
-- **Release cadence.** Changesets versioning, publish workflow, tag cutting. Deferred by decision; re-adopt when we're ready to ship.
 
 ## Verification
 
