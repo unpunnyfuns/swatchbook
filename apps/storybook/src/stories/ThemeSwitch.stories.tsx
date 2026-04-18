@@ -107,7 +107,7 @@ export const PerAxisDataAttrs = meta.story({
     if (!wrapper) throw new Error('expected story wrapper with data-mode attribute');
     expect(wrapper.getAttribute('data-mode')).toBe('Dark');
     expect(wrapper.getAttribute('data-brand')).toBe('Brand A');
-    expect(wrapper.getAttribute('data-theme')).toBe('Dark · Brand A');
+    expect(wrapper.getAttribute('data-theme')).toBe('Dark · Brand A · Normal');
     expect(document.documentElement.getAttribute('data-mode')).toBe('Dark');
     expect(document.documentElement.getAttribute('data-brand')).toBe('Brand A');
   },
