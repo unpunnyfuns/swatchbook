@@ -51,8 +51,8 @@ it('emits every primitive + composite type covered by the fixture', () => {
 });
 
 it('keeps sparse overrides: Dark flips surface, size scale identical', () => {
-  const lightBlock = extractBlock(css, 'Light');
-  const darkBlock = extractBlock(css, 'Dark');
+  const lightBlock = extractBlock(css, 'Light · Default');
+  const darkBlock = extractBlock(css, 'Dark · Default');
   expect(lightBlock).toBeTruthy();
   expect(darkBlock).toBeTruthy();
   const lightSize = grep(lightBlock, '--sb-size-ref-400:');

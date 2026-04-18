@@ -46,7 +46,7 @@ async function bgWhenMounted(el: Element): Promise<string> {
  * Component channels should all be near 255.
  */
 export const Light = meta.story({
-  parameters: { swatchbook: { theme: 'Light' } },
+  parameters: { swatchbook: { theme: 'Light · Default' } },
   play: async ({ canvasElement }) => {
     const card = canvasElement.querySelector<HTMLElement>('[data-testid="probe-card"]');
     if (!card) throw new Error('probe-card missing');
@@ -64,7 +64,7 @@ export const Light = meta.story({
  * Component channels should all be low.
  */
 export const Dark = meta.story({
-  parameters: { swatchbook: { theme: 'Dark' } },
+  parameters: { swatchbook: { theme: 'Dark · Default' } },
   play: async ({ canvasElement }) => {
     const card = canvasElement.querySelector<HTMLElement>('[data-testid="probe-card"]');
     if (!card) throw new Error('probe-card missing');

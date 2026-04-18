@@ -75,7 +75,7 @@ export const AlwaysDark = meta.story({
 });
 ```
 
-Any valid theme name — including stacked compositions like `'Light · Brand A'` — is accepted.
+Any valid theme name — including multi-axis permutations like `'Light · Brand A'` — is accepted.
 
 ## Do / don't
 
