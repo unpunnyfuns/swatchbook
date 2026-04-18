@@ -37,7 +37,7 @@ This keeps the addon narrow, keeps the value shareable across the DTCG ecosystem
 
 ## Context
 
-`/Users/palnes/src/swatchbook` has been initialized: git repo, root `package.json` (currently `@unpunnyfuns/swatchbook` — to be renamed to `swatchbook-monorepo` private at scaffold; see "Workspace root"), pnpm 10.18.1, MIT, empty `pnpm-lock.yaml`. Goal: a Storybook addon + doc blocks that lets authors browse DTCG design tokens, render them in docs, switch themes from the toolbar, and replace the default color control with a token picker. Must support multi-layer DTCG theming (layered files, DTCG 2025.10 resolvers, and Tokens Studio `$themes` manifests). Terrazzo (`@terrazzo/parser`) is the expected foundation for DTCG parsing/alias resolution — its capability surface is validated in Step 0 before scope is final.
+The repo has been initialized: git repo, root `package.json` (currently `@unpunnyfuns/swatchbook` — to be renamed to `swatchbook-monorepo` private at scaffold; see "Workspace root"), pnpm 10.18.1, MIT, empty `pnpm-lock.yaml`. Goal: a Storybook addon + doc blocks that lets authors browse DTCG design tokens, render them in docs, switch themes from the toolbar, and replace the default color control with a token picker. Must support multi-layer DTCG theming (layered files, DTCG 2025.10 resolvers, and Tokens Studio `$themes` manifests). Terrazzo (`@terrazzo/parser`) is the expected foundation for DTCG parsing/alias resolution — its capability surface is validated in Step 0 before scope is final.
 
 Packages published under the `@unpunnyfuns` scope.
 
@@ -419,7 +419,7 @@ The plan is the **design doc**; GitHub milestones/issues are the **tracker**. Do
 
 ### In-repo location
 
-- `docs/plan.md` — this file, committed at scaffold (M0). Copied from `/Users/palnes/.claude/plans/this-is-an-empty-snazzy-ocean.md` and renamed.
+- `docs/plan.md` — this file, committed at scaffold (M0).
 - `docs/decisions.md` — append-only ADR-lite log for scope/approach changes made during execution. Entry format: date, decision, rationale, superseded-by link.
 - `docs/terrazzo-notes.md` — output of the M0 spike (capability audit of `@terrazzo/parser`).
 - `CLAUDE.md` at repo root — orients future Claude sessions. Points at `docs/plan.md`, links the DTCG skill, names the current milestone, and lists the key conventions from the user's global CLAUDE.md that apply here (oxlint/oxfmt, functional style, Vitest, no CSS-in-JS, etc.).
