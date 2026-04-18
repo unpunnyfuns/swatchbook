@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
-import { IconButton, TooltipLinkList, WithTooltip } from 'storybook/internal/components';
+import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
+import { IconButton, WithTooltipPure } from 'storybook/internal/components';
 import { addons, types, useGlobals, useStorybookApi } from 'storybook/manager-api';
 import {
   ADDON_ID,
@@ -54,13 +54,39 @@ const EMPTY_AXES: readonly AxisEntry[] = [];
 const EMPTY_PRESETS: readonly PresetEntry[] = [];
 const EMPTY_THEMES: ThemeEntry[] = [];
 
-function ThemeIcon(): ReactElement {
+/**
+ * Root toolbar glyph — a 3-swatch stack chosen to read as "swatchbook"
+ * at 14px and to look visually distinct from the previous per-axis chip
+ * icon (single circle) so users notice the toolbar change.
+ */
+function SwatchbookIcon(): ReactElement {
   return h(
     'svg',
     { width: 14, height: 14, viewBox: '0 0 14 14', 'aria-hidden': true },
-    h('circle', { cx: 7, cy: 7, r: 6, fill: 'currentColor', opacity: 0.15 }),
-    h('path', {
-      d: 'M7 1a6 6 0 0 0 0 12 3 3 0 0 0 0-6 3 3 0 0 1 0-6Z',
+    h('rect', {
+      x: 1,
+      y: 2,
+      width: 9,
+      height: 9,
+      rx: 1.5,
+      fill: 'currentColor',
+      opacity: 0.25,
+    }),
+    h('rect', {
+      x: 2.5,
+      y: 3.5,
+      width: 9,
+      height: 9,
+      rx: 1.5,
+      fill: 'currentColor',
+      opacity: 0.55,
+    }),
+    h('rect', {
+      x: 4,
+      y: 5,
+      width: 9,
+      height: 9,
+      rx: 1.5,
       fill: 'currentColor',
     }),
   );
@@ -101,74 +127,6 @@ function displayLabelFor(axis: AxisEntry): string {
   return axis.name;
 }
 
-interface AxisDropdownProps {
-  axis: AxisEntry;
-  active: string;
-  onSelect: (next: string) => void;
-}
-
-function AxisDropdown({ axis, active, onSelect }: AxisDropdownProps): ReactElement {
-  const label = displayLabelFor(axis);
-  const title = axis.description ? `${label} — ${axis.description}` : label;
-
-  const tooltip = ({ onHide }: { onHide: () => void }): ReactElement =>
-    h(
-      'div',
-      { style: { minWidth: 200 } },
-      h(
-        'div',
-        {
-          style: {
-            padding: '8px 12px',
-            fontSize: 11,
-            textTransform: 'uppercase',
-            letterSpacing: 0.5,
-            opacity: 0.6,
-          },
-        },
-        label,
-      ),
-      axis.description
-        ? h(
-            'div',
-            {
-              style: {
-                padding: '0 12px 8px',
-                fontSize: 12,
-                opacity: 0.7,
-                lineHeight: 1.4,
-              },
-            },
-            axis.description,
-          )
-        : null,
-      h(TooltipLinkList, {
-        links: axis.contexts.map((ctx) => ({
-          id: ctx,
-          title: ctx,
-          active: ctx === active,
-          onClick: () => {
-            onSelect(ctx);
-            onHide();
-          },
-        })),
-      }),
-    );
-
-  return h(WithTooltip, {
-    placement: 'bottom',
-    trigger: 'click',
-    closeOnOutsideClick: true,
-    tooltip,
-    children: h(
-      IconButton,
-      { key: `${TOOL_ID}/${axis.name}`, title },
-      h(ThemeIcon),
-      h('span', { style: { marginLeft: 6 } }, `${label}: ${active}`),
-    ),
-  });
-}
-
 /**
  * Compose a preset's sanitized partial tuple with the axis defaults, so
  * applying a preset that only names some axes leaves the omitted ones at
@@ -201,7 +159,101 @@ function tuplesEqual(
   return true;
 }
 
-interface PresetPillsProps {
+const SECTION_LABEL_STYLE: React.CSSProperties = {
+  padding: '8px 12px 4px',
+  fontSize: 11,
+  textTransform: 'uppercase',
+  letterSpacing: 0.5,
+  opacity: 0.6,
+};
+
+const SECTION_BODY_STYLE: React.CSSProperties = {
+  padding: '0 12px 10px',
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: 4,
+};
+
+const AXIS_ROW_STYLE: React.CSSProperties = {
+  padding: '0 12px 10px',
+  display: 'grid',
+  gridTemplateColumns: 'max-content 1fr',
+  columnGap: 12,
+  rowGap: 4,
+  alignItems: 'center',
+};
+
+const AXIS_LABEL_STYLE: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 600,
+  opacity: 0.85,
+};
+
+const AXIS_PILLS_STYLE: React.CSSProperties = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: 4,
+};
+
+const OPTION_PILL_BASE: React.CSSProperties = {
+  padding: '3px 8px',
+  borderRadius: 4,
+  fontSize: 12,
+  lineHeight: '18px',
+  border: '1px solid transparent',
+  background: 'transparent',
+  cursor: 'pointer',
+  color: 'inherit',
+};
+
+const OPTION_PILL_ACTIVE: React.CSSProperties = {
+  ...OPTION_PILL_BASE,
+  fontWeight: 600,
+  background: 'rgba(0, 122, 255, 0.12)',
+  borderColor: 'rgba(0, 122, 255, 0.45)',
+};
+
+const PRESET_PILL_MODIFIED: React.CSSProperties = {
+  display: 'inline-block',
+  width: 6,
+  height: 6,
+  marginLeft: 6,
+  borderRadius: '50%',
+  background: 'currentColor',
+  opacity: 0.6,
+  verticalAlign: 'middle',
+};
+
+const DIVIDER_STYLE: React.CSSProperties = {
+  height: 1,
+  background: 'currentColor',
+  opacity: 0.1,
+  margin: '2px 8px',
+};
+
+interface OptionPillProps {
+  label: string;
+  active: boolean;
+  title?: string;
+  onClick: () => void;
+  trailing?: ReactElement | null;
+}
+
+function OptionPill({ label, active, title, onClick, trailing }: OptionPillProps): ReactElement {
+  return h(
+    'button',
+    {
+      type: 'button',
+      title,
+      onClick,
+      style: active ? OPTION_PILL_ACTIVE : OPTION_PILL_BASE,
+    },
+    label,
+    trailing ?? null,
+  );
+}
+
+interface PresetsSectionProps {
   presets: readonly PresetEntry[];
   axes: readonly AxisEntry[];
   defaults: Readonly<Record<string, string>>;
@@ -210,59 +262,65 @@ interface PresetPillsProps {
   onApply: (preset: PresetEntry) => void;
 }
 
-function PresetPills({
+function PresetsSection({
   presets,
   axes,
   defaults,
   activeTuple,
   lastApplied,
   onApply,
-}: PresetPillsProps): ReactElement {
+}: PresetsSectionProps): ReactElement {
   return h(
-    'span',
-    {
-      style: { display: 'inline-flex', alignItems: 'center', gap: 4, marginRight: 4 },
-    },
-    ...presets.map((preset) => {
-      const tuple = presetTuple(preset, axes, defaults);
-      const matches = tuplesEqual(tuple, activeTuple, axes);
-      const modified = !matches && preset.name === lastApplied;
-      const title = preset.description ? `${preset.name} — ${preset.description}` : preset.name;
-      return h(
-        IconButton,
-        {
+    'div',
+    null,
+    h('div', { style: SECTION_LABEL_STYLE }, 'Presets'),
+    h(
+      'div',
+      { style: SECTION_BODY_STYLE },
+      ...presets.map((preset) => {
+        const tuple = presetTuple(preset, axes, defaults);
+        const matches = tuplesEqual(tuple, activeTuple, axes);
+        const modified = !matches && preset.name === lastApplied;
+        const title = preset.description ? `${preset.name} — ${preset.description}` : preset.name;
+        return h(OptionPill, {
           key: `${TOOL_ID}/preset/${preset.name}`,
+          label: preset.name,
           active: matches,
           title,
           onClick: () => onApply(preset),
-        },
-        h(
-          'span',
-          {
-            style: {
-              padding: '0 6px',
-              fontWeight: matches ? 600 : 400,
-            },
-          },
-          preset.name,
-          modified
-            ? h('span', {
-                'aria-hidden': true,
-                style: {
-                  display: 'inline-block',
-                  width: 6,
-                  height: 6,
-                  marginLeft: 6,
-                  borderRadius: '50%',
-                  background: 'currentColor',
-                  opacity: 0.6,
-                  verticalAlign: 'middle',
-                },
-              })
+          trailing: modified
+            ? h('span', { 'aria-hidden': true, style: PRESET_PILL_MODIFIED })
             : null,
-        ),
-      );
-    }),
+        });
+      }),
+    ),
+  );
+}
+
+interface AxisSectionProps {
+  axis: AxisEntry;
+  active: string;
+  onSelect: (next: string) => void;
+}
+
+function AxisSection({ axis, active, onSelect }: AxisSectionProps): ReactElement {
+  const label = displayLabelFor(axis);
+  return h(
+    'div',
+    { style: AXIS_ROW_STYLE },
+    h('div', { style: AXIS_LABEL_STYLE, title: axis.description }, label),
+    h(
+      'div',
+      { style: AXIS_PILLS_STYLE },
+      ...axis.contexts.map((ctx) =>
+        h(OptionPill, {
+          key: `${TOOL_ID}/${axis.name}/${ctx}`,
+          label: ctx,
+          active: ctx === active,
+          onClick: () => onSelect(ctx),
+        }),
+      ),
+    ),
   );
 }
 
@@ -274,74 +332,111 @@ const COLOR_FORMAT_OPTIONS: readonly { id: string; label: string }[] = [
   { id: 'raw', label: 'Raw (JSON)' },
 ];
 
-interface ColorFormatDropdownProps {
+interface ColorFormatSectionProps {
   active: string;
   onSelect: (next: string) => void;
 }
 
-function ColorFormatDropdown({ active, onSelect }: ColorFormatDropdownProps): ReactElement {
-  const activeLabel = COLOR_FORMAT_OPTIONS.find((o) => o.id === active)?.label ?? 'Hex';
-  const tooltip = ({ onHide }: { onHide: () => void }): ReactElement =>
+function ColorFormatSection({ active, onSelect }: ColorFormatSectionProps): ReactElement {
+  return h(
+    'div',
+    null,
+    h('div', { style: SECTION_LABEL_STYLE }, 'Color format'),
     h(
       'div',
-      { style: { minWidth: 200 } },
-      h(
-        'div',
-        {
-          style: {
-            padding: '8px 12px',
-            fontSize: 11,
-            textTransform: 'uppercase',
-            letterSpacing: 0.5,
-            opacity: 0.6,
-          },
-        },
-        'Color format',
-      ),
-      h(
-        'div',
-        {
-          style: { padding: '0 12px 8px', fontSize: 12, opacity: 0.7, lineHeight: 1.4 },
-        },
-        'Display-only. Emitted CSS is unaffected.',
-      ),
-      h(TooltipLinkList, {
-        links: COLOR_FORMAT_OPTIONS.map((opt) => ({
-          id: opt.id,
-          title: opt.label,
+      { style: SECTION_BODY_STYLE },
+      ...COLOR_FORMAT_OPTIONS.map((opt) =>
+        h(OptionPill, {
+          key: `${TOOL_ID}/color-format/${opt.id}`,
+          label: opt.label,
           active: opt.id === active,
-          onClick: () => {
-            onSelect(opt.id);
-            onHide();
-          },
-        })),
+          onClick: () => onSelect(opt.id),
+        }),
+      ),
+    ),
+  );
+}
+
+interface PopoverBodyProps {
+  axes: readonly AxisEntry[];
+  presets: readonly PresetEntry[];
+  defaults: Readonly<Record<string, string>>;
+  activeTuple: Readonly<Record<string, string>>;
+  activeColorFormat: string;
+  lastApplied: string | null;
+  onApplyPreset: (preset: PresetEntry) => void;
+  onSelectAxis: (axisName: string, next: string) => void;
+  onSelectColorFormat: (next: string) => void;
+  onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => void;
+}
+
+function PopoverBody(props: PopoverBodyProps): ReactElement {
+  const {
+    axes,
+    presets,
+    defaults,
+    activeTuple,
+    activeColorFormat,
+    lastApplied,
+    onApplyPreset,
+    onSelectAxis,
+    onSelectColorFormat,
+    onKeyDown,
+  } = props;
+  const sections: ReactElement[] = [];
+  if (presets.length > 0) {
+    sections.push(
+      h(PresetsSection, {
+        key: 'presets',
+        presets,
+        axes,
+        defaults,
+        activeTuple,
+        lastApplied,
+        onApply: onApplyPreset,
+      }),
+      h('div', { key: 'presets-divider', style: DIVIDER_STYLE }),
+    );
+  }
+  axes.forEach((axis, idx) => {
+    sections.push(
+      h(AxisSection, {
+        key: `axis-${axis.name}`,
+        axis,
+        active: activeTuple[axis.name] ?? axis.default,
+        onSelect: (next) => onSelectAxis(axis.name, next),
       }),
     );
-
-  return h(WithTooltip, {
-    placement: 'bottom',
-    trigger: 'click',
-    closeOnOutsideClick: true,
-    tooltip,
-    children: h(
-      IconButton,
-      { key: `${TOOL_ID}/color-format`, title: `Color format: ${activeLabel}` },
-      h(
-        'svg',
-        { width: 14, height: 14, viewBox: '0 0 14 14', 'aria-hidden': true },
-        h('circle', { cx: 4.5, cy: 5.5, r: 3, fill: '#e5484d', opacity: 0.85 }),
-        h('circle', { cx: 9.5, cy: 5.5, r: 3, fill: '#30a46c', opacity: 0.85 }),
-        h('circle', { cx: 7, cy: 9.5, r: 3, fill: '#3e63dd', opacity: 0.85 }),
-      ),
-      h('span', { style: { marginLeft: 6 } }, activeLabel),
-    ),
+    if (idx === axes.length - 1) {
+      sections.push(h('div', { key: 'axes-divider', style: DIVIDER_STYLE }));
+    }
   });
+  sections.push(
+    h(ColorFormatSection, {
+      key: 'color-format',
+      active: activeColorFormat,
+      onSelect: onSelectColorFormat,
+    }),
+  );
+  return h(
+    'div',
+    {
+      role: 'menu',
+      tabIndex: -1,
+      onKeyDown,
+      style: { minWidth: 260, padding: '4px 0', outline: 'none' },
+      'data-testid': 'swatchbook-toolbar-popover',
+    },
+    ...sections,
+  );
 }
 
 function AxesToolbar(): ReactElement {
   const [globals, updateGlobals] = useGlobals();
   const api = useStorybookApi();
   const [payload, setPayload] = useState<InitPayload | null>(null);
+  const [open, setOpen] = useState(false);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const channel = addons.getChannel();
@@ -419,40 +514,74 @@ function AxesToolbar(): ReactElement {
     });
   }, [api, axes, activeTuple, setAxis]);
 
+  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>): void => {
+    if (event.key === 'Escape') {
+      event.stopPropagation();
+      setOpen(false);
+    }
+  }, []);
+
+  /**
+   * Escape closes even when focus hasn't entered the popover yet (e.g. the
+   * user opened it via click and the mouse is still over the canvas). We
+   * attach a document-level listener when open.
+   */
+  useEffect(() => {
+    if (!open) return;
+    const onDocKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', onDocKey);
+    return () => document.removeEventListener('keydown', onDocKey);
+  }, [open]);
+
   if (axes.length === 0) {
     return h(
       IconButton,
       { key: TOOL_ID, title: 'Swatchbook theme (loading…)', disabled: true },
-      h(ThemeIcon),
-      h('span', { style: { marginLeft: 6, opacity: 0.6 } }, '—'),
+      h(SwatchbookIcon),
     );
   }
 
+  const summary = axes.map((a) => activeTuple[a.name] ?? a.default).join(' · ');
+  const title = `Swatchbook · ${summary}`;
+
+  const button = h(
+    IconButton,
+    {
+      key: TOOL_ID,
+      title,
+      active: open,
+      onClick: () => setOpen((prev) => !prev),
+    },
+    h(SwatchbookIcon),
+    h('span', { style: { marginLeft: 6 } }, 'Swatchbook'),
+  );
+
+  const tooltipBody = h(PopoverBody, {
+    axes,
+    presets,
+    defaults,
+    activeTuple,
+    activeColorFormat,
+    lastApplied,
+    onApplyPreset: applyPreset,
+    onSelectAxis: setAxis,
+    onSelectColorFormat: (next: string) => updateGlobals({ [COLOR_FORMAT_GLOBAL_KEY]: next }),
+    onKeyDown: handleKeyDown,
+  });
+
   return h(
     'span',
-    { style: { display: 'inline-flex', alignItems: 'center', gap: 4 } },
-    presets.length > 0
-      ? h(PresetPills, {
-          presets,
-          axes,
-          defaults,
-          activeTuple,
-          lastApplied,
-          onApply: applyPreset,
-        })
-      : null,
-    ...axes.map((axis) =>
-      h(AxisDropdown, {
-        key: axis.name,
-        axis,
-        active: activeTuple[axis.name] ?? axis.default,
-        onSelect: (next: string) => setAxis(axis.name, next),
-      }),
-    ),
-    h(ColorFormatDropdown, {
-      key: `${TOOL_ID}/color-format`,
-      active: activeColorFormat,
-      onSelect: (next: string) => updateGlobals({ [COLOR_FORMAT_GLOBAL_KEY]: next }),
+    { ref: bodyRef, style: { display: 'inline-flex', alignItems: 'center' } },
+    h(WithTooltipPure, {
+      placement: 'bottom',
+      trigger: 'click',
+      visible: open,
+      onVisibleChange: (next: boolean) => setOpen(next),
+      closeOnOutsideClick: true,
+      tooltip: tooltipBody,
+      children: button,
     }),
   );
 }
