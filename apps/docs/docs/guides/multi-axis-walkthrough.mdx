@@ -14,7 +14,6 @@ Step-by-step setup of a two-axis theming model — `mode × brand` — using the
 tokens/
   ref/            # raw primitives — color palettes, size scale, font families
   sys/            # semantic slots — color.sys.surface.default → {color.ref.neutral.0}
-  cmp/            # component-scoped — cmp.button.bg → {color.sys.accent.bg}
   themes/
     light.json    # Light mode overrides of sys
     dark.json     # Dark mode overrides of sys
@@ -22,7 +21,7 @@ tokens/
   resolver.json
 ```
 
-Ref → sys → cmp is the DTCG pyramid. Components alias sys (never ref directly) so a brand swap at sys propagates through every component that uses the accent.
+Two layers: `ref` (primitives) and `sys` (semantic slots aliased into ref). Component variation is carried by modes on sys — the resolver's `mode × brand` axes swap values at the sys level, and components alias sys directly. There's no `cmp` layer here by design: modes already handle the specialization a component layer would try to introduce, and every added layer multiplies the token count for every axis. See [Terrazzo's own guidance](https://terrazzo.app/docs/guides/architecture/) on keeping layers minimal.
 
 ## 2. The resolver
 
@@ -34,8 +33,7 @@ Two independent modifiers:
   "version": "2025.10",
   "sets": {
     "ref": { "sources": [{ "$ref": "./ref/color.palette.json" } /* , … */] },
-    "sys": { "sources": [{ "$ref": "./sys/color.json" } /* , … */] },
-    "cmp": { "sources": [{ "$ref": "./cmp/button.json" } /* , … */] }
+    "sys": { "sources": [{ "$ref": "./sys/color.json" } /* , … */] }
   },
   "modifiers": {
     "mode": {
@@ -58,7 +56,6 @@ Two independent modifiers:
   "resolutionOrder": [
     { "$ref": "#/sets/ref" },
     { "$ref": "#/sets/sys" },
-    { "$ref": "#/sets/cmp" },
     { "$ref": "#/modifiers/mode" },
     { "$ref": "#/modifiers/brand" }
   ]
@@ -68,8 +65,8 @@ Two independent modifiers:
 Key points:
 
 - `"Default": []` is a legal context — no override files, just the sys baseline.
-- `resolutionOrder` lists modifiers **after** sets: sys/cmp load first, mode/brand overlay on top.
-- `brand` appears after `mode` in `resolutionOrder`, so if both touch the same token path, brand wins. That's authoring intent — brand-a.json can override light.json for accent-only tweaks.
+- `resolutionOrder` lists modifiers **after** sets: ref/sys load first, mode/brand overlay on top.
+- `brand` appears after `mode` in `resolutionOrder`, so if both touch the same token path, brand wins. That's authoring intent — `brand-a.json` can override `light.json` for accent-only tweaks.
 
 ## 3. Config
 
@@ -79,12 +76,12 @@ import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
 export default defineSwatchbookConfig({
   tokens: ['tokens/**/*.json'],
   resolver: 'tokens/resolver.json',
-  default: 'Light · Default',
+  default: { mode: 'Light', brand: 'Default' },
   cssVarPrefix: 'ds',
 });
 ```
 
-The `default` string is the composed tuple name — `<mode> · <brand>` for this project.
+`default` is a partial tuple keyed by axis name. Omit it entirely to start in the all-axis-defaults tuple; name any axis explicitly to override. Unknown keys and invalid values produce `warn` diagnostics and fall back to the axis default.
 
 ## 4. What Storybook shows
 
@@ -97,7 +94,7 @@ With the config live:
   - `[data-mode="Dark"][data-brand="Default"] { … }`
   - `[data-mode="Light"][data-brand="Brand A"] { … }`
   - `[data-mode="Dark"][data-brand="Brand A"] { … }`
-- **Components** (Button, Card, Input in the reference Storybook) repaint as you switch axes.
+- **Components** in the reference Storybook (Button, Card, Input) read `var(--ds-color-sys-*)` directly and repaint as you switch axes — no component-specific token plumbing needed.
 
 ## 5. Preset pills
 
