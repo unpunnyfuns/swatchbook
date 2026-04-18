@@ -106,7 +106,7 @@ export function FontWeightScale({
     }
     collected.sort((a, b) => {
       if (Number.isFinite(a.weight) && Number.isFinite(b.weight)) return a.weight - b.weight;
-      return a.path.localeCompare(b.path);
+      return a.path.localeCompare(b.path, undefined, { numeric: true });
     });
     return collected;
   }, [resolved, filter, cssVarPrefix]);

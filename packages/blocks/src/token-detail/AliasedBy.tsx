@@ -92,7 +92,7 @@ function sortPaths(paths: readonly string[]): string[] {
   return paths.toSorted((a, b) => {
     const ra = GROUP_RANK[a.split('.')[0] ?? ''] ?? 2;
     const rb = GROUP_RANK[b.split('.')[0] ?? ''] ?? 2;
-    return ra !== rb ? ra - rb : a.localeCompare(b);
+    return ra !== rb ? ra - rb : a.localeCompare(b, undefined, { numeric: true });
   });
 }
 

@@ -129,7 +129,7 @@ export function BorderPreview({ filter = 'border', caption }: BorderPreviewProps
         value: (token.$value ?? {}) as BorderValue,
       });
     }
-    collected.sort((a, b) => a.path.localeCompare(b.path));
+    collected.sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true }));
     return collected;
   }, [resolved, filter, cssVarPrefix]);
 

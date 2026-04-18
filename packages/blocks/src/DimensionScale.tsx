@@ -138,7 +138,7 @@ export function DimensionScale({
     }
     collected.sort((a, b) => {
       if (Number.isFinite(a.pxValue) && Number.isFinite(b.pxValue)) return a.pxValue - b.pxValue;
-      return a.path.localeCompare(b.path);
+      return a.path.localeCompare(b.path, undefined, { numeric: true });
     });
     return collected;
   }, [resolved, filter, cssVarPrefix]);

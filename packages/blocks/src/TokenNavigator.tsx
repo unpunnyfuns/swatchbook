@@ -224,7 +224,7 @@ function buildTree(resolved: Record<string, VirtualToken>, root: string | undefi
 function sortTree(node: GroupNode): void {
   node.children.sort((a, b) => {
     if (a.kind !== b.kind) return a.kind === 'group' ? -1 : 1;
-    return a.segment.localeCompare(b.segment);
+    return a.segment.localeCompare(b.segment, undefined, { numeric: true });
   });
   for (const c of node.children) {
     if (c.kind === 'group') sortTree(c);
