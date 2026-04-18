@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
+import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/internal/format-color.ts';
-import { useColorFormat } from '#/internal/use-color-format.ts';
 import { formatValue, globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface TokenTableProps {
