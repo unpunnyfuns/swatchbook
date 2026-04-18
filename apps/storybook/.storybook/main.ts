@@ -21,6 +21,10 @@ export default defineMain({
         config: {
           resolver: resolverPath,
           default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+          // Uncomment to suppress the `contrast` axis from this Storybook —
+          // the toolbar dropdown disappears, CSS emission drops it from
+          // compound selectors, and the tokens panel shows a pinned indicator.
+          // disabledAxes: ['contrast'],
           cssVarPrefix: 'sb',
           presets: [
             {

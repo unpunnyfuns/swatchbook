@@ -1,8 +1,17 @@
 import { BufferedLogger, toDiagnostics } from '#/diagnostics.ts';
+import { validateDisabledAxes } from '#/disabled-axes.ts';
 import { validatePresets } from '#/presets.ts';
 import { resolveDefaultTuple } from '#/themes/default.ts';
 import { normalizeThemes } from '#/themes/normalize.ts';
-import { permutationID, type Config, type Project, type ResolvedTheme } from '#/types.ts';
+import {
+  permutationID,
+  type Axis,
+  type Config,
+  type Project,
+  type ResolvedTheme,
+  type Theme,
+  type TokenMap,
+} from '#/types.ts';
 
 /**
  * Load a swatchbook project from a config. Themes are eagerly resolved,
@@ -17,32 +26,79 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
   const logger = new BufferedLogger({ level: 'warn' });
   const normalized = await normalizeThemes(config, cwd, logger);
 
+  const { names: disabledAxes, diagnostics: disabledDiagnostics } = validateDisabledAxes(
+    config.disabledAxes,
+    normalized.axes,
+  );
+
+  const {
+    axes: filteredAxes,
+    themes: filteredThemes,
+    resolved: filteredResolved,
+  } = applyDisabledAxes(normalized.axes, normalized.themes, normalized.resolved, disabledAxes);
+
   const { tuple: defaultTuple, diagnostics: defaultDiagnostics } = resolveDefaultTuple(
     config.default,
-    normalized.axes,
+    filteredAxes,
   );
   const computedDefault = permutationID(defaultTuple);
-  const defaultThemeName = normalized.resolved[computedDefault]
+  const defaultThemeName = filteredResolved[computedDefault]
     ? computedDefault
-    : (normalized.themes[0]?.name ?? '');
+    : (filteredThemes[0]?.name ?? '');
 
-  const graph = normalized.resolved[defaultThemeName] ?? {};
+  const graph = filteredResolved[defaultThemeName] ?? {};
 
-  const { presets, diagnostics: presetDiagnostics } = validatePresets(
-    config.presets,
-    normalized.axes,
-  );
+  const { presets, diagnostics: presetDiagnostics } = validatePresets(config.presets, filteredAxes);
 
   return {
     config,
-    axes: normalized.axes,
+    axes: filteredAxes,
+    disabledAxes,
     presets,
-    themes: normalized.themes,
-    themesResolved: normalized.resolved,
+    themes: filteredThemes,
+    themesResolved: filteredResolved,
     graph,
     sourceFiles: normalized.sourceFiles,
-    diagnostics: [...toDiagnostics(logger), ...defaultDiagnostics, ...presetDiagnostics],
+    diagnostics: [
+      ...toDiagnostics(logger),
+      ...disabledDiagnostics,
+      ...defaultDiagnostics,
+      ...presetDiagnostics,
+    ],
   };
+}
+
+/**
+ * Project `disabledAxes` onto the loader output: drop disabled axes from
+ * the axis list, keep only the themes whose disabled-axis values equal
+ * their axis defaults, and prune `resolved` to the surviving theme names.
+ * Returns the original triple unchanged when `disabled` is empty.
+ */
+function applyDisabledAxes(
+  axes: Axis[],
+  themes: Theme[],
+  resolved: Record<string, TokenMap>,
+  disabled: string[],
+): { axes: Axis[]; themes: Theme[]; resolved: Record<string, TokenMap> } {
+  if (disabled.length === 0) return { axes, themes, resolved };
+
+  const disabledSet = new Set(disabled);
+  const axisDefaults = new Map<string, string>();
+  for (const axis of axes) axisDefaults.set(axis.name, axis.default);
+
+  const filteredAxes = axes.filter((a) => !disabledSet.has(a.name));
+  const filteredThemes = themes.filter((theme) => {
+    for (const name of disabled) {
+      if (theme.input[name] !== axisDefaults.get(name)) return false;
+    }
+    return true;
+  });
+  const surviving = new Set(filteredThemes.map((t) => t.name));
+  const filteredResolved: Record<string, TokenMap> = {};
+  for (const [name, tokens] of Object.entries(resolved)) {
+    if (surviving.has(name)) filteredResolved[name] = tokens;
+  }
+  return { axes: filteredAxes, themes: filteredThemes, resolved: filteredResolved };
 }
 
 /** Fetch the resolved tokens for a named theme. Throws if the name is unknown. */
