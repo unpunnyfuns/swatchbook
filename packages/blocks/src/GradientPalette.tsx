@@ -142,7 +142,7 @@ export function GradientPalette({
         stops: asStops(token.$value),
       });
     }
-    collected.sort((a, b) => a.path.localeCompare(b.path));
+    collected.sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true }));
     return collected;
   }, [resolved, filter, cssVarPrefix]);
 

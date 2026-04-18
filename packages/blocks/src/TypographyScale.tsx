@@ -116,7 +116,7 @@ export function TypographyScale({
         if (token.$type !== 'typography') return false;
         return globMatch(path, filter);
       })
-      .toSorted(([a], [b]) => a.localeCompare(b))
+      .toSorted(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
       .map(([path, token]) => {
         const value = token.$value;
         if (!value || typeof value !== 'object') {

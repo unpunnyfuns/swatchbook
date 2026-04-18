@@ -108,7 +108,7 @@ export function ColorPalette({
         if (token.$type !== 'color') return false;
         return globMatch(path, filter);
       })
-      .toSorted(([a], [b]) => a.localeCompare(b));
+      .toSorted(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }));
 
     for (const [path, token] of entries) {
       const segments = path.split('.');
@@ -126,7 +126,9 @@ export function ColorPalette({
       bucket.set(groupKey, list);
     }
 
-    return [...bucket.entries()].toSorted(([a], [b]) => a.localeCompare(b));
+    return [...bucket.entries()].toSorted(([a], [b]) =>
+      a.localeCompare(b, undefined, { numeric: true }),
+    );
   }, [resolved, filter, groupBy, cssVarPrefix, colorFormat]);
 
   const totalCount = groups.reduce((acc, [, swatches]) => acc + swatches.length, 0);

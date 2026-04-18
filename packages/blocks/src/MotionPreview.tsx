@@ -158,7 +158,7 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
     }
     collected.sort((a, b) => {
       if (a.kind !== b.kind) return a.kind.localeCompare(b.kind);
-      return a.path.localeCompare(b.path);
+      return a.path.localeCompare(b.path, undefined, { numeric: true });
     });
     return collected;
   }, [resolved, filter, cssVarPrefix]);

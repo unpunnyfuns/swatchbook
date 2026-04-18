@@ -104,7 +104,7 @@ export function TokenTable({
         if (type && token.$type !== type) return false;
         return true;
       })
-      .toSorted(([a], [b]) => a.localeCompare(b));
+      .toSorted(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }));
     return entries.map(([path, token]) => {
       const isColor = token.$type === 'color';
       const color = isColor ? formatColor(token.$value, colorFormat) : null;
