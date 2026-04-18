@@ -226,3 +226,23 @@ That reframing was tightened further: "we only care about DTCG, via Terrazzo, to
 **Rationale:** Two products served one user poorly. One product serves three users (DS engineer as curator; feature engineers + stakeholders as audience) cleanly. The "extrapolate, don't invent" principle keeps scope narrow, pushes shared value upstream, and stops us turning the addon into a custom analyzer.
 
 **Plan impact:** Mission + roadmap sections rewritten. Token-aware controls and reverse-index milestones closed with reasoning. Two new milestones created with seed issues.
+
+---
+
+## 2026-04-19 — Multi-axis theming honors DTCG resolver structure; CSS emission flat per tuple
+
+**Context:** Seeding the Multi-axis theming UX milestone forced two design calls.
+
+First, what "axis" means: DTCG 2025.10 resolvers model theming as ordered `sets` + independent `modifiers`, each with named `contexts`. Our normalization flattens every path (layered / resolver / manifest) into `Theme[]`, throwing away the modifier structure resolver authors already wrote. Tokens Studio `$themes` and the authored layered shape have no axis concept at all.
+
+Second, how to emit CSS for N axes: one block per cartesian tuple with compound selectors (`[data-mode="Dark"][data-brand="Brand A"] { … }`) vs nested cascading where each axis contributes an independent selector and later axes override earlier ones.
+
+**Decision:**
+- **Preserve axes from resolvers; synthesize a single-axis shape for layered inputs.** Resolver input gets real `Project.axes`; the layered path normalizes to one synthetic `theme` axis so downstream code sees one shape. A `defineConfig({ axes: [...] })` opt-in (issue #137) lets layered-config authors declare axes explicitly. (Manifest support was removed in the major-version bump, so only two theming paths remain.)
+- **CSS emission is flat per tuple.** One block per cartesian combination, every var redeclared. Nested cascading is nicer when axes never collide at the same token path, but the spec explicitly allows collisions — `brand-a.json` may override `color.sys.surface.default` already set by `mode.dark`. Flat emission is correct under every resolution order; nested would require a cross-axis collision analysis we don't want to own.
+
+**Rationale:** The resolver is the spec-native path and already models axes natively via Terrazzo; layered configs opt into axes through `defineConfig`. Flat CSS trades size for correctness — ~200 tokens × `k^N` tuples stays well under 100KB for realistic N, and gzip collapses the redundancy.
+
+**Terrazzo already provides the axis primitives.** `Resolver.source.modifiers`, `listPermutations()`, `apply(input)`, and `getPermutationID(input)` model tuples and per-modifier contexts natively. `packages/core/src/themes/resolver.ts` already iterates permutations and stores the tuple on `Theme.input` — we simply never expose the modifier structure to `Project`, so downstream code keys on the flat permutation ID instead of the tuple. The multi-axis work is mostly plumbing: surface what Terrazzo gives us; route preview, toolbar, emission, and blocks through tuples. Not reinventing resolution.
+
+**Plan impact:** `docs/plan.md` Multi-axis section rewritten with concrete issue breakdown (#131–#138). CLAUDE.md current-milestone line updated. Per-context display-name extensions and modifier `description` labels (from the original milestone sketch) demoted to post-milestone follow-ups; saved tuple presets stay in scope as issue #138 but land as config (`defineConfig({ presets })`) rather than localStorage so they're reviewable and shared across teammates.

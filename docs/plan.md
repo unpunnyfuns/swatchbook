@@ -594,17 +594,24 @@ Beyond spec convergence, four scope areas deepen the "easier to understand DTCG"
 
 ### Multi-axis theming UX
 
-**Goal:** Multi-modifier resolvers stop being a hostile UI surface. Users compose themes axis-by-axis from the toolbar.
+**Goal:** Honor the DTCG resolver's N-modifier model end-to-end. Selection state is a tuple `{ axisName: contextName }`; toolbar, preview, CSS emission, and blocks all treat axes as first-class.
 
-**Work:**
-- **Multi-column theme composer toolbar tool** — when the resolver has ≥2 modifiers, the toolbar renders one column per axis (appearance × brand × density × …), each with its contexts as picks. Composition updates `globals.swatchbookTheme` to the full permutation.
-- **Per-axis naming** — the addon reads modifier `description` / `displayName` (extending the DTCG resolver shape in a documented way if needed) to label columns.
-- **Saved compositions (localStorage)** — "Save this combination as…" button; saved combos appear as quick-select pills next to the composer.
-- **Display-name override extension** — a documented `$extensions.swatchbook.displayName` field on modifier contexts that core picks up for friendlier toolbar labels without touching the spec surface.
-- **Toolbar dogfood** — tokens-reference gets a multi-axis variant so the storybook app exercises the composer in CI.
+**Design premise:** DTCG 2025.10 models theming as ordered `sets` + independent `modifiers`, each modifier contributing one context at resolve time. Our normalization currently flattens resolver output into a single `Theme[]`, which throws away the modifier structure authors already wrote. Multi-axis UX = stop flattening. (Manifest support was removed in the major-version bump — there are now only two theming paths: resolver and layered.)
 
-**Exit:** A resolver with `appearance × brand × density` renders cleanly in the toolbar; each axis is pickable independently; saved combos persist across reloads. Interaction tests cover the composer.
-**Demo:** Toolbar shows three columns; picking "dark × brand-a × compact" repaints the preview.
+**Work (issues #131–#137):**
+- **#131 — core axes in Project.** Extend `Project` with `axes: Axis[]`. Resolver path preserves modifiers; layered path normalizes to a single synthetic `theme` axis (until #137 lets it declare axes explicitly).
+- **#132 — fixture.** `tokens-reference` ships a real multi-modifier resolver (`mode × brand`, maybe `contrast`) replacing the `·`-joined flat form.
+- **#133 — globals tuple.** `globals.swatchbookAxes: Record<axis, context>` replaces `swatchbookTheme`; preview sets one `data-<axis>` attribute per axis.
+- **#134 — N-dropdown toolbar.** One dropdown per axis. Single-axis projects render one dropdown unchanged from today.
+- **#135 — CSS emission.** One block per cartesian tuple with compound attribute selectors (`[data-mode][data-brand] { … }`); flat over nested because axes can collide at the same path.
+- **#136 — tuple-aware panel + TokenDetail.** Resolved values follow the active tuple; TokenDetail shows per-axis variance (row if one axis varies, matrix if multiple).
+- **#137 — layered-config axes.** `defineConfig` accepts an `axes` shape alongside `themes` for authors who don't use a resolver.
+- **#138 — named tuple presets in config.** `defineConfig({ presets: [{ name, axes }] })` lets authors pin common tuples ("Brand A Dark"). Toolbar renders them as quick-select pills. Config over localStorage so presets are reviewable and shared.
+
+**Non-goals for this milestone:** per-context display-name extensions, modifier `description` labels. Revisit as a follow-up once the structural work lands.
+
+**Exit:** A resolver with `mode × brand` renders as two dropdowns; changing either repaints the preview; TokenDetail shows axis-aware variance; CSS emission produces one block per tuple. Interaction tests cover the composer end-to-end.
+**Demo:** Toolbar shows `mode` and `brand` independently; picking `Dark` + `Brand A` repaints the preview; TokenDetail for `color.sys.accent.bg` shows values differ along brand, constant along mode.
 
 ### Alias topology
 
