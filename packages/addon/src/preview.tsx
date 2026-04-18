@@ -7,6 +7,7 @@ import {
   cssVarPrefix,
   defaultTheme,
   diagnostics,
+  presets as virtualPresets,
   themes,
   themesResolved,
 } from 'virtual:swatchbook/tokens';
@@ -78,6 +79,7 @@ function broadcastInit(): void {
   const channel = addons.getChannel();
   channel.emit(INIT_EVENT, {
     axes: virtualAxes,
+    presets: virtualPresets,
     themes,
     defaultTheme,
     themesResolved,

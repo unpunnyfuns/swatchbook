@@ -9,6 +9,7 @@ export type {
   Config,
   Diagnostic,
   DiagnosticSeverity,
+  Preset,
   Project,
   ResolvedTheme,
   Theme,
