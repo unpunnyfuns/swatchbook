@@ -6,7 +6,7 @@ sidebar_position: 2
 
 # Addon
 
-Published as `@unpunnyfuns/swatchbook-addon`. Storybook addon. Loads your config at build time via `@unpunnyfuns/swatchbook-core`, exposes the resolved graph as a virtual module, registers a preview decorator + manager toolbar + the Design Tokens panel, and ships a `useToken` hook.
+Published as `@unpunnyfuns/swatchbook-addon`. Storybook addon. Loads your config at build time via `@unpunnyfuns/swatchbook-core`, exposes the resolved graph as a virtual module, registers a preview decorator + manager toolbar + the Design Tokens panel, and ships a `useToken` hook. Block-side hooks (`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`) live in `@unpunnyfuns/swatchbook-blocks`.
 
 ## Install
 
@@ -14,13 +14,34 @@ Published as `@unpunnyfuns/swatchbook-addon`. Storybook addon. Loads your config
 npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
 ```
 
-This gives you the toolbar, Design Tokens panel (hierarchical tree view + diagnostics), preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `SwatchbookProvider`, block-side hooks) live in `@unpunnyfuns/swatchbook-blocks` — install it alongside if you want them.
+This gives you the toolbar, Design Tokens panel (diagnostics summary + hierarchical tree view), preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `SwatchbookProvider`, block-side hooks) live in `@unpunnyfuns/swatchbook-blocks` — install it alongside if you want them.
 
 Peer requirements: Storybook 10.3+ on the Vite builder, React 18+.
 
 ## Registration
 
-The addon is a CSF Next preview addon. Register it in your `preview.ts`:
+Register the addon in `main.ts#addons` with your config (inline `config` preferred; `configPath` also works — see the [config reference](./config)):
+
+```ts title=".storybook/main.ts"
+import { defineMain } from '@storybook/react-vite/node';
+
+export default defineMain({
+  framework: '@storybook/react-vite',
+  addons: [
+    {
+      name: '@unpunnyfuns/swatchbook-addon',
+      options: {
+        config: {
+          resolver: 'tokens/resolver.json',
+          cssVarPrefix: 'ds',
+        },
+      },
+    },
+  ],
+});
+```
+
+Then opt the preview into the addon's annotations (CSF Next factory) in `preview.ts`:
 
 ```ts title=".storybook/preview.ts"
 import { definePreview } from '@storybook/react-vite';
@@ -31,13 +52,11 @@ export default definePreview({
 });
 ```
 
-No entry in `main.ts#addons` — the preview annotation is the full registration.
-
 ## What it registers
 
-- **Preview decorator** — reads the active axis tuple, writes `data-<axis>="<context>"` attributes on `<html>` + story wrapper, mounts the per-theme CSS, emits `INIT_EVENT` to the manager.
-- **Toolbar tool** — one `IconButton` per axis with contexts as picks, plus preset pills.
-- **Design Tokens panel** — hierarchical tree of every token in the active theme (searchable, click a leaf to copy its `var(--…)` reference), with a collapsible diagnostics section beneath that auto-expands on warnings/errors.
+- **Preview decorator** — reads the active axis tuple, writes `data-<axis>="<context>"` attributes (plus `data-theme="<composed id>"`) on `<html>` + story wrapper, mounts the per-theme CSS, emits `INIT_EVENT` to the manager.
+- **Toolbar tool** — a single Swatchbook `IconButton`. Clicking opens a popover containing preset pills, one dropdown per axis, and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`). Escape and outside-click close it.
+- **Design Tokens panel** — a collapsible diagnostics section at the top (auto-expands on warnings/errors, green `OK` badge when clean) followed by a searchable hierarchical tree of every token in the active theme (click a leaf to copy its `var(--…)` reference).
 
 ## Globals
 
@@ -45,8 +64,9 @@ No entry in `main.ts#addons` — the preview annotation is the full registration
 | --- | --- | --- |
 | `swatchbookAxes` | `Record<string, string>` | Active tuple. Preferred input. |
 | `swatchbookTheme` | `string` | Composed permutation ID. Back-compat companion. |
+| `swatchbookColorFormat` | `'hex' \| 'rgb' \| 'hsl' \| 'oklch' \| 'raw'` | Display-only color format consumed by the blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`). Does **not** affect emitted CSS. Default `hex`. |
 
-The toolbar writes both in lockstep so legacy consumers keep working.
+The toolbar writes `swatchbookAxes` and `swatchbookTheme` in lockstep so legacy consumers keep working. `swatchbookColorFormat` is toggled from the color-format picker in the popover; `hex` falls back to space-separated `rgb()` (flagged with a ⚠ warning marker) for colors outside sRGB gamut.
 
 ## Per-story overrides
 
@@ -64,7 +84,7 @@ export const DarkBrandA = meta.story({
 
 ## Hooks
 
-Exposed under `@unpunnyfuns/swatchbook-addon/hooks`.
+The addon exposes exactly one hook, under `@unpunnyfuns/swatchbook-addon/hooks`.
 
 ### `useToken(path)`
 
@@ -81,18 +101,11 @@ function Brand() {
 
 Paths autocomplete from the generated `.swatchbook/tokens.d.ts`. Add `"include": [".swatchbook/**/*.d.ts"]` to your consumer tsconfig.
 
-### `useActiveTheme()` / `useActiveAxes()`
+### Block-side hooks live in `@unpunnyfuns/swatchbook-blocks`
 
-Exposed from `@unpunnyfuns/swatchbook-blocks` — see the [blocks reference](./blocks.mdx). `useActiveTheme()` returns the current composed permutation ID as a string; `useActiveAxes()` returns the active tuple as `Readonly<Record<string, string>>`.
+`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the contexts that back them (`SwatchbookContext`, `ThemeContext`, `AxesContext`, `ColorFormatContext`) are exported from `@unpunnyfuns/swatchbook-blocks` — see the [blocks reference](./blocks). They are **not** re-exported from the addon; import them from blocks.
 
-## Contexts
-
-Exposed from `@unpunnyfuns/swatchbook-blocks`.
-
-- `ThemeContext` — React context carrying the composed permutation ID.
-- `AxesContext` — React context carrying the tuple.
-
-Both are populated by the preview decorator and consumed by `useActiveTheme` / `useActiveAxes`. You can also consume them directly for non-hook call sites.
+The preview decorator mounts a `SwatchbookProvider` (from blocks) that populates every context, so those hooks just work wherever the addon is registered.
 
 ## Exported constants
 
