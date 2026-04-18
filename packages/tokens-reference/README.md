@@ -1,6 +1,6 @@
-# @unpunnyfuns/swatchbook-tokens-reference
+# Tokens reference
 
-Exhaustive DTCG 2025.10 pyramid used as swatchbook's internal test bed. Private — not published.
+Internal workspace package (`@unpunnyfuns/swatchbook-tokens-reference`). Exhaustive DTCG 2025.10 fixture used as swatchbook's internal test bed. Private — not published.
 
 ## Structure
 

@@ -1,6 +1,6 @@
-# @unpunnyfuns/swatchbook-blocks
+# Blocks
 
-Storybook MDX doc blocks for DTCG design tokens. React components for rendering token documentation inside `.mdx` pages or regular stories. Self-mount the addon's CSS and react to axis changes from the toolbar; work inside the docs container even though story decorators don't.
+Published as `@unpunnyfuns/swatchbook-blocks`. Storybook MDX doc blocks for DTCG design tokens. React components for rendering token documentation inside `.mdx` pages or regular stories. Self-mount the addon's CSS and react to axis changes from the toolbar; work inside the docs container even though story decorators don't.
 
 > **Documentation:** [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/). Token parsing powered by [Terrazzo](https://terrazzo.app/) by [Drew Powers](https://github.com/drwpow) via `@unpunnyfuns/swatchbook-core`.
 
