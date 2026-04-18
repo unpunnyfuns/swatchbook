@@ -2,7 +2,7 @@ import { ShadowSample } from '@unpunnyfuns/swatchbook-blocks';
 import preview from '../../.storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Blocks/Samples/ShadowSample',
+  title: 'Internals/Samples/ShadowSample',
   component: ShadowSample,
   argTypes: {
     path: { control: 'text' },

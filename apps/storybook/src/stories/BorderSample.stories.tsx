@@ -2,7 +2,7 @@ import { BorderSample } from '@unpunnyfuns/swatchbook-blocks';
 import preview from '../../.storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Blocks/Samples/BorderSample',
+  title: 'Internals/Samples/BorderSample',
   component: BorderSample,
   argTypes: {
     path: { control: 'text' },

@@ -2,7 +2,7 @@ import { AliasChain } from '@unpunnyfuns/swatchbook-blocks';
 import preview from '../../../.storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Blocks/TokenDetail/AliasChain',
+  title: 'Internals/TokenDetail/AliasChain',
   component: AliasChain,
   argTypes: {
     path: { control: 'text' },

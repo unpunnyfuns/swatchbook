@@ -2,7 +2,7 @@ import { MotionSample } from '@unpunnyfuns/swatchbook-blocks';
 import preview from '../../.storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Blocks/MotionSample',
+  title: 'Internals/Samples/MotionSample',
   component: MotionSample,
   argTypes: {
     path: { control: 'text' },
