@@ -29,5 +29,10 @@
     "turbo": "^2.9.0",
     "typescript": "^6.0.0",
     "vitest": "^4.1.4"
+  },
+  "pnpm": {
+    "overrides": {
+      "webpackbar": "7.0.0"
+    }
   }
 }

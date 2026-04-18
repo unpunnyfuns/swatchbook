@@ -1,0 +1,37 @@
+---
+id: intro
+slug: /
+title: Introduction
+sidebar_position: 1
+---
+
+# Swatchbook
+
+A Storybook addon for documenting [DTCG design tokens](https://design-tokens.org/tr/2025/drafts/). It parses your token files, composes themes through a resolver or layered configuration, and renders a live documentation surface inside your Storybook — searchable token panel, per-axis theme switcher, tuple-aware `TokenDetail` blocks, `ColorPalette`, `TypographyScale`, and more.
+
+## Who it's for
+
+Design-system authors who already have DTCG tokens (or are in the process of authoring them) and want to publish a browsable, interactive reference without building a custom docs site.
+
+## What the addon gives you
+
+- **Toolbar** — one dropdown per modifier axis, preset pills for named combinations.
+- **Tokens panel** — searchable, filterable, grouped by `$type`. Click a token to copy its `var(--…)` reference.
+- **Diagnostics panel** — invalid tokens, broken aliases, type mismatches surface with severity and location.
+- **Doc blocks** — `TokenDetail`, `TokenTable`, `ColorPalette`, `TypographyScale`, `FontFamilySample`, `FontWeightScale`, `StrokeStyleSample`, motion/shadow/border previews. Embed them in MDX stories.
+- **`useToken` hook** — typed lookups from component code, reactive to the active theme.
+
+## See it live
+
+The [live Storybook](/swatchbook/storybook/) runs the addon against this repo's [`tokens-reference`](https://github.com/unpunnyfuns/swatchbook/tree/main/packages/tokens-reference) fixture — a realistic multi-file DTCG pyramid with resolver-driven axes. Every block, panel, and toolbar control is wired up against those tokens.
+
+## How to read these docs
+
+- **[Quickstart](./quickstart)** — install, configure, run.
+- **Concepts** — the mental model: theming inputs, axes, presets, diagnostics.
+- **Guides** — walkthroughs for multi-axis setup and authoring doc stories with the blocks.
+- **Reference** — API surface per published package (`core`, `addon`, `blocks`).
+
+## What these docs assume
+
+You're comfortable with Storybook (CSF, decorators, MDX docs). For DTCG itself, you've skimmed the [2025.10 spec](https://design-tokens.org/tr/2025/drafts/) or at least seen `$value` / `$type` / alias syntax before — we won't re-teach the spec here.

@@ -1,0 +1,85 @@
+---
+id: axes
+title: Axes
+sidebar_position: 2
+---
+
+# Axes
+
+An **axis** is one orthogonal dimension of your theming model — `mode`, `brand`, `density`, `contrast`, whatever. Each axis has a set of named **contexts** (one of which is the default) and at any moment exactly one context is selected per axis.
+
+## Tuples, not strings
+
+The addon's canonical representation of "what theme is active" is a **tuple**: `Record<axisName, contextName>`. For a resolver with `mode × brand`, a tuple looks like:
+
+```ts
+{ mode: 'Dark', brand: 'Brand A' }
+```
+
+Every resolved token, every CSS selector, every panel readout keys on this tuple. The flat composed string (`"Dark · Brand A"`) exists only for back-compat and cosmetic display — downstream code should prefer the tuple.
+
+## Data attributes
+
+When a tuple is active, the preview decorator writes one `data-<axisName>="<context>"` attribute per axis to `<html>` and the story wrapper:
+
+```html
+<html data-mode="Dark" data-brand="Brand A" data-theme="Dark · Brand A">
+```
+
+CSS emission matches these per-axis attributes with compound selectors:
+
+```css
+:root {
+  --ds-color-sys-surface-default: #ffffff;
+}
+[data-mode="Dark"][data-brand="Default"] {
+  --ds-color-sys-surface-default: #0f172a;
+}
+[data-mode="Dark"][data-brand="Brand A"] {
+  --ds-color-sys-surface-default: #111827;
+}
+```
+
+Each non-default tuple gets its own flat block (every var redeclared). The `:root` block carries the default tuple. No nested cascading — that would require cross-axis collision analysis we don't own, and the DTCG spec explicitly allows axes to write to the same token path.
+
+## Independence
+
+Axes are **independent**. Selecting `mode=Dark` does not constrain `brand`; the resolver evaluates each modifier in `resolutionOrder` and each contributes its own layer stack. This is why the toolbar renders one dropdown per axis rather than one flat dropdown listing every combination.
+
+## Where axes come from
+
+- **Resolver input**: each DTCG modifier becomes one axis (`source: 'resolver'`).
+- **Layered config**: each `axes[]` entry becomes one axis (`source: 'layered'`).
+- **Neither input**: a single synthetic axis named `theme` (`source: 'synthetic'`).
+
+Accessible from your Storybook via:
+
+```ts
+import { useActiveAxes } from '@unpunnyfuns/swatchbook-addon/hooks';
+
+function MyComponent() {
+  const axes = useActiveAxes();
+  // axes === { mode: 'Dark', brand: 'Brand A' }
+}
+```
+
+## Per-story overrides
+
+Force a specific tuple on a single story:
+
+```ts
+export const DarkBrandA = meta.story({
+  parameters: {
+    swatchbook: {
+      axes: { mode: 'Dark', brand: 'Brand A' },
+    },
+  },
+});
+```
+
+Omit an axis and it falls back to that axis's default. Invalid axis keys or context values are silently ignored (the decorator falls back to defaults). The legacy `parameters.swatchbook.theme: 'Composed Name'` form still works but axes tuples are preferred.
+
+## See also
+
+- [Presets](./presets) — name common tuples and render them as toolbar pills.
+- [Reference: core](../reference/core) — the `Axis` type surface.

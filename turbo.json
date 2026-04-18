@@ -4,8 +4,17 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "tokens/**", "package.json", "tsconfig*.json"],
-      "outputs": ["dist/**"]
+      "inputs": [
+        "src/**",
+        "tokens/**",
+        "docs/**",
+        "static/**",
+        "docusaurus.config.ts",
+        "sidebars.ts",
+        "package.json",
+        "tsconfig*.json"
+      ],
+      "outputs": ["dist/**", "build/**", ".docusaurus/**"]
     },
     "build:storybook": {
       "dependsOn": ["^build"],
