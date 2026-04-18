@@ -23,6 +23,10 @@ Requires `@unpunnyfuns/swatchbook-addon` to be registered in your Storybook conf
 | `FontWeightScale`   | Same sample text rendered at each `fontWeight` primitive, sorted ascending.         |
 | `StrokeStyleSample` | Border rendered per `strokeStyle` primitive.                                        |
 | `GradientPalette`   | Wide swatch per `gradient` token with stop breakdown (linear-gradient default).      |
+| `MotionSample`      | Animated ball + track for one `transition` / `duration` / `cubicBezier` token. Accepts `speed` / `runKey`. |
+| `ShadowSample`      | Surface rectangle with one `shadow` token applied as `box-shadow`.                  |
+| `BorderSample`      | Surface rectangle with one `border` token applied as `border`.                      |
+| `DimensionBar`      | Width-driven bar (or square / radius sample, via `kind`) for one `dimension` token. |
 | `TokenDetail`       | Single-token inspector — composition of the subcomponents below. |
 | `TokenHeader`       | Heading + `$type` pill + cssVar + `$description`, or a missing-token empty state. |
 | `CompositePreview`  | Type-dispatched live preview (typography, shadow, border, transition, dimension, duration, cubicBezier, fontFamily, fontWeight, strokeStyle, gradient, color). |

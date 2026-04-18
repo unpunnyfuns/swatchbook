@@ -1,11 +1,15 @@
 export { BorderPreview, type BorderPreviewProps } from '#/BorderPreview.tsx';
+export { BorderSample, type BorderSampleProps } from '#/border-preview/BorderSample.tsx';
 export { ColorPalette, type ColorPaletteProps } from '#/ColorPalette.tsx';
 export { DimensionScale, type DimensionKind, type DimensionScaleProps } from '#/DimensionScale.tsx';
+export { DimensionBar, type DimensionBarProps } from '#/dimension-scale/DimensionBar.tsx';
 export { FontFamilySample, type FontFamilySampleProps } from '#/FontFamilySample.tsx';
 export { FontWeightScale, type FontWeightScaleProps } from '#/FontWeightScale.tsx';
 export { GradientPalette, type GradientPaletteProps } from '#/GradientPalette.tsx';
 export { MotionPreview, type MotionPreviewProps, type MotionSpeed } from '#/MotionPreview.tsx';
+export { MotionSample, type MotionSampleProps } from '#/motion-preview/MotionSample.tsx';
 export { ShadowPreview, type ShadowPreviewProps } from '#/ShadowPreview.tsx';
+export { ShadowSample, type ShadowSampleProps } from '#/shadow-preview/ShadowSample.tsx';
 export { StrokeStyleSample, type StrokeStyleSampleProps } from '#/StrokeStyleSample.tsx';
 export { TokenDetail, type TokenDetailProps } from '#/TokenDetail.tsx';
 export { AliasChain, type AliasChainProps } from '#/token-detail/AliasChain.tsx';
