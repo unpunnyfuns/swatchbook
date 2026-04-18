@@ -18,7 +18,7 @@ Blocks read the token graph from a `SwatchbookProvider`. Inside Storybook, regis
 | ------------------- | ----------------------------------------------------------------------------------- |
 | `TokenTable`        | Searchable table of tokens, filterable by path glob and `$type`.                    |
 | `TokenNavigator`    | Expandable tree view of the token graph keyed on dot-path segments, with inline per-type previews. |
-| `ColorPalette`      | Swatch grid grouped by sub-path (`groupBy` controls depth).                         |
+| `ColorPalette`      | Swatch grid grouped by sub-path. Auto-groups from the filter; `groupBy` overrides.  |
 | `TypographyScale`   | Each typography composite token rendered as a sample line using its own value.      |
 | `FontFamilySample`  | Pangram rendered per `fontFamily` primitive.                                        |
 | `FontWeightScale`   | Same sample text rendered at each `fontWeight` primitive, sorted ascending.         |
@@ -50,7 +50,7 @@ import { TokenTable, ColorPalette, TokenDetail } from '@unpunnyfuns/swatchbook-b
 
 # Color tokens
 
-<ColorPalette filter="color.sys.*" groupBy={3} />
+<ColorPalette filter="color.sys.*" />
 
 ## Every color token
 
@@ -84,7 +84,7 @@ export function TokenDocs() {
 
 ```ts
 <TokenTable filter="color.sys.*" type="color" />
-<ColorPalette filter="color.sys.*" groupBy={3} />
+<ColorPalette filter="color.sys.*" />
 <TypographyScale filter="typography" sample="The quick brown fox" />
 <TokenDetail path="color.sys.accent.bg" />
 ```
