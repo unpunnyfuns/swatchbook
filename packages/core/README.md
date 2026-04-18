@@ -29,14 +29,17 @@ pnpm add @unpunnyfuns/swatchbook-core
 import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
 
 export default defineSwatchbookConfig({
-  tokens: ['tokens/**/*.json'],
   resolver: 'tokens/resolver.json',
   default: { mode: 'Light', brand: 'Default' },
   cssVarPrefix: 'sb',
 });
 ```
 
-The resolver file is the spec-defined document describing how token sets compose into named themes — see [the DTCG 2025.10 resolver draft](https://design-tokens.org/tr/2025/drafts/resolver/).
+The resolver file is the spec-defined document describing how token sets compose into named themes — see [the DTCG 2025.10 resolver draft](https://design-tokens.org/tr/2025/drafts/resolver/). Every token file the resolver references via `$ref` is loaded automatically; the addon's Vite plugin derives HMR watch paths from that set, so no separate `tokens` glob is needed for resolver-backed projects.
+
+If you want HMR to watch a directory broader than the resolver references directly — say, to pick up a new token file the moment it's added — supply `tokens: ['tokens/**/*.json']` alongside `resolver` and the plugin will union the two.
+
+Projects without a resolver (plain-parse or layered-axes) still need `tokens` — the loader has nothing to start from otherwise.
 
 `default` is a partial tuple keyed by axis name. Any axis you omit falls back to that axis's own `default`; unknown keys and invalid context values produce `warn` diagnostics and are sanitized out. Omit `default` entirely to start the project in the all-axis-defaults tuple.
 

@@ -9,6 +9,7 @@ export interface LayeredLoadResult {
   axes: Axis[];
   themes: Theme[];
   resolved: Record<string, TokenMap>;
+  sourceFiles: string[];
 }
 
 /**
@@ -84,13 +85,15 @@ export async function loadLayeredThemes(
 
   const themes: Theme[] = [];
   const resolved: Record<string, TokenMap> = {};
+  const sourceSet = new Set<string>();
   for (const { input, allFiles, tokens } of perTuple) {
     const id = permutationID(input);
     themes.push({ name: id, input: { ...input }, sources: allFiles });
     resolved[id] = tokens;
+    for (const f of allFiles) sourceSet.add(f);
   }
 
-  return { axes, themes, resolved };
+  return { axes, themes, resolved, sourceFiles: [...sourceSet].toSorted() };
 }
 
 function cartesianTuples(axesConfig: AxisConfig[]): Record<string, string>[] {

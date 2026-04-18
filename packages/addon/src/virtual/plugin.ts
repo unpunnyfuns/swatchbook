@@ -1,5 +1,6 @@
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
 import { loadProject, projectCss } from '@unpunnyfuns/swatchbook-core';
+import { dirname, isAbsolute, resolve as resolvePath } from 'node:path';
 import type { Plugin } from 'vite';
 import { RESOLVED_VIRTUAL_MODULE_ID, VIRTUAL_MODULE_ID } from '#/constants.ts';
 
@@ -11,8 +12,8 @@ export interface SwatchbookPluginOptions {
 /**
  * Vite plugin that serves the virtual `virtual:swatchbook/tokens` module —
  * a single source of truth for themes, resolved token maps, per-theme CSS,
- * and diagnostics. Watches the token files + manifest/resolver for changes
- * and invalidates the module so HMR reloads the preview with fresh data.
+ * and diagnostics. Watches the token files + resolver for changes and
+ * invalidates the module so HMR reloads the preview with fresh data.
  */
 export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions): Plugin {
   let project: Project | undefined;
@@ -54,7 +55,7 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
     },
 
     configureServer(server) {
-      const watchPaths = collectWatchPaths(config, cwd);
+      const watchPaths = collectWatchPaths(config, project, cwd);
       for (const p of watchPaths) server.watcher.add(p);
 
       const invalidate = async (): Promise<void> => {
@@ -79,18 +80,29 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
   };
 }
 
-function collectWatchPaths(config: Config, cwd: string): string[] {
+/**
+ * Collect the set of filesystem paths the dev server should watch for
+ * HMR. When `config.tokens` is set, use its globs (stripped to their
+ * base directories) — users opt in to broader watching this way. When
+ * absent, use the resolver file + every `$ref` target it pulled in, as
+ * tracked on `project.sourceFiles` — which stays correct as the resolver
+ * evolves without requiring a parallel `tokens` glob.
+ */
+function collectWatchPaths(config: Config, project: Project | undefined, cwd: string): string[] {
   const paths: string[] = [];
-  for (const glob of config.tokens) {
-    // Strip the glob portion and watch the base directory.
-    const base = glob.replace(/\/\*.*$/, '').replace(/\/[^/]*\*.*$/, '');
-    paths.push(resolveFromCwd(base, cwd));
+  if (config.tokens && config.tokens.length > 0) {
+    for (const glob of config.tokens) {
+      const base = glob.replace(/\/\*.*$/, '').replace(/\/[^/]*\*.*$/, '');
+      paths.push(resolveFromCwd(base, cwd));
+    }
+  } else if (project?.sourceFiles) {
+    for (const file of project.sourceFiles) paths.push(dirname(file));
   }
   if (config.resolver) paths.push(resolveFromCwd(config.resolver, cwd));
   return [...new Set(paths)];
 }
 
 function resolveFromCwd(p: string, cwd: string): string {
-  if (p.startsWith('/')) return p;
-  return `${cwd}/${p}`;
+  if (isAbsolute(p)) return p;
+  return resolvePath(cwd, p);
 }
