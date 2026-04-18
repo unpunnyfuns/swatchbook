@@ -1,4 +1,6 @@
 import type { ReactElement } from 'react';
+import { useColorFormat } from '#/contexts.ts';
+import { formatColor } from '#/internal/format-color.ts';
 import { formatValue } from '#/internal/use-project.ts';
 import { AliasChain } from '#/token-detail/AliasChain.tsx';
 import { AliasedBy } from '#/token-detail/AliasedBy.tsx';
@@ -19,6 +21,7 @@ export interface TokenDetailProps {
 
 export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
   const { token, cssVar, activeTheme } = useTokenDetailData(path);
+  const colorFormat = useColorFormat();
 
   if (!token) {
     return (
@@ -31,7 +34,9 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
   }
 
   const isColor = token.$type === 'color';
-  const value = formatValue(token.$value);
+  const formatted = isColor ? formatColor(token.$value, colorFormat) : null;
+  const value = formatted ? formatted.value : formatValue(token.$value);
+  const outOfGamut = formatted?.outOfGamut ?? false;
 
   return (
     <div data-theme={activeTheme} style={styles.wrapper}>
@@ -43,6 +48,15 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
       <div style={styles.chain}>
         {isColor && <span style={{ ...styles.swatch, background: cssVar }} aria-hidden />}
         <span>{value}</span>
+        {outOfGamut && (
+          <span
+            title='Out of sRGB gamut for this format'
+            aria-label='out of gamut'
+            style={{ marginLeft: 6 }}
+          >
+            ⚠
+          </span>
+        )}
       </div>
 
       <AliasChain path={path} />

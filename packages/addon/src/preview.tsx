@@ -14,12 +14,16 @@ import {
 } from 'virtual:swatchbook/tokens';
 import {
   AxesContext,
+  COLOR_FORMATS,
+  type ColorFormat,
+  ColorFormatContext,
   type ProjectSnapshot,
   SwatchbookContext,
   ThemeContext,
 } from '@unpunnyfuns/swatchbook-blocks';
 import {
   AXES_GLOBAL_KEY,
+  COLOR_FORMAT_GLOBAL_KEY,
   DATA_THEME_ATTR,
   GLOBAL_KEY,
   INIT_EVENT,
@@ -171,6 +175,14 @@ function resolveTuple(
   return defaultTuple();
 }
 
+function resolveColorFormat(globals: Record<string, unknown>): ColorFormat {
+  const raw = globals[COLOR_FORMAT_GLOBAL_KEY];
+  if (typeof raw === 'string' && (COLOR_FORMATS as readonly string[]).includes(raw)) {
+    return raw as ColorFormat;
+  }
+  return 'hex';
+}
+
 const themedDecorator: Decorator = (Story, context) => {
   const tuple = useMemo(
     () =>
@@ -179,6 +191,10 @@ const themedDecorator: Decorator = (Story, context) => {
         context.parameters as Record<string, Record<string, unknown>>,
       ),
     [context.globals, context.parameters],
+  );
+  const colorFormat = useMemo(
+    () => resolveColorFormat(context.globals as Record<string, unknown>),
+    [context.globals],
   );
   const themeName = useMemo(() => {
     const match = themes.find((t) => {
@@ -230,15 +246,17 @@ const themedDecorator: Decorator = (Story, context) => {
     <SwatchbookContext.Provider value={snapshot}>
       <ThemeContext.Provider value={themeName}>
         <AxesContext.Provider value={tuple}>
-          <div
-            {...wrapperAttrs}
-            style={{
-              padding: '1rem',
-              minHeight: '100%',
-            }}
-          >
-            <Story />
-          </div>
+          <ColorFormatContext.Provider value={colorFormat}>
+            <div
+              {...wrapperAttrs}
+              style={{
+                padding: '1rem',
+                minHeight: '100%',
+              }}
+            >
+              <Story />
+            </div>
+          </ColorFormatContext.Provider>
         </AxesContext.Provider>
       </ThemeContext.Provider>
     </SwatchbookContext.Provider>
@@ -260,6 +278,10 @@ export const globalTypes: NonNullable<Preview['globalTypes']> = {
     name: 'Axes',
     description: 'Per-axis context selection. Takes precedence over the composed theme name.',
   },
+  [COLOR_FORMAT_GLOBAL_KEY]: {
+    name: 'Color format',
+    description: 'Display format for color tokens in blocks. Emitted CSS is unaffected.',
+  },
 };
 
 function buildInitialAxes(): Record<string, string> {
@@ -271,4 +293,5 @@ function buildInitialAxes(): Record<string, string> {
 export const initialGlobals: NonNullable<Preview['initialGlobals']> = {
   [GLOBAL_KEY]: defaultTheme ?? themes[0]?.name ?? 'Light',
   [AXES_GLOBAL_KEY]: buildInitialAxes(),
+  [COLOR_FORMAT_GLOBAL_KEY]: 'hex',
 };

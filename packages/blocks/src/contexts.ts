@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+import type { ColorFormat } from '#/internal/format-color.ts';
 
 /**
  * Typed shape of the addon's `virtual:swatchbook/tokens` module, duplicated
@@ -102,4 +103,21 @@ export const AxesContext = createContext<Readonly<Record<string, string>>>({});
 
 export function useActiveAxes(): Readonly<Record<string, string>> {
   return useContext(AxesContext);
+}
+
+/**
+ * Active color-display format for the current story/docs render. Populated
+ * by the addon's preview decorator from the `swatchbookColorFormat` global
+ * (per-story `globals` or toolbar dropdown) and consumed by blocks that
+ * render color-token values. Emitted CSS is unaffected.
+ *
+ * Runs through plain React context rather than Storybook's `useGlobals` so
+ * per-story seeded globals flow through on first render and the same hook
+ * is safe to call from MDX doc blocks (where the preview-hooks context
+ * isn't available).
+ */
+export const ColorFormatContext = createContext<ColorFormat>('hex');
+
+export function useColorFormat(): ColorFormat {
+  return useContext(ColorFormatContext);
 }

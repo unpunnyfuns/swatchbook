@@ -8,6 +8,8 @@ export const PARAM_KEY = 'swatchbook';
 export const GLOBAL_KEY = 'swatchbookTheme';
 /** Tuple companion: `Record<axisName, contextName>`. Optional — when present, takes precedence over the string global. */
 export const AXES_GLOBAL_KEY = 'swatchbookAxes';
+/** Display-only color format for blocks (`hex` | `rgb` | `hsl` | `oklch` | `raw`). Emitted CSS is unaffected. */
+export const COLOR_FORMAT_GLOBAL_KEY = 'swatchbookColorFormat';
 
 export const VIRTUAL_MODULE_ID = 'virtual:swatchbook/tokens';
 export const RESOLVED_VIRTUAL_MODULE_ID = `\0${VIRTUAL_MODULE_ID}`;
