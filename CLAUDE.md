@@ -11,7 +11,7 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Current milestone
 
-`Current: between milestones` — Multi-axis theming UX closed 2026-04-19 (issues #131–#138 all landed). The DTCG resolver's N-modifier model is now first-class end-to-end: `Project.axes`, tuple globals, N-dropdown toolbar, per-tuple CSS emission, axis-aware panel + TokenDetail, layered-config axes, and named tuple presets. Prior milestones (DTCG comprehension visualizations, Alias topology, DTCG type coverage) all closed 2026-04-18. No feature milestone is active; pick one from `docs/plan.md` when starting new scope.
+`Current: Documentation site` — seeded 2026-04-18 with issues #151 + #152. Public docs at GH Pages: Docusaurus at `/`, Storybook static build at `/storybook`. Docusaurus holds narrative + concepts + reference (no live blocks, no runtime token integration); Storybook is the live DTCG documentation rendered by our own addon. Dogfood (Infima overrides) deferred indefinitely. Prior milestones all closed 2026-04-18–2026-04-19.
 
 Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
 
