@@ -19,6 +19,7 @@ import {
   PARAM_KEY,
   STYLE_ELEMENT_ID,
 } from '#/constants.ts';
+import { type ProjectSnapshot, SwatchbookContext } from '#/swatchbook-context.ts';
 import { AxesContext, ThemeContext } from '#/theme-context.ts';
 
 /** CSS var name with the active prefix applied. */
@@ -183,20 +184,37 @@ const themedDecorator: Decorator = (Story, context) => {
     if (value !== undefined) wrapperAttrs[`data-${axis.name}`] = value;
   }
 
+  const snapshot = useMemo<ProjectSnapshot>(
+    () => ({
+      axes: virtualAxes,
+      presets: virtualPresets,
+      themes,
+      themesResolved,
+      activeTheme: themeName,
+      activeAxes: tuple,
+      cssVarPrefix,
+      diagnostics,
+      css,
+    }),
+    [themeName, tuple],
+  );
+
   return (
-    <ThemeContext.Provider value={themeName}>
-      <AxesContext.Provider value={tuple}>
-        <div
-          {...wrapperAttrs}
-          style={{
-            padding: '1rem',
-            minHeight: '100%',
-          }}
-        >
-          <Story />
-        </div>
-      </AxesContext.Provider>
-    </ThemeContext.Provider>
+    <SwatchbookContext.Provider value={snapshot}>
+      <ThemeContext.Provider value={themeName}>
+        <AxesContext.Provider value={tuple}>
+          <div
+            {...wrapperAttrs}
+            style={{
+              padding: '1rem',
+              minHeight: '100%',
+            }}
+          >
+            <Story />
+          </div>
+        </AxesContext.Provider>
+      </ThemeContext.Provider>
+    </SwatchbookContext.Provider>
   );
 };
 
