@@ -13,24 +13,39 @@ export interface Theme {
 
 /**
  * One modifier axis of the theming model. Resolver-backed projects surface
- * one `Axis` per DTCG modifier; projects without a resolver (e.g. plain
- * token parsing with no composition) get a single synthetic axis named
- * `theme`.
+ * one `Axis` per DTCG modifier; layered-config projects surface one `Axis`
+ * per `axes[]` entry; projects without a resolver or layered config get a
+ * single synthetic axis named `theme`.
  */
 export interface Axis {
   name: string;
   contexts: string[];
   default: string;
   description?: string;
-  source: 'resolver' | 'synthetic';
+  source: 'resolver' | 'layered' | 'synthetic';
 }
 
-/** Swatchbook configuration. The resolver is the sole theming input. */
+/**
+ * One authored axis for layered configurations. Each context names an
+ * ordered list of glob patterns / file paths (relative to cwd) that layer
+ * on top of `Config.tokens` for that context. An empty array means "no
+ * override" — valid, and common for a `Default` context.
+ */
+export interface AxisConfig {
+  name: string;
+  description?: string;
+  contexts: Record<string, string[]>;
+  default: string;
+}
+
+/** Swatchbook configuration. Supply either `resolver` or `axes`, not both. */
 export interface Config {
-  /** Glob patterns for DTCG token files. */
+  /** Glob patterns for base DTCG token files. */
   tokens: string[];
-  /** Path to a DTCG 2025.10 resolver file. */
-  resolver: string;
+  /** Path to a DTCG 2025.10 resolver file. Mutually exclusive with `axes`. */
+  resolver?: string;
+  /** Authored layered axes. Mutually exclusive with `resolver`. */
+  axes?: AxisConfig[];
   /** Name of the default theme. */
   default?: string;
   /** Prefix for emitted CSS custom properties. */

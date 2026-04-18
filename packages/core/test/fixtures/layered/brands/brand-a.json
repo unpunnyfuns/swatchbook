@@ -1,0 +1,8 @@
+{
+  "color": {
+    "sys": {
+      "$type": "color",
+      "accent": { "$value": "{color.ref.red}" }
+    }
+  }
+}

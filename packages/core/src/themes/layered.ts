@@ -1,0 +1,122 @@
+import { readFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
+import { defineConfig as defineTerrazzoConfig, parse } from '@terrazzo/parser';
+import type { BufferedLogger } from '#/diagnostics.ts';
+import { collectGlobbedFiles } from '#/themes/util.ts';
+import { type Axis, type AxisConfig, permutationID, type Theme, type TokenMap } from '#/types.ts';
+
+export interface LayeredLoadResult {
+  axes: Axis[];
+  themes: Theme[];
+  resolved: Record<string, TokenMap>;
+  defaultThemeName: string;
+}
+
+/**
+ * Realize themes from a layered (resolver-less) configuration. Each axis
+ * context supplies an ordered list of overlay files; for every tuple in
+ * the cartesian product we parse `[...base, ...overlayFilesInAxisOrder]`
+ * with alias resolution enabled. Terrazzo's parser applies last-write-wins
+ * semantics on duplicate token paths, so overlay files override base
+ * tokens in the order we concatenate them.
+ */
+export async function loadLayeredThemes(
+  axesConfig: AxisConfig[],
+  tokenGlobs: string[],
+  cwd: string,
+  logger: BufferedLogger,
+  explicitDefault?: string,
+): Promise<LayeredLoadResult> {
+  const cwdUrl = pathToFileURL(`${cwd}/`);
+  const terrazzoConfig = defineTerrazzoConfig({}, { logger, cwd: cwdUrl });
+
+  const baseFiles = await collectGlobbedFiles(tokenGlobs, cwd);
+
+  const axes: Axis[] = axesConfig.map((ax) => ({
+    name: ax.name,
+    contexts: Object.keys(ax.contexts),
+    default: ax.default,
+    ...(ax.description !== undefined ? { description: ax.description } : {}),
+    source: 'layered' as const,
+  }));
+
+  const fileCache = new Map<string, string>();
+  const readInput = async (filename: string) => {
+    let src = fileCache.get(filename);
+    if (src === undefined) {
+      src = await readFile(filename, 'utf8');
+      fileCache.set(filename, src);
+    }
+    return { filename: pathToFileURL(filename), src };
+  };
+
+  const tuples = cartesianTuples(axesConfig);
+
+  const contextFilesCache = new Map<string, string[]>();
+  const filesForAxisContext = (axisName: string, ctx: string, patterns: string[]): string[] => {
+    const key = `${axisName}::${ctx}`;
+    let files = contextFilesCache.get(key);
+    if (!files) {
+      files = patterns.length === 0 ? [] : collectGlobbedFiles(patterns, cwd);
+      contextFilesCache.set(key, files);
+    }
+    return files;
+  };
+
+  const perTuple = await Promise.all(
+    tuples.map(async (input) => {
+      const overlayFiles: string[] = [];
+      for (const ax of axesConfig) {
+        const ctx = input[ax.name];
+        if (ctx === undefined) continue;
+        const patterns = ax.contexts[ctx] ?? [];
+        overlayFiles.push(...filesForAxisContext(ax.name, ctx, patterns));
+      }
+      const allFiles = [...baseFiles, ...overlayFiles];
+      const inputs = await Promise.all(allFiles.map(readInput));
+      const parsed = await parse(inputs, {
+        logger,
+        config: terrazzoConfig,
+        resolveAliases: true,
+        continueOnError: true,
+      });
+      return { input, allFiles, tokens: parsed.tokens };
+    }),
+  );
+
+  const themes: Theme[] = [];
+  const resolved: Record<string, TokenMap> = {};
+  for (const { input, allFiles, tokens } of perTuple) {
+    const id = permutationID(input);
+    themes.push({ name: id, input: { ...input }, sources: allFiles });
+    resolved[id] = tokens;
+  }
+
+  const defaultInput: Record<string, string> = {};
+  for (const ax of axesConfig) defaultInput[ax.name] = ax.default;
+  const defaultByAxes = permutationID(defaultInput);
+  const defaultThemeName =
+    explicitDefault && resolved[explicitDefault]
+      ? explicitDefault
+      : resolved[defaultByAxes]
+        ? defaultByAxes
+        : (themes[0]?.name ?? '');
+
+  return { axes, themes, resolved, defaultThemeName };
+}
+
+function cartesianTuples(axesConfig: AxisConfig[]): Record<string, string>[] {
+  if (axesConfig.length === 0) return [{}];
+  let acc: Record<string, string>[] = [{}];
+  for (const ax of axesConfig) {
+    const contexts = Object.keys(ax.contexts);
+    const next: Record<string, string>[] = [];
+    for (const partial of acc) {
+      for (const ctx of contexts) {
+        next.push({ ...partial, [ax.name]: ctx });
+      }
+    }
+    acc = next;
+  }
+  return acc;
+}
