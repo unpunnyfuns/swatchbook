@@ -183,6 +183,7 @@ const OPTION_PILL_BASE: React.CSSProperties = {
   cursor: 'pointer',
   color: 'inherit',
   outline: 'none',
+  boxShadow: 'none',
 };
 
 const OPTION_PILL_ACTIVE: React.CSSProperties = {
