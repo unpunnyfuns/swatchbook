@@ -36,7 +36,7 @@ interface Diagnostic {
 
 ## The panel
 
-The Diagnostics panel shows every diagnostic grouped by severity, with a green **OK** badge when the list is empty. Clicking a diagnostic with a `filename`/`line` jumps to the source if your Storybook has the right URL handler; otherwise it's shown as text.
+The **Design Tokens** panel includes a collapsible diagnostics section beneath the token tree. It shows a green **OK** badge when the list is empty and auto-expands to list every diagnostic (severity + message + group/source) when there are warnings or errors.
 
 ## Interpreting them
 
@@ -66,4 +66,4 @@ Future work may add a `strict` config flag that bakes this in. Track in [issues]
 
 ## See also
 
-- [Quickstart](../quickstart) — getting to a clean Diagnostics panel is the first milestone.
+- [Quickstart](../quickstart) — getting to a clean diagnostics section is the first milestone.

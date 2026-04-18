@@ -17,13 +17,13 @@ Monorepo published under the `@unpunnyfuns` scope.
 | Package | Purpose |
 | --- | --- |
 | [`@unpunnyfuns/swatchbook-core`](./packages/core) | Framework-free DTCG loader. Wraps Terrazzo's parser and DTCG 2025.10 resolver; emits CSS variables and TypeScript types. |
-| [`@unpunnyfuns/swatchbook-addon`](./packages/addon) | Storybook 10 addon. Preset wires core into Vite via a virtual module, the toolbar renders one dropdown per modifier axis, the panels browse tokens and diagnostics, and `useToken()` gives typed reads from stories. |
+| [`@unpunnyfuns/swatchbook-addon`](./packages/addon) | Storybook 10 addon. Preset wires core into Vite via a virtual module, the toolbar renders one dropdown per modifier axis, the Design Tokens panel browses the resolved graph with inline diagnostics, and `useToken()` gives typed reads from stories. |
 | [`@unpunnyfuns/swatchbook-blocks`](./packages/blocks) | MDX doc blocks for Storybook docs pages. Per-type rendering — color swatches, dimension bars, typography samples, composite previews, per-token detail with the full alias chain. |
 | [`@unpunnyfuns/swatchbook-tokens`](./packages/tokens-starter) | Minimal DTCG starter set (iceboxed past v0.1.0 — see `docs/decisions.md`). |
 
 ## Install
 
-Install the addon for the toolbar, tokens + diagnostics panels, preview decorator, and `useToken()` hook:
+Install the addon for the toolbar, Design Tokens panel (tree + diagnostics), preview decorator, and `useToken()` hook:
 
 ```sh
 npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
