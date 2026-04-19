@@ -59,15 +59,24 @@ function ensureSubscribed(): void {
     }
   };
   /**
-   * Intentionally not listening to `setGlobals` here. It fires once on
-   * preview init carrying the current user globals — if any updates have
-   * happened the manager re-emits `updateGlobals` for us. Listening to
-   * `setGlobals` added no coverage in practice and risks overwriting a
-   * just-toggled value with the pre-toggle snapshot in edge-case orderings.
+   * `setGlobals` fires once on preview init carrying the URL-persisted user
+   * globals (Storybook stores toolbar selections in `?globals=…`). Without
+   * this listener, deeplinking to an MDX page with a non-default axis tuple
+   * or color format renders defaults for one frame before the first
+   * `updateGlobals` arrives. `emitGlobals()` reads from `userGlobals.get()`
+   * (current state), so the payload is never stale — safe to handle.
    */
   channel.on('globalsUpdated', onGlobals);
   channel.on('updateGlobals', onGlobals);
+  channel.on('setGlobals', onGlobals);
 }
+
+/**
+ * Subscribe at module load so the `SET_GLOBALS` emission from preview init
+ * lands in our snapshot before any block renders. Running `useSyncExternalStore`'s
+ * `subscribe` lazily on first hook call would miss the event in most cases.
+ */
+ensureSubscribed();
 
 function subscribe(cb: () => void): () => void {
   ensureSubscribed();
