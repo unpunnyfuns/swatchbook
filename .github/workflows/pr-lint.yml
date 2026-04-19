@@ -79,9 +79,9 @@ jobs:
             echo "::error::PR body is empty. Every code PR links an issue via 'Closes #N' (or 'Fixes' / 'Resolves')."
             exit 1
           fi
-          if echo "$BODY" | grep -qiE '(close[sd]?|fix(e[sd])?|resolve[sd]?|refs?) #[0-9]+'; then
+          if echo "$BODY" | grep -qiE '(close[sd]?|fix(e[sd])?|resolve[sd]?|refs?)[^a-z0-9#]{1,10}#[0-9]+'; then
             echo "Linked-issue reference found."
             exit 0
           fi
-          echo "::error::PR body must link an issue — include 'Closes #N', 'Fixes #N', 'Resolves #N', or 'Refs #N'. Open one first if needed: gh issue create --milestone \"Mx — …\" --title \"…\""
+          echo "::error::PR body must link an issue — include 'Closes #N' or 'Closes: #N' (same for Fixes/Resolves/Refs). Open one first if needed: gh issue create --milestone \"Mx — …\" --title \"…\""
           exit 1
