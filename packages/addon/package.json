@@ -60,7 +60,7 @@
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18",
-    "storybook": "^10.3.0"
+    "storybook": "^10.3.5"
   },
   "devDependencies": {
     "@storybook/react-vite": "^10.3.5",
