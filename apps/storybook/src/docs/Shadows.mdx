@@ -1,0 +1,26 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { ShadowPreview, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
+
+<Meta title='Docs/Shadows' />
+
+# Shadows
+
+DTCG `shadow` tokens are either a single layer or an array of layers,
+each carrying `offsetX` / `offsetY` / `blur` / `spread` / `color` and an
+optional `inset` flag. Emitted CSS concatenates the layers into a single
+`box-shadow` value.
+
+## System shadows
+
+Every `shadow.sys.*` token applied to a surface rectangle. Switch the
+theme in the toolbar to see shadows redraw against dark surfaces.
+
+<ShadowPreview filter='shadow.sys.*' />
+
+## Inspect a single token
+
+Alias chain, per-layer breakdown, and the CSS var reference.
+
+<TokenDetail path='shadow.sys.md' />
+
+<TokenDetail path='shadow.sys.lg' />

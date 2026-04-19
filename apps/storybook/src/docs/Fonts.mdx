@@ -1,0 +1,30 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { FontFamilySample, FontWeightScale, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
+
+<Meta title='Docs/Fonts' />
+
+# Fonts
+
+Two primitive token types back every `typography.*` composite:
+**`fontFamily`** (a font stack — string or array) and **`fontWeight`**
+(a numeric weight). This page shows both separately; see
+[Typography](?path=/docs/docs-typography--docs) for the composites that
+combine them.
+
+## Font families
+
+Pangram rendered per `fontFamily` primitive.
+
+<FontFamilySample />
+
+## Font weights
+
+`Aa` rendered at every `fontWeight` primitive, sorted ascending.
+
+<FontWeightScale />
+
+## Inspect a single token
+
+<TokenDetail path='font.ref.family.sans' />
+
+<TokenDetail path='font.ref.weight.bold' />

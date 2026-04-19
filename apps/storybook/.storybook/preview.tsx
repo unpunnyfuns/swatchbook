@@ -15,7 +15,23 @@ export default definePreview({
     backgrounds: { disable: true },
     options: {
       storySort: {
-        order: ['Docs', ['Introduction', 'Colors', 'Typography', 'Tokens'], '*'],
+        order: [
+          'Docs',
+          [
+            'Introduction',
+            'Colors',
+            'Typography',
+            'Fonts',
+            'Dimensions',
+            'Shadows',
+            'Borders',
+            'Gradients',
+            'Motion',
+            'StrokeStyles',
+            'Tokens',
+          ],
+          '*',
+        ],
       },
     },
   },
