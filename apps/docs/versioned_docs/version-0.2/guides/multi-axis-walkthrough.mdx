@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # Multi-axis walkthrough
 
-Step-by-step setup of a multi-axis theming model — `mode × brand × contrast` — using the resolver input. The walkthrough builds it up in stages, starting with `mode × brand` and adding `contrast` at the end. The [live Storybook](/swatchbook/storybook/) runs the full three-axis fixture; open it in a second tab and cross-reference as you read.
+Step-by-step setup of a multi-axis theming model — `mode × brand × contrast` — using the resolver input. The walkthrough builds it up in stages, starting with `mode × brand` and adding `contrast` at the end. The [live Storybook](pathname:///storybook/) runs the full three-axis fixture; open it in a second tab and cross-reference as you read.
 
 ## 1. The token layout
 
@@ -127,10 +127,10 @@ The fixture now has a `contrast` modifier too, composing additively with `mode` 
 }
 ```
 
-`contrast` is appended to `resolutionOrder` after `brand`, so brand's accent stays dominant and contrast only reinforces where they don't collide. The [live Storybook](/swatchbook/storybook/) includes an **A11y High Contrast** preset that flips `contrast` to `High` on the Light baseline — open the preview and try it alongside the other two presets. See [axes](../concepts/axes) on why the CSS emission is flat rather than nested.
+`contrast` is appended to `resolutionOrder` after `brand`, so brand's accent stays dominant and contrast only reinforces where they don't collide. The [live Storybook](pathname:///storybook/) includes an **A11y High Contrast** preset that flips `contrast` to `High` on the Light baseline — open the preview and try it alongside the other two presets. See [axes](../concepts/axes) on why the CSS emission is flat rather than nested.
 
 ## See also
 
 - [Theming inputs](../concepts/theming-inputs) — resolver vs layered trade-off.
 - [Authoring doc stories](./authoring-doc-stories) — documenting this setup in MDX.
-- [Live Storybook](/swatchbook/storybook/) — this exact config, running.
+- [Live Storybook](pathname:///storybook/) — this exact config, running.
