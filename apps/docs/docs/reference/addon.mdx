@@ -6,7 +6,7 @@ sidebar_position: 2
 
 # Addon
 
-Published as `@unpunnyfuns/swatchbook-addon`. Storybook addon. Loads your config at build time via `@unpunnyfuns/swatchbook-core`, exposes the resolved graph as a virtual module, registers a preview decorator + manager toolbar + the Design Tokens panel, and ships a `useToken` hook. Block-side hooks (`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`) live in `@unpunnyfuns/swatchbook-blocks`.
+Published as `@unpunnyfuns/swatchbook-addon`. Storybook addon. Loads your config at build time via `@unpunnyfuns/swatchbook-core`, exposes the resolved graph as a virtual module, registers a preview decorator + manager toolbar, and ships a `useToken` hook. Block-side hooks (`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`) live in `@unpunnyfuns/swatchbook-blocks`.
 
 ## Install
 
@@ -14,7 +14,7 @@ Published as `@unpunnyfuns/swatchbook-addon`. Storybook addon. Loads your config
 npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
 ```
 
-This gives you the toolbar, Design Tokens panel (diagnostics summary + hierarchical tree view), preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `SwatchbookProvider`, block-side hooks) live in `@unpunnyfuns/swatchbook-blocks` — install it alongside if you want them.
+This gives you the toolbar, preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `Diagnostics`, `SwatchbookProvider`, block-side hooks) live in `@unpunnyfuns/swatchbook-blocks` — install it alongside if you want them. See the [token-dashboard guide](../guides/token-dashboard) for the recommended MDX composition that replaces the old in-manager Design Tokens panel.
 
 Peer requirements: Storybook 10.3+ on the Vite builder, React 18+.
 
@@ -56,7 +56,8 @@ export default definePreview({
 
 - **Preview decorator** — reads the active axis tuple, writes `data-<prefix>-<axis>="<context>"` attributes (plus `data-<prefix>-theme="<composed id>"`) on `<html>` + story wrapper, mounts the per-theme CSS, emits `INIT_EVENT` to the manager. The prefix follows `cssVarPrefix` (default `swatch`).
 - **Toolbar tool** — a single Swatchbook `IconButton`. Clicking opens a popover containing preset pills, one dropdown per axis, and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`). Escape and outside-click close it.
-- **Design Tokens panel** — a collapsible diagnostics section at the top (auto-expands on warnings/errors, green `OK` badge when clean) followed by a searchable hierarchical tree of every token in the active theme (click a leaf to copy its `var(--…)` reference).
+
+For the browsable tree + diagnostics surface that the old Design Tokens panel provided, compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` on an MDX page — see the [token-dashboard guide](../guides/token-dashboard).
 
 ## Globals
 

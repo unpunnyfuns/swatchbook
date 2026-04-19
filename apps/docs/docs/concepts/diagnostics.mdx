@@ -34,9 +34,9 @@ interface Diagnostic {
 - **`warn`** — something is unusual or probably-a-mistake but the project loaded. Example: a preset with an unknown axis key is dropped and produces a warn.
 - **`info`** — diagnostic for the curious. Rare.
 
-## The panel
+## Rendering them in docs
 
-The **Design Tokens** panel includes a collapsible diagnostics section above the token tree (between the search input and the tree). It shows a green **OK** badge when the list is empty and auto-expands to list every diagnostic (severity + message + group/source) when there are warnings or errors.
+The `<Diagnostics />` block renders the project's diagnostics as a collapsible list — green **OK** badge when clean, auto-expanded with a severity summary when warnings or errors are present. Compose it on an MDX page alongside `<TokenNavigator />` / `<TokenTable />` to get the same surface area the in-manager Design Tokens panel used to provide; see the [token-dashboard guide](../guides/token-dashboard).
 
 ## Interpreting them
 
