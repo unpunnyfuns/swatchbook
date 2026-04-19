@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { addons } from 'storybook/preview-api';
+import { useEffect } from 'react';
 import { useActiveAxes, useActiveTheme, useOptionalSwatchbookData } from '#/contexts.ts';
+import { useChannelGlobals } from '#/internal/channel-globals.ts';
 import {
   axes as virtualAxes,
   css as generatedCss,
@@ -24,8 +24,6 @@ export interface ProjectData {
 }
 
 const STYLE_ELEMENT_ID = 'swatchbook-tokens';
-const GLOBAL_KEY = 'swatchbookTheme';
-const AXES_GLOBAL_KEY = 'swatchbookAxes';
 
 function ensureStylesheet(css: string): void {
   if (typeof document === 'undefined') return;
@@ -36,10 +34,6 @@ function ensureStylesheet(css: string): void {
     document.head.appendChild(style);
   }
   if (style.textContent !== css) style.textContent = css;
-}
-
-interface GlobalsPayload {
-  globals?: Record<string, unknown>;
 }
 
 function defaultTuple(axes: readonly VirtualAxis[]): Record<string, string> {
@@ -105,41 +99,20 @@ export function useProject(): ProjectData {
 function useVirtualModuleFallback(enabled: boolean): ProjectData {
   const contextTheme = useActiveTheme();
   const contextAxes = useActiveAxes();
-  const [channelTheme, setChannelTheme] = useState<string | null>(null);
-  const [channelAxes, setChannelAxes] = useState<Record<string, string> | null>(null);
+  const channelGlobals = useChannelGlobals();
 
   useEffect(() => {
     if (!enabled) return;
     ensureStylesheet(generatedCss);
   }, [enabled]);
 
-  useEffect(() => {
-    if (!enabled) return;
-    const channel = addons.getChannel();
-    const onGlobals = (payload: GlobalsPayload): void => {
-      const nextTheme = payload.globals?.[GLOBAL_KEY];
-      if (typeof nextTheme === 'string') setChannelTheme(nextTheme);
-      const nextAxes = payload.globals?.[AXES_GLOBAL_KEY];
-      if (nextAxes && typeof nextAxes === 'object') {
-        setChannelAxes(nextAxes as Record<string, string>);
-      }
-    };
-    channel.on('globalsUpdated', onGlobals);
-    channel.on('updateGlobals', onGlobals);
-    channel.on('setGlobals', onGlobals);
-    return () => {
-      channel.off('globalsUpdated', onGlobals);
-      channel.off('updateGlobals', onGlobals);
-      channel.off('setGlobals', onGlobals);
-    };
-  }, [enabled]);
-
   const hasContextAxes = Object.keys(contextAxes).length > 0;
   const activeAxes: Record<string, string> = hasContextAxes
     ? { ...contextAxes }
-    : (channelAxes ?? defaultTuple(virtualAxes));
+    : (channelGlobals.axes ?? defaultTuple(virtualAxes));
 
   const derivedName = nameForTuple(themes, activeAxes);
+  const channelTheme = channelGlobals.theme;
   const fallbackTupleName =
     channelTheme && tupleForName(themes, channelTheme) ? channelTheme : null;
   const activeTheme =
