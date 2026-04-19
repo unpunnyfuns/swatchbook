@@ -1,5 +1,13 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.1.1
+
+### Patch Changes
+
+- 76456b6: Fix the `storybook.icon` URL in the addon's `package.json` — previous path referenced a non-existent file, and the Storybook addon catalog doesn't support SVG. Point at the committed PNG so the addon tile renders on https://storybook.js.org/addons.
+  - @unpunnyfuns/swatchbook-core@0.1.1
+  - @unpunnyfuns/swatchbook-blocks@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
