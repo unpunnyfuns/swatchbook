@@ -295,3 +295,38 @@ export const initialGlobals: NonNullable<Preview['initialGlobals']> = {
   [AXES_GLOBAL_KEY]: buildInitialAxes(),
   [COLOR_FORMAT_GLOBAL_KEY]: 'hex',
 };
+
+/**
+ * Module-level channel subscription: writes the active tuple's attributes
+ * onto `<html>` regardless of whether a story decorator is rendering.
+ *
+ * The {@link themedDecorator} already sets these inside story renders, but
+ * it never runs on MDX docs pages that embed blocks without `<Story />`.
+ * Without attrs on an ancestor, the per-tuple CSS selectors
+ * (`[data-mode="Dark"][data-brand="…"]`) don't match and everything falls
+ * back to the `:root` default tuple — so colors stay defaults even after
+ * the toolbar switches axes. Subscribing globally fixes MDX docs at the
+ * cost of one idempotent redundant write per story render.
+ */
+function installGlobalAxisApplier(): void {
+  if (typeof document === 'undefined') return;
+  const channel = addons.getChannel();
+  const apply = (globals: Record<string, unknown>): void => {
+    ensureStylesheet();
+    const tuple = resolveTuple(globals, {});
+    const match = themes.find((t) => {
+      const input = t.input as Record<string, string>;
+      return Object.keys(input).every((k) => input[k] === tuple[k]);
+    });
+    const themeName = match?.name ?? defaultTheme ?? themes[0]?.name ?? 'Light';
+    setRootAxes(themeName, tuple);
+  };
+  const onGlobals = (payload: { globals?: Record<string, unknown> }): void => {
+    if (payload.globals) apply(payload.globals);
+  };
+  channel.on('globalsUpdated', onGlobals);
+  channel.on('setGlobals', onGlobals);
+  channel.on('updateGlobals', onGlobals);
+}
+
+installGlobalAxisApplier();
