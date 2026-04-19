@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
-import { themeAttrs } from '#/internal/data-attr.ts';
+import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { formatValue } from '#/internal/use-project.ts';
 import { AliasChain } from '#/token-detail/AliasChain.tsx';
 import { AliasedBy } from '#/token-detail/AliasedBy.tsx';
@@ -27,7 +27,10 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
 
   if (!token) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={styles.wrapper}>
+      <div
+        {...themeAttrs(cssVarPrefix, activeTheme)}
+        style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
+      >
         <div style={styles.missing}>
           Token <code>{path}</code> not found in theme <strong>{activeTheme}</strong>.
         </div>
@@ -41,7 +44,10 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
   const outOfGamut = formatted?.outOfGamut ?? false;
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={styles.wrapper}>
+    <div
+      {...themeAttrs(cssVarPrefix, activeTheme)}
+      style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
+    >
       <TokenHeader path={path} {...(heading !== undefined && { heading })} />
 
       <div style={styles.sectionHeader}>Resolved value · {activeTheme}</div>

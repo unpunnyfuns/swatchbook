@@ -2,7 +2,7 @@ import type { CSSProperties, ReactElement } from 'react';
 import { useMemo, useState } from 'react';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { BORDER_DEFAULT, MONO_STACK, surfaceStyle } from '#/internal/styles.ts';
-import { themeAttrs } from '#/internal/data-attr.ts';
+import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 import {
   MotionSample,
@@ -164,14 +164,20 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={styles.wrapper}>
+      <div
+        {...themeAttrs(cssVarPrefix, activeTheme)}
+        style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
+      >
         <div style={styles.empty}>No motion tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={styles.wrapper}>
+    <div
+      {...themeAttrs(cssVarPrefix, activeTheme)}
+      style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
+    >
       <div style={styles.caption}>{captionText}</div>
       <div style={styles.controls}>
         <span style={styles.controlLabel}>Speed</span>

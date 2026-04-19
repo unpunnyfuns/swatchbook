@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactElement } from 'react';
+import { chromeAliases } from '#/internal/data-attr.ts';
 import { makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface ShadowSampleProps {
@@ -17,5 +18,10 @@ const sampleStyle: CSSProperties = {
 export function ShadowSample({ path }: ShadowSampleProps): ReactElement {
   const { cssVarPrefix } = useProject();
   const cssVar = makeCssVar(path, cssVarPrefix);
-  return <div style={{ ...sampleStyle, boxShadow: cssVar }} aria-hidden />;
+  return (
+    <div
+      style={{ ...chromeAliases(cssVarPrefix), ...sampleStyle, boxShadow: cssVar }}
+      aria-hidden
+    />
+  );
 }

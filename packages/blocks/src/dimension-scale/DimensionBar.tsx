@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactElement } from 'react';
+import { chromeAliases } from '#/internal/data-attr.ts';
 import { makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export type DimensionKind = 'length' | 'radius' | 'size';
@@ -67,18 +68,21 @@ export function DimensionBar({ path, kind = 'length' }: DimensionBarProps): Reac
   const capped = Number.isFinite(pxValue) && pxValue > MAX_RENDER_PX;
   const cappedValue = capped ? `${MAX_RENDER_PX}px` : cssVar;
 
+  const aliases = chromeAliases(cssVarPrefix);
   switch (kind) {
     case 'radius':
-      return <div style={{ ...styles.radiusSample, borderRadius: cssVar }} aria-hidden />;
+      return (
+        <div style={{ ...aliases, ...styles.radiusSample, borderRadius: cssVar }} aria-hidden />
+      );
     case 'size':
       return (
         <div
-          style={{ ...styles.sizeSample, width: cappedValue, height: cappedValue }}
+          style={{ ...aliases, ...styles.sizeSample, width: cappedValue, height: cappedValue }}
           aria-hidden
         />
       );
     case 'length':
     default:
-      return <div style={{ ...styles.bar, width: cappedValue }} aria-hidden />;
+      return <div style={{ ...aliases, ...styles.bar, width: cappedValue }} aria-hidden />;
   }
 }
