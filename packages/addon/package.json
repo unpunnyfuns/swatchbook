@@ -2,6 +2,24 @@
   "name": "@unpunnyfuns/swatchbook-addon",
   "version": "0.0.0",
   "description": "Storybook addon for DTCG design tokens — toolbar, panel, and useToken hook.",
+  "license": "MIT",
+  "author": "unpunnyfuns <unpunnyfuns@gmail.com>",
+  "homepage": "https://unpunnyfuns.github.io/swatchbook/",
+  "bugs": "https://github.com/unpunnyfuns/swatchbook/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unpunnyfuns/swatchbook.git",
+    "directory": "packages/addon"
+  },
+  "keywords": [
+    "storybook",
+    "storybook-addon",
+    "storybook-addons",
+    "design-tokens",
+    "dtcg",
+    "design-system",
+    "tokens"
+  ],
   "type": "module",
   "engines": {
     "node": ">=24.14.0"
@@ -60,7 +78,7 @@
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18",
-    "storybook": "^10.3.0"
+    "storybook": "^10.3.5"
   },
   "devDependencies": {
     "@storybook/react-vite": "^10.3.5",
