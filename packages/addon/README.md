@@ -2,7 +2,7 @@
 
 Published as `@unpunnyfuns/swatchbook-addon`. Storybook 10 addon for DTCG design tokens. Loads your tokens at config time (via `@unpunnyfuns/swatchbook-core`), exposes the resolved graph to the preview through a virtual module, renders one toolbar dropdown per modifier axis (`mode`, `brand`, and so on) plus a unified Design Tokens panel (hierarchical tree + diagnostics), and ships a `useToken()` hook with typed paths.
 
-> **Documentation:** [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/). Token parsing powered by [Terrazzo](https://terrazzo.app/) by [Drew Powers](https://github.com/drwpow) via `@unpunnyfuns/swatchbook-core`.
+> **Documentation:** [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/). Token parsing powered by [Terrazzo](https://terrazzo.app/) by the [Terrazzo team](https://github.com/terrazzoapp) via `@unpunnyfuns/swatchbook-core`.
 
 ## Install
 
