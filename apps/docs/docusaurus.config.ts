@@ -1,4 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
@@ -7,7 +9,12 @@ import type * as Preset from '@docusaurus/preset-classic';
 // unreleased banner, and the newest snapshot under versioned_docs/ serves as
 // the default at /. Before the first snapshot exists, skip the versions map
 // entirely so current keeps serving at /.
-const versionsPath = './versions.json';
+//
+// Resolve relative to the config file itself — `./versions.json` vs
+// `process.cwd()` is brittle in CI (Turbo / docusaurus CLI can shift cwd),
+// and an empty `hasReleasedVersion` silently collapses the version routing.
+const here = dirname(fileURLToPath(import.meta.url));
+const versionsPath = resolve(here, 'versions.json');
 const hasReleasedVersion =
   existsSync(versionsPath) && JSON.parse(readFileSync(versionsPath, 'utf8')).length > 0;
 
