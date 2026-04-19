@@ -1,0 +1,103 @@
+---
+id: quickstart
+title: Quickstart
+sidebar_position: 2
+---
+
+# Quickstart
+
+Takes ~5 minutes if you already have a Storybook project.
+
+## Install
+
+Install the addon for the toolbar, Design Tokens panel (diagnostics + tree), preview decorator, and `useToken()` hook:
+
+```bash
+npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
+```
+
+Install the blocks package too if you want the MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `SwatchbookProvider`, and the block-side hooks):
+
+```bash
+npm install -D @unpunnyfuns/swatchbook-blocks
+```
+
+Peer requirements: Storybook 10.3+ on the Vite builder, React 18+, Node 24+.
+
+## Configure
+
+Register the addon with an inline config in `.storybook/main.ts`:
+
+```ts title=".storybook/main.ts"
+import { defineMain } from '@storybook/react-vite/node';
+
+export default defineMain({
+  framework: '@storybook/react-vite',
+  addons: [
+    {
+      name: '@unpunnyfuns/swatchbook-addon',
+      options: {
+        config: {
+          resolver: 'tokens/resolver.json',
+          cssVarPrefix: 'ds',
+        },
+      },
+    },
+  ],
+});
+```
+
+Opt the preview into the addon's annotations (decorator, globals, CSS injection):
+
+```ts title=".storybook/preview.ts"
+import { definePreview } from '@storybook/react-vite';
+import swatchbookAddon from '@unpunnyfuns/swatchbook-addon';
+
+export default definePreview({
+  addons: [swatchbookAddon()],
+});
+```
+
+Inline `config` is the primary path. If you'd rather keep the config in its own file (useful when the same config is consumed by a CLI or CI lint outside Storybook), write a `swatchbook.config.ts` and point at it with `options.configPath: '../swatchbook.config.ts'` — see [config reference](./reference/config) for details.
+
+Start Storybook:
+
+```bash
+pnpm storybook
+```
+
+## What you should see
+
+- **Toolbar**: a single Swatchbook icon button in the top bar. Click it to open a popover containing preset pills, one dropdown per modifier in your resolver, and a color-format picker. If you've written a single `theme` modifier with `Light`/`Dark` contexts, you get one dropdown inside the popover; if you have `mode × brand`, you get two. Escape or outside-click closes it.
+- **Design Tokens panel** (bottom panel): a diagnostics summary at the top — green "OK" badge if your tokens are clean, auto-expands to list warnings and errors — followed by a searchable hierarchical tree of every token your resolver yields.
+
+Switch themes from the toolbar; the panel's resolved values update live.
+
+## No resolver yet?
+
+If you haven't written a DTCG 2025.10 resolver, you can use the **layered** config form instead:
+
+```ts
+export default defineSwatchbookConfig({
+  tokens: ['tokens/ref/**/*.json', 'tokens/sys/**/*.json'],
+  axes: [
+    {
+      name: 'mode',
+      contexts: {
+        Light: ['tokens/themes/light.json'],
+        Dark: ['tokens/themes/dark.json'],
+      },
+      default: 'Light',
+    },
+  ],
+  cssVarPrefix: 'ds',
+});
+```
+
+Each context names an ordered list of file paths (or globs) that layer on top of the base `tokens` files for that context. See [theming inputs](./concepts/theming-inputs) for when to pick which.
+
+## Next
+
+- Read [theming inputs](./concepts/theming-inputs) to understand the resolver vs layered trade-off.
+- Embed [doc blocks in MDX stories](./guides/authoring-doc-stories) to build a proper reference page.
+- Poke at the [live Storybook](/swatchbook/storybook/) to see the addon running against a real multi-axis fixture.
