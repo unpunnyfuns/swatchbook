@@ -1,0 +1,64 @@
+/**
+ * Shared payload types for the INIT_EVENT channel broadcast — both the
+ * preview (emitter) and the manager-side consumers (`manager.tsx`,
+ * `panel.tsx`) pin their shapes here so the three don't drift.
+ *
+ * The types intentionally mirror what `@unpunnyfuns/swatchbook-core`
+ * produces, but are re-declared locally because the manager bundle runs
+ * in a Node-free environment and can't import from core at runtime (core
+ * pulls `node:fs/promises` via the loader).
+ */
+
+export type DiagnosticSeverity = 'error' | 'warn' | 'info';
+
+export interface VirtualToken {
+  $type?: string;
+  $value?: unknown;
+  $description?: string;
+}
+
+export interface VirtualTheme {
+  name: string;
+  input: Record<string, string>;
+  sources: string[];
+}
+
+export interface VirtualAxis {
+  name: string;
+  contexts: readonly string[];
+  default: string;
+  description?: string;
+  source: 'resolver' | 'layered' | 'synthetic';
+}
+
+export interface VirtualPreset {
+  name: string;
+  axes: Partial<Record<string, string>>;
+  description?: string;
+}
+
+export interface VirtualDiagnostic {
+  severity: DiagnosticSeverity;
+  group: string;
+  message: string;
+  filename?: string;
+  line?: number;
+  column?: number;
+}
+
+/**
+ * The full INIT_EVENT payload. Preview emits it whole via `broadcastInit`;
+ * consumers read the subset they need — manager's toolbar reads axes +
+ * presets + themes + defaultTheme, panel reads additionally disabledAxes +
+ * themesResolved + diagnostics + cssVarPrefix.
+ */
+export interface InitPayload {
+  axes: readonly VirtualAxis[];
+  disabledAxes: readonly string[];
+  presets: readonly VirtualPreset[];
+  themes: readonly VirtualTheme[];
+  defaultTheme: string | null;
+  themesResolved: Record<string, Record<string, VirtualToken>>;
+  diagnostics: readonly VirtualDiagnostic[];
+  cssVarPrefix: string;
+}

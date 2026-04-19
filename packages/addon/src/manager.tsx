@@ -2,6 +2,12 @@ import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactEle
 import { IconButton, WithTooltipPure } from 'storybook/internal/components';
 import { addons, types, useGlobals, useStorybookApi } from 'storybook/manager-api';
 import {
+  type InitPayload,
+  type VirtualAxis as AxisEntry,
+  type VirtualPreset as PresetEntry,
+  type VirtualTheme as ThemeEntry,
+} from '#/channel-types.ts';
+import {
   ADDON_ID,
   AXES_GLOBAL_KEY,
   COLOR_FORMAT_GLOBAL_KEY,
@@ -24,36 +30,9 @@ import { DesignTokensPanel } from '#/panel.tsx';
  */
 const h = React.createElement;
 
-interface AxisEntry {
-  name: string;
-  contexts: readonly string[];
-  default: string;
-  description?: string;
-  source: 'resolver' | 'layered' | 'synthetic';
-}
-
-interface ThemeEntry {
-  name: string;
-  input: Record<string, string>;
-  sources: string[];
-}
-
-interface PresetEntry {
-  name: string;
-  axes: Partial<Record<string, string>>;
-  description?: string;
-}
-
-interface InitPayload {
-  axes: readonly AxisEntry[];
-  presets: readonly PresetEntry[];
-  themes: ThemeEntry[];
-  defaultTheme: string | null;
-}
-
 const EMPTY_AXES: readonly AxisEntry[] = [];
 const EMPTY_PRESETS: readonly PresetEntry[] = [];
-const EMPTY_THEMES: ThemeEntry[] = [];
+const EMPTY_THEMES: readonly ThemeEntry[] = [];
 
 /**
  * Root toolbar glyph — a split-circle ("yinyang") mark: a faint filled
