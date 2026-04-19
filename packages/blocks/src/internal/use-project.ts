@@ -6,10 +6,17 @@ import {
   css as generatedCss,
   cssVarPrefix,
   defaultTheme,
+  diagnostics as virtualDiagnostics,
   themes,
   themesResolved,
 } from 'virtual:swatchbook/tokens';
-import type { ProjectSnapshot, VirtualAxis, VirtualTheme, VirtualToken } from '#/types.ts';
+import type {
+  ProjectSnapshot,
+  VirtualAxis,
+  VirtualDiagnostic,
+  VirtualTheme,
+  VirtualToken,
+} from '#/types.ts';
 
 type ResolvedTokens = Record<string, VirtualToken>;
 
@@ -20,6 +27,7 @@ export interface ProjectData {
   themes: readonly VirtualTheme[];
   resolved: ResolvedTokens;
   themesResolved: Record<string, ResolvedTokens>;
+  diagnostics: readonly VirtualDiagnostic[];
   cssVarPrefix: string;
 }
 
@@ -74,6 +82,7 @@ function snapshotToData(snapshot: ProjectSnapshot): ProjectData {
     themes: snapshot.themes,
     themesResolved: snapshot.themesResolved,
     resolved: snapshot.themesResolved[snapshot.activeTheme] ?? {},
+    diagnostics: snapshot.diagnostics,
     cssVarPrefix: snapshot.cssVarPrefix,
   };
 }
@@ -131,6 +140,7 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
     themes,
     themesResolved,
     resolved: themesResolved[activeTheme] ?? {},
+    diagnostics: virtualDiagnostics,
     cssVarPrefix,
   };
 }
