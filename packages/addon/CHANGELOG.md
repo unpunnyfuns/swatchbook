@@ -1,5 +1,14 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.1.2
+
+### Patch Changes
+
+- e298dc3: Fix axis switching on MDX docs pages. The addon's preview decorator wrote `data-<axis>` attributes to `<html>` from inside the story wrapper — so bare MDX pages (no `<Story />`) had no ancestor carrying the tuple, the per-tuple CSS selectors never matched, and colors stayed on `:root` defaults no matter what the toolbar did. Subscribe to the channel at module level and write the same attrs independent of any decorator run, and pick up `setGlobals` in the blocks' fallback so the "Active tuple" indicator reflects the current selection on first render.
+- Updated dependencies [e298dc3]
+  - @unpunnyfuns/swatchbook-blocks@0.1.2
+  - @unpunnyfuns/swatchbook-core@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes
