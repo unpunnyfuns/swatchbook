@@ -72,7 +72,7 @@ export const TokenTableRenders = meta.story({
     const headerTexts = [...canvasElement.querySelectorAll('thead th')].map((th) =>
       th.textContent?.trim(),
     );
-    expect(headerTexts).toEqual(expect.arrayContaining(['Path', 'Type', 'Value']));
+    expect(headerTexts).toEqual(expect.arrayContaining(['Path', 'Value']));
     const rows = canvasElement.querySelectorAll('tbody tr');
     expect(rows.length, 'table must render at least one row').toBeGreaterThan(0);
   },

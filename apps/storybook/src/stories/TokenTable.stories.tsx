@@ -23,7 +23,6 @@ const meta = preview.meta({
         'transition',
       ],
     },
-    showVar: { control: 'boolean' },
   },
 });
 

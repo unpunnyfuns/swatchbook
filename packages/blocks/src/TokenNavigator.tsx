@@ -3,15 +3,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
 import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
+import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import {
   BORDER_DEFAULT,
-  BORDER_STRONG,
   EmptyState,
   MONO_STACK,
   SIZE_LABEL,
   SIZE_META,
   SIZE_PILL,
-  SURFACE_DEFAULT,
   surfaceStyle,
   TEXT_DEFAULT,
   TEXT_MUTED,
@@ -22,7 +21,6 @@ import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { makeCssVar, useProject } from '#/internal/use-project.ts';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
-import { TokenDetail } from '#/TokenDetail.tsx';
 import type { VirtualToken } from '#/types.ts';
 
 export interface TokenNavigatorProps {
@@ -141,39 +139,6 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'flex-end',
     marginLeft: 'auto',
-  } satisfies CSSProperties,
-  backdrop: {
-    position: 'fixed',
-    inset: 0,
-    background: 'rgba(0,0,0,0.4)',
-    zIndex: 10000,
-    display: 'flex',
-    alignItems: 'stretch',
-    justifyContent: 'flex-end',
-  } satisfies CSSProperties,
-  panel: {
-    width: 'min(560px, 100%)',
-    height: '100%',
-    overflowY: 'auto',
-    background: SURFACE_DEFAULT,
-    color: TEXT_DEFAULT,
-    boxShadow: '-8px 0 24px rgba(0,0,0,0.2)',
-    padding: 16,
-    position: 'relative',
-  } satisfies CSSProperties,
-  closeButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 32,
-    height: 32,
-    borderRadius: 4,
-    border: BORDER_STRONG,
-    background: 'transparent',
-    color: 'inherit',
-    cursor: 'pointer',
-    fontSize: 16,
-    lineHeight: 1,
   } satisfies CSSProperties,
 };
 
@@ -323,7 +288,11 @@ export function TokenNavigator({
       </ul>
 
       {selectedPath !== null && (
-        <DetailOverlay path={selectedPath} onClose={() => setSelectedPath(null)} />
+        <DetailOverlay
+          path={selectedPath}
+          onClose={() => setSelectedPath(null)}
+          testId='token-navigator-overlay'
+        />
       )}
     </div>
   );
@@ -491,48 +460,5 @@ function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
     <span style={styles.previewBox}>
       <span style={styles.value}>{formatTokenValue(token.$value, type, colorFormat)}</span>
     </span>
-  );
-}
-
-interface DetailOverlayProps {
-  path: string;
-  onClose(): void;
-}
-
-function DetailOverlay({ path, onClose }: DetailOverlayProps): ReactElement {
-  useEffect(() => {
-    const onKey = (e: globalThis.KeyboardEvent): void => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
-  return (
-    <div
-      style={styles.backdrop}
-      onClick={onClose}
-      role='presentation'
-      data-testid='token-navigator-overlay'
-    >
-      <div
-        style={styles.panel}
-        onClick={(e) => e.stopPropagation()}
-        role='dialog'
-        aria-modal='true'
-        aria-label={`Token detail for ${path}`}
-      >
-        <button
-          type='button'
-          style={styles.closeButton}
-          onClick={onClose}
-          aria-label='Close'
-          data-testid='token-navigator-close'
-        >
-          ×
-        </button>
-        <TokenDetail path={path} />
-      </div>
-    </div>
   );
 }
