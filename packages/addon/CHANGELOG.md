@@ -1,0 +1,77 @@
+# @unpunnyfuns/swatchbook-addon
+
+## 0.1.0
+
+### Minor Changes
+
+- 735150a: Addon preview now resolves theme selection from an axis **tuple** rather than a composed name. New `swatchbookAxes` global (`Record<axisName, contextName>`) and `parameters.swatchbook.axes` per-story override take precedence over the existing `swatchbookTheme` / `parameters.swatchbook.theme` string form (still accepted for back-compat). The decorator writes one `data-<axisName>="<context>"` attribute per axis to `<html>` and the story wrapper — alongside the existing `data-theme` composed ID — giving upcoming CSS emission (#135) and toolbar (#134) work a stable target. A new `AxesContext` + `useActiveAxes()` hook exposes the tuple to consumer components.
+- 943fda9: Add a color-format switcher across `TokenTable`, `TokenDetail`, and `ColorPalette`. A new `swatchbookColorFormat` global (default `hex`) and a matching toolbar dropdown route every color value through `formatColor()` — `hex`, `rgb`, `hsl`, `oklch`, or `raw` JSON. Out-of-gamut or wide-gamut colors fall back to `rgb()` for the `hex` format and are marked with a ⚠ indicator. Display only — emitted CSS is unaffected.
+- 3cffe67: Consolidate the Swatchbook toolbar into a single icon button that opens one popover holding presets, per-axis pickers, and the color-format selector. The popover stays open across picks and closes only on root-icon click, outside click, or Escape. Replaces the previous chain of chips which consumed most of the toolbar width at three axes.
+- 1d77100: Consolidate the addon's `Swatchbook tokens` and `Swatchbook diagnostics` panels into a single `Design Tokens` panel. The primary content is now a hierarchical tree of the active theme's tokens (expand/collapse groups, type pill + inline value/color-swatch preview, click a leaf to copy its `var(--…)` reference, search filter across paths). Diagnostics live in a collapsible section beneath the tree — collapsed with a green "OK" badge when clean, auto-expanded with a severity summary when warnings or errors are present. The `PANEL_TOKENS_TAB` / `PANEL_DIAGNOSTICS_TAB` constants are removed; use the new `PANEL_ID = 'swatchbook/design-tokens'` if you're wiring panel focus programmatically.
+- 5072345: New `Config.disabledAxes?: string[]` suppresses declared axes from the toolbar, CSS emission, and theme enumeration without editing the resolver. Each listed axis pins to its `default` context: `Project.axes` drops it, `Project.themes` collapses to the default-context slice, CSS emission stops including it in compound selectors, and the addon's toolbar skips the dropdown. The tokens panel shows a small pinned indicator so the suppression stays visible. Unknown axis names surface as `warn` diagnostics (group `swatchbook/disabled-axes`) and are ignored. Filtered-out names land on the new `Project.disabledAxes: string[]` for downstream tooling. Config-level only — no runtime toggle.
+- 0cb84fd: Drop the explicit-layers theming input. The DTCG 2025.10 resolver is now the sole theming input — `Config.themes`, the `ThemeConfig` type, and `resolveThemingMode` are all gone. Consumers with a layered config must move to a `resolver.json`.
+
+  Theme names come from the resolver's modifier contexts: single-axis resolvers use the modifier value directly (context `Light` → theme name `Light`), multi-axis resolvers keep Terrazzo's JSON-encoded permutation ID. Pick sensible modifier context names in your resolver; what you write is what consumers see.
+
+  The `themingMode` field on the virtual module is also removed — there's only one mode to be in.
+
+- 6c7bfe5: Drop Tokens Studio `$themes` manifest support. The DTCG 2025.10 resolver is now the spec-native theming input; consumers using a manifest should convert to a `resolver.json` (the transformation is mechanical). `Config.manifest` is removed, `resolveThemingMode` returns `'layered' | 'resolver'`, and `themingMode` on the virtual module narrows accordingly. `@unpunnyfuns/swatchbook-tokens-reference` no longer exports `manifestPath`.
+- 26fa690: Inline configuration in `.storybook/main.ts` is now the documented default — `options.config` takes a `Config` object directly, no separate `swatchbook.config.ts` file required. `options.configPath` is still supported; it's the right answer when you want the same config consumed by other tooling (a CLI, a CI lint job) alongside Storybook. READMEs, quickstart, and the config reference page all lead with the inline shape.
+
+  No API change — both options already existed on the addon. The addon's own fixture (`apps/storybook/.storybook/main.ts`) switches to inline to dogfood the preferred setup.
+
+- 48bf3e5: **Breaking.** `SwatchbookProvider`, `SwatchbookContext`, `ThemeContext`, `AxesContext`, `useSwatchbookData`, `useOptionalSwatchbookData`, `useActiveTheme`, `useActiveAxes`, and the `Virtual*Shape` / `ProjectSnapshot` types now live exclusively in `@unpunnyfuns/swatchbook-blocks`. They are no longer exported from `@unpunnyfuns/swatchbook-addon` — import them from `@unpunnyfuns/swatchbook-blocks` directly. Workspace dep graph runs addon → blocks, which is the direction it was always meant to. Closes issue #202.
+- 05b38dd: Toolbar now renders one dropdown per modifier axis instead of a single flat list of composed theme names. For a project with independent `mode` and `brand` axes you get two controls (`mode: Light`, `brand: Brand A`) that combine into any valid permutation; the synthetic single-theme axis still presents as one "Theme" dropdown so UX is unchanged for projects without a resolver. Each dropdown shows the axis contexts with the current selection checked, surfaces the axis description in a tooltip when present, and updates both `swatchbookAxes` (the canonical tuple) and `swatchbookTheme` (the composed permutation ID for the panel + legacy consumers) atomically. The `alt+T` shortcut now cycles the primary (first) axis's contexts while pinning the rest of the tuple.
+- 37933a3: `Config.tokens` is now optional when `config.resolver` is set. The resolver's own `$ref` targets fully determine what gets loaded, and `Project.sourceFiles` exposes every file touched so the addon's Vite plugin can derive HMR watch paths without a parallel `tokens` glob. Supplying `tokens` alongside `resolver` still works — the watch paths union with the resolver-derived set, useful when you want HMR to watch broader directories than the resolver references.
+
+  Plain-parse (no resolver, no axes) and layered (`axes` set) modes still require `tokens` — the loader has no other starting point. Configs that omit `resolver`, `axes`, AND `tokens` now throw a descriptive error at load time.
+
+- c1a8c71: Expose modifier axes as first-class on `Project`. `Project.axes: Axis[]` surfaces each DTCG resolver modifier with its `contexts`, `default`, `description`, and `source` (`'resolver' | 'synthetic'`); projects loaded without a resolver get a single synthetic `theme` axis. A new `permutationID(input)` utility centralizes the tuple-to-string logic previously inlined in the resolver loader — single-axis tuples stringify to the context value; multi-axis tuples join with `·`. The virtual `virtual:swatchbook/tokens` module now also exports `axes`, so toolbar and panel work in follow-up PRs can key on tuples rather than flat theme names.
+- 92d5ae6: Introduce `SwatchbookProvider` + `useSwatchbookData` + `ProjectSnapshot` for framework-free block rendering. Blocks no longer depend on the addon's `virtual:swatchbook/tokens` module when a provider is in the tree, which means they render in plain React apps, unit tests, and non-Storybook doc sites — just hand the provider a `ProjectSnapshot`. The addon's preview decorator now mounts the provider around every story automatically, so Storybook-side authors see no change. The virtual-module fallback stays in place during the transition.
+- 2d94d76: The bundled `tokens-reference` fixture gains a `contrast` axis (`Normal` / `High`), composing with `mode` and `brand` for 8 total themes. The `High` context thickens borders and swaps the focus ring to a high-contrast yellow; surfaces and accents stay owned by `mode` and `brand`. A new `A11y High Contrast` preset demonstrates the composition. Consumers of the fixture see three toolbar dropdowns and three-segment theme names (e.g. `Light · Default · Normal`).
+- b29dd7c: Tokens panel and `TokenDetail` block are now axis-tuple aware. The panel reads the active tuple from `globals.swatchbookAxes` (falling back to `swatchbookTheme` for back-compat) and shows a compact per-axis indicator above the token list. `TokenDetail` replaces its flat per-theme values table with an axis-aware view: tokens that are constant across every tuple collapse to one row; tokens that vary along a single axis render a compact 1-axis table (one row per context); tokens that vary along two or more axes render a matrix of the two most-varying axes, with further axes collapsed to the active selection. The `useProject()` hook now returns `activeAxes` + `axes` alongside `activeTheme` and subscribes to both `swatchbookAxes` and `swatchbookTheme` updates, keeping every block reactive to axis changes.
+- 04b3f44: Named tuple presets — `defineSwatchbookConfig({ presets })` now takes an ordered list of `{ name, axes, description? }` entries. Each preset names a partial axis tuple (any axis the preset omits falls back to that axis's `default` when applied). Core validates presets at `loadProject` time: unknown axis keys and invalid context values surface as `warn` diagnostics and are sanitized out, but the preset itself is preserved (an empty preset is still a valid tuple). Project gains a `presets` field, the virtual module gains a `presets` export, and the addon broadcasts presets alongside axes/themes on `INIT_EVENT`. The toolbar renders presets as quick-select pills next to the axis dropdowns: clicking a pill writes the composed tuple into `globals.swatchbookAxes` + `globals.swatchbookTheme`, highlights the pill whose tuple matches the current selection, and shows a subtle modified-marker dot if the user tweaks an axis dropdown after applying a preset.
+
+### Patch Changes
+
+- f14083a: Addon UI polish: restore the yinyang-style toolbar icon, drop the "Swatchbook" label from the toolbar button (tooltip still explains), and clear lingering `:focus` outlines from toolbar pills and Design Tokens panel tree rows. Also moves the Diagnostics section to the top of the Design Tokens panel so warnings and errors are visible without scrolling past the token tree. Closes #219 and #220.
+- 4ca9bb3: Align `storybook` peerDependency range on `@unpunnyfuns/swatchbook-addon` with `@unpunnyfuns/swatchbook-blocks` (`^10.3.5`). Consumers pinning Storybook to 10.3.0–10.3.4 previously satisfied the addon floor but failed the blocks floor.
+- 226b34e: Actually kill the pill's stray border color after deselection. Previous `outline: none` + `boxShadow: none` + `onMouseDown: preventDefault` attempts all missed the root cause: `OPTION_PILL_BASE` used the `border` shorthand, so when React transitioned active → inactive it _removed_ the `borderColor` inline-style key rather than updating its value — letting Storybook's theme's own `border-color` rule paint the button white. Switching to explicit `borderWidth` / `borderStyle` / `borderColor` longhands keeps `borderColor` permanently in the inline style, so every transition is a value change.
+- 37774f7: Kill the stray focus ring that stuck on previously-clicked toolbar pills. `outline: none` alone wasn't enough — Storybook's button theme paints a `box-shadow`-based focus ring on `:focus`, which inline style overrides. Added `boxShadow: 'none'` to the pill base.
+- d3e2b18: Stop the toolbar popover's pills from taking focus on mouse click. Storybook's theme applies a `:focus` border-color rule that stuck on the previously-clicked pill even with `outline: none` and `boxShadow: none` overrides — cleaner fix is to skip focus-on-click with `onMouseDown: preventDefault`. Keyboard tabbing still focuses pills normally.
+- 1986a0f: Add standard npm publish metadata — `license` (MIT), `repository`, `homepage`, `bugs`, `author`, `keywords` — to all three published packages. No runtime change; required for registry discoverability, npm provenance attestation, and legal clarity ahead of the v0.1.0 release.
+- Updated dependencies [4ca9bb3]
+- Updated dependencies [943fda9]
+- Updated dependencies [3741dc7]
+- Updated dependencies [c593297]
+- Updated dependencies [7a631dc]
+- Updated dependencies [9d862a3]
+- Updated dependencies [dfb5ec6]
+- Updated dependencies [5072345]
+- Updated dependencies [0cb84fd]
+- Updated dependencies [6c7bfe5]
+- Updated dependencies [bdcc784]
+- Updated dependencies [954c26b]
+- Updated dependencies [9b5ecdc]
+- Updated dependencies [e091420]
+- Updated dependencies [48bf3e5]
+- Updated dependencies [8db913b]
+- Updated dependencies [78ef794]
+- Updated dependencies [d45d5da]
+- Updated dependencies [f5ccc4d]
+- Updated dependencies [37933a3]
+- Updated dependencies [abf657d]
+- Updated dependencies [c1a8c71]
+- Updated dependencies [1986a0f]
+- Updated dependencies [4737535]
+- Updated dependencies [1434e4e]
+- Updated dependencies [28b2473]
+- Updated dependencies [92d5ae6]
+- Updated dependencies [4a986d8]
+- Updated dependencies [2f5bb68]
+- Updated dependencies [0ec7ff3]
+- Updated dependencies [881038e]
+- Updated dependencies [b29dd7c]
+- Updated dependencies [04b3f44]
+  - @unpunnyfuns/swatchbook-blocks@0.1.0
+  - @unpunnyfuns/swatchbook-core@0.1.0
