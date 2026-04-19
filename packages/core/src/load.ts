@@ -22,9 +22,20 @@ import {
  * (token globs, `resolver`, theme layer globs) resolve against this
  * directory.
  */
+/** Default `cssVarPrefix` applied when the config omits one. Namespaces
+ * emitted vars (`--swatch-…`) and data attributes (`data-swatch-…`) so
+ * swatchbook output doesn't collide with whatever else the consumer has
+ * claimed in `:root`. Override in config to use a project-specific prefix
+ * or set to `''` to opt out of namespacing. */
+export const DEFAULT_CSS_VAR_PREFIX = 'swatch';
+
 export async function loadProject(config: Config, cwd: string = process.cwd()): Promise<Project> {
   const logger = new BufferedLogger({ level: 'warn' });
-  const normalized = await normalizeThemes(config, cwd, logger);
+  const configWithDefaults: Config = {
+    ...config,
+    cssVarPrefix: config.cssVarPrefix ?? DEFAULT_CSS_VAR_PREFIX,
+  };
+  const normalized = await normalizeThemes(configWithDefaults, cwd, logger);
 
   const { names: disabledAxes, diagnostics: disabledDiagnostics } = validateDisabledAxes(
     config.disabledAxes,
@@ -51,7 +62,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
   const { presets, diagnostics: presetDiagnostics } = validatePresets(config.presets, filteredAxes);
 
   return {
-    config,
+    config: configWithDefaults,
     axes: filteredAxes,
     disabledAxes,
     presets,

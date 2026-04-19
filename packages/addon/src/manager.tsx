@@ -7,6 +7,8 @@ import {
   COLOR_FORMAT_GLOBAL_KEY,
   GLOBAL_KEY,
   INIT_EVENT,
+  INIT_REQUEST_EVENT,
+  PREVIEW_MOUSEDOWN_EVENT,
   PANEL_ID,
   TOOL_ID,
 } from '#/constants.ts';
@@ -433,6 +435,13 @@ function AxesToolbar(): ReactElement {
     const channel = addons.getChannel();
     const onInit = (next: InitPayload): void => setPayload(next);
     channel.on(INIT_EVENT, onInit);
+    /**
+     * Ask the preview to (re-)emit INIT_EVENT in case it already broadcast
+     * before this effect subscribed. Without this request, a late-mounting
+     * manager (story navigation, docs reload) can stay in "loading…" until
+     * the user triggers a globals change.
+     */
+    channel.emit(INIT_REQUEST_EVENT);
     return () => {
       channel.off(INIT_EVENT, onInit);
     };
@@ -541,8 +550,20 @@ function AxesToolbar(): ReactElement {
       if (target.closest('[data-testid="swatchbook-toolbar-popover"]')) return;
       setOpen(false);
     };
+    /**
+     * The manager's document-level listener above can't see mousedowns
+     * inside the preview iframe. Preview emits PREVIEW_MOUSEDOWN_EVENT on
+     * every mousedown over its own document; listen for it here so
+     * clicking the canvas / docs page also closes the popover.
+     */
+    const channel = addons.getChannel();
+    const onPreviewMouseDown = (): void => setOpen(false);
     document.addEventListener('mousedown', onDocMouseDown);
-    return () => document.removeEventListener('mousedown', onDocMouseDown);
+    channel.on(PREVIEW_MOUSEDOWN_EVENT, onPreviewMouseDown);
+    return () => {
+      document.removeEventListener('mousedown', onDocMouseDown);
+      channel.off(PREVIEW_MOUSEDOWN_EVENT, onPreviewMouseDown);
+    };
   }, [open]);
 
   if (axes.length === 0) {

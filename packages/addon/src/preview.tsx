@@ -1,6 +1,7 @@
 import type { Decorator, Preview } from '@storybook/react-vite';
 import { useEffect, useMemo } from 'react';
 import { addons } from 'storybook/preview-api';
+import { dataAttr } from '#/data-attr.ts';
 import {
   axes as virtualAxes,
   css,
@@ -24,9 +25,10 @@ import {
 import {
   AXES_GLOBAL_KEY,
   COLOR_FORMAT_GLOBAL_KEY,
-  DATA_THEME_ATTR,
   GLOBAL_KEY,
   INIT_EVENT,
+  INIT_REQUEST_EVENT,
+  PREVIEW_MOUSEDOWN_EVENT,
   PARAM_KEY,
   STYLE_ELEMENT_ID,
 } from '#/constants.ts';
@@ -61,21 +63,22 @@ html, body {
 }
 
 /**
- * Write the composed permutation ID to `data-theme` plus one
- * `data-<axis>=<context>` per axis. The composed ID stays for CSS
- * emission's current `[data-theme="…"]` selectors (retires in #135);
- * per-axis attributes are what upcoming toolbar + panel work will key on.
+ * Write the composed permutation ID to `data-<prefix>-theme` plus one
+ * `data-<prefix>-<axis>=<context>` per axis. Prefix follows `cssVarPrefix`
+ * so the attr namespace and the emitted-CSS selectors stay in lockstep;
+ * empty prefix keeps the bare `data-theme` form.
  */
 function setRootAxes(themeName: string, tuple: Readonly<Record<string, string>>): void {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
-  root.setAttribute(DATA_THEME_ATTR, themeName);
+  root.setAttribute(dataAttr(cssVarPrefix, 'theme'), themeName);
   for (const axis of virtualAxes) {
+    const attr = dataAttr(cssVarPrefix, axis.name);
     const value = tuple[axis.name];
     if (value === undefined) {
-      root.removeAttribute(`data-${axis.name}`);
+      root.removeAttribute(attr);
     } else {
-      root.setAttribute(`data-${axis.name}`, value);
+      root.setAttribute(attr, value);
     }
   }
   /**
@@ -88,7 +91,7 @@ function setRootAxes(themeName: string, tuple: Readonly<Record<string, string>>)
   if (pinnedSample) {
     for (const name of virtualDisabledAxes) {
       const value = pinnedSample[name];
-      if (value !== undefined) root.setAttribute(`data-${name}`, value);
+      if (value !== undefined) root.setAttribute(dataAttr(cssVarPrefix, name), value);
     }
   }
 }
@@ -213,16 +216,18 @@ const themedDecorator: Decorator = (Story, context) => {
     setRootAxes(themeName, tuple);
   }, [themeName, tuple]);
 
-  const wrapperAttrs: Record<string, string> = { [DATA_THEME_ATTR]: themeName };
+  const wrapperAttrs: Record<string, string> = {
+    [dataAttr(cssVarPrefix, 'theme')]: themeName,
+  };
   for (const axis of virtualAxes) {
     const value = tuple[axis.name];
-    if (value !== undefined) wrapperAttrs[`data-${axis.name}`] = value;
+    if (value !== undefined) wrapperAttrs[dataAttr(cssVarPrefix, axis.name)] = value;
   }
   const pinnedSample = themes[0]?.input;
   if (pinnedSample) {
     for (const name of virtualDisabledAxes) {
       const value = pinnedSample[name];
-      if (value !== undefined) wrapperAttrs[`data-${name}`] = value;
+      if (value !== undefined) wrapperAttrs[dataAttr(cssVarPrefix, name)] = value;
     }
   }
 
@@ -319,6 +324,13 @@ function installGlobalAxisApplier(): void {
    */
   ensureStylesheet();
   broadcastInit();
+  /**
+   * If the manager subscribes to INIT_EVENT after our initial broadcast,
+   * it misses the payload and the toolbar stays in its "loading…" state
+   * until something else re-fires it. Honor an explicit request event so
+   * a late-mounting manager can ask for the payload.
+   */
+  channel.on(INIT_REQUEST_EVENT, broadcastInit);
   const apply = (globals: Record<string, unknown>): void => {
     ensureStylesheet();
     const tuple = resolveTuple(globals, {});
@@ -338,3 +350,20 @@ function installGlobalAxisApplier(): void {
 }
 
 installGlobalAxisApplier();
+
+/**
+ * Bridge `mousedown` inside the preview iframe to the manager via a
+ * dedicated channel event. The toolbar popover's outside-click listener
+ * runs on the manager's document, which can't observe mousedowns inside
+ * the preview; without this bridge, clicking the canvas leaves the
+ * popover open. Idempotent: fires at most once per real mousedown.
+ */
+function installPreviewMouseDownBridge(): void {
+  if (typeof document === 'undefined') return;
+  const channel = addons.getChannel();
+  document.addEventListener('mousedown', () => {
+    channel.emit(PREVIEW_MOUSEDOWN_EVENT);
+  });
+}
+
+installPreviewMouseDownBridge();

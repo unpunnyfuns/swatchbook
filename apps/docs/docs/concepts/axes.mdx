@@ -20,27 +20,29 @@ Every resolved token, every CSS selector, every panel readout keys on this tuple
 
 ## Data attributes
 
-When a tuple is active, the preview decorator writes one `data-<axisName>="<context>"` attribute per axis to `<html>` and the story wrapper:
+When a tuple is active, the preview decorator writes one `data-<prefix>-<axisName>="<context>"` attribute per axis to `<html>` and the story wrapper. The prefix follows `cssVarPrefix` (default `swatch`), so swatchbook's scaffolding doesn't collide with other libraries that claim bare `data-mode` / `data-theme`:
 
 ```html
-<html data-mode="Dark" data-brand="Brand A" data-theme="Dark · Brand A">
+<html data-swatch-mode="Dark" data-swatch-brand="Brand A" data-swatch-theme="Dark · Brand A">
 ```
 
-CSS emission matches these per-axis attributes with compound selectors:
+CSS emission matches those attributes with compound selectors:
 
 ```css
 :root {
-  --ds-color-sys-surface-default: #ffffff;
+  --swatch-color-sys-surface-default: #ffffff;
 }
-[data-mode="Dark"][data-brand="Default"] {
-  --ds-color-sys-surface-default: #0f172a;
+[data-swatch-mode="Dark"][data-swatch-brand="Default"] {
+  --swatch-color-sys-surface-default: #0f172a;
 }
-[data-mode="Dark"][data-brand="Brand A"] {
-  --ds-color-sys-surface-default: #111827;
+[data-swatch-mode="Dark"][data-swatch-brand="Brand A"] {
+  --swatch-color-sys-surface-default: #111827;
 }
 ```
 
 Each non-default tuple gets its own flat block (every var redeclared). The `:root` block carries the default tuple. Nested cascading isn't used because axes are allowed to write to the same token path under the DTCG spec; flat emission avoids the collision-detection work that nesting would require.
+
+> These attributes + CSS vars are the scaffolding swatchbook needs so tokens repaint when a reader flips an axis in the toolbar. They are not a public styling API — consumer components shouldn't depend on them for production theming. See [what swatchbook is not](../intro#what-its-not).
 
 ## Independence
 

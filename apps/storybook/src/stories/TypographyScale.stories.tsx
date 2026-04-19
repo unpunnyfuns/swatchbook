@@ -16,7 +16,7 @@ export default meta;
 export const All = meta.story({
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      const wrapper = canvasElement.querySelector('[data-theme]');
+      const wrapper = canvasElement.querySelector('[data-sb-theme]');
       expect(
         wrapper?.textContent,
         'typography scale should include at least one typography path',

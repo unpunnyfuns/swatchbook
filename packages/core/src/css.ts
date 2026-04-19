@@ -50,7 +50,7 @@ export function emitCss(
     if (multiAxis && theme === defaultTheme) continue;
     const decls = declarationsFor(theme, themesResolved, varOpts, transformAlias);
     if (decls.length === 0) continue;
-    blocks.push(`${selectorFor(theme, axes)} {\n${decls.join('\n')}\n}`);
+    blocks.push(`${selectorFor(theme, axes, prefix)} {\n${decls.join('\n')}\n}`);
   }
 
   return `${blocks.join('\n\n')}\n`;
@@ -86,18 +86,38 @@ function declarationsFor(
  * Compose the selector for a tuple. Multi-axis projects get a compound
  * attribute selector in axis order; single-axis projects keep the familiar
  * `[data-theme="…"]` shape so the single-attribute selector stays recognizable.
+ *
+ * When `prefix` is set, data-attr names get the same prefix the CSS vars use —
+ * e.g. `cssVarPrefix: 'sb'` yields `[data-sb-mode="Dark"]` instead of
+ * `[data-mode="Dark"]`. Avoids collisions with third-party libs that claim
+ * bare `data-mode` / `data-theme`. Empty prefix keeps the bare form as
+ * opt-out.
  */
-function selectorFor(theme: Theme, axes: Axis[]): string {
+function selectorFor(theme: Theme, axes: Axis[], prefix: string): string {
+  const attr = attrName(prefix);
   if (axes.length <= 1) {
-    return `[data-theme="${cssEscape(theme.name)}"]`;
+    return `[${attr('theme')}="${cssEscape(theme.name)}"]`;
   }
   const parts: string[] = [];
   for (const axis of axes) {
     const value = theme.input[axis.name];
     if (value === undefined) continue;
-    parts.push(`[data-${axis.name}="${cssEscape(value)}"]`);
+    parts.push(`[${attr(axis.name)}="${cssEscape(value)}"]`);
   }
-  return parts.length > 0 ? parts.join('') : `[data-theme="${cssEscape(theme.name)}"]`;
+  return parts.length > 0 ? parts.join('') : `[${attr('theme')}="${cssEscape(theme.name)}"]`;
+}
+
+/**
+ * Helper producing a prefixed `data-*` attribute name when `prefix` is set,
+ * `data-*` otherwise. Exported so the addon + blocks can stay in lockstep
+ * without re-implementing the naming rule.
+ */
+export function dataAttr(prefix: string, key: string): string {
+  return prefix ? `data-${prefix}-${key}` : `data-${key}`;
+}
+
+function attrName(prefix: string): (key: string) => string {
+  return (key) => dataAttr(prefix, key);
 }
 
 function buildDefaultTuple(axes: Axis[]): Record<string, string> {

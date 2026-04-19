@@ -22,7 +22,7 @@ it('emits exactly one :root block plus N-1 per-tuple blocks', () => {
 });
 
 it('compound selector order matches Project.axes order', () => {
-  const axisNames = project.axes.map((a) => a.name);
+  const axisNames = project.axes.map((a) => `sb-${a.name}`);
   const selectorMatches = css.match(/\[data-[^\]]+\](?:\[data-[^\]]+\])+/g) ?? [];
   expect(selectorMatches.length).toBeGreaterThan(0);
   for (const selector of selectorMatches) {

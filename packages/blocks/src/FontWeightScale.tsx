@@ -7,6 +7,7 @@ import {
   MONO_STACK,
   surfaceStyle,
 } from '#/internal/styles.ts';
+import { themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface FontWeightScaleProps {
@@ -110,14 +111,14 @@ export function FontWeightScale({
 
   if (rows.length === 0) {
     return (
-      <div data-theme={activeTheme} style={styles.wrapper}>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={styles.wrapper}>
         <div style={styles.empty}>No fontWeight tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div data-theme={activeTheme} style={styles.wrapper}>
+    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={styles.wrapper}>
       <div style={styles.caption}>{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} style={styles.row}>
