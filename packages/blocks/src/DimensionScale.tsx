@@ -7,7 +7,7 @@ import {
   emptyStyle,
   MONO_STACK,
   surfaceStyle,
-} from '#/internal/styles.ts';
+} from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';

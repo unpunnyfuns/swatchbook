@@ -2,7 +2,15 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
-import { BORDER_FAINT, emptyStyle, MONO_STACK, surfaceStyle } from '#/internal/styles.ts';
+import {
+  BORDER_DEFAULT,
+  BORDER_FAINT,
+  BORDER_STRONG,
+  MONO_STACK,
+  SURFACE_MUTED,
+  emptyStyle,
+  surfaceStyle,
+} from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
@@ -43,7 +51,7 @@ const styles = {
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     opacity: 0.6,
-    borderBottom: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.3))',
+    borderBottom: BORDER_STRONG,
   } satisfies React.CSSProperties,
   td: {
     padding: '8px 12px',
@@ -61,7 +69,7 @@ const styles = {
     fontSize: 10,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
-    background: 'var(--sb-color-sys-surface-muted, rgba(128,128,128,0.15))',
+    background: SURFACE_MUTED,
   } satisfies React.CSSProperties,
   value: {
     fontFamily: MONO_STACK,
@@ -76,7 +84,7 @@ const styles = {
     verticalAlign: 'middle',
     marginRight: 6,
     borderRadius: 3,
-    border: '1px solid var(--sb-color-sys-border-default, rgba(0,0,0,0.1))',
+    border: BORDER_DEFAULT,
   } satisfies React.CSSProperties,
 };
 

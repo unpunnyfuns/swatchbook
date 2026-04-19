@@ -1,7 +1,13 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo, useState } from 'react';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
-import { BORDER_DEFAULT, MONO_STACK, surfaceStyle } from '#/internal/styles.ts';
+import {
+  BORDER_DEFAULT,
+  BORDER_STRONG,
+  MONO_STACK,
+  TEXT_MUTED,
+  surfaceStyle,
+} from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 import {
@@ -28,7 +34,7 @@ const styles = {
   wrapper: surfaceStyle,
   caption: {
     padding: '4px 0 4px',
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
     fontSize: 12,
   } satisfies CSSProperties,
   controls: {
@@ -39,7 +45,7 @@ const styles = {
   } satisfies CSSProperties,
   controlLabel: {
     fontSize: 11,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   } satisfies CSSProperties,
@@ -49,7 +55,7 @@ const styles = {
     padding: '4px 8px',
     background: 'transparent',
     color: 'inherit',
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.3))',
+    border: BORDER_STRONG,
     borderRadius: 4,
     cursor: 'pointer',
   } satisfies CSSProperties,
@@ -64,7 +70,7 @@ const styles = {
     marginLeft: 'auto',
     background: 'transparent',
     color: 'inherit',
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.3))',
+    border: BORDER_STRONG,
     borderRadius: 4,
     cursor: 'pointer',
   } satisfies CSSProperties,
@@ -92,18 +98,18 @@ const styles = {
   specs: {
     fontFamily: MONO_STACK,
     fontSize: 11,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
   } satisfies CSSProperties,
   cssVar: {
     fontFamily: MONO_STACK,
     fontSize: 11,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
     whiteSpace: 'nowrap',
   } satisfies CSSProperties,
   empty: {
     padding: '24px 12px',
     textAlign: 'center',
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
   } satisfies CSSProperties,
 };
 

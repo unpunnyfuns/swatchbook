@@ -1,5 +1,15 @@
 import type { CSSProperties } from 'react';
-import { BORDER_DEFAULT, BORDER_FAINT, MONO_STACK, surfaceStyle } from '#/internal/styles.ts';
+import {
+  BORDER_DEFAULT,
+  BORDER_FAINT,
+  BORDER_STRONG,
+  MONO_STACK,
+  SURFACE_MUTED,
+  SURFACE_RAISED,
+  TEXT_DEFAULT,
+  TEXT_MUTED,
+  surfaceStyle,
+} from '#/internal/styles.tsx';
 
 export const styles = {
   wrapper: {
@@ -27,7 +37,7 @@ export const styles = {
     fontSize: 10,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
-    background: 'var(--sb-color-sys-surface-muted, rgba(128,128,128,0.15))',
+    background: SURFACE_MUTED,
   } satisfies CSSProperties,
   description: {
     margin: '0 0 12px',
@@ -77,13 +87,13 @@ export const styles = {
     verticalAlign: 'middle',
     marginRight: 6,
     borderRadius: 3,
-    border: '1px solid var(--sb-color-sys-border-default, rgba(0,0,0,0.1))',
+    border: BORDER_DEFAULT,
   } satisfies CSSProperties,
   snippet: {
     display: 'block',
     padding: '8px 10px',
     borderRadius: 4,
-    background: 'var(--sb-color-sys-surface-muted, rgba(128,128,128,0.1))',
+    background: SURFACE_MUTED,
     fontFamily: MONO_STACK,
     fontSize: 12,
     whiteSpace: 'pre',
@@ -99,14 +109,14 @@ export const styles = {
   shadowSample: {
     width: 140,
     height: 56,
-    background: 'var(--sb-color-sys-surface-raised, #fff)',
+    background: SURFACE_RAISED,
     border: BORDER_FAINT,
     borderRadius: 6,
   } satisfies CSSProperties,
   borderSample: {
     width: 140,
     height: 56,
-    background: 'var(--sb-color-sys-surface-raised, transparent)',
+    background: SURFACE_RAISED,
     borderRadius: 6,
   } satisfies CSSProperties,
   gradientSample: {
@@ -118,18 +128,18 @@ export const styles = {
   strokeStyleLine: {
     height: 0,
     borderTopWidth: 4,
-    borderTopColor: 'var(--sb-color-sys-text-default, CanvasText)',
+    borderTopColor: TEXT_DEFAULT,
     width: 220,
   } satisfies CSSProperties,
   strokeStyleSvg: {
     width: 220,
     height: 24,
-    color: 'var(--sb-color-sys-text-default, CanvasText)',
+    color: TEXT_DEFAULT,
   } satisfies CSSProperties,
   strokeStyleFallback: {
     fontFamily: MONO_STACK,
     fontSize: 12,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
   } satisfies CSSProperties,
   colorSwatchRow: {
     display: 'flex',
@@ -158,14 +168,14 @@ export const styles = {
     marginTop: 6,
   } satisfies CSSProperties,
   breakdownKey: {
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
   } satisfies CSSProperties,
   breakdownLayerHeader: {
     gridColumn: '1 / -1',
     fontSize: 10,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
     marginTop: 4,
   } satisfies CSSProperties,
   fontFamilySample: {
@@ -196,7 +206,7 @@ export const styles = {
     height: 32,
     width: '100%',
     maxWidth: 320,
-    background: 'var(--sb-color-sys-surface-muted, rgba(128,128,128,0.08))',
+    background: SURFACE_MUTED,
     borderRadius: 16,
     overflow: 'hidden',
   } satisfies CSSProperties,
@@ -230,7 +240,7 @@ export const styles = {
   } satisfies CSSProperties,
   reducedMotion: {
     fontSize: 11,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
     fontStyle: 'italic',
   } satisfies CSSProperties,
   tupleIndicator: {
@@ -246,7 +256,7 @@ export const styles = {
     padding: '6px 10px',
     marginBottom: 4,
     borderRadius: 4,
-    background: 'var(--sb-color-sys-surface-muted, rgba(128,128,128,0.1))',
+    background: SURFACE_MUTED,
   } satisfies CSSProperties,
   consumerRowLabel: {
     fontFamily: MONO_STACK,
@@ -268,9 +278,9 @@ export const styles = {
     padding: '3px 8px',
     fontSize: 11,
     fontFamily: MONO_STACK,
-    background: 'var(--sb-color-sys-surface-raised, Canvas)',
-    color: 'var(--sb-color-sys-text-default, CanvasText)',
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.3))',
+    background: SURFACE_RAISED,
+    color: TEXT_DEFAULT,
+    border: BORDER_STRONG,
     borderRadius: 4,
     cursor: 'pointer',
     flexShrink: 0,

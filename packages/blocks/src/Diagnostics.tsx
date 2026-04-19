@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
-import { surfaceStyle } from '#/internal/styles.ts';
+import { BORDER_FAINT, TEXT_MUTED, surfaceStyle } from '#/internal/styles.tsx';
 import { useProject } from '#/internal/use-project.ts';
 import type { VirtualDiagnostic } from '#/types.ts';
 
@@ -47,7 +47,7 @@ const styles = {
     gridTemplateColumns: '60px 1fr',
     gap: 12,
     padding: '8px 4px',
-    borderTop: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.12))',
+    borderTop: BORDER_FAINT,
     fontSize: 12,
   } satisfies CSSProperties,
   label: {
@@ -56,7 +56,7 @@ const styles = {
     letterSpacing: 0.5,
   } satisfies CSSProperties,
   meta: {
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
     fontSize: 11,
     marginTop: 4,
     opacity: 0.7,

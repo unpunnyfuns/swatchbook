@@ -3,11 +3,11 @@ import { useMemo } from 'react';
 import {
   BORDER_DEFAULT,
   BORDER_FAINT,
+  MONO_STACK,
   captionStyle,
   emptyStyle,
-  MONO_STACK,
   surfaceStyle,
-} from '#/internal/styles.ts';
+} from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
@@ -72,7 +72,7 @@ const styles = {
     width: 10,
     height: 10,
     borderRadius: 2,
-    border: '1px solid var(--sb-color-sys-border-default, rgba(0,0,0,0.1))',
+    border: BORDER_DEFAULT,
     flex: '0 0 auto',
   } satisfies CSSProperties,
   stopPosition: {
