@@ -1,9 +1,9 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
-import { type ColorFormat, formatColor } from '#/format-color.ts';
+import type { ColorFormat } from '#/format-color.ts';
 import { dataAttr } from '#/internal/data-attr.ts';
-import { formatValue } from '#/internal/use-project.ts';
+import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { styles } from '#/token-detail/styles.ts';
 import {
   type DetailToken,
@@ -26,8 +26,9 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
   const { token, cssVar, axes, themes, themesResolved, activeAxes, cssVarPrefix } =
     useTokenDetailData(path);
   const colorFormat = useColorFormat();
-  const isColor = token?.$type === 'color';
-  const formatFn = (t: DetailToken | undefined): string => valueFor(t, isColor, colorFormat);
+  const tokenType = token?.$type;
+  const isColor = tokenType === 'color';
+  const formatFn = (t: DetailToken | undefined): string => valueFor(t, tokenType, colorFormat);
 
   const variance = useMemo(
     () => analyzeVariance(path, axes, themes, themesResolved),
@@ -167,19 +168,29 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
   );
 }
 
-function valueFor(token: DetailToken | undefined, isColor: boolean, format: ColorFormat): string {
+function valueFor(
+  token: DetailToken | undefined,
+  $type: string | undefined,
+  format: ColorFormat,
+): string {
   if (!token) return '—';
-  if (isColor) return formatColor(token.$value, format).value;
-  return formatValue(token.$value);
+  return formatTokenValue(token.$value, $type, format);
 }
 
-function themeValue(
+/**
+ * Stable key for variance detection — compares structural equality across
+ * themes, not a display string. We pin `raw` so color representation
+ * changes (the toolbar's format dropdown) don't artificially make axes
+ * look like they vary.
+ */
+function varianceKey(
   themesResolved: Record<string, Record<string, DetailToken>>,
   themeName: string,
   path: string,
 ): string {
   const t = themesResolved[themeName]?.[path];
-  return t ? formatValue(t.$value) : '—';
+  if (!t) return '';
+  return JSON.stringify(t.$value);
 }
 
 function tupleName(
@@ -210,7 +221,7 @@ function analyzeVariance(
         .join('|');
       const ctx = theme.input[axis.name] ?? '';
       const bucket = byOthers.get(others) ?? new Map<string, string>();
-      bucket.set(ctx, themeValue(themesResolved, theme.name, path));
+      bucket.set(ctx, varianceKey(themesResolved, theme.name, path));
       byOthers.set(others, bucket);
     }
     let varies = false;

@@ -175,15 +175,3 @@ export function globMatch(path: string, glob: string | undefined): boolean {
   if (glob.endsWith('**')) return path.startsWith(glob.slice(0, -2));
   return path === glob || path.startsWith(`${glob}.`);
 }
-
-export function formatValue(value: unknown): string {
-  if (value == null) return '';
-  if (typeof value === 'string' || typeof value === 'number') return String(value);
-  if (typeof value === 'object') {
-    const v = value as Record<string, unknown>;
-    if (typeof v['hex'] === 'string') return v['hex'] as string;
-    if ('value' in v && 'unit' in v) return `${String(v['value'])}${String(v['unit'])}`;
-    return JSON.stringify(value).slice(0, 120);
-  }
-  return String(value);
-}

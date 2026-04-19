@@ -3,10 +3,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
 import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
-import { formatColor } from '#/format-color.ts';
 import { BORDER_DEFAULT, MONO_STACK, surfaceStyle } from '#/internal/styles.ts';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
-import { formatValue, makeCssVar, useProject } from '#/internal/use-project.ts';
+import { formatTokenValue } from '#/internal/format-token-value.ts';
+import { makeCssVar, useProject } from '#/internal/use-project.ts';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
 import { TokenDetail } from '#/TokenDetail.tsx';
@@ -420,10 +420,9 @@ function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
 
   if (type === 'color') {
     const cssVar = makeCssVar(path, cssVarPrefix);
-    const formatted = formatColor(token.$value, colorFormat);
     return (
       <span style={styles.previewBox}>
-        <span style={styles.value}>{formatted?.value ?? formatValue(token.$value)}</span>
+        <span style={styles.value}>{formatTokenValue(token.$value, type, colorFormat)}</span>
         <span style={{ ...styles.colorSwatch, background: cssVar, marginLeft: 8 }} aria-hidden />
       </span>
     );
@@ -431,7 +430,7 @@ function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
   if (type === 'dimension') {
     return (
       <span style={styles.previewBox}>
-        <span style={styles.value}>{formatValue(token.$value)}</span>
+        <span style={styles.value}>{formatTokenValue(token.$value, type, colorFormat)}</span>
         <span style={{ marginLeft: 8, display: 'inline-block', minWidth: 40, maxWidth: 120 }}>
           <DimensionBar path={path} kind='length' />
         </span>
@@ -482,7 +481,7 @@ function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
 
   return (
     <span style={styles.previewBox}>
-      <span style={styles.value}>{formatValue(token.$value)}</span>
+      <span style={styles.value}>{formatTokenValue(token.$value, type, colorFormat)}</span>
     </span>
   );
 }

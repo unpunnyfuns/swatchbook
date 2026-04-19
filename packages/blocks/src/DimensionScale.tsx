@@ -9,7 +9,8 @@ import {
   surfaceStyle,
 } from '#/internal/styles.ts';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
-import { formatValue, globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
+import { formatTokenValue } from '#/internal/format-token-value.ts';
+import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export type { DimensionKind };
 
@@ -124,7 +125,7 @@ export function DimensionScale({
       collected.push({
         path,
         cssVar: makeCssVar(path, cssVarPrefix),
-        displayValue: formatValue(token.$value),
+        displayValue: formatTokenValue(token.$value, token.$type, 'raw'),
         pxValue,
         capped: Number.isFinite(pxValue) && pxValue > MAX_RENDER_PX,
       });

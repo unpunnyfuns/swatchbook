@@ -4,7 +4,8 @@ import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import { BORDER_FAINT, emptyStyle, MONO_STACK, surfaceStyle } from '#/internal/styles.ts';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
-import { formatValue, globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
+import { formatTokenValue } from '#/internal/format-token-value.ts';
+import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface TokenTableProps {
   /**
@@ -102,7 +103,7 @@ export function TokenTable({
       return {
         path,
         type: token.$type ?? '',
-        value: color ? color.value : formatValue(token.$value),
+        value: formatTokenValue(token.$value, token.$type, colorFormat),
         outOfGamut: color?.outOfGamut ?? false,
         description: token.$description ?? '',
         cssVar: makeCssVar(path, cssVarPrefix),
