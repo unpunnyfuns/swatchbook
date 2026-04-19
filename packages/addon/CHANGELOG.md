@@ -1,5 +1,26 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.2.0
+
+### Minor Changes
+
+- 2f733b5: **BREAKING:** Prefix `data-*` attributes with `cssVarPrefix`. `emitCss` now emits `[data-<prefix>-mode="Dark"][data-<prefix>-brand="Brand A"]` instead of `[data-mode="Dark"][data-brand="Brand A"]`, and the addon's preview decorator writes the matching prefixed attrs on `<html>`. Default prefix becomes `swatch` (applied in `loadProject` when config omits one); set `cssVarPrefix: ''` to keep the bare `data-<axis>` form. Fixes collisions with third-party libs that claim generic `data-mode` / `data-theme` (Tailwind, many theme-switcher plugins).
+
+  Also adds `dataAttr(prefix, key)` export from `@unpunnyfuns/swatchbook-core` so consumer code setting these attrs manually stays in lockstep.
+
+  Docs reframed to clarify that swatchbook is a **DTCG token documentation tool**, not a runtime theme-switcher or CSS-variable framework. The toolbar's axis switching is a documentation affordance for inspecting tokens across every context; the emitted CSS + attrs are internal scaffolding, not a production theming API.
+
+### Patch Changes
+
+- da9ac3e: Fix two toolbar-popover papercuts:
+
+  - Clicks inside the preview iframe now close the popover. The manager's document-level mousedown listener can't observe events inside the preview, so the preview now emits a channel event on mousedown and the popover listens for it.
+  - Toolbar no longer stays stuck in its "loading…" state when the manager mounts after the preview's initial `INIT_EVENT` broadcast. Manager now sends an `INIT_REQUEST` on mount and the preview re-broadcasts in response, closing the timing race.
+
+- Updated dependencies [2f733b5]
+  - @unpunnyfuns/swatchbook-core@0.2.0
+  - @unpunnyfuns/swatchbook-blocks@0.2.0
+
 ## 0.1.5
 
 ### Patch Changes
