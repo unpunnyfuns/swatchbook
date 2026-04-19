@@ -3,13 +3,21 @@ import { pathToFileURL } from 'node:url';
 import { defineConfig as defineTerrazzoConfig, parse } from '@terrazzo/parser';
 import type { BufferedLogger } from '#/diagnostics.ts';
 import { collectGlobbedFiles } from '#/themes/util.ts';
-import { type Axis, type AxisConfig, permutationID, type Theme, type TokenMap } from '#/types.ts';
+import {
+  type Axis,
+  type AxisConfig,
+  type Diagnostic,
+  permutationID,
+  type Theme,
+  type TokenMap,
+} from '#/types.ts';
 
 export interface LayeredLoadResult {
   axes: Axis[];
   themes: Theme[];
   resolved: Record<string, TokenMap>;
   sourceFiles: string[];
+  diagnostics: Diagnostic[];
 }
 
 /**
@@ -93,7 +101,7 @@ export async function loadLayeredThemes(
     for (const f of allFiles) sourceSet.add(f);
   }
 
-  return { axes, themes, resolved, sourceFiles: [...sourceSet].toSorted() };
+  return { axes, themes, resolved, sourceFiles: [...sourceSet].toSorted(), diagnostics: [] };
 }
 
 function cartesianTuples(axesConfig: AxisConfig[]): Record<string, string>[] {

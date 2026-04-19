@@ -7,6 +7,7 @@ import {
   permutationID,
   type Axis,
   type Config,
+  type Diagnostic,
   type Project,
   type ResolvedTheme,
   type Theme,
@@ -61,6 +62,20 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
 
   const { presets, diagnostics: presetDiagnostics } = validatePresets(config.presets, filteredAxes);
 
+  // A misconfigured `disabledAxes` (e.g. pinning an axis whose default
+  // context has no theme rows) can filter every theme out. We still return
+  // an empty project so the addon can render diagnostics instead of
+  // crashing, but the cause is easy to miss — the panel just shows an
+  // empty tree. Flag it here so users have something actionable to read.
+  const projectDiagnostics: Diagnostic[] = [];
+  if (disabledAxes.length > 0 && filteredThemes.length === 0) {
+    projectDiagnostics.push({
+      severity: 'warn',
+      group: 'swatchbook/project',
+      message: `\`disabledAxes\` ${JSON.stringify(disabledAxes)} filtered out every theme — nothing left to render. Check that the pinned axes' default contexts are represented in the resolver's permutations.`,
+    });
+  }
+
   return {
     config: configWithDefaults,
     axes: filteredAxes,
@@ -72,9 +87,11 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     sourceFiles: normalized.sourceFiles,
     diagnostics: [
       ...toDiagnostics(logger),
+      ...normalized.diagnostics,
       ...disabledDiagnostics,
       ...defaultDiagnostics,
       ...presetDiagnostics,
+      ...projectDiagnostics,
     ],
   };
 }
