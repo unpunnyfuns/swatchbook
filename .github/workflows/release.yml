@@ -52,6 +52,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # setup-node with registry-url writes an .npmrc containing
+          # `_authToken=${NODE_AUTH_TOKEN}`, and that file wins over the
+          # one changesets/action writes to ~/.npmrc. Without this, npm
+          # expands NODE_AUTH_TOKEN to empty and the registry returns 404.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           # Opt into npm package provenance so published tarballs carry a
           # sigstore attestation linking them back to this workflow run.
           NPM_CONFIG_PROVENANCE: true
