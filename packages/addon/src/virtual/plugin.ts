@@ -91,7 +91,12 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
  * tracked on `project.sourceFiles` — which stays correct as the resolver
  * evolves without requiring a parallel `tokens` glob.
  */
-function collectWatchPaths(config: Config, project: Project | undefined, cwd: string): string[] {
+/** @internal Exported for tests; not part of the public API. */
+export function collectWatchPaths(
+  config: Config,
+  project: Project | undefined,
+  cwd: string,
+): string[] {
   const paths: string[] = [];
   if (config.tokens && config.tokens.length > 0) {
     for (const glob of config.tokens) {

@@ -76,7 +76,8 @@ async function writeTokenCodegen(
   await writeFile(resolve(outDir, 'tokens.d.ts'), content);
 }
 
-function renderTokenTypes(project: Project): string {
+/** @internal Exported for tests; not part of the public API. */
+export function renderTokenTypes(project: Project): string {
   const paths = new Set<string>();
   for (const theme of project.themes) {
     const tokens = project.themesResolved[theme.name];
