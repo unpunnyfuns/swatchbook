@@ -14,15 +14,12 @@ export default meta;
 
 async function firstColorValueCell(canvasElement: HTMLElement): Promise<HTMLElement> {
   await waitFor(() => {
-    const row = canvasElement.querySelector('tbody tr');
-    if (!row) throw new Error('no rows yet');
+    const value = canvasElement.querySelector('[data-testid="token-table-value"]');
+    if (!value) throw new Error('no rows yet');
   });
-  const row = canvasElement.querySelector('tbody tr');
-  if (!row) throw new Error('no rows');
-  const cells = row.querySelectorAll<HTMLElement>('td');
-  const valueCell = cells[2];
-  if (!valueCell) throw new Error('no value cell');
-  return valueCell;
+  const value = canvasElement.querySelector<HTMLElement>('[data-testid="token-table-value"]');
+  if (!value) throw new Error('no value span');
+  return value;
 }
 
 async function waitForMatch(

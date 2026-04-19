@@ -66,8 +66,37 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     expect(within(table).getByText('color.sys.text')).toBeDefined();
     expect(within(table).getByText('color.sys.surface')).toBeDefined();
     expect(within(table).getByText('space.sys.md')).toBeDefined();
+  });
 
-    expect(within(table).getByText('var(--sb-color-sys-text)')).toBeDefined();
+  it('clicking a row opens the TokenDetail overlay by default', async () => {
+    const snapshot = makeSnapshot();
+    const { findByTestId } = render(
+      <SwatchbookProvider value={snapshot}>
+        <TokenTable />
+      </SwatchbookProvider>,
+    );
+
+    const rows = screen.getAllByTestId('token-table-row');
+    const target = rows.find((r) => r.getAttribute('data-path') === 'color.sys.text');
+    if (!target) throw new Error('row not found');
+    target.click();
+
+    const overlay = await findByTestId('token-table-overlay');
+    expect(overlay).toBeDefined();
+  });
+
+  it('onSelect suppresses the overlay and hands the path to the consumer', () => {
+    const snapshot = makeSnapshot();
+    const picks: string[] = [];
+    render(
+      <SwatchbookProvider value={snapshot}>
+        <TokenTable onSelect={(p) => picks.push(p)} />
+      </SwatchbookProvider>,
+    );
+    const rows = screen.getAllByTestId('token-table-row');
+    rows[0]?.click();
+    expect(picks.length).toBe(1);
+    expect(screen.queryByTestId('token-table-overlay')).toBeNull();
   });
 
   it('honors the filter prop to narrow to a path subtree', () => {

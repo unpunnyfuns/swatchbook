@@ -94,7 +94,7 @@ export const ExpandAndOpenDetail = meta.story({
     expect(overlay).toBeDefined();
 
     // 4. Close via the close button.
-    const close = await canvas.findByTestId('token-navigator-close');
+    const close = await canvas.findByTestId('token-navigator-overlay-close');
     await userEvent.click(close);
 
     await waitFor(() => {
