@@ -70,9 +70,11 @@
   "scripts": {
     "build": "tsdown",
     "typecheck": "tsc --noEmit",
-    "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src",
-    "format": "oxfmt -c ../../.oxfmtrc.json src",
-    "format:check": "oxfmt --check -c ../../.oxfmtrc.json src"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src test",
+    "format": "oxfmt -c ../../.oxfmtrc.json src test",
+    "format:check": "oxfmt --check -c ../../.oxfmtrc.json src test"
   },
   "dependencies": {
     "@unpunnyfuns/swatchbook-blocks": "workspace:*",
@@ -95,6 +97,7 @@
     "storybook": "^10.3.5",
     "tsdown": "^0.21.9",
     "typescript": "^6.0.0",
-    "vite": "^8.0.4"
+    "vite": "^8.0.4",
+    "vitest": "^4.1.4"
   }
 }
