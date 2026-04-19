@@ -18,6 +18,7 @@ export default definePreview({
         order: [
           'Docs',
           [
+            'Dashboard',
             'Introduction',
             'Colors',
             'Typography',
@@ -28,7 +29,6 @@ export default definePreview({
             'Gradients',
             'Motion',
             'StrokeStyles',
-            'Tokens',
           ],
           '*',
         ],
