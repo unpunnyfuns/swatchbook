@@ -311,6 +311,14 @@ export const initialGlobals: NonNullable<Preview['initialGlobals']> = {
 function installGlobalAxisApplier(): void {
   if (typeof document === 'undefined') return;
   const channel = addons.getChannel();
+  /**
+   * Inject the stylesheet and emit the init payload once on module load so
+   * the manager's toolbar populates and CSS vars are available even when no
+   * story/decorator ever runs (bare MDX docs pages). Without these, the
+   * toolbar sits in its disabled "loading…" state and nothing is styled.
+   */
+  ensureStylesheet();
+  broadcastInit();
   const apply = (globals: Record<string, unknown>): void => {
     ensureStylesheet();
     const tuple = resolveTuple(globals, {});
