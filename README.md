@@ -57,7 +57,7 @@ See the [documentation](https://unpunnyfuns.github.io/swatchbook/) for concepts,
 
 ## Credits
 
-Parses DTCG tokens through [Terrazzo](https://terrazzo.app/) by [Drew Powers](https://github.com/drwpow) — its parser, resolver evaluation, and alias resolution are the foundation this project builds on.
+Parses DTCG tokens through [Terrazzo](https://terrazzo.app/) by the [Terrazzo team](https://github.com/terrazzoapp) — its parser, resolver evaluation, and alias resolution are the foundation this project builds on.
 
 ## Development
 

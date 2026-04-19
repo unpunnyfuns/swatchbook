@@ -152,7 +152,7 @@ Single-axis projects (one resolver modifier, or the synthetic `theme` axis) keep
 
 ## Credits
 
-Token parsing, alias resolution, and DTCG resolver evaluation are provided by [Terrazzo](https://terrazzo.app/) by [Drew Powers](https://github.com/drwpow). This package wraps those APIs into a Swatchbook-shaped project.
+Token parsing, alias resolution, and DTCG resolver evaluation are provided by [Terrazzo](https://terrazzo.app/) by the [Terrazzo team](https://github.com/terrazzoapp). This package wraps those APIs into a Swatchbook-shaped project.
 
 ## See also
 
