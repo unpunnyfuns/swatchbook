@@ -1,4 +1,5 @@
 import { ColorPalette } from '@unpunnyfuns/swatchbook-blocks';
+import { waitFor } from 'storybook/test';
 import preview from '../../.storybook/preview.tsx';
 
 const meta = preview.meta({
@@ -12,7 +13,22 @@ const meta = preview.meta({
 
 export default meta;
 
-export const All = meta.story();
-export const SysOnly = meta.story({ args: { filter: 'color.sys.*' } });
-export const RefBlue = meta.story({ args: { filter: 'color.ref.blue.*' } });
+async function assertPaletteRenders(canvas: HTMLElement): Promise<void> {
+  await waitFor(() => {
+    const section = canvas.querySelector('section');
+    if (!section) throw new Error('palette section not found');
+  });
+}
+
+export const All = meta.story({
+  play: async ({ canvasElement }) => assertPaletteRenders(canvasElement),
+});
+export const SysOnly = meta.story({
+  args: { filter: 'color.sys.*' },
+  play: async ({ canvasElement }) => assertPaletteRenders(canvasElement),
+});
+export const RefBlue = meta.story({
+  args: { filter: 'color.ref.blue.*' },
+  play: async ({ canvasElement }) => assertPaletteRenders(canvasElement),
+});
 export const Flat = meta.story({ args: { groupBy: 2 } });
