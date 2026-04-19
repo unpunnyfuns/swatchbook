@@ -1,6 +1,5 @@
 export const ADDON_ID = 'swatchbook';
 export const TOOL_ID = `${ADDON_ID}/theme-switcher`;
-export const PANEL_ID = `${ADDON_ID}/design-tokens`;
 export const PARAM_KEY = 'swatchbook';
 /** Canonical active-theme global: composed permutation ID (string). Read by toolbar, panel, blocks. */
 export const GLOBAL_KEY = 'swatchbookTheme';

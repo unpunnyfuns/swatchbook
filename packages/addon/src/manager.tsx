@@ -15,10 +15,8 @@ import {
   INIT_EVENT,
   INIT_REQUEST_EVENT,
   PREVIEW_MOUSEDOWN_EVENT,
-  PANEL_ID,
   TOOL_ID,
 } from '#/constants.ts';
-import { DesignTokensPanel } from '#/panel.tsx';
 
 /**
  * Use explicit `React.createElement` rather than JSX so the manager bundle
@@ -601,12 +599,5 @@ addons.register(ADDON_ID, () => {
     title: 'Swatchbook theme',
     match: ({ viewMode, tabId }) => !tabId && (viewMode === 'story' || viewMode === 'docs'),
     render: () => h(AxesToolbar),
-  });
-
-  addons.add(PANEL_ID, {
-    type: types.PANEL,
-    title: 'Design Tokens',
-    match: ({ viewMode }) => viewMode === 'story',
-    render: ({ active }) => h(DesignTokensPanel, { active: !!active }),
   });
 });
