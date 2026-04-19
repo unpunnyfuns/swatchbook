@@ -7,8 +7,9 @@ export interface EmitCssOptions {
   prefix?: string;
   /**
    * Project axes used to key per-tuple blocks on compound attribute selectors
-   * (`[data-mode="Dark"][data-brand="Brand A"] { … }`). When omitted, emission
-   * falls back to the legacy single-selector shape keyed on `data-theme`.
+   * (`[data-<prefix>-mode="Dark"][data-<prefix>-brand="Brand A"] { … }`). When
+   * omitted or single-axis, emission collapses to the simpler single-attribute
+   * form `[data-<prefix>-theme="…"]`.
    */
   axes?: Axis[];
 }
