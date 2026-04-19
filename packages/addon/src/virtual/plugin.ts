@@ -1,6 +1,7 @@
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
 import { loadProject, projectCss } from '@unpunnyfuns/swatchbook-core';
-import { dirname, isAbsolute, resolve as resolvePath } from 'node:path';
+import { dirname, isAbsolute, resolve as resolvePath, sep } from 'node:path';
+import picomatch from 'picomatch';
 import type { Plugin } from 'vite';
 import { RESOLVED_VIRTUAL_MODULE_ID, VIRTUAL_MODULE_ID } from '#/constants.ts';
 
@@ -66,16 +67,17 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
         server.ws.send({ type: 'full-reload' });
       };
 
+      const matches = (changed: string): boolean =>
+        watchPaths.some((p) => changed === p || changed.startsWith(`${p}${sep}`));
+
       server.watcher.on('change', (changed) => {
-        if (watchPaths.some((p) => changed === p || changed.startsWith(p))) {
-          void invalidate();
-        }
+        if (matches(changed)) void invalidate();
       });
       server.watcher.on('add', (changed) => {
-        if (watchPaths.some((p) => changed.startsWith(p))) void invalidate();
+        if (matches(changed)) void invalidate();
       });
       server.watcher.on('unlink', (changed) => {
-        if (watchPaths.some((p) => changed.startsWith(p))) void invalidate();
+        if (matches(changed)) void invalidate();
       });
     },
   };
@@ -93,8 +95,11 @@ function collectWatchPaths(config: Config, project: Project | undefined, cwd: st
   const paths: string[] = [];
   if (config.tokens && config.tokens.length > 0) {
     for (const glob of config.tokens) {
-      const base = glob.replace(/\/\*.*$/, '').replace(/\/[^/]*\*.*$/, '');
-      paths.push(resolveFromCwd(base, cwd));
+      // `picomatch.scan` yields the longest literal prefix before any glob
+      // metachar, so it handles brace expansion, nested globstars, and the
+      // other shapes the hand-rolled regex missed.
+      const { base } = picomatch.scan(glob);
+      paths.push(resolveFromCwd(base || '.', cwd));
     }
   } else if (project?.sourceFiles) {
     for (const file of project.sourceFiles) paths.push(dirname(file));
