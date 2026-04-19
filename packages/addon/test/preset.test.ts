@@ -1,3 +1,9 @@
+// Pragmatic exception: `renderTokenTypes` is not part of the public API,
+// but its real "surface" is the generated `.swatchbook/tokens.d.ts` file
+// consumed by TypeScript during `useToken()` autocompletion. Testing the
+// pure function is materially cheaper than a full codegen-write-read-parse
+// round-trip while asserting the same observable output. If the signature
+// ever changes, this test should move to a snapshot of the written file.
 import type { Project } from '@unpunnyfuns/swatchbook-core';
 import { describe, expect, it } from 'vitest';
 import { renderTokenTypes } from '#/preset.ts';

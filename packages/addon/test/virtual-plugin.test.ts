@@ -1,3 +1,9 @@
+// Pragmatic exception: `collectWatchPaths` is not part of the public API,
+// but its real "surface" is Vite HMR file-watching behavior — which is
+// impractical to test end-to-end (tmp fs, watcher events, dev server).
+// Testing the pure function directly catches the common regressions
+// (brace expansion, absolute paths, sourceFiles fallback) at a fraction
+// of the cost.
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
 import { describe, expect, it } from 'vitest';
 import { collectWatchPaths } from '#/virtual/plugin.ts';
