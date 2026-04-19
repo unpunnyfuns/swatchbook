@@ -1,7 +1,7 @@
 import type { Decorator, Preview } from '@storybook/react-vite';
 import { useEffect, useMemo } from 'react';
 import { addons } from 'storybook/preview-api';
-import { dataAttr } from '@unpunnyfuns/swatchbook-core';
+import { dataAttr } from '#/data-attr.ts';
 import {
   axes as virtualAxes,
   css,
