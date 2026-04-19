@@ -12,12 +12,13 @@
     "directory": "packages/addon"
   },
   "keywords": [
-    "storybook",
     "storybook-addon",
-    "storybook-addons",
+    "storybook",
     "design-tokens",
     "dtcg",
     "design-system",
+    "design",
+    "style",
     "tokens"
   ],
   "type": "module",
