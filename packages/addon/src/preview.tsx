@@ -63,6 +63,35 @@ html, body {
 }
 
 /**
+ * Apply `cb(axisName, value)` for every pinned (disabled) axis whose value
+ * is present on any surviving theme's `input`. Disabled axes don't appear
+ * in `virtualAxes`, but CSS may still reference their pinned value on
+ * compound selectors — every theme that survived filtering carries the
+ * same pinned context per disabled axis, so sampling any theme works.
+ */
+function forEachPinnedAxis(cb: (name: string, value: string) => void): void {
+  const pinnedSample = themes[0]?.input;
+  if (!pinnedSample) return;
+  for (const name of virtualDisabledAxes) {
+    const value = pinnedSample[name];
+    if (value !== undefined) cb(name, value);
+  }
+}
+
+/**
+ * Pick the theme name for a tuple, falling back to `defaultTheme` and then
+ * the first theme. Returns empty string when the project has no themes so
+ * callers can omit the attr instead of writing a made-up context name.
+ */
+function matchThemeName(tuple: Readonly<Record<string, string>>): string {
+  const match = themes.find((t) => {
+    const input = t.input as Record<string, string>;
+    return Object.keys(input).every((k) => input[k] === tuple[k]);
+  });
+  return match?.name ?? defaultTheme ?? themes[0]?.name ?? '';
+}
+
+/**
  * Write the composed permutation ID to `data-<prefix>-theme` plus one
  * `data-<prefix>-<axis>=<context>` per axis. Prefix follows `cssVarPrefix`
  * so the attr namespace and the emitted-CSS selectors stay in lockstep;
@@ -71,7 +100,9 @@ html, body {
 function setRootAxes(themeName: string, tuple: Readonly<Record<string, string>>): void {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
-  root.setAttribute(dataAttr(cssVarPrefix, 'theme'), themeName);
+  const themeAttr = dataAttr(cssVarPrefix, 'theme');
+  if (themeName) root.setAttribute(themeAttr, themeName);
+  else root.removeAttribute(themeAttr);
   for (const axis of virtualAxes) {
     const attr = dataAttr(cssVarPrefix, axis.name);
     const value = tuple[axis.name];
@@ -81,19 +112,9 @@ function setRootAxes(themeName: string, tuple: Readonly<Record<string, string>>)
       root.setAttribute(attr, value);
     }
   }
-  /**
-   * Disabled axes aren't in `virtualAxes`, but CSS may still reference their
-   * pinned value on compound selectors in extension code. Read the value
-   * from any surviving theme's `input` — every theme that survived filtering
-   * carries the same pinned context for each disabled axis.
-   */
-  const pinnedSample = themes[0]?.input;
-  if (pinnedSample) {
-    for (const name of virtualDisabledAxes) {
-      const value = pinnedSample[name];
-      if (value !== undefined) root.setAttribute(dataAttr(cssVarPrefix, name), value);
-    }
-  }
+  forEachPinnedAxis((name, value) => {
+    root.setAttribute(dataAttr(cssVarPrefix, name), value);
+  });
 }
 
 /**
@@ -199,13 +220,7 @@ const themedDecorator: Decorator = (Story, context) => {
     () => resolveColorFormat(context.globals as Record<string, unknown>),
     [context.globals],
   );
-  const themeName = useMemo(() => {
-    const match = themes.find((t) => {
-      const input = t.input as Record<string, string>;
-      return Object.keys(input).every((k) => input[k] === tuple[k]);
-    });
-    return match?.name ?? defaultTheme ?? themes[0]?.name ?? 'Light';
-  }, [tuple]);
+  const themeName = useMemo(() => matchThemeName(tuple), [tuple]);
 
   useEffect(() => {
     ensureStylesheet();
@@ -216,20 +231,15 @@ const themedDecorator: Decorator = (Story, context) => {
     setRootAxes(themeName, tuple);
   }, [themeName, tuple]);
 
-  const wrapperAttrs: Record<string, string> = {
-    [dataAttr(cssVarPrefix, 'theme')]: themeName,
-  };
+  const wrapperAttrs: Record<string, string> = {};
+  if (themeName) wrapperAttrs[dataAttr(cssVarPrefix, 'theme')] = themeName;
   for (const axis of virtualAxes) {
     const value = tuple[axis.name];
     if (value !== undefined) wrapperAttrs[dataAttr(cssVarPrefix, axis.name)] = value;
   }
-  const pinnedSample = themes[0]?.input;
-  if (pinnedSample) {
-    for (const name of virtualDisabledAxes) {
-      const value = pinnedSample[name];
-      if (value !== undefined) wrapperAttrs[dataAttr(cssVarPrefix, name)] = value;
-    }
-  }
+  forEachPinnedAxis((name, value) => {
+    wrapperAttrs[dataAttr(cssVarPrefix, name)] = value;
+  });
 
   const snapshot = useMemo<ProjectSnapshot>(
     () => ({
@@ -296,7 +306,7 @@ function buildInitialAxes(): Record<string, string> {
 }
 
 export const initialGlobals: NonNullable<Preview['initialGlobals']> = {
-  [GLOBAL_KEY]: defaultTheme ?? themes[0]?.name ?? 'Light',
+  [GLOBAL_KEY]: defaultTheme ?? themes[0]?.name ?? '',
   [AXES_GLOBAL_KEY]: buildInitialAxes(),
   [COLOR_FORMAT_GLOBAL_KEY]: 'hex',
 };
@@ -334,12 +344,7 @@ function installGlobalAxisApplier(): void {
   const apply = (globals: Record<string, unknown>): void => {
     ensureStylesheet();
     const tuple = resolveTuple(globals, {});
-    const match = themes.find((t) => {
-      const input = t.input as Record<string, string>;
-      return Object.keys(input).every((k) => input[k] === tuple[k]);
-    });
-    const themeName = match?.name ?? defaultTheme ?? themes[0]?.name ?? 'Light';
-    setRootAxes(themeName, tuple);
+    setRootAxes(matchThemeName(tuple), tuple);
   };
   const onGlobals = (payload: { globals?: Record<string, unknown> }): void => {
     if (payload.globals) apply(payload.globals);
