@@ -1,4 +1,6 @@
 import type { ReactElement } from 'react';
+import { useColorFormat } from '#/contexts.ts';
+import { type ColorFormat, formatColor } from '#/format-color.ts';
 import { styles } from '#/token-detail/styles.ts';
 import { useTokenDetailData } from '#/token-detail/internal.ts';
 
@@ -9,16 +11,25 @@ export interface CompositeBreakdownProps {
 
 export function CompositeBreakdown({ path }: CompositeBreakdownProps): ReactElement | null {
   const { token } = useTokenDetailData(path);
+  const colorFormat = useColorFormat();
   if (!token) return null;
-  return <CompositeBreakdownContent type={token.$type} rawValue={token.$value} />;
+  return (
+    <CompositeBreakdownContent
+      type={token.$type}
+      rawValue={token.$value}
+      colorFormat={colorFormat}
+    />
+  );
 }
 
 export function CompositeBreakdownContent({
   type,
   rawValue,
+  colorFormat,
 }: {
   type: string | undefined;
   rawValue: unknown;
+  colorFormat: ColorFormat;
 }): ReactElement | null {
   if (!rawValue || typeof rawValue !== 'object') return null;
 
@@ -36,7 +47,7 @@ export function CompositeBreakdownContent({
   if (type === 'border') {
     const v = rawValue as Record<string, unknown>;
     return renderKeyValueList([
-      ['color', formatColorValue(v['color'])],
+      ['color', formatColorSubValue(v['color'], colorFormat)],
       ['width', formatDimensionValue(v['width'])],
       ['style', formatPrimitive(v['style'])],
     ]);
@@ -61,7 +72,7 @@ export function CompositeBreakdownContent({
           return (
             <div key={shadowLayerKey(v, i)} style={{ display: 'contents' }}>
               {multi && <div style={styles.breakdownLayerHeader}>Layer {i + 1}</div>}
-              <KeyValueRow label='color' value={formatColorValue(v['color'])} />
+              <KeyValueRow label='color' value={formatColorSubValue(v['color'], colorFormat)} />
               <KeyValueRow label='offsetX' value={formatDimensionValue(v['offsetX'])} />
               <KeyValueRow label='offsetY' value={formatDimensionValue(v['offsetY'])} />
               <KeyValueRow label='blur' value={formatDimensionValue(v['blur'])} />
@@ -86,7 +97,7 @@ export function CompositeBreakdownContent({
             <KeyValueRow
               key={gradientStopKey(v, i)}
               label={`${(position * 100).toFixed(0)}%`}
-              value={formatColorValue(v['color'])}
+              value={formatColorSubValue(v['color'], colorFormat)}
             />
           );
         })}
@@ -141,18 +152,15 @@ function formatDimensionValue(v: unknown): string | null {
   return JSON.stringify(v);
 }
 
-function formatColorValue(v: unknown): string | null {
+/**
+ * Route sub-value colors through `formatColor` so they honor the active
+ * color-format dropdown, just like the standalone `<ColorPalette />` and
+ * `<TokenDetail />` top-line do. Returns `null` for a missing field so
+ * the key/value row drops out entirely.
+ */
+function formatColorSubValue(v: unknown, format: ColorFormat): string | null {
   if (v == null) return null;
-  if (typeof v === 'string') return v;
-  if (typeof v === 'object') {
-    const c = v as { colorSpace?: unknown; components?: unknown; alpha?: unknown };
-    if (Array.isArray(c.components) && typeof c.colorSpace === 'string') {
-      const parts = c.components.map((n) => (typeof n === 'number' ? n.toFixed(3) : String(n)));
-      const alpha = typeof c.alpha === 'number' && c.alpha !== 1 ? ` / ${c.alpha}` : '';
-      return `${c.colorSpace}(${parts.join(' ')}${alpha})`;
-    }
-  }
-  return JSON.stringify(v);
+  return formatColor(v, format).value;
 }
 
 function shadowLayerKey(layer: Record<string, unknown>, fallback: number): string {

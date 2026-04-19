@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
-import { formatValue } from '#/internal/use-project.ts';
+import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { AliasChain } from '#/token-detail/AliasChain.tsx';
 import { AliasedBy } from '#/token-detail/AliasedBy.tsx';
 import { AxisVariance } from '#/token-detail/AxisVariance.tsx';
@@ -39,9 +39,9 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
   }
 
   const isColor = token.$type === 'color';
-  const formatted = isColor ? formatColor(token.$value, colorFormat) : null;
-  const value = formatted ? formatted.value : formatValue(token.$value);
-  const outOfGamut = formatted?.outOfGamut ?? false;
+  const gamut = isColor ? formatColor(token.$value, colorFormat) : null;
+  const value = formatTokenValue(token.$value, token.$type, colorFormat);
+  const outOfGamut = gamut?.outOfGamut ?? false;
 
   return (
     <div
