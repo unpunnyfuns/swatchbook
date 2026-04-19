@@ -18,6 +18,8 @@
     "design-tokens",
     "dtcg",
     "design-system",
+    "design",
+    "style",
     "tokens"
   ],
   "type": "module",
