@@ -126,9 +126,11 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
     };
     channel.on('globalsUpdated', onGlobals);
     channel.on('updateGlobals', onGlobals);
+    channel.on('setGlobals', onGlobals);
     return () => {
       channel.off('globalsUpdated', onGlobals);
       channel.off('updateGlobals', onGlobals);
+      channel.off('setGlobals', onGlobals);
     };
   }, [enabled]);
 
