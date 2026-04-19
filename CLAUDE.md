@@ -2,13 +2,6 @@
 
 Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfuns`.
 
-## Start here
-
-- Design doc: `docs/plan.md` — current state summary, package responsibilities, scope areas, decisions locked in.
-- Decision log: `docs/decisions.md` — append-only ADR-lite for changes made during execution.
-- Terrazzo spike: `docs/terrazzo-notes.md` — what `@terrazzo/parser` gives us and what core still owns.
-- Future plans: `docs/future.md` — ideas deliberately deferred past v0.1.0, with the *why* preserved so we don't re-litigate.
-
 ## Current state
 
 `v0.3.0 shipped` — three fixed-group packages (core / addon / blocks) published via Changesets + trusted publishing. Documentation site live at https://unpunnyfuns.github.io/swatchbook/ with multi-version support (`/next/` for main, `/` for the latest release, older minors browsable via the version dropdown).
