@@ -6,9 +6,18 @@ on:
 
 # Prevent concurrent release runs — we don't want two Version Packages PRs
 # racing or a publish triggering while another is mid-flight.
+#
+# `cancel-in-progress: true`: when a newer push arrives (most importantly
+# the Version Packages PR's merge commit right after a sibling feature
+# merge), cancel any earlier in-flight run. The earlier run was only going
+# to regenerate the VP PR from a pre-consumption snapshot of `.changeset/`
+# and would spawn a ghost PR (see issue #361 post-0.3.0 for the symptom).
+# The workflow is idempotent — publishing a version that's already shipped
+# is a no-op on npm, and re-updating the VP PR is free — so cancellation
+# loses no work.
 concurrency:
   group: release
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   release:
