@@ -9,23 +9,29 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 - Terrazzo spike: `docs/terrazzo-notes.md` — what `@terrazzo/parser` gives us and what core still owns.
 - Future plans: `docs/future.md` — ideas deliberately deferred past v0.1.0, with the *why* preserved so we don't re-litigate.
 
-## Current milestone
+## Current state
 
-`Current: prepping v0.1.0 release` — remaining work tracked in the **Release** milestone: publish workflow in CI with npm token + provenance (issue #41), then cut v0.1.0 with tag + release notes (issue #42). Feature work feeding into the release has already landed: full DTCG type parity with Terrazzo, consolidated toolbar (PR #213) and Design Tokens panel (PR #218), toolbar polish (PR #221), `disabledAxes` config surface (PR #206), `SwatchbookProvider` for framework-free rendering (PR #201), `TokenNavigator` block (PR #210), consumer-output panel (PR #209), color value format switcher (PR #208). Documentation site live at https://unpunnyfuns.github.io/swatchbook/.
+`v0.3.0 shipped` — three fixed-group packages (core / addon / blocks) published via Changesets + trusted publishing. Documentation site live at https://unpunnyfuns.github.io/swatchbook/ with multi-version support (`/next/` for main, `/` for the latest release, older minors browsable via the version dropdown).
 
-Update this line when a milestone closes. See the matching GitHub milestones for per-issue state.
+Post-0.3.0 landscape:
+
+- **Panel → docblock migration** complete. The addon's in-manager Design Tokens panel was removed in v0.3.0 (PR #350). Consumers compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` on an MDX page via the [token-dashboard guide](https://unpunnyfuns.github.io/swatchbook/guides/token-dashboard).
+- **TokenTable redesign** in v0.3.0 (PR #359): compact two-column layout with click-to-open `<TokenDetail>` drawer, shared with `<TokenNavigator>`'s drawer via `internal/DetailOverlay.tsx`.
+- **sortBy/sortDir + default-filter fix** (PR #349): every list-style block takes `sortBy`/`sortDir` props and the broken `filter = '$type'` defaults were removed.
+- **Chrome consistency sweep** (PR #347) + **scoped element reset** (PR #357): block chrome pulls from named constants in `internal/styles.tsx`; each block carries `data-swatchbook-block` and mounts a one-time stylesheet that zeroes `.sbdocs *` bleed on MDX docs pages.
+- **`formatTokenValue`** (PR #346): single entry point for per-`$type` value stringification across every block, honoring the color-format dropdown for color sub-values of composites (shadow, border, gradient).
+
+Update this section when the state genuinely shifts. See the matching GitHub milestones for per-issue state.
 
 ### Milestone taxonomy
 
-GitHub milestones are scope buckets, not a sequence. Originally prefixed `M0`–`M13` when the work was ordered around a v0.1.0 release; prefixes were dropped during the feature push and re-focused now that we're cutting v0.1.0.
+GitHub milestones are scope buckets, not a sequence. Currently active:
 
-Two active tracks:
+- **Maintenance** — hygiene, refactors, CI polish, cleanup. The default home for most post-v0.3.0 work.
+- **Release** — Changesets versioning, publish workflow, cutting tags. Dormant between releases; active when a minor/major is queued.
+- **Feature milestones** — named scope areas. Spun up per-effort when a coherent push lands (e.g. *Block value display + chrome consistency*, *Panel → docblock migration* — both closed as of v0.3.0). No implied ordering.
 
-- **Feature milestones** — named scope areas in `docs/plan.md` (*Foundation*, *Core*, *Doc blocks*, *DTCG comprehension visualizations*, *Multi-axis theming UX*, …). Pick one to be "current" when we're pushing on features; the line above names what's active. No implied ordering beyond what `docs/plan.md` describes.
-- **Maintenance** — hygiene, refactors, CI polish, deferred cleanups. Drained opportunistically; never blocks a feature milestone.
-- **Release** — Changesets versioning, publish workflow, cutting tags. **Active** for v0.1.0 — see the "Current milestone" line.
-
-When filing an issue: feature work → the relevant scope milestone. Repo hygiene → *Maintenance*. Release plumbing → the *Release* milestone.
+When filing an issue: feature work → the relevant scope milestone if one's active. Repo hygiene → *Maintenance*. Release plumbing → *Release*.
 
 ## Project conventions
 
@@ -93,9 +99,11 @@ claude
 
 ## Releases
 
-- **Versioning:** [Changesets](https://github.com/changesets/changesets). Config in `.changeset/config.json`. The three published packages — `@unpunnyfuns/swatchbook-core`, `@unpunnyfuns/swatchbook-addon`, `@unpunnyfuns/swatchbook-blocks` — are grouped as `fixed`: they always carry the same version and release together. Private workspaces (root, `apps/storybook`, `tokens-reference`) and the iceboxed `tokens-starter` are listed under `ignore` so they never appear in bump prompts or get published.
+- **Versioning:** [Changesets](https://github.com/changesets/changesets). Config in `.changeset/config.json`. The three published packages — `@unpunnyfuns/swatchbook-core`, `@unpunnyfuns/swatchbook-addon`, `@unpunnyfuns/swatchbook-blocks` — are grouped as `fixed`: they always carry the same version and release together. Private workspaces (root, `apps/storybook`, `tokens-reference`, `tokens-starter`) are listed under `ignore` so they never appear in bump prompts or get published.
 - **Writing a changeset:** any PR with a user-visible change to the fixed-group packages runs `pnpm changeset` locally, picks the bump type (`patch` / `minor` / `major`), and commits the generated `.changeset/*.md` alongside the change. Purely internal refactors and doc-only PRs can skip it.
-- **Publishing flow:** on `main`, Changesets' GitHub Action opens a "Version Packages" PR that consumes queued `.changeset/*.md` entries, bumps `package.json` versions, and regenerates `CHANGELOG.md`. Merging that PR runs `pnpm release` (builds + `changeset publish`) which pushes tags to GitHub and publishes to npm. See `.github/workflows/release.yml` (lands under the Release milestone via issue #41).
+- **Publishing flow:** on `main`, Changesets' GitHub Action opens a "Version Packages" PR that consumes queued `.changeset/*.md` entries, bumps `package.json` versions, and regenerates `CHANGELOG.md`. Merging that PR runs `pnpm release` (builds + `changeset publish`) which pushes tags to GitHub and publishes to npm via trusted publishing (GitHub OIDC → short-lived npm token; no `NPM_TOKEN` secret, provenance attestation on). See `.github/workflows/release.yml`.
+- **VP PR race — don't fight it.** The release workflow runs `concurrency.group: release` with `cancel-in-progress: true` (PR #365): when a feature merge lands right after a Version Packages merge, the later workflow run cancels the earlier one so the earlier run can't regenerate a ghost VP PR from a pre-consumption changeset snapshot. The workflow also has a post-step (PR #364) that closes any empty VP PR whose `changeset-release/main` branch has collapsed to no diff vs main. Both are belt-and-suspenders; if a ghost PR still appears, close it manually and check that `cancel-in-progress` is still set.
+- **Docs versioning:** `scripts/snapshot-docs-version.mjs` snapshots `apps/docs/docs/` into `apps/docs/versioned_docs/version-<minor>/` and updates `versions.json` + `versioned_sidebars/`. Run it when cutting a new minor (the current `docs/` tree becomes the new released version; `main`'s `docs/` keeps serving at `/next/`). Turbo's `build` task includes `versioned_docs/**`, `versioned_sidebars/**`, `versions.json` in its input hash so the remote cache invalidates when a snapshot lands (PR #362 — without this, a fresh minor silently serves the previous minor's HTML).
 
 ## Plan governance
 
