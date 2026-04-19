@@ -173,7 +173,10 @@ export function ColorPalette({
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={styles.wrapper}>
+    <div
+      {...themeAttrs(cssVarPrefix, activeTheme)}
+      style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
+    >
       <div style={styles.caption}>{captionText}</div>
       {groups.map(([group, swatches]) => (
         <section key={group} style={styles.group}>
