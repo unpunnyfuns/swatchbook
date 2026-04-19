@@ -16,7 +16,7 @@ export interface VirtualAxisShape {
   contexts: readonly string[];
   default: string;
   description?: string;
-  source: 'resolver' | 'synthetic';
+  source: 'resolver' | 'layered' | 'synthetic';
 }
 
 export interface VirtualThemeShape {

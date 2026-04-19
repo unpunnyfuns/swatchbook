@@ -13,7 +13,7 @@ export interface VirtualAxisLike {
   readonly name: string;
   readonly contexts: readonly string[];
   readonly default: string;
-  readonly source: 'resolver' | 'synthetic';
+  readonly source: 'resolver' | 'layered' | 'synthetic';
 }
 
 export interface VirtualThemeLike {

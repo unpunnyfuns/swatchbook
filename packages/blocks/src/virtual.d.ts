@@ -11,7 +11,7 @@ declare module 'virtual:swatchbook/tokens' {
     contexts: readonly string[];
     default: string;
     description?: string;
-    source: 'resolver' | 'synthetic';
+    source: 'resolver' | 'layered' | 'synthetic';
   }
 
   interface VirtualTheme {

@@ -31,7 +31,7 @@ interface VirtualAxis {
   contexts: readonly string[];
   default: string;
   description?: string;
-  source: 'resolver' | 'synthetic';
+  source: 'resolver' | 'layered' | 'synthetic';
 }
 
 type DiagnosticSeverity = 'error' | 'warn' | 'info';

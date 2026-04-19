@@ -29,7 +29,7 @@ interface AxisEntry {
   contexts: readonly string[];
   default: string;
   description?: string;
-  source: 'resolver' | 'synthetic';
+  source: 'resolver' | 'layered' | 'synthetic';
 }
 
 interface ThemeEntry {
