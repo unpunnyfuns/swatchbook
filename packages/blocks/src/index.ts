@@ -8,6 +8,7 @@ export {
 export { BorderPreview, type BorderPreviewProps } from '#/BorderPreview.tsx';
 export { BorderSample, type BorderSampleProps } from '#/border-preview/BorderSample.tsx';
 export { ColorPalette, type ColorPaletteProps } from '#/ColorPalette.tsx';
+export { Diagnostics, type DiagnosticsProps } from '#/Diagnostics.tsx';
 export { DimensionScale, type DimensionKind, type DimensionScaleProps } from '#/DimensionScale.tsx';
 export { DimensionBar, type DimensionBarProps } from '#/dimension-scale/DimensionBar.tsx';
 export { FontFamilySample, type FontFamilySampleProps } from '#/FontFamilySample.tsx';
