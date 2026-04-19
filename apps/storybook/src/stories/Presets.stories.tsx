@@ -30,6 +30,14 @@ async function waitForAttr(el: Element, attr: string, expected: string): Promise
   });
 }
 
+async function findWrapper(canvasElement: HTMLElement): Promise<HTMLElement> {
+  return waitFor(() => {
+    const el = canvasElement.querySelector<HTMLElement>('[data-sb-mode]');
+    if (!el) throw new Error('story wrapper missing');
+    return el;
+  });
+}
+
 /**
  * Preset config in `swatchbook.config.ts`: `Default Light` →
  * `{ mode: 'Light', brand: 'Default' }`. The preview decorator
@@ -40,16 +48,15 @@ export const DefaultLightPreset = meta.story({
     swatchbook: { axes: { mode: 'Light', brand: 'Default' } },
   },
   play: async ({ canvasElement }) => {
-    const wrapper = canvasElement.querySelector<HTMLElement>('[data-mode]');
-    if (!wrapper) throw new Error('story wrapper missing');
-    await waitForAttr(wrapper, 'data-mode', 'Light');
-    await waitForAttr(wrapper, 'data-brand', 'Default');
-    expect(wrapper.getAttribute('data-theme')).toBe('Light · Default · Normal');
+    const wrapper = await findWrapper(canvasElement);
+    await waitForAttr(wrapper, 'data-sb-mode', 'Light');
+    await waitForAttr(wrapper, 'data-sb-brand', 'Default');
+    expect(wrapper.getAttribute('data-sb-theme')).toBe('Light · Default · Normal');
   },
 });
 
 /**
- * `Brand A Dark` preset — full-tuple match. Per-axis `data-*` attributes
+ * `Brand A Dark` preset — full-tuple match. Per-axis `data-sb-*` attributes
  * should reflect the preset exactly.
  */
 export const BrandADarkPreset = meta.story({
@@ -57,10 +64,9 @@ export const BrandADarkPreset = meta.story({
     swatchbook: { axes: { mode: 'Dark', brand: 'Brand A' } },
   },
   play: async ({ canvasElement }) => {
-    const wrapper = canvasElement.querySelector<HTMLElement>('[data-mode]');
-    if (!wrapper) throw new Error('story wrapper missing');
-    await waitForAttr(wrapper, 'data-mode', 'Dark');
-    await waitForAttr(wrapper, 'data-brand', 'Brand A');
-    expect(wrapper.getAttribute('data-theme')).toBe('Dark · Brand A · Normal');
+    const wrapper = await findWrapper(canvasElement);
+    await waitForAttr(wrapper, 'data-sb-mode', 'Dark');
+    await waitForAttr(wrapper, 'data-sb-brand', 'Brand A');
+    expect(wrapper.getAttribute('data-sb-theme')).toBe('Dark · Brand A · Normal');
   },
 });
