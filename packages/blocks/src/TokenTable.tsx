@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
-import { formatColor } from '#/internal/format-color.ts';
+import { formatColor } from '#/format-color.ts';
 import { BORDER_FAINT, emptyStyle, MONO_STACK, surfaceStyle } from '#/internal/styles.ts';
 import { formatValue, globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
