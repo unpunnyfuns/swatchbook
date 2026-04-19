@@ -45,6 +45,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Create Version Packages PR or publish
+        id: changesets
         uses: changesets/action@v1
         with:
           # `pnpm run <script>` disambiguates from pnpm's built-ins
@@ -62,3 +63,30 @@ jobs:
           # up the GitHub OIDC token via id-token: write and exchanges
           # it for a short-lived publish token at publish time.
           NPM_CONFIG_PROVENANCE: true
+
+      # changesets/action maintains a `changeset-release/main` branch and
+      # keeps the Version Packages PR open across runs. When the branch's
+      # diff vs main collapses to nothing (all changesets consumed, nothing
+      # new pending), the PR sticks around with a stale body — misleads at a
+      # glance ("0.3.0 is already shipped, why is it proposing 0.3.0 again?"
+      # — because the body was regenerated from consumed changesets). Close
+      # any empty VP PR so the next real changeset opens a fresh, accurate
+      # one.
+      - name: Close empty Version Packages PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          pr_json=$(gh pr list --head changeset-release/main --state open --json number,headRefName --limit 1)
+          pr_number=$(echo "$pr_json" | jq -r '.[0].number // empty')
+          if [ -z "$pr_number" ]; then
+            echo "No open Version Packages PR to check."
+            exit 0
+          fi
+          diff_stat=$(git fetch origin changeset-release/main && git diff --stat origin/main..origin/changeset-release/main | tail -n 1)
+          if [ -z "$diff_stat" ]; then
+            echo "Version Packages PR #$pr_number has no diff vs main — closing."
+            gh pr close "$pr_number" --delete-branch --comment 'Closed automatically: no changesets pending. The next real changeset on main will open a fresh PR.'
+          else
+            echo "Version Packages PR #$pr_number has real changes — leaving open."
+          fi
