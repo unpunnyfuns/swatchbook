@@ -27,6 +27,8 @@ import {
   DATA_THEME_ATTR,
   GLOBAL_KEY,
   INIT_EVENT,
+  INIT_REQUEST_EVENT,
+  PREVIEW_MOUSEDOWN_EVENT,
   PARAM_KEY,
   STYLE_ELEMENT_ID,
 } from '#/constants.ts';
@@ -319,6 +321,13 @@ function installGlobalAxisApplier(): void {
    */
   ensureStylesheet();
   broadcastInit();
+  /**
+   * If the manager subscribes to INIT_EVENT after our initial broadcast,
+   * it misses the payload and the toolbar stays in its "loading…" state
+   * until something else re-fires it. Honor an explicit request event so
+   * a late-mounting manager can ask for the payload.
+   */
+  channel.on(INIT_REQUEST_EVENT, broadcastInit);
   const apply = (globals: Record<string, unknown>): void => {
     ensureStylesheet();
     const tuple = resolveTuple(globals, {});
@@ -338,3 +347,20 @@ function installGlobalAxisApplier(): void {
 }
 
 installGlobalAxisApplier();
+
+/**
+ * Bridge `mousedown` inside the preview iframe to the manager via a
+ * dedicated channel event. The toolbar popover's outside-click listener
+ * runs on the manager's document, which can't observe mousedowns inside
+ * the preview; without this bridge, clicking the canvas leaves the
+ * popover open. Idempotent: fires at most once per real mousedown.
+ */
+function installPreviewMouseDownBridge(): void {
+  if (typeof document === 'undefined') return;
+  const channel = addons.getChannel();
+  document.addEventListener('mousedown', () => {
+    channel.emit(PREVIEW_MOUSEDOWN_EVENT);
+  });
+}
+
+installPreviewMouseDownBridge();

@@ -17,3 +17,13 @@ export const STYLE_ELEMENT_ID = 'swatchbook-tokens';
 
 /** Channel event: preview → manager, carries theme list + mode. */
 export const INIT_EVENT = 'swatchbook/init';
+/** Channel event: manager → preview, asks preview to re-emit INIT_EVENT.
+ * Covers the race where the manager subscribes after the preview's
+ * initial broadcast — without it the toolbar stays in "loading…" until
+ * the user triggers anything that re-fires INIT_EVENT. */
+export const INIT_REQUEST_EVENT = 'swatchbook/init-request';
+/** Channel event: preview → manager, fires once per `mousedown` on the
+ * preview document. The toolbar popover listens for it so clicks landing
+ * inside the preview iframe close the popover — a plain document-level
+ * listener on the manager can't see iframe events. */
+export const PREVIEW_MOUSEDOWN_EVENT = 'swatchbook/preview-mousedown';
