@@ -13,10 +13,8 @@ top-to-bottom view of the design-token set for the active theme:
 project-level health, a browsable tree of every token, and a searchable
 table for quick lookup.
 
-This is the recommended replacement for the in-manager Design Tokens
-panel the addon used to ship. Blocks live in docs, so the dashboard
-lives where it belongs — alongside every other surface you publish for
-designers and engineers consuming your tokens.
+Blocks live in docs, so the dashboard lives alongside every other
+surface you publish for designers and engineers consuming your tokens.
 
 ## Template
 
@@ -48,21 +46,6 @@ or exported `ProjectSnapshot` (see the [blocks reference](../reference/blocks)).
 You can see this dashboard composition live against our
 [`tokens-reference`](https://github.com/unpunnyfuns/swatchbook/tree/main/packages/tokens-reference)
 fixture in the [live Storybook](pathname:///storybook/).
-
-## Why a dashboard instead of the old panel?
-
-- **One surface.** The addon's old panel re-implemented the tree and
-  diagnostics in the manager bundle, where it couldn't reach MDX docs
-  pages and had to maintain a parallel virtual-module contract. Blocks
-  already render everywhere — story decorators, autodocs, MDX pages,
-  plain React apps via `SwatchbookProvider`.
-
-- **One dependency graph.** One place to add a new block type, one
-  place to track bugs, one place to theme the chrome.
-
-- **Docs is where designers look up tokens.** The panel's always-on
-  story-view placement made sense when stories were the primary target;
-  for a DTCG documentation tool the docs page is the right home.
 
 ## Variations
 

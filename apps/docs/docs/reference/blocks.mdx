@@ -53,33 +53,102 @@ export function TokenDocs() {
 
 ## Blocks
 
-### `<TokenDetail path />`
+Four groups by shape of use: **overviews** (survey many tokens at once — `TokenNavigator`, `TokenTable`, plus the per-type scales and palettes), the **inspector** (single-token deep-dive — `TokenDetail` and its subparts), **samples** (one-token visual atoms you can drop inline), and **utility** (`Diagnostics`). Most overviews take `filter?` (path glob), `sortBy?`, `sortDir?`, and `caption?`.
 
-Single-token deep-dive. Renders:
+## Overview blocks
 
-- Header: heading, `$type` pill, cssVar reference, description.
-- Composite preview — for `typography`, `shadow`, `border`, `transition`, `dimension`, `duration`, `cubicBezier`, `fontFamily`, `fontWeight`, `strokeStyle`, `gradient`, `color`.
-- Composite breakdown — labelled sub-value grid for composite types.
-- Alias chain (forward) — e.g. `color.sys.accent.bg → color.ref.blue.700`.
-- Aliased-by tree (backward) — everything that transitively aliases this token.
-- Per-axis variance — values along whichever axes move the token.
-- Consumer output — a two-row summary of **Path** and **CSS var** for the active token, each with a copy button (see `<ConsumerOutput />`).
+### Across types
 
-Props: `path: string`, `heading?: string`.
+#### `<TokenNavigator root? initiallyExpanded? onSelect? />`
 
-`TokenDetail` is a composition. Each section is also exported as a standalone block so MDX authors can embed just the piece they need — all take the same `path: string` prop.
+Expandable tree of the token graph. Each interior group shows its child count; each leaf shows its `$type` pill plus an inline preview (color swatch, dimension bar, shadow / border / motion sample, or a formatted value). Clicking a leaf opens a slide-over with the full `<TokenDetail>`; pass `onSelect` to own the click follow-up instead.
+
+Props:
+
+- `root?: string` — mount at this subtree (e.g. `"color"`, `"typography.sys"`). Omit to show everything.
+- `initiallyExpanded?: number` — depth open on first render. `0` all collapsed, `1` top-level groups open (default), `2` one deeper, etc.
+- `onSelect?(path: string): void` — receives a leaf's full dot-path on click; suppresses the built-in overlay.
+
+#### `<TokenTable filter? type? caption? sortBy? sortDir? onSelect? />`
+
+Compact two-column table: **Path** and **Value** (with inline type pill + color swatch). Clicking a row opens the same slide-over `<TokenDetail>` the tree uses; pass `onSelect` to own the follow-up. Columns follow content with per-column `min-width` floors, so the table breathes in narrow containers.
+
+Props:
+
+- `filter?: string` — path glob.
+- `type?: string` — DTCG `$type` filter (`"color"`, `"dimension"`, …).
+- `caption?: string` — override the caption.
+- `sortBy?: 'path' | 'value' | 'none'` — default `'path'`.
+- `sortDir?: 'asc' | 'desc'` — default `'asc'`.
+- `onSelect?(path: string): void` — suppress the built-in drawer.
+
+### Per-type
+
+Every block in this group scopes to one DTCG `$type`, filters / sorts, and renders a type-specific visual. All accept `filter?: string`, `sortBy?`, `sortDir?`, and `caption?: string`.
+
+#### `<ColorPalette filter? groupBy? caption? sortBy? sortDir? />`
+
+Swatch grid grouped by dot-path prefix. `groupBy` is auto-derived from the filter's fixed-prefix depth but can be overridden. Default sort is `'path'`; `'value'` orders colors perceptually via oklch **L → C → H** so ramps read light → dark and warm → cool.
+
+#### `<TypographyScale filter? sample? caption? sortBy? sortDir? />`
+
+One sample line per `typography` composite, rendered with the token's own `fontFamily` / `fontSize` / `fontWeight` / `lineHeight` / `letterSpacing`. `sample?: string` overrides the text.
+
+#### `<DimensionScale filter? kind? caption? sortBy? sortDir? />`
+
+Width-driven bar (default), radius-sample square, or size-sample square per `dimension` token. Defaults to `sortBy: 'value'` — ordered numerically by the rendered pixel size.
+
+- `kind?: 'length' | 'radius' | 'size'` — visualization mode (default `'length'`).
+
+#### `<FontFamilySample filter? sample? caption? sortBy? sortDir? />`
+
+Pangram rendered per `fontFamily` primitive. `sample?: string` overrides the text.
+
+#### `<FontWeightScale filter? sample? caption? sortBy? sortDir? />`
+
+Same sample text rendered at each `fontWeight` primitive. Defaults to `sortBy: 'value'` — ordered 100 → 900.
+
+#### `<BorderPreview filter? caption? sortBy? sortDir? />`
+
+One framed `<BorderSample>` per `border` composite token.
+
+#### `<ShadowPreview filter? caption? sortBy? sortDir? />`
+
+One `<ShadowSample>` surface per `shadow` composite token.
+
+#### `<MotionPreview filter? caption? sortBy? sortDir? />`
+
+One animated `<MotionSample>` per `transition` / `duration` / `cubicBezier` token. Respects `prefers-reduced-motion`.
+
+#### `<StrokeStyleSample filter? caption? sortBy? sortDir? />`
+
+Border rendered per `strokeStyle` primitive. Supports string forms (`solid`, `dashed`, `dotted`, `double`) natively; object forms (`dashArray` / `lineCap`) fall back to a textual summary.
+
+#### `<GradientPalette filter? caption? sortBy? sortDir? />`
+
+Wide sample per `gradient` token (linear, left → right by default) with a stop list. DTCG gradients are stop arrays — the gradient *function* is a rendering choice the consumer makes.
+
+## Inspector blocks
+
+`TokenDetail` is a composition of the subcomponents below. All take the same `path: string` prop and can be embedded individually.
+
+### `<TokenDetail path heading? />`
+
+Full deep-dive: header + composite preview + composite breakdown + alias chain + aliased-by tree + per-axis variance + consumer output + usage snippet.
+
+Props: `path: string`, `heading?: string` (defaults to `path`).
 
 ### `<TokenHeader path heading? />`
 
-Heading, `$type` pill, cssVar reference, and description. Renders a missing-token empty state if `path` isn't in the active theme.
+Heading + `$type` pill + cssVar reference + description. Renders a missing-token empty state when `path` isn't in the active theme.
 
 ### `<CompositePreview path />`
 
-Live, type-dispatched preview of the token's resolved value (typography sample, shadow swatch, gradient strip, animating ball for `duration` / `cubicBezier` / `transition`, etc.).
+Type-dispatched live preview of the token's resolved value (typography sample, shadow swatch, gradient strip, animating ball for motion, etc.).
 
 ### `<CompositeBreakdown path />`
 
-Labelled sub-value grid for composite token types (`typography`, `border`, `transition`, `shadow`, `gradient`). Renders nothing for primitives.
+Labelled sub-value grid for composite types (`typography`, `border`, `transition`, `shadow`, `gradient`). Renders nothing for primitives.
 
 ### `<AliasChain path />`
 
@@ -87,11 +156,11 @@ Forward alias chain (`color.sys.accent.bg → color.ref.blue.700`). Renders noth
 
 ### `<AliasedBy path />`
 
-Aliased-by tree — every token that transitively aliases this one. Truncates at depth 6 with a note.
+Backward alias tree — every token that transitively aliases this one. Truncates at depth 6.
 
 ### `<AxisVariance path />`
 
-Per-axis value table. Collapses to a single row when the value is constant, a vertical list for one varying axis, or a two-axis matrix when values cross two axes (extra axes are fixed to the active selection).
+Per-axis value table. Collapses to one row when the value is constant, a list for one varying axis, or a matrix for two axes (extras pinned to the active selection).
 
 ### `<TokenUsageSnippet path />`
 
@@ -99,93 +168,35 @@ Copy-ready `color: var(--…);` reference snippet.
 
 ### `<ConsumerOutput path />`
 
-Compact two-row summary of the token's consumer-facing outputs: the token's dot-path and its CSS custom property name (`var(--…)`). Each row has its own copy-to-clipboard button. Displays the active axis tuple above the rows when more than one axis is in play.
+Two-row summary of the token's **Path** and **CSS var** with copy-to-clipboard on each. Shows the active axis tuple above the rows when more than one axis is in play.
 
-Props: `path: string`.
+## Sample blocks
 
-### `<TokenNavigator root? initiallyExpanded? onSelect? />`
-
-Expandable tree view of the token graph, keyed on dot-path segments. Complements the flat `TokenTable` and the typed `ColorPalette` with an explorable hierarchy. Each interior group shows its child count; each leaf shows its `$type` pill plus an inline preview (color swatch, dimension bar, shadow / border / motion sample, or a formatted value fallback for types without a preview primitive).
-
-Props:
-
-- `root?: string` — mount at this subtree (e.g. `"color"`, `"typography.sys"`). Omit to show everything.
-- `initiallyExpanded?: number` — depth open on first render. `0` = all collapsed, `1` = top-level groups open (default), `2` = one level deeper, etc.
-- `onSelect?(path: string): void` — receives a leaf's full dot-path on click. When provided, the inline `<TokenDetail>` slide-over is suppressed and the consumer owns the follow-up UI; when omitted, clicking a leaf opens a fixed-position overlay with a full `<TokenDetail>` and a close button.
-
-### `<TokenTable filter? type? showVar? caption? />`
-
-Filterable table. Columns: name, value, resolved, description.
-
-Props:
-
-- `filter?: string` — path glob (`"color.sys.*"`, `"color.sys"`, or exact path).
-- `type?: string` — DTCG `$type` filter.
-- `showVar?: boolean` — show the CSS variable reference column. Default `true`.
-- `caption?: string` — override the table caption.
-
-Rows sort numerically by dot-path, so `blue.50` lands before `blue.100`. Color cells are rendered through the active color-format global (`swatchbookColorFormat`).
-
-### `<ColorPalette filter? groupBy? caption? />`
-
-Swatch grid grouped by dot-path prefix. Sorted numerically by path.
-
-Props:
-
-- `filter?: string` — path glob (`"color.ref.blue.*"`, `"color.sys.*"`, …). Default: every `color` token.
-- `groupBy?: number` — grouping depth. `2` yields groups like `color.sys`/`color.ref`; `3` yields `color.sys.surface`/`color.sys.text`, etc. Default `3`. Pick a depth where each group holds at least a handful of swatches — setting it too high (e.g. `groupBy={5}` on a three-segment path) produces one swatch per group.
-- `caption?: string` — override the section caption.
-
-Color values are rendered through the active color-format global (`swatchbookColorFormat`).
-
-### `<TypographyScale />`
-
-Renders each `typography` composite token as a sample line using its own value.
-
-### `<FontFamilySample sample? />`
-
-Pangram rendered per `fontFamily` primitive. Props: `sample?: string` (default: the quick brown fox…).
-
-### `<FontWeightScale sample? />`
-
-Same "Aa" sample at each `fontWeight` primitive, sorted ascending. Props: `sample?: string` (default: "Aa").
-
-### `<StrokeStyleSample />`
-
-Border rendered per `strokeStyle` primitive. String-form styles (`solid`, `dashed`, `dotted`, `double`) render as `border-style`; object-form (with `dashArray` / `lineCap`) renders a textual fallback.
+Lower-level than the "Per-type overviews" blocks — these render the visual for **one** token by path. Useful for custom MDX layouts that don't want the full overview chrome.
 
 ### `<MotionSample path speed? runKey? />`
 
-Standalone per-token animated sample (the animated ball + track from `MotionPreview`). Accepts any `transition`, `duration`, or `cubicBezier` token path. Respects `prefers-reduced-motion`.
-
-Props: `path: string`, `speed?: 0.25 | 0.5 | 1 | 2` (default `1`), `runKey?: number` (change to force a restart).
+Animated ball + track for one `transition` / `duration` / `cubicBezier`. `speed?: 0.25 | 0.5 | 1 | 2` (default `1`); `runKey?: number` forces a restart when it changes.
 
 ### `<ShadowSample path />`
 
-Standalone per-token shadow sample (the surface rectangle with `box-shadow` from `ShadowPreview`).
-
-Props: `path: string`.
+Surface rectangle with the token's shadow applied as `box-shadow`.
 
 ### `<BorderSample path />`
 
-Standalone per-token border sample (the surface rectangle with `border` from `BorderPreview`).
-
-Props: `path: string`.
+Surface rectangle with the token's border applied.
 
 ### `<DimensionBar path kind? />`
 
-Standalone per-token dimension visual (the bar / square / radius sample from `DimensionScale`).
+Width-driven bar, border-radius square, or sized square for one `dimension` token. `kind?: 'length' | 'radius' | 'size'` (default `'length'`).
 
-Props: `path: string`, `kind?: 'length' | 'radius' | 'size'` (default `'length'`).
+## Utility blocks
 
-### `<GradientPalette filter? caption? />`
+### `<Diagnostics caption? />`
 
-Wide sample per `gradient` token with the stop list as a sidebar. Samples use `linear-gradient(to right, …)` by default — DTCG gradients are stop arrays, and the gradient function is a rendering choice the consumer makes at use-site. If you want radial/conic previews here, open an issue.
+Project load diagnostics (parser errors, resolver warnings, disabled-axis validation) as a collapsible list. Green **OK** badge when clean; auto-expands with a severity summary on warnings or errors. Not a token view — surfaces the project's own load state. See the [diagnostics concept](../concepts/diagnostics) for severity semantics.
 
-Props:
-
-- `filter?: string` — path glob (`"gradient.ref.*"`, etc.). Defaults to every `gradient` token.
-- `caption?: string` — override the caption.
+Props: `caption?: string` — overrides the summary heading.
 
 ## Hooks
 

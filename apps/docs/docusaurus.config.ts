@@ -39,6 +39,13 @@ const config: Config = {
   organizationName: 'unpunnyfuns',
   projectName: 'swatchbook',
 
+  // The Storybook build is stitched into apps/docs/build/storybook by the
+  // deploy workflow (see .github/workflows/docs.yml), so links to
+  // `/storybook/` work at runtime but Docusaurus's compile-time broken-link
+  // checker can't see the stitched route. Leave this as 'warn' — the
+  // per-link hook only runs for markdown links, not the build-end check
+  // that reports every route, so there's no way to allowlist just that
+  // path without silencing the whole check.
   onBrokenLinks: 'warn',
 
   i18n: {
