@@ -169,11 +169,7 @@ const styles = {
   } satisfies CSSProperties,
 };
 
-/** @internal Exported for tests; not part of the public API. */
-export function buildTree(
-  resolved: Record<string, VirtualToken>,
-  root: string | undefined,
-): TreeNode[] {
+function buildTree(resolved: Record<string, VirtualToken>, root: string | undefined): TreeNode[] {
   const rootPrefix = root && root.length > 0 ? `${root}.` : '';
   const rootSegments = root ? root.split('.') : [];
 
