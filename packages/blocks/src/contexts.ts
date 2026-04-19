@@ -1,5 +1,6 @@
-import { createContext, useContext } from 'react';
-import type { ColorFormat } from '#/internal/format-color.ts';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { addons } from 'storybook/preview-api';
+import { COLOR_FORMATS, type ColorFormat } from '#/internal/format-color.ts';
 
 /**
  * Typed shape of the addon's `virtual:swatchbook/tokens` module, duplicated
@@ -116,8 +117,40 @@ export function useActiveAxes(): Readonly<Record<string, string>> {
  * is safe to call from MDX doc blocks (where the preview-hooks context
  * isn't available).
  */
-export const ColorFormatContext = createContext<ColorFormat>('hex');
+export const ColorFormatContext = createContext<ColorFormat | null>(null);
+
+const COLOR_FORMAT_GLOBAL_KEY = 'swatchbookColorFormat';
+
+interface GlobalsPayload {
+  globals?: Record<string, unknown>;
+}
+
+function isColorFormat(value: unknown): value is ColorFormat {
+  return typeof value === 'string' && (COLOR_FORMATS as readonly string[]).includes(value);
+}
 
 export function useColorFormat(): ColorFormat {
-  return useContext(ColorFormatContext);
+  const contextValue = useContext(ColorFormatContext);
+  const [channelFormat, setChannelFormat] = useState<ColorFormat | null>(null);
+
+  const fallbackEnabled = contextValue === null;
+
+  useEffect(() => {
+    if (!fallbackEnabled) return;
+    const channel = addons.getChannel();
+    const onGlobals = (payload: GlobalsPayload): void => {
+      const next = payload.globals?.[COLOR_FORMAT_GLOBAL_KEY];
+      if (isColorFormat(next)) setChannelFormat(next);
+    };
+    channel.on('globalsUpdated', onGlobals);
+    channel.on('updateGlobals', onGlobals);
+    channel.on('setGlobals', onGlobals);
+    return () => {
+      channel.off('globalsUpdated', onGlobals);
+      channel.off('updateGlobals', onGlobals);
+      channel.off('setGlobals', onGlobals);
+    };
+  }, [fallbackEnabled]);
+
+  return contextValue ?? channelFormat ?? 'hex';
 }
