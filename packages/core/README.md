@@ -139,7 +139,7 @@ Multi-axis projects emit one `:root` block with the default-tuple values, plus o
 [data-mode="Dark"][data-brand="Brand A"] { … }
 ```
 
-Every var is redeclared inside every block (flat emission). Nested cascading would be smaller but breaks whenever axes collide at the same token path — see `docs/decisions.md` for the rationale. Consumers flip tuples by writing one `data-<axis>="<context>"` attribute per axis on an ancestor (typically `<html>`).
+Every var is redeclared inside every block (flat emission). Nested cascading would be smaller but breaks whenever axes collide at the same token path. Consumers flip tuples by writing one `data-<axis>="<context>"` attribute per axis on an ancestor (typically `<html>`).
 
 Single-axis projects (one resolver modifier, or the synthetic `theme` axis) keep the familiar `[data-theme="…"]` shape — the compound selector collapses to a single attribute selector anyway, so the simpler form stays readable.
 

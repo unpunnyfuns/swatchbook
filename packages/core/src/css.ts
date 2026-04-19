@@ -19,7 +19,8 @@ export interface EmitCssOptions {
  * With axes supplied, emits a `:root` block carrying the default-tuple values
  * plus one block per non-default cartesian tuple keyed on a compound attribute
  * selector matching `Project.axes` order. Every var is redeclared per tuple
- * (flat emission) — see `docs/decisions.md` for the rationale.
+ * (flat emission): nested cascading would be smaller but breaks whenever
+ * axes collide at the same token path.
  *
  * For single-axis projects (resolver with one modifier, or synthetic `theme`),
  * emission keeps the familiar `[data-theme="…"]` shape.

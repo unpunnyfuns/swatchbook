@@ -2,13 +2,6 @@
 
 Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfuns`.
 
-## Start here
-
-- Design doc: `docs/plan.md` — current state summary, package responsibilities, scope areas, decisions locked in.
-- Decision log: `docs/decisions.md` — append-only ADR-lite for changes made during execution.
-- Terrazzo spike: `docs/terrazzo-notes.md` — what `@terrazzo/parser` gives us and what core still owns.
-- Future plans: `docs/future.md` — ideas deliberately deferred past v0.1.0, with the *why* preserved so we don't re-litigate.
-
 ## Current milestone
 
 `Current: prepping v0.1.0 release` — remaining work tracked in the **Release** milestone: publish workflow in CI with npm token + provenance (issue #41), then cut v0.1.0 with tag + release notes (issue #42). Feature work feeding into the release has already landed: full DTCG type parity with Terrazzo, consolidated toolbar (PR #213) and Design Tokens panel (PR #218), toolbar polish (PR #221), `disabledAxes` config surface (PR #206), `SwatchbookProvider` for framework-free rendering (PR #201), `TokenNavigator` block (PR #210), consumer-output panel (PR #209), color value format switcher (PR #208). Documentation site live at https://unpunnyfuns.github.io/swatchbook/.
@@ -21,7 +14,7 @@ GitHub milestones are scope buckets, not a sequence. Originally prefixed `M0`–
 
 Two active tracks:
 
-- **Feature milestones** — named scope areas in `docs/plan.md` (*Foundation*, *Core*, *Doc blocks*, *DTCG comprehension visualizations*, *Multi-axis theming UX*, …). Pick one to be "current" when we're pushing on features; the line above names what's active. No implied ordering beyond what `docs/plan.md` describes.
+- **Feature milestones** — named scope areas (*Foundation*, *Core*, *Doc blocks*, *DTCG comprehension visualizations*, *Multi-axis theming UX*, …). Pick one to be "current" when we're pushing on features; the line above names what's active. No implied ordering across them.
 - **Maintenance** — hygiene, refactors, CI polish, deferred cleanups. Drained opportunistically; never blocks a feature milestone.
 - **Release** — Changesets versioning, publish workflow, cutting tags. **Active** for v0.1.0 — see the "Current milestone" line.
 
@@ -29,7 +22,7 @@ When filing an issue: feature work → the relevant scope milestone. Repo hygien
 
 ## Project conventions
 
-- **Latest deps policy:** always pin the latest stable major/minor of every third-party dependency unless a concrete blocker is documented in `docs/decisions.md`. When adding a dep, check `npm view <pkg> version` and use that. Default to eager upgrades — we'd rather hit new-version friction early than accumulate a drift debt.
+- **Latest deps policy:** always pin the latest stable major/minor of every third-party dependency unless there's a concrete blocker. When adding a dep, check `npm view <pkg> version` and use that. Default to eager upgrades — we'd rather hit new-version friction early than accumulate a drift debt.
 - **ESM only.** Every package is `"type": "module"`. No CJS builds, no dual-format outputs, no `require()`-compatible fallbacks. Package builds emit ESM only (`tsdown --format esm`). If a downstream consumer still needs CJS, that's their problem to solve with a bundler.
 - **Bundler:** `tsdown` (rolldown-powered). Never add `tsup` — it's deprecated.
 - **Source layout:** every package keeps its code under `./src/`. Package root holds config only (`package.json`, `tsconfig.json`, `README.md`). Build output goes to `./dist/`.
@@ -99,8 +92,6 @@ claude
 
 ## Plan governance
 
-- Plan body edits → same PR as the change they reflect.
-- Tactical choices that don't change design intent → append to `docs/decisions.md`.
 - PR template (`.github/pull_request_template.md`) requires `Milestone:`, `Closes:`, and `Plan impact:` lines — don't remove them.
 - Every PR links an existing GitHub issue. File one first if needed: `gh issue create --milestone "Mx — …" --title "…"`. Merging the PR auto-closes the issue; milestones close automatically when the last issue is done.
 - **PR titles follow [Conventional Commits](https://www.conventionalcommits.org/)**: `<type>(<scope>): <description>`. Types: `feat` / `fix` / `chore` / `docs` / `test` / `ci` / `refactor` / `perf` / `build` / `revert`. Scope is a package slug (`core`, `addon`, `blocks`, `tokens-reference`, `tokens-starter`, `storybook`, `ci`) or omitted. Milestone goes in the PR body, never the title — squash-merge lands the title on `main`.
