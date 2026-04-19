@@ -2,6 +2,24 @@
   "name": "@unpunnyfuns/swatchbook-core",
   "version": "0.0.0",
   "description": "Framework-free core for loading and emitting DTCG design tokens.",
+  "license": "MIT",
+  "author": "unpunnyfuns <unpunnyfuns@gmail.com>",
+  "homepage": "https://unpunnyfuns.github.io/swatchbook/",
+  "bugs": "https://github.com/unpunnyfuns/swatchbook/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unpunnyfuns/swatchbook.git",
+    "directory": "packages/core"
+  },
+  "keywords": [
+    "design-tokens",
+    "dtcg",
+    "design-system",
+    "tokens",
+    "css-variables",
+    "terrazzo",
+    "typescript"
+  ],
   "type": "module",
   "engines": {
     "node": ">=24.14.0"
