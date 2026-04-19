@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.1.4
+
+### Patch Changes
+
+- be1ee1f: Tidy npm keywords: drop `storybook-addon` from `@unpunnyfuns/swatchbook-blocks` (it's a companion doc-block library, not an addon), and add broader discovery terms `design` and `style` to `@unpunnyfuns/swatchbook-addon`.
+
 ## 0.1.3
 
 ### Patch Changes

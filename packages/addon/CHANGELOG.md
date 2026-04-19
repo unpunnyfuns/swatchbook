@@ -1,5 +1,15 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.1.4
+
+### Patch Changes
+
+- be1ee1f: Tidy npm keywords: drop `storybook-addon` from `@unpunnyfuns/swatchbook-blocks` (it's a companion doc-block library, not an addon), and add broader discovery terms `design` and `style` to `@unpunnyfuns/swatchbook-addon`.
+- df29138: Fix the Swatchbook toolbar popover not closing on outside click. `WithTooltipPure`'s built-in `closeOnOutsideClick` misses the case of clicks that land outside the portaled popover; add a document-level `mousedown` listener while open that closes unless the click is inside the trigger wrapper or the popover body.
+- Updated dependencies [be1ee1f]
+  - @unpunnyfuns/swatchbook-blocks@0.1.4
+  - @unpunnyfuns/swatchbook-core@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes
