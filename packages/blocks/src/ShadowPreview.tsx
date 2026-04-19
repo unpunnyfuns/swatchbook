@@ -2,11 +2,12 @@ import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
 import {
   BORDER_DEFAULT,
+  MONO_STACK,
+  TEXT_MUTED,
   captionStyle,
   emptyStyle,
-  MONO_STACK,
   surfaceStyle,
-} from '#/internal/styles.ts';
+} from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
@@ -66,13 +67,13 @@ const styles = {
     rowGap: 2,
   } satisfies CSSProperties,
   breakdownKey: {
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
   } satisfies CSSProperties,
   layerHeader: {
     fontSize: 10,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
     marginTop: 6,
   } satisfies CSSProperties,
 };

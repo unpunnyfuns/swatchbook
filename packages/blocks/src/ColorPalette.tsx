@@ -4,11 +4,12 @@ import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import {
   BORDER_DEFAULT,
+  BORDER_FAINT,
+  MONO_STACK,
   captionStyle,
   emptyStyle,
-  MONO_STACK,
   surfaceStyle,
-} from '#/internal/styles.ts';
+} from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
@@ -65,7 +66,7 @@ const styles = {
   swatch: {
     height: 56,
     width: '100%',
-    borderBottom: '1px solid var(--sb-color-sys-border-default, rgba(0,0,0,0.08))',
+    borderBottom: BORDER_FAINT,
   } satisfies React.CSSProperties,
   meta: {
     padding: '8px 10px',

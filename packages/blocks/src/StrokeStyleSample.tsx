@@ -2,11 +2,13 @@ import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
 import {
   BORDER_DEFAULT,
+  MONO_STACK,
+  TEXT_DEFAULT,
+  TEXT_MUTED,
   captionStyle,
   emptyStyle,
-  MONO_STACK,
   surfaceStyle,
-} from '#/internal/styles.ts';
+} from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
@@ -60,23 +62,23 @@ const styles = {
   value: {
     fontFamily: MONO_STACK,
     fontSize: 11,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
   } satisfies CSSProperties,
   line: {
     height: 0,
     borderTopWidth: 4,
-    borderTopColor: 'var(--sb-color-sys-text-default, CanvasText)',
+    borderTopColor: TEXT_DEFAULT,
     width: '100%',
   } satisfies CSSProperties,
   objectFallback: {
     fontFamily: MONO_STACK,
     fontSize: 11,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
   } satisfies CSSProperties,
   cssVar: {
     fontFamily: MONO_STACK,
     fontSize: 11,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
   } satisfies CSSProperties,
 };
 

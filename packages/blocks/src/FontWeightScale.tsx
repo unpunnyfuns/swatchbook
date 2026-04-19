@@ -2,11 +2,12 @@ import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
 import {
   BORDER_DEFAULT,
+  MONO_STACK,
+  TEXT_MUTED,
   captionStyle,
   emptyStyle,
-  MONO_STACK,
   surfaceStyle,
-} from '#/internal/styles.ts';
+} from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
@@ -50,7 +51,7 @@ const styles = {
   value: {
     fontFamily: MONO_STACK,
     fontSize: 11,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
   } satisfies CSSProperties,
   sample: {
     fontSize: 28,
@@ -59,7 +60,7 @@ const styles = {
   cssVar: {
     fontFamily: MONO_STACK,
     fontSize: 11,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
   } satisfies CSSProperties,
 };
 

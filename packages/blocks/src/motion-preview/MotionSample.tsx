@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactElement } from 'react';
+import { SURFACE_MUTED, TEXT_MUTED } from '#/internal/styles.tsx';
 import { useEffect, useMemo, useState } from 'react';
 import { chromeAliases } from '#/internal/data-attr.ts';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
@@ -26,7 +27,7 @@ const styles = {
   track: {
     position: 'relative',
     height: 36,
-    background: 'var(--sb-color-sys-surface-muted, rgba(128,128,128,0.08))',
+    background: SURFACE_MUTED,
     borderRadius: 18,
     overflow: 'hidden',
   } satisfies CSSProperties,
@@ -41,7 +42,7 @@ const styles = {
   } satisfies CSSProperties,
   reducedMotion: {
     fontSize: 11,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
     fontStyle: 'italic',
   } satisfies CSSProperties,
 };

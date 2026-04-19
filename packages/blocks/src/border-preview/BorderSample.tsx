@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactElement } from 'react';
+import { SURFACE_RAISED } from '#/internal/styles.tsx';
 import { chromeAliases } from '#/internal/data-attr.ts';
 import { makeCssVar, useProject } from '#/internal/use-project.ts';
 
@@ -10,7 +11,7 @@ export interface BorderSampleProps {
 const sampleStyle: CSSProperties = {
   width: 120,
   height: 56,
-  background: 'var(--sb-color-sys-surface-raised, transparent)',
+  background: SURFACE_RAISED,
   borderRadius: 6,
 };
 

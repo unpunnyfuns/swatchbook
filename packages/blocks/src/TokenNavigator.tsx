@@ -3,7 +3,20 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
 import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
-import { BORDER_DEFAULT, MONO_STACK, surfaceStyle } from '#/internal/styles.ts';
+import {
+  BORDER_DEFAULT,
+  BORDER_STRONG,
+  EmptyState,
+  MONO_STACK,
+  SIZE_LABEL,
+  SIZE_META,
+  SIZE_PILL,
+  SURFACE_DEFAULT,
+  surfaceStyle,
+  TEXT_DEFAULT,
+  TEXT_MUTED,
+  typePillStyle,
+} from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { makeCssVar, useProject } from '#/internal/use-project.ts';
@@ -49,8 +62,8 @@ const styles = {
   wrapper: surfaceStyle,
   caption: {
     padding: '4px 0 12px',
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
-    fontSize: 12,
+    color: TEXT_MUTED,
+    fontSize: SIZE_META,
   } satisfies CSSProperties,
   tree: {
     listStyle: 'none',
@@ -72,7 +85,7 @@ const styles = {
     cursor: 'pointer',
     userSelect: 'none',
     fontFamily: MONO_STACK,
-    fontSize: 12,
+    fontSize: SIZE_META,
   } satisfies CSSProperties,
   leafRow: {
     display: 'flex',
@@ -82,30 +95,28 @@ const styles = {
     borderRadius: 4,
     cursor: 'pointer',
     fontFamily: MONO_STACK,
-    fontSize: 12,
+    fontSize: SIZE_META,
   } satisfies CSSProperties,
   caret: {
     display: 'inline-block',
     width: 12,
     textAlign: 'center',
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    color: TEXT_MUTED,
   } satisfies CSSProperties,
   tail: {
     fontFamily: MONO_STACK,
-    fontSize: 12,
+    fontSize: SIZE_META,
   } satisfies CSSProperties,
   typePill: {
-    display: 'inline-block',
+    ...typePillStyle,
+    // Tree leaves use a smaller pill (1px vs 2px padding) so the row
+    // height stays compact against inline swatch/preview visuals.
     padding: '1px 6px',
-    borderRadius: 4,
-    fontSize: 10,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-    background: 'var(--sb-color-sys-surface-muted, rgba(128,128,128,0.15))',
+    fontSize: SIZE_PILL,
   } satisfies CSSProperties,
   value: {
-    fontSize: 11,
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
+    fontSize: SIZE_LABEL,
+    color: TEXT_MUTED,
     marginLeft: 'auto',
     wordBreak: 'break-all',
     maxWidth: '40%',
@@ -113,26 +124,21 @@ const styles = {
   } satisfies CSSProperties,
   count: {
     marginLeft: 'auto',
-    fontSize: 11,
-    color: 'var(--sb-color-sys-text-default, CanvasText)',
+    fontSize: SIZE_LABEL,
+    color: TEXT_DEFAULT,
   } satisfies CSSProperties,
   colorSwatch: {
     display: 'inline-block',
     width: 14,
     height: 14,
     borderRadius: 3,
-    border: '1px solid var(--sb-color-sys-border-default, rgba(0,0,0,0.1))',
+    border: BORDER_DEFAULT,
   } satisfies CSSProperties,
   previewBox: {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
     marginLeft: 'auto',
-  } satisfies CSSProperties,
-  empty: {
-    padding: '24px 12px',
-    textAlign: 'center',
-    color: 'var(--sb-color-sys-text-muted, CanvasText)',
   } satisfies CSSProperties,
   backdrop: {
     position: 'fixed',
@@ -147,8 +153,8 @@ const styles = {
     width: 'min(560px, 100%)',
     height: '100%',
     overflowY: 'auto',
-    background: 'var(--sb-color-sys-surface-default, Canvas)',
-    color: 'var(--sb-color-sys-text-default, CanvasText)',
+    background: SURFACE_DEFAULT,
+    color: TEXT_DEFAULT,
     boxShadow: '-8px 0 24px rgba(0,0,0,0.2)',
     padding: 16,
     position: 'relative',
@@ -160,7 +166,7 @@ const styles = {
     width: 32,
     height: 32,
     borderRadius: 4,
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.3))',
+    border: BORDER_STRONG,
     background: 'transparent',
     color: 'inherit',
     cursor: 'pointer',
@@ -287,9 +293,9 @@ export function TokenNavigator({
         {...themeAttrs(cssVarPrefix, activeTheme)}
         style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
       >
-        <div style={styles.empty}>
+        <EmptyState>
           {root ? `No tokens under "${root}".` : 'No tokens in the active theme.'}
-        </div>
+        </EmptyState>
       </div>
     );
   }

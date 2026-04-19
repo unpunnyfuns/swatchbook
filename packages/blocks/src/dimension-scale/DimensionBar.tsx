@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactElement } from 'react';
+import { BORDER_STRONG } from '#/internal/styles.tsx';
 import { chromeAliases } from '#/internal/data-attr.ts';
 import { makeCssVar, useProject } from '#/internal/use-project.ts';
 
@@ -29,11 +30,11 @@ const styles = {
     width: 56,
     height: 56,
     background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.3))',
+    border: BORDER_STRONG,
   } satisfies CSSProperties,
   sizeSample: {
     background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.3))',
+    border: BORDER_STRONG,
     minWidth: 1,
     minHeight: 1,
   } satisfies CSSProperties,

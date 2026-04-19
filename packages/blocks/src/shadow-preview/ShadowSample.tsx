@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactElement } from 'react';
+import { BORDER_FAINT, SURFACE_RAISED } from '#/internal/styles.tsx';
 import { chromeAliases } from '#/internal/data-attr.ts';
 import { makeCssVar, useProject } from '#/internal/use-project.ts';
 
@@ -10,8 +11,8 @@ export interface ShadowSampleProps {
 const sampleStyle: CSSProperties = {
   width: 120,
   height: 56,
-  background: 'var(--sb-color-sys-surface-raised, #fff)',
-  border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.15))',
+  background: SURFACE_RAISED,
+  border: BORDER_FAINT,
   borderRadius: 6,
 };
 
