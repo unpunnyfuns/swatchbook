@@ -4,6 +4,7 @@ import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
 import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
 import { formatColor } from '#/internal/format-color.ts';
+import { BORDER_DEFAULT, MONO_STACK, surfaceStyle } from '#/internal/styles.ts';
 import { formatValue, makeCssVar, useProject } from '#/internal/use-project.ts';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
@@ -44,14 +45,7 @@ interface GroupNode {
 type TreeNode = LeafNode | GroupNode;
 
 const styles = {
-  wrapper: {
-    fontFamily: 'var(--sb-typography-sys-body-font-family, system-ui)',
-    fontSize: 'var(--sb-typography-sys-body-font-size, 14px)',
-    color: 'var(--sb-color-sys-text-default, CanvasText)',
-    background: 'var(--sb-color-sys-surface-default, Canvas)',
-    padding: 12,
-    borderRadius: 6,
-  } satisfies CSSProperties,
+  wrapper: surfaceStyle,
   caption: {
     padding: '4px 0 12px',
     color: 'var(--sb-color-sys-text-muted, CanvasText)',
@@ -66,7 +60,7 @@ const styles = {
     listStyle: 'none',
     margin: 0,
     paddingLeft: 18,
-    borderLeft: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.2))',
+    borderLeft: BORDER_DEFAULT,
   } satisfies CSSProperties,
   groupRow: {
     display: 'flex',
@@ -76,7 +70,7 @@ const styles = {
     borderRadius: 4,
     cursor: 'pointer',
     userSelect: 'none',
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
   } satisfies CSSProperties,
   leafRow: {
@@ -86,7 +80,7 @@ const styles = {
     padding: '4px 6px',
     borderRadius: 4,
     cursor: 'pointer',
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
   } satisfies CSSProperties,
   caret: {
@@ -96,7 +90,7 @@ const styles = {
     color: 'var(--sb-color-sys-text-muted, CanvasText)',
   } satisfies CSSProperties,
   tail: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
   } satisfies CSSProperties,
   typePill: {

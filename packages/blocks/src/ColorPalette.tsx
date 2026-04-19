@@ -2,6 +2,13 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/internal/format-color.ts';
+import {
+  BORDER_DEFAULT,
+  captionStyle,
+  emptyStyle,
+  MONO_STACK,
+  surfaceStyle,
+} from '#/internal/styles.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface ColorPaletteProps {
@@ -28,24 +35,14 @@ export interface ColorPaletteProps {
 }
 
 const styles = {
-  wrapper: {
-    fontFamily: 'var(--sb-typography-sys-body-font-family, system-ui)',
-    fontSize: 'var(--sb-typography-sys-body-font-size, 14px)',
-    color: 'var(--sb-color-sys-text-default, CanvasText)',
-    background: 'var(--sb-color-sys-surface-default, Canvas)',
-    padding: 12,
-    borderRadius: 6,
-  } satisfies React.CSSProperties,
-  caption: {
-    padding: '4px 0 12px',
-    opacity: 0.7,
-    fontSize: 12,
-  } satisfies React.CSSProperties,
+  wrapper: surfaceStyle,
+  caption: captionStyle,
+  empty: emptyStyle,
   group: {
     marginBottom: 20,
   } satisfies React.CSSProperties,
   groupHeader: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 11,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -58,7 +55,7 @@ const styles = {
     gap: 8,
   } satisfies React.CSSProperties,
   card: {
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.2))',
+    border: BORDER_DEFAULT,
     borderRadius: 6,
     overflow: 'hidden',
     display: 'flex',
@@ -76,18 +73,13 @@ const styles = {
     gap: 2,
   } satisfies React.CSSProperties,
   leaf: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
   } satisfies React.CSSProperties,
   value: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 11,
     opacity: 0.7,
-  } satisfies React.CSSProperties,
-  empty: {
-    padding: '24px 12px',
-    textAlign: 'center',
-    opacity: 0.6,
   } satisfies React.CSSProperties,
 };
 

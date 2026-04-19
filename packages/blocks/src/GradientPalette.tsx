@@ -1,5 +1,13 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
+import {
+  BORDER_DEFAULT,
+  BORDER_FAINT,
+  captionStyle,
+  emptyStyle,
+  MONO_STACK,
+  surfaceStyle,
+} from '#/internal/styles.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface GradientPaletteProps {
@@ -13,26 +21,16 @@ export interface GradientPaletteProps {
 }
 
 const styles = {
-  wrapper: {
-    fontFamily: 'var(--sb-typography-sys-body-font-family, system-ui)',
-    fontSize: 'var(--sb-typography-sys-body-font-size, 14px)',
-    color: 'var(--sb-color-sys-text-default, CanvasText)',
-    background: 'var(--sb-color-sys-surface-default, Canvas)',
-    padding: 12,
-    borderRadius: 6,
-  } satisfies CSSProperties,
-  caption: {
-    padding: '4px 0 12px',
-    opacity: 0.7,
-    fontSize: 12,
-  } satisfies CSSProperties,
+  wrapper: surfaceStyle,
+  caption: captionStyle,
+  empty: emptyStyle,
   row: {
     display: 'grid',
     gridTemplateColumns: 'minmax(180px, 240px) 1fr minmax(140px, 220px)',
     gap: 16,
     alignItems: 'center',
     padding: '16px 0',
-    borderBottom: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.2))',
+    borderBottom: BORDER_DEFAULT,
   } satisfies CSSProperties,
   meta: {
     display: 'flex',
@@ -41,24 +39,24 @@ const styles = {
     minWidth: 0,
   } satisfies CSSProperties,
   path: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   } satisfies CSSProperties,
   cssVar: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 11,
     opacity: 0.7,
   } satisfies CSSProperties,
   sample: {
     height: 56,
     borderRadius: 6,
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.15))',
+    border: BORDER_FAINT,
   } satisfies CSSProperties,
   stops: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 11,
     display: 'flex',
     flexDirection: 'column',
@@ -77,11 +75,6 @@ const styles = {
     flex: '0 0 auto',
   } satisfies CSSProperties,
   stopPosition: {
-    opacity: 0.6,
-  } satisfies CSSProperties,
-  empty: {
-    padding: '24px 12px',
-    textAlign: 'center',
     opacity: 0.6,
   } satisfies CSSProperties,
 };

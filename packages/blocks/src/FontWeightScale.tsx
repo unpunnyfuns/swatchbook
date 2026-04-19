@@ -1,5 +1,12 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
+import {
+  BORDER_DEFAULT,
+  captionStyle,
+  emptyStyle,
+  MONO_STACK,
+  surfaceStyle,
+} from '#/internal/styles.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface FontWeightScaleProps {
@@ -15,25 +22,16 @@ export interface FontWeightScaleProps {
 }
 
 const styles = {
-  wrapper: {
-    fontFamily: 'var(--sb-typography-sys-body-font-family, system-ui)',
-    color: 'var(--sb-color-sys-text-default, CanvasText)',
-    background: 'var(--sb-color-sys-surface-default, Canvas)',
-    padding: 12,
-    borderRadius: 6,
-  } satisfies CSSProperties,
-  caption: {
-    padding: '4px 0 12px',
-    opacity: 0.7,
-    fontSize: 12,
-  } satisfies CSSProperties,
+  wrapper: surfaceStyle,
+  caption: captionStyle,
+  empty: emptyStyle,
   row: {
     display: 'grid',
     gridTemplateColumns: 'minmax(160px, 220px) 1fr auto',
     gap: 16,
     alignItems: 'baseline',
     padding: '12px 0',
-    borderBottom: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.2))',
+    borderBottom: BORDER_DEFAULT,
   } satisfies CSSProperties,
   meta: {
     display: 'flex',
@@ -42,14 +40,14 @@ const styles = {
     minWidth: 0,
   } satisfies CSSProperties,
   path: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   } satisfies CSSProperties,
   value: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 11,
     color: 'var(--sb-color-sys-text-muted, CanvasText)',
   } satisfies CSSProperties,
@@ -58,14 +56,9 @@ const styles = {
     lineHeight: 1,
   } satisfies CSSProperties,
   cssVar: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 11,
     color: 'var(--sb-color-sys-text-muted, CanvasText)',
-  } satisfies CSSProperties,
-  empty: {
-    padding: '24px 12px',
-    textAlign: 'center',
-    opacity: 0.6,
   } satisfies CSSProperties,
 };
 

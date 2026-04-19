@@ -1,18 +1,15 @@
 import type { CSSProperties } from 'react';
+import { BORDER_DEFAULT, BORDER_FAINT, MONO_STACK, surfaceStyle } from '#/internal/styles.ts';
 
 export const styles = {
   wrapper: {
-    fontFamily: 'var(--sb-typography-sys-body-font-family, system-ui)',
-    fontSize: 'var(--sb-typography-sys-body-font-size, 14px)',
-    color: 'var(--sb-color-sys-text-default, CanvasText)',
-    background: 'var(--sb-color-sys-surface-default, Canvas)',
+    ...surfaceStyle,
     padding: 16,
-    borderRadius: 6,
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.2))',
+    border: BORDER_DEFAULT,
   } satisfies CSSProperties,
   heading: {
     margin: 0,
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 16,
   } satisfies CSSProperties,
   subline: {
@@ -37,7 +34,7 @@ export const styles = {
     opacity: 0.85,
   } satisfies CSSProperties,
   sectionHeader: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 11,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -49,13 +46,13 @@ export const styles = {
     flexWrap: 'wrap',
     gap: 6,
     alignItems: 'center',
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
   } satisfies CSSProperties,
   chainNode: {
     padding: '2px 6px',
     borderRadius: 4,
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.2))',
+    border: BORDER_DEFAULT,
   } satisfies CSSProperties,
   arrow: {
     opacity: 0.5,
@@ -67,7 +64,7 @@ export const styles = {
     fontSize: 12,
   } satisfies CSSProperties,
   themeRow: {
-    borderBottom: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.15))',
+    borderBottom: BORDER_FAINT,
   } satisfies CSSProperties,
   themeCell: {
     padding: '6px 8px',
@@ -87,7 +84,7 @@ export const styles = {
     padding: '8px 10px',
     borderRadius: 4,
     background: 'var(--sb-color-sys-surface-muted, rgba(128,128,128,0.1))',
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
     whiteSpace: 'pre',
     overflow: 'auto',
@@ -103,7 +100,7 @@ export const styles = {
     width: 140,
     height: 56,
     background: 'var(--sb-color-sys-surface-raised, #fff)',
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.15))',
+    border: BORDER_FAINT,
     borderRadius: 6,
   } satisfies CSSProperties,
   borderSample: {
@@ -116,7 +113,7 @@ export const styles = {
     width: 220,
     height: 56,
     borderRadius: 6,
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.15))',
+    border: BORDER_FAINT,
   } satisfies CSSProperties,
   strokeStyleLine: {
     height: 0,
@@ -130,7 +127,7 @@ export const styles = {
     color: 'var(--sb-color-sys-text-default, CanvasText)',
   } satisfies CSSProperties,
   strokeStyleFallback: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
     color: 'var(--sb-color-sys-text-muted, CanvasText)',
   } satisfies CSSProperties,
@@ -139,7 +136,7 @@ export const styles = {
     gap: 1,
     borderRadius: 6,
     overflow: 'hidden',
-    border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.2))',
+    border: BORDER_DEFAULT,
     width: 220,
     height: 56,
   } satisfies CSSProperties,
@@ -152,7 +149,7 @@ export const styles = {
     boxShadow: 'inset 0 0 0 8px rgba(17, 17, 17, 0.9)',
   } satisfies CSSProperties,
   breakdownSection: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
     display: 'grid',
     gridTemplateColumns: 'auto 1fr',
@@ -216,7 +213,7 @@ export const styles = {
     listStyle: 'none',
     margin: 0,
     padding: 0,
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
   } satisfies CSSProperties,
   aliasedByRow: {
@@ -240,7 +237,7 @@ export const styles = {
     fontSize: 11,
     opacity: 0.7,
     margin: '0 0 6px',
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
   } satisfies CSSProperties,
   consumerRow: {
     display: 'flex',
@@ -252,7 +249,7 @@ export const styles = {
     background: 'var(--sb-color-sys-surface-muted, rgba(128,128,128,0.1))',
   } satisfies CSSProperties,
   consumerRowLabel: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 10,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -262,7 +259,7 @@ export const styles = {
   } satisfies CSSProperties,
   consumerRowValue: {
     flex: 1,
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
     whiteSpace: 'nowrap',
     overflow: 'auto',
@@ -270,7 +267,7 @@ export const styles = {
   consumerRowCopy: {
     padding: '3px 8px',
     fontSize: 11,
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     background: 'var(--sb-color-sys-surface-raised, Canvas)',
     color: 'var(--sb-color-sys-text-default, CanvasText)',
     border: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.3))',
