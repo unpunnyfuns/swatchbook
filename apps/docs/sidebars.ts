@@ -13,7 +13,15 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Blocks',
       collapsed: false,
-      items: ['reference/blocks', 'guides/authoring-doc-stories', 'guides/token-dashboard'],
+      items: [
+        'reference/blocks/blocks',
+        'reference/blocks/overview',
+        'reference/blocks/inspector',
+        'reference/blocks/samples',
+        'reference/blocks/utility',
+        'guides/authoring-doc-stories',
+        'guides/token-dashboard',
+      ],
     },
     {
       type: 'category',
