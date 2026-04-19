@@ -60,7 +60,7 @@
   },
   "storybook": {
     "displayName": "Swatchbook",
-    "icon": "https://raw.githubusercontent.com/unpunnyfuns/swatchbook/main/apps/storybook/public/logo.svg",
+    "icon": "https://raw.githubusercontent.com/unpunnyfuns/swatchbook/main/apps/docs/static/img/logo.png",
     "supportedFrameworks": [
       "react"
     ]
