@@ -5,6 +5,7 @@ import { useColorFormat } from '#/contexts.ts';
 import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
 import { formatColor } from '#/internal/format-color.ts';
 import { BORDER_DEFAULT, MONO_STACK, surfaceStyle } from '#/internal/styles.ts';
+import { themeAttrs } from '#/internal/data-attr.ts';
 import { formatValue, makeCssVar, useProject } from '#/internal/use-project.ts';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
@@ -246,7 +247,7 @@ export function TokenNavigator({
   initiallyExpanded = 1,
   onSelect,
 }: TokenNavigatorProps): ReactElement {
-  const { resolved, activeTheme } = useProject();
+  const { resolved, activeTheme, cssVarPrefix } = useProject();
 
   const tree = useMemo(() => buildTree(resolved, root), [resolved, root]);
 
@@ -282,7 +283,7 @@ export function TokenNavigator({
 
   if (tree.length === 0) {
     return (
-      <div data-theme={activeTheme} style={styles.wrapper}>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={styles.wrapper}>
         <div style={styles.empty}>
           {root ? `No tokens under "${root}".` : 'No tokens in the active theme.'}
         </div>
@@ -291,7 +292,7 @@ export function TokenNavigator({
   }
 
   return (
-    <div data-theme={activeTheme} style={styles.wrapper}>
+    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={styles.wrapper}>
       <div style={styles.caption}>
         {root ? `Tokens under ${root}` : 'Token graph'} · {activeTheme}
       </div>

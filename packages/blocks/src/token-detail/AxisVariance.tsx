@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
+import { dataAttr } from '#/internal/data-attr.ts';
 import { type ColorFormat, formatColor } from '#/internal/format-color.ts';
 import { formatValue } from '#/internal/use-project.ts';
 import { styles } from '#/token-detail/styles.ts';
@@ -22,7 +23,8 @@ interface Variance {
 }
 
 export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
-  const { token, cssVar, axes, themes, themesResolved, activeAxes } = useTokenDetailData(path);
+  const { token, cssVar, axes, themes, themesResolved, activeAxes, cssVarPrefix } =
+    useTokenDetailData(path);
   const colorFormat = useColorFormat();
   const isColor = token?.$type === 'color';
   const formatFn = (t: DetailToken | undefined): string => valueFor(t, isColor, colorFormat);
@@ -89,7 +91,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                   {isColor && row.themeName && (
                     <span
                       style={{ ...styles.swatch, background: cssVar }}
-                      data-theme={row.themeName}
+                      {...{ [dataAttr(cssVarPrefix, 'theme')]: row.themeName }}
                       aria-hidden
                     />
                   )}
@@ -143,7 +145,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                     {isColor && name && (
                       <span
                         style={{ ...styles.swatch, background: cssVar }}
-                        data-theme={name}
+                        {...{ [dataAttr(cssVarPrefix, 'theme')]: name }}
                         aria-hidden
                       />
                     )}

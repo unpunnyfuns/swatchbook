@@ -12,7 +12,6 @@ export const COLOR_FORMAT_GLOBAL_KEY = 'swatchbookColorFormat';
 export const VIRTUAL_MODULE_ID = 'virtual:swatchbook/tokens';
 export const RESOLVED_VIRTUAL_MODULE_ID = `\0${VIRTUAL_MODULE_ID}`;
 
-export const DATA_THEME_ATTR = 'data-theme';
 export const STYLE_ELEMENT_ID = 'swatchbook-tokens';
 
 /** Channel event: preview → manager, carries theme list + mode. */
