@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.1.5
+
+### Patch Changes
+
+- 89d48a1: Declare `"sideEffects": false` on all three published packages. No CSS imports, no module-level work that isn't gated behind used-export reachability. Gives consumer bundlers permission to tree-shake unused exports more aggressively.
+
 ## 0.1.4
 
 ## 0.1.3

@@ -1,5 +1,16 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.1.5
+
+### Patch Changes
+
+- 51c9b7e: Add an explicit `aria-label="Search tokens"` to the Design Tokens panel's search input. Placeholder text alone doesn't satisfy WCAG 2.1 4.1.2 (Name, Role, Value) — screen readers now announce the field's purpose.
+- 89d48a1: Declare `"sideEffects": false` on all three published packages. No CSS imports, no module-level work that isn't gated behind used-export reachability. Gives consumer bundlers permission to tree-shake unused exports more aggressively.
+- Updated dependencies [d5f2a03]
+- Updated dependencies [89d48a1]
+  - @unpunnyfuns/swatchbook-blocks@0.1.5
+  - @unpunnyfuns/swatchbook-core@0.1.5
+
 ## 0.1.4
 
 ### Patch Changes
