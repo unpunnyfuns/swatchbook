@@ -526,6 +526,25 @@ function AxesToolbar(): ReactElement {
     return () => document.removeEventListener('keydown', onDocKey);
   }, [open]);
 
+  /**
+   * `WithTooltipPure`'s built-in `closeOnOutsideClick` misses some cases
+   * (portaled popover + manager iframe boundaries). Belt-and-suspenders:
+   * close when the user mouses down anywhere that isn't the trigger wrapper
+   * or the popover body.
+   */
+  useEffect(() => {
+    if (!open) return;
+    const onDocMouseDown = (e: MouseEvent): void => {
+      const target = e.target;
+      if (!(target instanceof Element)) return;
+      if (bodyRef.current?.contains(target)) return;
+      if (target.closest('[data-testid="swatchbook-toolbar-popover"]')) return;
+      setOpen(false);
+    };
+    document.addEventListener('mousedown', onDocMouseDown);
+    return () => document.removeEventListener('mousedown', onDocMouseDown);
+  }, [open]);
+
   if (axes.length === 0) {
     return h(
       IconButton,
