@@ -62,7 +62,7 @@ const css = emitCss(project.themes, project.themesResolved, {
 });
 ```
 
-Single-axis projects keep the familiar `[data-theme="…"]` shape.
+Single-axis projects keep the familiar single-attribute shape — `[data-<prefix>-theme="…"]` with a prefix set (default `swatch`), `[data-theme="…"]` when you opt out with `cssVarPrefix: ''`.
 
 ### `projectCss(project)`
 

@@ -34,12 +34,17 @@ export function extractBlock(css: string, selector: string): string {
 
 /**
  * Compose a compound attribute selector for a tuple in the supplied key order.
- * `{ mode: 'Dark', brand: 'Default' }` becomes
- * `[data-mode="Dark"][data-brand="Default"]`.
+ * `{ mode: 'Dark', brand: 'Default' }` with prefix `'sb'` becomes
+ * `[data-sb-mode="Dark"][data-sb-brand="Default"]`. Empty prefix keeps the
+ * bare `data-<axis>` form.
  */
-export function tupleSelector(tuple: Readonly<Record<string, string>>): string {
+export function tupleSelector(
+  tuple: Readonly<Record<string, string>>,
+  prefix: string = 'sb',
+): string {
+  const attr = prefix ? `data-${prefix}-` : 'data-';
   return Object.entries(tuple)
-    .map(([k, v]) => `[data-${k}="${v}"]`)
+    .map(([k, v]) => `[${attr}${k}="${v}"]`)
     .join('');
 }
 

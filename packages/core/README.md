@@ -17,8 +17,9 @@ npm install @unpunnyfuns/swatchbook-core
 | `defineSwatchbookConfig(config)` | Identity helper for a typed `swatchbook.config.ts`. |
 | `loadProject(config, cwd?)` | Parse + resolve — returns `Project { axes, themes, themesResolved, graph, diagnostics, … }`. |
 | `resolveTheme(project, name)` | Pick a single composed theme out of a project. |
-| `emitCss(themes, themesResolved, options?)` | Concatenated stylesheet — `:root` for the default tuple plus one compound-selector block per non-default tuple (`[data-mode="Dark"][data-brand="Brand A"] { … }`). Single-axis projects keep the familiar `[data-theme="…"]` shape. |
+| `emitCss(themes, themesResolved, options?)` | Concatenated stylesheet — `:root` for the default tuple plus one compound-selector block per non-default tuple (`[data-swatch-mode="Dark"][data-swatch-brand="Brand A"] { … }`). Attribute names are prefixed with `cssVarPrefix` (default `swatch`); set `cssVarPrefix: ''` for bare `data-mode` / `data-theme`. |
 | `projectCss(project)` | Same as `emitCss` with project defaults (prefix + axes) applied. |
+| `dataAttr(prefix, key)` | Compose a prefixed `data-*` attribute name. Exported so consumer code that has to set the attrs manually (rare — the addon does it in Storybook) stays in lockstep with emitted selectors. |
 | `emitTypes(project)` | TypeScript source declaring the token-path union + `SwatchbookTokenMap`. |
 | `permutationID(input)` | Stringify a tuple (`{ mode: 'Dark', brand: 'Brand A' }` → `"Dark · Brand A"`) to the form used as `Theme.name` and CSS data-attribute values. |
 | Types | `Axis`, `AxisConfig`, `Config`, `Preset`, `Theme`, `Project`, `ResolvedTheme`, `TokenMap`, `Diagnostic`, `DiagnosticSeverity`. |
@@ -130,18 +131,18 @@ export default defineSwatchbookConfig({
 
 ## CSS emission
 
-Multi-axis projects emit one `:root` block with the default-tuple values, plus one block per non-default combination of axis contexts keyed on a compound attribute selector in `Project.axes` order:
+Multi-axis projects emit one `:root` block with the default-tuple values, plus one block per non-default combination of axis contexts keyed on a compound attribute selector in `Project.axes` order. Attribute names are namespaced with `cssVarPrefix` (default `swatch`) so swatchbook's scaffolding doesn't collide with other libs that claim bare `data-mode` / `data-theme`:
 
 ```css
-:root { --sb-color-sys-surface-default: rgb(255 255 255); … }
-[data-mode="Dark"][data-brand="Default"] { --sb-color-sys-surface-default: rgb(17 17 17); … }
-[data-mode="Light"][data-brand="Brand A"] { … }
-[data-mode="Dark"][data-brand="Brand A"] { … }
+:root { --swatch-color-sys-surface-default: rgb(255 255 255); … }
+[data-swatch-mode="Dark"][data-swatch-brand="Default"] { --swatch-color-sys-surface-default: rgb(17 17 17); … }
+[data-swatch-mode="Light"][data-swatch-brand="Brand A"] { … }
+[data-swatch-mode="Dark"][data-swatch-brand="Brand A"] { … }
 ```
 
-Every var is redeclared inside every block (flat emission). Nested cascading would be smaller but breaks whenever axes collide at the same token path — see `docs/decisions.md` for the rationale. Consumers flip tuples by writing one `data-<axis>="<context>"` attribute per axis on an ancestor (typically `<html>`).
+Every var is redeclared inside every block (flat emission). Nested cascading would be smaller but breaks whenever axes collide at the same token path. Inside Storybook the addon's preview decorator writes the matching `data-<prefix>-<axis>` attributes onto `<html>` automatically; outside Storybook, set them yourself — or pass `cssVarPrefix: ''` to opt out and get the bare `data-<axis>` form.
 
-Single-axis projects (one resolver modifier, or the synthetic `theme` axis) keep the familiar `[data-theme="…"]` shape — the compound selector collapses to a single attribute selector anyway, so the simpler form stays readable.
+Single-axis projects (one resolver modifier, or the synthetic `theme` axis) keep the familiar single-attribute shape — `[data-swatch-theme="…"]` with the default prefix, `[data-theme="…"]` if you opt out.
 
 ## Do / don't
 

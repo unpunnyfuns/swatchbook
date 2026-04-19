@@ -7,6 +7,7 @@ import {
   MONO_STACK,
   surfaceStyle,
 } from '#/internal/styles.ts';
+import { themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, useProject } from '#/internal/use-project.ts';
 
 export interface TypographyScaleProps {
@@ -101,7 +102,7 @@ export function TypographyScale({
   sample = 'The quick brown fox jumps over the lazy dog.',
   caption,
 }: TypographyScaleProps): ReactElement {
-  const { resolved, activeTheme } = useProject();
+  const { resolved, activeTheme, cssVarPrefix } = useProject();
 
   const rows = useMemo<Row[]>(() => {
     return Object.entries(resolved)
@@ -125,14 +126,14 @@ export function TypographyScale({
 
   if (rows.length === 0) {
     return (
-      <div data-theme={activeTheme} style={styles.wrapper}>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={styles.wrapper}>
         <div style={styles.empty}>No typography tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div data-theme={activeTheme} style={styles.wrapper}>
+    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={styles.wrapper}>
       <div style={styles.caption}>{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} style={styles.row}>

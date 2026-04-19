@@ -54,7 +54,7 @@ export default definePreview({
 
 ## What it registers
 
-- **Preview decorator** — reads the active axis tuple, writes `data-<axis>="<context>"` attributes (plus `data-theme="<composed id>"`) on `<html>` + story wrapper, mounts the per-theme CSS, emits `INIT_EVENT` to the manager.
+- **Preview decorator** — reads the active axis tuple, writes `data-<prefix>-<axis>="<context>"` attributes (plus `data-<prefix>-theme="<composed id>"`) on `<html>` + story wrapper, mounts the per-theme CSS, emits `INIT_EVENT` to the manager. The prefix follows `cssVarPrefix` (default `swatch`).
 - **Toolbar tool** — a single Swatchbook `IconButton`. Clicking opens a popover containing preset pills, one dropdown per axis, and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`). Escape and outside-click close it.
 - **Design Tokens panel** — a collapsible diagnostics section at the top (auto-expands on warnings/errors, green `OK` badge when clean) followed by a searchable hierarchical tree of every token in the active theme (click a leaf to copy its `var(--…)` reference).
 

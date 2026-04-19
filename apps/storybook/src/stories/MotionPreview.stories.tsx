@@ -16,7 +16,7 @@ export const SystemTransitions = meta.story({
   args: { filter: 'motion.sys.*' },
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      const wrapper = canvasElement.querySelector('[data-theme]');
+      const wrapper = canvasElement.querySelector('[data-sb-theme]');
       expect(wrapper?.textContent, 'motion preview should include at least one axis path').toMatch(
         /motion\./,
       );
