@@ -9,51 +9,16 @@ import React, {
 } from 'react';
 import { Placeholder, ScrollArea } from 'storybook/internal/components';
 import { addons, useGlobals } from 'storybook/manager-api';
+import type {
+  DiagnosticSeverity,
+  InitPayload,
+  VirtualDiagnostic,
+  VirtualToken,
+} from '#/channel-types.ts';
 import { AXES_GLOBAL_KEY, GLOBAL_KEY, INIT_EVENT } from '#/constants.ts';
 
 /** `React.createElement` alias so the manager bundle avoids `react/jsx-runtime`. */
 const h = React.createElement;
-
-interface VirtualToken {
-  $type?: string;
-  $value?: unknown;
-  $description?: string;
-}
-
-interface VirtualTheme {
-  name: string;
-  input: Record<string, string>;
-  sources: string[];
-}
-
-interface VirtualAxis {
-  name: string;
-  contexts: readonly string[];
-  default: string;
-  description?: string;
-  source: 'resolver' | 'layered' | 'synthetic';
-}
-
-type DiagnosticSeverity = 'error' | 'warn' | 'info';
-
-interface VirtualDiagnostic {
-  severity: DiagnosticSeverity;
-  group: string;
-  message: string;
-  filename?: string;
-  line?: number;
-  column?: number;
-}
-
-interface InitPayload {
-  axes: VirtualAxis[];
-  disabledAxes: readonly string[];
-  themes: VirtualTheme[];
-  defaultTheme: string | null;
-  themesResolved: Record<string, Record<string, VirtualToken>>;
-  diagnostics: VirtualDiagnostic[];
-  cssVarPrefix: string;
-}
 
 function usePayload(): InitPayload | null {
   const [payload, setPayload] = useState<InitPayload | null>(null);

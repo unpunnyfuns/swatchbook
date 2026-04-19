@@ -2,46 +2,18 @@
  * Typed shape of the addon's `virtual:swatchbook/tokens` module. The runtime
  * payload is produced by this package's Vite plugin (`swatchbookTokensPlugin`)
  * and JSON-serialized, so this declaration describes the plain-data shape
- * consumers read back.
+ * consumers read back. Shapes are drawn from `#/channel-types.ts` so the
+ * virtual module, the INIT_EVENT payload, and the manager-side consumers
+ * can't drift from each other.
  */
 declare module 'virtual:swatchbook/tokens' {
-  interface VirtualAxis {
-    name: string;
-    contexts: readonly string[];
-    default: string;
-    description?: string;
-    source: 'resolver' | 'layered' | 'synthetic';
-  }
-
-  interface VirtualTheme {
-    name: string;
-    input: Record<string, string>;
-    sources: string[];
-  }
-
-  interface VirtualDiagnostic {
-    severity: 'error' | 'warn' | 'info';
-    group: string;
-    message: string;
-    filename?: string;
-    line?: number;
-    column?: number;
-  }
-
-  interface VirtualToken {
-    $type?: string;
-    $value?: unknown;
-    $description?: string;
-    aliasOf?: string;
-    aliasChain?: readonly string[];
-    aliasedBy?: readonly string[];
-  }
-
-  interface VirtualPreset {
-    name: string;
-    axes: Partial<Record<string, string>>;
-    description?: string;
-  }
+  import type {
+    VirtualAxis,
+    VirtualDiagnostic,
+    VirtualPreset,
+    VirtualTheme,
+    VirtualToken,
+  } from '#/channel-types.ts';
 
   export const axes: readonly VirtualAxis[];
   export const disabledAxes: readonly string[];
