@@ -8,8 +8,6 @@ export interface NormalizedThemes {
   themes: Theme[];
   resolved: Record<string, TokenMap>;
   sourceFiles: string[];
-  /** Files loaded as source-only (not emitted to CSS). Reserved for future use. */
-  sourceOnlyFiles: Set<string>;
 }
 
 /**
@@ -33,10 +31,8 @@ export async function normalizeThemes(
         'swatchbook: config with `axes` must also supply `tokens` (the base token files the overlays layer onto).',
       );
     }
-    const r = await loadLayeredThemes(config.axes, config.tokens, cwd, logger);
-    return { ...r, sourceOnlyFiles: new Set() };
+    return loadLayeredThemes(config.axes, config.tokens, cwd, logger);
   }
 
-  const r = await loadResolverThemes(config.resolver, config.tokens, cwd, logger);
-  return { ...r, sourceOnlyFiles: new Set() };
+  return loadResolverThemes(config.resolver, config.tokens, cwd, logger);
 }
