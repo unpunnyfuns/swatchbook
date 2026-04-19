@@ -15,9 +15,9 @@ Design-system authors who already have DTCG tokens (or are in the process of aut
 
 ## What the addon gives you
 
-- **Toolbar** — a single Swatchbook icon button opens a popover with preset pills, one dropdown per modifier axis, and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`) that controls how blocks display colors.
+- **Doc blocks** — `TokenDetail`, `TokenTable`, `TokenNavigator`, `ColorPalette`, `TypographyScale`, `FontFamilySample`, `FontWeightScale`, `StrokeStyleSample`, motion/shadow/border previews. Once the addon is wired up, *authoring pages with these blocks is the primary day-to-day swatchbook interaction*. See the [blocks reference](./reference/blocks) and the [authoring guide](./guides/authoring-doc-stories).
+- **Toolbar** — a single Swatchbook icon button opens a popover with preset pills, one dropdown per modifier axis (so a reader can browse tokens in every context), and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`) that controls how blocks display colors.
 - **Design Tokens panel** — a diagnostics summary at the top (green `OK` badge when clean; auto-expands on warnings or errors) followed by a searchable hierarchical tree of every token in the active theme. Click a leaf to copy its `var(--…)` reference.
-- **Doc blocks** — `TokenDetail`, `TokenTable`, `TokenNavigator`, `ColorPalette`, `TypographyScale`, `FontFamilySample`, `FontWeightScale`, `StrokeStyleSample`, motion/shadow/border previews. Embed them in MDX stories.
 - **`useToken` hook** — typed lookups from component code, reactive to the active theme.
 
 ## See it live
@@ -28,8 +28,8 @@ The [live Storybook](/swatchbook/storybook/) runs the addon against this repo's 
 
 - **[Quickstart](./quickstart)** — install, configure, run.
 - **Concepts** — the mental model: theming inputs, axes, presets, diagnostics.
-- **Guides** — walkthroughs for multi-axis setup and authoring doc stories with the blocks.
-- **Reference** — API surface per published package (`core`, `addon`, `blocks`).
+- **Guides** — start with [authoring doc stories with the blocks](./guides/authoring-doc-stories); the [multi-axis walkthrough](./guides/multi-axis-walkthrough) covers one-time setup.
+- **Reference** — API surface per published package (`blocks`, `addon`, `core`, `config`).
 
 ## What these docs assume
 

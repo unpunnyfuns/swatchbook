@@ -19,13 +19,17 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Guides',
       collapsed: false,
-      items: ['guides/multi-axis-walkthrough', 'guides/authoring-doc-stories'],
+      items: ['guides/authoring-doc-stories', 'guides/multi-axis-walkthrough'],
     },
     {
       type: 'category',
       label: 'Reference',
       collapsed: false,
-      items: ['reference/config', 'reference/core', 'reference/addon', 'reference/blocks'],
+      // Blocks lead — after initial setup, authoring pages with blocks is
+      // the primary day-to-day swatchbook interaction. Addon is peer-of-
+      // blocks; core is for build-time consumers; config is rarely read
+      // end-to-end so it goes last.
+      items: ['reference/blocks', 'reference/addon', 'reference/core', 'reference/config'],
     },
   ],
 };
