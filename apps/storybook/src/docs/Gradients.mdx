@@ -1,0 +1,21 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { GradientPalette, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
+
+<Meta title='Docs/Gradients' />
+
+# Gradients
+
+DTCG `gradient` tokens are arrays of `{ color, position }` stops. The
+rendering function — `linear-gradient` / `radial-gradient` / `conic-gradient`
+— is a choice the consumer makes at use-site; the token carries only the
+stops. This showcase uses `linear-gradient(to right, …)` for previews.
+
+## All gradients
+
+<GradientPalette />
+
+## Inspect a single token
+
+<TokenDetail path='gradient.ref.sunrise' />
+
+<TokenDetail path='gradient.ref.cool' />
