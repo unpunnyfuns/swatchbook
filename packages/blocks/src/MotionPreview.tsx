@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo, useState } from 'react';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
+import { BORDER_DEFAULT, MONO_STACK, surfaceStyle } from '#/internal/styles.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 import {
   MotionSample,
@@ -23,14 +24,7 @@ export interface MotionPreviewProps {
 const SPEEDS: MotionSpeed[] = [0.25, 0.5, 1, 2];
 
 const styles = {
-  wrapper: {
-    fontFamily: 'var(--sb-typography-sys-body-font-family, system-ui)',
-    fontSize: 'var(--sb-typography-sys-body-font-size, 14px)',
-    color: 'var(--sb-color-sys-text-default, CanvasText)',
-    background: 'var(--sb-color-sys-surface-default, Canvas)',
-    padding: 12,
-    borderRadius: 6,
-  } satisfies CSSProperties,
+  wrapper: surfaceStyle,
   caption: {
     padding: '4px 0 4px',
     color: 'var(--sb-color-sys-text-muted, CanvasText)',
@@ -49,7 +43,7 @@ const styles = {
     letterSpacing: 0.5,
   } satisfies CSSProperties,
   speedBtn: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 11,
     padding: '4px 8px',
     background: 'transparent',
@@ -79,7 +73,7 @@ const styles = {
     gap: 16,
     alignItems: 'center',
     padding: '14px 0',
-    borderBottom: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.2))',
+    borderBottom: BORDER_DEFAULT,
   } satisfies CSSProperties,
   meta: {
     display: 'flex',
@@ -88,19 +82,19 @@ const styles = {
     minWidth: 0,
   } satisfies CSSProperties,
   path: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   } satisfies CSSProperties,
   specs: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 11,
     color: 'var(--sb-color-sys-text-muted, CanvasText)',
   } satisfies CSSProperties,
   cssVar: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 11,
     color: 'var(--sb-color-sys-text-muted, CanvasText)',
     whiteSpace: 'nowrap',

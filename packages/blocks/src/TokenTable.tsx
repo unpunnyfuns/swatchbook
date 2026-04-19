@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/internal/format-color.ts';
+import { BORDER_FAINT, emptyStyle, MONO_STACK, surfaceStyle } from '#/internal/styles.ts';
 import { formatValue, globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface TokenTableProps {
@@ -19,14 +20,8 @@ export interface TokenTableProps {
 }
 
 const styles = {
-  wrapper: {
-    fontFamily: 'var(--sb-typography-sys-body-font-family, system-ui)',
-    fontSize: 'var(--sb-typography-sys-body-font-size, 14px)',
-    color: 'var(--sb-color-sys-text-default, CanvasText)',
-    background: 'var(--sb-color-sys-surface-default, Canvas)',
-    padding: 12,
-    borderRadius: 6,
-  } satisfies React.CSSProperties,
+  wrapper: surfaceStyle,
+  empty: emptyStyle,
   caption: {
     captionSide: 'top',
     textAlign: 'left',
@@ -50,11 +45,11 @@ const styles = {
   } satisfies React.CSSProperties,
   td: {
     padding: '8px 12px',
-    borderBottom: '1px solid var(--sb-color-sys-border-default, rgba(128,128,128,0.15))',
+    borderBottom: BORDER_FAINT,
     verticalAlign: 'top',
   } satisfies React.CSSProperties,
   path: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
   } satisfies React.CSSProperties,
   typePill: {
@@ -67,7 +62,7 @@ const styles = {
     background: 'var(--sb-color-sys-surface-muted, rgba(128,128,128,0.15))',
   } satisfies React.CSSProperties,
   value: {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontFamily: MONO_STACK,
     fontSize: 12,
     opacity: 0.85,
     wordBreak: 'break-all',
@@ -80,11 +75,6 @@ const styles = {
     marginRight: 6,
     borderRadius: 3,
     border: '1px solid var(--sb-color-sys-border-default, rgba(0,0,0,0.1))',
-  } satisfies React.CSSProperties,
-  empty: {
-    padding: '24px 12px',
-    textAlign: 'center',
-    opacity: 0.6,
   } satisfies React.CSSProperties,
 };
 
