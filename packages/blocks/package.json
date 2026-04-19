@@ -12,8 +12,9 @@
     "directory": "packages/blocks"
   },
   "keywords": [
-    "storybook",
+    "storybook-addon",
     "storybook-blocks",
+    "storybook",
     "design-tokens",
     "dtcg",
     "mdx",
