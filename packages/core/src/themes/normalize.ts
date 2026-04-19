@@ -1,13 +1,14 @@
 import type { BufferedLogger } from '#/diagnostics.ts';
 import { loadLayeredThemes } from '#/themes/layered.ts';
 import { loadResolverThemes } from '#/themes/resolver.ts';
-import type { Axis, Config, Theme, TokenMap } from '#/types.ts';
+import type { Axis, Config, Diagnostic, Theme, TokenMap } from '#/types.ts';
 
 export interface NormalizedThemes {
   axes: Axis[];
   themes: Theme[];
   resolved: Record<string, TokenMap>;
   sourceFiles: string[];
+  diagnostics: Diagnostic[];
 }
 
 /**

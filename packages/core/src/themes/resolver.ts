@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { isAbsolute, resolve as resolvePath } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { defineConfig as defineTerrazzoConfig, loadResolver, parse } from '@terrazzo/parser';
-import { permutationID, type Axis, type Theme, type TokenMap } from '#/types.ts';
+import { permutationID, type Axis, type Diagnostic, type Theme, type TokenMap } from '#/types.ts';
 import type { BufferedLogger } from '#/diagnostics.ts';
 import { collectGlobbedFiles } from '#/themes/util.ts';
 
@@ -11,6 +11,7 @@ export interface ResolverLoadResult {
   themes: Theme[];
   resolved: Record<string, TokenMap>;
   sourceFiles: string[];
+  diagnostics: Diagnostic[];
 }
 
 /**
@@ -86,19 +87,39 @@ export async function loadResolverThemes(
       themes: [{ name, input: { theme: name }, sources: tokenFiles }],
       resolved: { [name]: parsed.tokens },
       sourceFiles: tokenFiles,
+      diagnostics: [],
     };
   }
 
   const { resolver } = loaded;
   const permutations = resolver.listPermutations();
 
-  const axes: Axis[] = Object.entries(resolver.source.modifiers ?? {}).map(([name, modifier]) => ({
-    name,
-    contexts: Object.keys(modifier.contexts ?? {}),
-    default: modifier.default ?? Object.keys(modifier.contexts ?? {})[0] ?? '',
-    ...(modifier.description !== undefined ? { description: modifier.description } : {}),
-    source: 'resolver' as const,
-  }));
+  const diagnostics: Diagnostic[] = [];
+  const axes: Axis[] = Object.entries(resolver.source.modifiers ?? {}).map(([name, modifier]) => {
+    const contexts = Object.keys(modifier.contexts ?? {});
+    let defaultContext = modifier.default ?? contexts[0];
+    // The DTCG 2025.10 resolver spec allows a modifier with no `default` to
+    // fall through to the first context key; a modifier with neither a
+    // `default` nor any contexts is a malformed resolver that produces an
+    // axis with empty-string `default` downstream. Flag it so users see
+    // where the nonsense is coming from instead of debugging from a
+    // mysterious `""` theme name.
+    if (defaultContext === undefined) {
+      diagnostics.push({
+        severity: 'warn',
+        group: 'swatchbook/resolver',
+        message: `Resolver modifier "${name}" has no default and no contexts — axis is unusable.`,
+      });
+      defaultContext = '';
+    }
+    return {
+      name,
+      contexts,
+      default: defaultContext,
+      ...(modifier.description !== undefined ? { description: modifier.description } : {}),
+      source: 'resolver' as const,
+    };
+  });
 
   const themes: Theme[] = [];
   const resolved: Record<string, TokenMap> = {};
@@ -116,5 +137,5 @@ export async function loadResolverThemes(
   // want HMR to watch directories broader than the resolver references.
   for (const f of tokenFiles) if (!sourceFiles.includes(f)) sourceFiles.push(f);
 
-  return { axes, themes, resolved, sourceFiles: sourceFiles.toSorted() };
+  return { axes, themes, resolved, sourceFiles: sourceFiles.toSorted(), diagnostics };
 }
