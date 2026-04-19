@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatColor } from '#/internal/format-color.ts';
+import { formatColor } from '#/format-color.ts';
 
 describe('formatColor', () => {
   it('renders sRGB hex by default for in-gamut colors', () => {

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
 import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
-import { formatColor } from '#/internal/format-color.ts';
+import { formatColor } from '#/format-color.ts';
 import { BORDER_DEFAULT, MONO_STACK, surfaceStyle } from '#/internal/styles.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { formatValue, makeCssVar, useProject } from '#/internal/use-project.ts';

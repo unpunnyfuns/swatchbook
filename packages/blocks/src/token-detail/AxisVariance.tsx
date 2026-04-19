@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
+import { type ColorFormat, formatColor } from '#/format-color.ts';
 import { dataAttr } from '#/internal/data-attr.ts';
-import { type ColorFormat, formatColor } from '#/internal/format-color.ts';
 import { formatValue } from '#/internal/use-project.ts';
 import { styles } from '#/token-detail/styles.ts';
 import {

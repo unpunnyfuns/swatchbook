@@ -1,0 +1,35 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { DimensionScale, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
+
+<Meta title='Docs/Dimensions' />
+
+# Dimensions
+
+DTCG `dimension` tokens are `{ value, unit }` objects — most of the scale
+is in `px` / `rem`. The reference fixture splits dimensions into two
+groups: **`space.sys.*`** (layout spacing) and **`radius.sys.*`** (border
+radii). Size primitives live under `size.ref.*`.
+
+## Spacing scale
+
+Width-driven bars, sorted numerically.
+
+<DimensionScale filter='space.sys.*' />
+
+## Radius scale
+
+Rendered as rounded squares so you can eyeball the corner curve.
+
+<DimensionScale filter='radius.sys.*' kind='radius' />
+
+## Raw size primitives
+
+Square samples sized directly from the token's `$value`.
+
+<DimensionScale filter='size.ref.*' kind='size' />
+
+## Inspect a single token
+
+<TokenDetail path='space.sys.md' />
+
+<TokenDetail path='radius.sys.md' />

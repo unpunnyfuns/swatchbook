@@ -433,6 +433,7 @@ export function DesignTokensPanel({ active }: PanelProps): ReactElement | null {
         style: searchInputStyle,
         type: 'search',
         placeholder: `Search ${tokenCount} tokens in ${themeName}…`,
+        'aria-label': 'Search tokens',
         value: query,
         onChange: (e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value),
       }),

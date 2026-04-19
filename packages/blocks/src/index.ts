@@ -4,7 +4,7 @@ export {
   type FormatColorResult,
   formatColor,
   type NormalizedColor,
-} from '#/internal/format-color.ts';
+} from '#/format-color.ts';
 export { BorderPreview, type BorderPreviewProps } from '#/BorderPreview.tsx';
 export { BorderSample, type BorderSampleProps } from '#/border-preview/BorderSample.tsx';
 export { ColorPalette, type ColorPaletteProps } from '#/ColorPalette.tsx';

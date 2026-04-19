@@ -1,0 +1,22 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { StrokeStyleSample, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
+
+<Meta title='Docs/StrokeStyles' />
+
+# Stroke styles
+
+DTCG `strokeStyle` covers the CSS `border-style` keywords (`solid`,
+`dashed`, `dotted`, `double`, etc.) plus richer object forms carrying
+explicit `dashArray` / `lineCap` for SVG strokes. String-form values
+render as a literal `border-style`; object-form tokens fall back to a
+textual display — there's no pure-CSS equivalent.
+
+## Stroke style primitives
+
+<StrokeStyleSample />
+
+## Inspect a single token
+
+<TokenDetail path='stroke.ref.style.dashed' />
+
+<TokenDetail path='stroke.ref.style.custom-dash' />

@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { useColorFormat } from '#/contexts.ts';
+import { formatColor } from '#/format-color.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
-import { formatColor } from '#/internal/format-color.ts';
 import { formatValue } from '#/internal/use-project.ts';
 import { AliasChain } from '#/token-detail/AliasChain.tsx';
 import { AliasedBy } from '#/token-detail/AliasedBy.tsx';
