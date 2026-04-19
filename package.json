@@ -19,7 +19,7 @@
     "build:storybook": "turbo run build:storybook",
     "dev": "turbo run storybook",
     "changeset": "changeset",
-    "version": "changeset version",
+    "version": "changeset version && node scripts/snapshot-docs-version.mjs",
     "release": "turbo run build --filter=@unpunnyfuns/swatchbook-core --filter=@unpunnyfuns/swatchbook-addon --filter=@unpunnyfuns/swatchbook-blocks && changeset publish"
   },
   "devDependencies": {
