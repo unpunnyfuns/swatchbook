@@ -10,6 +10,7 @@ import {
 } from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
+import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export type { DimensionKind };
@@ -29,6 +30,16 @@ export interface DimensionScaleProps {
   kind?: DimensionKind;
   /** Override the caption. */
   caption?: string;
+  /**
+   * Sort order.
+   * - `'value'` (default) — numeric by rendered pixel size (`px` / `rem` / `em`).
+   *   Non-convertible units (ex/ch/%) land after the convertible ones.
+   * - `'path'` — lexicographic on the dot-path.
+   * - `'none'` — preserve project iteration order.
+   */
+  sortBy?: SortBy;
+  /** `'asc'` (default) or `'desc'`. */
+  sortDir?: SortDir;
 }
 
 const MAX_RENDER_PX = 480;
@@ -110,32 +121,30 @@ function toPixels(raw: unknown): number {
 }
 
 export function DimensionScale({
-  filter = 'dimension',
+  filter,
   kind = 'length',
   caption,
+  sortBy = 'value',
+  sortDir = 'asc',
 }: DimensionScaleProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
 
-  const rows = useMemo(() => {
-    const collected: Row[] = [];
-    for (const [path, token] of Object.entries(resolved)) {
-      if (token.$type !== 'dimension') continue;
-      if (!globMatch(path, filter)) continue;
+  const rows = useMemo<Row[]>(() => {
+    const filtered = Object.entries(resolved).filter(([path, token]) => {
+      if (token.$type !== 'dimension') return false;
+      return globMatch(path, filter);
+    });
+    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => {
       const pxValue = toPixels(token.$value);
-      collected.push({
+      return {
         path,
         cssVar: makeCssVar(path, cssVarPrefix),
         displayValue: formatTokenValue(token.$value, token.$type, 'raw'),
         pxValue,
         capped: Number.isFinite(pxValue) && pxValue > MAX_RENDER_PX,
-      });
-    }
-    collected.sort((a, b) => {
-      if (Number.isFinite(a.pxValue) && Number.isFinite(b.pxValue)) return a.pxValue - b.pxValue;
-      return a.path.localeCompare(b.path, undefined, { numeric: true });
+      };
     });
-    return collected;
-  }, [resolved, filter, cssVarPrefix]);
+  }, [resolved, filter, cssVarPrefix, sortBy, sortDir]);
 
   const captionText =
     caption ??

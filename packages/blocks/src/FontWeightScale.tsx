@@ -9,6 +9,7 @@ import {
   surfaceStyle,
 } from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
+import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface FontWeightScaleProps {
@@ -21,6 +22,15 @@ export interface FontWeightScaleProps {
   sample?: string;
   /** Override the caption. */
   caption?: string;
+  /**
+   * Sort order.
+   * - `'value'` (default) — ascending numeric by weight (100 → 900).
+   * - `'path'` — lexicographic on the dot-path.
+   * - `'none'` — preserve project iteration order.
+   */
+  sortBy?: SortBy;
+  /** `'asc'` (default) or `'desc'`. */
+  sortDir?: SortDir;
 }
 
 const styles = {
@@ -81,30 +91,26 @@ function toWeight(raw: unknown): number {
 }
 
 export function FontWeightScale({
-  filter = 'fontWeight',
+  filter,
   sample = 'Aa',
   caption,
+  sortBy = 'value',
+  sortDir = 'asc',
 }: FontWeightScaleProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
 
   const rows = useMemo<Row[]>(() => {
-    const collected: Row[] = [];
-    for (const [path, token] of Object.entries(resolved)) {
-      if (token.$type !== 'fontWeight') continue;
-      if (!globMatch(path, filter)) continue;
-      collected.push({
-        path,
-        cssVar: makeCssVar(path, cssVarPrefix),
-        display: token.$value == null ? '' : String(token.$value),
-        weight: toWeight(token.$value),
-      });
-    }
-    collected.sort((a, b) => {
-      if (Number.isFinite(a.weight) && Number.isFinite(b.weight)) return a.weight - b.weight;
-      return a.path.localeCompare(b.path, undefined, { numeric: true });
+    const filtered = Object.entries(resolved).filter(([path, token]) => {
+      if (token.$type !== 'fontWeight') return false;
+      return globMatch(path, filter);
     });
-    return collected;
-  }, [resolved, filter, cssVarPrefix]);
+    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
+      path,
+      cssVar: makeCssVar(path, cssVarPrefix),
+      display: token.$value == null ? '' : String(token.$value),
+      weight: toWeight(token.$value),
+    }));
+  }, [resolved, filter, cssVarPrefix, sortBy, sortDir]);
 
   const captionText =
     caption ??

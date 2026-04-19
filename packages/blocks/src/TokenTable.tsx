@@ -13,6 +13,7 @@ import {
 } from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
+import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface TokenTableProps {
@@ -27,6 +28,18 @@ export interface TokenTableProps {
   showVar?: boolean;
   /** Override the table caption. */
   caption?: string;
+  /**
+   * Sort order.
+   * - `'path'` (default) — lexicographic on the dot-path.
+   * - `'value'` — per-`$type`: numeric for `dimension` / `duration` /
+   *   `fontWeight`; perceptual (oklch L → C → H) for `color`; lexicographic
+   *   for `fontFamily` / `strokeStyle`. Composite types fall through to
+   *   path order.
+   * - `'none'` — preserve project iteration order.
+   */
+  sortBy?: SortBy;
+  /** `'asc'` (default) or `'desc'`. */
+  sortDir?: SortDir;
 }
 
 const styles = {
@@ -93,18 +106,19 @@ export function TokenTable({
   type,
   showVar = true,
   caption,
+  sortBy = 'path',
+  sortDir = 'asc',
 }: TokenTableProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
   const colorFormat = useColorFormat();
 
   const rows = useMemo(() => {
-    const entries = Object.entries(resolved)
-      .filter(([path, token]) => {
-        if (!globMatch(path, filter)) return false;
-        if (type && token.$type !== type) return false;
-        return true;
-      })
-      .toSorted(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }));
+    const filtered = Object.entries(resolved).filter(([path, token]) => {
+      if (!globMatch(path, filter)) return false;
+      if (type && token.$type !== type) return false;
+      return true;
+    });
+    const entries = sortTokens(filtered, { by: sortBy, dir: sortDir });
     return entries.map(([path, token]) => {
       const isColor = token.$type === 'color';
       const color = isColor ? formatColor(token.$value, colorFormat) : null;
@@ -118,7 +132,7 @@ export function TokenTable({
         isColor,
       };
     });
-  }, [resolved, filter, type, cssVarPrefix, colorFormat]);
+  }, [resolved, filter, type, cssVarPrefix, colorFormat, sortBy, sortDir]);
 
   const captionText =
     caption ??

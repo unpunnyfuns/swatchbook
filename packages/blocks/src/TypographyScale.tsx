@@ -9,6 +9,7 @@ import {
 } from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, useProject } from '#/internal/use-project.ts';
+import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 
 export interface TypographyScaleProps {
   /**
@@ -20,6 +21,14 @@ export interface TypographyScaleProps {
   sample?: string;
   /** Override the caption. */
   caption?: string;
+  /**
+   * Sort order. `'path'` (default) sorts lexicographically on the
+   * dot-path; `'value'` ordering falls through to path for this block's
+   * type (composite / non-numeric); `'none'` preserves project order.
+   */
+  sortBy?: SortBy;
+  /** `'asc'` (default) or `'desc'`. */
+  sortDir?: SortDir;
 }
 
 const styles = {
@@ -98,27 +107,27 @@ function buildRow(path: string, composite: Record<string, unknown>): Row {
 }
 
 export function TypographyScale({
-  filter = 'typography',
+  filter,
   sample = 'The quick brown fox jumps over the lazy dog.',
   caption,
+  sortBy = 'path',
+  sortDir = 'asc',
 }: TypographyScaleProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
 
   const rows = useMemo<Row[]>(() => {
-    return Object.entries(resolved)
-      .filter(([path, token]) => {
-        if (token.$type !== 'typography') return false;
-        return globMatch(path, filter);
-      })
-      .toSorted(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
-      .map(([path, token]) => {
-        const value = token.$value;
-        if (!value || typeof value !== 'object') {
-          return { path, sampleStyle: {}, specs: '' };
-        }
-        return buildRow(path, value as Record<string, unknown>);
-      });
-  }, [resolved, filter]);
+    const filtered = Object.entries(resolved).filter(([path, token]) => {
+      if (token.$type !== 'typography') return false;
+      return globMatch(path, filter);
+    });
+    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => {
+      const value = token.$value;
+      if (!value || typeof value !== 'object') {
+        return { path, sampleStyle: {}, specs: '' };
+      }
+      return buildRow(path, value as Record<string, unknown>);
+    });
+  }, [resolved, filter, sortBy, sortDir]);
 
   const captionText =
     caption ??
