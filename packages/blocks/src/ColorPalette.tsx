@@ -95,8 +95,10 @@ interface Swatch {
 /**
  * Count segments in the filter before the first glob (`*` / `**`).
  * `color.ref.*` → 2; `color.sys.surface.*` → 3; `color` → 1; undefined → 0.
+ *
+ * @internal Exported for tests; not part of the public API.
  */
-function fixedPrefixLength(filter: string | undefined): number {
+export function fixedPrefixLength(filter: string | undefined): number {
   if (!filter) return 0;
   const segments = filter.split('.');
   let fixed = 0;
