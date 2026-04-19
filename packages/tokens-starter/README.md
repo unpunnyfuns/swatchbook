@@ -14,7 +14,7 @@ pnpm add @unpunnyfuns/swatchbook-tokens
 
 | Path                               | What                                                                 |
 | ---------------------------------- | -------------------------------------------------------------------- |
-| `@unpunnyfuns/swatchbook-tokens/css`    | Single concatenated stylesheet with `[data-theme="…"]` blocks.  |
+| `@unpunnyfuns/swatchbook-tokens/css`    | Single concatenated stylesheet keyed on `[data-swatch-theme="…"]` blocks (prefix matches the default `cssVarPrefix`).  |
 | `@unpunnyfuns/swatchbook-tokens/themes/<name>.json` | Per-theme resolved tokens (keyed by token path).    |
 | `@unpunnyfuns/swatchbook-tokens/tokens/*` | Raw DTCG JSON — for re-resolving with your own config.          |
 | `@unpunnyfuns/swatchbook-tokens`        | Typed `cssVars` map + `token()` helper + `themes` list.         |
@@ -24,14 +24,14 @@ pnpm add @unpunnyfuns/swatchbook-tokens
 ```ts
 import '@unpunnyfuns/swatchbook-tokens/css';
 // Flip the active theme:
-document.documentElement.setAttribute('data-theme', 'Light');
+document.documentElement.setAttribute('data-swatch-theme', 'Light');
 ```
 
 ```css
 .button {
-  background: var(--sb-color-sys-accent);
-  color:      var(--sb-color-sys-text-inverse);
-  padding:    var(--sb-space-sys-sm) var(--sb-space-sys-md);
+  background: var(--swatch-color-sys-accent);
+  color:      var(--swatch-color-sys-text-inverse);
+  padding:    var(--swatch-space-sys-sm) var(--swatch-space-sys-md);
 }
 ```
 
@@ -40,7 +40,7 @@ document.documentElement.setAttribute('data-theme', 'Light');
 ```ts
 import { token, cssVars, type TokenPath } from '@unpunnyfuns/swatchbook-tokens';
 
-const bg = token('color.sys.accent');           // 'var(--sb-color-sys-accent)'
+const bg = token('color.sys.accent');           // 'var(--swatch-color-sys-accent)'
 const muted: TokenPath = 'color.sys.text-muted'; // ✅ autocompletes
 ```
 
