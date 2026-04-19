@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
-import type { ColorFormat } from '#/internal/format-color.ts';
+import type { ColorFormat } from '#/format-color.ts';
 
 /**
  * Typed shape of the addon's `virtual:swatchbook/tokens` module, duplicated
