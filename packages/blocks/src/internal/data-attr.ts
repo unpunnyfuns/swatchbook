@@ -11,12 +11,24 @@ export function dataAttr(prefix: string, key: string): string {
 }
 
 /**
- * Spread helper for the common `<div data-<prefix>-theme="…">` block
- * wrapper. Returns an object keyed on the prefixed attribute name so the
- * call site stays readable: `<div {...themeAttrs(prefix, theme)} />`.
+ * Marker attribute set on every block wrapper. Used as the scope selector
+ * for the defensive element-reset stylesheet in `block-reset.ts` so
+ * Storybook MDX docs CSS (`.sbdocs table`, `.sbdocs ul`, …) can't bleed
+ * into our chrome.
+ */
+export const BLOCK_ATTR = 'data-swatchbook-block';
+
+/**
+ * Spread helper for the common `<div data-<prefix>-theme="…" data-swatchbook-block>`
+ * block wrapper. Returns an object keyed on the prefixed theme attribute
+ * plus the scoping marker so the call site stays readable:
+ * `<div {...themeAttrs(prefix, theme)} />`.
  */
 export function themeAttrs(prefix: string, themeName: string): Record<string, string> {
-  return { [dataAttr(prefix, 'theme')]: themeName };
+  return {
+    [dataAttr(prefix, 'theme')]: themeName,
+    [BLOCK_ATTR]: '',
+  };
 }
 
 /**
