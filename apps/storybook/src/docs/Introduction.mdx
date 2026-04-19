@@ -4,32 +4,58 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Swatchbook
 
-A Storybook addon and set of MDX doc blocks for DTCG design tokens. This
-storybook is the integration testbed — it loads the `tokens-reference`
-fixture (ref → sys → themed via `mode × brand` modes) through the addon
-and dogfoods every block in the library.
+A Storybook addon and set of MDX doc blocks for **documenting DTCG
+design tokens**. This storybook is the integration testbed — it loads
+the `tokens-reference` fixture (ref → sys, with `mode × brand` modes
+via a DTCG resolver) through the addon and dogfoods every block in the
+library.
 
 ## Pages
 
-- **[Colors](?path=/docs/docs-colors--docs)** — `ColorPalette` over the
-  system palette plus a `TokenTable` filtered to `color.*`.
+- **[Dashboard](?path=/docs/docs-dashboard--docs)** — the recommended
+  composition: `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />`
+  on one page. This is the pattern that replaces the old in-manager
+  Design Tokens panel.
+- **[Tokens](?path=/docs/docs-tokens--docs)** — full `TokenTable` plus
+  `TokenDetail` spotlights for tokens with alias chains.
+- **[Colors](?path=/docs/docs-colors--docs)** — `ColorPalette` grids.
 - **[Typography](?path=/docs/docs-typography--docs)** — `TypographyScale`
-  rendering composite typography tokens with real sub-values.
-- **[Tokens](?path=/docs/docs-tokens--docs)** — full `TokenTable` with
-  `TokenDetail` spotlights for representative tokens including alias
-  chains.
+  rendering composites with real sub-values.
+- **[Fonts](?path=/docs/docs-fonts--docs)** — `FontFamilySample` and
+  `FontWeightScale` for the primitives that back typography composites.
+- **[Dimensions](?path=/docs/docs-dimensions--docs)** — `DimensionScale`
+  for spacing and radius scales.
+- **[Borders](?path=/docs/docs-borders--docs)**,
+  **[Shadows](?path=/docs/docs-shadows--docs)**,
+  **[StrokeStyles](?path=/docs/docs-strokestyles--docs)**,
+  **[Gradients](?path=/docs/docs-gradients--docs)**,
+  **[Motion](?path=/docs/docs-motion--docs)** — per-type preview blocks.
 
 ## Live theme switching
 
-The toolbar exposes one dropdown per modifier declared in
-`tokens/resolver.json` (`mode`, `brand`). Every block on every page
-reacts to the active axis tuple.
+The toolbar (single icon button in the top bar) opens a popover with
+preset pills, one dropdown per modifier declared in the resolver
+(`mode`, `brand`), and a color-format picker (`hex` / `rgb` / `hsl` /
+`oklch` / `raw`). Every block on every page re-renders against the
+active tuple — and color-display formats flip live too.
 
 ## Blocks
 
-Four blocks ship from `@unpunnyfuns/swatchbook-blocks`:
+Every block ships from `@unpunnyfuns/swatchbook-blocks`. Highlights:
 
-- **`TokenTable`** — searchable, type-filterable table of tokens with swatches.
-- **`ColorPalette`** — grouped color swatch grid.
-- **`TypographyScale`** — rendered sample for each typography token.
-- **`TokenDetail`** — single-token inspector with alias chain and per-theme values.
+- **`TokenTable`** / **`TokenNavigator`** — searchable tabular and tree
+  views of the active theme's graph. Both carry `filter` and `sortBy`
+  props for scoping and ordering.
+- **`TokenDetail`** — single-token inspector: composite preview, alias
+  chain, aliased-by tree, per-axis variance matrix, CSS-var snippet.
+- **`ColorPalette`** — swatch grid, auto-groups by path depth.
+- **`TypographyScale`** / **`FontFamilySample`** / **`FontWeightScale`** —
+  type primitives and composites rendered at their own values.
+- **`Diagnostics`** — collapsible list of parser/resolver warnings. Green
+  OK when clean; auto-expands on errors.
+- **`DimensionScale`** / **`BorderPreview`** / **`ShadowPreview`** /
+  **`StrokeStyleSample`** / **`GradientPalette`** / **`MotionPreview`** —
+  per-type visual previews.
+
+See the [blocks reference](https://unpunnyfuns.github.io/swatchbook/reference/blocks)
+for the full list and every prop.
