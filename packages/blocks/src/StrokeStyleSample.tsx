@@ -12,6 +12,7 @@ import {
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
+import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 
 export interface StrokeStyleSampleProps {
   /**
@@ -21,6 +22,14 @@ export interface StrokeStyleSampleProps {
   filter?: string;
   /** Override the caption. */
   caption?: string;
+  /**
+   * Sort order. `'path'` (default) sorts lexicographically on the
+   * dot-path; `'value'` ordering falls through to path for this block's
+   * type (composite / non-numeric); `'none'` preserves project order.
+   */
+  sortBy?: SortBy;
+  /** `'asc'` (default) or `'desc'`. */
+  sortDir?: SortDir;
 }
 
 const STRING_STYLES = new Set([
@@ -95,25 +104,25 @@ function extractCssStyle(value: unknown): string | null {
 }
 
 export function StrokeStyleSample({
-  filter = 'strokeStyle',
+  filter,
   caption,
+  sortBy = 'path',
+  sortDir = 'asc',
 }: StrokeStyleSampleProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
 
   const rows = useMemo<Row[]>(() => {
-    return Object.entries(resolved)
-      .filter(([path, token]) => {
-        if (token.$type !== 'strokeStyle') return false;
-        return globMatch(path, filter);
-      })
-      .toSorted(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
-      .map(([path, token]) => ({
-        path,
-        cssVar: makeCssVar(path, cssVarPrefix),
-        displayValue: formatTokenValue(token.$value, token.$type, 'raw'),
-        cssStyle: extractCssStyle(token.$value),
-      }));
-  }, [resolved, filter, cssVarPrefix]);
+    const filtered = Object.entries(resolved).filter(([path, token]) => {
+      if (token.$type !== 'strokeStyle') return false;
+      return globMatch(path, filter);
+    });
+    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
+      path,
+      cssVar: makeCssVar(path, cssVarPrefix),
+      displayValue: formatTokenValue(token.$value, token.$type, 'raw'),
+      cssStyle: extractCssStyle(token.$value),
+    }));
+  }, [resolved, filter, cssVarPrefix, sortBy, sortDir]);
 
   const captionText =
     caption ??

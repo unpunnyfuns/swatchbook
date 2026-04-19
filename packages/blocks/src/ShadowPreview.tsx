@@ -9,6 +9,7 @@ import {
   surfaceStyle,
 } from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
+import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
 
@@ -20,6 +21,14 @@ export interface ShadowPreviewProps {
   filter?: string;
   /** Override the caption. */
   caption?: string;
+  /**
+   * Sort order. `'path'` (default) sorts lexicographically on the
+   * dot-path; `'value'` falls through to path (shadows don't have a
+   * single-axis ordering); `'none'` preserves project order.
+   */
+  sortBy?: SortBy;
+  /** `'asc'` (default) or `'desc'`. */
+  sortDir?: SortDir;
 }
 
 const styles = {
@@ -133,23 +142,25 @@ function layerKey(path: string, layer: ShadowLayer, fallback: number): string {
   return `${path}|${off}|${blur}|${spread}|${fallback}`;
 }
 
-export function ShadowPreview({ filter = 'shadow', caption }: ShadowPreviewProps): ReactElement {
+export function ShadowPreview({
+  filter,
+  caption,
+  sortBy = 'path',
+  sortDir = 'asc',
+}: ShadowPreviewProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
 
-  const rows = useMemo(() => {
-    const collected: Row[] = [];
-    for (const [path, token] of Object.entries(resolved)) {
-      if (token.$type !== 'shadow') continue;
-      if (!globMatch(path, filter)) continue;
-      collected.push({
-        path,
-        cssVar: makeCssVar(path, cssVarPrefix),
-        layers: asLayers(token.$value),
-      });
-    }
-    collected.sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true }));
-    return collected;
-  }, [resolved, filter, cssVarPrefix]);
+  const rows = useMemo<Row[]>(() => {
+    const filtered = Object.entries(resolved).filter(([path, token]) => {
+      if (token.$type !== 'shadow') return false;
+      return globMatch(path, filter);
+    });
+    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
+      path,
+      cssVar: makeCssVar(path, cssVarPrefix),
+      layers: asLayers(token.$value),
+    }));
+  }, [resolved, filter, cssVarPrefix, sortBy, sortDir]);
 
   const captionText =
     caption ??

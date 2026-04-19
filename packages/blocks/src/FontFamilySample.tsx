@@ -10,6 +10,7 @@ import {
 } from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
+import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 
 export interface FontFamilySampleProps {
   /**
@@ -21,6 +22,14 @@ export interface FontFamilySampleProps {
   sample?: string;
   /** Override the caption. */
   caption?: string;
+  /**
+   * Sort order. `'path'` (default) sorts lexicographically on the
+   * dot-path; `'value'` ordering falls through to path for this block's
+   * type (composite / non-numeric); `'none'` preserves project order.
+   */
+  sortBy?: SortBy;
+  /** `'asc'` (default) or `'desc'`. */
+  sortDir?: SortDir;
 }
 
 const styles = {
@@ -77,25 +86,25 @@ function stackString(raw: unknown): string {
 }
 
 export function FontFamilySample({
-  filter = 'fontFamily',
+  filter,
   sample = 'The quick brown fox jumps over the lazy dog.',
   caption,
+  sortBy = 'path',
+  sortDir = 'asc',
 }: FontFamilySampleProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
 
   const rows = useMemo<Row[]>(() => {
-    return Object.entries(resolved)
-      .filter(([path, token]) => {
-        if (token.$type !== 'fontFamily') return false;
-        return globMatch(path, filter);
-      })
-      .toSorted(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
-      .map(([path, token]) => ({
-        path,
-        cssVar: makeCssVar(path, cssVarPrefix),
-        stack: stackString(token.$value),
-      }));
-  }, [resolved, filter, cssVarPrefix]);
+    const filtered = Object.entries(resolved).filter(([path, token]) => {
+      if (token.$type !== 'fontFamily') return false;
+      return globMatch(path, filter);
+    });
+    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
+      path,
+      cssVar: makeCssVar(path, cssVarPrefix),
+      stack: stackString(token.$value),
+    }));
+  }, [resolved, filter, cssVarPrefix, sortBy, sortDir]);
 
   const captionText =
     caption ??

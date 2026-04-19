@@ -11,6 +11,7 @@ import {
   surfaceStyle,
 } from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
+import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface ColorPaletteProps {
@@ -34,6 +35,16 @@ export interface ColorPaletteProps {
   groupBy?: number;
   /** Override the section caption. */
   caption?: string;
+  /**
+   * Sort order within each group.
+   * - `'path'` (default) — lexicographic on the dot-path.
+   * - `'value'` — perceptual ordering: oklch L → C → H (ramps read
+   *   light→dark, then warm→cool within each lightness band).
+   * - `'none'` — preserve project iteration order.
+   */
+  sortBy?: SortBy;
+  /** `'asc'` (default) or `'desc'`. */
+  sortDir?: SortDir;
 }
 
 const styles = {
@@ -109,20 +120,21 @@ function fixedPrefixLength(filter: string | undefined): number {
 }
 
 export function ColorPalette({
-  filter = 'color',
+  filter,
   groupBy,
   caption,
+  sortBy = 'path',
+  sortDir = 'asc',
 }: ColorPaletteProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
   const colorFormat = useColorFormat();
 
   const groups = useMemo(() => {
-    const entries = Object.entries(resolved)
-      .filter(([path, token]) => {
-        if (token.$type !== 'color') return false;
-        return globMatch(path, filter);
-      })
-      .toSorted(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }));
+    const filtered = Object.entries(resolved).filter(([path, token]) => {
+      if (token.$type !== 'color') return false;
+      return globMatch(path, filter);
+    });
+    const entries = sortTokens(filtered, { by: sortBy, dir: sortDir });
 
     const maxDepth = entries.reduce((m, [p]) => Math.max(m, p.split('.').length), 0);
     /**
@@ -155,7 +167,7 @@ export function ColorPalette({
     return [...bucket.entries()].toSorted(([a], [b]) =>
       a.localeCompare(b, undefined, { numeric: true }),
     );
-  }, [resolved, filter, groupBy, cssVarPrefix, colorFormat]);
+  }, [resolved, filter, groupBy, cssVarPrefix, colorFormat, sortBy, sortDir]);
 
   const totalCount = groups.reduce((acc, [, swatches]) => acc + swatches.length, 0);
   const captionText =
