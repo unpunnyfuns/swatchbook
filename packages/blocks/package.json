@@ -19,6 +19,7 @@
     "dtcg",
     "mdx",
     "design-system",
+    "organize",
     "tokens"
   ],
   "type": "module",
