@@ -1,6 +1,15 @@
+import { existsSync, readFileSync } from 'node:fs';
 import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+
+// Docs versioning: current (main) renders as "Next 🚧" at /next/ with an
+// unreleased banner, and the newest snapshot under versioned_docs/ serves as
+// the default at /. Before the first snapshot exists, skip the versions map
+// entirely so current keeps serving at /.
+const versionsPath = './versions.json';
+const hasReleasedVersion =
+  existsSync(versionsPath) && JSON.parse(readFileSync(versionsPath, 'utf8')).length > 0;
 
 const config: Config = {
   title: 'Swatchbook',
@@ -38,6 +47,12 @@ const config: Config = {
           routeBasePath: '/',
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/unpunnyfuns/swatchbook/tree/main/apps/docs/',
+          includeCurrentVersion: true,
+          ...(hasReleasedVersion && {
+            versions: {
+              current: { label: 'Next 🚧', path: 'next', banner: 'unreleased' },
+            },
+          }),
         },
         blog: false,
         theme: {
@@ -56,6 +71,9 @@ const config: Config = {
       items: [
         { type: 'docSidebar', sidebarId: 'docs', position: 'left', label: 'Docs' },
         { href: 'pathname:///storybook/', label: 'Live Storybook', position: 'left' },
+        ...(hasReleasedVersion
+          ? [{ type: 'docsVersionDropdown' as const, position: 'right' as const }]
+          : []),
         {
           href: 'https://github.com/unpunnyfuns/swatchbook',
           label: 'GitHub',

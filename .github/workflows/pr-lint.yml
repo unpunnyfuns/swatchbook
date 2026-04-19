@@ -36,6 +36,7 @@ jobs:
             tokens-reference
             tokens-starter
             storybook
+            docs
             ci
           requireScope: false
           subjectPattern: ^(?![A-Z]).+$
