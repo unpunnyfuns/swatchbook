@@ -118,9 +118,11 @@ const styles = {
     fontSize: SIZE_LABEL,
     color: TEXT_MUTED,
     marginLeft: 'auto',
-    wordBreak: 'break-all',
-    maxWidth: '40%',
+    minWidth: 0,
     textAlign: 'right',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   } satisfies CSSProperties,
   count: {
     marginLeft: 'auto',
