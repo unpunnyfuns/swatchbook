@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useEffect, useMemo, useState } from 'react';
+import { chromeAliases } from '#/internal/data-attr.ts';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { useProject } from '#/internal/use-project.ts';
 
@@ -135,7 +136,7 @@ export function resolveMotionSpec(
 }
 
 export function MotionSample({ path, speed = 1, runKey = 0 }: MotionSampleProps): ReactElement {
-  const { resolved } = useProject();
+  const { resolved, cssVarPrefix } = useProject();
   const reducedMotion = usePrefersReducedMotion();
 
   const spec = useMemo(() => resolveMotionSpec(resolved[path], resolved), [resolved, path]);
@@ -161,14 +162,14 @@ export function MotionSample({ path, speed = 1, runKey = 0 }: MotionSampleProps)
 
   if (reducedMotion) {
     return (
-      <div style={styles.reducedMotion}>
+      <div style={{ ...chromeAliases(cssVarPrefix), ...styles.reducedMotion }}>
         Animation suppressed by `prefers-reduced-motion: reduce`.
       </div>
     );
   }
 
   return (
-    <div style={styles.track}>
+    <div style={{ ...chromeAliases(cssVarPrefix), ...styles.track }}>
       <div
         style={{
           ...styles.ball,

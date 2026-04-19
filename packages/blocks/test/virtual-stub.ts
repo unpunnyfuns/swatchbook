@@ -5,6 +5,7 @@
  * addon Vite plugin is in the pipeline.
  */
 export const axes = [] as const;
+export const disabledAxes = [] as const;
 export const presets = [] as const;
 export const themes = [] as const;
 export const defaultTheme = null;
