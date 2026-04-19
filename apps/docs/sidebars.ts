@@ -4,6 +4,17 @@ const sidebars: SidebarsConfig = {
   docs: [
     'intro',
     'quickstart',
+    // Blocks promoted to the top level. After initial setup, authoring
+    // pages with the doc blocks is the primary swatchbook interaction —
+    // the reference (what's available) and the authoring guide (how to
+    // compose them) land right below the quickstart rather than buried
+    // under Reference / Guides.
+    {
+      type: 'category',
+      label: 'Blocks',
+      collapsed: false,
+      items: ['reference/blocks', 'guides/authoring-doc-stories'],
+    },
     {
       type: 'category',
       label: 'Concepts',
@@ -19,17 +30,13 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Guides',
       collapsed: false,
-      items: ['guides/authoring-doc-stories', 'guides/multi-axis-walkthrough'],
+      items: ['guides/multi-axis-walkthrough'],
     },
     {
       type: 'category',
       label: 'Reference',
       collapsed: false,
-      // Blocks lead — after initial setup, authoring pages with blocks is
-      // the primary day-to-day swatchbook interaction. Addon is peer-of-
-      // blocks; core is for build-time consumers; config is rarely read
-      // end-to-end so it goes last.
-      items: ['reference/blocks', 'reference/addon', 'reference/core', 'reference/config'],
+      items: ['reference/addon', 'reference/core', 'reference/config'],
     },
   ],
 };
