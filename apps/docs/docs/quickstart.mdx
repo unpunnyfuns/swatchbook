@@ -68,9 +68,51 @@ pnpm storybook
 
 ## What you should see
 
-- **Toolbar**: a single Swatchbook icon button in the top bar. Click it to open a popover containing preset pills, one dropdown per modifier in your resolver, and a color-format picker. If you've written a single `theme` modifier with `Light`/`Dark` contexts, you get one dropdown inside the popover; if you have `mode × brand`, you get two. Escape or outside-click closes it.
+**Toolbar**: a single Swatchbook icon button in the top bar. Click it to open a popover containing preset pills, one dropdown per modifier in your resolver, and a color-format picker. If you've written a single `theme` modifier with `Light`/`Dark` contexts, you get one dropdown inside the popover; if you have `mode × brand`, you get two. Escape or outside-click closes it.
 
-For a browsable tree of every token in the active theme plus a diagnostics summary, compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` into an MDX docs page — see the [token-dashboard guide](./guides/token-dashboard). Switching themes from the toolbar re-renders those blocks live.
+## Your first doc page
+
+Create an MDX file under your stories glob. The addon's blocks render against whichever tuple the toolbar has active, so everything below re-renders live as you flip modifiers:
+
+```mdx title="src/docs/Tokens.mdx"
+import { Meta } from '@storybook/addon-docs/blocks';
+import {
+  ColorPalette,
+  Diagnostics,
+  TokenDetail,
+  TokenNavigator,
+  TokenTable,
+} from '@unpunnyfuns/swatchbook-blocks';
+
+<Meta title="Docs/Tokens" />
+
+# Tokens
+
+<Diagnostics />
+
+## Palette
+<ColorPalette filter="color.palette.*" />
+
+## Semantic roles
+<ColorPalette filter="color.*" />
+
+## Everything
+<TokenNavigator initiallyExpanded={0} />
+
+## Inspect a single token
+<TokenDetail path="color.accent.bg" />
+```
+
+Each block takes filter/scoping props so you can pick what shows up:
+
+- **`<ColorPalette filter="…" />`** — swatch grid grouped by sub-path. Filter by a glob (`"color.palette.*"`, `"color.brand.*"`).
+- **`<TokenTable filter="…" type="…" />`** — searchable two-column table (path + value). Filter by path glob, scope by DTCG `$type`.
+- **`<TokenNavigator root="…" type="…" initiallyExpanded={0..∞} />`** — expandable tree. Scope to a subtree (`root="color"`) and/or a `$type`; `initiallyExpanded={0}` opens fully collapsed.
+- **`<TokenDetail path="…" />`** — alias chain, per-theme values, CSS var reference, and `useToken` snippet for one token.
+- **`<Diagnostics />`** — collapsible list of parser / resolver / validation warnings. Auto-opens when anything's non-zero.
+- **`<TypographyScale>`, `<DimensionScale>`, `<FontFamilySample>`, `<FontWeightScale>`, `<BorderPreview>`, `<ShadowPreview>`, `<GradientPalette>`, `<MotionPreview>`, `<StrokeStyleSample>`** — type-specific blocks with built-in samples. Filter by path glob when you want a subset.
+
+The [blocks reference](./reference/blocks) has the full prop list for each. The [authoring guide](./guides/authoring-doc-stories) walks through composing them in real pages.
 
 ## Theme the block chrome against your tokens
 

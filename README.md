@@ -55,7 +55,42 @@ export default definePreview({
 });
 ```
 
-See the [documentation](https://unpunnyfuns.github.io/swatchbook/) for concepts, guides, and the full API reference.
+## First doc page
+
+Create an MDX file under your stories glob. Everything below re-renders against whichever tuple the toolbar has active:
+
+```mdx
+import { Meta } from '@storybook/addon-docs/blocks';
+import {
+  ColorPalette,
+  Diagnostics,
+  TokenDetail,
+  TokenNavigator,
+  TokenTable,
+} from '@unpunnyfuns/swatchbook-blocks';
+
+<Meta title="Docs/Tokens" />
+
+# Tokens
+
+<Diagnostics />
+
+## Palette
+<ColorPalette filter="color.palette.*" />
+
+## Semantic roles
+<ColorPalette filter="color.*" />
+
+## Everything
+<TokenNavigator initiallyExpanded={0} />
+
+## Inspect a single token
+<TokenDetail path="color.accent.bg" />
+```
+
+Each block takes filter / scoping props — `filter` (path glob), `type` (DTCG `$type`), `root` (subtree). Type-specific blocks (`<TypographyScale>`, `<DimensionScale>`, `<FontFamilySample>`, `<FontWeightScale>`, `<BorderPreview>`, `<ShadowPreview>`, `<GradientPalette>`, `<MotionPreview>`, `<StrokeStyleSample>`) ship alongside the cross-type ones and render with built-in samples. See the [blocks reference](https://unpunnyfuns.github.io/swatchbook/reference/blocks) for the full prop list per block.
+
+See the [documentation](https://unpunnyfuns.github.io/swatchbook/) for concepts, guides, chrome theming, and the full API reference.
 
 ## Credits
 
