@@ -32,7 +32,7 @@ addons.setConfig({
     ...(preferDark ? themes.dark : themes.light),
     base: preferDark ? 'dark' : 'light',
     brandTitle: brandMarkup,
-    brandUrl: 'https://unpunnyfuns.github.io/swatchbook/',
+    brandUrl: './',
     brandTarget: '_self',
   }),
 });
