@@ -1,7 +1,7 @@
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useMemo } from 'react';
+import './BorderPreview.css';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
-import { BORDER_DEFAULT, MONO_STACK, TEXT_MUTED } from '#/internal/styles.tsx';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
@@ -23,51 +23,6 @@ export interface BorderPreviewProps {
   /** `'asc'` (default) or `'desc'`. */
   sortDir?: SortDir;
 }
-
-const styles = {
-  row: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(160px, 220px) 140px 1fr',
-    gap: 16,
-    alignItems: 'center',
-    padding: '14px 0',
-    borderBottom: BORDER_DEFAULT,
-  } satisfies CSSProperties,
-  meta: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 2,
-    minWidth: 0,
-  } satisfies CSSProperties,
-  path: {
-    fontFamily: MONO_STACK,
-    fontSize: 12,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  } satisfies CSSProperties,
-  cssVar: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    opacity: 0.7,
-  } satisfies CSSProperties,
-  sampleCell: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  } satisfies CSSProperties,
-  breakdown: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    display: 'grid',
-    gridTemplateColumns: 'auto 1fr',
-    columnGap: 12,
-    rowGap: 2,
-  } satisfies CSSProperties,
-  breakdownKey: {
-    color: TEXT_MUTED,
-  } satisfies CSSProperties,
-};
 
 interface BorderValue {
   color?: unknown;
@@ -144,20 +99,20 @@ export function BorderPreview({
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
-        <div key={row.path} style={styles.row}>
-          <div style={styles.meta}>
-            <span style={styles.path}>{row.path}</span>
-            <span style={styles.cssVar}>{row.cssVar}</span>
+        <div key={row.path} className="sb-border-preview__row">
+          <div className="sb-border-preview__meta">
+            <span className="sb-border-preview__path">{row.path}</span>
+            <span className="sb-border-preview__css-var">{row.cssVar}</span>
           </div>
-          <div style={styles.sampleCell}>
+          <div className="sb-border-preview__sample-cell">
             <BorderSample path={row.path} />
           </div>
-          <div style={styles.breakdown}>
-            <span style={styles.breakdownKey}>width</span>
+          <div className="sb-border-preview__breakdown">
+            <span className="sb-border-preview__breakdown-key">width</span>
             <span>{formatDimension(row.value.width)}</span>
-            <span style={styles.breakdownKey}>style</span>
+            <span className="sb-border-preview__breakdown-key">style</span>
             <span>{row.value.style != null ? String(row.value.style) : '—'}</span>
-            <span style={styles.breakdownKey}>color</span>
+            <span className="sb-border-preview__breakdown-key">color</span>
             <span>{formatColor(row.value.color)}</span>
           </div>
         </div>

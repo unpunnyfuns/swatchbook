@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
-import { BORDER_DEFAULT, MONO_STACK, TEXT_DEFAULT, TEXT_MUTED } from '#/internal/styles.tsx';
+import './StrokeStyleSample.css';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
@@ -34,51 +34,6 @@ const STRING_STYLES = new Set([
   'outset',
   'inset',
 ]);
-
-const styles = {
-  row: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(160px, 220px) 1fr auto',
-    gap: 16,
-    alignItems: 'center',
-    padding: '14px 0',
-    borderBottom: BORDER_DEFAULT,
-  } satisfies CSSProperties,
-  meta: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 2,
-    minWidth: 0,
-  } satisfies CSSProperties,
-  path: {
-    fontFamily: MONO_STACK,
-    fontSize: 12,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  } satisfies CSSProperties,
-  value: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    color: TEXT_MUTED,
-  } satisfies CSSProperties,
-  line: {
-    height: 0,
-    borderTopWidth: 4,
-    borderTopColor: TEXT_DEFAULT,
-    width: '100%',
-  } satisfies CSSProperties,
-  objectFallback: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    color: TEXT_MUTED,
-  } satisfies CSSProperties,
-  cssVar: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    color: TEXT_MUTED,
-  } satisfies CSSProperties,
-};
 
 interface Row {
   path: string;
@@ -129,25 +84,25 @@ export function StrokeStyleSample({
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
-        <div key={row.path} style={styles.row}>
-          <div style={styles.meta}>
-            <span style={styles.path}>{row.path}</span>
-            <span style={styles.value}>{row.displayValue}</span>
+        <div key={row.path} className="sb-stroke-style-sample__row">
+          <div className="sb-stroke-style-sample__meta">
+            <span className="sb-stroke-style-sample__path">{row.path}</span>
+            <span className="sb-stroke-style-sample__value">{row.displayValue}</span>
           </div>
           {row.cssStyle ? (
             <div
+              className="sb-stroke-style-sample__line"
               style={{
-                ...styles.line,
                 borderTopStyle: row.cssStyle as CSSProperties['borderTopStyle'],
               }}
               aria-hidden
             />
           ) : (
-            <span style={styles.objectFallback}>
+            <span className="sb-stroke-style-sample__object-fallback">
               Object-form (dashArray + lineCap) — no pure CSS `border-style` equivalent.
             </span>
           )}
-          <span style={styles.cssVar}>{row.cssVar}</span>
+          <span className="sb-stroke-style-sample__css-var">{row.cssVar}</span>
         </div>
       ))}
     </div>

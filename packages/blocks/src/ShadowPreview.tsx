@@ -1,6 +1,7 @@
-import type { CSSProperties, ReactElement } from 'react';
+import cx from 'clsx';
+import type { ReactElement } from 'react';
 import { useMemo } from 'react';
-import { BORDER_DEFAULT, MONO_STACK, TEXT_MUTED } from '#/internal/styles.tsx';
+import './ShadowPreview.css';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
@@ -23,59 +24,6 @@ export interface ShadowPreviewProps {
   /** `'asc'` (default) or `'desc'`. */
   sortDir?: SortDir;
 }
-
-const styles = {
-  row: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(160px, 220px) 140px 1fr',
-    gap: 16,
-    alignItems: 'center',
-    padding: '16px 0',
-    borderBottom: BORDER_DEFAULT,
-  } satisfies CSSProperties,
-  meta: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 2,
-    minWidth: 0,
-  } satisfies CSSProperties,
-  path: {
-    fontFamily: MONO_STACK,
-    fontSize: 12,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  } satisfies CSSProperties,
-  cssVar: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    opacity: 0.7,
-  } satisfies CSSProperties,
-  sampleCell: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 96,
-  } satisfies CSSProperties,
-  breakdown: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    display: 'grid',
-    gridTemplateColumns: 'auto 1fr',
-    columnGap: 12,
-    rowGap: 2,
-  } satisfies CSSProperties,
-  breakdownKey: {
-    color: TEXT_MUTED,
-  } satisfies CSSProperties,
-  layerHeader: {
-    fontSize: 10,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    color: TEXT_MUTED,
-    marginTop: 6,
-  } satisfies CSSProperties,
-};
 
 interface ShadowLayer {
   color?: unknown;
@@ -168,15 +116,15 @@ export function ShadowPreview({
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
-        <div key={row.path} style={styles.row}>
-          <div style={styles.meta}>
-            <span style={styles.path}>{row.path}</span>
-            <span style={styles.cssVar}>{row.cssVar}</span>
+        <div key={row.path} className="sb-shadow-preview__row">
+          <div className="sb-shadow-preview__meta">
+            <span className="sb-shadow-preview__path">{row.path}</span>
+            <span className="sb-shadow-preview__css-var">{row.cssVar}</span>
           </div>
-          <div style={styles.sampleCell}>
+          <div className="sb-shadow-preview__sample-cell">
             <ShadowSample path={row.path} />
           </div>
-          <div style={styles.breakdown}>
+          <div className="sb-shadow-preview__breakdown">
             {row.layers.length === 1
               ? renderLayer(row.layers[0])
               : row.layers.map((layer, i) => (
@@ -204,7 +152,7 @@ function renderLayer(layer: ShadowLayer | undefined): ReactElement[] {
   ];
   if (layer.inset) entries.push(['inset', String(layer.inset)]);
   return entries.flatMap(([k, v]) => [
-    <span key={`k-${k}`} style={styles.breakdownKey}>
+    <span key={`k-${k}`} className="sb-shadow-preview__breakdown-key">
       {k}
     </span>,
     <span key={`v-${k}`}>{v}</span>,
@@ -221,11 +169,13 @@ function Layer({
   total: number;
 }): ReactElement {
   return (
-    <div style={{ gridColumn: '1 / -1' }}>
-      <div style={styles.layerHeader}>
+    <div className="sb-shadow-preview__layer">
+      <div className="sb-shadow-preview__layer-header">
         layer {index + 1} of {total}
       </div>
-      <div style={{ ...styles.breakdown, marginTop: 2 }}>{renderLayer(layer)}</div>
+      <div className={cx('sb-shadow-preview__breakdown', 'sb-shadow-preview__layer-breakdown')}>
+        {renderLayer(layer)}
+      </div>
     </div>
   );
 }

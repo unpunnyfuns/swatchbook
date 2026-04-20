@@ -1,6 +1,6 @@
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useMemo } from 'react';
-import { BORDER_DEFAULT, BORDER_FAINT, MONO_STACK } from '#/internal/styles.tsx';
+import './GradientPalette.css';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
@@ -22,62 +22,6 @@ export interface GradientPaletteProps {
   /** `'asc'` (default) or `'desc'`. */
   sortDir?: SortDir;
 }
-
-const styles = {
-  row: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(180px, 240px) 1fr minmax(140px, 220px)',
-    gap: 16,
-    alignItems: 'center',
-    padding: '16px 0',
-    borderBottom: BORDER_DEFAULT,
-  } satisfies CSSProperties,
-  meta: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 2,
-    minWidth: 0,
-  } satisfies CSSProperties,
-  path: {
-    fontFamily: MONO_STACK,
-    fontSize: 12,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  } satisfies CSSProperties,
-  cssVar: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    opacity: 0.7,
-  } satisfies CSSProperties,
-  sample: {
-    height: 56,
-    borderRadius: 6,
-    border: BORDER_FAINT,
-  } satisfies CSSProperties,
-  stops: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 2,
-  } satisfies CSSProperties,
-  stopRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-  } satisfies CSSProperties,
-  stopSwatch: {
-    width: 10,
-    height: 10,
-    borderRadius: 2,
-    border: BORDER_DEFAULT,
-    flex: '0 0 auto',
-  } satisfies CSSProperties,
-  stopPosition: {
-    opacity: 0.6,
-  } satisfies CSSProperties,
-};
 
 interface GradientStop {
   color?: {
@@ -154,24 +98,26 @@ export function GradientPalette({
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
-        <div key={row.path} style={styles.row}>
-          <div style={styles.meta}>
-            <span style={styles.path}>{row.path}</span>
-            <span style={styles.cssVar}>{row.cssVar}</span>
+        <div key={row.path} className="sb-gradient-palette__row">
+          <div className="sb-gradient-palette__meta">
+            <span className="sb-gradient-palette__path">{row.path}</span>
+            <span className="sb-gradient-palette__css-var">{row.cssVar}</span>
           </div>
           <div
-            style={{ ...styles.sample, background: `linear-gradient(to right, ${row.cssVar})` }}
+            className="sb-gradient-palette__sample"
+            style={{ background: `linear-gradient(to right, ${row.cssVar})` }}
             aria-hidden
           />
-          <div style={styles.stops}>
+          <div className="sb-gradient-palette__stops">
             {row.stops.map((stop, i) => (
-              <div key={stopKey(row.path, stop, i)} style={styles.stopRow}>
+              <div key={stopKey(row.path, stop, i)} className="sb-gradient-palette__stop-row">
                 <span
-                  style={{ ...styles.stopSwatch, background: stopCssColor(stop) }}
+                  className="sb-gradient-palette__stop-swatch"
+                  style={{ background: stopCssColor(stop) }}
                   aria-hidden
                 />
                 <span>{stopCssColor(stop)}</span>
-                <span style={styles.stopPosition}>
+                <span className="sb-gradient-palette__stop-position">
                   @ {((stop.position ?? 0) * 100).toFixed(0)}%
                 </span>
               </div>
