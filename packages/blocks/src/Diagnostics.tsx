@@ -1,4 +1,4 @@
-import cx from 'classnames';
+import cx from 'clsx';
 import type { ReactElement } from 'react';
 import './Diagnostics.css';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
