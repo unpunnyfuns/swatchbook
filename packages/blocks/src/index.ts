@@ -1,5 +1,3 @@
-import '#/internal/block-reset.css';
-
 export {
   COLOR_FORMATS,
   type ColorFormat,

@@ -11,23 +11,32 @@ export function dataAttr(prefix: string, key: string): string {
 }
 
 /**
- * Marker attribute set on every block wrapper. Used as the scope selector
- * for the defensive element-reset stylesheet in `block-reset.css` so
- * Storybook MDX docs CSS (`.sbdocs table`, `.sbdocs ul`, …) can't bleed
- * into our chrome.
+ * Marker attribute set on every block wrapper. Retained as a stable hook
+ * for consumer-side selectors (e.g. when a host app wants to target or
+ * override block chrome without relying on hashed class names).
  */
 export const BLOCK_ATTR = 'data-swatchbook-block';
 
 /**
- * Spread helper for the common `<div data-<prefix>-theme="…" data-swatchbook-block>`
- * block wrapper. Returns an object keyed on the prefixed theme attribute
- * plus the scoping marker so the call site stays readable:
- * `<div {...themeAttrs(prefix, theme)} />`.
+ * Opt-out class that Storybook's `.sbdocs` stylesheet uses to self-exclude
+ * on MDX docs pages — every `.sbdocs` house rule is wrapped in
+ * `:not(.sb-unstyled, .sb-unstyled *)`, so any descendant of a `.sb-unstyled`
+ * container is left alone. Stamped onto every block wrapper so blocks
+ * render identically in MDX docs and regular stories without fighting
+ * cascade specificity.
+ */
+const STORYBOOK_UNSTYLED_CLASS = 'sb-unstyled';
+
+/**
+ * Spread helper for the common `<div data-<prefix>-theme="…" data-swatchbook-block className="sb-unstyled">`
+ * block wrapper. Returns the prefixed theme attribute, the scoping marker,
+ * and Storybook's `.sb-unstyled` opt-out class.
  */
 export function themeAttrs(prefix: string, themeName: string): Record<string, string> {
   return {
     [dataAttr(prefix, 'theme')]: themeName,
     [BLOCK_ATTR]: '',
+    className: STORYBOOK_UNSTYLED_CLASS,
   };
 }
 
