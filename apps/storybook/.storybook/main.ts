@@ -9,6 +9,7 @@ function pkg(name: string): string {
 
 export default defineMain({
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(ts|tsx)'],
+  staticDirs: ['./assets'],
   addons: [
     pkg('@chromatic-com/storybook'),
     pkg('@storybook/addon-vitest'),

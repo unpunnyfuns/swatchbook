@@ -1,10 +1,13 @@
-# Swatchbook
+# swatchbook
 
-A Storybook addon and MDX blocks for documenting [DTCG](https://www.designtokens.org/) design tokens — parsed via [Terrazzo](https://terrazzo.app/) — with a toolbar that flips **light/dark, brand, contrast, density, or whatever independent dimensions your design system cares about**. Each dimension is a modifier on your DTCG resolver; swatchbook reads them directly, so you don't enumerate every combination as a flat theme ID. (See ["why axes, not themes"](https://unpunnyfuns.github.io/swatchbook/concepts/axes-vs-themes).)
+A Storybook addon and MDX blocks for documenting [DTCG](https://www.designtokens.org/) design tokens.
 
-Alongside the switcher, swatchbook ships MDX doc blocks — `TokenNavigator`, `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail`, and more — that render your tokens as browsable reference pages without a bespoke docs site.
+Two things in one:
 
-**Documentation:** [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/) (live Storybook at [`/storybook`](https://unpunnyfuns.github.io/swatchbook/storybook/)).
+- **Doc blocks** — `TokenNavigator`, `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail`, and more. Drop them into MDX pages and your token reference writes itself.
+- **A multi-axis theme switcher** — flip dark mode, brand, contrast, density, whatever dimensions your design system has, from one toolbar button. Each dimension is a DTCG resolver modifier; each becomes a dropdown inside a single popover. (See [*why axes, not themes*](https://unpunnyfuns.github.io/swatchbook/concepts/axes-vs-themes).)
+
+**Documentation:** [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/) · **Live Storybook:** [/storybook](https://unpunnyfuns.github.io/swatchbook/storybook/)
 
 ## Packages
 

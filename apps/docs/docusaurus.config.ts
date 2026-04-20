@@ -19,9 +19,9 @@ const hasReleasedVersion =
   existsSync(versionsPath) && JSON.parse(readFileSync(versionsPath, 'utf8')).length > 0;
 
 const config: Config = {
-  title: 'Swatchbook',
+  title: 'swatchbook',
   tagline: 'Storybook addon for DTCG design tokens',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/logo.svg',
 
   future: {
     v4: {
@@ -81,7 +81,11 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'Swatchbook',
+      title: 'swatchbook',
+      logo: {
+        alt: 'swatchbook logo',
+        src: 'img/logo.svg',
+      },
       items: [
         { type: 'docSidebar', sidebarId: 'docs', position: 'left', label: 'Docs' },
         { href: 'pathname:///storybook/', label: 'Live Storybook', position: 'left' },
