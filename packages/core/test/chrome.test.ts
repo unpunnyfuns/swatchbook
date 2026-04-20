@@ -21,10 +21,10 @@ it('validateChrome returns empty when input is undefined', () => {
 
 it('validateChrome keeps entries whose source is a known chrome path and target resolves', () => {
   const { entries, diagnostics } = validateChrome(
-    { 'color.sys.surface.default': 'color.ref.blue.500' },
+    { 'color.surface.default': 'color.ref.blue.500' },
     { Light: tokensFixture },
   );
-  expect(entries).toEqual({ 'color.sys.surface.default': 'color.ref.blue.500' });
+  expect(entries).toEqual({ 'color.surface.default': 'color.ref.blue.500' });
   expect(diagnostics).toEqual([]);
 });
 
@@ -42,7 +42,7 @@ it('validateChrome drops unknown source keys with a warn diagnostic', () => {
 
 it('validateChrome drops entries whose target resolves in no theme', () => {
   const { entries, diagnostics } = validateChrome(
-    { 'color.sys.surface.default': 'color.nowhere' },
+    { 'color.surface.default': 'color.nowhere' },
     { Light: tokensFixture },
   );
   expect(entries).toEqual({});
@@ -53,8 +53,8 @@ it('validateChrome drops entries whose target resolves in no theme', () => {
 
 it('CHROME_PATHS covers the ten chrome variables blocks read', () => {
   expect(CHROME_PATHS).toHaveLength(10);
-  expect(CHROME_PATHS).toContain('color.sys.surface.default');
-  expect(CHROME_PATHS).toContain('typography.sys.body.font-family');
+  expect(CHROME_PATHS).toContain('color.surface.default');
+  expect(CHROME_PATHS).toContain('typography.body.font-family');
 });
 
 let project: Project;
@@ -67,7 +67,7 @@ beforeAll(async () => {
       default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
       cssVarPrefix: 'sb',
       chrome: {
-        'color.sys.surface.default': 'color.ref.blue.500',
+        'color.surface.default': 'color.ref.blue.500',
         'color.fake.path': 'color.ref.blue.500',
       },
     },
@@ -77,7 +77,7 @@ beforeAll(async () => {
 
 it('loadProject stores validated chrome entries on the project', () => {
   expect(project.chrome).toEqual({
-    'color.sys.surface.default': 'color.ref.blue.500',
+    'color.surface.default': 'color.ref.blue.500',
   });
 });
 
@@ -87,13 +87,19 @@ it('loadProject surfaces a chrome diagnostic for the dropped entry', () => {
   expect(chromeDiags[0]?.message).toMatch(/unknown source path "color\.fake\.path"/);
 });
 
-it('projectCss emits a :root alias block for chrome entries', () => {
+it('projectCss emits the chrome alias using the fixed --swatchbook- namespace', () => {
   const css = projectCss(project);
   const rootBlocks = css.split('\n\n').filter((b) => b.startsWith(':root {'));
   const aliasBlock = rootBlocks.find((b) =>
-    b.includes('--sb-color-sys-surface-default: var(--sb-color-ref-blue-500)'),
+    b.includes('--swatchbook-color-surface-default: var(--sb-color-ref-blue-500)'),
   );
   expect(aliasBlock).toBeDefined();
+});
+
+it('projectCss never prefixes chrome source vars with the project prefix', () => {
+  const css = projectCss(project);
+  expect(css).not.toMatch(/--sb-swatchbook-/);
+  expect(css).not.toMatch(/--sb-color-surface-default:\s*var\(/);
 });
 
 it('projectCss skips chrome emission when no valid entries survive', async () => {
@@ -107,5 +113,5 @@ it('projectCss skips chrome emission when no valid entries survive', async () =>
     fixtureCwd,
   );
   const css = projectCss(p);
-  expect(css).not.toMatch(/--sb-color-sys-surface-default:\s*var\(--sb-color-ref-blue-500\)/);
+  expect(css).not.toMatch(/--swatchbook-color-surface-default:/);
 });

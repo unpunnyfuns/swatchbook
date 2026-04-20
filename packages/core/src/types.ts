@@ -93,17 +93,18 @@ export interface Config {
    */
   disabledAxes?: string[];
   /**
-   * Map from swatchbook block chrome paths (the closed set in `CHROME_PATHS`)
-   * to token paths in the consumer's project. Used when the project doesn't
-   * natively expose the `color.sys.*` / `typography.sys.*` shape blocks
-   * expect — each entry emits a `:root` alias `--<prefix>-<source>:
-   * var(--<prefix>-<target>)`, so block chrome reads resolve through the
-   * alias to the consumer's token values.
+   * Map from swatchbook block chrome roles (the closed set in `CHROME_PATHS`
+   * — e.g. `color.surface.default`, `color.text.default`) to token paths in
+   * the consumer's project. Each entry emits a `:root` alias
+   * `--swatchbook-<role>: var(--<prefix>-<target>)`; blocks read the fixed
+   * `--swatchbook-*` namespace directly, so the project's `cssVarPrefix`
+   * never collides with chrome reads.
    *
-   * Target var indirection means per-theme values flip automatically; no
-   * per-theme override needed. Unknown source keys and target paths that
+   * Target var indirection means per-theme values flip automatically — no
+   * per-theme override needed. Unknown role keys and target paths that
    * don't resolve in any theme produce `warn` diagnostics (group
-   * `swatchbook/chrome`) and are dropped.
+   * `swatchbook/chrome`) and are dropped. Without a chrome map, blocks
+   * fall back to the `Canvas` / `CanvasText` system colors.
    */
   chrome?: Record<string, string>;
 }

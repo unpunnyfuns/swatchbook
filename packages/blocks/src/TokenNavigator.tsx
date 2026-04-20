@@ -15,7 +15,7 @@ import {
   TEXT_MUTED,
   typePillStyle,
 } from '#/internal/styles.tsx';
-import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
+import { themeAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { makeCssVar, useProject } from '#/internal/use-project.ts';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
@@ -254,7 +254,7 @@ export function TokenNavigator({
 
   if (tree.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
         <EmptyState>
           {root ? `No tokens under "${root}".` : 'No tokens in the active theme.'}
         </EmptyState>
@@ -263,7 +263,7 @@ export function TokenNavigator({
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
+    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div style={styles.caption}>
         {root ? `Tokens under ${root}` : 'Token graph'} · {activeTheme}
       </div>

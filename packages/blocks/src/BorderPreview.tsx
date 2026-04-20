@@ -2,7 +2,7 @@ import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { BORDER_DEFAULT, MONO_STACK, TEXT_MUTED } from '#/internal/styles.tsx';
-import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
+import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
@@ -134,14 +134,14 @@ export function BorderPreview({
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
         <div className="sb-block__empty">No border tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
+    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} style={styles.row}>

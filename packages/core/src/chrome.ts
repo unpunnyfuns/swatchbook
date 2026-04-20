@@ -1,29 +1,35 @@
 import type { Diagnostic, TokenMap } from '#/types.ts';
 
 /**
- * Closed set of token paths that swatchbook's block chrome reads. Consumers
- * whose projects don't expose these paths natively can supply a `chrome`
- * config entry mapping each path to a path in their own token tree — the CSS
- * emitter then emits `:root` aliases that redirect chrome's reads to the
- * consumer's tokens.
+ * Closed set of roles that swatchbook's block chrome reads. Each role emits
+ * to a fixed `--swatchbook-<dashform>` custom property that blocks reference
+ * directly — independent of the project's `cssVarPrefix`, so there is zero
+ * chance of the project's token namespace colliding with chrome reads.
  *
- * Must stay in lockstep with `CHROME_VARS` in
- * `packages/blocks/src/internal/data-attr.ts`.
+ * Consumers whose tokens don't happen to match these roles supply a
+ * `chrome` config entry mapping each role to a token path in their own
+ * tree; the CSS emitter appends `:root` aliases of the form
+ * `--swatchbook-<role>: var(--<prefix>-<target>);`, so chrome reads resolve
+ * through the alias to the consumer's tokens while per-theme value flips
+ * ride through the target's existing per-theme emission.
  */
 export const CHROME_PATHS = [
-  'color.sys.border.default',
-  'color.sys.surface.default',
-  'color.sys.surface.muted',
-  'color.sys.surface.raised',
-  'color.sys.text.default',
-  'color.sys.text.muted',
-  'color.sys.accent.bg',
-  'color.sys.accent.fg',
-  'typography.sys.body.font-family',
-  'typography.sys.body.font-size',
+  'color.border.default',
+  'color.surface.default',
+  'color.surface.muted',
+  'color.surface.raised',
+  'color.text.default',
+  'color.text.muted',
+  'color.accent.bg',
+  'color.accent.fg',
+  'typography.body.font-family',
+  'typography.body.font-size',
 ] as const satisfies readonly string[];
 
 export type ChromePath = (typeof CHROME_PATHS)[number];
+
+/** Fixed prefix for chrome CSS custom properties. Independent of project config. */
+export const CHROME_VAR_PREFIX = 'swatchbook';
 
 export interface ChromeValidationResult {
   entries: Record<string, string>;

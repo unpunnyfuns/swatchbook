@@ -1,5 +1,6 @@
 import type { TokenNormalized } from '@terrazzo/parser';
 import { generateShorthand, makeCSSVar, transformCSSValue } from '@terrazzo/token-tools/css';
+import { CHROME_VAR_PREFIX } from '#/chrome.ts';
 import type { Axis, Theme, TokenMap } from '#/types.ts';
 
 export interface EmitCssOptions {
@@ -68,7 +69,7 @@ export function emitCss(
   if (chromeEntries.length > 0) {
     const lines: string[] = [];
     for (const [source, target] of chromeEntries) {
-      const sourceVar = makeCSSVar(source, varOpts);
+      const sourceVar = makeCSSVar(source, { prefix: CHROME_VAR_PREFIX });
       const targetVar = makeCSSVar(target, { ...varOpts, wrapVar: true });
       lines.push(`  ${sourceVar}: ${targetVar};`);
     }

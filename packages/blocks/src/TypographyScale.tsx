@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
 import { BORDER_DEFAULT, MONO_STACK } from '#/internal/styles.tsx';
-import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
+import { themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, useProject } from '#/internal/use-project.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 
@@ -126,14 +126,14 @@ export function TypographyScale({
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
         <div className="sb-block__empty">No typography tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
+    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} style={styles.row}>

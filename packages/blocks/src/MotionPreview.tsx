@@ -2,7 +2,7 @@ import type { CSSProperties, ReactElement } from 'react';
 import { useMemo, useState } from 'react';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { BORDER_DEFAULT, BORDER_STRONG, MONO_STACK, TEXT_MUTED } from '#/internal/styles.tsx';
-import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
+import { themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 import {
   MotionSample,
@@ -53,8 +53,8 @@ const styles = {
     cursor: 'pointer',
   } satisfies CSSProperties,
   speedBtnActive: {
-    background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
-    color: 'var(--sb-color-sys-accent-fg, #fff)',
+    background: 'var(--swatchbook-color-accent-bg, #3b82f6)',
+    color: 'var(--swatchbook-color-accent-fg, #fff)',
     borderColor: 'transparent',
   } satisfies CSSProperties,
   replayBtn: {
@@ -163,14 +163,14 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
         <div style={styles.empty}>No motion tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
+    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div style={styles.caption}>{captionText}</div>
       <div style={styles.controls}>
         <span style={styles.controlLabel}>Speed</span>

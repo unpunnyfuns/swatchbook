@@ -1,32 +1,34 @@
 /*
  * Shared chrome applied to every block wrapper + a few common sub-parts.
  *
- * The `var(--sb-*)` references are redirected to the consumer's actual
- * `cssVarPrefix` by `chromeAliases(prefix)` (spread as inline style on
- * each block wrapper). Custom properties inherit down the tree, so these
- * rules read the aliases regardless of depth.
+ * The `var(--swatchbook-*)` references are a fixed namespace owned by
+ * swatchbook — independent of the consumer's `cssVarPrefix`, so there's
+ * zero chance of project tokens colliding with chrome reads. Consumers
+ * who want to theme the chrome supply a `chrome` config entry in
+ * `@unpunnyfuns/swatchbook-core`; without one, chrome falls back to the
+ * `Canvas` / `CanvasText` system colors.
  *
  * Per-block geometry stays in each block's own stylesheet; this file only
  * holds primitives that are truly shared (surface, caption, empty-state).
  */
 
 .sb-block {
-  font-family: var(--sb-typography-sys-body-font-family, system-ui);
-  font-size: var(--sb-typography-sys-body-font-size, 14px);
-  color: var(--sb-color-sys-text-default, CanvasText);
-  background: var(--sb-color-sys-surface-default, Canvas);
+  font-family: var(--swatchbook-typography-body-font-family, system-ui);
+  font-size: var(--swatchbook-typography-body-font-size, 14px);
+  color: var(--swatchbook-color-text-default, CanvasText);
+  background: var(--swatchbook-color-surface-default, Canvas);
   padding: 12px;
   border-radius: 6px;
 }
 
 .sb-block__caption {
   padding: 4px 0 12px;
-  color: var(--sb-color-sys-text-muted, CanvasText);
+  color: var(--swatchbook-color-text-muted, CanvasText);
   font-size: 12px;
 }
 
 .sb-block__empty {
   padding: 24px 12px;
   text-align: center;
-  color: var(--sb-color-sys-text-muted, CanvasText);
+  color: var(--swatchbook-color-text-muted, CanvasText);
 }

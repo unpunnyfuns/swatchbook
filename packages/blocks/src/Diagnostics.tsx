@@ -1,7 +1,7 @@
 import cx from 'clsx';
 import type { ReactElement } from 'react';
 import './Diagnostics.css';
-import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
+import { themeAttrs } from '#/internal/data-attr.ts';
 import { useProject } from '#/internal/use-project.ts';
 import type { VirtualDiagnostic } from '#/types.ts';
 
@@ -60,11 +60,7 @@ export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
   const variant = summaryVariant(diagnostics);
 
   return (
-    <div
-      {...themeAttrs(cssVarPrefix, activeTheme)}
-      style={chromeAliases(cssVarPrefix)}
-      data-testid="diagnostics"
-    >
+    <div {...themeAttrs(cssVarPrefix, activeTheme)} data-testid="diagnostics">
       <details open={hasErrorsOrWarnings}>
         <summary
           className={cx(

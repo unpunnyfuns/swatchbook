@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import { BORDER_DEFAULT, BORDER_FAINT, MONO_STACK } from '#/internal/styles.tsx';
-import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
+import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
@@ -166,14 +166,14 @@ export function ColorPalette({
 
   if (totalCount === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
         <div className="sb-block__empty">No color tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
+    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {groups.map(([group, swatches]) => (
         <section key={group} style={styles.group}>
