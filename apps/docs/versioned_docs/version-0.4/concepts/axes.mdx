@@ -1,0 +1,91 @@
+---
+id: axes
+title: Axes
+sidebar_position: 2
+---
+
+# Axes
+
+An **axis** is one independent dimension of your theming model — `mode`, `brand`, `density`, `contrast`, whatever fits your system. Each axis has a set of named **contexts** (one of which is the default), and at any moment exactly one context is selected per axis.
+
+## Tuples, not strings
+
+The addon's canonical representation of "what theme is active" is a **tuple**: one context selected per axis. For a resolver with `mode` and `brand`, a tuple looks like:
+
+```ts
+{ mode: 'Dark', brand: 'Brand A' }
+```
+
+Every resolved token, every CSS selector, every panel readout keys on this tuple. The composed string name (`"Dark · Brand A"`) exists for back-compat and display — prefer the tuple in consuming code.
+
+## Data attributes
+
+When a tuple is active, the preview decorator writes one `data-<prefix>-<axisName>="<context>"` attribute per axis to `<html>` and the story wrapper. The prefix follows `cssVarPrefix` (default `swatch`), so swatchbook's scaffolding doesn't collide with other libraries that claim bare `data-mode` / `data-theme`:
+
+```html
+<html data-swatch-mode="Dark" data-swatch-brand="Brand A" data-swatch-theme="Dark · Brand A">
+```
+
+CSS emission matches those attributes with compound selectors:
+
+```css
+:root {
+  --swatch-color-sys-surface-default: #ffffff;
+}
+[data-swatch-mode="Dark"][data-swatch-brand="Default"] {
+  --swatch-color-sys-surface-default: #0f172a;
+}
+[data-swatch-mode="Dark"][data-swatch-brand="Brand A"] {
+  --swatch-color-sys-surface-default: #111827;
+}
+```
+
+Each non-default tuple gets its own flat block (every var redeclared). The `:root` block carries the default tuple. Nested cascading isn't used because axes are allowed to write to the same token path under the DTCG spec; flat emission avoids the collision-detection work that nesting would require.
+
+> These attributes + CSS vars are the scaffolding swatchbook needs so tokens repaint when a reader flips an axis in the toolbar. They are not a public styling API — consumer components shouldn't depend on them for production theming. See [what swatchbook is not](/).
+
+## Independence
+
+Axes are independent. Selecting `mode=Dark` does not constrain `brand`; the resolver evaluates each modifier in `resolutionOrder` and each contributes its own layer stack. The toolbar popover reflects this by rendering one dropdown per axis rather than a single flat dropdown that lists every theme.
+
+## Where axes come from
+
+- **Resolver input**: each DTCG modifier becomes one axis (`source: 'resolver'`).
+- **Layered config**: each `axes[]` entry becomes one axis (`source: 'layered'`).
+- **Neither input**: a single synthetic axis named `theme` (`source: 'synthetic'`).
+
+Accessible from your Storybook via:
+
+```ts
+import { useActiveAxes } from '@unpunnyfuns/swatchbook-blocks';
+
+function MyComponent() {
+  const axes = useActiveAxes();
+  // axes === { mode: 'Dark', brand: 'Brand A' }
+}
+```
+
+## Per-story overrides
+
+Force a specific tuple on a single story:
+
+```ts
+export const DarkBrandA = meta.story({
+  parameters: {
+    swatchbook: {
+      axes: { mode: 'Dark', brand: 'Brand A' },
+    },
+  },
+});
+```
+
+Omit an axis and it falls back to that axis's default. Invalid axis keys or context values are silently ignored (the decorator falls back to defaults). The legacy `parameters.swatchbook.theme: 'Composed Name'` form still works but axes tuples are preferred.
+
+## Disabling an axis
+
+A resolver may declare more modifiers than a given Storybook wants to surface — e.g. a work-in-progress `contrast` variant, or an experimental `density` mode. Rather than editing the resolver, list the axis name in `config.disabledAxes` and the project behaves as if that axis didn't exist for this session: no toolbar dropdown, no extra CSS blocks, and the axis is pinned to its `default` context in the active tuple. The Design Tokens panel still shows a faint pinned indicator so the suppression isn't invisible. See the [`disabledAxes`](../reference/config#disabledaxes-string) field in the config reference for details.
+
+## See also
+
+- [Presets](./presets) — name common tuples and render them as toolbar pills.
+- [Reference: core](../reference/core) — the `Axis` type surface.
