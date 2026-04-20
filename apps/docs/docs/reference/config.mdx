@@ -152,6 +152,56 @@ defineSwatchbookConfig({
 
 Config-level only — there's no runtime toggle. Disabling an axis is the cleanest way to hide a work-in-progress modifier (or an experimental axis you don't want surfaced yet) without editing the resolver document. Unknown axis names produce `warn` diagnostics (group `swatchbook/disabled-axes`) and are ignored; the filtered list lands on `Project.disabledAxes` for downstream tooling.
 
+### `chrome?: Record<string, string>`
+
+Map from swatchbook's ten block-chrome roles to token paths in your project. Block components (`<TokenTable>`, `<ColorPalette>`, etc.) read a fixed `--swatchbook-*` CSS variable namespace for their surfaces, text, and accents — independent of `cssVarPrefix`, so your token namespace never collides with chrome reads. Without a `chrome` map, chrome falls back to the `Canvas` / `CanvasText` system colors (functional but untheme d).
+
+The ten roles (closed set — also exported as `CHROME_ROLES` and the `ChromeRole` type from `@unpunnyfuns/swatchbook-core`):
+
+| Role              | Reads as                               |
+| ----------------- | -------------------------------------- |
+| `surfaceDefault`  | `--swatchbook-surface-default`         |
+| `surfaceMuted`    | `--swatchbook-surface-muted`           |
+| `surfaceRaised`   | `--swatchbook-surface-raised`          |
+| `textDefault`     | `--swatchbook-text-default`            |
+| `textMuted`       | `--swatchbook-text-muted`              |
+| `borderDefault`   | `--swatchbook-border-default`          |
+| `accentBg`        | `--swatchbook-accent-bg`               |
+| `accentFg`        | `--swatchbook-accent-fg`               |
+| `bodyFontFamily`  | `--swatchbook-body-font-family`        |
+| `bodyFontSize`    | `--swatchbook-body-font-size`          |
+
+Each entry emits a `:root` alias that redirects the chrome read to your target token's already-emitted CSS variable:
+
+```ts
+defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  cssVarPrefix: 'ds',
+  chrome: {
+    surfaceDefault: 'color.brand.bg.primary',
+    textDefault:    'color.brand.fg.primary',
+    accentBg:       'color.brand.accent.primary',
+    // …
+  },
+});
+```
+
+Produces:
+
+```css
+:root {
+  --swatchbook-surface-default: var(--ds-color-brand-bg-primary);
+  --swatchbook-text-default:    var(--ds-color-brand-fg-primary);
+  --swatchbook-accent-bg:       var(--ds-color-brand-accent-primary);
+}
+```
+
+Per-theme values flip automatically — the target variable is already theme-scoped by the regular token emission, and the alias inherits whatever value is active for the current tuple. No per-theme `chrome` override needed.
+
+**Composite sub-field targets are accepted.** `typography.sys.body` is a composite token that emits one sub-variable per field; the chrome map can target those directly (`bodyFontSize: 'typography.sys.body.font-size'`) even though the sub-field isn't a standalone token ID.
+
+Unknown role keys (outside the ten above) and target paths that don't resolve to any token or composite sub-field in any theme produce `warn` diagnostics (group `swatchbook/chrome`) and are dropped. The validated entries land on `Project.chrome` for downstream tooling.
+
 ## See also
 
 - [Theming inputs](../concepts/theming-inputs) — when to pick resolver vs layered.

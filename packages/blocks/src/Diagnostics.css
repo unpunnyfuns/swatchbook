@@ -34,7 +34,7 @@
   grid-template-columns: 60px 1fr;
   gap: 12px;
   padding: 8px 4px;
-  border-top: 1px solid var(--swatchbook-color-border-default, rgba(128, 128, 128, 0.15));
+  border-top: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.15));
   font-size: 12px;
 }
 
@@ -54,7 +54,7 @@
 
 .sb-diagnostics__meta {
   margin-top: 4px;
-  color: var(--swatchbook-color-text-muted, CanvasText);
+  color: var(--swatchbook-text-muted, CanvasText);
   font-size: 11px;
   opacity: 0.7;
 }

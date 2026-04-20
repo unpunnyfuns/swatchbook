@@ -21,18 +21,18 @@ const MAX_RENDER_PX = 480;
 const styles = {
   bar: {
     height: 14,
-    background: 'var(--swatchbook-color-accent-bg, #3b82f6)',
+    background: 'var(--swatchbook-accent-bg, #3b82f6)',
     borderRadius: 2,
     minWidth: 1,
   } satisfies CSSProperties,
   radiusSample: {
     width: 56,
     height: 56,
-    background: 'var(--swatchbook-color-accent-bg, #3b82f6)',
+    background: 'var(--swatchbook-accent-bg, #3b82f6)',
     border: BORDER_STRONG,
   } satisfies CSSProperties,
   sizeSample: {
-    background: 'var(--swatchbook-color-accent-bg, #3b82f6)',
+    background: 'var(--swatchbook-accent-bg, #3b82f6)',
     border: BORDER_STRONG,
     minWidth: 1,
     minHeight: 1,

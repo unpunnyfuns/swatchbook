@@ -10,16 +10,16 @@ import type { CSSProperties, ReactElement, ReactNode } from 'react';
 
 export const MONO_STACK = 'ui-monospace, SFMono-Regular, Menlo, monospace';
 
-export const TEXT_DEFAULT = 'var(--swatchbook-color-text-default, CanvasText)';
-export const TEXT_MUTED = 'var(--swatchbook-color-text-muted, CanvasText)';
+export const TEXT_DEFAULT = 'var(--swatchbook-text-default, CanvasText)';
+export const TEXT_MUTED = 'var(--swatchbook-text-muted, CanvasText)';
 
-export const SURFACE_DEFAULT = 'var(--swatchbook-color-surface-default, Canvas)';
-export const SURFACE_RAISED = 'var(--swatchbook-color-surface-raised, Canvas)';
-export const SURFACE_MUTED = 'var(--swatchbook-color-surface-muted, rgba(128,128,128,0.15))';
+export const SURFACE_DEFAULT = 'var(--swatchbook-surface-default, Canvas)';
+export const SURFACE_RAISED = 'var(--swatchbook-surface-raised, Canvas)';
+export const SURFACE_MUTED = 'var(--swatchbook-surface-muted, rgba(128,128,128,0.15))';
 
-export const BORDER_DEFAULT = `1px solid var(--swatchbook-color-border-default, rgba(128,128,128,0.2))`;
-export const BORDER_FAINT = `1px solid var(--swatchbook-color-border-default, rgba(128,128,128,0.15))`;
-export const BORDER_STRONG = `1px solid var(--swatchbook-color-border-default, rgba(128,128,128,0.3))`;
+export const BORDER_DEFAULT = `1px solid var(--swatchbook-border-default, rgba(128,128,128,0.2))`;
+export const BORDER_FAINT = `1px solid var(--swatchbook-border-default, rgba(128,128,128,0.15))`;
+export const BORDER_STRONG = `1px solid var(--swatchbook-border-default, rgba(128,128,128,0.3))`;
 
 export const SIZE_LABEL = 11;
 export const SIZE_META = 12;

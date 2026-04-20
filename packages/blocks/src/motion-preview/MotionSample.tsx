@@ -37,7 +37,7 @@ const styles = {
     height: 28,
     marginTop: -14,
     borderRadius: '50%',
-    background: 'var(--swatchbook-color-accent-bg, #3b82f6)',
+    background: 'var(--swatchbook-accent-bg, #3b82f6)',
   } satisfies CSSProperties,
   reducedMotion: {
     fontSize: 11,

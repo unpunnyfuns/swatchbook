@@ -1,4 +1,4 @@
-export { CHROME_PATHS, type ChromePath } from '#/chrome.ts';
+export { CHROME_ROLES, type ChromeRole } from '#/chrome.ts';
 export { defineSwatchbookConfig } from '#/config.ts';
 export { loadProject, resolveTheme } from '#/load.ts';
 export { projectCss, emitTypes } from '#/emit.ts';

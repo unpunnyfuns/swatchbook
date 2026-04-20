@@ -53,8 +53,8 @@ const styles = {
     cursor: 'pointer',
   } satisfies CSSProperties,
   speedBtnActive: {
-    background: 'var(--swatchbook-color-accent-bg, #3b82f6)',
-    color: 'var(--swatchbook-color-accent-fg, #fff)',
+    background: 'var(--swatchbook-accent-bg, #3b82f6)',
+    color: 'var(--swatchbook-accent-fg, #fff)',
     borderColor: 'transparent',
   } satisfies CSSProperties,
   replayBtn: {

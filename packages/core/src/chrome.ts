@@ -13,20 +13,20 @@ import type { Diagnostic, TokenMap } from '#/types.ts';
  * through the alias to the consumer's tokens while per-theme value flips
  * ride through the target's existing per-theme emission.
  */
-export const CHROME_PATHS = [
-  'color.border.default',
-  'color.surface.default',
-  'color.surface.muted',
-  'color.surface.raised',
-  'color.text.default',
-  'color.text.muted',
-  'color.accent.bg',
-  'color.accent.fg',
-  'typography.body.font-family',
-  'typography.body.font-size',
+export const CHROME_ROLES = [
+  'borderDefault',
+  'surfaceDefault',
+  'surfaceMuted',
+  'surfaceRaised',
+  'textDefault',
+  'textMuted',
+  'accentBg',
+  'accentFg',
+  'bodyFontFamily',
+  'bodyFontSize',
 ] as const satisfies readonly string[];
 
-export type ChromePath = (typeof CHROME_PATHS)[number];
+export type ChromeRole = (typeof CHROME_ROLES)[number];
 
 /** Fixed prefix for chrome CSS custom properties. Independent of project config. */
 export const CHROME_VAR_PREFIX = 'swatchbook';
@@ -38,7 +38,7 @@ export interface ChromeValidationResult {
 
 /**
  * Validate `config.chrome` against the project's resolved tokens. Unknown
- * source keys (outside `CHROME_PATHS`) and target paths that don't resolve
+ * source keys (outside `CHROME_ROLES`) and target paths that don't resolve
  * in any theme produce `warn` diagnostics and are dropped. Surviving entries
  * flow into CSS emission as `:root` alias declarations.
  */
@@ -49,19 +49,19 @@ export function validateChrome(
   const diagnostics: Diagnostic[] = [];
   if (!raw) return { entries: {}, diagnostics };
 
-  const known = new Set<string>(CHROME_PATHS);
+  const known = new Set<string>(CHROME_ROLES);
   const tokenIDs = new Set<string>();
   for (const tokens of Object.values(themesResolved)) {
     for (const id of Object.keys(tokens)) tokenIDs.add(id);
   }
 
   const entries: Record<string, string> = {};
-  for (const [source, target] of Object.entries(raw)) {
-    if (!known.has(source)) {
+  for (const [role, target] of Object.entries(raw)) {
+    if (!known.has(role)) {
       diagnostics.push({
         severity: 'warn',
         group: 'swatchbook/chrome',
-        message: `\`chrome\` references unknown source path "${source}" — dropped. Known paths: ${CHROME_PATHS.join(', ')}.`,
+        message: `\`chrome\` references unknown role "${role}" — dropped. Known roles: ${CHROME_ROLES.join(', ')}.`,
       });
       continue;
     }
@@ -69,11 +69,11 @@ export function validateChrome(
       diagnostics.push({
         severity: 'warn',
         group: 'swatchbook/chrome',
-        message: `\`chrome\` maps "${source}" → "${target}" but "${target}" is not a token or composite sub-field in any theme — dropped.`,
+        message: `\`chrome\` maps "${role}" → "${target}" but "${target}" is not a token or composite sub-field in any theme — dropped.`,
       });
       continue;
     }
-    entries[source] = target;
+    entries[role] = target;
   }
 
   return { entries, diagnostics };
