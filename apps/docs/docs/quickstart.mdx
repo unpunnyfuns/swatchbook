@@ -72,6 +72,36 @@ pnpm storybook
 
 For a browsable tree of every token in the active theme plus a diagnostics summary, compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` into an MDX docs page — see the [token-dashboard guide](./guides/token-dashboard). Switching themes from the toolbar re-renders those blocks live.
 
+## Theme the block chrome against your tokens
+
+The MDX doc blocks read their surfaces, text, and accent colours from a fixed `--swatchbook-*` CSS-variable namespace. Out of the box those variables fall back to light/dark literals that flip with the active `color-scheme`, which means the blocks render legibly before you wire anything up. To have them reflect your own tokens, supply a `chrome` map — one entry per role, each pointing at a token path in your project:
+
+```ts title=".storybook/main.ts"
+{
+  name: '@unpunnyfuns/swatchbook-addon',
+  options: {
+    config: {
+      resolver: 'tokens/resolver.json',
+      cssVarPrefix: 'ds',
+      chrome: {
+        surfaceDefault: 'color.sys.surface.default',
+        surfaceMuted:   'color.sys.surface.muted',
+        surfaceRaised:  'color.sys.surface.raised',
+        textDefault:    'color.sys.text.default',
+        textMuted:      'color.sys.text.muted',
+        borderDefault:  'color.sys.border.default',
+        accentBg:       'color.sys.accent.bg',
+        accentFg:       'color.sys.accent.fg',
+        bodyFontFamily: 'typography.sys.body.font-family',
+        bodyFontSize:   'typography.sys.body.font-size',
+      },
+    },
+  },
+},
+```
+
+With a `chrome` map in place the blocks track every toolbar flip — switch brand or contrast and the block chrome repaints alongside your stories. The closed set of roles (and what each maps to internally) is in the [`chrome` config reference](./reference/config#chrome-recordstring-string).
+
 ## No resolver yet?
 
 If you haven't written a DTCG 2025.10 resolver, you can use the **layered** config form instead:
