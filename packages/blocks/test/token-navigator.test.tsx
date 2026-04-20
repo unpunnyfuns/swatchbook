@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { type ProjectSnapshot, SwatchbookProvider, TokenNavigator } from '#/index.ts';
 
@@ -110,5 +110,68 @@ describe('TokenNavigator', () => {
       </SwatchbookProvider>,
     );
     expect(screen.getByText(/No tokens matching \$type=fontWeight/)).toBeDefined();
+  });
+
+  it('renders a search input by default that prunes the tree to matching leaves', () => {
+    const { container } = render(
+      <SwatchbookProvider value={makeSnapshot()}>
+        <TokenNavigator />
+      </SwatchbookProvider>,
+    );
+
+    const input = screen.getByTestId('token-navigator-search') as HTMLInputElement;
+    expect(input).toBeDefined();
+
+    fireEvent.change(input, { target: { value: 'bg' } });
+
+    // `color.bg` is the single leaf matching 'bg'; `radius` and `color.fg` /
+    // `color.palette.blue.500` prune out.
+    const leafPaths = within(screen.getByRole('tree'))
+      .getAllByTestId('token-navigator-leaf')
+      .map((el) => el.getAttribute('data-path'));
+    expect(leafPaths).toEqual(['color.bg']);
+    expect(container.textContent).toContain('matching "bg"');
+  });
+
+  it('auto-expands groups on the path to a matching leaf', () => {
+    render(
+      <SwatchbookProvider value={makeSnapshot()}>
+        <TokenNavigator initiallyExpanded={0} />
+      </SwatchbookProvider>,
+    );
+
+    const input = screen.getByTestId('token-navigator-search') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'blue' } });
+
+    // `color.palette.blue.500` is nested under `color > palette > blue`.
+    // Even though `initiallyExpanded={0}` leaves everything collapsed, the
+    // search should reveal the matching leaf.
+    const leafPaths = within(screen.getByRole('tree'))
+      .getAllByTestId('token-navigator-leaf')
+      .map((el) => el.getAttribute('data-path'));
+    expect(leafPaths).toContain('color.palette.blue.500');
+  });
+
+  it('shows an empty message when the search matches nothing', () => {
+    render(
+      <SwatchbookProvider value={makeSnapshot()}>
+        <TokenNavigator />
+      </SwatchbookProvider>,
+    );
+
+    const input = screen.getByTestId('token-navigator-search') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'xyz-no-match' } });
+
+    expect(screen.getByText(/No tokens match "xyz-no-match"/)).toBeDefined();
+    expect(screen.queryByRole('tree')).toBeNull();
+  });
+
+  it('hides the search input when searchable={false}', () => {
+    render(
+      <SwatchbookProvider value={makeSnapshot()}>
+        <TokenNavigator searchable={false} />
+      </SwatchbookProvider>,
+    );
+    expect(screen.queryByTestId('token-navigator-search')).toBeNull();
   });
 });

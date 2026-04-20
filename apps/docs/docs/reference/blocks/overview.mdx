@@ -17,20 +17,21 @@ Most blocks in this group take:
 
 ## Across types
 
-### `<TokenNavigator root? type? initiallyExpanded? onSelect? />`
+### `<TokenNavigator root? type? initiallyExpanded? searchable? onSelect? />`
 
-Expandable tree of the token graph. Each interior group shows its child count; each leaf shows its `$type` pill plus an inline preview (color swatch, dimension bar, shadow / border / motion sample, or a formatted value). Clicking a leaf opens a slide-over with the full `<TokenDetail>`; pass `onSelect` to own the click follow-up instead.
+Expandable tree of the token graph. Each interior group shows its child count; each leaf shows its `$type` pill plus an inline preview (color swatch, dimension bar, shadow / border / motion sample, or a formatted value). A search input at the top filters by path substring — matching leaves survive, groups on the way to them auto-expand. Clicking a leaf opens a slide-over with the full `<TokenDetail>`; pass `onSelect` to own the click follow-up instead.
 
 Props:
 
 - `root?: string` — mount at this subtree (e.g. `"color"`, `"typography"`). Omit to show everything.
 - `type?: string | readonly string[]` — restrict to one DTCG `$type` (`type="color"`) or a small-multiples set (`type={['duration', 'cubicBezier', 'transition']}`). Composes with `root` — both constraints must hold.
 - `initiallyExpanded?: number` — depth open on first render. `0` all collapsed, `1` top-level groups open (default), `2` one deeper, etc.
+- `searchable?: boolean` — render a runtime search input above the tree. Defaults to `true`. Pass `false` to hide the input (the `root` / `type` props still apply at authoring time).
 - `onSelect?(path: string): void` — receives a leaf's full dot-path on click; suppresses the built-in overlay.
 
-### `<TokenTable filter? type? caption? sortBy? sortDir? onSelect? />`
+### `<TokenTable filter? type? caption? sortBy? sortDir? searchable? onSelect? />`
 
-Compact two-column table: **Path** and **Value** (with inline type pill + color swatch). Clicking a row opens the same slide-over `<TokenDetail>` the tree uses; pass `onSelect` to own the follow-up. Columns follow content with per-column `min-width` floors, so the table breathes in narrow containers.
+Compact two-column table: **Path** and **Value** (with inline type pill + color swatch). A search input at the top narrows rows by path, type, or value substring. Clicking a row opens the same slide-over `<TokenDetail>` the tree uses; pass `onSelect` to own the follow-up. Columns follow content with per-column `min-width` floors, so the table breathes in narrow containers.
 
 Props:
 
@@ -39,6 +40,7 @@ Props:
 - `caption?: string` — override the caption.
 - `sortBy?: 'path' | 'value' | 'none'` — default `'path'`.
 - `sortDir?: 'asc' | 'desc'` — default `'asc'`.
+- `searchable?: boolean` — render a runtime search input above the table. Defaults to `true`.
 - `onSelect?(path: string): void` — suppress the built-in drawer.
 
 ## Per-type

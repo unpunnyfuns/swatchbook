@@ -31,6 +31,14 @@ export interface TokenNavigatorProps {
    */
   initiallyExpanded?: number;
   /**
+   * Render a runtime search input above the tree. Matches are
+   * case-insensitive substrings against a leaf's token path; groups
+   * that contain no matching leaves collapse out, and every group on
+   * the path to a match auto-expands so hits are visible without
+   * clicking. Defaults to `true`.
+   */
+  searchable?: boolean;
+  /**
    * Called with a leaf's full dot-path when it is clicked. When set, the
    * inline `<TokenDetail>` slide-over is suppressed — the consumer owns
    * the follow-up UI.
@@ -132,10 +140,33 @@ function countLeaves(node: TreeNode): number {
   return n;
 }
 
+/**
+ * Return a pruned copy of the tree containing only leaves whose path
+ * matches `needle` (case-insensitive substring) plus the groups on the
+ * way to them. Every surviving group's path is added to `expandOut` so
+ * callers can force those groups open.
+ */
+function pruneTreeForSearch(nodes: TreeNode[], needle: string, expandOut: Set<string>): TreeNode[] {
+  const out: TreeNode[] = [];
+  for (const node of nodes) {
+    if (node.kind === 'leaf') {
+      if (node.path.toLowerCase().includes(needle)) out.push(node);
+    } else {
+      const children = pruneTreeForSearch(node.children, needle, expandOut);
+      if (children.length > 0) {
+        expandOut.add(node.path);
+        out.push({ ...node, children });
+      }
+    }
+  }
+  return out;
+}
+
 export function TokenNavigator({
   root,
   type,
   initiallyExpanded = 1,
+  searchable = true,
   onSelect,
 }: TokenNavigatorProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
@@ -159,6 +190,24 @@ export function TokenNavigator({
   }, [initialExpanded]);
 
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+
+  const { visibleTree, searchExpanded } = useMemo(() => {
+    if (!searchable || query.trim() === '') {
+      return { visibleTree: tree, searchExpanded: null as Set<string> | null };
+    }
+    const needle = query.trim().toLowerCase();
+    const expandOut = new Set<string>();
+    const pruned = pruneTreeForSearch(tree, needle, expandOut);
+    return { visibleTree: pruned, searchExpanded: expandOut };
+  }, [tree, query, searchable]);
+
+  const effectiveExpanded = useMemo(() => {
+    if (!searchExpanded) return expanded;
+    const merged = new Set(expanded);
+    for (const p of searchExpanded) merged.add(p);
+    return merged;
+  }, [expanded, searchExpanded]);
 
   const toggle = useCallback((path: string): void => {
     setExpanded((prev) => {
@@ -193,23 +242,49 @@ export function TokenNavigator({
     );
   }
 
+  const trimmedQuery = query.trim();
+  const matchCount = useMemo(() => {
+    if (!searchExpanded) return 0;
+    let n = 0;
+    for (const node of visibleTree) n += countLeaves(node);
+    return n;
+  }, [visibleTree, searchExpanded]);
+
   return (
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+      {searchable && (
+        <div className="sb-token-navigator__search">
+          <input
+            type="search"
+            className="sb-token-navigator__search-input"
+            placeholder="Search tokens…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label="Search tokens by path"
+            data-testid="token-navigator-search"
+          />
+        </div>
+      )}
       <div className="sb-token-navigator__caption">
         {root ? `Tokens under ${root}` : 'Token graph'}
-        {typeLabel} · {activeTheme}
+        {typeLabel}
+        {trimmedQuery !== '' ? ` · ${matchCount} matching "${trimmedQuery}"` : ''} · {activeTheme}
       </div>
-      <ul className="sb-token-navigator__tree" role="tree">
-        {tree.map((node) => (
-          <TreeNodeRow
-            key={node.path || node.segment}
-            node={node}
-            expanded={expanded}
-            onToggle={toggle}
-            onLeafClick={handleLeafClick}
-          />
-        ))}
-      </ul>
+      {visibleTree.length === 0 ? (
+        <div className="sb-block__empty">No tokens match "{trimmedQuery}".</div>
+      ) : (
+        <ul className="sb-token-navigator__tree" role="tree">
+          {visibleTree.map((node) => (
+            <TreeNodeRow
+              key={node.path || node.segment}
+              node={node}
+              expanded={effectiveExpanded}
+              onToggle={toggle}
+              onLeafClick={handleLeafClick}
+            />
+          ))}
+        </ul>
+      )}
 
       {selectedPath !== null && (
         <DetailOverlay
