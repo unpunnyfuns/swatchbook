@@ -16,10 +16,10 @@ export default definePreview({
     options: {
       storySort: {
         order: [
+          'Introduction',
           'Docs',
           [
             'Dashboard',
-            'Introduction',
             'Colors',
             'Typography',
             'Fonts',
