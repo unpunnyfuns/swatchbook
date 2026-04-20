@@ -64,4 +64,51 @@ describe('TokenNavigator', () => {
     );
     expect(screen.getByText(/No tokens under "does-not-exist"/)).toBeDefined();
   });
+
+  it('filters by DTCG $type with a single string', () => {
+    render(
+      <SwatchbookProvider value={makeSnapshot()}>
+        <TokenNavigator type="dimension" />
+      </SwatchbookProvider>,
+    );
+    const tree = screen.getByRole('tree');
+    const topGroups = within(tree)
+      .getAllByTestId('token-navigator-group')
+      .filter((el) => el.getAttribute('data-path')?.split('.').length === 1);
+    const names = topGroups.map((el) => el.getAttribute('data-path'));
+    expect(names).toEqual(['radius']);
+    expect(screen.queryByText('bg')).toBeNull();
+  });
+
+  it('filters by DTCG $type with an array of types', () => {
+    render(
+      <SwatchbookProvider value={makeSnapshot()}>
+        <TokenNavigator type={['color', 'dimension']} />
+      </SwatchbookProvider>,
+    );
+    const tree = screen.getByRole('tree');
+    const topGroups = within(tree)
+      .getAllByTestId('token-navigator-group')
+      .filter((el) => el.getAttribute('data-path')?.split('.').length === 1);
+    const names = topGroups.map((el) => el.getAttribute('data-path')).toSorted();
+    expect(names).toEqual(['color', 'radius']);
+  });
+
+  it('composes `type` with `root` — both constraints must hold', () => {
+    render(
+      <SwatchbookProvider value={makeSnapshot()}>
+        <TokenNavigator root="color" type="dimension" />
+      </SwatchbookProvider>,
+    );
+    expect(screen.getByText(/No tokens under "color"/)).toBeDefined();
+  });
+
+  it('shows a type-aware empty-state when no tokens match', () => {
+    render(
+      <SwatchbookProvider value={makeSnapshot()}>
+        <TokenNavigator type="fontWeight" />
+      </SwatchbookProvider>,
+    );
+    expect(screen.getByText(/No tokens matching \$type=fontWeight/)).toBeDefined();
+  });
 });

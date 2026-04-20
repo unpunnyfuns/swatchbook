@@ -8,6 +8,7 @@ const meta = preview.meta({
   component: TokenNavigator,
   argTypes: {
     root: { control: 'text' },
+    type: { control: 'text' },
     initiallyExpanded: { control: { type: 'number', min: 0, max: 6 } },
   },
 });
@@ -21,6 +22,17 @@ export const ColorSubtree = meta.story({ args: { root: 'color' } });
 export const FullyCollapsed = meta.story({ args: { initiallyExpanded: 0 } });
 
 export const DeepExpanded = meta.story({ args: { initiallyExpanded: 3, root: 'color' } });
+
+/**
+ * `type` scopes the tree by DTCG `$type`. Passing a single string restricts
+ * to one type; passing an array narrows to a small-multiples view. Composes
+ * with `root` — both constraints must hold.
+ */
+export const ColorTypeFilter = meta.story({ args: { type: 'color' } });
+
+export const MotionTypes = meta.story({
+  args: { type: ['duration', 'cubicBezier', 'transition'], initiallyExpanded: 2 },
+});
 
 function RecordingNavigator() {
   const [last, setLast] = useState<string | null>(null);
