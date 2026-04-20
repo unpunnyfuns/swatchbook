@@ -1,6 +1,6 @@
 {
   "name": "@unpunnyfuns/swatchbook-core",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Framework-free core for loading and emitting DTCG design tokens.",
   "license": "MIT",
   "author": "unpunnyfuns <unpunnyfuns@gmail.com>",
