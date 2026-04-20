@@ -1,0 +1,116 @@
+.sb-token-navigator__caption {
+  padding: 4px 0 12px;
+  color: var(--swatchbook-text-muted, CanvasText);
+  font-size: 12px;
+}
+
+.sb-token-navigator__tree {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sb-token-navigator__nested {
+  list-style: none;
+  margin: 0;
+  padding-left: 18px;
+  border-left: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.2));
+}
+
+.sb-token-navigator__group-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+.sb-token-navigator__leaf-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+.sb-token-navigator__caret {
+  display: inline-block;
+  width: 12px;
+  text-align: center;
+  color: var(--swatchbook-text-muted, CanvasText);
+}
+
+.sb-token-navigator__tail {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+.sb-token-navigator__type-pill {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: var(--swatchbook-surface-muted, rgba(128, 128, 128, 0.15));
+}
+
+.sb-token-navigator__value {
+  font-size: 11px;
+  color: var(--swatchbook-text-muted, CanvasText);
+  margin-left: auto;
+  min-width: 0;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-token-navigator__count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--swatchbook-text-default, CanvasText);
+}
+
+.sb-token-navigator__color-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.2));
+  margin-left: 8px;
+}
+
+.sb-token-navigator__preview-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.sb-token-navigator__preview-dimension {
+  margin-left: 8px;
+  display: inline-block;
+  min-width: 40px;
+  max-width: 120px;
+}
+
+.sb-token-navigator__preview-scaled {
+  margin-left: 8px;
+  display: inline-block;
+  transform: scale(0.5);
+  transform-origin: right center;
+}
+
+.sb-token-navigator__preview-motion {
+  margin-left: 8px;
+  display: inline-block;
+  width: 80px;
+}

@@ -1,22 +1,13 @@
-import type { CSSProperties, KeyboardEvent, ReactElement } from 'react';
+import type { KeyboardEvent, ReactElement } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import './TokenNavigator.css';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
 import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
-import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
-import {
-  BORDER_DEFAULT,
-  EmptyState,
-  MONO_STACK,
-  SIZE_LABEL,
-  SIZE_META,
-  SIZE_PILL,
-  TEXT_DEFAULT,
-  TEXT_MUTED,
-  typePillStyle,
-} from '#/internal/styles.tsx';
 import { themeAttrs } from '#/internal/data-attr.ts';
+import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
+import { EmptyState } from '#/internal/styles.tsx';
 import { makeCssVar, useProject } from '#/internal/use-project.ts';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
@@ -54,91 +45,6 @@ interface GroupNode {
 }
 
 type TreeNode = LeafNode | GroupNode;
-
-const styles = {
-  caption: {
-    padding: '4px 0 12px',
-    color: TEXT_MUTED,
-    fontSize: SIZE_META,
-  } satisfies CSSProperties,
-  tree: {
-    listStyle: 'none',
-    margin: 0,
-    padding: 0,
-  } satisfies CSSProperties,
-  nested: {
-    listStyle: 'none',
-    margin: 0,
-    paddingLeft: 18,
-    borderLeft: BORDER_DEFAULT,
-  } satisfies CSSProperties,
-  groupRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-    padding: '4px 6px',
-    borderRadius: 4,
-    cursor: 'pointer',
-    userSelect: 'none',
-    fontFamily: MONO_STACK,
-    fontSize: SIZE_META,
-  } satisfies CSSProperties,
-  leafRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '4px 6px',
-    borderRadius: 4,
-    cursor: 'pointer',
-    fontFamily: MONO_STACK,
-    fontSize: SIZE_META,
-  } satisfies CSSProperties,
-  caret: {
-    display: 'inline-block',
-    width: 12,
-    textAlign: 'center',
-    color: TEXT_MUTED,
-  } satisfies CSSProperties,
-  tail: {
-    fontFamily: MONO_STACK,
-    fontSize: SIZE_META,
-  } satisfies CSSProperties,
-  typePill: {
-    ...typePillStyle,
-    // Tree leaves use a smaller pill (1px vs 2px padding) so the row
-    // height stays compact against inline swatch/preview visuals.
-    padding: '1px 6px',
-    fontSize: SIZE_PILL,
-  } satisfies CSSProperties,
-  value: {
-    fontSize: SIZE_LABEL,
-    color: TEXT_MUTED,
-    marginLeft: 'auto',
-    minWidth: 0,
-    textAlign: 'right',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  } satisfies CSSProperties,
-  count: {
-    marginLeft: 'auto',
-    fontSize: SIZE_LABEL,
-    color: TEXT_DEFAULT,
-  } satisfies CSSProperties,
-  colorSwatch: {
-    display: 'inline-block',
-    width: 14,
-    height: 14,
-    borderRadius: 3,
-    border: BORDER_DEFAULT,
-  } satisfies CSSProperties,
-  previewBox: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    marginLeft: 'auto',
-  } satisfies CSSProperties,
-};
 
 function buildTree(resolved: Record<string, VirtualToken>, root: string | undefined): TreeNode[] {
   const rootPrefix = root && root.length > 0 ? `${root}.` : '';
@@ -264,10 +170,10 @@ export function TokenNavigator({
 
   return (
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
-      <div style={styles.caption}>
+      <div className="sb-token-navigator__caption">
         {root ? `Tokens under ${root}` : 'Token graph'} · {activeTheme}
       </div>
-      <ul style={styles.tree} role="tree">
+      <ul className="sb-token-navigator__tree" role="tree">
         {tree.map((node) => (
           <TreeNodeRow
             key={node.path || node.segment}
@@ -313,20 +219,20 @@ function TreeNodeRow({ node, expanded, onToggle, onLeafClick }: TreeNodeRowProps
       <div
         role="button"
         tabIndex={0}
-        style={styles.groupRow}
+        className="sb-token-navigator__group-row"
         onClick={() => onToggle(node.path)}
         onKeyDown={onKey}
         data-path={node.path}
         data-testid="token-navigator-group"
       >
-        <span style={styles.caret} aria-hidden>
+        <span className="sb-token-navigator__caret" aria-hidden>
           {isOpen ? '▾' : '▸'}
         </span>
         <span>{node.segment}</span>
-        <span style={styles.count}>{countLeaves(node)}</span>
+        <span className="sb-token-navigator__count">{countLeaves(node)}</span>
       </div>
       {isOpen && (
-        <ul style={styles.nested} role="group">
+        <ul className="sb-token-navigator__nested" role="group">
           {node.children.map((c) => (
             <TreeNodeRow
               key={c.path || c.segment}
@@ -360,17 +266,17 @@ function LeafRow({ node, onLeafClick }: LeafRowProps): ReactElement {
       <div
         role="button"
         tabIndex={0}
-        style={styles.leafRow}
+        className="sb-token-navigator__leaf-row"
         onClick={() => onLeafClick(node.path)}
         onKeyDown={onKey}
         data-path={node.path}
         data-testid="token-navigator-leaf"
       >
-        <span style={styles.caret} aria-hidden>
+        <span className="sb-token-navigator__caret" aria-hidden>
           •
         </span>
-        <span style={styles.tail}>{node.segment}</span>
-        {type && <span style={styles.typePill}>{type}</span>}
+        <span className="sb-token-navigator__tail">{node.segment}</span>
+        {type && <span className="sb-token-navigator__type-pill">{type}</span>}
         <LeafPreview path={node.path} token={node.token} />
       </div>
     </li>
@@ -390,17 +296,25 @@ function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
   if (type === 'color') {
     const cssVar = makeCssVar(path, cssVarPrefix);
     return (
-      <span style={styles.previewBox}>
-        <span style={styles.value}>{formatTokenValue(token.$value, type, colorFormat)}</span>
-        <span style={{ ...styles.colorSwatch, background: cssVar, marginLeft: 8 }} aria-hidden />
+      <span className="sb-token-navigator__preview-box">
+        <span className="sb-token-navigator__value">
+          {formatTokenValue(token.$value, type, colorFormat)}
+        </span>
+        <span
+          className="sb-token-navigator__color-swatch"
+          style={{ background: cssVar }}
+          aria-hidden
+        />
       </span>
     );
   }
   if (type === 'dimension') {
     return (
-      <span style={styles.previewBox}>
-        <span style={styles.value}>{formatTokenValue(token.$value, type, colorFormat)}</span>
-        <span style={{ marginLeft: 8, display: 'inline-block', minWidth: 40, maxWidth: 120 }}>
+      <span className="sb-token-navigator__preview-box">
+        <span className="sb-token-navigator__value">
+          {formatTokenValue(token.$value, type, colorFormat)}
+        </span>
+        <span className="sb-token-navigator__preview-dimension">
           <DimensionBar path={path} kind="length" />
         </span>
       </span>
@@ -408,15 +322,8 @@ function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
   }
   if (type === 'shadow') {
     return (
-      <span style={styles.previewBox}>
-        <span
-          style={{
-            marginLeft: 8,
-            display: 'inline-block',
-            transform: 'scale(0.5)',
-            transformOrigin: 'right center',
-          }}
-        >
+      <span className="sb-token-navigator__preview-box">
+        <span className="sb-token-navigator__preview-scaled">
           <ShadowSample path={path} />
         </span>
       </span>
@@ -424,15 +331,8 @@ function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
   }
   if (type === 'border') {
     return (
-      <span style={styles.previewBox}>
-        <span
-          style={{
-            marginLeft: 8,
-            display: 'inline-block',
-            transform: 'scale(0.5)',
-            transformOrigin: 'right center',
-          }}
-        >
+      <span className="sb-token-navigator__preview-box">
+        <span className="sb-token-navigator__preview-scaled">
           <BorderSample path={path} />
         </span>
       </span>
@@ -440,8 +340,8 @@ function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
   }
   if (type === 'transition' || type === 'duration' || type === 'cubicBezier') {
     return (
-      <span style={styles.previewBox}>
-        <span style={{ marginLeft: 8, display: 'inline-block', width: 80 }}>
+      <span className="sb-token-navigator__preview-box">
+        <span className="sb-token-navigator__preview-motion">
           <MotionSample path={path} />
         </span>
       </span>
@@ -449,8 +349,10 @@ function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
   }
 
   return (
-    <span style={styles.previewBox}>
-      <span style={styles.value}>{formatTokenValue(token.$value, type, colorFormat)}</span>
+    <span className="sb-token-navigator__preview-box">
+      <span className="sb-token-navigator__value">
+        {formatTokenValue(token.$value, type, colorFormat)}
+      </span>
     </span>
   );
 }
