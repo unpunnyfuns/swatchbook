@@ -1,7 +1,7 @@
 {
   "color": {
     "$type": "color",
-    "$description": "High-contrast overlay — strengthens borders and focus rings. Surfaces and accents stay in mode/brand's lane.",
+    "$description": "High-contrast overlay — strengthens borders and focus rings. Typography shifts to a Comic-family stack; irregular letterforms are easier to parse for some dyslexic readers. Surfaces and accents stay in mode/brand's lane.",
     "border": {
       "default": { "$value": "{color.palette.neutral.700}" },
       "strong":  { "$value": "{color.palette.neutral.900}" },
@@ -10,6 +10,37 @@
     "text": {
       "muted":  { "$value": "{color.palette.neutral.700}" },
       "subtle": { "$value": "{color.palette.neutral.600}" }
+    }
+  },
+  "typography": {
+    "$type": "typography",
+    "$description": "High-contrast typography — body and heading composites shift to the Comic family with slightly looser line-height; code stays monospace.",
+    "body": {
+      "$value": {
+        "fontFamily": "{font.family.comic}",
+        "fontSize":   "{size.rem-400}",
+        "fontWeight": "{font.weight.regular}",
+        "lineHeight": 1.6,
+        "letterSpacing": { "value": 0, "unit": "px" }
+      }
+    },
+    "body-strong": {
+      "$value": {
+        "fontFamily": "{font.family.comic}",
+        "fontSize":   "{size.rem-400}",
+        "fontWeight": "{font.weight.bold}",
+        "lineHeight": 1.6,
+        "letterSpacing": { "value": 0, "unit": "px" }
+      }
+    },
+    "heading": {
+      "$value": {
+        "fontFamily": "{font.family.comic}",
+        "fontSize":   "{size.rem-700}",
+        "fontWeight": "{font.weight.bold}",
+        "lineHeight": 1.3,
+        "letterSpacing": { "value": 0, "unit": "px" }
+      }
     }
   },
   "border": {
