@@ -12,7 +12,7 @@ export type { DimensionKind };
 export interface DimensionScaleProps {
   /**
    * Token-path filter. Defaults to every `dimension` token. Use e.g.
-   * `"space.sys.*"` to scope to the spacing scale.
+   * `"space.*"` to scope to the spacing scale.
    */
   filter?: string;
   /**

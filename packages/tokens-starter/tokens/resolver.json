@@ -2,16 +2,15 @@
   "$schema": "https://design-tokens.org/tr/2025/drafts/resolver/",
   "version": "2025.10",
   "name": "swatchbook-tokens-starter",
-  "description": "Minimal resolver for the starter set — single theme (Light).",
+  "description": "Minimal resolver for the starter set. Flat token paths organized per `$type` — color, size, space — plus a single `theme` modifier (Light baseline).",
   "sets": {
-    "ref": {
+    "tokens": {
+      "description": "Flat DTCG tokens grouped by `$type`.",
       "sources": [
-        { "$ref": "./ref/color.json" },
-        { "$ref": "./ref/size.json" }
+        { "$ref": "./color.json" },
+        { "$ref": "./size.json" },
+        { "$ref": "./space.json" }
       ]
-    },
-    "sys": {
-      "sources": [{ "$ref": "./sys/color.json" }]
     }
   },
   "modifiers": {
@@ -23,8 +22,7 @@
     }
   },
   "resolutionOrder": [
-    { "$ref": "#/sets/ref" },
-    { "$ref": "#/sets/sys" },
+    { "$ref": "#/sets/tokens" },
     { "$ref": "#/modifiers/theme" }
   ]
 }

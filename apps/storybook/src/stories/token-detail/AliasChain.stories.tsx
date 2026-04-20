@@ -11,5 +11,5 @@ const meta = preview.meta({
 
 export default meta;
 
-export const AccentBg = meta.story({ args: { path: 'color.sys.accent.bg' } });
-export const SpaceMd = meta.story({ args: { path: 'space.sys.md' } });
+export const AccentBg = meta.story({ args: { path: 'color.accent.bg' } });
+export const SpaceMd = meta.story({ args: { path: 'space.md' } });

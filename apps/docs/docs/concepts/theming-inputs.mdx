@@ -17,8 +17,7 @@ A DTCG 2025.10 resolver document (`resolver.json`) describes sets and modifiers 
   "$schema": "https://design-tokens.org/tr/2025/drafts/resolver/",
   "version": "2025.10",
   "sets": {
-    "ref": { "sources": [{ "$ref": "./ref/color.json" }] },
-    "sys": { "sources": [{ "$ref": "./sys/color.json" }] }
+    "tokens": { "sources": [{ "$ref": "./color.json" }] }
   },
   "modifiers": {
     "mode": {
@@ -30,8 +29,7 @@ A DTCG 2025.10 resolver document (`resolver.json`) describes sets and modifiers 
     }
   },
   "resolutionOrder": [
-    { "$ref": "#/sets/ref" },
-    { "$ref": "#/sets/sys" },
+    { "$ref": "#/sets/tokens" },
     { "$ref": "#/modifiers/mode" }
   ]
 }
@@ -55,7 +53,7 @@ For projects that don't want to write a resolver file — or whose layers don't 
 
 ```ts title="swatchbook.config.ts"
 export default defineSwatchbookConfig({
-  tokens: ['tokens/ref/**/*.json', 'tokens/sys/**/*.json'],
+  tokens: ['tokens/**/*.json'],
   axes: [
     {
       name: 'mode',

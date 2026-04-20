@@ -1,19 +1,17 @@
 {
   "color": {
-    "sys": {
-      "$type": "color",
-      "$description": "Brand A — swaps the accent from blue to violet. Composable with light/dark.",
-      "accent": {
-        "bg":       { "$value": "{color.ref.violet.700}" },
-        "bg-hover": { "$value": "{color.ref.violet.900}" },
-        "fg":       { "$value": "{color.ref.neutral.0}" }
-      },
-      "text": {
-        "accent":   { "$value": "{color.ref.violet.700}" }
-      },
-      "border": {
-        "focus":    { "$value": "{color.ref.violet.500}" }
-      }
+    "$type": "color",
+    "$description": "Brand A — swaps the accent from blue to violet. Composable with light/dark.",
+    "accent": {
+      "bg":       { "$value": "{color.violet.700}" },
+      "bg-hover": { "$value": "{color.violet.900}" },
+      "fg":       { "$value": "{color.neutral.0}" }
+    },
+    "text": {
+      "accent":   { "$value": "{color.violet.700}" }
+    },
+    "border": {
+      "focus":    { "$value": "{color.violet.500}" }
     }
   }
 }

@@ -12,7 +12,7 @@ const meta = preview.meta({
 
 export default meta;
 
-export const Default = meta.story({ args: { path: 'color.sys.accent.bg' } });
+export const Default = meta.story({ args: { path: 'color.accent.bg' } });
 export const WithHeading = meta.story({
-  args: { path: 'typography.sys.heading', heading: 'Heading typography' },
+  args: { path: 'typography.heading', heading: 'Heading typography' },
 });

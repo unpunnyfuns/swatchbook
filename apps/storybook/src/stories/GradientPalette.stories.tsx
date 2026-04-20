@@ -20,4 +20,4 @@ export const AllGradients = meta.story({
     });
   },
 });
-export const RefGradients = meta.story({ args: { filter: 'gradient.ref.*' } });
+export const RefGradients = meta.story({ args: { filter: 'gradient.*' } });

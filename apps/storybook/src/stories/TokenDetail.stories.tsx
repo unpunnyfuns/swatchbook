@@ -21,20 +21,20 @@ async function assertDetailRenders(canvas: HTMLElement, path: string): Promise<v
 }
 
 export const SysSurface = meta.story({
-  args: { path: 'color.sys.surface.default' },
+  args: { path: 'color.surface.default' },
   play: async ({ canvasElement, args }) => assertDetailRenders(canvasElement, args.path as string),
 });
-export const SysAccent = meta.story({ args: { path: 'color.sys.text.accent' } });
+export const SysAccent = meta.story({ args: { path: 'color.text.accent' } });
 export const AccentBg = meta.story({
-  args: { path: 'color.sys.accent.bg' },
+  args: { path: 'color.accent.bg' },
   play: async ({ canvasElement, args }) => assertDetailRenders(canvasElement, args.path as string),
 });
-export const SpaceMd = meta.story({ args: { path: 'space.sys.md' } });
+export const SpaceMd = meta.story({ args: { path: 'space.md' } });
 export const TypographyBody = meta.story({
-  args: { path: 'typography.sys.body' },
+  args: { path: 'typography.body' },
   play: async ({ canvasElement, args }) => assertDetailRenders(canvasElement, args.path as string),
 });
-export const Gradient = meta.story({ args: { path: 'gradient.ref.sunrise' } });
-export const StrokeStyleString = meta.story({ args: { path: 'stroke.ref.style.dashed' } });
-export const StrokeStyleObject = meta.story({ args: { path: 'stroke.ref.style.custom-dash' } });
+export const Gradient = meta.story({ args: { path: 'gradient.sunrise' } });
+export const StrokeStyleString = meta.story({ args: { path: 'stroke.style.dashed' } });
+export const StrokeStyleObject = meta.story({ args: { path: 'stroke.style.custom-dash' } });
 export const Missing = meta.story({ args: { path: 'color.does.not.exist' } });

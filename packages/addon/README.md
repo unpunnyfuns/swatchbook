@@ -67,8 +67,8 @@ export default definePreview({
 import { useToken } from '@unpunnyfuns/swatchbook-addon/hooks';
 
 function Card() {
-  const bg = useToken('color.sys.surface.default');
-  const radius = useToken('radius.sys.lg');
+  const bg = useToken('color.surface.default');
+  const radius = useToken('radius.lg');
   return (
     <div style={{ background: bg.cssVar, borderRadius: radius.cssVar }}>
       {bg.description}

@@ -1,32 +1,32 @@
 .primary,
 .ghost {
-  border-radius: var(--sb-radius-sys-md);
-  padding: var(--sb-space-sys-sm) var(--sb-space-sys-md);
-  font-family: var(--sb-typography-sys-body-strong-font-family);
-  font-size: var(--sb-typography-sys-body-strong-font-size);
-  font-weight: var(--sb-typography-sys-body-strong-font-weight);
-  line-height: var(--sb-typography-sys-body-strong-line-height);
+  border-radius: var(--sb-radius-md);
+  padding: var(--sb-space-sm) var(--sb-space-md);
+  font-family: var(--sb-typography-body-strong-font-family);
+  font-size: var(--sb-typography-body-strong-font-size);
+  font-weight: var(--sb-typography-body-strong-font-weight);
+  line-height: var(--sb-typography-body-strong-line-height);
   cursor: pointer;
-  transition-duration: var(--sb-motion-sys-enter-duration);
-  transition-timing-function: var(--sb-motion-sys-enter-timing-function);
+  transition-duration: var(--sb-transition-enter-duration);
+  transition-timing-function: var(--sb-transition-enter-timing-function);
   transition-property: background, color, border-color;
-  border: var(--sb-border-sys-default);
+  border: var(--sb-border-default);
 }
 
 .primary {
-  background: var(--sb-color-sys-accent-bg);
-  color: var(--sb-color-sys-accent-fg);
+  background: var(--sb-color-accent-bg);
+  color: var(--sb-color-accent-fg);
 }
 
 .primary:hover {
-  background: var(--sb-color-sys-accent-bg-hover);
+  background: var(--sb-color-accent-bg-hover);
 }
 
 .ghost {
-  background: var(--sb-color-sys-surface-default);
-  color: var(--sb-color-sys-text-accent);
+  background: var(--sb-color-surface-default);
+  color: var(--sb-color-text-accent);
 }
 
 .ghost:hover {
-  background: var(--sb-color-sys-surface-muted);
+  background: var(--sb-color-surface-muted);
 }

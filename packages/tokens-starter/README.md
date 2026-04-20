@@ -29,9 +29,9 @@ document.documentElement.setAttribute('data-swatch-theme', 'Light');
 
 ```css
 .button {
-  background: var(--swatch-color-sys-accent);
-  color:      var(--swatch-color-sys-text-inverse);
-  padding:    var(--swatch-space-sys-sm) var(--swatch-space-sys-md);
+  background: var(--swatch-color-accent);
+  color:      var(--swatch-color-text-inverse);
+  padding:    var(--swatch-space-sm) var(--swatch-space-md);
 }
 ```
 
@@ -40,8 +40,8 @@ document.documentElement.setAttribute('data-swatch-theme', 'Light');
 ```ts
 import { token, cssVars, type TokenPath } from '@unpunnyfuns/swatchbook-tokens';
 
-const bg = token('color.sys.accent');           // 'var(--swatch-color-sys-accent)'
-const muted: TokenPath = 'color.sys.text-muted'; // ✅ autocompletes
+const bg = token('color.accent');           // 'var(--swatch-color-accent)'
+const muted: TokenPath = 'color.text-muted'; // ✅ autocompletes
 ```
 
 ✅ Use via CSS vars when styling DOM. Prefer `token()` only when you need a string at runtime.

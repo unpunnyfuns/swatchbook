@@ -39,19 +39,19 @@ describe('renderTokenTypes', () => {
       ],
       themesResolved: {
         Light: {
-          'color.sys.bg': { id: 'color.sys.bg' } as never,
-          'color.sys.fg': { id: 'color.sys.fg' } as never,
+          'color.bg': { id: 'color.bg' } as never,
+          'color.fg': { id: 'color.fg' } as never,
         },
         Dark: {
-          'color.sys.accent': { id: 'color.sys.accent' } as never,
-          'color.sys.bg': { id: 'color.sys.bg' } as never,
+          'color.accent': { id: 'color.accent' } as never,
+          'color.bg': { id: 'color.bg' } as never,
         },
       },
     });
     const out = renderTokenTypes(project);
-    const bgIdx = out.indexOf('"color.sys.bg"');
-    const accentIdx = out.indexOf('"color.sys.accent"');
-    const fgIdx = out.indexOf('"color.sys.fg"');
+    const bgIdx = out.indexOf('"color.bg"');
+    const accentIdx = out.indexOf('"color.accent"');
+    const fgIdx = out.indexOf('"color.fg"');
     expect(accentIdx).toBeLessThan(bgIdx);
     expect(bgIdx).toBeLessThan(fgIdx);
   });

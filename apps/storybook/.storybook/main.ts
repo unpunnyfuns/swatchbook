@@ -29,19 +29,19 @@ export default defineMain({
           // Dogfood: wire block chrome to the reference tokens. Without this
           // map, chrome falls back to the hard-coded `light-dark()` defaults
           // in `DEFAULT_CHROME_MAP` — readable, but deaf to our Brand A /
-          // contrast axes. Mapping to `color.sys.*` / `typography.sys.*`
+          // contrast axes. Mapping to `color.*` / `typography.*`
           // makes block chrome track every toolbar flip.
           chrome: {
-            surfaceDefault: 'color.sys.surface.default',
-            surfaceMuted: 'color.sys.surface.muted',
-            surfaceRaised: 'color.sys.surface.raised',
-            textDefault: 'color.sys.text.default',
-            textMuted: 'color.sys.text.muted',
-            borderDefault: 'color.sys.border.default',
-            accentBg: 'color.sys.accent.bg',
-            accentFg: 'color.sys.accent.fg',
-            bodyFontFamily: 'typography.sys.body.font-family',
-            bodyFontSize: 'typography.sys.body.font-size',
+            surfaceDefault: 'color.surface.default',
+            surfaceMuted: 'color.surface.muted',
+            surfaceRaised: 'color.surface.raised',
+            textDefault: 'color.text.default',
+            textMuted: 'color.text.muted',
+            borderDefault: 'color.border.default',
+            accentBg: 'color.accent.bg',
+            accentFg: 'color.accent.fg',
+            bodyFontFamily: 'typography.body.font-family',
+            bodyFontSize: 'typography.body.font-size',
           },
           presets: [
             {

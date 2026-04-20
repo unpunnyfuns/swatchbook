@@ -3,8 +3,8 @@ import { expect, waitFor } from 'storybook/test';
 import preview from '../../.storybook/preview.tsx';
 
 function Probe() {
-  const surface = useToken('color.sys.surface.default');
-  const text = useToken('color.sys.text.default');
+  const surface = useToken('color.surface.default');
+  const text = useToken('color.text.default');
   return (
     <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 13, padding: 12 }}>
       <div>
@@ -54,8 +54,8 @@ async function textContent(root: Element, testId: string): Promise<string> {
 }
 
 /**
- * Under Light, `color.sys.surface.default` aliases into `neutral.0` (white)
- * and `color.sys.text.default` into `neutral.900` (near-black). The cssVar
+ * Under Light, `color.surface.default` aliases into `neutral.0` (white)
+ * and `color.text.default` into `neutral.900` (near-black). The cssVar
  * strings are theme-invariant; only the resolved `value` should shift.
  */
 export const Light = meta.story({
@@ -75,12 +75,12 @@ export const Light = meta.story({
     ).toBeLessThan(0.3);
 
     const cssVar = await textContent(canvasElement, 'surface-cssvar');
-    expect(cssVar).toBe('var(--sb-color-sys-surface-default)');
+    expect(cssVar).toBe('var(--sb-color-surface-default)');
   },
 });
 
 /**
- * Under Dark, `color.sys.surface.default` and `color.sys.text.default` flip —
+ * Under Dark, `color.surface.default` and `color.text.default` flip —
  * the same `useToken()` calls now resolve against `neutral.900` and
  * `neutral.50` respectively. This story proves `useToken` is reactive to
  * the active theme (via `parameters.swatchbook.theme` here — same channel
@@ -103,6 +103,6 @@ export const Dark = meta.story({
     ).toBeGreaterThan(0.9);
 
     const cssVar = await textContent(canvasElement, 'surface-cssvar');
-    expect(cssVar, 'cssVar must be theme-invariant').toBe('var(--sb-color-sys-surface-default)');
+    expect(cssVar, 'cssVar must be theme-invariant').toBe('var(--sb-color-surface-default)');
   },
 });

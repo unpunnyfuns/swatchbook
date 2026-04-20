@@ -11,5 +11,5 @@ const meta = preview.meta({
 
 export default meta;
 
-export const Default = meta.story({ args: { path: 'border.sys.default' } });
-export const Focus = meta.story({ args: { path: 'border.sys.focus' } });
+export const Default = meta.story({ args: { path: 'border.default' } });
+export const Focus = meta.story({ args: { path: 'border.focus' } });

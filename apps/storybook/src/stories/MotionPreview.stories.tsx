@@ -13,7 +13,7 @@ const meta = preview.meta({
 export default meta;
 
 export const SystemTransitions = meta.story({
-  args: { filter: 'motion.sys.*' },
+  args: { filter: 'transition.*' },
   play: async ({ canvasElement }) => {
     await waitFor(() => {
       const wrapper = canvasElement.querySelector('[data-sb-theme]');

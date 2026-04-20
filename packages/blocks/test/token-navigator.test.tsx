@@ -10,9 +10,9 @@ function makeSnapshot(): ProjectSnapshot {
     themes: [{ name: 'Light', input: { theme: 'Light' }, sources: [] }],
     themesResolved: {
       Light: {
-        'color.sys.bg': { $type: 'color', $value: { hex: '#fff' } },
-        'color.sys.fg': { $type: 'color', $value: { hex: '#111' } },
-        'color.ref.blue.500': { $type: 'color', $value: { hex: '#3b82f6' } },
+        'color.bg': { $type: 'color', $value: { hex: '#fff' } },
+        'color.fg': { $type: 'color', $value: { hex: '#111' } },
+        'color.blue.500': { $type: 'color', $value: { hex: '#3b82f6' } },
         'radius.sm': { $type: 'dimension', $value: { value: 4, unit: 'px' } },
       },
     },
@@ -47,10 +47,9 @@ describe('TokenNavigator', () => {
   it('scopes the tree under a `root` prop to only that subtree', () => {
     render(
       <SwatchbookProvider value={makeSnapshot()}>
-        <TokenNavigator root="color.sys" />
+        <TokenNavigator root="color" />
       </SwatchbookProvider>,
     );
-    expect(screen.queryByText('ref')).toBeNull();
     expect(screen.queryByText('radius')).toBeNull();
     // Leaves `bg` and `fg` visible under the scoped root.
     expect(screen.getByText('bg')).toBeDefined();

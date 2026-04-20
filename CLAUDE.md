@@ -44,7 +44,7 @@ When filing an issue: feature work → the relevant scope milestone if one's act
   ```ts
   import { emitCss } from '#/css.ts';          // ✅
   import { Button }  from '#/components/Button.tsx'; // ✅
-  import tokens     from '#/tokens/sys/color.json';  // ✅
+  import tokens     from '#/tokens/color.json';  // ✅
   import logo       from '#/assets/logo.svg';        // ✅
   import './styles.css';                             // ✅
   import { foo }    from '#/foo';                    // ❌ no extension
@@ -67,7 +67,7 @@ When filing an issue: feature work → the relevant scope milestone if one's act
   pnpm -r format && pnpm turbo run lint typecheck test
   ```
   Format changes to already-staged files land as noisy follow-up commits; CI fails on lint/typecheck/test regressions. Running all four locally catches every class before the push. If something is too slow, scope with `--filter=<pkg>` — don't skip.
-- **Design tokens:** ref → sys only. Variation lives in modes on sys (i.e., resolver modifiers like `mode`, `brand`, `contrast`), which already handle the component specialization a `cmp` layer would attempt. Component-layer tokens are an explicit anti-pattern here — they double the token count for every axis without expressive gain; components alias `sys` directly.
+- **Design tokens:** flat paths organized per DTCG `$type`, following [Terrazzo's style guide](https://terrazzo.app/docs/guides/styleguide/). Primitives (color, dimension, duration, fontFamily, fontWeight, cubicBezier, number, strokeStyle) and composites (shadow, border, transition, gradient, typography) coexist under their type root — `color.blue.500` alongside `color.surface.default`, `size.100` alongside `space.md`, `duration.fast` alongside `transition.enter`. No tier prefix in paths. Variation across `mode`, `brand`, `contrast` lives in resolver modifiers.
 - **TypeScript:** strict, `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, `verbatimModuleSyntax` on.
 - **READMEs:** module name + one-liner; structure table; TypeScript examples with imports; ✅/❌ for do's/don'ts.
 

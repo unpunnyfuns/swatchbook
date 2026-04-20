@@ -38,7 +38,7 @@ describe('Diagnostics', () => {
           {
             severity: 'error',
             group: 'parser',
-            message: 'Missing $value on color.sys.bg',
+            message: 'Missing $value on color.bg',
             filename: '/proj/tokens.json',
             line: 4,
           },
@@ -56,7 +56,7 @@ describe('Diagnostics', () => {
     const details = screen.getByText(/✖ 1 error · ⚠ 1 warning/).closest('details');
     expect(details?.hasAttribute('open')).toBe(true);
 
-    expect(screen.getByText('Missing $value on color.sys.bg')).toBeDefined();
+    expect(screen.getByText('Missing $value on color.bg')).toBeDefined();
     expect(screen.getByText('modifier unusable')).toBeDefined();
     expect(screen.getByText(/parser · \/proj\/tokens.json · :4/)).toBeDefined();
   });

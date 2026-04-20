@@ -20,7 +20,7 @@ export const ColorSubtree = meta.story({ args: { root: 'color' } });
 
 export const FullyCollapsed = meta.story({ args: { initiallyExpanded: 0 } });
 
-export const DeepExpanded = meta.story({ args: { initiallyExpanded: 3, root: 'color.sys' } });
+export const DeepExpanded = meta.story({ args: { initiallyExpanded: 3, root: 'color' } });
 
 function RecordingNavigator() {
   const [last, setLast] = useState<string | null>(null);
@@ -32,7 +32,7 @@ function RecordingNavigator() {
       >
         Last selected: {last ?? '(none)'}
       </div>
-      <TokenNavigator root="color.sys" onSelect={(p) => setLast(p)} />
+      <TokenNavigator root="color" onSelect={(p) => setLast(p)} />
     </div>
   );
 }

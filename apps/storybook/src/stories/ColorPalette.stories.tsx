@@ -24,11 +24,11 @@ export const All = meta.story({
   play: async ({ canvasElement }) => assertPaletteRenders(canvasElement),
 });
 export const SysOnly = meta.story({
-  args: { filter: 'color.sys.*' },
+  args: { filter: 'color.*' },
   play: async ({ canvasElement }) => assertPaletteRenders(canvasElement),
 });
 export const RefBlue = meta.story({
-  args: { filter: 'color.ref.blue.*' },
+  args: { filter: 'color.blue.*' },
   play: async ({ canvasElement }) => assertPaletteRenders(canvasElement),
 });
 export const Flat = meta.story({ args: { groupBy: 2 } });

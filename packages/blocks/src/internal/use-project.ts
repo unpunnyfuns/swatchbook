@@ -161,7 +161,7 @@ export function makeCssVar(path: string, prefix: string): string {
  * | `undefined` / `''` | everything                                          |
  * | `*` or `**`        | everything                                          |
  * | `color`            | exact path `color`, or any descendant `color.*`     |
- * | `color.sys.*`      | any path whose fixed prefix is `color.sys.`         |
+ * | `color.*`      | any path whose fixed prefix is `color.`         |
  * | `color**`          | any path starting with `color`                      |
  *
  * Not supported (all pass through as literal segment matchers): brace

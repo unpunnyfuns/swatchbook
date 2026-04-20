@@ -11,5 +11,5 @@ const meta = preview.meta({
 
 export default meta;
 
-export const RefNeutralZero = meta.story({ args: { path: 'color.ref.neutral.0' } });
-export const RefBlue500 = meta.story({ args: { path: 'color.ref.blue.500' } });
+export const RefNeutralZero = meta.story({ args: { path: 'color.neutral.0' } });
+export const RefBlue500 = meta.story({ args: { path: 'color.blue.500' } });

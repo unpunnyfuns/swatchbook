@@ -57,8 +57,8 @@ it('redeclares every var per tuple (flat emission, not nested cascading)', () =>
 it('holds brand-invariant tokens stable across mode at the same brand', () => {
   const lightDefault = extractBlock(css, ':root');
   const darkDefault = extractBlock(css, tupleSelector({ mode: 'Dark', brand: 'Default', contrast: 'Normal' }));
-  const lightSize = grep(lightDefault, '--sb-size-ref-400:');
-  const darkSize = grep(darkDefault, '--sb-size-ref-400:');
+  const lightSize = grep(lightDefault, '--sb-size-400:');
+  const darkSize = grep(darkDefault, '--sb-size-400:');
   expect(lightSize).toBeDefined();
   expect(darkSize).toBeDefined();
   expect(lightSize).toEqual(darkSize);

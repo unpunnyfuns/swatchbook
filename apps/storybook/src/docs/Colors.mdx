@@ -7,34 +7,34 @@ import { ColorPalette, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 
 Color tokens come in two tiers:
 
-- **`color.ref.*`** — raw palette primitives (blues, neutrals, reds, …). No
+- **`color.*`** — raw palette primitives (blues, neutrals, reds, …). No
   aliases, theme-invariant.
-- **`color.sys.*`** — semantic slots (`surface.default`, `text.muted`,
+- **`color.*`** — semantic slots (`surface.default`, `text.muted`,
   `accent.*`). Every `sys` token aliases into `ref` and carries
   mode- and brand-varied values through the resolver.
 
-Component styling reads `color.sys.*` directly — variation is handled by
+Component styling reads `color.*` directly — variation is handled by
 the active `mode × brand` tuple, so there's no separate component-token
 layer.
 
 ## System palette
 
-Groups the semantic color tokens by sub-path (e.g. `color.sys.surface.*`,
-`color.sys.text.*`, `color.sys.accent.*`). Switch the theme in the toolbar
+Groups the semantic color tokens by sub-path (e.g. `color.surface.*`,
+`color.text.*`, `color.accent.*`). Switch the theme in the toolbar
 to see every swatch repaint.
 
-<ColorPalette filter="color.sys.*" />
+<ColorPalette filter="color.*" />
 
 ## Reference palette
 
 Every primitive color in the reference tier. Use as the source of truth
 when building new `sys` tokens, not when styling components directly.
 
-<ColorPalette filter="color.ref.*" />
+<ColorPalette filter="color.*" />
 
 ## Raw table
 
 The same tokens as rows with resolved values, types, and CSS var names —
 handy when you know the path you're looking for.
 
-<TokenTable filter="color.sys.*" type="color" />
+<TokenTable filter="color.*" type="color" />

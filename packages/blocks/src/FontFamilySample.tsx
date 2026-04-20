@@ -8,7 +8,7 @@ import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts
 export interface FontFamilySampleProps {
   /**
    * Token-path filter. Defaults to every `fontFamily` token. Use e.g.
-   * `"font.ref.family.*"` to scope to the ref layer.
+   * `"font.family.*"` to scope to the ref layer.
    */
   filter?: string;
   /** Override the sample text rendered for each token. */

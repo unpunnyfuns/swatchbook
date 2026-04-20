@@ -9,8 +9,8 @@ it('populates sourceFiles with every $ref target when config.tokens is omitted',
 
   expect(project.sourceFiles.length).toBeGreaterThan(5);
   expect(project.sourceFiles).toContain(resolverPath);
-  expect(project.sourceFiles).toContain(resolvePath(tokensDir, 'ref/color.palette.json'));
-  expect(project.sourceFiles).toContain(resolvePath(tokensDir, 'sys/color.json'));
+  expect(project.sourceFiles).toContain(resolvePath(tokensDir, 'color.json'));
+  expect(project.sourceFiles).toContain(resolvePath(tokensDir, 'size.json'));
   expect(project.sourceFiles).toContain(resolvePath(tokensDir, 'themes/light.json'));
 });
 

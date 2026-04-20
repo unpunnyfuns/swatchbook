@@ -50,15 +50,15 @@ import { TokenTable, ColorPalette, TokenDetail } from '@unpunnyfuns/swatchbook-b
 
 # Color tokens
 
-<ColorPalette filter="color.sys.*" />
+<ColorPalette filter="color.*" />
 
 ## Every color token
 
-<TokenTable filter="color.sys.*" type="color" />
+<TokenTable filter="color.*" type="color" />
 
 ## Inspect one
 
-<TokenDetail path="color.sys.accent.bg" />
+<TokenDetail path="color.accent.bg" />
 ```
 
 ### Outside Storybook
@@ -72,7 +72,7 @@ import snapshot from './tokens-snapshot.json';
 export function TokenDocs() {
   return (
     <SwatchbookProvider value={snapshot}>
-      <TokenTable filter='color.sys.*' />
+      <TokenTable filter='color.*' />
     </SwatchbookProvider>
   );
 }
@@ -83,10 +83,10 @@ export function TokenDocs() {
 ## Props
 
 ```ts
-<TokenTable filter="color.sys.*" type="color" />
-<ColorPalette filter="color.sys.*" />
+<TokenTable filter="color.*" type="color" />
+<ColorPalette filter="color.*" />
 <TypographyScale filter="typography" sample="The quick brown fox" />
-<TokenDetail path="color.sys.accent.bg" />
+<TokenDetail path="color.accent.bg" />
 ```
 
 ## Do / don't

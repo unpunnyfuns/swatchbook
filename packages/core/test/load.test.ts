@@ -48,7 +48,7 @@ describe('loadProject — resolver mode', () => {
         contexts: ['Default', 'Brand A'],
         default: 'Default',
         description:
-          'Accent palette. `Default` leaves sys alone; `Brand A` overrides the accent scale.',
+          'Accent palette. `Default` leaves the baseline alone; `Brand A` overrides the accent scale.',
         source: 'resolver',
       },
       {
@@ -56,7 +56,7 @@ describe('loadProject — resolver mode', () => {
         contexts: ['Normal', 'High'],
         default: 'Normal',
         description:
-          'Border + focus emphasis. `Normal` leaves sys alone; `High` thickens borders and boosts the focus ring.',
+          'Border + focus emphasis. `Normal` leaves the baseline alone; `High` thickens borders and boosts the focus ring.',
         source: 'resolver',
       },
     ]);
@@ -69,14 +69,14 @@ describe('loadProject — resolver mode', () => {
 
   it('resolves alias chains (sys → ref)', () => {
     const light = resolveTheme(project, 'Light · Default · Normal').tokens;
-    const accentBg = light['color.sys.accent.bg'];
+    const accentBg = light['color.accent.bg'];
     expect(accentBg).toBeDefined();
     expect(accentBg?.$type).toBe('color');
   });
 
   it('produces different surface values for Light vs Dark at the same brand', () => {
-    const light = resolveTheme(project, 'Light · Default · Normal').tokens['color.sys.surface.default'];
-    const dark = resolveTheme(project, 'Dark · Default · Normal').tokens['color.sys.surface.default'];
+    const light = resolveTheme(project, 'Light · Default · Normal').tokens['color.surface.default'];
+    const dark = resolveTheme(project, 'Dark · Default · Normal').tokens['color.surface.default'];
     expect(light).toBeDefined();
     expect(dark).toBeDefined();
     expect(JSON.stringify(light?.$value)).not.toEqual(JSON.stringify(dark?.$value));

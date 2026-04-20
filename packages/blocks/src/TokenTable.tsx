@@ -12,7 +12,7 @@ import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface TokenTableProps {
   /**
-   * Token-path filter. `"color.sys.*"` matches every `color.sys.…` token;
+   * Token-path filter. `"color.*"` matches every `color.…` token;
    * omit to include everything. Combines with `type` (both must match).
    */
   filter?: string;

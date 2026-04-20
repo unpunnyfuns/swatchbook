@@ -8,7 +8,7 @@ import { TokenDetail, TypographyScale } from '@unpunnyfuns/swatchbook-blocks';
 Typography tokens are DTCG composites — each `$value` is an object with
 `fontFamily`, `fontSize`, `fontWeight`, `lineHeight`, and optional
 `letterSpacing`. Every sub-value aliases into the reference tier
-(`font.ref.sans`, `size.ref.*`, `font.ref.weight.*`).
+(`font.sans`, `size.*`, `font.weight.*`).
 
 ## Scale
 
@@ -21,6 +21,6 @@ Every `typography.*` token rendered as a sample line using its own value.
 `TokenDetail` shows the alias chain, per-theme values, and the CSS var
 reference you'd drop into a stylesheet.
 
-<TokenDetail path="typography.sys.body" />
+<TokenDetail path="typography.body" />
 
-<TokenDetail path="typography.sys.heading" />
+<TokenDetail path="typography.heading" />

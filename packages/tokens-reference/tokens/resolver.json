@@ -2,30 +2,21 @@
   "$schema": "https://design-tokens.org/tr/2025/drafts/resolver/",
   "version": "2025.10",
   "name": "swatchbook-reference",
-  "description": "DTCG 2025.10 native resolver. Two layers (ref and sys) plus three independent modifiers — `mode` (light/dark baseline), `brand` (default/Brand A accent), and `contrast` (normal/high border + focus emphasis) — compose into 8 named themes. Component variation is carried by modes on sys; no `cmp` layer.",
+  "description": "DTCG 2025.10 native resolver. Flat token paths organized per `$type` — color, size/space/radius, font, typography, motion, border, shadow, gradient, stroke, number — plus three independent modifiers: `mode` (light/dark baseline), `brand` (default/Brand A accent), and `contrast` (normal/high border + focus emphasis).",
   "sets": {
-    "ref": {
-      "description": "Raw primitives (loaded but not emitted).",
+    "tokens": {
+      "description": "Flat DTCG tokens grouped by `$type`.",
       "sources": [
-        { "$ref": "./ref/color.palette.json" },
-        { "$ref": "./ref/size.scale.json" },
-        { "$ref": "./ref/font.json" },
-        { "$ref": "./ref/motion.json" },
-        { "$ref": "./ref/stroke.json" },
-        { "$ref": "./ref/number.json" },
-        { "$ref": "./ref/gradient.json" }
-      ]
-    },
-    "sys": {
-      "description": "Semantic slots.",
-      "sources": [
-        { "$ref": "./sys/color.json" },
-        { "$ref": "./sys/space.json" },
-        { "$ref": "./sys/radius.json" },
-        { "$ref": "./sys/typography.json" },
-        { "$ref": "./sys/shadow.json" },
-        { "$ref": "./sys/border.json" },
-        { "$ref": "./sys/motion.json" }
+        { "$ref": "./color.json" },
+        { "$ref": "./size.json" },
+        { "$ref": "./font.json" },
+        { "$ref": "./typography.json" },
+        { "$ref": "./motion.json" },
+        { "$ref": "./border.json" },
+        { "$ref": "./shadow.json" },
+        { "$ref": "./gradient.json" },
+        { "$ref": "./stroke.json" },
+        { "$ref": "./number.json" }
       ]
     }
   },
@@ -39,7 +30,7 @@
       "default": "Light"
     },
     "brand": {
-      "description": "Accent palette. `Default` leaves sys alone; `Brand A` overrides the accent scale.",
+      "description": "Accent palette. `Default` leaves the baseline alone; `Brand A` overrides the accent scale.",
       "contexts": {
         "Default": [],
         "Brand A": [{ "$ref": "./themes/brand-a.json" }]
@@ -47,7 +38,7 @@
       "default": "Default"
     },
     "contrast": {
-      "description": "Border + focus emphasis. `Normal` leaves sys alone; `High` thickens borders and boosts the focus ring.",
+      "description": "Border + focus emphasis. `Normal` leaves the baseline alone; `High` thickens borders and boosts the focus ring.",
       "contexts": {
         "Normal": [],
         "High": [{ "$ref": "./themes/contrast-high.json" }]
@@ -56,8 +47,7 @@
     }
   },
   "resolutionOrder": [
-    { "$ref": "#/sets/ref" },
-    { "$ref": "#/sets/sys" },
+    { "$ref": "#/sets/tokens" },
     { "$ref": "#/modifiers/mode" },
     { "$ref": "#/modifiers/brand" },
     { "$ref": "#/modifiers/contrast" }

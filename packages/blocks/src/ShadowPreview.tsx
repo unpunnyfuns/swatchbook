@@ -10,7 +10,7 @@ import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
 export interface ShadowPreviewProps {
   /**
    * Token-path filter. Defaults to every `shadow` token. Use e.g.
-   * `"shadow.sys.*"` to scope to the semantic layer.
+   * `"shadow.*"` to scope to the semantic layer.
    */
   filter?: string;
   /** Override the caption. */

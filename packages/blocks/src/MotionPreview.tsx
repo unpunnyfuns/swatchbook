@@ -16,7 +16,7 @@ export type { MotionSpeed };
 export interface MotionPreviewProps {
   /**
    * Token-path filter. Defaults to transition + duration + cubicBezier
-   * tokens. Use e.g. `"motion.sys.*"` to scope to the semantic layer.
+   * tokens. Use e.g. `"transition.*"` to scope to the semantic layer.
    */
   filter?: string;
   /** Override the caption. */

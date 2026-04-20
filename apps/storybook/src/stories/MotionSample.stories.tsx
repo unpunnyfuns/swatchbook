@@ -12,4 +12,4 @@ const meta = preview.meta({
 
 export default meta;
 
-export const Default = meta.story({ args: { path: 'motion.sys.enter' } });
+export const Default = meta.story({ args: { path: 'transition.enter' } });

@@ -84,16 +84,16 @@ The MDX doc blocks read their surfaces, text, and accent colours from a fixed `-
       resolver: 'tokens/resolver.json',
       cssVarPrefix: 'ds',
       chrome: {
-        surfaceDefault: 'color.sys.surface.default',
-        surfaceMuted:   'color.sys.surface.muted',
-        surfaceRaised:  'color.sys.surface.raised',
-        textDefault:    'color.sys.text.default',
-        textMuted:      'color.sys.text.muted',
-        borderDefault:  'color.sys.border.default',
-        accentBg:       'color.sys.accent.bg',
-        accentFg:       'color.sys.accent.fg',
-        bodyFontFamily: 'typography.sys.body.font-family',
-        bodyFontSize:   'typography.sys.body.font-size',
+        surfaceDefault: 'color.surface.default',
+        surfaceMuted:   'color.surface.muted',
+        surfaceRaised:  'color.surface.raised',
+        textDefault:    'color.text.default',
+        textMuted:      'color.text.muted',
+        borderDefault:  'color.border.default',
+        accentBg:       'color.accent.bg',
+        accentFg:       'color.accent.fg',
+        bodyFontFamily: 'typography.body.font-family',
+        bodyFontSize:   'typography.body.font-size',
       },
     },
   },
@@ -108,7 +108,7 @@ If you haven't written a DTCG 2025.10 resolver, you can use the **layered** conf
 
 ```ts
 export default defineSwatchbookConfig({
-  tokens: ['tokens/ref/**/*.json', 'tokens/sys/**/*.json'],
+  tokens: ['tokens/**/*.json'],
   axes: [
     {
       name: 'mode',

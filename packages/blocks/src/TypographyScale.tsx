@@ -8,7 +8,7 @@ import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts
 export interface TypographyScaleProps {
   /**
    * Token-path filter. Defaults to every `typography` token. Use e.g.
-   * `"typography.sys.*"` to scope to the semantic layer.
+   * `"typography.*"` to scope to the semantic layer.
    */
   filter?: string;
   /** Override the sample text rendered for each token. */

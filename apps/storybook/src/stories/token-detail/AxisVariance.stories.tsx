@@ -11,5 +11,5 @@ const meta = preview.meta({
 
 export default meta;
 
-export const AccentBg = meta.story({ args: { path: 'color.sys.accent.bg' } });
-export const SurfaceDefault = meta.story({ args: { path: 'color.sys.surface.default' } });
+export const AccentBg = meta.story({ args: { path: 'color.accent.bg' } });
+export const SurfaceDefault = meta.story({ args: { path: 'color.surface.default' } });

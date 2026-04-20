@@ -50,7 +50,7 @@ async function waitForContent(root: ParentNode, selector: string): Promise<Eleme
  * swatch card whose background resolves to a non-transparent CSS value.
  */
 export const ColorPaletteRenders = meta.story({
-  render: () => <ColorPalette filter="color.sys.surface.*" groupBy={3} />,
+  render: () => <ColorPalette filter="color.surface.*" groupBy={3} />,
   play: async ({ canvasElement }) => {
     const section = await waitForContent(canvasElement, 'section');
     const swatch = section.querySelector<HTMLElement>('[aria-hidden="true"]');
@@ -66,7 +66,7 @@ export const ColorPaletteRenders = meta.story({
  * `TokenTable` must render the expected headers and at least one data row.
  */
 export const TokenTableRenders = meta.story({
-  render: () => <TokenTable filter="color.sys.*" type="color" />,
+  render: () => <TokenTable filter="color.*" type="color" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'tbody tr');
     const headerTexts = [...canvasElement.querySelectorAll('thead th')].map((th) =>
@@ -81,10 +81,10 @@ export const TokenTableRenders = meta.story({
 /**
  * `DimensionScale` must render one bar per dimension token, and each bar's
  * rendered width must reflect the underlying cssVar (i.e. non-zero for
- * tokens with a non-zero value — space.sys.md is 12px).
+ * tokens with a non-zero value — space.md is 12px).
  */
 export const DimensionScaleRenders = meta.story({
-  render: () => <DimensionScale filter="space.sys.*" />,
+  render: () => <DimensionScale filter="space.*" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'div[aria-hidden="true"]');
     const bars = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -102,7 +102,7 @@ export const DimensionScaleRenders = meta.story({
  * computed style for at least one shadow token.
  */
 export const ShadowPreviewRenders = meta.story({
-  render: () => <ShadowPreview filter="shadow.sys.*" />,
+  render: () => <ShadowPreview filter="shadow.*" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'div[aria-hidden="true"]');
     const samples = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -123,7 +123,7 @@ export const ShadowPreviewRenders = meta.story({
  * that includes `gradient` (the computed shorthand).
  */
 export const GradientPaletteRenders = meta.story({
-  render: () => <GradientPalette filter="gradient.ref.*" />,
+  render: () => <GradientPalette filter="gradient.*" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'div[aria-hidden="true"]');
     const samples = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -143,7 +143,7 @@ export const GradientPaletteRenders = meta.story({
  * `none` for at least one border token.
  */
 export const BorderPreviewRenders = meta.story({
-  render: () => <BorderPreview filter="border.sys.*" />,
+  render: () => <BorderPreview filter="border.*" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'div[aria-hidden="true"]');
     const samples = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -164,7 +164,7 @@ export const BorderPreviewRenders = meta.story({
  * is on — we don't assert behavior there, just that the block renders).
  */
 export const MotionPreviewRenders = meta.story({
-  render: () => <MotionPreview filter="motion.sys.*" />,
+  render: () => <MotionPreview filter="transition.*" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'div[aria-hidden="true"]');
     const balls = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -191,7 +191,7 @@ export const MotionPreviewRenders = meta.story({
  * dasharray). Assert both render a visible element beyond the text value.
  */
 export const TokenDetailStrokeStyleString = meta.story({
-  render: () => <TokenDetail path="stroke.ref.style.dashed" />,
+  render: () => <TokenDetail path="stroke.style.dashed" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const line = canvasElement.querySelector<HTMLElement>('div[aria-hidden="true"]');
@@ -204,7 +204,7 @@ export const TokenDetailStrokeStyleString = meta.story({
 });
 
 export const TokenDetailStrokeStyleObject = meta.story({
-  render: () => <TokenDetail path="stroke.ref.style.custom-dash" />,
+  render: () => <TokenDetail path="stroke.style.custom-dash" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const svg = canvasElement.querySelector('svg');
@@ -221,7 +221,7 @@ export const TokenDetailStrokeStyleObject = meta.story({
  * line). Assert both swatches exist and carry a non-transparent background.
  */
 export const TokenDetailColorSwatch = meta.story({
-  render: () => <TokenDetail path="color.sys.accent.bg" />,
+  render: () => <TokenDetail path="color.accent.bg" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const swatches = [
@@ -240,7 +240,7 @@ export const TokenDetailColorSwatch = meta.story({
  * fontWeight, lineHeight, and optionally letterSpacing.
  */
 export const TokenDetailCompositeBreakdownTypography = meta.story({
-  render: () => <TokenDetail path="typography.sys.heading" />,
+  render: () => <TokenDetail path="typography.heading" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const body = canvasElement.textContent ?? '';
@@ -251,7 +251,7 @@ export const TokenDetailCompositeBreakdownTypography = meta.story({
 });
 
 export const TokenDetailCompositeBreakdownShadow = meta.story({
-  render: () => <TokenDetail path="shadow.sys.md" />,
+  render: () => <TokenDetail path="shadow.md" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const body = canvasElement.textContent ?? '';
@@ -262,7 +262,7 @@ export const TokenDetailCompositeBreakdownShadow = meta.story({
 });
 
 export const TokenDetailCompositeBreakdownGradient = meta.story({
-  render: () => <TokenDetail path="gradient.ref.sunrise" />,
+  render: () => <TokenDetail path="gradient.sunrise" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const body = canvasElement.textContent ?? '';
@@ -293,15 +293,15 @@ export const TypographyScaleRenders = meta.story({
  * section, and alias chain for a known path.
  */
 export const TokenDetailRenders = meta.story({
-  render: () => <TokenDetail path="color.sys.accent.bg" />,
+  render: () => <TokenDetail path="color.accent.bg" />,
   play: async ({ canvasElement }) => {
     const heading = await waitForContent(canvasElement, 'h3');
-    expect(heading.textContent).toBe('color.sys.accent.bg');
+    expect(heading.textContent).toBe('color.accent.bg');
 
     const bodyText = canvasElement.textContent ?? '';
     expect(bodyText, 'must render Resolved value section').toContain('Resolved value');
     expect(bodyText, 'must render Alias chain section').toContain('Alias chain');
-    expect(bodyText, 'must render the cssVar reference').toContain('var(--sb-color-sys-accent-bg)');
+    expect(bodyText, 'must render the cssVar reference').toContain('var(--sb-color-accent-bg)');
   },
 });
 
@@ -311,7 +311,7 @@ export const TokenDetailRenders = meta.story({
  * the effect applied, transition as an animated ball.
  */
 export const TokenDetailTypographyComposite = meta.story({
-  render: () => <TokenDetail path="typography.sys.heading" />,
+  render: () => <TokenDetail path="typography.heading" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const sample = [...canvasElement.querySelectorAll<HTMLElement>('div')].find((el) =>
@@ -328,7 +328,7 @@ export const TokenDetailTypographyComposite = meta.story({
 });
 
 export const TokenDetailShadowComposite = meta.story({
-  render: () => <TokenDetail path="shadow.sys.md" />,
+  render: () => <TokenDetail path="shadow.md" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const samples = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -350,7 +350,7 @@ export const TokenDetailShadowComposite = meta.story({
  * fallback, which is acceptable.
  */
 export const StrokeStyleSampleRenders = meta.story({
-  render: () => <StrokeStyleSample filter="stroke.ref.style.*" />,
+  render: () => <StrokeStyleSample filter="stroke.style.*" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'section, div');
     const lines = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -372,11 +372,11 @@ export const StrokeStyleSampleRenders = meta.story({
  * sample's computed `font-family` must resolve to a non-empty stack.
  */
 export const FontFamilySampleRenders = meta.story({
-  render: () => <FontFamilySample filter="font.ref.family.*" />,
+  render: () => <FontFamilySample filter="font.family.*" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'section, div');
     const paths = [...canvasElement.querySelectorAll('span')].filter((el) =>
-      el.textContent?.startsWith('font.ref.family.'),
+      el.textContent?.startsWith('font.family.'),
     );
     expect(paths.length, 'at least one fontFamily row must render').toBeGreaterThan(0);
     const samples = [...canvasElement.querySelectorAll<HTMLElement>('div')].filter((el) =>
@@ -395,7 +395,7 @@ export const FontFamilySampleRenders = meta.story({
  * computed `font-weight` reflecting each token's value.
  */
 export const FontWeightScaleRenders = meta.story({
-  render: () => <FontWeightScale filter="font.ref.weight.*" />,
+  render: () => <FontWeightScale filter="font.weight.*" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'section, div');
     const samples = [...canvasElement.querySelectorAll<HTMLElement>('div')].filter(
@@ -416,7 +416,7 @@ export const FontWeightScaleRenders = meta.story({
  * computed `font-family` reflects the token's stack.
  */
 export const TokenDetailFontFamilyPrimitive = meta.story({
-  render: () => <TokenDetail path="font.ref.family.sans" />,
+  render: () => <TokenDetail path="font.family.sans" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const sample = [...canvasElement.querySelectorAll<HTMLElement>('div')].find((el) =>
@@ -434,7 +434,7 @@ export const TokenDetailFontFamilyPrimitive = meta.story({
  * computed `font-weight` matches the token value.
  */
 export const TokenDetailFontWeightPrimitive = meta.story({
-  render: () => <TokenDetail path="font.ref.weight.bold" />,
+  render: () => <TokenDetail path="font.weight.bold" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const sample = [...canvasElement.querySelectorAll<HTMLElement>('div')].find(
@@ -453,7 +453,7 @@ export const TokenDetailFontWeightPrimitive = meta.story({
  * width matches the token's cssVar.
  */
 export const TokenDetailDimensionPrimitive = meta.story({
-  render: () => <TokenDetail path="space.sys.md" />,
+  render: () => <TokenDetail path="space.md" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const bars = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -468,7 +468,7 @@ export const TokenDetailDimensionPrimitive = meta.story({
  * the suppressed-notice is acceptable.
  */
 export const TokenDetailDurationPrimitive = meta.story({
-  render: () => <TokenDetail path="duration.ref.slow" />,
+  render: () => <TokenDetail path="duration.slow" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const balls = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -490,7 +490,7 @@ export const TokenDetailDurationPrimitive = meta.story({
  * whose computed `transition-timing-function` reflects the easing curve.
  */
 export const TokenDetailCubicBezierPrimitive = meta.story({
-  render: () => <TokenDetail path="easing.ref.standard" />,
+  render: () => <TokenDetail path="cubicBezier.standard" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const balls = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -513,7 +513,7 @@ export const TokenDetailCubicBezierPrimitive = meta.story({
  * promise of backward alias traversal.
  */
 export const TokenDetailAliasedBy = meta.story({
-  render: () => <TokenDetail path="color.ref.neutral.0" />,
+  render: () => <TokenDetail path="color.neutral.0" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const body = canvasElement.textContent ?? '';
@@ -521,7 +521,7 @@ export const TokenDetailAliasedBy = meta.story({
     const nodes = [...canvasElement.querySelectorAll('li span')].map((el) =>
       el.textContent?.trim(),
     );
-    const hasSys = nodes.some((n) => n?.startsWith('color.sys.'));
+    const hasSys = nodes.some((n) => n?.startsWith('color.'));
     expect(hasSys, 'tree must include at least one sys descendant').toBe(true);
   },
 });
@@ -549,7 +549,7 @@ export const TokenDetailMissing = meta.story({
  * issue #136.
  */
 export const TokenDetailOneAxisBrand = meta.story({
-  render: () => <TokenDetail path="color.sys.accent.bg" />,
+  render: () => <TokenDetail path="color.accent.bg" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const header = [...canvasElement.querySelectorAll('div')].find((el) =>
@@ -569,7 +569,7 @@ export const TokenDetailOneAxisBrand = meta.story({
  * render a single row that notes the value applies to every tuple.
  */
 export const TokenDetailConstantAcrossAxes = meta.story({
-  render: () => <TokenDetail path="space.sys.md" />,
+  render: () => <TokenDetail path="space.md" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const header = [...canvasElement.querySelectorAll('div')].find(

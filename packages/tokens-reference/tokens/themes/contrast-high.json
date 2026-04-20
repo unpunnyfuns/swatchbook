@@ -1,43 +1,39 @@
 {
   "color": {
-    "sys": {
-      "$type": "color",
-      "$description": "High-contrast overlay — strengthens borders and focus rings. Surfaces and accents stay in mode/brand's lane.",
-      "border": {
-        "default": { "$value": "{color.ref.neutral.700}" },
-        "strong":  { "$value": "{color.ref.neutral.900}" },
-        "focus":   { "$value": "{color.ref.yellow.500}" }
-      },
-      "text": {
-        "muted":  { "$value": "{color.ref.neutral.700}" },
-        "subtle": { "$value": "{color.ref.neutral.600}" }
-      }
+    "$type": "color",
+    "$description": "High-contrast overlay — strengthens borders and focus rings. Surfaces and accents stay in mode/brand's lane.",
+    "border": {
+      "default": { "$value": "{color.neutral.700}" },
+      "strong":  { "$value": "{color.neutral.900}" },
+      "focus":   { "$value": "{color.yellow.500}" }
+    },
+    "text": {
+      "muted":  { "$value": "{color.neutral.700}" },
+      "subtle": { "$value": "{color.neutral.600}" }
     }
   },
   "border": {
-    "sys": {
-      "$type": "border",
-      "$description": "High-contrast border widths — composite bumps to 2px default, 3px focus.",
-      "default": {
-        "$value": {
-          "color": "{color.sys.border.default}",
-          "width": { "value": 2, "unit": "px" },
-          "style": "solid"
-        }
-      },
-      "strong": {
-        "$value": {
-          "color": "{color.sys.border.strong}",
-          "width": { "value": 2, "unit": "px" },
-          "style": "solid"
-        }
-      },
-      "focus": {
-        "$value": {
-          "color": "{color.sys.border.focus}",
-          "width": { "value": 3, "unit": "px" },
-          "style": "solid"
-        }
+    "$type": "border",
+    "$description": "High-contrast border widths — composite bumps to 2px default, 3px focus.",
+    "default": {
+      "$value": {
+        "color": "{color.border.default}",
+        "width": { "value": 2, "unit": "px" },
+        "style": "solid"
+      }
+    },
+    "strong": {
+      "$value": {
+        "color": "{color.border.strong}",
+        "width": { "value": 2, "unit": "px" },
+        "style": "solid"
+      }
+    },
+    "focus": {
+      "$value": {
+        "color": "{color.border.focus}",
+        "width": { "value": 3, "unit": "px" },
+        "style": "solid"
       }
     }
   }

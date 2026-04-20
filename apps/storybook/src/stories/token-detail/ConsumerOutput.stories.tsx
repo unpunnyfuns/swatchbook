@@ -13,16 +13,16 @@ const meta = preview.meta({
 export default meta;
 
 export const Color = meta.story({
-  args: { path: 'color.sys.accent.bg' },
+  args: { path: 'color.accent.bg' },
   parameters: { swatchbook: { axes: { mode: 'Light', brand: 'Default' } } },
 });
 
 export const Space = meta.story({
-  args: { path: 'space.sys.md' },
+  args: { path: 'space.md' },
 });
 
 export const RendersPathAndCssRows = meta.story({
-  args: { path: 'color.sys.accent.bg' },
+  args: { path: 'color.accent.bg' },
   play: async ({ canvasElement }) => {
     await waitFor(() => {
       const pathEl = canvasElement.querySelector('[data-testid="consumer-output-path"]');
@@ -31,13 +31,13 @@ export const RendersPathAndCssRows = meta.story({
     });
     const pathEl = canvasElement.querySelector('[data-testid="consumer-output-path"]');
     const cssEl = canvasElement.querySelector('[data-testid="consumer-output-css"]');
-    expect(pathEl?.textContent).toBe('color.sys.accent.bg');
-    expect(cssEl?.textContent).toBe('var(--sb-color-sys-accent-bg)');
+    expect(pathEl?.textContent).toBe('color.accent.bg');
+    expect(cssEl?.textContent).toBe('var(--sb-color-accent-bg)');
   },
 });
 
 export const CopyPathWritesToClipboard = meta.story({
-  args: { path: 'color.sys.accent.bg' },
+  args: { path: 'color.accent.bg' },
   play: async ({ canvasElement }) => {
     const writes: string[] = [];
     const originalClipboard = navigator.clipboard;
@@ -62,7 +62,7 @@ export const CopyPathWritesToClipboard = meta.story({
       await waitFor(() => {
         if (writes.length === 0) throw new Error('clipboard not written');
       });
-      expect(writes).toEqual(['color.sys.accent.bg']);
+      expect(writes).toEqual(['color.accent.bg']);
     } finally {
       Object.defineProperty(navigator, 'clipboard', {
         configurable: true,
@@ -73,7 +73,7 @@ export const CopyPathWritesToClipboard = meta.story({
 });
 
 export const CopyCssWritesToClipboard = meta.story({
-  args: { path: 'color.sys.accent.bg' },
+  args: { path: 'color.accent.bg' },
   play: async ({ canvasElement }) => {
     const writes: string[] = [];
     const originalClipboard = navigator.clipboard;
@@ -98,7 +98,7 @@ export const CopyCssWritesToClipboard = meta.story({
       await waitFor(() => {
         if (writes.length === 0) throw new Error('clipboard not written');
       });
-      expect(writes).toEqual(['var(--sb-color-sys-accent-bg)']);
+      expect(writes).toEqual(['var(--sb-color-accent-bg)']);
     } finally {
       Object.defineProperty(navigator, 'clipboard', {
         configurable: true,

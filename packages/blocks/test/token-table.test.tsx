@@ -20,17 +20,17 @@ function makeSnapshot(): ProjectSnapshot {
     ],
     themesResolved: {
       Light: {
-        'color.sys.text': {
+        'color.text': {
           $type: 'color',
           $value: { hex: '#111111' },
           $description: 'Primary text.',
         },
-        'color.sys.surface': {
+        'color.surface': {
           $type: 'color',
           $value: { hex: '#ffffff' },
           $description: 'Default surface.',
         },
-        'space.sys.md': {
+        'space.md': {
           $type: 'dimension',
           $value: { value: 16, unit: 'px' },
         },
@@ -63,9 +63,9 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     const rows = within(table).getAllByRole('row');
     expect(rows.length).toBe(4);
 
-    expect(within(table).getByText('color.sys.text')).toBeDefined();
-    expect(within(table).getByText('color.sys.surface')).toBeDefined();
-    expect(within(table).getByText('space.sys.md')).toBeDefined();
+    expect(within(table).getByText('color.text')).toBeDefined();
+    expect(within(table).getByText('color.surface')).toBeDefined();
+    expect(within(table).getByText('space.md')).toBeDefined();
   });
 
   it('clicking a row opens the TokenDetail overlay by default', async () => {
@@ -77,7 +77,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     );
 
     const rows = screen.getAllByTestId('token-table-row');
-    const target = rows.find((r) => r.getAttribute('data-path') === 'color.sys.text');
+    const target = rows.find((r) => r.getAttribute('data-path') === 'color.text');
     if (!target) throw new Error('row not found');
     target.click();
 
@@ -104,7 +104,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
 
     render(
       <SwatchbookProvider value={snapshot}>
-        <TokenTable filter="color.sys.*" />
+        <TokenTable filter="color.*" />
       </SwatchbookProvider>,
     );
 
@@ -112,7 +112,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     const rows = within(table).getAllByRole('row');
     expect(rows.length).toBe(3);
 
-    expect(within(table).queryByText('space.sys.md')).toBeNull();
+    expect(within(table).queryByText('space.md')).toBeNull();
   });
 
   it('renders the empty state when the filter matches nothing', () => {
@@ -120,7 +120,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
 
     render(
       <SwatchbookProvider value={snapshot}>
-        <TokenTable filter="typography.sys.*" />
+        <TokenTable filter="typography.*" />
       </SwatchbookProvider>,
     );
 
@@ -140,6 +140,6 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     const wrapper = container.querySelector('[data-swatch-theme]') as HTMLElement | null;
     expect(wrapper).not.toBeNull();
     expect(wrapper?.style.getPropertyValue('--swatchbook-color-border-default')).toBe('');
-    expect(wrapper?.style.getPropertyValue('--sb-color-sys-border-default')).toBe('');
+    expect(wrapper?.style.getPropertyValue('--sb-color-border-default')).toBe('');
   });
 });
