@@ -76,7 +76,7 @@ describe('Diagnostics', () => {
   it('honors the caption override', () => {
     render(
       <SwatchbookProvider value={makeSnapshot()}>
-        <Diagnostics caption='Project health' />
+        <Diagnostics caption="Project health" />
       </SwatchbookProvider>,
     );
     expect(screen.getByText('Project health')).toBeDefined();

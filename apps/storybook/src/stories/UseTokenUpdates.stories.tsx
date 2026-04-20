@@ -10,13 +10,13 @@ function Probe() {
       <div>
         <strong>surface.default</strong>
       </div>
-      <div data-testid='surface-value'>{JSON.stringify(surface.value)}</div>
-      <div data-testid='surface-cssvar'>{surface.cssVar}</div>
+      <div data-testid="surface-value">{JSON.stringify(surface.value)}</div>
+      <div data-testid="surface-cssvar">{surface.cssVar}</div>
       <div style={{ marginTop: 12 }}>
         <strong>text.default</strong>
       </div>
-      <div data-testid='text-value'>{JSON.stringify(text.value)}</div>
-      <div data-testid='text-cssvar'>{text.cssVar}</div>
+      <div data-testid="text-value">{JSON.stringify(text.value)}</div>
+      <div data-testid="text-cssvar">{text.cssVar}</div>
     </div>
   );
 }

@@ -58,8 +58,8 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
         <span>{value}</span>
         {outOfGamut && (
           <span
-            title='Out of sRGB gamut for this format'
-            aria-label='out of gamut'
+            title="Out of sRGB gamut for this format"
+            aria-label="out of gamut"
             style={{ marginLeft: 6 }}
           >
             ⚠

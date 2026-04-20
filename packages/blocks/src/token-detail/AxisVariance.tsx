@@ -45,10 +45,10 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
     return (
       <>
         <div style={styles.sectionHeader}>Values across axes</div>
-        <table style={styles.themeTable} data-testid='token-detail-values'>
+        <table style={styles.themeTable} data-testid="token-detail-values">
           <tbody>
             <tr style={styles.themeRow}>
-              <td style={styles.themeCell} data-testid='token-detail-constant'>
+              <td style={styles.themeCell} data-testid="token-detail-constant">
                 {isColor && <span style={{ ...styles.swatch, background: cssVar }} aria-hidden />}
                 {value}
                 <span style={{ opacity: 0.6, marginLeft: 8 }}>
@@ -83,7 +83,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
     return (
       <>
         <div style={styles.sectionHeader}>Varies with {axisName}</div>
-        <table style={styles.themeTable} data-testid='token-detail-values'>
+        <table style={styles.themeTable} data-testid="token-detail-values">
           <tbody>
             {contextValues.map((row) => (
               <tr key={row.ctx} style={styles.themeRow} data-axis={axisName} data-context={row.ctx}>
@@ -116,7 +116,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
   return (
     <>
       <div style={styles.sectionHeader}>Varies with {variance.varyingAxes.join(' × ')}</div>
-      <table style={styles.themeTable} data-testid='token-detail-values'>
+      <table style={styles.themeTable} data-testid="token-detail-values">
         <thead>
           <tr style={styles.themeRow}>
             <th style={{ ...styles.themeCell, textAlign: 'left', opacity: 0.7 }}>

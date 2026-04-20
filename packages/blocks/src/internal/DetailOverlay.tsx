@@ -68,19 +68,19 @@ export function DetailOverlay({
   }, [onClose]);
 
   return (
-    <div style={styles.backdrop} onClick={onClose} role='presentation' data-testid={testId}>
+    <div style={styles.backdrop} onClick={onClose} role="presentation" data-testid={testId}>
       <div
         style={styles.panel}
         onClick={(e) => e.stopPropagation()}
-        role='dialog'
-        aria-modal='true'
+        role="dialog"
+        aria-modal="true"
         aria-label={`Token detail for ${path}`}
       >
         <button
-          type='button'
+          type="button"
           style={styles.closeButton}
           onClick={onClose}
-          aria-label='Close'
+          aria-label="Close"
           data-testid={`${testId}-close`}
         >
           ×

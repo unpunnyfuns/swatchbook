@@ -107,7 +107,7 @@ export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
     <div
       {...themeAttrs(cssVarPrefix, activeTheme)}
       style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
-      data-testid='diagnostics'
+      data-testid="diagnostics"
     >
       <details open={hasErrorsOrWarnings}>
         <summary style={{ ...styles.summary, color: summaryColor(diagnostics) }}>

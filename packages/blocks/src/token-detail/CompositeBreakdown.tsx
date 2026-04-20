@@ -72,12 +72,12 @@ export function CompositeBreakdownContent({
           return (
             <div key={shadowLayerKey(v, i)} style={{ display: 'contents' }}>
               {multi && <div style={styles.breakdownLayerHeader}>Layer {i + 1}</div>}
-              <KeyValueRow label='color' value={formatColorSubValue(v['color'], colorFormat)} />
-              <KeyValueRow label='offsetX' value={formatDimensionValue(v['offsetX'])} />
-              <KeyValueRow label='offsetY' value={formatDimensionValue(v['offsetY'])} />
-              <KeyValueRow label='blur' value={formatDimensionValue(v['blur'])} />
-              <KeyValueRow label='spread' value={formatDimensionValue(v['spread'])} />
-              {'inset' in v && <KeyValueRow label='inset' value={formatPrimitive(v['inset'])} />}
+              <KeyValueRow label="color" value={formatColorSubValue(v['color'], colorFormat)} />
+              <KeyValueRow label="offsetX" value={formatDimensionValue(v['offsetX'])} />
+              <KeyValueRow label="offsetY" value={formatDimensionValue(v['offsetY'])} />
+              <KeyValueRow label="blur" value={formatDimensionValue(v['blur'])} />
+              <KeyValueRow label="spread" value={formatDimensionValue(v['spread'])} />
+              {'inset' in v && <KeyValueRow label="inset" value={formatPrimitive(v['inset'])} />}
             </div>
           );
         })}

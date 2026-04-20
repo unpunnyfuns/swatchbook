@@ -43,7 +43,7 @@ describe('ColorPalette', () => {
   it('narrows to the filter subtree and derives groupBy from it', () => {
     render(
       <SwatchbookProvider value={makeSnapshot()}>
-        <ColorPalette filter='color.sys.*' />
+        <ColorPalette filter="color.sys.*" />
       </SwatchbookProvider>,
     );
     // `color.sys.*` has fixed length 2. Tokens below max out at depth 3,
@@ -61,7 +61,7 @@ describe('ColorPalette', () => {
     // their shade as the leaf.
     render(
       <SwatchbookProvider value={makeSnapshot()}>
-        <ColorPalette filter='color.ref.blue.*' />
+        <ColorPalette filter="color.ref.blue.*" />
       </SwatchbookProvider>,
     );
     expect(screen.getByText('color.ref.blue')).toBeDefined();
@@ -71,7 +71,7 @@ describe('ColorPalette', () => {
   it('shows the empty state when the filter matches no color tokens', () => {
     render(
       <SwatchbookProvider value={makeSnapshot()}>
-        <ColorPalette filter='typography.*' />
+        <ColorPalette filter="typography.*" />
       </SwatchbookProvider>,
     );
     expect(screen.getByText('No color tokens match this filter.')).toBeDefined();

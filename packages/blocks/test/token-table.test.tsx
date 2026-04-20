@@ -104,7 +104,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
 
     render(
       <SwatchbookProvider value={snapshot}>
-        <TokenTable filter='color.sys.*' />
+        <TokenTable filter="color.sys.*" />
       </SwatchbookProvider>,
     );
 
@@ -120,7 +120,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
 
     render(
       <SwatchbookProvider value={snapshot}>
-        <TokenTable filter='typography.sys.*' />
+        <TokenTable filter="typography.sys.*" />
       </SwatchbookProvider>,
     );
 

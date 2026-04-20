@@ -204,8 +204,8 @@ export function ColorPalette({
                     {swatch.value}
                     {swatch.outOfGamut && (
                       <span
-                        title='Out of sRGB gamut for this format'
-                        aria-label='out of gamut'
+                        title="Out of sRGB gamut for this format"
+                        aria-label="out of gamut"
                         style={{ marginLeft: 4 }}
                       >
                         {' '}
