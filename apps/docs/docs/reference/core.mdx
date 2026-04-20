@@ -96,6 +96,8 @@ interface Config {
   default?: Partial<Record<string, string>>;
   /** Axis names to suppress from the toolbar and CSS emission; each is pinned to its default context. */
   disabledAxes?: string[];
+  /** Map from block chrome roles (CHROME_ROLES) to target token paths — emits :root aliases redirecting --swatchbook-* chrome reads to consumer tokens. */
+  chrome?: Record<string, string>;
   cssVarPrefix?: string;
   outDir?: string;
 }
@@ -143,6 +145,8 @@ interface Project {
   /** Axis names suppressed via `config.disabledAxes` and validated against the resolver. */
   disabledAxes: string[];
   presets: Preset[];
+  /** Validated chrome-alias entries from `config.chrome`. Invalid entries are dropped and reported as diagnostics. */
+  chrome: Record<string, string>;
   themes: Theme[];
   themesResolved: Record<string, TokenMap>;
   graph: TokenMap; // default theme's resolved tokens

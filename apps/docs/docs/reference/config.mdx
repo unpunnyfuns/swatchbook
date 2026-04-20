@@ -152,6 +152,62 @@ defineSwatchbookConfig({
 
 Config-level only — there's no runtime toggle. Disabling an axis is the cleanest way to hide a work-in-progress modifier (or an experimental axis you don't want surfaced yet) without editing the resolver document. Unknown axis names produce `warn` diagnostics (group `swatchbook/disabled-axes`) and are ignored; the filtered list lands on `Project.disabledAxes` for downstream tooling.
 
+### `chrome?: Record<string, string>`
+
+Override one or more of swatchbook's ten block-chrome roles. Block components (`<TokenTable>`, `<ColorPalette>`, etc.) read a fixed `--swatchbook-*` CSS variable namespace for their surfaces, text, and accents — independent of `cssVarPrefix`, so your token namespace never collides with chrome reads. Every role is always declared: by default, to the hard-coded literals in `DEFAULT_CHROME_MAP` (which use `light-dark()` so chrome auto-flips with the active `color-scheme` — Storybook's light/dark preference, the OS, whatever). Any role you set in `chrome` replaces that literal with a `var(--<prefix>-<your-token>)` reference so chrome reflows with your own theme switches instead.
+
+The ten roles (closed set — also exported as `CHROME_ROLES` and the `ChromeRole` type from `@unpunnyfuns/swatchbook-core`):
+
+| Role              | Reads as                               |
+| ----------------- | -------------------------------------- |
+| `surfaceDefault`  | `--swatchbook-surface-default`         |
+| `surfaceMuted`    | `--swatchbook-surface-muted`           |
+| `surfaceRaised`   | `--swatchbook-surface-raised`          |
+| `textDefault`     | `--swatchbook-text-default`            |
+| `textMuted`       | `--swatchbook-text-muted`              |
+| `borderDefault`   | `--swatchbook-border-default`          |
+| `accentBg`        | `--swatchbook-accent-bg`               |
+| `accentFg`        | `--swatchbook-accent-fg`               |
+| `bodyFontFamily`  | `--swatchbook-body-font-family`        |
+| `bodyFontSize`    | `--swatchbook-body-font-size`          |
+
+Each entry emits a `:root` alias that redirects the chrome read to your target token's already-emitted CSS variable:
+
+```ts
+defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  cssVarPrefix: 'ds',
+  chrome: {
+    surfaceDefault: 'color.brand.bg.primary',
+    textDefault:    'color.brand.fg.primary',
+    accentBg:       'color.brand.accent.primary',
+    // …
+  },
+});
+```
+
+Produces a single `:root` chrome block with all ten roles declared — overrides become `var(...)` references that inherit per-theme values automatically, the rest stay on `DEFAULT_CHROME_MAP`'s hard-coded literals:
+
+```css
+:root {
+  color-scheme: light dark;
+  --swatchbook-surface-default: var(--ds-color-brand-bg-primary);
+  --swatchbook-surface-muted:   light-dark(#f4f4f5, #1e293b);
+  --swatchbook-surface-raised:  light-dark(#ffffff, #111827);
+  --swatchbook-text-default:    var(--ds-color-brand-fg-primary);
+  --swatchbook-text-muted:      light-dark(#4b5563, #94a3b8);
+  --swatchbook-border-default:  light-dark(#e5e7eb, #334155);
+  --swatchbook-accent-bg:       var(--ds-color-brand-accent-primary);
+  --swatchbook-accent-fg:       light-dark(#ffffff, #0b1220);
+  --swatchbook-body-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --swatchbook-body-font-size:  14px;
+}
+```
+
+**Composite sub-field targets are accepted.** `typography.sys.body` is a composite token that emits one sub-variable per field; the chrome map can target those directly (`bodyFontSize: 'typography.sys.body.font-size'`) even though the sub-field isn't a standalone token ID.
+
+Unknown role keys (outside the ten above) and target paths that don't resolve to any token or composite sub-field in any theme produce `warn` diagnostics (group `swatchbook/chrome`) and are dropped — the corresponding chrome slot falls back to its hard-coded literal default. The validated entries land on `Project.chrome` for downstream tooling.
+
 ## See also
 
 - [Theming inputs](../concepts/theming-inputs) — when to pick resolver vs layered.

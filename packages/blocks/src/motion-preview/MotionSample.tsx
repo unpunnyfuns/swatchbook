@@ -1,7 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { SURFACE_MUTED, TEXT_MUTED } from '#/internal/styles.tsx';
 import { useEffect, useMemo, useState } from 'react';
-import { chromeAliases } from '#/internal/data-attr.ts';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { useProject } from '#/internal/use-project.ts';
 
@@ -38,7 +37,7 @@ const styles = {
     height: 28,
     marginTop: -14,
     borderRadius: '50%',
-    background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
+    background: 'var(--swatchbook-accent-bg, #3b82f6)',
   } satisfies CSSProperties,
   reducedMotion: {
     fontSize: 11,
@@ -137,7 +136,7 @@ export function resolveMotionSpec(
 }
 
 export function MotionSample({ path, speed = 1, runKey = 0 }: MotionSampleProps): ReactElement {
-  const { resolved, cssVarPrefix } = useProject();
+  const { resolved } = useProject();
   const reducedMotion = usePrefersReducedMotion();
 
   const spec = useMemo(() => resolveMotionSpec(resolved[path], resolved), [resolved, path]);
@@ -163,14 +162,14 @@ export function MotionSample({ path, speed = 1, runKey = 0 }: MotionSampleProps)
 
   if (reducedMotion) {
     return (
-      <div style={{ ...chromeAliases(cssVarPrefix), ...styles.reducedMotion }}>
+      <div style={styles.reducedMotion}>
         Animation suppressed by `prefers-reduced-motion: reduce`.
       </div>
     );
   }
 
   return (
-    <div style={{ ...chromeAliases(cssVarPrefix), ...styles.track }}>
+    <div style={styles.track}>
       <div
         style={{
           ...styles.ball,

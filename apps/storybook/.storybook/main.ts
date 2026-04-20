@@ -26,6 +26,23 @@ export default defineMain({
           // compound selectors, and the Design Tokens panel shows a pinned indicator.
           // disabledAxes: ['contrast'],
           cssVarPrefix: 'sb',
+          // Dogfood: wire block chrome to the reference tokens. Without this
+          // map, chrome falls back to the hard-coded `light-dark()` defaults
+          // in `DEFAULT_CHROME_MAP` — readable, but deaf to our Brand A /
+          // contrast axes. Mapping to `color.sys.*` / `typography.sys.*`
+          // makes block chrome track every toolbar flip.
+          chrome: {
+            surfaceDefault: 'color.sys.surface.default',
+            surfaceMuted: 'color.sys.surface.muted',
+            surfaceRaised: 'color.sys.surface.raised',
+            textDefault: 'color.sys.text.default',
+            textMuted: 'color.sys.text.muted',
+            borderDefault: 'color.sys.border.default',
+            accentBg: 'color.sys.accent.bg',
+            accentFg: 'color.sys.accent.fg',
+            bodyFontFamily: 'typography.sys.body.font-family',
+            bodyFontSize: 'typography.sys.body.font-size',
+          },
           presets: [
             {
               name: 'Default Light',

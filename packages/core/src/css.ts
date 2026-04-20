@@ -1,5 +1,6 @@
 import type { TokenNormalized } from '@terrazzo/parser';
 import { generateShorthand, makeCSSVar, transformCSSValue } from '@terrazzo/token-tools/css';
+import { CHROME_ROLES, CHROME_VAR_PREFIX, DEFAULT_CHROME_MAP } from '#/chrome.ts';
 import type { Axis, Theme, TokenMap } from '#/types.ts';
 
 export interface EmitCssOptions {
@@ -12,6 +13,15 @@ export interface EmitCssOptions {
    * form `[data-<prefix>-theme="…"]`.
    */
   axes?: Axis[];
+  /**
+   * Validated chrome-alias entries from `Project.chrome`. Each `source →
+   * target` pair appends `--<prefix>-<source>: var(--<prefix>-<target>);` to
+   * a trailing `:root` block, so blocks that read the fixed chrome paths
+   * resolve through the alias to the consumer's own token values. Entries
+   * must already be validated; unknown source keys or unresolved targets
+   * should be filtered upstream (see `validateChrome`).
+   */
+  chrome?: Record<string, string>;
 }
 
 /**
@@ -53,6 +63,20 @@ export function emitCss(
     if (decls.length === 0) continue;
     blocks.push(`${selectorFor(theme, axes, prefix)} {\n${decls.join('\n')}\n}`);
   }
+
+  const chrome = options.chrome ?? {};
+  const chromeLines: string[] = ['  color-scheme: light dark;'];
+  for (const role of CHROME_ROLES) {
+    const sourceVar = makeCSSVar(role, { prefix: CHROME_VAR_PREFIX });
+    const target = chrome[role];
+    if (target !== undefined) {
+      const targetVar = makeCSSVar(target, { ...varOpts, wrapVar: true });
+      chromeLines.push(`  ${sourceVar}: ${targetVar};`);
+    } else {
+      chromeLines.push(`  ${sourceVar}: ${DEFAULT_CHROME_MAP[role]};`);
+    }
+  }
+  blocks.push(`:root {\n${chromeLines.join('\n')}\n}`);
 
   return `${blocks.join('\n\n')}\n`;
 }

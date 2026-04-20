@@ -195,7 +195,7 @@ export const styles = {
   } satisfies CSSProperties,
   dimensionBar: {
     height: 16,
-    background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
+    background: 'var(--swatchbook-accent-bg, #3b82f6)',
     borderRadius: 3,
     maxWidth: '100%',
   } satisfies CSSProperties,
@@ -215,7 +215,7 @@ export const styles = {
     height: 24,
     marginTop: -12,
     borderRadius: '50%',
-    background: 'var(--sb-color-sys-accent-bg, #3b82f6)',
+    background: 'var(--swatchbook-accent-bg, #3b82f6)',
   } satisfies CSSProperties,
   aliasedByList: {
     listStyle: 'none',
