@@ -5,36 +5,37 @@ import { ColorPalette, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 
 # Colors
 
-Color tokens come in two tiers:
+Color tokens split into two groups under the `color.*` root:
 
-- **`color.ref.*`** — raw palette primitives (blues, neutrals, reds, …). No
-  aliases, theme-invariant.
-- **`color.sys.*`** — semantic slots (`surface.default`, `text.muted`,
-  `accent.*`). Every `sys` token aliases into `ref` and carries
-  mode- and brand-varied values through the resolver.
+- **`color.palette.*`** — raw hue primitives (`blue.500`, `neutral.0`,
+  `red.100`, …). No aliases, theme-invariant.
+- **`color.<role>.*`** — semantic roles (`surface.default`, `text.muted`,
+  `accent.bg`, `border.default`, `status.success-bg`). Each role aliases
+  into `color.palette.*` and carries mode- and brand-varied values
+  through the resolver.
 
-Component styling reads `color.sys.*` directly — variation is handled by
-the active `mode × brand` tuple, so there's no separate component-token
-layer.
+Component styling reads the role paths directly — variation is handled
+by the active `mode × brand × contrast` tuple, flowing through the
+modifier overlays.
 
-## System palette
+## Semantic roles
 
-Groups the semantic color tokens by sub-path (e.g. `color.sys.surface.*`,
-`color.sys.text.*`, `color.sys.accent.*`). Switch the theme in the toolbar
-to see every swatch repaint.
+Groups the role colors by sub-path (`color.surface.*`, `color.text.*`,
+`color.accent.*`, `color.border.*`, `color.status.*`). Switch the theme
+in the toolbar to see every swatch repaint.
 
-<ColorPalette filter="color.sys.*" />
+<ColorPalette filter="color.*" />
 
-## Reference palette
+## Palette
 
-Every primitive color in the reference tier. Use as the source of truth
-when building new `sys` tokens, not when styling components directly.
+Every primitive hue. Use as the alias source when authoring new roles,
+not when styling components directly.
 
-<ColorPalette filter="color.ref.*" />
+<ColorPalette filter="color.palette.*" />
 
 ## Raw table
 
 The same tokens as rows with resolved values, types, and CSS var names —
 handy when you know the path you're looking for.
 
-<TokenTable filter="color.sys.*" type="color" />
+<TokenTable filter="color.*" type="color" />

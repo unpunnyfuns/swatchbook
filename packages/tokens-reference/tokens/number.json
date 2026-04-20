@@ -1,0 +1,16 @@
+{
+  "number": {
+    "$type": "number",
+    "$description": "Unitless numeric primitives — opacities, line-height multipliers, z-index slots.",
+    "opacity": {
+      "disabled":     { "$value": 0.4 },
+      "muted":        { "$value": 0.7 },
+      "scrim":        { "$value": 0.6 }
+    },
+    "line-height": {
+      "tight":  { "$value": 1.15 },
+      "normal": { "$value": 1.4 },
+      "loose":  { "$value": 1.7 }
+    }
+  }
+}

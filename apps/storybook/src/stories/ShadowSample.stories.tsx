@@ -11,4 +11,4 @@ const meta = preview.meta({
 
 export default meta;
 
-export const Default = meta.story({ args: { path: 'shadow.sys.md' } });
+export const Default = meta.story({ args: { path: 'shadow.md' } });

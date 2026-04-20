@@ -1,0 +1,10 @@
+{
+  "space": {
+    "$type": "dimension",
+    "xs": { "$value": "{size.100}" },
+    "sm": { "$value": "{size.200}" },
+    "md": { "$value": "{size.300}" },
+    "lg": { "$value": "{size.400}" },
+    "xl": { "$value": "{size.600}" }
+  }
+}

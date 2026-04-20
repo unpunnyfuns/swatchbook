@@ -6,8 +6,10 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 A Storybook addon and set of MDX doc blocks for **documenting DTCG
 design tokens**. This storybook is the integration testbed — it loads
-the `tokens-reference` fixture (ref → sys, with `mode × brand` modes
-via a DTCG resolver) through the addon and dogfoods every block in the
+the `tokens-reference` fixture (flat per-`$type` tokens with palette
+primitives under `color.palette.*` and semantic roles at
+`color.<role>.*`, plus `mode × brand × contrast` modifier axes via a
+DTCG resolver) through the addon and dogfoods every block in the
 library.
 
 ## Pages

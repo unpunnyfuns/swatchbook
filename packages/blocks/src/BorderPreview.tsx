@@ -9,7 +9,7 @@ import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 export interface BorderPreviewProps {
   /**
    * Token-path filter. Defaults to every `border` token. Use e.g.
-   * `"border.sys.*"` to scope to the semantic layer.
+   * `"border.*"` to scope to the semantic layer.
    */
   filter?: string;
   /** Override the caption. */

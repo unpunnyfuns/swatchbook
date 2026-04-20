@@ -8,7 +8,7 @@ import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 export interface FontWeightScaleProps {
   /**
    * Token-path filter. Defaults to every `fontWeight` token. Use e.g.
-   * `"font.ref.weight.*"` to scope to the ref layer.
+   * `"font.weight.*"` to scope to the ref layer.
    */
   filter?: string;
   /** Override the sample text rendered for each token. */

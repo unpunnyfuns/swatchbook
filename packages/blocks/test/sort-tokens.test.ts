@@ -13,15 +13,15 @@ function entry(path: string, $type: string, $value: unknown): [string, VirtualTo
 describe('sortTokens', () => {
   it('sorts by path ascending by default', () => {
     const input = [
-      entry('color.ref.blue.500', 'color', { hex: '#3b82f6' }),
-      entry('color.ref.blue.100', 'color', { hex: '#dbeafe' }),
-      entry('color.ref.blue.300', 'color', { hex: '#93c5fd' }),
+      entry('color.palette.blue.500', 'color', { hex: '#3b82f6' }),
+      entry('color.palette.blue.100', 'color', { hex: '#dbeafe' }),
+      entry('color.palette.blue.300', 'color', { hex: '#93c5fd' }),
     ];
     const out = sortTokens(input);
     expect(out.map(([p]) => p)).toEqual([
-      'color.ref.blue.100',
-      'color.ref.blue.300',
-      'color.ref.blue.500',
+      'color.palette.blue.100',
+      'color.palette.blue.300',
+      'color.palette.blue.500',
     ]);
   });
 

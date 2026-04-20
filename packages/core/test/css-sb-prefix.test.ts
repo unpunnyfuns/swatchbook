@@ -28,29 +28,30 @@ it('terminates with a trailing newline', () => {
 });
 
 it('applies the prefix to variable names', () => {
-  expect(css).toContain('--sb-color-sys-surface-default:');
-  expect(css).not.toMatch(/^\s*--color-sys-surface-default:/m);
+  expect(css).toContain('--sb-color-surface-default:');
+  expect(css).not.toMatch(/^\s*--color-surface-default:/m);
 });
 
 it('applies the prefix to aliased var(…) references inside values', () => {
-  const line = css.split('\n').find((l) => l.includes('--sb-color-sys-accent-bg:'));
+  const line = css.split('\n').find((l) => l.includes('--sb-color-accent-bg:'));
   expect(line).toBeDefined();
-  expect(line).toMatch(/var\(--sb-color-ref-/);
+  expect(line).toMatch(/var\(--sb-color-/);
 });
 
+
 it('emits every primitive + composite type covered by the fixture', () => {
-  expect(css).toMatch(/--sb-color-ref-blue-500:\s*rgb\(/i);
-  expect(css).toMatch(/--sb-size-ref-100:\s*4px/);
-  expect(css).toMatch(/--sb-font-ref-family-sans:/);
-  expect(css).toMatch(/--sb-font-ref-weight-bold:\s*700/);
-  expect(css).toMatch(/--sb-duration-ref-fast:\s*120ms/);
-  expect(css).toMatch(/--sb-easing-ref-standard:\s*cubic-bezier\(/);
-  expect(css).toMatch(/--sb-typography-sys-body-font-family:/);
-  expect(css).toMatch(/--sb-typography-sys-body-font-size:/);
-  expect(css).toMatch(/--sb-typography-sys-body-font-weight:/);
-  expect(css).toMatch(/--sb-shadow-sys-md/);
-  expect(css).toMatch(/--sb-border-sys-default/);
-  expect(css).toMatch(/--sb-motion-sys-enter/);
+  expect(css).toMatch(/--sb-color-palette-blue-500:\s*rgb\(/i);
+  expect(css).toMatch(/--sb-size-100:\s*4px/);
+  expect(css).toMatch(/--sb-font-family-sans:/);
+  expect(css).toMatch(/--sb-font-weight-bold:\s*700/);
+  expect(css).toMatch(/--sb-duration-fast:\s*120ms/);
+  expect(css).toMatch(/--sb-cubic-bezier-standard:\s*cubic-bezier\(/);
+  expect(css).toMatch(/--sb-typography-body-font-family:/);
+  expect(css).toMatch(/--sb-typography-body-font-size:/);
+  expect(css).toMatch(/--sb-typography-body-font-weight:/);
+  expect(css).toMatch(/--sb-shadow-md/);
+  expect(css).toMatch(/--sb-border-default/);
+  expect(css).toMatch(/--sb-transition-enter/);
 });
 
 it('keeps sparse overrides: Dark flips surface, size scale identical', () => {
@@ -58,11 +59,11 @@ it('keeps sparse overrides: Dark flips surface, size scale identical', () => {
   const darkBlock = extractBlock(css, tupleSelector({ mode: 'Dark', brand: 'Default', contrast: 'Normal' }));
   expect(lightBlock).toBeTruthy();
   expect(darkBlock).toBeTruthy();
-  const lightSize = grep(lightBlock, '--sb-size-ref-400:');
-  const darkSize = grep(darkBlock, '--sb-size-ref-400:');
+  const lightSize = grep(lightBlock, '--sb-size-400:');
+  const darkSize = grep(darkBlock, '--sb-size-400:');
   expect(lightSize).toEqual(darkSize);
 
-  const lightSurface = grep(lightBlock, '--sb-color-sys-surface-default:');
-  const darkSurface = grep(darkBlock, '--sb-color-sys-surface-default:');
+  const lightSurface = grep(lightBlock, '--sb-color-surface-default:');
+  const darkSurface = grep(darkBlock, '--sb-color-surface-default:');
   expect(lightSurface).not.toEqual(darkSurface);
 });

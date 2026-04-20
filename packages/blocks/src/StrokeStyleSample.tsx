@@ -9,7 +9,7 @@ import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts
 export interface StrokeStyleSampleProps {
   /**
    * Token-path filter. Defaults to every `strokeStyle` token. Use e.g.
-   * `"stroke.ref.style.*"` to scope to the ref layer.
+   * `"stroke.style.*"` to scope to the ref layer.
    */
   filter?: string;
   /** Override the caption. */

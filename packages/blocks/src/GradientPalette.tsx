@@ -8,7 +8,7 @@ import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 export interface GradientPaletteProps {
   /**
    * Token-path filter. Defaults to every `gradient` token. Use e.g.
-   * `"gradient.ref.*"` or `"gradient.sys.accent"` to scope.
+   * `"gradient.*"` or `"gradient.accent"` to scope.
    */
   filter?: string;
   /** Override the caption. */

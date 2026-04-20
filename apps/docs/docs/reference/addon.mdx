@@ -95,7 +95,7 @@ Typed lookup. Returns `{ value, cssVar, type, description }` for the given path;
 import { useToken } from '@unpunnyfuns/swatchbook-addon/hooks';
 
 function Brand() {
-  const accent = useToken('color.sys.accent.bg');
+  const accent = useToken('color.accent.bg');
   return <span style={{ background: accent.cssVar }}>{accent.description}</span>;
 }
 ```

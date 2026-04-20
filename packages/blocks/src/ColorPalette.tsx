@@ -10,20 +10,20 @@ import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 export interface ColorPaletteProps {
   /**
    * Token-path filter. Defaults to every `color` token. Use e.g.
-   * `"color.sys.*"` to scope to the semantic layer, or `"color.ref.blue.*"`
+   * `"color.*"` to scope to the semantic layer, or `"color.palette.blue.*"`
    * for a single ref ramp.
    */
   filter?: string;
   /**
    * Grouping depth. Tokens are grouped by the first `groupBy` dot-segments
-   * of their path. `2` yields groups like `color.sys`, `color.ref`; `3`
-   * yields `color.sys.surface`, `color.sys.text`, etc.
+   * of their path. `1` yields a single `color` group; `2` yields
+   * `color.surface`, `color.text`, `color.blue`, etc.
    *
    * If omitted, groupBy is derived from the filter: one level below the
    * filter's fixed prefix (segments before the first `*`), clamped so each
-   * swatch still carries a leaf label. `"color.sys.*"` → groups at
-   * `color.sys.<family>`; `"color.ref.blue.*"` collapses all shades into
-   * one `color.ref.blue` group because the tokens have no deeper level.
+   * swatch still carries a leaf label. `"color.*"` → groups at
+   * `color.<family>`; `"color.palette.blue.*"` collapses all shades into
+   * one `color.blue` group because the tokens have no deeper level.
    */
   groupBy?: number;
   /** Override the section caption. */
@@ -50,7 +50,7 @@ interface Swatch {
 
 /**
  * Count segments in the filter before the first glob (`*` / `**`).
- * `color.ref.*` → 2; `color.sys.surface.*` → 3; `color` → 1; undefined → 0.
+ * `color.*` → 2; `color.surface.*` → 3; `color` → 1; undefined → 0.
  */
 function fixedPrefixLength(filter: string | undefined): number {
   if (!filter) return 0;

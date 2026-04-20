@@ -42,7 +42,7 @@ async function bgWhenMounted(el: Element): Promise<string> {
 }
 
 /**
- * Light surface (color.sys.surface.raised → color.ref.neutral.0, i.e. white).
+ * Light surface (color.surface.raised → color.palette.neutral.0, i.e. white).
  * Component channels should all be near 255.
  */
 export const Light = meta.story({
@@ -60,7 +60,7 @@ export const Light = meta.story({
 });
 
 /**
- * Dark surface (color.sys.surface.raised → color.ref.neutral.800, near-black).
+ * Dark surface (color.surface.raised → color.palette.neutral.800, near-black).
  * Component channels should all be low.
  */
 export const Dark = meta.story({
@@ -78,8 +78,8 @@ export const Dark = meta.story({
 });
 
 /**
- * Stacked composition: Brand A overrides `color.sys.accent.bg` from blue to
- * violet. The button (whose styles read `var(--sb-color-sys-accent-bg)` directly)
+ * Stacked composition: Brand A overrides `color.accent.bg` from blue to
+ * violet. The button (whose styles read `var(--sb-color-accent-bg)` directly)
  * must render with a red channel that exceeds the blue channel — violet's
  * defining property — whereas plain Light/Dark accents are blue-dominant.
  */

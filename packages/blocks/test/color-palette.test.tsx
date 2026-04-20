@@ -10,10 +10,10 @@ function makeSnapshot(): ProjectSnapshot {
     themes: [{ name: 'Light', input: { theme: 'Light' }, sources: [] }],
     themesResolved: {
       Light: {
-        'color.sys.bg': { $type: 'color', $value: { hex: '#fff' } },
-        'color.sys.fg': { $type: 'color', $value: { hex: '#111' } },
-        'color.ref.blue.500': { $type: 'color', $value: { hex: '#3b82f6' } },
-        'color.ref.red.500': { $type: 'color', $value: { hex: '#ef4444' } },
+        'color.bg': { $type: 'color', $value: { hex: '#fff' } },
+        'color.fg': { $type: 'color', $value: { hex: '#111' } },
+        'color.palette.blue.500': { $type: 'color', $value: { hex: '#3b82f6' } },
+        'color.palette.red.500': { $type: 'color', $value: { hex: '#ef4444' } },
         'radius.sm': { $type: 'dimension', $value: { value: 4, unit: 'px' } },
       },
     },
@@ -43,28 +43,27 @@ describe('ColorPalette', () => {
   it('narrows to the filter subtree and derives groupBy from it', () => {
     render(
       <SwatchbookProvider value={makeSnapshot()}>
-        <ColorPalette filter="color.sys.*" />
+        <ColorPalette filter="color.*" />
       </SwatchbookProvider>,
     );
-    // `color.sys.*` has fixed length 2. Tokens below max out at depth 3,
-    // so groupBy clamps to 2 — one `color.sys` group header with `bg` and
-    // `fg` as leaves. Out-of-filter refs don't appear.
-    expect(screen.getByText('color.sys')).toBeDefined();
-    expect(screen.getByText('bg')).toBeDefined();
-    expect(screen.getByText('fg')).toBeDefined();
-    expect(screen.queryByText('color.ref.blue.500')).toBeNull();
+    // `color.*` has fixed length 1. Auto groupBy clamps so every swatch
+    // keeps a leaf label — depth-2 tokens get `color.<leaf>` groups,
+    // depth-4 palette tokens collapse under the shared `color.palette` group.
+    expect(screen.getByText('color.bg')).toBeDefined();
+    expect(screen.getByText('color.fg')).toBeDefined();
+    expect(screen.getByText('color.palette')).toBeDefined();
   });
 
   it('clamps auto-groupBy so each swatch keeps a leaf label', () => {
-    // `color.ref.blue.*` has fixed length 3; with 4-segment tokens the
+    // `color.palette.blue.*` has fixed length 3; with 4-segment tokens the
     // auto groupBy clamps so all blue shades land under one group with
     // their shade as the leaf.
     render(
       <SwatchbookProvider value={makeSnapshot()}>
-        <ColorPalette filter="color.ref.blue.*" />
+        <ColorPalette filter="color.palette.blue.*" />
       </SwatchbookProvider>,
     );
-    expect(screen.getByText('color.ref.blue')).toBeDefined();
+    expect(screen.getByText('color.palette.blue')).toBeDefined();
     expect(screen.getByText('500')).toBeDefined();
   });
 

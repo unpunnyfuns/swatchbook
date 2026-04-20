@@ -1,0 +1,34 @@
+{
+  "border": {
+    "$type": "border",
+    "$description": "Composite border tokens (color + width + style).",
+    "default": {
+      "$value": {
+        "color": "{color.border.default}",
+        "width": { "value": 1, "unit": "px" },
+        "style": "solid"
+      }
+    },
+    "strong": {
+      "$value": {
+        "color": "{color.border.strong}",
+        "width": { "value": 1, "unit": "px" },
+        "style": "solid"
+      }
+    },
+    "focus": {
+      "$value": {
+        "color": "{color.border.focus}",
+        "width": { "value": 2, "unit": "px" },
+        "style": "solid"
+      }
+    },
+    "dashed": {
+      "$value": {
+        "color": "{color.border.default}",
+        "width": { "value": 1, "unit": "px" },
+        "style": "dashed"
+      }
+    }
+  }
+}

@@ -116,7 +116,7 @@ default: { brand: 'Brand A' }
 
 ### `cssVarPrefix?: string`
 
-Prefix prepended to every emitted CSS variable. `color.sys.accent.bg` becomes `var(--<prefix>-color-sys-accent-bg)`; an empty string disables the prefix. Typical values are short and project-specific (`ds`, `sb`, `ui`).
+Prefix prepended to every emitted CSS variable. `color.accent.bg` becomes `var(--<prefix>-color-accent-bg)`; an empty string disables the prefix. Typical values are short and project-specific (`ds`, `sb`, `ui`).
 
 ### `outDir?: string`
 
@@ -204,7 +204,7 @@ Produces a single `:root` chrome block with all ten roles declared — overrides
 }
 ```
 
-**Composite sub-field targets are accepted.** `typography.sys.body` is a composite token that emits one sub-variable per field; the chrome map can target those directly (`bodyFontSize: 'typography.sys.body.font-size'`) even though the sub-field isn't a standalone token ID.
+**Composite sub-field targets are accepted.** `typography.body` is a composite token that emits one sub-variable per field; the chrome map can target those directly (`bodyFontSize: 'typography.body.font-size'`) even though the sub-field isn't a standalone token ID.
 
 Unknown role keys (outside the ten above) and target paths that don't resolve to any token or composite sub-field in any theme produce `warn` diagnostics (group `swatchbook/chrome`) and are dropped — the corresponding chrome slot falls back to its hard-coded literal default. The validated entries land on `Project.chrome` for downstream tooling.
 

@@ -12,16 +12,25 @@ Step-by-step setup of a multi-axis theming model — `mode × brand × contrast`
 
 ```
 tokens/
-  ref/            # raw primitives — color palettes, size scale, font families
-  sys/            # semantic slots — color.sys.surface.default → {color.ref.neutral.0}
+  color.json         # palette primitives (color.palette.blue.500, …) + semantic roles (color.surface.default, color.text.accent, …)
+  size.json          # size primitives (size.100, size.rem-400) + space.md + radius.sm
+  font.json          # font.family.sans, font.weight.regular
+  typography.json    # composites — typography.body, typography.heading
+  motion.json        # duration.fast, cubicBezier.ease-out, transition.enter
+  border.json        # composites — border.default, border.focus
+  shadow.json        # composites — shadow.sm, shadow.md
+  gradient.json      # gradient primitives
+  stroke.json        # stroke.style.solid, stroke.style.dashed
+  number.json        # unitless — number.opacity.disabled, number.line-height.tight
   themes/
-    light.json    # Light mode overrides of sys
-    dark.json     # Dark mode overrides of sys
-    brand-a.json  # Brand A overrides of color.sys.accent.*
+    light.json       # Light-mode role overrides
+    dark.json        # Dark-mode role overrides
+    brand-a.json     # Brand A accent overrides
+    contrast-high.json
   resolver.json
 ```
 
-Two layers: `ref` (primitives) and `sys` (semantic slots aliased into ref). Component variation is carried by modes on sys — the resolver's `mode × brand` axes swap values at the sys level, and components alias sys directly. There's no `cmp` layer here by design: modes already handle the specialization a component layer would try to introduce, and every added layer multiplies the token count for every axis. See [Terrazzo's own guidance](https://terrazzo.app/docs/guides/architecture/) on keeping layers minimal.
+One file per DTCG `$type` at the root — palette primitives and semantic roles coexist under their type root. For colors the palette hues live under `color.palette.*` (blue, neutral, red, green, yellow) while semantic roles sit at `color.<role>.*` (`color.surface.default` aliases `{color.palette.neutral.0}`, etc.). Modifier overlays under `themes/` re-alias the role paths per context. Components alias the role paths directly; variation across `mode`, `brand`, `contrast` flows through the modifier overlays. See [Terrazzo's style guide](https://terrazzo.app/docs/guides/styleguide/) for the rationale.
 
 ## 2. The resolver
 
@@ -32,8 +41,7 @@ Two independent modifiers:
   "$schema": "https://design-tokens.org/tr/2025/drafts/resolver/",
   "version": "2025.10",
   "sets": {
-    "ref": { "sources": [{ "$ref": "./ref/color.palette.json" } /* , … */] },
-    "sys": { "sources": [{ "$ref": "./sys/color.json" } /* , … */] }
+    "tokens": { "sources": [{ "$ref": "./color.json" } /* , … */] }
   },
   "modifiers": {
     "mode": {
@@ -54,8 +62,7 @@ Two independent modifiers:
     }
   },
   "resolutionOrder": [
-    { "$ref": "#/sets/ref" },
-    { "$ref": "#/sets/sys" },
+    { "$ref": "#/sets/tokens" },
     { "$ref": "#/modifiers/mode" },
     { "$ref": "#/modifiers/brand" }
   ]
@@ -64,8 +71,8 @@ Two independent modifiers:
 
 Key points:
 
-- `"Default": []` is a legal context — no override files, just the sys baseline.
-- `resolutionOrder` lists modifiers **after** sets: ref/sys load first, mode/brand overlay on top.
+- `"Default": []` is a legal context — no override files, just the baseline roles.
+- `resolutionOrder` lists modifiers **after** sets: the `tokens` set loads first, mode/brand overlay on top.
 - `brand` appears after `mode` in `resolutionOrder`, so if both touch the same token path, brand wins. That's authoring intent — `brand-a.json` can override `light.json` for accent-only tweaks.
 
 ## 3. Config
@@ -94,7 +101,7 @@ With the config live:
   - `[data-ds-mode="Dark"][data-ds-brand="Default"] { … }`
   - `[data-ds-mode="Light"][data-ds-brand="Brand A"] { … }`
   - `[data-ds-mode="Dark"][data-ds-brand="Brand A"] { … }`
-- **Demo components** in the reference Storybook (Button, Card, Input) read `var(--ds-color-sys-*)` directly and repaint as you switch axes — this is the documentation affordance that lets authors verify tokens in every context, not a production theming contract.
+- **Demo components** in the reference Storybook (Button, Card, Input) read `var(--ds-color-*)` directly and repaint as you switch axes — this is the documentation affordance that lets authors verify tokens in every context, not a production theming contract.
 
 ## 5. Preset pills
 

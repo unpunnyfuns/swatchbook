@@ -112,8 +112,8 @@ export function validateChrome(
 
 /**
  * A target resolves if it's either a direct token ID, or a composite
- * sub-field under one (`typography.sys.body.font-family` under the composite
- * `typography.sys.body`). Composite tokens emit one CSS var per sub-field,
+ * sub-field under one (`typography.body.font-family` under the composite
+ * `typography.body`). Composite tokens emit one CSS var per sub-field,
  * so either form is a valid alias target.
  */
 function targetResolves(target: string, tokenIDs: Set<string>): boolean {

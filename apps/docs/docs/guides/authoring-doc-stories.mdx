@@ -28,17 +28,17 @@ import { ColorPalette, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 
 # Colors
 
-Our color system has two tiers: primitives in `color.ref` and semantic slots
-in `color.sys`. Semantic slots carry mode- and brand-varied values through
-the resolver, so components style themselves against `color.sys.*` directly.
+Our color tokens live under a single flat namespace. Semantic slots like
+`color.surface.default` carry mode- and brand-varied values through the
+resolver, so components style themselves against `color.*` directly.
 
 ## Primitive palette
 
-<ColorPalette filter="color.ref.*" />
+<ColorPalette filter="color.*" />
 
 ## Semantic slots
 
-<TokenTable filter="color.sys.*" type="color" />
+<TokenTable filter="color.*" type="color" />
 ```
 
 Restart your Storybook dev server (if HMR doesn't pick up new MDX files) and visit `Docs / Colors`. The palette swatches and table values update live as you flip the toolbar.
@@ -66,7 +66,7 @@ If you're writing a component that needs a token's resolved value (not just a CS
 import { useToken } from '@unpunnyfuns/swatchbook-addon/hooks';
 
 function Badge({ level }: { level: 'info' | 'warn' }) {
-  const tokenName = level === 'info' ? 'color.sys.accent.bg' : 'color.sys.warning.bg';
+  const tokenName = level === 'info' ? 'color.accent.bg' : 'color.warning.bg';
   const bg = useToken(tokenName);
   return <span style={{ background: bg.cssVar }}>{bg.description}</span>;
 }

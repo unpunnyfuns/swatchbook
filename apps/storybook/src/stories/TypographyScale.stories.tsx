@@ -24,7 +24,7 @@ export const All = meta.story({
     });
   },
 });
-export const HeadingOnly = meta.story({ args: { filter: 'typography.sys.heading' } });
+export const HeadingOnly = meta.story({ args: { filter: 'typography.heading' } });
 export const Pangram = meta.story({
   args: { sample: 'Sphinx of black quartz, judge my vow — 0123456789' },
 });

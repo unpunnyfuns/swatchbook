@@ -12,7 +12,7 @@ function TokenProbe({ path }: { path: string }) {
         padding: '8px 12px',
         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
         fontSize: 13,
-        borderBottom: 'var(--sb-border-sys-default)',
+        borderBottom: 'var(--sb-border-default)',
       }}
     >
       <code style={{ opacity: 0.7 }}>{path}</code>
@@ -33,12 +33,12 @@ function TokenProbe({ path }: { path: string }) {
 
 function ProbeGrid() {
   const paths = [
-    'color.sys.surface.default',
-    'color.sys.text.default',
-    'color.sys.accent.bg',
-    'radius.sys.md',
-    'typography.sys.heading',
-    'shadow.sys.md',
+    'color.surface.default',
+    'color.text.default',
+    'color.accent.bg',
+    'radius.md',
+    'typography.heading',
+    'shadow.md',
   ] as const;
   return (
     <div>

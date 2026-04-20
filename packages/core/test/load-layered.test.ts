@@ -65,29 +65,29 @@ describe('loadProject — layered axes', () => {
     const project = await loadProject(layeredConfig(), fixtureCwd);
     expect(project.themesResolved['Light · Default']).toBeDefined();
     const def = resolveTheme(project, 'Light · Default').tokens;
-    expect(def['color.sys.surface']?.$value).toMatchObject({ components: [1, 1, 1] });
+    expect(def['color.surface']?.$value).toMatchObject({ components: [1, 1, 1] });
   });
 
   it('applies overlay layers in order — last write wins on same path', async () => {
     const project = await loadProject(layeredConfig(), fixtureCwd);
     const dark = resolveTheme(project, 'Dark · Default').tokens;
-    expect(dark['color.sys.surface']?.$value).toMatchObject({ components: [0, 0, 0] });
-    expect(dark['color.sys.text']?.$value).toMatchObject({ components: [1, 1, 1] });
-    expect(dark['color.sys.accent']?.$value).toMatchObject({ components: [0.1, 0.3, 0.9] });
+    expect(dark['color.surface']?.$value).toMatchObject({ components: [0, 0, 0] });
+    expect(dark['color.text']?.$value).toMatchObject({ components: [1, 1, 1] });
+    expect(dark['color.accent']?.$value).toMatchObject({ components: [0.1, 0.3, 0.9] });
   });
 
   it('brand overlay overrides sys.accent while leaving surface alone', async () => {
     const project = await loadProject(layeredConfig(), fixtureCwd);
     const brand = resolveTheme(project, 'Light · Brand A').tokens;
-    expect(brand['color.sys.accent']?.$value).toMatchObject({ components: [0.9, 0.2, 0.2] });
-    expect(brand['color.sys.surface']?.$value).toMatchObject({ components: [1, 1, 1] });
+    expect(brand['color.accent']?.$value).toMatchObject({ components: [0.9, 0.2, 0.2] });
+    expect(brand['color.surface']?.$value).toMatchObject({ components: [1, 1, 1] });
   });
 
   it('multi-axis overlays compose (Dark + Brand A)', async () => {
     const project = await loadProject(layeredConfig(), fixtureCwd);
     const tokens = resolveTheme(project, 'Dark · Brand A').tokens;
-    expect(tokens['color.sys.surface']?.$value).toMatchObject({ components: [0, 0, 0] });
-    expect(tokens['color.sys.accent']?.$value).toMatchObject({ components: [0.9, 0.2, 0.2] });
+    expect(tokens['color.surface']?.$value).toMatchObject({ components: [0, 0, 0] });
+    expect(tokens['color.accent']?.$value).toMatchObject({ components: [0.9, 0.2, 0.2] });
   });
 
   it('empty context arrays are legal (no-override case)', async () => {
@@ -104,7 +104,7 @@ describe('loadProject — layered axes', () => {
     const project = await loadProject(config, fixtureCwd);
     expect(project.themes.map((t) => t.name).toSorted()).toEqual(['Brand A', 'Default']);
     const def = resolveTheme(project, 'Default').tokens;
-    expect(def['color.sys.accent']?.$value).toMatchObject({ components: [0.1, 0.3, 0.9] });
+    expect(def['color.accent']?.$value).toMatchObject({ components: [0.1, 0.3, 0.9] });
   });
 });
 

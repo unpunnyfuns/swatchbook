@@ -13,7 +13,7 @@ const meta = preview.meta({
 export default meta;
 
 export const SystemBorders = meta.story({
-  args: { filter: 'border.sys.*' },
+  args: { filter: 'border.*' },
   play: async ({ canvasElement }) => {
     await waitFor(() => {
       const samples = canvasElement.querySelectorAll('[aria-hidden="true"]');

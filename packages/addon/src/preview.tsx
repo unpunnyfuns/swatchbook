@@ -47,8 +47,8 @@ function ensureStylesheet(): void {
   if (typeof document === 'undefined') return;
   const bodyRules = `
 html, body {
-  background: var(${v('color-sys-surface-default')}, Canvas);
-  color: var(${v('color-sys-text-default')}, CanvasText);
+  background: var(${v('color-surface-default')}, Canvas);
+  color: var(${v('color-text-default')}, CanvasText);
   margin: 0;
 }
 `;

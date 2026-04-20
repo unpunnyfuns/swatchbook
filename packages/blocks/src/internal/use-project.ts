@@ -146,7 +146,14 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
 }
 
 export function makeCssVar(path: string, prefix: string): string {
-  const tail = path.replaceAll('.', '-');
+  // Match Terrazzo's emitter: split on `.`, kebab-case each segment (so
+  // camelCase segments like `cubicBezier` become `cubic-bezier`), then join
+  // with `-`. Without this the block-side reference drifts from the
+  // emitted CSS var name whenever a segment carries capitals.
+  const tail = path
+    .split('.')
+    .map((segment) => segment.replaceAll(/([a-z\d])([A-Z])/g, '$1-$2').toLowerCase())
+    .join('-');
   return prefix ? `var(--${prefix}-${tail})` : `var(--${tail})`;
 }
 
@@ -161,7 +168,7 @@ export function makeCssVar(path: string, prefix: string): string {
  * | `undefined` / `''` | everything                                          |
  * | `*` or `**`        | everything                                          |
  * | `color`            | exact path `color`, or any descendant `color.*`     |
- * | `color.sys.*`      | any path whose fixed prefix is `color.sys.`         |
+ * | `color.*`      | any path whose fixed prefix is `color.`         |
  * | `color**`          | any path starting with `color`                      |
  *
  * Not supported (all pass through as literal segment matchers): brace

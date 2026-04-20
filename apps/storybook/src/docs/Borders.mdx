@@ -6,15 +6,15 @@ import { BorderPreview, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
 # Borders
 
 DTCG `border` tokens compose `width`, `style`, and `color` — emitted as a
-CSS `border` shorthand. Color typically aliases into `color.sys.border.*`
+CSS `border` shorthand. Color typically aliases into `color.border.*`
 so mode changes repaint the stroke.
 
 ## System borders
 
-<BorderPreview filter="border.sys.*" />
+<BorderPreview filter="border.*" />
 
 ## Inspect a single token
 
-<TokenDetail path="border.sys.default" />
+<TokenDetail path="border.default" />
 
-<TokenDetail path="border.sys.focus" />
+<TokenDetail path="border.focus" />

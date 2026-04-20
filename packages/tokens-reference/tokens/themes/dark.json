@@ -1,26 +1,24 @@
 {
   "color": {
-    "sys": {
-      "$type": "color",
-      "$description": "Dark theme — inverts surface/text against the neutral ramp.",
-      "surface": {
-        "default": { "$value": "{color.ref.neutral.900}" },
-        "muted":   { "$value": "{color.ref.neutral.800}" },
-        "subtle":  { "$value": "{color.ref.neutral.700}" },
-        "inverse": { "$value": "{color.ref.neutral.0}" },
-        "raised":  { "$value": "{color.ref.neutral.800}" }
-      },
-      "text": {
-        "default": { "$value": "{color.ref.neutral.50}" },
-        "muted":   { "$value": "{color.ref.neutral.300}" },
-        "subtle":  { "$value": "{color.ref.neutral.400}" },
-        "inverse": { "$value": "{color.ref.neutral.900}" },
-        "accent":  { "$value": "{color.ref.blue.300}" }
-      },
-      "border": {
-        "default": { "$value": "{color.ref.neutral.700}" },
-        "strong":  { "$value": "{color.ref.neutral.500}" }
-      }
+    "$type": "color",
+    "$description": "Dark theme — inverts surface/text against the neutral ramp.",
+    "surface": {
+      "default": { "$value": "{color.palette.neutral.900}" },
+      "muted":   { "$value": "{color.palette.neutral.800}" },
+      "subtle":  { "$value": "{color.palette.neutral.700}" },
+      "inverse": { "$value": "{color.palette.neutral.0}" },
+      "raised":  { "$value": "{color.palette.neutral.800}" }
+    },
+    "text": {
+      "default": { "$value": "{color.palette.neutral.50}" },
+      "muted":   { "$value": "{color.palette.neutral.300}" },
+      "subtle":  { "$value": "{color.palette.neutral.400}" },
+      "inverse": { "$value": "{color.palette.neutral.900}" },
+      "accent":  { "$value": "{color.palette.blue.300}" }
+    },
+    "border": {
+      "default": { "$value": "{color.palette.neutral.700}" },
+      "strong":  { "$value": "{color.palette.neutral.500}" }
     }
   }
 }

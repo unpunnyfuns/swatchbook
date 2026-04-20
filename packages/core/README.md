@@ -134,8 +134,8 @@ export default defineSwatchbookConfig({
 Multi-axis projects emit one `:root` block with the default-tuple values, plus one block per non-default combination of axis contexts keyed on a compound attribute selector in `Project.axes` order. Attribute names are namespaced with `cssVarPrefix` (default `swatch`) so swatchbook's scaffolding doesn't collide with other libs that claim bare `data-mode` / `data-theme`:
 
 ```css
-:root { --swatch-color-sys-surface-default: rgb(255 255 255); … }
-[data-swatch-mode="Dark"][data-swatch-brand="Default"] { --swatch-color-sys-surface-default: rgb(17 17 17); … }
+:root { --swatch-color-surface-default: rgb(255 255 255); … }
+[data-swatch-mode="Dark"][data-swatch-brand="Default"] { --swatch-color-surface-default: rgb(17 17 17); … }
 [data-swatch-mode="Light"][data-swatch-brand="Brand A"] { … }
 [data-swatch-mode="Dark"][data-swatch-brand="Brand A"] { … }
 ```

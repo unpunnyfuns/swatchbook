@@ -9,8 +9,8 @@ import type { Project, TokenMap } from '#/types';
 const fixtureCwd = dirname(tokensDir);
 
 const tokensFixture: TokenMap = {
-  'color.ref.blue.500': {} as TokenMap[string],
-  'color.ref.neutral.0': {} as TokenMap[string],
+  'color.palette.blue.500': {} as TokenMap[string],
+  'color.palette.neutral.0': {} as TokenMap[string],
 };
 
 it('validateChrome returns empty when input is undefined', () => {
@@ -21,16 +21,16 @@ it('validateChrome returns empty when input is undefined', () => {
 
 it('validateChrome keeps entries whose role is known and target resolves', () => {
   const { entries, diagnostics } = validateChrome(
-    { surfaceDefault: 'color.ref.blue.500' },
+    { surfaceDefault: 'color.palette.blue.500' },
     { Light: tokensFixture },
   );
-  expect(entries).toEqual({ surfaceDefault: 'color.ref.blue.500' });
+  expect(entries).toEqual({ surfaceDefault: 'color.palette.blue.500' });
   expect(diagnostics).toEqual([]);
 });
 
 it('validateChrome drops unknown roles with a warn diagnostic', () => {
   const { entries, diagnostics } = validateChrome(
-    { bogusRole: 'color.ref.blue.500' },
+    { bogusRole: 'color.palette.blue.500' },
     { Light: tokensFixture },
   );
   expect(entries).toEqual({});
@@ -41,12 +41,12 @@ it('validateChrome drops unknown roles with a warn diagnostic', () => {
 });
 
 it('validateChrome accepts composite sub-field targets (parent token exists)', () => {
-  const composite: TokenMap = { 'typography.sys.body': {} as TokenMap[string] };
+  const composite: TokenMap = { 'typography.body': {} as TokenMap[string] };
   const { entries, diagnostics } = validateChrome(
-    { bodyFontFamily: 'typography.sys.body.font-family' },
+    { bodyFontFamily: 'typography.body.font-family' },
     { Light: composite },
   );
-  expect(entries).toEqual({ bodyFontFamily: 'typography.sys.body.font-family' });
+  expect(entries).toEqual({ bodyFontFamily: 'typography.body.font-family' });
   expect(diagnostics).toEqual([]);
 });
 
@@ -76,8 +76,8 @@ beforeAll(async () => {
       default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
       cssVarPrefix: 'sb',
       chrome: {
-        surfaceDefault: 'color.ref.blue.500',
-        bogusRole: 'color.ref.blue.500',
+        surfaceDefault: 'color.palette.blue.500',
+        bogusRole: 'color.palette.blue.500',
       },
     },
     fixtureCwd,
@@ -85,7 +85,7 @@ beforeAll(async () => {
 }, 30_000);
 
 it('loadProject stores only the validated user-supplied chrome entries', () => {
-  expect(project.chrome).toEqual({ surfaceDefault: 'color.ref.blue.500' });
+  expect(project.chrome).toEqual({ surfaceDefault: 'color.palette.blue.500' });
 });
 
 it('loadProject surfaces a chrome diagnostic for dropped user entries', () => {
@@ -100,7 +100,7 @@ it('projectCss emits every chrome role — user entry as var, others as literal 
   const chromeBlock = rootBlocks.find((b) => b.includes('--swatchbook-surface-default:'));
   expect(chromeBlock).toBeDefined();
   expect(chromeBlock).toContain('color-scheme: light dark;');
-  expect(chromeBlock).toContain('--swatchbook-surface-default: var(--sb-color-ref-blue-500);');
+  expect(chromeBlock).toContain('--swatchbook-surface-default: var(--sb-color-palette-blue-500);');
   expect(chromeBlock).toContain(
     `--swatchbook-accent-bg: ${DEFAULT_CHROME_MAP.accentBg};`,
   );

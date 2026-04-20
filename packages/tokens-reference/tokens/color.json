@@ -1,8 +1,7 @@
 {
   "color": {
-    "ref": {
-      "$type": "color",
-      "$description": "Raw color primitives. Never aliased by components directly.",
+    "$type": "color",
+    "palette": {
       "neutral": {
         "0": {
           "$value": {
@@ -187,58 +186,6 @@
           }
         }
       },
-      "violet": {
-        "50": {
-          "$value": {
-            "colorSpace": "srgb",
-            "components": [
-              0.9608,
-              0.9529,
-              1.0
-            ]
-          }
-        },
-        "300": {
-          "$value": {
-            "colorSpace": "srgb",
-            "components": [
-              0.7686,
-              0.7098,
-              0.9922
-            ]
-          }
-        },
-        "500": {
-          "$value": {
-            "colorSpace": "srgb",
-            "components": [
-              0.5451,
-              0.3608,
-              0.9647
-            ]
-          }
-        },
-        "700": {
-          "$value": {
-            "colorSpace": "srgb",
-            "components": [
-              0.4275,
-              0.1569,
-              0.851
-            ]
-          }
-        },
-        "900": {
-          "$value": {
-            "colorSpace": "srgb",
-            "components": [
-              0.298,
-              0.1137,
-              0.5843
-            ]
-          }
-        }
-      },
       "green": {
         "100": {
           "$value": {
@@ -335,6 +282,92 @@
           }
         }
       }
+    },
+    "violet": {
+      "50": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.9608,
+            0.9529,
+            1.0
+          ]
+        }
+      },
+      "300": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.7686,
+            0.7098,
+            0.9922
+          ]
+        }
+      },
+      "500": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.5451,
+            0.3608,
+            0.9647
+          ]
+        }
+      },
+      "700": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.4275,
+            0.1569,
+            0.851
+          ]
+        }
+      },
+      "900": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.298,
+            0.1137,
+            0.5843
+          ]
+        }
+      }
+    },
+    "surface": {
+      "default":   { "$value": "{color.palette.neutral.0}" },
+      "muted":     { "$value": "{color.palette.neutral.50}" },
+      "subtle":    { "$value": "{color.palette.neutral.100}" },
+      "inverse":   { "$value": "{color.palette.neutral.900}" },
+      "raised":    { "$value": "{color.palette.neutral.0}" }
+    },
+    "text": {
+      "default":   { "$value": "{color.palette.neutral.900}" },
+      "muted":     { "$value": "{color.palette.neutral.600}" },
+      "subtle":    { "$value": "{color.palette.neutral.500}" },
+      "inverse":   { "$value": "{color.palette.neutral.0}" },
+      "accent":    { "$value": "{color.palette.blue.700}" },
+      "danger":    { "$value": "{color.palette.red.700}" },
+      "success":   { "$value": "{color.palette.green.700}" }
+    },
+    "border": {
+      "default":   { "$value": "{color.palette.neutral.200}" },
+      "strong":    { "$value": "{color.palette.neutral.400}" },
+      "focus":     { "$value": "{color.palette.blue.500}" }
+    },
+    "accent": {
+      "bg":        { "$value": "{color.palette.blue.700}" },
+      "bg-hover":  { "$value": "{color.palette.blue.900}" },
+      "fg":        { "$value": "{color.palette.neutral.0}" }
+    },
+    "status": {
+      "success-bg": { "$value": "{color.palette.green.100}" },
+      "success-fg": { "$value": "{color.palette.green.700}" },
+      "danger-bg":  { "$value": "{color.palette.red.100}" },
+      "danger-fg":  { "$value": "{color.palette.red.700}" },
+      "warning-bg": { "$value": "{color.palette.yellow.100}" },
+      "warning-fg": { "$value": "{color.palette.yellow.700}" }
     }
   }
 }

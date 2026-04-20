@@ -1,21 +1,19 @@
 {
   "color": {
-    "sys": {
-      "$type": "color",
-      "$description": "Light theme — default values match the sys layer baseline.",
-      "surface": {
-        "default": { "$value": "{color.ref.neutral.0}" },
-        "muted":   { "$value": "{color.ref.neutral.50}" },
-        "subtle":  { "$value": "{color.ref.neutral.100}" },
-        "inverse": { "$value": "{color.ref.neutral.900}" },
-        "raised":  { "$value": "{color.ref.neutral.0}" }
-      },
-      "text": {
-        "default": { "$value": "{color.ref.neutral.900}" },
-        "muted":   { "$value": "{color.ref.neutral.600}" },
-        "subtle":  { "$value": "{color.ref.neutral.500}" },
-        "inverse": { "$value": "{color.ref.neutral.0}" }
-      }
+    "$type": "color",
+    "$description": "Light theme — default values match the baseline.",
+    "surface": {
+      "default": { "$value": "{color.palette.neutral.0}" },
+      "muted":   { "$value": "{color.palette.neutral.50}" },
+      "subtle":  { "$value": "{color.palette.neutral.100}" },
+      "inverse": { "$value": "{color.palette.neutral.900}" },
+      "raised":  { "$value": "{color.palette.neutral.0}" }
+    },
+    "text": {
+      "default": { "$value": "{color.palette.neutral.900}" },
+      "muted":   { "$value": "{color.palette.neutral.600}" },
+      "subtle":  { "$value": "{color.palette.neutral.500}" },
+      "inverse": { "$value": "{color.palette.neutral.0}" }
     }
   }
 }

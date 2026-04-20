@@ -21,12 +21,12 @@ async function assertScaleRenders(canvas: HTMLElement): Promise<void> {
 }
 
 export const SpaceSystem = meta.story({
-  args: { filter: 'space.sys.*' },
+  args: { filter: 'space.*' },
   play: async ({ canvasElement }) => assertScaleRenders(canvasElement),
 });
-export const RadiusSystem = meta.story({ args: { filter: 'radius.sys.*', kind: 'radius' } });
+export const RadiusSystem = meta.story({ args: { filter: 'radius.*', kind: 'radius' } });
 export const SizeReferencePx = meta.story({
-  args: { filter: 'size.ref.*', kind: 'size' },
+  args: { filter: 'size.*', kind: 'size' },
   play: async ({ canvasElement }) => assertScaleRenders(canvasElement),
 });
 export const All = meta.story();
