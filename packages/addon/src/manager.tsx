@@ -467,29 +467,34 @@ function AxesToolbar(): ReactElement {
   );
 
   useEffect(() => {
-    if (axes.length === 0) return;
+    if (presets.length === 0) return;
     /**
-     * alt+T cycles the primary (first) axis's contexts, keeping the rest
-     * of the tuple pinned. With multi-axis projects this makes the shortcut
-     * predictable — you always know which wheel you're spinning. For
-     * single-axis projects the behavior is identical to the pre-N-dropdown
-     * toolbar (cycle through every theme).
+     * `alt+shift+C` cycles through the project's presets, applying the
+     * next one each press. When no preset has been applied yet, starts
+     * from the first. Stays out of Storybook's core shortcut surface —
+     * the earlier default (`alt+T`) collided with the built-in "toggle
+     * addon panel" binding on some platforms. Users can still rebind it
+     * through Storybook's own keyboard-shortcuts panel.
+     *
+     * Only registers when the project actually defines presets. For
+     * projects without presets the cycle would have nothing to cycle
+     * through, so the shortcut disappears entirely rather than sitting
+     * dead in the menu.
      */
-    const primary = axes[0];
-    if (!primary) return;
     api.setAddonShortcut(ADDON_ID, {
-      label: `Cycle swatchbook ${displayLabelFor(primary)}`,
-      defaultShortcut: ['alt', 'T'],
-      actionName: 'cycleAxis',
+      label: `Cycle swatchbook presets (${presets.length})`,
+      defaultShortcut: ['alt', 'shift', 'C'],
+      actionName: 'cyclePreset',
       showInMenu: true,
       action: () => {
-        const current = activeTuple[primary.name] ?? primary.default;
-        const idx = primary.contexts.indexOf(current);
-        const next = primary.contexts[(idx + 1) % primary.contexts.length];
-        if (next !== undefined) setAxis(primary.name, next);
+        const currentIdx = lastApplied
+          ? presets.findIndex((preset) => preset.name === lastApplied)
+          : -1;
+        const next = presets[(currentIdx + 1) % presets.length];
+        if (next) applyPreset(next);
       },
     });
-  }, [api, axes, activeTuple, setAxis]);
+  }, [api, presets, lastApplied, applyPreset]);
 
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>): void => {
     if (event.key === 'Escape') {
