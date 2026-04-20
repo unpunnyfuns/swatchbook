@@ -1,4 +1,5 @@
-export { CHROME_ROLES, type ChromeRole } from '#/chrome.ts';
+export { CHROME_ROLES, DEFAULT_CHROME_MAP, type ChromeRole } from '#/chrome.ts';
+
 export { defineSwatchbookConfig } from '#/config.ts';
 export { loadProject, resolveTheme } from '#/load.ts';
 export { projectCss, emitTypes } from '#/emit.ts';

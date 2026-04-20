@@ -1,6 +1,6 @@
 import type { TokenNormalized } from '@terrazzo/parser';
 import { generateShorthand, makeCSSVar, transformCSSValue } from '@terrazzo/token-tools/css';
-import { CHROME_VAR_PREFIX } from '#/chrome.ts';
+import { CHROME_ROLES, CHROME_VAR_PREFIX, DEFAULT_CHROME_MAP } from '#/chrome.ts';
 import type { Axis, Theme, TokenMap } from '#/types.ts';
 
 export interface EmitCssOptions {
@@ -65,16 +65,18 @@ export function emitCss(
   }
 
   const chrome = options.chrome ?? {};
-  const chromeEntries = Object.entries(chrome);
-  if (chromeEntries.length > 0) {
-    const lines: string[] = [];
-    for (const [source, target] of chromeEntries) {
-      const sourceVar = makeCSSVar(source, { prefix: CHROME_VAR_PREFIX });
+  const chromeLines: string[] = [];
+  for (const role of CHROME_ROLES) {
+    const sourceVar = makeCSSVar(role, { prefix: CHROME_VAR_PREFIX });
+    const target = chrome[role];
+    if (target !== undefined) {
       const targetVar = makeCSSVar(target, { ...varOpts, wrapVar: true });
-      lines.push(`  ${sourceVar}: ${targetVar};`);
+      chromeLines.push(`  ${sourceVar}: ${targetVar};`);
+    } else {
+      chromeLines.push(`  ${sourceVar}: ${DEFAULT_CHROME_MAP[role]};`);
     }
-    blocks.push(`:root {\n${lines.join('\n')}\n}`);
   }
+  blocks.push(`:root {\n${chromeLines.join('\n')}\n}`);
 
   return `${blocks.join('\n\n')}\n`;
 }

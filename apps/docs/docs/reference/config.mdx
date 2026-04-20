@@ -154,7 +154,7 @@ Config-level only — there's no runtime toggle. Disabling an axis is the cleane
 
 ### `chrome?: Record<string, string>`
 
-Map from swatchbook's ten block-chrome roles to token paths in your project. Block components (`<TokenTable>`, `<ColorPalette>`, etc.) read a fixed `--swatchbook-*` CSS variable namespace for their surfaces, text, and accents — independent of `cssVarPrefix`, so your token namespace never collides with chrome reads. Without a `chrome` map, chrome falls back to the `Canvas` / `CanvasText` system colors (functional but untheme d).
+Override one or more of swatchbook's ten block-chrome roles. Block components (`<TokenTable>`, `<ColorPalette>`, etc.) read a fixed `--swatchbook-*` CSS variable namespace for their surfaces, text, and accents — independent of `cssVarPrefix`, so your token namespace never collides with chrome reads. Every role is always declared: by default, to the hard-coded light-mode literals in `DEFAULT_CHROME_MAP`; any role you set in `chrome` replaces that literal with a `var(--<prefix>-<your-token>)` reference so chrome reflows with your theme switches.
 
 The ten roles (closed set — also exported as `CHROME_ROLES` and the `ChromeRole` type from `@unpunnyfuns/swatchbook-core`):
 
@@ -186,21 +186,26 @@ defineSwatchbookConfig({
 });
 ```
 
-Produces:
+Produces a single `:root` chrome block with all ten roles declared — overrides become `var(...)` references that inherit per-theme values automatically, the rest stay on `DEFAULT_CHROME_MAP`'s hard-coded literals:
 
 ```css
 :root {
   --swatchbook-surface-default: var(--ds-color-brand-bg-primary);
+  --swatchbook-surface-muted:   #f4f4f5;
+  --swatchbook-surface-raised:  #ffffff;
   --swatchbook-text-default:    var(--ds-color-brand-fg-primary);
+  --swatchbook-text-muted:      #6b7280;
+  --swatchbook-border-default:  #e5e7eb;
   --swatchbook-accent-bg:       var(--ds-color-brand-accent-primary);
+  --swatchbook-accent-fg:       #ffffff;
+  --swatchbook-body-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --swatchbook-body-font-size:  14px;
 }
 ```
 
-Per-theme values flip automatically — the target variable is already theme-scoped by the regular token emission, and the alias inherits whatever value is active for the current tuple. No per-theme `chrome` override needed.
-
 **Composite sub-field targets are accepted.** `typography.sys.body` is a composite token that emits one sub-variable per field; the chrome map can target those directly (`bodyFontSize: 'typography.sys.body.font-size'`) even though the sub-field isn't a standalone token ID.
 
-Unknown role keys (outside the ten above) and target paths that don't resolve to any token or composite sub-field in any theme produce `warn` diagnostics (group `swatchbook/chrome`) and are dropped. The validated entries land on `Project.chrome` for downstream tooling.
+Unknown role keys (outside the ten above) and target paths that don't resolve to any token or composite sub-field in any theme produce `warn` diagnostics (group `swatchbook/chrome`) and are dropped — the corresponding chrome slot falls back to its hard-coded literal default. The validated entries land on `Project.chrome` for downstream tooling.
 
 ## See also
 

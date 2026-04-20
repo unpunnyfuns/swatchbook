@@ -1,7 +1,7 @@
 import { beforeAll, expect, it } from 'vitest';
 import { dirname } from 'node:path';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens-reference';
-import { CHROME_ROLES, validateChrome } from '#/chrome';
+import { CHROME_ROLES, DEFAULT_CHROME_MAP, validateChrome } from '#/chrome';
 import { projectCss } from '#/emit';
 import { loadProject } from '#/load';
 import type { Project, TokenMap } from '#/types';
@@ -19,7 +19,7 @@ it('validateChrome returns empty when input is undefined', () => {
   expect(diagnostics).toEqual([]);
 });
 
-it('validateChrome keeps entries whose role is a known chrome role and target resolves', () => {
+it('validateChrome keeps entries whose role is known and target resolves', () => {
   const { entries, diagnostics } = validateChrome(
     { surfaceDefault: 'color.ref.blue.500' },
     { Light: tokensFixture },
@@ -61,10 +61,9 @@ it('validateChrome drops entries whose target resolves in no theme', () => {
   expect(diagnostics[0]?.message).toMatch(/"color\.nowhere" is not a token/);
 });
 
-it('CHROME_ROLES covers the ten chrome variables blocks read', () => {
+it('CHROME_ROLES and DEFAULT_CHROME_MAP cover the same ten roles', () => {
   expect(CHROME_ROLES).toHaveLength(10);
-  expect(CHROME_ROLES).toContain('surfaceDefault');
-  expect(CHROME_ROLES).toContain('bodyFontFamily');
+  expect(Object.keys(DEFAULT_CHROME_MAP).toSorted()).toEqual([...CHROME_ROLES].toSorted());
 });
 
 let project: Project;
@@ -85,34 +84,31 @@ beforeAll(async () => {
   );
 }, 30_000);
 
-it('loadProject stores validated chrome entries on the project', () => {
-  expect(project.chrome).toEqual({
-    surfaceDefault: 'color.ref.blue.500',
-  });
+it('loadProject stores only the validated user-supplied chrome entries', () => {
+  expect(project.chrome).toEqual({ surfaceDefault: 'color.ref.blue.500' });
 });
 
-it('loadProject surfaces a chrome diagnostic for the dropped entry', () => {
+it('loadProject surfaces a chrome diagnostic for dropped user entries', () => {
   const chromeDiags = project.diagnostics.filter((d) => d.group === 'swatchbook/chrome');
   expect(chromeDiags).toHaveLength(1);
   expect(chromeDiags[0]?.message).toMatch(/unknown role "bogusRole"/);
 });
 
-it('projectCss emits the chrome alias using the fixed --swatchbook- namespace', () => {
+it('projectCss emits every chrome role — user entry as var, others as literal defaults', () => {
   const css = projectCss(project);
   const rootBlocks = css.split('\n\n').filter((b) => b.startsWith(':root {'));
-  const aliasBlock = rootBlocks.find((b) =>
-    b.includes('--swatchbook-surface-default: var(--sb-color-ref-blue-500)'),
+  const chromeBlock = rootBlocks.find((b) => b.includes('--swatchbook-surface-default:'));
+  expect(chromeBlock).toBeDefined();
+  expect(chromeBlock).toContain('--swatchbook-surface-default: var(--sb-color-ref-blue-500);');
+  expect(chromeBlock).toContain(
+    `--swatchbook-accent-bg: ${DEFAULT_CHROME_MAP.accentBg};`,
   );
-  expect(aliasBlock).toBeDefined();
+  expect(chromeBlock).toContain(
+    `--swatchbook-body-font-size: ${DEFAULT_CHROME_MAP.bodyFontSize};`,
+  );
 });
 
-it('projectCss never prefixes chrome source vars with the project prefix', () => {
-  const css = projectCss(project);
-  expect(css).not.toMatch(/--sb-swatchbook-/);
-  expect(css).not.toMatch(/--sb-surface-default:\s*var\(/);
-});
-
-it('projectCss skips chrome emission when no valid entries survive', async () => {
+it('projectCss emits all ten roles even when chrome config is absent', async () => {
   const p = await loadProject(
     {
       tokens: ['tokens/**/*.json'],
@@ -123,5 +119,17 @@ it('projectCss skips chrome emission when no valid entries survive', async () =>
     fixtureCwd,
   );
   const css = projectCss(p);
-  expect(css).not.toMatch(/--swatchbook-surface-default:/);
+  for (const role of CHROME_ROLES) {
+    const varName = `--swatchbook-${role
+      .replace(/([A-Z])/g, '-$1')
+      .toLowerCase()
+      .replace(/^-/, '')}`;
+    expect(css, `chrome var ${varName} must be declared`).toContain(`${varName}:`);
+  }
+});
+
+it('projectCss never prefixes chrome source vars with the project prefix', () => {
+  const css = projectCss(project);
+  expect(css).not.toMatch(/--sb-swatchbook-/);
+  expect(css).not.toMatch(/--sb-surface-default:\s*var\(/);
 });

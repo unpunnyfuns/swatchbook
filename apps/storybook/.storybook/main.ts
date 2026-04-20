@@ -26,18 +26,11 @@ export default defineMain({
           // compound selectors, and the Design Tokens panel shows a pinned indicator.
           // disabledAxes: ['contrast'],
           cssVarPrefix: 'sb',
-          chrome: {
-            surfaceDefault: 'color.sys.surface.default',
-            surfaceMuted: 'color.sys.surface.muted',
-            surfaceRaised: 'color.sys.surface.raised',
-            textDefault: 'color.sys.text.default',
-            textMuted: 'color.sys.text.muted',
-            borderDefault: 'color.sys.border.default',
-            accentBg: 'color.sys.accent.bg',
-            accentFg: 'color.sys.accent.fg',
-            bodyFontFamily: 'typography.sys.body.font-family',
-            bodyFontSize: 'typography.sys.body.font-size',
-          },
+          // Block chrome wires automatically — the reference tokens use the
+          // conventional `color.sys.*` / `typography.sys.*` paths that
+          // `DEFAULT_CHROME_MAP` expects, so no explicit `chrome` config is
+          // needed here. Override individual roles if you deviate from that
+          // shape.
           presets: [
             {
               name: 'Default Light',

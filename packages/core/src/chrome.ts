@@ -31,6 +31,31 @@ export type ChromeRole = (typeof CHROME_ROLES)[number];
 /** Fixed prefix for chrome CSS custom properties. Independent of project config. */
 export const CHROME_VAR_PREFIX = 'swatchbook';
 
+/**
+ * Hard-coded literal CSS values for each chrome role. Used as the baseline
+ * for every project — the CSS emitter always declares all ten chrome vars,
+ * starting from these defaults and overlaying any user-supplied `chrome`
+ * entry as a `var(...)` reference on top. Projects with no chrome config
+ * still get readable, light-mode-themed chrome instead of falling through
+ * to `Canvas` / `CanvasText`.
+ *
+ * Values chosen for WCAG AA contrast on the default surface and reasonable
+ * visual weight — they don't need to match any specific design system.
+ * Consumers theme chrome against their own tokens by filling `config.chrome`.
+ */
+export const DEFAULT_CHROME_MAP: Record<ChromeRole, string> = {
+  surfaceDefault: '#ffffff',
+  surfaceMuted: '#f4f4f5',
+  surfaceRaised: '#ffffff',
+  textDefault: '#111827',
+  textMuted: '#6b7280',
+  borderDefault: '#e5e7eb',
+  accentBg: '#1d4ed8',
+  accentFg: '#ffffff',
+  bodyFontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+  bodyFontSize: '14px',
+};
+
 export interface ChromeValidationResult {
   entries: Record<string, string>;
   diagnostics: Diagnostic[];
@@ -38,9 +63,10 @@ export interface ChromeValidationResult {
 
 /**
  * Validate `config.chrome` against the project's resolved tokens. Unknown
- * source keys (outside `CHROME_ROLES`) and target paths that don't resolve
- * in any theme produce `warn` diagnostics and are dropped. Surviving entries
- * flow into CSS emission as `:root` alias declarations.
+ * roles (outside `CHROME_ROLES`) and target paths that don't resolve in any
+ * theme produce `warn` diagnostics and are dropped. Surviving entries land
+ * on `Project.chrome` and override the hard-coded `DEFAULT_CHROME_MAP`
+ * literals during CSS emission.
  */
 export function validateChrome(
   raw: Record<string, string> | undefined,
