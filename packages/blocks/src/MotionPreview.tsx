@@ -1,13 +1,7 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo, useState } from 'react';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
-import {
-  BORDER_DEFAULT,
-  BORDER_STRONG,
-  MONO_STACK,
-  TEXT_MUTED,
-  surfaceStyle,
-} from '#/internal/styles.tsx';
+import { BORDER_DEFAULT, BORDER_STRONG, MONO_STACK, TEXT_MUTED } from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 import {
@@ -31,7 +25,6 @@ export interface MotionPreviewProps {
 const SPEEDS: MotionSpeed[] = [0.25, 0.5, 1, 2];
 
 const styles = {
-  wrapper: surfaceStyle,
   caption: {
     padding: '4px 0 4px',
     color: TEXT_MUTED,
@@ -170,20 +163,14 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
 
   if (rows.length === 0) {
     return (
-      <div
-        {...themeAttrs(cssVarPrefix, activeTheme)}
-        style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
-      >
+      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
         <div style={styles.empty}>No motion tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div
-      {...themeAttrs(cssVarPrefix, activeTheme)}
-      style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
-    >
+    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
       <div style={styles.caption}>{captionText}</div>
       <div style={styles.controls}>
         <span style={styles.controlLabel}>Speed</span>

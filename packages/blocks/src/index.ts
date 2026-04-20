@@ -1,3 +1,5 @@
+import '#/internal/styles.css';
+
 export {
   COLOR_FORMATS,
   type ColorFormat,

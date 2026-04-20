@@ -1,14 +1,7 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
-import {
-  BORDER_DEFAULT,
-  MONO_STACK,
-  TEXT_MUTED,
-  captionStyle,
-  emptyStyle,
-  surfaceStyle,
-} from '#/internal/styles.tsx';
+import { BORDER_DEFAULT, MONO_STACK, TEXT_MUTED } from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
@@ -32,9 +25,6 @@ export interface BorderPreviewProps {
 }
 
 const styles = {
-  wrapper: surfaceStyle,
-  caption: captionStyle,
-  empty: emptyStyle,
   row: {
     display: 'grid',
     gridTemplateColumns: 'minmax(160px, 220px) 140px 1fr',
@@ -144,21 +134,15 @@ export function BorderPreview({
 
   if (rows.length === 0) {
     return (
-      <div
-        {...themeAttrs(cssVarPrefix, activeTheme)}
-        style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
-      >
-        <div style={styles.empty}>No border tokens match this filter.</div>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
+        <div className='sb-block__empty'>No border tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div
-      {...themeAttrs(cssVarPrefix, activeTheme)}
-      style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
-    >
-      <div style={styles.caption}>{captionText}</div>
+    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
+      <div className='sb-block__caption'>{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} style={styles.row}>
           <div style={styles.meta}>

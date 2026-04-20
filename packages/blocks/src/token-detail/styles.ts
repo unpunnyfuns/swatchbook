@@ -8,12 +8,10 @@ import {
   SURFACE_RAISED,
   TEXT_DEFAULT,
   TEXT_MUTED,
-  surfaceStyle,
 } from '#/internal/styles.tsx';
 
 export const styles = {
   wrapper: {
-    ...surfaceStyle,
     padding: 16,
     border: BORDER_DEFAULT,
   } satisfies CSSProperties,

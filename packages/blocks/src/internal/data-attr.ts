@@ -25,18 +25,24 @@ export const BLOCK_ATTR = 'data-swatchbook-block';
  * render identically in MDX docs and regular stories without fighting
  * cascade specificity.
  */
-const STORYBOOK_UNSTYLED_CLASS = 'sb-unstyled';
+const WRAPPER_CLASSES = 'sb-unstyled sb-block';
 
 /**
- * Spread helper for the common `<div data-<prefix>-theme="…" data-swatchbook-block className="sb-unstyled">`
- * block wrapper. Returns the prefixed theme attribute, the scoping marker,
- * and Storybook's `.sb-unstyled` opt-out class.
+ * Spread helper for the common block wrapper. Returns:
+ * - `data-<prefix>-theme="<composed theme name>"` — so theme-keyed CSS
+ *   emitted by `@unpunnyfuns/swatchbook-core` resolves against this
+ *   subtree.
+ * - `data-swatchbook-block` — stable consumer hook for targeting block
+ *   chrome from outside.
+ * - `className="sb-unstyled sb-block"` — Storybook's opt-out class so
+ *   MDX docs house styles self-exclude the subtree, plus `sb-block`
+ *   which carries the shared chrome from `internal/styles.css`.
  */
 export function themeAttrs(prefix: string, themeName: string): Record<string, string> {
   return {
     [dataAttr(prefix, 'theme')]: themeName,
     [BLOCK_ATTR]: '',
-    className: STORYBOOK_UNSTYLED_CLASS,
+    className: WRAPPER_CLASSES,
   };
 }
 

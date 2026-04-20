@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
-import { BORDER_FAINT, TEXT_MUTED, surfaceStyle } from '#/internal/styles.tsx';
+import { BORDER_FAINT, TEXT_MUTED } from '#/internal/styles.tsx';
 import { useProject } from '#/internal/use-project.ts';
 import type { VirtualDiagnostic } from '#/types.ts';
 
@@ -24,7 +24,6 @@ const severityLabel: Record<DiagnosticSeverity, string> = {
 };
 
 const styles = {
-  wrapper: surfaceStyle,
   summary: {
     display: 'flex',
     alignItems: 'center',
@@ -106,7 +105,7 @@ export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
   return (
     <div
       {...themeAttrs(cssVarPrefix, activeTheme)}
-      style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
+      style={chromeAliases(cssVarPrefix)}
       data-testid='diagnostics'
     >
       <details open={hasErrorsOrWarnings}>

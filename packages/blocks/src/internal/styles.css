@@ -1,0 +1,32 @@
+/*
+ * Shared chrome applied to every block wrapper + a few common sub-parts.
+ *
+ * The `var(--sb-*)` references are redirected to the consumer's actual
+ * `cssVarPrefix` by `chromeAliases(prefix)` (spread as inline style on
+ * each block wrapper). Custom properties inherit down the tree, so these
+ * rules read the aliases regardless of depth.
+ *
+ * Per-block geometry stays in each block's own stylesheet; this file only
+ * holds primitives that are truly shared (surface, caption, empty-state).
+ */
+
+.sb-block {
+  font-family: var(--sb-typography-sys-body-font-family, system-ui);
+  font-size: var(--sb-typography-sys-body-font-size, 14px);
+  color: var(--sb-color-sys-text-default, CanvasText);
+  background: var(--sb-color-sys-surface-default, Canvas);
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.sb-block__caption {
+  padding: 4px 0 12px;
+  color: var(--sb-color-sys-text-muted, CanvasText);
+  font-size: 12px;
+}
+
+.sb-block__empty {
+  padding: 24px 12px;
+  text-align: center;
+  color: var(--sb-color-sys-text-muted, CanvasText);
+}
