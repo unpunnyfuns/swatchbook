@@ -1,0 +1,19 @@
+<!--
+  Shrink the brand image in the manager's sidebar header. Our SVG is
+  authored at 800×800 and Storybook's default brand slot doesn't clamp
+  vertical size, so without this the logo dominates the sidebar. Keep
+  it as a small icon beside the wordmark.
+-->
+<style>
+  /* The brand image lives inside the sidebar's top area. Storybook's
+     class names aren't stable across versions, so target broadly:
+     any image inside the manager sidebar or a sb-bar header. */
+  nav img[src*='logo'],
+  aside img[src*='logo'],
+  .sidebar-header img,
+  [class*='sidebar'] img[src*='logo'] {
+    height: 24px;
+    width: auto;
+    max-height: 24px;
+  }
+</style>
