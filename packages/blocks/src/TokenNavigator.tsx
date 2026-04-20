@@ -267,7 +267,7 @@ export function TokenNavigator({
       <div style={styles.caption}>
         {root ? `Tokens under ${root}` : 'Token graph'} · {activeTheme}
       </div>
-      <ul style={styles.tree} role='tree'>
+      <ul style={styles.tree} role="tree">
         {tree.map((node) => (
           <TreeNodeRow
             key={node.path || node.segment}
@@ -283,7 +283,7 @@ export function TokenNavigator({
         <DetailOverlay
           path={selectedPath}
           onClose={() => setSelectedPath(null)}
-          testId='token-navigator-overlay'
+          testId="token-navigator-overlay"
         />
       )}
     </div>
@@ -309,15 +309,15 @@ function TreeNodeRow({ node, expanded, onToggle, onLeafClick }: TreeNodeRowProps
     }
   };
   return (
-    <li role='treeitem' aria-expanded={isOpen}>
+    <li role="treeitem" aria-expanded={isOpen}>
       <div
-        role='button'
+        role="button"
         tabIndex={0}
         style={styles.groupRow}
         onClick={() => onToggle(node.path)}
         onKeyDown={onKey}
         data-path={node.path}
-        data-testid='token-navigator-group'
+        data-testid="token-navigator-group"
       >
         <span style={styles.caret} aria-hidden>
           {isOpen ? '▾' : '▸'}
@@ -326,7 +326,7 @@ function TreeNodeRow({ node, expanded, onToggle, onLeafClick }: TreeNodeRowProps
         <span style={styles.count}>{countLeaves(node)}</span>
       </div>
       {isOpen && (
-        <ul style={styles.nested} role='group'>
+        <ul style={styles.nested} role="group">
           {node.children.map((c) => (
             <TreeNodeRow
               key={c.path || c.segment}
@@ -356,15 +356,15 @@ function LeafRow({ node, onLeafClick }: LeafRowProps): ReactElement {
   };
   const type = node.token.$type ?? '';
   return (
-    <li role='treeitem'>
+    <li role="treeitem">
       <div
-        role='button'
+        role="button"
         tabIndex={0}
         style={styles.leafRow}
         onClick={() => onLeafClick(node.path)}
         onKeyDown={onKey}
         data-path={node.path}
-        data-testid='token-navigator-leaf'
+        data-testid="token-navigator-leaf"
       >
         <span style={styles.caret} aria-hidden>
           •
@@ -401,7 +401,7 @@ function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
       <span style={styles.previewBox}>
         <span style={styles.value}>{formatTokenValue(token.$value, type, colorFormat)}</span>
         <span style={{ marginLeft: 8, display: 'inline-block', minWidth: 40, maxWidth: 120 }}>
-          <DimensionBar path={path} kind='length' />
+          <DimensionBar path={path} kind="length" />
         </span>
       </span>
     );

@@ -142,17 +142,17 @@ function StrokeStylePreview({ value }: { value: unknown }): ReactElement {
     return (
       <svg
         style={styles.strokeStyleSvg}
-        viewBox='0 0 220 24'
-        preserveAspectRatio='none'
+        viewBox="0 0 220 24"
+        preserveAspectRatio="none"
         aria-hidden
       >
         <line
-          x1='4'
-          y1='12'
-          x2='216'
-          y2='12'
-          stroke='currentColor'
-          strokeWidth='4'
+          x1="4"
+          y1="12"
+          x2="216"
+          y2="12"
+          stroke="currentColor"
+          strokeWidth="4"
           strokeDasharray={lengths.join(' ')}
           strokeLinecap={cap as 'butt' | 'round' | 'square'}
         />

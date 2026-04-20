@@ -6,10 +6,10 @@ import { Card } from '../components/Card.tsx';
 function ThemeProbe() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 12 }}>
-      <Card data-testid='probe-card' title='Probe card'>
+      <Card data-testid="probe-card" title="Probe card">
         Surface-driven — flips with Light ↔ Dark.
       </Card>
-      <Button data-testid='probe-button' variant='primary'>
+      <Button data-testid="probe-button" variant="primary">
         Accent-driven — flips with Brand A.
       </Button>
     </div>

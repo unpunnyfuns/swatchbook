@@ -1,7 +1,7 @@
 import { Meta } from '@storybook/addon-docs/blocks';
 import { ColorPalette, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 
-<Meta title='Docs/Colors' />
+<Meta title="Docs/Colors" />
 
 # Colors
 
@@ -23,18 +23,18 @@ Groups the semantic color tokens by sub-path (e.g. `color.sys.surface.*`,
 `color.sys.text.*`, `color.sys.accent.*`). Switch the theme in the toolbar
 to see every swatch repaint.
 
-<ColorPalette filter='color.sys.*' />
+<ColorPalette filter="color.sys.*" />
 
 ## Reference palette
 
 Every primitive color in the reference tier. Use as the source of truth
 when building new `sys` tokens, not when styling components directly.
 
-<ColorPalette filter='color.ref.*' />
+<ColorPalette filter="color.ref.*" />
 
 ## Raw table
 
 The same tokens as rows with resolved values, types, and CSS var names —
 handy when you know the path you're looking for.
 
-<TokenTable filter='color.sys.*' type='color' />
+<TokenTable filter="color.sys.*" type="color" />

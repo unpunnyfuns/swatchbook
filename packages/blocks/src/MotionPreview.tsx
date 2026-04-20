@@ -177,7 +177,7 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
         {SPEEDS.map((s) => (
           <button
             key={s}
-            type='button'
+            type="button"
             style={{ ...styles.speedBtn, ...(s === speed ? styles.speedBtnActive : {}) }}
             onClick={() => setSpeed(s)}
           >
@@ -185,7 +185,7 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
           </button>
         ))}
         <button
-          type='button'
+          type="button"
           style={styles.replayBtn}
           onClick={() => setRun((n) => n + 1)}
           disabled={reducedMotion}

@@ -205,7 +205,7 @@ export function TokenTable({
               }}
               tabIndex={0}
               aria-label={`Inspect ${row.path}`}
-              data-testid='token-table-row'
+              data-testid="token-table-row"
               data-path={row.path}
             >
               <td style={{ ...styles.td, ...styles.path }}>{row.path}</td>
@@ -215,13 +215,13 @@ export function TokenTable({
                   {row.isColor && (
                     <span style={{ ...styles.swatch, background: row.cssVar }} aria-hidden />
                   )}
-                  <span style={styles.valueText} title={row.value} data-testid='token-table-value'>
+                  <span style={styles.valueText} title={row.value} data-testid="token-table-value">
                     {row.value}
                   </span>
                   {row.outOfGamut && (
                     <span
-                      title='Out of sRGB gamut for this format'
-                      aria-label='out of gamut'
+                      title="Out of sRGB gamut for this format"
+                      aria-label="out of gamut"
                       style={{ flexShrink: 0 }}
                     >
                       ⚠
@@ -238,7 +238,7 @@ export function TokenTable({
         <DetailOverlay
           path={selectedPath}
           onClose={() => setSelectedPath(null)}
-          testId='token-table-overlay'
+          testId="token-table-overlay"
         />
       )}
     </div>

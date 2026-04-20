@@ -47,7 +47,7 @@ describe('TokenNavigator', () => {
   it('scopes the tree under a `root` prop to only that subtree', () => {
     render(
       <SwatchbookProvider value={makeSnapshot()}>
-        <TokenNavigator root='color.sys' />
+        <TokenNavigator root="color.sys" />
       </SwatchbookProvider>,
     );
     expect(screen.queryByText('ref')).toBeNull();
@@ -60,7 +60,7 @@ describe('TokenNavigator', () => {
   it('shows an empty-state message when the root matches no tokens', () => {
     render(
       <SwatchbookProvider value={makeSnapshot()}>
-        <TokenNavigator root='does-not-exist' />
+        <TokenNavigator root="does-not-exist" />
       </SwatchbookProvider>,
     );
     expect(screen.getByText(/No tokens under "does-not-exist"/)).toBeDefined();

@@ -25,8 +25,8 @@ export function ConsumerOutput({ path }: ConsumerOutputProps): ReactElement | nu
           Active tuple: <strong>{tupleLabel}</strong>
         </div>
       )}
-      <OutputRow label='Path' value={path} testId='consumer-output-path' />
-      <OutputRow label='CSS' value={cssVar} testId='consumer-output-css' />
+      <OutputRow label="Path" value={path} testId="consumer-output-path" />
+      <OutputRow label="CSS" value={cssVar} testId="consumer-output-css" />
     </>
   );
 }
@@ -53,7 +53,7 @@ function CopyButton({ text, testId }: { text: string; testId: string }): ReactEl
   const [copied, setCopied] = useState(false);
   return (
     <button
-      type='button'
+      type="button"
       style={styles.consumerRowCopy}
       data-testid={testId}
       onClick={() => {

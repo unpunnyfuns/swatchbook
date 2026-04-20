@@ -27,12 +27,12 @@ function RecordingNavigator() {
   return (
     <div>
       <div
-        data-testid='custom-select-record'
+        data-testid="custom-select-record"
         style={{ padding: 8, fontFamily: 'ui-monospace, monospace', fontSize: 12 }}
       >
         Last selected: {last ?? '(none)'}
       </div>
-      <TokenNavigator root='color.sys' onSelect={(p) => setLast(p)} />
+      <TokenNavigator root="color.sys" onSelect={(p) => setLast(p)} />
     </div>
   );
 }
