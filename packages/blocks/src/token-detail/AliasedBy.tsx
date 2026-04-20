@@ -1,6 +1,5 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
-import { styles } from '#/token-detail/styles.ts';
 import { type DetailToken, useTokenDetailData } from '#/token-detail/internal.ts';
 
 export interface AliasedByProps {
@@ -27,14 +26,14 @@ export function AliasedBy({ path }: AliasedByProps): ReactElement | null {
 
   return (
     <>
-      <div style={styles.sectionHeader}>Aliased by</div>
-      <ul style={styles.aliasedByList}>
+      <div className="sb-token-detail__section-header">Aliased by</div>
+      <ul className="sb-token-detail__aliased-by-list">
         {tree.map((node) => (
           <AliasedByRow key={node.path} node={node} depth={0} />
         ))}
       </ul>
       {truncated && (
-        <div style={styles.aliasedByTruncated}>
+        <div className="sb-token-detail__aliased-by-truncated">
           Further descendants truncated at depth {ALIASED_BY_DEPTH_CAP}.
         </div>
       )}
@@ -45,11 +44,11 @@ export function AliasedBy({ path }: AliasedByProps): ReactElement | null {
 function AliasedByRow({ node, depth }: { node: AliasedByNode; depth: number }): ReactElement {
   return (
     <li>
-      <div style={{ ...styles.aliasedByRow, paddingLeft: depth * 16 }}>
-        <span style={styles.chainNode}>{node.path}</span>
+      <div className="sb-token-detail__aliased-by-row" style={{ paddingLeft: depth * 16 }}>
+        <span className="sb-token-detail__chain-node">{node.path}</span>
       </div>
       {node.children.length > 0 && (
-        <ul style={styles.aliasedByList}>
+        <ul className="sb-token-detail__aliased-by-list">
           {node.children.map((child) => (
             <AliasedByRow key={child.path} node={child} depth={depth + 1} />
           ))}

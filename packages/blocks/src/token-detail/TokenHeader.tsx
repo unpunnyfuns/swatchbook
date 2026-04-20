@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react';
-import { styles } from '#/token-detail/styles.ts';
 import { useTokenDetailData } from '#/token-detail/internal.ts';
 
 export interface TokenHeaderProps {
@@ -14,7 +13,7 @@ export function TokenHeader({ path, heading }: TokenHeaderProps): ReactElement {
 
   if (!token) {
     return (
-      <div style={styles.missing}>
+      <div className="sb-token-detail__missing">
         Token <code>{path}</code> not found in theme <strong>{activeTheme}</strong>.
       </div>
     );
@@ -22,12 +21,12 @@ export function TokenHeader({ path, heading }: TokenHeaderProps): ReactElement {
 
   return (
     <>
-      <h3 style={styles.heading}>{heading ?? path}</h3>
-      <div style={styles.subline}>
-        {token.$type && <span style={styles.typePill}>{token.$type}</span>}
+      <h3 className="sb-token-detail__heading">{heading ?? path}</h3>
+      <div className="sb-token-detail__subline">
+        {token.$type && <span className="sb-token-detail__type-pill">{token.$type}</span>}
         <span>{cssVar}</span>
       </div>
-      {token.$description && <p style={styles.description}>{token.$description}</p>}
+      {token.$description && <p className="sb-token-detail__description">{token.$description}</p>}
     </>
   );
 }

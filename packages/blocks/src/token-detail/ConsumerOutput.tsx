@@ -1,6 +1,5 @@
 import type { ReactElement } from 'react';
 import { useState } from 'react';
-import { styles } from '#/token-detail/styles.ts';
 import { useTokenDetailData } from '#/token-detail/internal.ts';
 
 export interface ConsumerOutputProps {
@@ -19,9 +18,9 @@ export function ConsumerOutput({ path }: ConsumerOutputProps): ReactElement | nu
 
   return (
     <>
-      <div style={styles.sectionHeader}>Consumer output</div>
+      <div className="sb-token-detail__section-header">Consumer output</div>
       {tupleLabel && (
-        <div style={styles.tupleIndicator}>
+        <div className="sb-token-detail__tuple-indicator">
           Active tuple: <strong>{tupleLabel}</strong>
         </div>
       )}
@@ -39,9 +38,9 @@ interface OutputRowProps {
 
 function OutputRow({ label, value, testId }: OutputRowProps): ReactElement {
   return (
-    <div style={styles.consumerRow}>
-      <span style={styles.consumerRowLabel}>{label}</span>
-      <code style={styles.consumerRowValue} data-testid={testId}>
+    <div className="sb-token-detail__consumer-row">
+      <span className="sb-token-detail__consumer-row-label">{label}</span>
+      <code className="sb-token-detail__consumer-row-value" data-testid={testId}>
         {value}
       </code>
       <CopyButton text={value} testId={`${testId}-copy`} />
@@ -54,7 +53,7 @@ function CopyButton({ text, testId }: { text: string; testId: string }): ReactEl
   return (
     <button
       type="button"
-      style={styles.consumerRowCopy}
+      className="sb-token-detail__consumer-row-copy"
       data-testid={testId}
       onClick={() => {
         void copyToClipboard(text).then((ok) => {

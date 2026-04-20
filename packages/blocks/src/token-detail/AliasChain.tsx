@@ -1,6 +1,5 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
-import { styles } from '#/token-detail/styles.ts';
 import { useTokenDetailData } from '#/token-detail/internal.ts';
 
 export interface AliasChainProps {
@@ -24,12 +23,12 @@ export function AliasChain({ path }: AliasChainProps): ReactElement | null {
 
   return (
     <>
-      <div style={styles.sectionHeader}>Alias chain</div>
-      <div style={styles.chain}>
+      <div className="sb-token-detail__section-header">Alias chain</div>
+      <div className="sb-token-detail__chain">
         {chain.map((step, i) => (
-          <span key={step} style={styles.chain}>
-            <span style={styles.chainNode}>{step}</span>
-            {i < chain.length - 1 && <span style={styles.arrow}>→</span>}
+          <span key={step} className="sb-token-detail__chain">
+            <span className="sb-token-detail__chain-node">{step}</span>
+            {i < chain.length - 1 && <span className="sb-token-detail__arrow">→</span>}
           </span>
         ))}
       </div>

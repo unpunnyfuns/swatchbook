@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react';
-import { styles } from '#/token-detail/styles.ts';
 import { useTokenDetailData } from '#/token-detail/internal.ts';
 
 export interface TokenUsageSnippetProps {
@@ -12,8 +11,8 @@ export function TokenUsageSnippet({ path }: TokenUsageSnippetProps): ReactElemen
   if (!token) return null;
   return (
     <>
-      <div style={styles.sectionHeader}>Usage</div>
-      <code style={styles.snippet}>{`color: ${cssVar};`}</code>
+      <div className="sb-token-detail__section-header">Usage</div>
+      <code className="sb-token-detail__snippet">{`color: ${cssVar};`}</code>
     </>
   );
 }
