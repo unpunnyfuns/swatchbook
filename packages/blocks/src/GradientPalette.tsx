@@ -145,14 +145,14 @@ export function GradientPalette({
   if (rows.length === 0) {
     return (
       <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
-        <div className='sb-block__empty'>No gradient tokens match this filter.</div>
+        <div className="sb-block__empty">No gradient tokens match this filter.</div>
       </div>
     );
   }
 
   return (
     <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
-      <div className='sb-block__caption'>{captionText}</div>
+      <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} style={styles.row}>
           <div style={styles.meta}>

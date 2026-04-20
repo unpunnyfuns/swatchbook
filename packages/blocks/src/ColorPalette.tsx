@@ -167,14 +167,14 @@ export function ColorPalette({
   if (totalCount === 0) {
     return (
       <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
-        <div className='sb-block__empty'>No color tokens match this filter.</div>
+        <div className="sb-block__empty">No color tokens match this filter.</div>
       </div>
     );
   }
 
   return (
     <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
-      <div className='sb-block__caption'>{captionText}</div>
+      <div className="sb-block__caption">{captionText}</div>
       {groups.map(([group, swatches]) => (
         <section key={group} style={styles.group}>
           <div style={styles.groupHeader}>{group}</div>

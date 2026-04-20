@@ -41,5 +41,5 @@ export const typePillStyle = {
  * `chromeAliases`), so the message itself just needs the muted type.
  */
 export function EmptyState({ children }: { children: ReactNode }): ReactElement {
-  return <div className='sb-block__empty'>{children}</div>;
+  return <div className="sb-block__empty">{children}</div>;
 }

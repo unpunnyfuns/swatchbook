@@ -176,7 +176,7 @@ export function TokenTable({
   if (rows.length === 0) {
     return (
       <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
-        <div className='sb-block__empty'>No tokens match this filter.</div>
+        <div className="sb-block__empty">No tokens match this filter.</div>
       </div>
     );
   }
