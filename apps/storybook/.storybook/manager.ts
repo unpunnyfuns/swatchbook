@@ -4,19 +4,35 @@ import { create, themes } from 'storybook/theming';
 /**
  * Manager-side theming for the Storybook UI chrome (sidebar, toolbar,
  * panel tabs) — separate from the preview-side swatchbook addon that
- * themes stories. This just brands the manager with the swatchbook logo
- * + lowercase wordmark so readers know where they are.
+ * themes stories. Brands the manager with the swatchbook logo + lowercase
+ * wordmark, and follows the user's OS `prefers-color-scheme` so dark-mode
+ * readers don't get a white chrome against their dark OS.
  *
- * Light theme only for now; the stock light chrome reads cleanly under
- * both preview color-schemes.
+ * Storybook doesn't ship a built-in interactive manager-theme toggle;
+ * `storybook-dark-mode` is the closest community option but it only
+ * manipulates DOM classes, not the `addons.setConfig` theme. The
+ * prefers-color-scheme check here runs once at manager load — consumers
+ * who want a different theme can flip their OS setting and reload.
  */
+const preferDark =
+  typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+// Storybook's `brandImage` replaces the title; passing HTML to
+// `brandTitle` is the documented way to get logo + wordmark side by
+// side. Inline sizing on the `<img>` keeps it a small icon.
+const brandMarkup = `
+  <span style="display:inline-flex;align-items:center;gap:8px;">
+    <img src="./logo.svg" alt="" style="height:24px;width:auto;" />
+    <span>swatchbook</span>
+  </span>
+`;
+
 addons.setConfig({
   theme: create({
-    ...themes.light,
-    base: 'light',
-    brandTitle: 'swatchbook',
-    brandUrl: 'https://unpunnyfuns.github.io/swatchbook/',
-    brandImage: './logo.svg',
+    ...(preferDark ? themes.dark : themes.light),
+    base: preferDark ? 'dark' : 'light',
+    brandTitle: brandMarkup,
+    brandUrl: './',
     brandTarget: '_self',
   }),
 });
