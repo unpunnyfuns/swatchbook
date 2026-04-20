@@ -1,3 +1,25 @@
+.sb-token-navigator__search {
+  padding: 0 0 8px;
+}
+
+.sb-token-navigator__search-input {
+  width: 100%;
+  max-width: 360px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.3));
+  background: var(--swatchbook-surface-default, Canvas);
+  color: var(--swatchbook-text-default, CanvasText);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.sb-token-navigator__search-input:focus-visible {
+  outline: 2px solid var(--swatchbook-accent-bg, #1d4ed8);
+  outline-offset: 1px;
+}
+
 .sb-token-navigator__caption {
   padding: 4px 0 12px;
   color: var(--swatchbook-text-muted, CanvasText);

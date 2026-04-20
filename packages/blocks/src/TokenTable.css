@@ -3,6 +3,35 @@
   border-collapse: collapse;
 }
 
+.sb-token-table__search {
+  padding: 0 0 8px;
+}
+
+.sb-token-table__search-input {
+  width: 100%;
+  max-width: 360px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.3));
+  background: var(--swatchbook-surface-default, Canvas);
+  color: var(--swatchbook-text-default, CanvasText);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.sb-token-table__search-input:focus-visible {
+  outline: 2px solid var(--swatchbook-accent-bg, #1d4ed8);
+  outline-offset: 1px;
+}
+
+.sb-token-table__empty-row {
+  color: var(--swatchbook-text-muted, CanvasText);
+  font-style: italic;
+  text-align: center;
+  padding: 16px 12px;
+}
+
 .sb-token-table__caption {
   caption-side: top;
   text-align: left;

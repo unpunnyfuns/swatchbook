@@ -33,6 +33,14 @@ export interface TokenTableProps {
   /** `'asc'` (default) or `'desc'`. */
   sortDir?: SortDir;
   /**
+   * Render a runtime search input above the table that narrows rows by
+   * case-insensitive substring against the token path, type, or value.
+   * Defaults to `true` because browsing a multi-hundred-token reference
+   * without search is painful. Pass `false` to hide the input (the
+   * `filter` / `type` props still apply at authoring time).
+   */
+  searchable?: boolean;
+  /**
    * Called with the clicked row's dot-path. When set, the built-in
    * `<TokenDetail>` slide-over is suppressed — the consumer owns the
    * follow-up UI (inline panel, drill-down route, …).
@@ -46,11 +54,13 @@ export function TokenTable({
   caption,
   sortBy = 'path',
   sortDir = 'asc',
+  searchable = true,
   onSelect,
 }: TokenTableProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
   const colorFormat = useColorFormat();
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
 
   const rows = useMemo(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
@@ -73,6 +83,17 @@ export function TokenTable({
     });
   }, [resolved, filter, type, cssVarPrefix, colorFormat, sortBy, sortDir]);
 
+  const visibleRows = useMemo(() => {
+    if (!searchable || query.trim() === '') return rows;
+    const needle = query.trim().toLowerCase();
+    return rows.filter(
+      (row) =>
+        row.path.toLowerCase().includes(needle) ||
+        row.type.toLowerCase().includes(needle) ||
+        row.value.toLowerCase().includes(needle),
+    );
+  }, [rows, query, searchable]);
+
   const handleRowClick = useCallback(
     (path: string) => {
       if (onSelect) onSelect(path);
@@ -81,11 +102,13 @@ export function TokenTable({
     [onSelect],
   );
 
+  const matchSuffix =
+    searchable && query.trim() !== '' ? ` · ${visibleRows.length} matching "${query.trim()}"` : '';
   const captionText =
     caption ??
     `${rows.length} token${rows.length === 1 ? '' : 's'}${
       filter ? ` matching \`${filter}\`` : ''
-    }${type ? ` · $type=${type}` : ''} · ${activeTheme}`;
+    }${type ? ` · $type=${type}` : ''}${matchSuffix} · ${activeTheme}`;
 
   if (rows.length === 0) {
     return (
@@ -97,6 +120,19 @@ export function TokenTable({
 
   return (
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+      {searchable && (
+        <div className="sb-token-table__search">
+          <input
+            type="search"
+            className="sb-token-table__search-input"
+            placeholder="Search tokens…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label="Search tokens by path, type, or value"
+            data-testid="token-table-search"
+          />
+        </div>
+      )}
       <table className="sb-token-table__table">
         <caption className="sb-token-table__caption">{captionText}</caption>
         <thead>
@@ -106,7 +142,14 @@ export function TokenTable({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
+          {visibleRows.length === 0 && (
+            <tr>
+              <td colSpan={2} className="sb-token-table__td sb-token-table__empty-row">
+                No tokens match "{query.trim()}".
+              </td>
+            </tr>
+          )}
+          {visibleRows.map((row) => (
             <tr
               key={row.path}
               className="sb-token-table__row"

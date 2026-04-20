@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { type ProjectSnapshot, SwatchbookProvider, TokenTable } from '#/index.ts';
 
@@ -113,6 +113,58 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     expect(rows.length).toBe(3);
 
     expect(within(table).queryByText('space.md')).toBeNull();
+  });
+
+  it('renders a search input by default that filters rows by substring', () => {
+    const snapshot = makeSnapshot();
+    const { container } = render(
+      <SwatchbookProvider value={snapshot}>
+        <TokenTable />
+      </SwatchbookProvider>,
+    );
+
+    const input = screen.getByTestId('token-table-search') as HTMLInputElement;
+    expect(input).toBeDefined();
+
+    const before = within(screen.getByRole('table')).getAllByRole('row').length;
+    expect(before).toBeGreaterThan(2);
+
+    // Typing narrows rows to those whose path contains the needle.
+    fireEvent.change(input, { target: { value: 'surface' } });
+
+    const after = within(screen.getByRole('table')).getAllByRole('row');
+    // Header row + at least one matching row; no non-matching rows.
+    const bodyRows = after.filter((r) => r.getAttribute('data-path'));
+    expect(bodyRows.length).toBeGreaterThan(0);
+    for (const row of bodyRows) {
+      expect(row.getAttribute('data-path')).toContain('surface');
+    }
+    expect(container.textContent).toContain('matching "surface"');
+  });
+
+  it('shows a "no matches" row when the search query matches nothing', () => {
+    const snapshot = makeSnapshot();
+    render(
+      <SwatchbookProvider value={snapshot}>
+        <TokenTable />
+      </SwatchbookProvider>,
+    );
+
+    const input = screen.getByTestId('token-table-search') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'xyz-no-match' } });
+
+    expect(screen.getByText(/No tokens match "xyz-no-match"/)).toBeDefined();
+  });
+
+  it('hides the search input when searchable={false}', () => {
+    const snapshot = makeSnapshot();
+    render(
+      <SwatchbookProvider value={snapshot}>
+        <TokenTable searchable={false} />
+      </SwatchbookProvider>,
+    );
+
+    expect(screen.queryByTestId('token-table-search')).toBeNull();
   });
 
   it('renders the empty state when the filter matches nothing', () => {
