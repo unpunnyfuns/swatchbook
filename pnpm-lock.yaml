@@ -184,7 +184,7 @@ importers:
         version: 10.3.5(@testing-library/dom@10.4.1)(prettier@2.8.8)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       tsdown:
         specifier: ^0.21.9
-        version: 0.21.9(typescript@6.0.3)
+        version: 0.21.9(@tsdown/css@0.21.9)(typescript@6.0.3)
       typescript:
         specifier: ^6.0.0
         version: 6.0.3
@@ -204,6 +204,9 @@ importers:
       '@testing-library/react':
         specifier: ^16.3.2
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      '@tsdown/css':
+        specifier: ^0.21.9
+        version: 0.21.9(jiti@2.6.1)(postcss@8.5.10)(tsdown@0.21.9)
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
@@ -224,7 +227,7 @@ importers:
         version: 10.3.5(@testing-library/dom@10.4.1)(prettier@2.8.8)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       tsdown:
         specifier: ^0.21.9
-        version: 0.21.9(typescript@6.0.3)
+        version: 0.21.9(@tsdown/css@0.21.9)(typescript@6.0.3)
       typescript:
         specifier: ^6.0.0
         version: 6.0.3
@@ -252,7 +255,7 @@ importers:
         version: 4.1.4(vitest@4.1.4)
       tsdown:
         specifier: ^0.21.9
-        version: 0.21.9(typescript@6.0.3)
+        version: 0.21.9(@tsdown/css@0.21.9)(typescript@6.0.3)
       typescript:
         specifier: ^6.0.0
         version: 6.0.3
@@ -3051,6 +3054,28 @@ packages:
       tmcp: ^1.18.0
     peerDependenciesMeta:
       '@tmcp/auth':
+        optional: true
+
+  '@tsdown/css@0.21.9':
+    resolution: {integrity: sha512-ZuSHdio/H9V3+LvHQ9HssC7vKNwqetG6NEyuUME5uCi1VsoGnYJKLQ+CZl4AMT87kSP+N6mF0egzdWtV34e3Pw==}
+    engines: {node: '>=20.19.0'}
+    peerDependencies:
+      postcss: ^8.4.0
+      postcss-import: ^16.0.0
+      postcss-modules: ^6.0.0
+      sass: '*'
+      sass-embedded: '*'
+      tsdown: 0.21.9
+    peerDependenciesMeta:
+      postcss:
+        optional: true
+      postcss-import:
+        optional: true
+      postcss-modules:
+        optional: true
+      sass:
+        optional: true
+      sass-embedded:
         optional: true
 
   '@turbo/darwin-64@2.9.6':
@@ -6054,6 +6079,24 @@ packages:
     engines: {node: '>=18'}
     peerDependencies:
       postcss: ^8.4
+
+  postcss-load-config@6.0.1:
+    resolution: {integrity: sha512-oPtTM4oerL+UXmx+93ytZVN82RrlY/wPUV8IeDxFrzIjXOLF1pN+EmKPLbubvKHT2HC20xXsCAH2Z+CKV6Oz/g==}
+    engines: {node: '>= 18'}
+    peerDependencies:
+      jiti: '>=1.21.0'
+      postcss: '>=8.0.9'
+      tsx: ^4.8.1
+      yaml: ^2.4.2
+    peerDependenciesMeta:
+      jiti:
+        optional: true
+      postcss:
+        optional: true
+      tsx:
+        optional: true
+      yaml:
+        optional: true
 
   postcss-loader@7.3.4:
     resolution: {integrity: sha512-iW5WTTBSC5BfsBJ9daFMPVrLT36MrNiC6fqOZTTaHjBNX6Pfd5p+hSBqe/fEeNd7pc13QiAyGt7VdGMw4eRC4A==}
@@ -11031,6 +11074,19 @@ snapshots:
       esm-env: 1.2.2
       tmcp: 1.19.3(typescript@6.0.3)
 
+  '@tsdown/css@0.21.9(jiti@2.6.1)(postcss@8.5.10)(tsdown@0.21.9)':
+    dependencies:
+      lightningcss: 1.32.0
+      postcss-load-config: 6.0.1(jiti@2.6.1)(postcss@8.5.10)
+      rolldown: 1.0.0-rc.16
+      tsdown: 0.21.9(@tsdown/css@0.21.9)(typescript@6.0.3)
+    optionalDependencies:
+      postcss: 8.5.10
+    transitivePeerDependencies:
+      - jiti
+      - tsx
+      - yaml
+
   '@turbo/darwin-64@2.9.6':
     optional: true
 
@@ -14476,6 +14532,13 @@ snapshots:
       '@csstools/utilities': 2.0.0(postcss@8.5.10)
       postcss: 8.5.10
 
+  postcss-load-config@6.0.1(jiti@2.6.1)(postcss@8.5.10):
+    dependencies:
+      lilconfig: 3.1.3
+    optionalDependencies:
+      jiti: 2.6.1
+      postcss: 8.5.10
+
   postcss-loader@7.3.4(postcss@8.5.10)(typescript@6.0.3)(webpack@5.106.2(@swc/core@1.15.26)(esbuild@0.27.7)):
     dependencies:
       cosmiconfig: 8.3.6(typescript@6.0.3)
@@ -15730,7 +15793,7 @@ snapshots:
       minimist: 1.2.8
       strip-bom: 3.0.0
 
-  tsdown@0.21.9(typescript@6.0.3):
+  tsdown@0.21.9(@tsdown/css@0.21.9)(typescript@6.0.3):
     dependencies:
       ansis: 4.2.0
       cac: 7.0.0
@@ -15749,6 +15812,7 @@ snapshots:
       unconfig-core: 7.5.0
       unrun: 0.2.36
     optionalDependencies:
+      '@tsdown/css': 0.21.9(jiti@2.6.1)(postcss@8.5.10)(tsdown@0.21.9)
       typescript: 6.0.3
     transitivePeerDependencies:
       - '@ts-macro/tsc'

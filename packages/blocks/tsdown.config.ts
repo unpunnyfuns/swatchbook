@@ -6,6 +6,9 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
+  css: {
+    inject: true,
+  },
   deps: {
     neverBundle: [
       /^@storybook\//,
