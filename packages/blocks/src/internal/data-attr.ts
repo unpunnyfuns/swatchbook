@@ -12,7 +12,7 @@ export function dataAttr(prefix: string, key: string): string {
 
 /**
  * Marker attribute set on every block wrapper. Used as the scope selector
- * for the defensive element-reset stylesheet in `block-reset.ts` so
+ * for the defensive element-reset stylesheet in `block-reset.css` so
  * Storybook MDX docs CSS (`.sbdocs table`, `.sbdocs ul`, …) can't bleed
  * into our chrome.
  */
