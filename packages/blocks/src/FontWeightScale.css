@@ -1,0 +1,40 @@
+.sb-font-weight-scale__row {
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) 1fr auto;
+  gap: 16px;
+  align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.2));
+}
+
+.sb-font-weight-scale__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sb-font-weight-scale__path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-font-weight-scale__value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: var(--swatchbook-text-muted, CanvasText);
+}
+
+.sb-font-weight-scale__sample {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.sb-font-weight-scale__css-var {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: var(--swatchbook-text-muted, CanvasText);
+}

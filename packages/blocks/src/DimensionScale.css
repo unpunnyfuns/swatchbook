@@ -1,0 +1,49 @@
+.sb-dimension-scale__row {
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.2));
+}
+
+.sb-dimension-scale__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sb-dimension-scale__path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-dimension-scale__specs {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.sb-dimension-scale__visual-cell {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.sb-dimension-scale__css-var {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+.sb-dimension-scale__cap {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  opacity: 0.6;
+  margin-left: 6px;
+}
