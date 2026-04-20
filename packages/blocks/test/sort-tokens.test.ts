@@ -18,7 +18,11 @@ describe('sortTokens', () => {
       entry('color.palette.blue.300', 'color', { hex: '#93c5fd' }),
     ];
     const out = sortTokens(input);
-    expect(out.map(([p]) => p)).toEqual(['color.palette.blue.100', 'color.palette.blue.300', 'color.palette.blue.500']);
+    expect(out.map(([p]) => p)).toEqual([
+      'color.palette.blue.100',
+      'color.palette.blue.300',
+      'color.palette.blue.500',
+    ]);
   });
 
   it('respects sortDir desc for path sort', () => {
