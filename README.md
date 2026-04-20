@@ -1,6 +1,8 @@
 # Swatchbook
 
-A Storybook addon and supporting packages for documenting [DTCG](https://www.designtokens.org/) design tokens — parsed via [Terrazzo](https://terrazzo.app/) — inside your Storybook.
+A Storybook addon and MDX blocks for documenting [DTCG](https://www.designtokens.org/) design tokens — parsed via [Terrazzo](https://terrazzo.app/) — with a toolbar that flips **light/dark, brand, contrast, density, or whatever independent dimensions your design system cares about**. Each dimension is a modifier on your DTCG resolver; swatchbook reads them directly, so you don't enumerate every combination as a flat theme ID. (See ["why axes, not themes"](https://unpunnyfuns.github.io/swatchbook/concepts/axes-vs-themes).)
+
+Alongside the switcher, swatchbook ships MDX doc blocks — `TokenNavigator`, `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail`, and more — that render your tokens as browsable reference pages without a bespoke docs site.
 
 **Documentation:** [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/) (live Storybook at [`/storybook`](https://unpunnyfuns.github.io/swatchbook/storybook/)).
 
@@ -9,7 +11,7 @@ A Storybook addon and supporting packages for documenting [DTCG](https://www.des
 | Package | Purpose |
 | --- | --- |
 | [`@unpunnyfuns/swatchbook-core`](./packages/core) | Framework-free DTCG loader. Emits CSS variables and TypeScript types. |
-| [`@unpunnyfuns/swatchbook-addon`](./packages/addon) | Storybook 10 addon. Toolbar, Design Tokens panel, preview decorator, `useToken()` hook. |
+| [`@unpunnyfuns/swatchbook-addon`](./packages/addon) | Storybook 10 addon. Toolbar, preview decorator, `useToken()` hook. |
 | [`@unpunnyfuns/swatchbook-blocks`](./packages/blocks) | MDX doc blocks. Color swatches, dimension bars, typography samples, composite previews, per-token detail. |
 
 ## Install
