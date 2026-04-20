@@ -197,6 +197,9 @@ importers:
 
   packages/blocks:
     dependencies:
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       colorjs.io:
         specifier: 0.6.1
         version: 0.6.1

@@ -1,6 +1,7 @@
-import type { CSSProperties, ReactElement } from 'react';
+import cx from 'clsx';
+import type { ReactElement } from 'react';
+import './Diagnostics.css';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
-import { BORDER_FAINT, TEXT_MUTED } from '#/internal/styles.tsx';
 import { useProject } from '#/internal/use-project.ts';
 import type { VirtualDiagnostic } from '#/types.ts';
 
@@ -11,55 +12,10 @@ export interface DiagnosticsProps {
 
 type DiagnosticSeverity = VirtualDiagnostic['severity'];
 
-const severityColor: Record<DiagnosticSeverity, string> = {
-  error: '#d64545',
-  warn: '#b08900',
-  info: 'inherit',
-};
-
 const severityLabel: Record<DiagnosticSeverity, string> = {
   error: 'ERROR',
   warn: 'WARN',
   info: 'INFO',
-};
-
-const styles = {
-  summary: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '4px 0',
-    fontSize: 13,
-    cursor: 'pointer',
-    listStyle: 'none',
-    fontWeight: 600,
-  } satisfies CSSProperties,
-  list: {
-    listStyle: 'none',
-    margin: '8px 0 0',
-    padding: 0,
-    display: 'flex',
-    flexDirection: 'column',
-  } satisfies CSSProperties,
-  row: {
-    display: 'grid',
-    gridTemplateColumns: '60px 1fr',
-    gap: 12,
-    padding: '8px 4px',
-    borderTop: BORDER_FAINT,
-    fontSize: 12,
-  } satisfies CSSProperties,
-  label: {
-    fontWeight: 600,
-    fontSize: 10,
-    letterSpacing: 0.5,
-  } satisfies CSSProperties,
-  meta: {
-    color: TEXT_MUTED,
-    fontSize: 11,
-    marginTop: 4,
-    opacity: 0.7,
-  } satisfies CSSProperties,
 };
 
 function summaryText(diagnostics: readonly VirtualDiagnostic[]): string {
@@ -77,11 +33,11 @@ function diagnosticKey(d: VirtualDiagnostic, i: number): string {
   return `${d.severity}:${d.group}:${d.filename ?? ''}:${d.line ?? ''}:${d.message}:${i}`;
 }
 
-function summaryColor(diagnostics: readonly VirtualDiagnostic[]): string {
-  if (diagnostics.length === 0) return '#30a46c';
-  if (diagnostics.some((d) => d.severity === 'error')) return severityColor.error;
-  if (diagnostics.some((d) => d.severity === 'warn')) return severityColor.warn;
-  return 'inherit';
+function summaryVariant(diagnostics: readonly VirtualDiagnostic[]): 'ok' | 'error' | 'warn' | null {
+  if (diagnostics.length === 0) return 'ok';
+  if (diagnostics.some((d) => d.severity === 'error')) return 'error';
+  if (diagnostics.some((d) => d.severity === 'warn')) return 'warn';
+  return null;
 }
 
 /**
@@ -101,6 +57,7 @@ export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
     (d) => d.severity === 'error' || d.severity === 'warn',
   );
   const headingText = caption ?? `Diagnostics · ${summaryText(diagnostics)}`;
+  const variant = summaryVariant(diagnostics);
 
   return (
     <div
@@ -109,20 +66,29 @@ export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
       data-testid="diagnostics"
     >
       <details open={hasErrorsOrWarnings}>
-        <summary style={{ ...styles.summary, color: summaryColor(diagnostics) }}>
+        <summary
+          className={cx(
+            'sb-diagnostics__summary',
+            variant && `sb-diagnostics__summary--${variant}`,
+          )}
+        >
           {headingText}
         </summary>
         {diagnostics.length > 0 && (
-          <ul style={styles.list}>
+          <ul className="sb-diagnostics__list">
             {diagnostics.map((d, i) => (
-              <li key={diagnosticKey(d, i)} style={styles.row}>
-                <span style={{ ...styles.label, color: severityColor[d.severity] }}>
+              <li key={diagnosticKey(d, i)} className="sb-diagnostics__row">
+                <span
+                  className={cx('sb-diagnostics__label', {
+                    [`sb-diagnostics__label--${d.severity}`]: d.severity !== 'info',
+                  })}
+                >
                   {severityLabel[d.severity]}
                 </span>
                 <div>
                   <div>{d.message}</div>
                   {(d.group || d.filename) && (
-                    <div style={styles.meta}>
+                    <div className="sb-diagnostics__meta">
                       {[d.group, d.filename, d.line ? `:${d.line}` : '']
                         .filter(Boolean)
                         .join(' · ')}
