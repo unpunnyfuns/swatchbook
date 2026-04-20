@@ -17,12 +17,13 @@ export const SystemTransitions = meta.story({
   play: async ({ canvasElement }) => {
     await waitFor(() => {
       const wrapper = canvasElement.querySelector('[data-sb-theme]');
-      expect(wrapper?.textContent, 'motion preview should include at least one axis path').toMatch(
-        /motion\./,
-      );
+      expect(
+        wrapper?.textContent,
+        'motion preview should include at least one transition path',
+      ).toMatch(/transition\./);
     });
   },
 });
 export const Durations = meta.story({ args: { filter: 'duration.*' } });
-export const Easings = meta.story({ args: { filter: 'easing.*' } });
+export const Easings = meta.story({ args: { filter: 'cubicBezier.*' } });
 export const All = meta.story();
