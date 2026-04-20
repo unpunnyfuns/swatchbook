@@ -1,6 +1,6 @@
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useEffect } from 'react';
-import { BORDER_STRONG, SURFACE_DEFAULT, TEXT_DEFAULT } from '#/internal/styles.tsx';
+import './DetailOverlay.css';
 import { TokenDetail } from '#/TokenDetail.tsx';
 
 /**
@@ -11,42 +11,6 @@ import { TokenDetail } from '#/TokenDetail.tsx';
  * + `aria-modal="true"` hints to AT that focus is trapped here; actual focus
  * management is tracked in the open-issue #253.
  */
-
-const styles = {
-  backdrop: {
-    position: 'fixed',
-    inset: 0,
-    background: 'rgba(0,0,0,0.4)',
-    zIndex: 10000,
-    display: 'flex',
-    alignItems: 'stretch',
-    justifyContent: 'flex-end',
-  } satisfies CSSProperties,
-  panel: {
-    width: 'min(560px, 100%)',
-    height: '100%',
-    overflowY: 'auto',
-    background: SURFACE_DEFAULT,
-    color: TEXT_DEFAULT,
-    boxShadow: '-8px 0 24px rgba(0,0,0,0.2)',
-    padding: 16,
-    position: 'relative',
-  } satisfies CSSProperties,
-  closeButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 32,
-    height: 32,
-    borderRadius: 4,
-    border: BORDER_STRONG,
-    background: 'transparent',
-    color: 'inherit',
-    cursor: 'pointer',
-    fontSize: 16,
-    lineHeight: 1,
-  } satisfies CSSProperties,
-} as const;
 
 export interface DetailOverlayProps {
   path: string;
@@ -68,9 +32,14 @@ export function DetailOverlay({
   }, [onClose]);
 
   return (
-    <div style={styles.backdrop} onClick={onClose} role="presentation" data-testid={testId}>
+    <div
+      className="sb-detail-overlay__backdrop"
+      onClick={onClose}
+      role="presentation"
+      data-testid={testId}
+    >
       <div
-        style={styles.panel}
+        className="sb-detail-overlay__panel"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -78,7 +47,7 @@ export function DetailOverlay({
       >
         <button
           type="button"
-          style={styles.closeButton}
+          className="sb-detail-overlay__close"
           onClick={onClose}
           aria-label="Close"
           data-testid={`${testId}-close`}

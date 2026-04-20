@@ -1,17 +1,9 @@
-import type { CSSProperties, ReactElement } from 'react';
+import cx from 'clsx';
+import type { ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';
+import './TokenTable.css';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
-import {
-  BORDER_FAINT,
-  BORDER_STRONG,
-  MONO_STACK,
-  SIZE_LABEL,
-  SIZE_META,
-  SIZE_PILL,
-  SURFACE_MUTED,
-  TEXT_MUTED,
-} from '#/internal/styles.tsx';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
@@ -47,84 +39,6 @@ export interface TokenTableProps {
    */
   onSelect?(path: string): void;
 }
-
-const styles = {
-  caption: {
-    captionSide: 'top',
-    textAlign: 'left',
-    padding: '8px 0',
-    color: TEXT_MUTED,
-    fontSize: SIZE_META,
-  } satisfies CSSProperties,
-  table: {
-    // `tableLayout: auto` lets column widths follow content; the per-cell
-    // `minWidth` values below keep the important columns from collapsing
-    // on narrow containers.
-    width: '100%',
-    borderCollapse: 'collapse',
-  } satisfies CSSProperties,
-  th: {
-    textAlign: 'left',
-    padding: '8px 12px',
-    fontSize: SIZE_LABEL,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    color: TEXT_MUTED,
-    borderBottom: BORDER_STRONG,
-  } satisfies CSSProperties,
-  thPath: {
-    minWidth: 180,
-  } satisfies CSSProperties,
-  thValue: {
-    minWidth: 160,
-  } satisfies CSSProperties,
-  row: {
-    cursor: 'pointer',
-  } satisfies CSSProperties,
-  td: {
-    padding: '8px 12px',
-    borderBottom: BORDER_FAINT,
-    verticalAlign: 'top',
-  } satisfies CSSProperties,
-  path: {
-    fontFamily: MONO_STACK,
-    fontSize: SIZE_META,
-  } satisfies CSSProperties,
-  valueCell: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    minWidth: 0,
-    fontFamily: MONO_STACK,
-    fontSize: SIZE_META,
-  } satisfies CSSProperties,
-  typePill: {
-    display: 'inline-block',
-    padding: '1px 6px',
-    borderRadius: 4,
-    fontSize: SIZE_PILL,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-    background: SURFACE_MUTED,
-    color: TEXT_MUTED,
-    fontFamily: MONO_STACK,
-    flexShrink: 0,
-  } satisfies CSSProperties,
-  swatch: {
-    display: 'inline-block',
-    width: 16,
-    height: 16,
-    borderRadius: 3,
-    border: BORDER_STRONG,
-    flexShrink: 0,
-  } satisfies CSSProperties,
-  valueText: {
-    minWidth: 0,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  } satisfies CSSProperties,
-};
 
 export function TokenTable({
   filter,
@@ -183,19 +97,19 @@ export function TokenTable({
 
   return (
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
-      <table style={styles.table}>
-        <caption style={styles.caption}>{captionText}</caption>
+      <table className="sb-token-table__table">
+        <caption className="sb-token-table__caption">{captionText}</caption>
         <thead>
           <tr>
-            <th style={{ ...styles.th, ...styles.thPath }}>Path</th>
-            <th style={{ ...styles.th, ...styles.thValue }}>Value</th>
+            <th className={cx('sb-token-table__th', 'sb-token-table__th--path')}>Path</th>
+            <th className={cx('sb-token-table__th', 'sb-token-table__th--value')}>Value</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
             <tr
               key={row.path}
-              style={styles.row}
+              className="sb-token-table__row"
               onClick={() => handleRowClick(row.path)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -208,21 +122,29 @@ export function TokenTable({
               data-testid="token-table-row"
               data-path={row.path}
             >
-              <td style={{ ...styles.td, ...styles.path }}>{row.path}</td>
-              <td style={styles.td}>
-                <span style={styles.valueCell}>
-                  {row.type && <span style={styles.typePill}>{row.type}</span>}
+              <td className={cx('sb-token-table__td', 'sb-token-table__path')}>{row.path}</td>
+              <td className="sb-token-table__td">
+                <span className="sb-token-table__value-cell">
+                  {row.type && <span className="sb-token-table__type-pill">{row.type}</span>}
                   {row.isColor && (
-                    <span style={{ ...styles.swatch, background: row.cssVar }} aria-hidden />
+                    <span
+                      className="sb-token-table__swatch"
+                      style={{ background: row.cssVar }}
+                      aria-hidden
+                    />
                   )}
-                  <span style={styles.valueText} title={row.value} data-testid="token-table-value">
+                  <span
+                    className="sb-token-table__value-text"
+                    title={row.value}
+                    data-testid="token-table-value"
+                  >
                     {row.value}
                   </span>
                   {row.outOfGamut && (
                     <span
                       title="Out of sRGB gamut for this format"
                       aria-label="out of gamut"
-                      style={{ flexShrink: 0 }}
+                      className="sb-token-table__gamut-warn"
                     >
                       ⚠
                     </span>
