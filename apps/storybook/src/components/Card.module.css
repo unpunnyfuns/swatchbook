@@ -1,0 +1,26 @@
+.card {
+  background: var(--sb-color-sys-surface-raised);
+  color: var(--sb-color-sys-text-default);
+  border: var(--sb-border-sys-default);
+  border-radius: var(--sb-radius-sys-lg);
+  padding: var(--sb-space-sys-lg);
+  box-shadow: var(--sb-shadow-sys-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-space-sys-md);
+  max-width: 320px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--sb-typography-sys-heading-font-family);
+  font-size: var(--sb-typography-sys-heading-font-size);
+  font-weight: var(--sb-typography-sys-heading-font-weight);
+  line-height: var(--sb-typography-sys-heading-line-height);
+}
+
+.body {
+  font-family: var(--sb-typography-sys-body-font-family);
+  font-size: var(--sb-typography-sys-body-font-size);
+  line-height: var(--sb-typography-sys-body-line-height);
+}
