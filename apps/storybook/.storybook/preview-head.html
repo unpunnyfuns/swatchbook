@@ -1,0 +1,18 @@
+<!--
+  Pipe the docs MDX page background + foreground through our own chrome
+  variables, so every MDX page sits on the same surface the blocks use
+  and follows the same `light-dark()` defaults (which auto-flip with
+  `color-scheme`).
+
+  Scoped to `.sbdocs-preview` (the docs container) so regular stories
+  aren't affected; they render whatever background the story itself
+  declares.
+-->
+<style>
+  .sbdocs-preview,
+  .sbdocs.sbdocs-preview,
+  .sbdocs-wrapper {
+    background: var(--swatchbook-surface-default, Canvas);
+    color: var(--swatchbook-text-default, CanvasText);
+  }
+</style>
