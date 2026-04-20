@@ -6,10 +6,10 @@ import { Card } from '../components/Card.tsx';
 function PresetProbe() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 12 }}>
-      <Card data-testid='preset-card' title='Preset card'>
+      <Card data-testid="preset-card" title="Preset card">
         Flips with the active preset tuple.
       </Card>
-      <Button data-testid='preset-button' variant='primary'>
+      <Button data-testid="preset-button" variant="primary">
         Accent follows Brand A.
       </Button>
     </div>
