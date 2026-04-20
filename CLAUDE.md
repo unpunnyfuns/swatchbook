@@ -4,14 +4,18 @@ Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfun
 
 ## Current state
 
-`v0.3.0 shipped` — three fixed-group packages (core / addon / blocks) published via Changesets + trusted publishing. Documentation site live at https://unpunnyfuns.github.io/swatchbook/ with multi-version support (`/next/` for main, `/` for the latest release, older minors browsable via the version dropdown).
+`v0.4.0 shipped` — three fixed-group packages (core / addon / blocks) published via Changesets + trusted publishing. Documentation site live at https://unpunnyfuns.github.io/swatchbook/ with multi-version support (`/next/` for main, `/` for the latest release, older minors browsable via the version dropdown).
 
-Post-0.3.0 landscape:
+Post-0.4.0 landscape:
+
+- **Block chrome config** (PR #388): blocks read ten chrome variables in a fixed `--swatchbook-*` namespace independent of `cssVarPrefix`; `DEFAULT_CHROME_MAP` holds hard-coded literals using `light-dark()` so zero-config chrome auto-flips with Storybook/OS color-scheme. `config.chrome = { surfaceDefault: 'color.brand.bg.primary', … }` wires individual roles to consumer tokens. The old `chromeAliases()` + prefix-rewiring inline style on every block wrapper is retired.
+- **Blocks styling migration** (PRs #384, #391, #393, #395, #397, #399): every block under `packages/blocks/src/` (Diagnostics, type-preview, scale, font+color, navigator+table, TokenDetail+subtree) moved from inline `const styles = {...}` objects to colocated `.css` files with BEM-ish `sb-<block>__<part>--<modifier>` class names and `clsx` for composition. `.sb-unstyled` scoping replaces the earlier `block-reset.ts` workaround. See issue #375 for the umbrella.
+
+Post-0.3.0 landscape (still accurate):
 
 - **Panel → docblock migration** complete. The addon's in-manager Design Tokens panel was removed in v0.3.0 (PR #350). Consumers compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` on an MDX page via the [token-dashboard guide](https://unpunnyfuns.github.io/swatchbook/guides/token-dashboard).
 - **TokenTable redesign** in v0.3.0 (PR #359): compact two-column layout with click-to-open `<TokenDetail>` drawer, shared with `<TokenNavigator>`'s drawer via `internal/DetailOverlay.tsx`.
 - **sortBy/sortDir + default-filter fix** (PR #349): every list-style block takes `sortBy`/`sortDir` props and the broken `filter = '$type'` defaults were removed.
-- **Chrome consistency sweep** (PR #347) + **scoped element reset** (PR #357): block chrome pulls from named constants in `internal/styles.tsx`; each block carries `data-swatchbook-block` and mounts a one-time stylesheet that zeroes `.sbdocs *` bleed on MDX docs pages.
 - **`formatTokenValue`** (PR #346): single entry point for per-`$type` value stringification across every block, honoring the color-format dropdown for color sub-values of composites (shadow, border, gradient).
 
 Update this section when the state genuinely shifts. See the matching GitHub milestones for per-issue state.
