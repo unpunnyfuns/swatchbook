@@ -2,13 +2,6 @@
 
 Storybook addon + doc blocks for DTCG design tokens. Monorepo under `@unpunnyfuns`.
 
-## Start here
-
-- Design doc: `docs/plan.md` — current state summary, package responsibilities, scope areas, decisions locked in.
-- Decision log: `docs/decisions.md` — append-only ADR-lite for changes made during execution.
-- Terrazzo spike: `docs/terrazzo-notes.md` — what `@terrazzo/parser` gives us and what core still owns.
-- Future plans: `docs/future.md` — ideas deliberately deferred past v0.1.0, with the *why* preserved so we don't re-litigate.
-
 ## Current state
 
 `v0.3.0 shipped` — three fixed-group packages (core / addon / blocks) published via Changesets + trusted publishing. Documentation site live at https://unpunnyfuns.github.io/swatchbook/ with multi-version support (`/next/` for main, `/` for the latest release, older minors browsable via the version dropdown).
@@ -102,7 +95,6 @@ claude
 - **Versioning:** [Changesets](https://github.com/changesets/changesets). Config in `.changeset/config.json`. The three published packages — `@unpunnyfuns/swatchbook-core`, `@unpunnyfuns/swatchbook-addon`, `@unpunnyfuns/swatchbook-blocks` — are grouped as `fixed`: they always carry the same version and release together. Private workspaces (root, `apps/storybook`, `tokens-reference`, `tokens-starter`) are listed under `ignore` so they never appear in bump prompts or get published.
 - **Writing a changeset:** any PR with a user-visible change to the fixed-group packages runs `pnpm changeset` locally, picks the bump type (`patch` / `minor` / `major`), and commits the generated `.changeset/*.md` alongside the change. Purely internal refactors and doc-only PRs can skip it.
 - **Publishing flow:** on `main`, Changesets' GitHub Action opens a "Version Packages" PR that consumes queued `.changeset/*.md` entries, bumps `package.json` versions, and regenerates `CHANGELOG.md`. Merging that PR runs `pnpm release` (builds + `changeset publish`) which pushes tags to GitHub and publishes to npm via trusted publishing (GitHub OIDC → short-lived npm token; no `NPM_TOKEN` secret, provenance attestation on). See `.github/workflows/release.yml`.
-- **VP PR race — don't fight it.** The release workflow runs `concurrency.group: release` with `cancel-in-progress: true` (PR #365): when a feature merge lands right after a Version Packages merge, the later workflow run cancels the earlier one so the earlier run can't regenerate a ghost VP PR from a pre-consumption changeset snapshot. The workflow also has a post-step (PR #364) that closes any empty VP PR whose `changeset-release/main` branch has collapsed to no diff vs main. Both are belt-and-suspenders; if a ghost PR still appears, close it manually and check that `cancel-in-progress` is still set.
 - **Docs versioning:** `scripts/snapshot-docs-version.mjs` snapshots `apps/docs/docs/` into `apps/docs/versioned_docs/version-<minor>/` and updates `versions.json` + `versioned_sidebars/`. Run it when cutting a new minor (the current `docs/` tree becomes the new released version; `main`'s `docs/` keeps serving at `/next/`). Turbo's `build` task includes `versioned_docs/**`, `versioned_sidebars/**`, `versions.json` in its input hash so the remote cache invalidates when a snapshot lands (PR #362 — without this, a fresh minor silently serves the previous minor's HTML).
 
 ## Plan governance
