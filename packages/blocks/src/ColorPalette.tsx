@@ -10,7 +10,7 @@ import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 export interface ColorPaletteProps {
   /**
    * Token-path filter. Defaults to every `color` token. Use e.g.
-   * `"color.*"` to scope to the semantic layer, or `"color.blue.*"`
+   * `"color.*"` to scope to the semantic layer, or `"color.palette.blue.*"`
    * for a single ref ramp.
    */
   filter?: string;
@@ -22,7 +22,7 @@ export interface ColorPaletteProps {
    * If omitted, groupBy is derived from the filter: one level below the
    * filter's fixed prefix (segments before the first `*`), clamped so each
    * swatch still carries a leaf label. `"color.*"` → groups at
-   * `color.<family>`; `"color.blue.*"` collapses all shades into
+   * `color.<family>`; `"color.palette.blue.*"` collapses all shades into
    * one `color.blue` group because the tokens have no deeper level.
    */
   groupBy?: number;

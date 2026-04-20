@@ -12,7 +12,7 @@ function makeSnapshot(): ProjectSnapshot {
       Light: {
         'color.bg': { $type: 'color', $value: { hex: '#fff' } },
         'color.fg': { $type: 'color', $value: { hex: '#111' } },
-        'color.blue.500': { $type: 'color', $value: { hex: '#3b82f6' } },
+        'color.palette.blue.500': { $type: 'color', $value: { hex: '#3b82f6' } },
         'radius.sm': { $type: 'dimension', $value: { value: 4, unit: 'px' } },
       },
     },

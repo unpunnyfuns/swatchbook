@@ -40,7 +40,7 @@ it('applies the prefix to aliased var(…) references inside values', () => {
 
 
 it('emits every primitive + composite type covered by the fixture', () => {
-  expect(css).toMatch(/--sb-color-blue-500:\s*rgb\(/i);
+  expect(css).toMatch(/--sb-color-palette-blue-500:\s*rgb\(/i);
   expect(css).toMatch(/--sb-size-100:\s*4px/);
   expect(css).toMatch(/--sb-font-family-sans:/);
   expect(css).toMatch(/--sb-font-weight-bold:\s*700/);

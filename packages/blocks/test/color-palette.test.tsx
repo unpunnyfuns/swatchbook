@@ -12,8 +12,8 @@ function makeSnapshot(): ProjectSnapshot {
       Light: {
         'color.bg': { $type: 'color', $value: { hex: '#fff' } },
         'color.fg': { $type: 'color', $value: { hex: '#111' } },
-        'color.blue.500': { $type: 'color', $value: { hex: '#3b82f6' } },
-        'color.red.500': { $type: 'color', $value: { hex: '#ef4444' } },
+        'color.palette.blue.500': { $type: 'color', $value: { hex: '#3b82f6' } },
+        'color.palette.red.500': { $type: 'color', $value: { hex: '#ef4444' } },
         'radius.sm': { $type: 'dimension', $value: { value: 4, unit: 'px' } },
       },
     },
@@ -48,22 +48,22 @@ describe('ColorPalette', () => {
     );
     // `color.*` has fixed length 1. Auto groupBy clamps so every swatch
     // keeps a leaf label — depth-2 tokens get `color.<leaf>` groups,
-    // depth-3 tokens group by their family (`color.blue`, `color.red`).
+    // depth-4 palette tokens collapse under the shared `color.palette` group.
     expect(screen.getByText('color.bg')).toBeDefined();
     expect(screen.getByText('color.fg')).toBeDefined();
-    expect(screen.getByText('color.blue')).toBeDefined();
+    expect(screen.getByText('color.palette')).toBeDefined();
   });
 
   it('clamps auto-groupBy so each swatch keeps a leaf label', () => {
-    // `color.blue.*` has fixed length 3; with 4-segment tokens the
+    // `color.palette.blue.*` has fixed length 3; with 4-segment tokens the
     // auto groupBy clamps so all blue shades land under one group with
     // their shade as the leaf.
     render(
       <SwatchbookProvider value={makeSnapshot()}>
-        <ColorPalette filter="color.blue.*" />
+        <ColorPalette filter="color.palette.blue.*" />
       </SwatchbookProvider>,
     );
-    expect(screen.getByText('color.blue')).toBeDefined();
+    expect(screen.getByText('color.palette.blue')).toBeDefined();
     expect(screen.getByText('500')).toBeDefined();
   });
 

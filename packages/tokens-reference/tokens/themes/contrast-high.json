@@ -3,13 +3,13 @@
     "$type": "color",
     "$description": "High-contrast overlay — strengthens borders and focus rings. Surfaces and accents stay in mode/brand's lane.",
     "border": {
-      "default": { "$value": "{color.neutral.700}" },
-      "strong":  { "$value": "{color.neutral.900}" },
-      "focus":   { "$value": "{color.yellow.500}" }
+      "default": { "$value": "{color.palette.neutral.700}" },
+      "strong":  { "$value": "{color.palette.neutral.900}" },
+      "focus":   { "$value": "{color.palette.yellow.500}" }
     },
     "text": {
-      "muted":  { "$value": "{color.neutral.700}" },
-      "subtle": { "$value": "{color.neutral.600}" }
+      "muted":  { "$value": "{color.palette.neutral.700}" },
+      "subtle": { "$value": "{color.palette.neutral.600}" }
     }
   },
   "border": {

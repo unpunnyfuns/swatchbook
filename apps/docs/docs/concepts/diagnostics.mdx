@@ -42,7 +42,7 @@ The `<Diagnostics />` block renders the project's diagnostics as a collapsible l
 
 Common patterns:
 
-- **`parser: Could not resolve alias "{color.blue.500}"`** — the alias target doesn't exist in the merged graph. Check for a typo in the path, or a missing ref file that wasn't included in `tokens` globs.
+- **`parser: Could not resolve alias "{color.palette.blue.500}"`** — the alias target doesn't exist in the merged graph. Check for a typo in the path, or a missing ref file that wasn't included in `tokens` globs.
 - **`parser: Invalid token value for $type "color"`** — the `$value` doesn't parse as the declared `$type`. Usually a string missing a unit or a color in the wrong format.
 - **`swatchbook/presets: Preset "X" has unknown axis key "Y"`** — a preset references an axis that doesn't exist on the project. Either the axis name was renamed or the preset predates the resolver change.
 

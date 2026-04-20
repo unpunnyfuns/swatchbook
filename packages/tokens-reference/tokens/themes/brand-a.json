@@ -5,7 +5,7 @@
     "accent": {
       "bg":       { "$value": "{color.violet.700}" },
       "bg-hover": { "$value": "{color.violet.900}" },
-      "fg":       { "$value": "{color.neutral.0}" }
+      "fg":       { "$value": "{color.palette.neutral.0}" }
     },
     "text": {
       "accent":   { "$value": "{color.violet.700}" }

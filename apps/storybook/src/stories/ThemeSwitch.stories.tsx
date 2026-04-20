@@ -42,7 +42,7 @@ async function bgWhenMounted(el: Element): Promise<string> {
 }
 
 /**
- * Light surface (color.surface.raised → color.neutral.0, i.e. white).
+ * Light surface (color.surface.raised → color.palette.neutral.0, i.e. white).
  * Component channels should all be near 255.
  */
 export const Light = meta.story({
@@ -60,7 +60,7 @@ export const Light = meta.story({
 });
 
 /**
- * Dark surface (color.surface.raised → color.neutral.800, near-black).
+ * Dark surface (color.surface.raised → color.palette.neutral.800, near-black).
  * Component channels should all be low.
  */
 export const Dark = meta.story({

@@ -513,7 +513,7 @@ export const TokenDetailCubicBezierPrimitive = meta.story({
  * promise of backward alias traversal.
  */
 export const TokenDetailAliasedBy = meta.story({
-  render: () => <TokenDetail path="color.neutral.0" />,
+  render: () => <TokenDetail path="color.palette.neutral.0" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'h3');
     const body = canvasElement.textContent ?? '';

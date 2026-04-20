@@ -16,7 +16,7 @@ beforeAll(async () => {
 }, 30_000);
 
 it('emits color tokens as rgb() values with the full component triple', () => {
-  const line = root.split('\n').find((l) => l.includes('--sb-color-blue-500:'));
+  const line = root.split('\n').find((l) => l.includes('--sb-color-palette-blue-500:'));
   expect(line).toMatch(/rgb\([\d.%\s]+\)/);
 });
 

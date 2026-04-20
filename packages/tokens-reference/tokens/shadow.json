@@ -4,7 +4,7 @@
     "$description": "Elevation shadows. Composite with color + offsets + blur + spread.",
     "sm": {
       "$value": {
-        "color":   "{color.neutral.900}",
+        "color":   "{color.palette.neutral.900}",
         "offsetX": { "value": 0, "unit": "px" },
         "offsetY": { "value": 1, "unit": "px" },
         "blur":    { "value": 2, "unit": "px" },
@@ -13,7 +13,7 @@
     },
     "md": {
       "$value": {
-        "color":   "{color.neutral.900}",
+        "color":   "{color.palette.neutral.900}",
         "offsetX": { "value": 0, "unit": "px" },
         "offsetY": { "value": 4, "unit": "px" },
         "blur":    { "value": 8, "unit": "px" },
@@ -23,14 +23,14 @@
     "lg": {
       "$value": [
         {
-          "color":   "{color.neutral.900}",
+          "color":   "{color.palette.neutral.900}",
           "offsetX": { "value": 0, "unit": "px" },
           "offsetY": { "value": 8, "unit": "px" },
           "blur":    { "value": 16, "unit": "px" },
           "spread":  { "value": 0, "unit": "px" }
         },
         {
-          "color":   "{color.neutral.900}",
+          "color":   "{color.palette.neutral.900}",
           "offsetX": { "value": 0, "unit": "px" },
           "offsetY": { "value": 2, "unit": "px" },
           "blur":    { "value": 4, "unit": "px" },

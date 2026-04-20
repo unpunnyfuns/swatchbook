@@ -61,13 +61,13 @@ When filing an issue: feature work → the relevant scope milestone if one's act
   - **No nested `describe`.** One `describe` per file at most, as a file-level grouping. If you feel the urge to nest, split files instead.
   - **No `beforeEach`** for cosmetic shared setup. Write an inline `setup()` helper and have each test call it; duplicating a line or two beats the "what is `user` here?" hunt.
   - **`beforeAll` is a perf escape hatch**, not a grouping tool. Acceptable only when the shared setup is genuinely expensive (e.g. `loadProject` takes ~1s so running it per-test would blow the timeout) and the alternative would be a meaningful regression. Annotate the reason inline.
-  - Prose over jargon in test names: `` it('resolves alias chains (sys → ref)') `` beats `` it('resolves') `` inside nested describes.
+  - Prose over jargon in test names: `` it('resolves alias chains (role → primitive)') `` beats `` it('resolves') `` inside nested describes.
 - **Pre-commit checks (always, no exceptions):** before running `git commit`, run
   ```
   pnpm -r format && pnpm turbo run lint typecheck test
   ```
   Format changes to already-staged files land as noisy follow-up commits; CI fails on lint/typecheck/test regressions. Running all four locally catches every class before the push. If something is too slow, scope with `--filter=<pkg>` — don't skip.
-- **Design tokens:** flat paths organized per DTCG `$type`, following [Terrazzo's style guide](https://terrazzo.app/docs/guides/styleguide/). Primitives (color, dimension, duration, fontFamily, fontWeight, cubicBezier, number, strokeStyle) and composites (shadow, border, transition, gradient, typography) coexist under their type root — `color.blue.500` alongside `color.surface.default`, `size.100` alongside `space.md`, `duration.fast` alongside `transition.enter`. No tier prefix in paths. Variation across `mode`, `brand`, `contrast` lives in resolver modifiers.
+- **Design tokens:** flat paths organized per DTCG `$type`, following [Terrazzo's style guide](https://terrazzo.app/docs/guides/styleguide/). Primitives (color, dimension, duration, fontFamily, fontWeight, cubicBezier, number, strokeStyle) and composites (shadow, border, transition, gradient, typography) coexist under their type root — `color.palette.blue.500` alongside `color.surface.default`, `size.100` alongside `space.md`, `duration.fast` alongside `transition.enter`. No tier prefix in paths. Variation across `mode`, `brand`, `contrast` lives in resolver modifiers.
 - **TypeScript:** strict, `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, `verbatimModuleSyntax` on.
 - **READMEs:** module name + one-liner; structure table; TypeScript examples with imports; ✅/❌ for do's/don'ts.
 

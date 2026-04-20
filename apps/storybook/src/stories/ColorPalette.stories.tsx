@@ -28,7 +28,7 @@ export const SysOnly = meta.story({
   play: async ({ canvasElement }) => assertPaletteRenders(canvasElement),
 });
 export const RefBlue = meta.story({
-  args: { filter: 'color.blue.*' },
+  args: { filter: 'color.palette.blue.*' },
   play: async ({ canvasElement }) => assertPaletteRenders(canvasElement),
 });
 export const Flat = meta.story({ args: { groupBy: 2 } });
