@@ -2,7 +2,10 @@ import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
 
 const sidebars: SidebarsConfig = {
   docs: [
-    'intro',
+    // `intro` is intentionally not in this sidebar. It's exposed as a
+    // top-level navbar link ("Introduction") so the landing page lives
+    // outside the Docs tree — visitors hitting the site hero first, then
+    // entering Docs when they want to read the manual.
     'quickstart',
     // Blocks promoted to the top level. After initial setup, authoring
     // pages with the doc blocks is the primary swatchbook interaction —
@@ -28,9 +31,11 @@ const sidebars: SidebarsConfig = {
       label: 'Concepts',
       collapsed: false,
       items: [
+        'concepts/axes-vs-themes',
         'concepts/theming-inputs',
         'concepts/axes',
         'concepts/presets',
+        'concepts/theme-reactivity',
         'concepts/diagnostics',
       ],
     },

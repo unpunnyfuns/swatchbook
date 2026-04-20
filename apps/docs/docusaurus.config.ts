@@ -83,6 +83,7 @@ const config: Config = {
     navbar: {
       title: 'Swatchbook',
       items: [
+        { to: '/', label: 'Introduction', position: 'left', activeBaseRegex: '^/(next/)?$' },
         { type: 'docSidebar', sidebarId: 'docs', position: 'left', label: 'Docs' },
         { href: 'pathname:///storybook/', label: 'Live Storybook', position: 'left' },
         ...(hasReleasedVersion
