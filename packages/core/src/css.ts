@@ -12,6 +12,15 @@ export interface EmitCssOptions {
    * form `[data-<prefix>-theme="…"]`.
    */
   axes?: Axis[];
+  /**
+   * Validated chrome-alias entries from `Project.chrome`. Each `source →
+   * target` pair appends `--<prefix>-<source>: var(--<prefix>-<target>);` to
+   * a trailing `:root` block, so blocks that read the fixed chrome paths
+   * resolve through the alias to the consumer's own token values. Entries
+   * must already be validated; unknown source keys or unresolved targets
+   * should be filtered upstream (see `validateChrome`).
+   */
+  chrome?: Record<string, string>;
 }
 
 /**
@@ -52,6 +61,18 @@ export function emitCss(
     const decls = declarationsFor(theme, themesResolved, varOpts, transformAlias);
     if (decls.length === 0) continue;
     blocks.push(`${selectorFor(theme, axes, prefix)} {\n${decls.join('\n')}\n}`);
+  }
+
+  const chrome = options.chrome ?? {};
+  const chromeEntries = Object.entries(chrome);
+  if (chromeEntries.length > 0) {
+    const lines: string[] = [];
+    for (const [source, target] of chromeEntries) {
+      const sourceVar = makeCSSVar(source, varOpts);
+      const targetVar = makeCSSVar(target, { ...varOpts, wrapVar: true });
+      lines.push(`  ${sourceVar}: ${targetVar};`);
+    }
+    blocks.push(`:root {\n${lines.join('\n')}\n}`);
   }
 
   return `${blocks.join('\n\n')}\n`;

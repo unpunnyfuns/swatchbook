@@ -10,6 +10,9 @@ export function projectCss(project: Project, options: EmitCssOptions = {}): stri
   if (merged.axes === undefined) {
     merged.axes = project.axes;
   }
+  if (merged.chrome === undefined && Object.keys(project.chrome).length > 0) {
+    merged.chrome = project.chrome;
+  }
   return emitCss(project.themes, project.themesResolved, merged);
 }
 

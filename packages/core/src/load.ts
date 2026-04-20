@@ -1,3 +1,4 @@
+import { validateChrome } from '#/chrome.ts';
 import { BufferedLogger, toDiagnostics } from '#/diagnostics.ts';
 import { validateDisabledAxes } from '#/disabled-axes.ts';
 import { validatePresets } from '#/presets.ts';
@@ -62,6 +63,11 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
 
   const { presets, diagnostics: presetDiagnostics } = validatePresets(config.presets, filteredAxes);
 
+  const { entries: chrome, diagnostics: chromeDiagnostics } = validateChrome(
+    config.chrome,
+    filteredResolved,
+  );
+
   // A misconfigured `disabledAxes` (e.g. pinning an axis whose default
   // context has no theme rows) can filter every theme out. We still return
   // an empty project so the addon can render diagnostics instead of
@@ -81,6 +87,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     axes: filteredAxes,
     disabledAxes,
     presets,
+    chrome,
     themes: filteredThemes,
     themesResolved: filteredResolved,
     graph,
@@ -91,6 +98,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
       ...disabledDiagnostics,
       ...defaultDiagnostics,
       ...presetDiagnostics,
+      ...chromeDiagnostics,
       ...projectDiagnostics,
     ],
   };

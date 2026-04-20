@@ -92,6 +92,20 @@ export interface Config {
    * Config-level only — no runtime toggle.
    */
   disabledAxes?: string[];
+  /**
+   * Map from swatchbook block chrome paths (the closed set in `CHROME_PATHS`)
+   * to token paths in the consumer's project. Used when the project doesn't
+   * natively expose the `color.sys.*` / `typography.sys.*` shape blocks
+   * expect — each entry emits a `:root` alias `--<prefix>-<source>:
+   * var(--<prefix>-<target>)`, so block chrome reads resolve through the
+   * alias to the consumer's token values.
+   *
+   * Target var indirection means per-theme values flip automatically; no
+   * per-theme override needed. Unknown source keys and target paths that
+   * don't resolve in any theme produce `warn` diagnostics (group
+   * `swatchbook/chrome`) and are dropped.
+   */
+  chrome?: Record<string, string>;
 }
 
 export type DiagnosticSeverity = 'error' | 'warn' | 'info';
@@ -123,6 +137,13 @@ export interface Project {
   disabledAxes: string[];
   /** Validated + sanitized presets from `config.presets`. Empty if unset. */
   presets: Preset[];
+  /**
+   * Validated chrome-alias map from `config.chrome`. Keys are swatchbook
+   * block chrome paths; values are token paths that resolve in at least one
+   * theme. Invalid entries from the raw config are dropped and reported as
+   * diagnostics. Empty if the config doesn't supply any.
+   */
+  chrome: Record<string, string>;
   themes: Theme[];
   /** Eagerly-resolved tokens per theme, keyed by `theme.name`. */
   themesResolved: Record<string, TokenMap>;
