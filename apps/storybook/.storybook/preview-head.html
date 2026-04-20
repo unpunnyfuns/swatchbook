@@ -1,12 +1,15 @@
 <!--
-  Pipe the docs MDX page background + foreground through our own chrome
+  Pipe the docs MDX background + prose text through our own chrome
   variables, so every MDX page sits on the same surface the blocks use
-  and follows the same `light-dark()` defaults (which auto-flip with
-  `color-scheme`).
+  and the prose follows the same `light-dark()` defaults that auto-flip
+  with `color-scheme`.
 
-  Scoped to `.sbdocs-preview` (the docs container) so regular stories
-  aren't affected; they render whatever background the story itself
-  declares.
+  Scoped to `.sbdocs-preview` / `.sbdocs-wrapper` so regular stories
+  aren't affected. Inside the scope we have to repaint each prose
+  element directly — Storybook's `.sbdocs` stylesheet sets hardcoded
+  colors per-element, so container-level `color` doesn't cascade.
+  `.sb-unstyled` subtrees (every block wrapper) opt out of `.sbdocs`
+  rules entirely, so the block chrome is unaffected by anything here.
 -->
 <style>
   .sbdocs-preview,
@@ -14,5 +17,38 @@
   .sbdocs-wrapper {
     background: var(--swatchbook-surface-default, Canvas);
     color: var(--swatchbook-text-default, CanvasText);
+  }
+
+  .sbdocs-wrapper h1,
+  .sbdocs-wrapper h2,
+  .sbdocs-wrapper h3,
+  .sbdocs-wrapper h4,
+  .sbdocs-wrapper h5,
+  .sbdocs-wrapper h6,
+  .sbdocs-wrapper p,
+  .sbdocs-wrapper li,
+  .sbdocs-wrapper td,
+  .sbdocs-wrapper th,
+  .sbdocs-wrapper blockquote,
+  .sbdocs-wrapper strong,
+  .sbdocs-wrapper em {
+    color: var(--swatchbook-text-default, CanvasText);
+  }
+
+  .sbdocs-wrapper code,
+  .sbdocs-wrapper pre {
+    background: var(--swatchbook-surface-muted, rgba(128, 128, 128, 0.15));
+    color: var(--swatchbook-text-default, CanvasText);
+  }
+
+  .sbdocs-wrapper a {
+    color: var(--swatchbook-accent-bg, #1d4ed8);
+  }
+
+  .sbdocs-wrapper hr,
+  .sbdocs-wrapper table,
+  .sbdocs-wrapper th,
+  .sbdocs-wrapper td {
+    border-color: var(--swatchbook-border-default, rgba(128, 128, 128, 0.2));
   }
 </style>
