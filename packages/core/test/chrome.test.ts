@@ -99,6 +99,7 @@ it('projectCss emits every chrome role — user entry as var, others as literal 
   const rootBlocks = css.split('\n\n').filter((b) => b.startsWith(':root {'));
   const chromeBlock = rootBlocks.find((b) => b.includes('--swatchbook-surface-default:'));
   expect(chromeBlock).toBeDefined();
+  expect(chromeBlock).toContain('color-scheme: light dark;');
   expect(chromeBlock).toContain('--swatchbook-surface-default: var(--sb-color-ref-blue-500);');
   expect(chromeBlock).toContain(
     `--swatchbook-accent-bg: ${DEFAULT_CHROME_MAP.accentBg};`,

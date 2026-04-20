@@ -65,7 +65,7 @@ export function emitCss(
   }
 
   const chrome = options.chrome ?? {};
-  const chromeLines: string[] = [];
+  const chromeLines: string[] = ['  color-scheme: light dark;'];
   for (const role of CHROME_ROLES) {
     const sourceVar = makeCSSVar(role, { prefix: CHROME_VAR_PREFIX });
     const target = chrome[role];

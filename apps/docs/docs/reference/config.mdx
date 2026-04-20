@@ -154,7 +154,7 @@ Config-level only — there's no runtime toggle. Disabling an axis is the cleane
 
 ### `chrome?: Record<string, string>`
 
-Override one or more of swatchbook's ten block-chrome roles. Block components (`<TokenTable>`, `<ColorPalette>`, etc.) read a fixed `--swatchbook-*` CSS variable namespace for their surfaces, text, and accents — independent of `cssVarPrefix`, so your token namespace never collides with chrome reads. Every role is always declared: by default, to the hard-coded light-mode literals in `DEFAULT_CHROME_MAP`; any role you set in `chrome` replaces that literal with a `var(--<prefix>-<your-token>)` reference so chrome reflows with your theme switches.
+Override one or more of swatchbook's ten block-chrome roles. Block components (`<TokenTable>`, `<ColorPalette>`, etc.) read a fixed `--swatchbook-*` CSS variable namespace for their surfaces, text, and accents — independent of `cssVarPrefix`, so your token namespace never collides with chrome reads. Every role is always declared: by default, to the hard-coded literals in `DEFAULT_CHROME_MAP` (which use `light-dark()` so chrome auto-flips with the active `color-scheme` — Storybook's light/dark preference, the OS, whatever). Any role you set in `chrome` replaces that literal with a `var(--<prefix>-<your-token>)` reference so chrome reflows with your own theme switches instead.
 
 The ten roles (closed set — also exported as `CHROME_ROLES` and the `ChromeRole` type from `@unpunnyfuns/swatchbook-core`):
 
@@ -190,14 +190,15 @@ Produces a single `:root` chrome block with all ten roles declared — overrides
 
 ```css
 :root {
+  color-scheme: light dark;
   --swatchbook-surface-default: var(--ds-color-brand-bg-primary);
-  --swatchbook-surface-muted:   #f4f4f5;
-  --swatchbook-surface-raised:  #ffffff;
+  --swatchbook-surface-muted:   light-dark(#f4f4f5, #1e293b);
+  --swatchbook-surface-raised:  light-dark(#ffffff, #111827);
   --swatchbook-text-default:    var(--ds-color-brand-fg-primary);
-  --swatchbook-text-muted:      #6b7280;
-  --swatchbook-border-default:  #e5e7eb;
+  --swatchbook-text-muted:      light-dark(#4b5563, #94a3b8);
+  --swatchbook-border-default:  light-dark(#e5e7eb, #334155);
   --swatchbook-accent-bg:       var(--ds-color-brand-accent-primary);
-  --swatchbook-accent-fg:       #ffffff;
+  --swatchbook-accent-fg:       light-dark(#ffffff, #0b1220);
   --swatchbook-body-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --swatchbook-body-font-size:  14px;
 }

@@ -35,23 +35,28 @@ export const CHROME_VAR_PREFIX = 'swatchbook';
  * Hard-coded literal CSS values for each chrome role. Used as the baseline
  * for every project — the CSS emitter always declares all ten chrome vars,
  * starting from these defaults and overlaying any user-supplied `chrome`
- * entry as a `var(...)` reference on top. Projects with no chrome config
- * still get readable, light-mode-themed chrome instead of falling through
- * to `Canvas` / `CanvasText`.
+ * entry as a `var(...)` reference on top.
  *
- * Values chosen for WCAG AA contrast on the default surface and reasonable
- * visual weight — they don't need to match any specific design system.
- * Consumers theme chrome against their own tokens by filling `config.chrome`.
+ * Color roles use the `light-dark()` CSS function so zero-config chrome
+ * auto-flips with the active `color-scheme` (which Storybook's preview
+ * iframe, MDX docs pages, the OS prefers-color-scheme chain, etc. all
+ * participate in). The emitter tags the chrome `:root` block with
+ * `color-scheme: light dark` so the function resolves correctly even when
+ * no parent element opts in. `light-dark()` is supported in Chrome 123+,
+ * Firefox 120+, and Safari 17.5+ — all evergreen.
+ *
+ * Values chosen for WCAG AA contrast in both modes. Consumers theme chrome
+ * against their own tokens by filling `config.chrome`.
  */
 export const DEFAULT_CHROME_MAP: Record<ChromeRole, string> = {
-  surfaceDefault: '#ffffff',
-  surfaceMuted: '#f4f4f5',
-  surfaceRaised: '#ffffff',
-  textDefault: '#111827',
-  textMuted: '#6b7280',
-  borderDefault: '#e5e7eb',
-  accentBg: '#1d4ed8',
-  accentFg: '#ffffff',
+  surfaceDefault: 'light-dark(#ffffff, #0f172a)',
+  surfaceMuted: 'light-dark(#f4f4f5, #1e293b)',
+  surfaceRaised: 'light-dark(#ffffff, #111827)',
+  textDefault: 'light-dark(#111827, #f1f5f9)',
+  textMuted: 'light-dark(#4b5563, #94a3b8)',
+  borderDefault: 'light-dark(#e5e7eb, #334155)',
+  accentBg: 'light-dark(#1d4ed8, #3b82f6)',
+  accentFg: 'light-dark(#ffffff, #0b1220)',
   bodyFontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
   bodyFontSize: '14px',
 };
