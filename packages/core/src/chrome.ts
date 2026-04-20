@@ -50,9 +50,9 @@ export function validateChrome(
   if (!raw) return { entries: {}, diagnostics };
 
   const known = new Set<string>(CHROME_PATHS);
-  const targetExists = new Set<string>();
+  const tokenIDs = new Set<string>();
   for (const tokens of Object.values(themesResolved)) {
-    for (const id of Object.keys(tokens)) targetExists.add(id);
+    for (const id of Object.keys(tokens)) tokenIDs.add(id);
   }
 
   const entries: Record<string, string> = {};
@@ -65,11 +65,11 @@ export function validateChrome(
       });
       continue;
     }
-    if (!targetExists.has(target)) {
+    if (!targetResolves(target, tokenIDs)) {
       diagnostics.push({
         severity: 'warn',
         group: 'swatchbook/chrome',
-        message: `\`chrome\` maps "${source}" → "${target}" but "${target}" is not a token in any theme — dropped.`,
+        message: `\`chrome\` maps "${source}" → "${target}" but "${target}" is not a token or composite sub-field in any theme — dropped.`,
       });
       continue;
     }
@@ -77,4 +77,17 @@ export function validateChrome(
   }
 
   return { entries, diagnostics };
+}
+
+/**
+ * A target resolves if it's either a direct token ID, or a composite
+ * sub-field under one (`typography.sys.body.font-family` under the composite
+ * `typography.sys.body`). Composite tokens emit one CSS var per sub-field,
+ * so either form is a valid alias target.
+ */
+function targetResolves(target: string, tokenIDs: Set<string>): boolean {
+  if (tokenIDs.has(target)) return true;
+  const lastDot = target.lastIndexOf('.');
+  if (lastDot < 0) return false;
+  return tokenIDs.has(target.slice(0, lastDot));
 }

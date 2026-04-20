@@ -26,6 +26,18 @@ export default defineMain({
           // compound selectors, and the Design Tokens panel shows a pinned indicator.
           // disabledAxes: ['contrast'],
           cssVarPrefix: 'sb',
+          chrome: {
+            'color.surface.default': 'color.sys.surface.default',
+            'color.surface.muted': 'color.sys.surface.muted',
+            'color.surface.raised': 'color.sys.surface.raised',
+            'color.text.default': 'color.sys.text.default',
+            'color.text.muted': 'color.sys.text.muted',
+            'color.border.default': 'color.sys.border.default',
+            'color.accent.bg': 'color.sys.accent.bg',
+            'color.accent.fg': 'color.sys.accent.fg',
+            'typography.body.font-family': 'typography.sys.body.font-family',
+            'typography.body.font-size': 'typography.sys.body.font-size',
+          },
           presets: [
             {
               name: 'Default Light',

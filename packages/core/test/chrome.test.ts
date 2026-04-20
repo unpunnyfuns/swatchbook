@@ -40,6 +40,16 @@ it('validateChrome drops unknown source keys with a warn diagnostic', () => {
   expect(diagnostics[0]?.message).toMatch(/unknown source path "color\.fake\.path"/);
 });
 
+it('validateChrome accepts composite sub-field targets (parent token exists)', () => {
+  const composite: TokenMap = { 'typography.sys.body': {} as TokenMap[string] };
+  const { entries, diagnostics } = validateChrome(
+    { 'typography.body.font-family': 'typography.sys.body.font-family' },
+    { Light: composite },
+  );
+  expect(entries).toEqual({ 'typography.body.font-family': 'typography.sys.body.font-family' });
+  expect(diagnostics).toEqual([]);
+});
+
 it('validateChrome drops entries whose target resolves in no theme', () => {
   const { entries, diagnostics } = validateChrome(
     { 'color.surface.default': 'color.nowhere' },
