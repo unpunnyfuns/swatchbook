@@ -1,6 +1,6 @@
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useMemo } from 'react';
-import { BORDER_DEFAULT, MONO_STACK, TEXT_MUTED } from '#/internal/styles.tsx';
+import './FontFamilySample.css';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
@@ -24,44 +24,6 @@ export interface FontFamilySampleProps {
   /** `'asc'` (default) or `'desc'`. */
   sortDir?: SortDir;
 }
-
-const styles = {
-  row: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(160px, 220px) 1fr auto',
-    gap: 16,
-    alignItems: 'baseline',
-    padding: '14px 0',
-    borderBottom: BORDER_DEFAULT,
-  } satisfies CSSProperties,
-  meta: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 2,
-    minWidth: 0,
-  } satisfies CSSProperties,
-  path: {
-    fontFamily: MONO_STACK,
-    fontSize: 12,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  } satisfies CSSProperties,
-  stack: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    color: TEXT_MUTED,
-  } satisfies CSSProperties,
-  sample: {
-    fontSize: 22,
-    lineHeight: 1.2,
-  } satisfies CSSProperties,
-  cssVar: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    color: TEXT_MUTED,
-  } satisfies CSSProperties,
-};
 
 interface Row {
   path: string;
@@ -112,13 +74,15 @@ export function FontFamilySample({
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
-        <div key={row.path} style={styles.row}>
-          <div style={styles.meta}>
-            <span style={styles.path}>{row.path}</span>
-            <span style={styles.stack}>{row.stack}</span>
+        <div key={row.path} className="sb-font-family-sample__row">
+          <div className="sb-font-family-sample__meta">
+            <span className="sb-font-family-sample__path">{row.path}</span>
+            <span className="sb-font-family-sample__stack">{row.stack}</span>
           </div>
-          <div style={{ ...styles.sample, fontFamily: row.cssVar }}>{sample}</div>
-          <span style={styles.cssVar}>{row.cssVar}</span>
+          <div className="sb-font-family-sample__sample" style={{ fontFamily: row.cssVar }}>
+            {sample}
+          </div>
+          <span className="sb-font-family-sample__css-var">{row.cssVar}</span>
         </div>
       ))}
     </div>
