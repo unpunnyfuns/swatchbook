@@ -7,15 +7,21 @@ sidebar_position: 1
 
 # Swatchbook
 
-A Storybook addon and MDX blocks for **documenting [DTCG design tokens](https://design-tokens.org/tr/2025/drafts/)**. It parses your token files through [Terrazzo](https://terrazzo.app/), composes them across a resolver's modifier axes (mode × brand × contrast × …), and renders a browsable reference inside your Storybook — searchable token panel, a toolbar that flips axes so readers can see every token in every context, tuple-aware `TokenDetail` blocks, `ColorPalette`, `TypographyScale`, and more.
+A Storybook addon and MDX blocks for **documenting [DTCG design tokens](https://design-tokens.org/tr/2025/drafts/)**.
+
+Flip **light/dark, brand, contrast, density** — or whatever independent dimensions your design system has — from one toolbar, without enumerating every combination as a flat theme ID. Swatchbook reads your resolver's modifiers directly through [Terrazzo](https://terrazzo.app/): each one becomes a toolbar dropdown, tokens repaint as readers flip axes, and CSS emission covers every combination under `[data-<prefix>-<axis>]` compound selectors. See [**why axes, not themes**](./concepts/axes-vs-themes) for the shape and what it gets you.
+
+Alongside the switcher, the addon ships MDX doc blocks — `TokenNavigator`, `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail`, and more — that render your tokens as browsable reference pages without a bespoke docs site. For day-to-day authoring, the blocks are the primary interaction.
 
 ## Who it's for
 
-Design-system authors who already have DTCG tokens (or are authoring them) and want a browsable, interactive reference without building a custom docs site.
+Design-system authors who already have DTCG tokens (or are authoring them) — especially systems with more than one independent dimension (brand × mode, contrast × mode, density, and so on) — and want a browsable, interactive reference without building a custom docs site.
+
+If your system has exactly one dimension and no plans for more, [`@storybook/addon-themes`](https://storybook.js.org/addons/@storybook/addon-themes)' single-string-ID model is simpler and probably a better fit.
 
 ## What it's not
 
-Swatchbook isn't a runtime theme-switcher, a CSS-variable framework, or a component styling system. It emits CSS vars and `data-<prefix>-*` attributes on `<html>` inside the Storybook preview so tokens repaint when an author toggles an axis in the toolbar — that's a documentation affordance, not a production theming API. For production theme switching, use your framework's theming tools (or call `@unpunnyfuns/swatchbook-core`'s `emitCss` at build time and wire it up yourself).
+Swatchbook isn't a runtime theme-switcher for production apps, a CSS-variable framework, or a component styling system. It emits CSS variables and `data-<prefix>-*` attributes on `<html>` inside the Storybook preview so tokens repaint when an author toggles an axis — that's a documentation affordance, not a production theming API. For production theme switching, use your framework's theming tools (or call `@unpunnyfuns/swatchbook-core`'s `emitCss` at build time and wire it up yourself). For how your stories react to toolbar flips, see [theme reactivity](./concepts/theme-reactivity).
 
 ## What the addon gives you
 
@@ -31,7 +37,7 @@ The [live Storybook](pathname:///storybook/) runs the addon against this repo's 
 
 - **[Quickstart](./quickstart)** — install, configure, run.
 - **Blocks** — the MDX doc blocks you'll spend most of your time with: the [reference](./reference/blocks) lists what's available and the [authoring guide](./guides/authoring-doc-stories) walks through composing them.
-- **Concepts** — the mental model: theming inputs, axes, presets, diagnostics.
+- **Concepts** — the mental model: [why axes, not themes](./concepts/axes-vs-themes), [theming inputs](./concepts/theming-inputs), [axes](./concepts/axes), [theme reactivity](./concepts/theme-reactivity), [presets](./concepts/presets), [diagnostics](./concepts/diagnostics).
 - **Guides** — the [multi-axis walkthrough](./guides/multi-axis-walkthrough) covers one-time setup.
 - **Reference** — API surface for the remaining packages (`addon`, `core`, `config`).
 
