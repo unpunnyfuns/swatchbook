@@ -17,6 +17,14 @@ export interface TokenNavigatorProps {
   /** If provided, mount at this dot-path subtree and hide everything outside it. */
   root?: string;
   /**
+   * Restrict the tree to tokens with the given DTCG `$type`(s). Pass a single
+   * string to scope to one type (`type="color"`), or an array for a narrow
+   * small-multiples view (`type={['duration', 'cubicBezier', 'transition']}`).
+   * Composes with `root` — both constraints must hold. Group nodes that end
+   * up with no surviving leaves collapse out.
+   */
+  type?: string | readonly string[];
+  /**
    * Depth (from the mounted root) that is expanded on first render.
    * `0` = everything collapsed, `1` = top-level groups open (default),
    * `2` = one level deeper, etc.
@@ -46,13 +54,18 @@ interface GroupNode {
 
 type TreeNode = LeafNode | GroupNode;
 
-function buildTree(resolved: Record<string, VirtualToken>, root: string | undefined): TreeNode[] {
+function buildTree(
+  resolved: Record<string, VirtualToken>,
+  root: string | undefined,
+  typeFilter: ReadonlySet<string> | undefined,
+): TreeNode[] {
   const rootPrefix = root && root.length > 0 ? `${root}.` : '';
   const rootSegments = root ? root.split('.') : [];
 
-  const entries = Object.entries(resolved).filter(([path]) => {
-    if (!root) return true;
-    return path === root || path.startsWith(rootPrefix);
+  const entries = Object.entries(resolved).filter(([path, token]) => {
+    if (root && !(path === root || path.startsWith(rootPrefix))) return false;
+    if (typeFilter && !(token.$type && typeFilter.has(token.$type))) return false;
+    return true;
   });
 
   const rootNode: GroupNode = { kind: 'group', segment: '', path: '', children: [] };
@@ -121,12 +134,18 @@ function countLeaves(node: TreeNode): number {
 
 export function TokenNavigator({
   root,
+  type,
   initiallyExpanded = 1,
   onSelect,
 }: TokenNavigatorProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
 
-  const tree = useMemo(() => buildTree(resolved, root), [resolved, root]);
+  const typeFilter = useMemo<ReadonlySet<string> | undefined>(() => {
+    if (type === undefined) return undefined;
+    return new Set(Array.isArray(type) ? type : [type]);
+  }, [type]);
+
+  const tree = useMemo(() => buildTree(resolved, root, typeFilter), [resolved, root, typeFilter]);
 
   const initialExpanded = useMemo(() => {
     const out = new Set<string>();
@@ -158,11 +177,17 @@ export function TokenNavigator({
     [onSelect],
   );
 
+  const typeLabel = typeFilter ? ` · ${[...typeFilter].map((t) => `$type=${t}`).join(', ')}` : '';
+
   if (tree.length === 0) {
     return (
       <div {...themeAttrs(cssVarPrefix, activeTheme)}>
         <EmptyState>
-          {root ? `No tokens under "${root}".` : 'No tokens in the active theme.'}
+          {root
+            ? `No tokens under "${root}"${typeFilter ? ` matching ${typeLabel.slice(3)}` : ''}.`
+            : typeFilter
+              ? `No tokens matching ${typeLabel.slice(3)} in the active theme.`
+              : 'No tokens in the active theme.'}
         </EmptyState>
       </div>
     );
@@ -171,7 +196,8 @@ export function TokenNavigator({
   return (
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-token-navigator__caption">
-        {root ? `Tokens under ${root}` : 'Token graph'} · {activeTheme}
+        {root ? `Tokens under ${root}` : 'Token graph'}
+        {typeLabel} · {activeTheme}
       </div>
       <ul className="sb-token-navigator__tree" role="tree">
         {tree.map((node) => (
