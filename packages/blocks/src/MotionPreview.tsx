@@ -1,8 +1,9 @@
-import type { CSSProperties, ReactElement } from 'react';
+import cx from 'clsx';
+import type { ReactElement } from 'react';
 import { useMemo, useState } from 'react';
-import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
-import { BORDER_DEFAULT, BORDER_STRONG, MONO_STACK, TEXT_MUTED } from '#/internal/styles.tsx';
+import './MotionPreview.css';
 import { themeAttrs } from '#/internal/data-attr.ts';
+import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 import {
   MotionSample,
@@ -23,88 +24,6 @@ export interface MotionPreviewProps {
 }
 
 const SPEEDS: MotionSpeed[] = [0.25, 0.5, 1, 2];
-
-const styles = {
-  caption: {
-    padding: '4px 0 4px',
-    color: TEXT_MUTED,
-    fontSize: 12,
-  } satisfies CSSProperties,
-  controls: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '8px 0 12px',
-  } satisfies CSSProperties,
-  controlLabel: {
-    fontSize: 11,
-    color: TEXT_MUTED,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  } satisfies CSSProperties,
-  speedBtn: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    padding: '4px 8px',
-    background: 'transparent',
-    color: 'inherit',
-    border: BORDER_STRONG,
-    borderRadius: 4,
-    cursor: 'pointer',
-  } satisfies CSSProperties,
-  speedBtnActive: {
-    background: 'var(--swatchbook-accent-bg, #3b82f6)',
-    color: 'var(--swatchbook-accent-fg, #fff)',
-    borderColor: 'transparent',
-  } satisfies CSSProperties,
-  replayBtn: {
-    fontSize: 11,
-    padding: '4px 10px',
-    marginLeft: 'auto',
-    background: 'transparent',
-    color: 'inherit',
-    border: BORDER_STRONG,
-    borderRadius: 4,
-    cursor: 'pointer',
-  } satisfies CSSProperties,
-  row: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(180px, 240px) 1fr auto',
-    gap: 16,
-    alignItems: 'center',
-    padding: '14px 0',
-    borderBottom: BORDER_DEFAULT,
-  } satisfies CSSProperties,
-  meta: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 2,
-    minWidth: 0,
-  } satisfies CSSProperties,
-  path: {
-    fontFamily: MONO_STACK,
-    fontSize: 12,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  } satisfies CSSProperties,
-  specs: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    color: TEXT_MUTED,
-  } satisfies CSSProperties,
-  cssVar: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    color: TEXT_MUTED,
-    whiteSpace: 'nowrap',
-  } satisfies CSSProperties,
-  empty: {
-    padding: '24px 12px',
-    textAlign: 'center',
-    color: TEXT_MUTED,
-  } satisfies CSSProperties,
-};
 
 interface Row {
   path: string;
@@ -164,21 +83,23 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
   if (rows.length === 0) {
     return (
       <div {...themeAttrs(cssVarPrefix, activeTheme)}>
-        <div style={styles.empty}>No motion tokens match this filter.</div>
+        <div className="sb-block__empty">No motion tokens match this filter.</div>
       </div>
     );
   }
 
   return (
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
-      <div style={styles.caption}>{captionText}</div>
-      <div style={styles.controls}>
-        <span style={styles.controlLabel}>Speed</span>
+      <div className="sb-block__caption">{captionText}</div>
+      <div className="sb-motion-preview__controls">
+        <span className="sb-motion-preview__control-label">Speed</span>
         {SPEEDS.map((s) => (
           <button
             key={s}
             type="button"
-            style={{ ...styles.speedBtn, ...(s === speed ? styles.speedBtnActive : {}) }}
+            className={cx('sb-motion-preview__speed-btn', {
+              'sb-motion-preview__speed-btn--active': s === speed,
+            })}
             onClick={() => setSpeed(s)}
           >
             {s}×
@@ -186,7 +107,7 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
         ))}
         <button
           type="button"
-          style={styles.replayBtn}
+          className="sb-motion-preview__replay-btn"
           onClick={() => setRun((n) => n + 1)}
           disabled={reducedMotion}
           title={reducedMotion ? 'Disabled by prefers-reduced-motion' : 'Replay all'}
@@ -195,13 +116,13 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
         </button>
       </div>
       {rows.map((row) => (
-        <div key={row.path} style={styles.row}>
-          <div style={styles.meta}>
-            <span style={styles.path}>{row.path}</span>
-            <span style={styles.specs}>{formatSpec(row)}</span>
+        <div key={row.path} className="sb-motion-preview__row">
+          <div className="sb-motion-preview__meta">
+            <span className="sb-motion-preview__path">{row.path}</span>
+            <span className="sb-motion-preview__specs">{formatSpec(row)}</span>
           </div>
           <MotionSample path={row.path} speed={speed} runKey={run} />
-          <span style={styles.cssVar}>{row.cssVar}</span>
+          <span className="sb-motion-preview__css-var">{row.cssVar}</span>
         </div>
       ))}
     </div>

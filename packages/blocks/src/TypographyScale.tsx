@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
-import { BORDER_DEFAULT, MONO_STACK } from '#/internal/styles.tsx';
+import './TypographyScale.css';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, useProject } from '#/internal/use-project.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
@@ -24,31 +24,6 @@ export interface TypographyScaleProps {
   /** `'asc'` (default) or `'desc'`. */
   sortDir?: SortDir;
 }
-
-const styles = {
-  row: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(160px, 220px) 1fr',
-    gap: 16,
-    alignItems: 'baseline',
-    padding: '14px 0',
-    borderBottom: BORDER_DEFAULT,
-  } satisfies CSSProperties,
-  meta: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 2,
-  } satisfies CSSProperties,
-  path: {
-    fontFamily: MONO_STACK,
-    fontSize: 12,
-  } satisfies CSSProperties,
-  specs: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    opacity: 0.7,
-  } satisfies CSSProperties,
-};
 
 interface Row {
   path: string;
@@ -136,10 +111,10 @@ export function TypographyScale({
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
-        <div key={row.path} style={styles.row}>
-          <div style={styles.meta}>
-            <span style={styles.path}>{row.path}</span>
-            {row.specs && <span style={styles.specs}>{row.specs}</span>}
+        <div key={row.path} className="sb-typography-scale__row">
+          <div className="sb-typography-scale__meta">
+            <span className="sb-typography-scale__path">{row.path}</span>
+            {row.specs && <span className="sb-typography-scale__specs">{row.specs}</span>}
           </div>
           <div style={row.sampleStyle}>{sample}</div>
         </div>

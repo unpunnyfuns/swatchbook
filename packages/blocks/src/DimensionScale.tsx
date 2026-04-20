@@ -1,7 +1,7 @@
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useMemo } from 'react';
+import './DimensionScale.css';
 import { DimensionBar, type DimensionKind } from '#/dimension-scale/DimensionBar.tsx';
-import { BORDER_DEFAULT, MONO_STACK } from '#/internal/styles.tsx';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
@@ -38,52 +38,6 @@ export interface DimensionScaleProps {
 
 const MAX_RENDER_PX = 480;
 
-const styles = {
-  row: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(160px, 220px) 1fr auto',
-    gap: 16,
-    alignItems: 'center',
-    padding: '10px 0',
-    borderBottom: BORDER_DEFAULT,
-  } satisfies CSSProperties,
-  meta: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 2,
-    minWidth: 0,
-  } satisfies CSSProperties,
-  path: {
-    fontFamily: MONO_STACK,
-    fontSize: 12,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  } satisfies CSSProperties,
-  specs: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    opacity: 0.7,
-  } satisfies CSSProperties,
-  visualCell: {
-    display: 'flex',
-    alignItems: 'center',
-    minWidth: 0,
-  } satisfies CSSProperties,
-  cssVar: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    opacity: 0.7,
-    whiteSpace: 'nowrap',
-  } satisfies CSSProperties,
-  cap: {
-    fontFamily: MONO_STACK,
-    fontSize: 10,
-    opacity: 0.6,
-    marginLeft: 6,
-  } satisfies CSSProperties,
-};
-
 interface Row {
   path: string;
   cssVar: string;
@@ -92,10 +46,6 @@ interface Row {
   capped: boolean;
 }
 
-/**
- * Convert a DTCG dimension `$value` (`{ value, unit }`) to pixels for the
- * purpose of ordering and deciding whether to show a cap indicator.
- */
 function toPixels(raw: unknown): number {
   if (raw == null || typeof raw !== 'object') return Number.NaN;
   const v = raw as { value?: unknown; unit?: unknown };
@@ -153,16 +103,18 @@ export function DimensionScale({
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
-        <div key={row.path} style={styles.row}>
-          <div style={styles.meta}>
-            <span style={styles.path}>{row.path}</span>
-            <span style={styles.specs}>{row.displayValue}</span>
+        <div key={row.path} className="sb-dimension-scale__row">
+          <div className="sb-dimension-scale__meta">
+            <span className="sb-dimension-scale__path">{row.path}</span>
+            <span className="sb-dimension-scale__specs">{row.displayValue}</span>
           </div>
-          <div style={styles.visualCell}>
+          <div className="sb-dimension-scale__visual-cell">
             <DimensionBar path={row.path} kind={kind} />
-            {row.capped && <span style={styles.cap}>capped at {MAX_RENDER_PX}px</span>}
+            {row.capped && (
+              <span className="sb-dimension-scale__cap">capped at {MAX_RENDER_PX}px</span>
+            )}
           </div>
-          <span style={styles.cssVar}>{row.cssVar}</span>
+          <span className="sb-dimension-scale__css-var">{row.cssVar}</span>
         </div>
       ))}
     </div>

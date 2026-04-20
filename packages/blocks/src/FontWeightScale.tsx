@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
-import { BORDER_DEFAULT, MONO_STACK, TEXT_MUTED } from '#/internal/styles.tsx';
+import './FontWeightScale.css';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
@@ -25,44 +25,6 @@ export interface FontWeightScaleProps {
   /** `'asc'` (default) or `'desc'`. */
   sortDir?: SortDir;
 }
-
-const styles = {
-  row: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(160px, 220px) 1fr auto',
-    gap: 16,
-    alignItems: 'baseline',
-    padding: '12px 0',
-    borderBottom: BORDER_DEFAULT,
-  } satisfies CSSProperties,
-  meta: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 2,
-    minWidth: 0,
-  } satisfies CSSProperties,
-  path: {
-    fontFamily: MONO_STACK,
-    fontSize: 12,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  } satisfies CSSProperties,
-  value: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    color: TEXT_MUTED,
-  } satisfies CSSProperties,
-  sample: {
-    fontSize: 28,
-    lineHeight: 1,
-  } satisfies CSSProperties,
-  cssVar: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    color: TEXT_MUTED,
-  } satisfies CSSProperties,
-};
 
 interface Row {
   path: string;
@@ -118,20 +80,18 @@ export function FontWeightScale({
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
-        <div key={row.path} style={styles.row}>
-          <div style={styles.meta}>
-            <span style={styles.path}>{row.path}</span>
-            <span style={styles.value}>{row.display}</span>
+        <div key={row.path} className="sb-font-weight-scale__row">
+          <div className="sb-font-weight-scale__meta">
+            <span className="sb-font-weight-scale__path">{row.path}</span>
+            <span className="sb-font-weight-scale__value">{row.display}</span>
           </div>
           <div
-            style={{
-              ...styles.sample,
-              fontWeight: row.cssVar as unknown as CSSProperties['fontWeight'],
-            }}
+            className="sb-font-weight-scale__sample"
+            style={{ fontWeight: row.cssVar as unknown as CSSProperties['fontWeight'] }}
           >
             {sample}
           </div>
-          <span style={styles.cssVar}>{row.cssVar}</span>
+          <span className="sb-font-weight-scale__css-var">{row.cssVar}</span>
         </div>
       ))}
     </div>
