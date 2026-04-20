@@ -1,0 +1,49 @@
+{
+  "docs": [
+    "intro",
+    "quickstart",
+    {
+      "type": "category",
+      "label": "Blocks",
+      "collapsed": false,
+      "items": [
+        "reference/blocks/blocks",
+        "reference/blocks/overview",
+        "reference/blocks/inspector",
+        "reference/blocks/samples",
+        "reference/blocks/utility",
+        "guides/authoring-doc-stories",
+        "guides/token-dashboard"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Concepts",
+      "collapsed": false,
+      "items": [
+        "concepts/theming-inputs",
+        "concepts/axes",
+        "concepts/presets",
+        "concepts/diagnostics"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Guides",
+      "collapsed": false,
+      "items": [
+        "guides/multi-axis-walkthrough"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Reference",
+      "collapsed": false,
+      "items": [
+        "reference/addon",
+        "reference/core",
+        "reference/config"
+      ]
+    }
+  ]
+}
