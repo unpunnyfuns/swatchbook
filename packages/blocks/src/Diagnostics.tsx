@@ -1,3 +1,4 @@
+import cx from 'classnames';
 import type { ReactElement } from 'react';
 import './Diagnostics.css';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
@@ -32,21 +33,11 @@ function diagnosticKey(d: VirtualDiagnostic, i: number): string {
   return `${d.severity}:${d.group}:${d.filename ?? ''}:${d.line ?? ''}:${d.message}:${i}`;
 }
 
-function summaryClass(diagnostics: readonly VirtualDiagnostic[]): string {
-  if (diagnostics.length === 0) return 'sb-diagnostics__summary sb-diagnostics__summary--ok';
-  if (diagnostics.some((d) => d.severity === 'error')) {
-    return 'sb-diagnostics__summary sb-diagnostics__summary--error';
-  }
-  if (diagnostics.some((d) => d.severity === 'warn')) {
-    return 'sb-diagnostics__summary sb-diagnostics__summary--warn';
-  }
-  return 'sb-diagnostics__summary';
-}
-
-function labelClass(severity: DiagnosticSeverity): string {
-  return severity === 'info'
-    ? 'sb-diagnostics__label'
-    : `sb-diagnostics__label sb-diagnostics__label--${severity}`;
+function summaryVariant(diagnostics: readonly VirtualDiagnostic[]): 'ok' | 'error' | 'warn' | null {
+  if (diagnostics.length === 0) return 'ok';
+  if (diagnostics.some((d) => d.severity === 'error')) return 'error';
+  if (diagnostics.some((d) => d.severity === 'warn')) return 'warn';
+  return null;
 }
 
 /**
@@ -66,6 +57,7 @@ export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
     (d) => d.severity === 'error' || d.severity === 'warn',
   );
   const headingText = caption ?? `Diagnostics · ${summaryText(diagnostics)}`;
+  const variant = summaryVariant(diagnostics);
 
   return (
     <div
@@ -74,12 +66,25 @@ export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
       data-testid="diagnostics"
     >
       <details open={hasErrorsOrWarnings}>
-        <summary className={summaryClass(diagnostics)}>{headingText}</summary>
+        <summary
+          className={cx(
+            'sb-diagnostics__summary',
+            variant && `sb-diagnostics__summary--${variant}`,
+          )}
+        >
+          {headingText}
+        </summary>
         {diagnostics.length > 0 && (
           <ul className="sb-diagnostics__list">
             {diagnostics.map((d, i) => (
               <li key={diagnosticKey(d, i)} className="sb-diagnostics__row">
-                <span className={labelClass(d.severity)}>{severityLabel[d.severity]}</span>
+                <span
+                  className={cx('sb-diagnostics__label', {
+                    [`sb-diagnostics__label--${d.severity}`]: d.severity !== 'info',
+                  })}
+                >
+                  {severityLabel[d.severity]}
+                </span>
                 <div>
                   <div>{d.message}</div>
                   {(d.group || d.filename) && (
