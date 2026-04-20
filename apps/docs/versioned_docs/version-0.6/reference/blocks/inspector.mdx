@@ -1,0 +1,47 @@
+---
+id: inspector
+title: Inspector blocks
+sidebar_position: 3
+---
+
+# Inspector blocks
+
+Single-token deep-dive. `<TokenDetail>` is the composition; each subcomponent below is also exported and takes the same `path: string` prop, so MDX authors can embed just the piece they need.
+
+## `<TokenDetail path heading? />`
+
+Full deep-dive: header + composite preview + composite breakdown + alias chain + aliased-by tree + per-axis variance + consumer output + usage snippet.
+
+Props: `path: string`, `heading?: string` (defaults to `path`).
+
+## `<TokenHeader path heading? />`
+
+Heading + `$type` pill + cssVar reference + description. Renders a missing-token empty state when `path` isn't in the active theme.
+
+## `<CompositePreview path />`
+
+Type-dispatched live preview of the token's resolved value (typography sample, shadow swatch, gradient strip, animating ball for motion, etc.).
+
+## `<CompositeBreakdown path />`
+
+Labelled sub-value grid for composite types (`typography`, `border`, `transition`, `shadow`, `gradient`). Renders nothing for primitives.
+
+## `<AliasChain path />`
+
+Forward alias chain (`color.accent.bg → color.palette.blue.700`). Renders nothing for non-aliases.
+
+## `<AliasedBy path />`
+
+Backward alias tree — every token that transitively aliases this one. Truncates at depth 6.
+
+## `<AxisVariance path />`
+
+Per-axis value table. Collapses to one row when the value is constant, a list for one varying axis, or a matrix for two axes (extras pinned to the active selection).
+
+## `<TokenUsageSnippet path />`
+
+Copy-ready `color: var(--…);` reference snippet.
+
+## `<ConsumerOutput path />`
+
+Two-row summary of the token's **Path** and **CSS var** with copy-to-clipboard on each. Shows the active axis tuple above the rows when more than one axis is in play.

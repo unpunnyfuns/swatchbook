@@ -1,0 +1,83 @@
+---
+id: axes-vs-themes
+title: Why axes, not themes
+sidebar_position: 1
+---
+
+# Why axes, not themes
+
+Most Storybook theme switchers — [`@storybook/addon-themes`](https://storybook.js.org/addons/@storybook/addon-themes), the framework provider wrappers (MUI / Chakra / Mantine), the Tailwind `dark:` variant, the whole ecosystem — model theme as **one string ID**. You pick `"light"` or `"dark"`, or `"brand-a-dark"` if you've stretched the shape far enough to accommodate more than one dimension.
+
+Swatchbook models theme as a **tuple across independent axes**. It's a different shape, and understanding why is the quickest way to judge whether swatchbook fits your project.
+
+## The familiar starting point
+
+You have dark mode.
+
+Then marketing asks for a second brand.
+
+Then accessibility asks for a high-contrast option.
+
+Then the tablet team asks for a compact density.
+
+With a one-string-ID model, the combinations multiply:
+
+```text
+light / dark                        → 2 themes
+× default / brand-a                 → 4 themes
+× normal / high contrast            → 8 themes
+× comfortable / compact             → 16 themes
+```
+
+You're now maintaining sixteen theme definitions, each one a cartesian combination of four capabilities. The name `brand-a-dark-high-compact` tells you nothing about what differs from `brand-a-dark-high-comfortable` — is it just the density values? You have to open the files to find out. Adding a fifth dimension doubles everything again.
+
+## Axes are the natural shape
+
+A capability is one axis. Each axis has its own contexts.
+
+```text
+mode:     Light | Dark
+brand:    Default | Brand A
+contrast: Normal | High
+density:  Comfortable | Compact
+```
+
+The cartesian product is implicit. You never write out the sixteen combinations — you write four axes and let them compose.
+
+[DTCG 2025.10](https://design-tokens.org/tr/2025/drafts/resolver/) encodes this directly: modifiers on the resolver define the axes, and `resolver.apply({ mode: 'Dark', brand: 'Brand A', contrast: 'Normal', density: 'Compact' })` composes the combined token set.
+
+## What that looks like in swatchbook
+
+Declare axes in your DTCG resolver, one modifier per dimension:
+
+```json
+{
+  "$schema": "https://design-tokens.org/schemas/resolver-v1.json",
+  "modifiers": {
+    "mode":    { "default": "Light", "contexts": { "Light": {…}, "Dark": {…} } },
+    "brand":   { "default": "Default", "contexts": { "Default": {…}, "Brand A": {…} } },
+    "contrast":{ "default": "Normal", "contexts": { "Normal": {…}, "High": {…} } }
+  }
+}
+```
+
+Swatchbook reads the modifiers directly. Each one becomes a toolbar dropdown. A reader flips `contrast` without touching `mode` or `brand`, and the CSS repaints for the one axis they changed.
+
+## What you get for free
+
+- **Independent axis toggling.** A reader inspects `Brand A / Dark / High Contrast` in one click; flipping back to `Normal` contrast doesn't require remembering which flat-ID combination that would be.
+- **Tuple-scoped CSS emission.** Each cartesian combination gets its own `[data-<prefix>-mode][data-<prefix>-brand][data-<prefix>-contrast]` selector block — no duplication beyond what the tokens actually require.
+- **Presets as shortcuts.** Named tuples (`"Default Light"`, `"Brand A Dark"`, `"A11y High Contrast"`) render as quick-select pills in the toolbar — faster than three independent dropdowns when a reader wants a common combination. See [Presets](./presets).
+- **Disabled axes as pinned context.** Hide an axis from the toolbar without removing it from the resolver: set `disabledAxes: ['contrast']` in config and the axis collapses to its default, disappearing from selectors and UI while the rest of the system carries on.
+
+## When axes *don't* pay off
+
+If your design system has exactly one dimension — the `light / dark` pair and nothing else on the horizon — the multi-axis machinery is overhead you don't need. [`@storybook/addon-themes`](https://storybook.js.org/addons/@storybook/addon-themes)' single-string-ID model is simpler and probably a better fit.
+
+Swatchbook's value is the composition. If you have (or plan to have) two or more dimensions, the axis model saves you from the sixteen-flat-themes future.
+
+## See also
+
+- [Axes](./axes) — the runtime model: tuples, data attributes, compound selectors.
+- [Theming inputs](./theming-inputs) — picking resolver vs layered axes vs plain-parse.
+- [Presets](./presets) — named shortcuts over raw tuples in the toolbar.
