@@ -11,7 +11,6 @@ import {
   SIZE_LABEL,
   SIZE_META,
   SIZE_PILL,
-  surfaceStyle,
   TEXT_DEFAULT,
   TEXT_MUTED,
   typePillStyle,
@@ -57,7 +56,6 @@ interface GroupNode {
 type TreeNode = LeafNode | GroupNode;
 
 const styles = {
-  wrapper: surfaceStyle,
   caption: {
     padding: '4px 0 12px',
     color: TEXT_MUTED,
@@ -256,10 +254,7 @@ export function TokenNavigator({
 
   if (tree.length === 0) {
     return (
-      <div
-        {...themeAttrs(cssVarPrefix, activeTheme)}
-        style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
-      >
+      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
         <EmptyState>
           {root ? `No tokens under "${root}".` : 'No tokens in the active theme.'}
         </EmptyState>
@@ -268,10 +263,7 @@ export function TokenNavigator({
   }
 
   return (
-    <div
-      {...themeAttrs(cssVarPrefix, activeTheme)}
-      style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
-    >
+    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
       <div style={styles.caption}>
         {root ? `Tokens under ${root}` : 'Token graph'} · {activeTheme}
       </div>

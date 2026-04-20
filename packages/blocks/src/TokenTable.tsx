@@ -11,8 +11,6 @@ import {
   SIZE_PILL,
   SURFACE_MUTED,
   TEXT_MUTED,
-  emptyStyle,
-  surfaceStyle,
 } from '#/internal/styles.tsx';
 import { chromeAliases, themeAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
@@ -51,8 +49,6 @@ export interface TokenTableProps {
 }
 
 const styles = {
-  wrapper: surfaceStyle,
-  empty: emptyStyle,
   caption: {
     captionSide: 'top',
     textAlign: 'left',
@@ -179,20 +175,14 @@ export function TokenTable({
 
   if (rows.length === 0) {
     return (
-      <div
-        {...themeAttrs(cssVarPrefix, activeTheme)}
-        style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
-      >
-        <div style={styles.empty}>No tokens match this filter.</div>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
+        <div className="sb-block__empty">No tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div
-      {...themeAttrs(cssVarPrefix, activeTheme)}
-      style={{ ...chromeAliases(cssVarPrefix), ...styles.wrapper }}
-    >
+    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={chromeAliases(cssVarPrefix)}>
       <table style={styles.table}>
         <caption style={styles.caption}>{captionText}</caption>
         <thead>
