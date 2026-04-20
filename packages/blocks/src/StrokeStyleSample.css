@@ -1,0 +1,48 @@
+.sb-stroke-style-sample__row {
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.2));
+}
+
+.sb-stroke-style-sample__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sb-stroke-style-sample__path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-stroke-style-sample__value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: var(--swatchbook-text-muted, CanvasText);
+}
+
+.sb-stroke-style-sample__line {
+  height: 0;
+  border-top-width: 4px;
+  border-top-color: var(--swatchbook-text-default, CanvasText);
+  width: 100%;
+}
+
+.sb-stroke-style-sample__object-fallback {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: var(--swatchbook-text-muted, CanvasText);
+}
+
+.sb-stroke-style-sample__css-var {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: var(--swatchbook-text-muted, CanvasText);
+}
