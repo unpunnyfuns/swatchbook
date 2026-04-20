@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
+import './ColorPalette.css';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
-import { BORDER_DEFAULT, BORDER_FAINT, MONO_STACK } from '#/internal/styles.tsx';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
@@ -39,52 +39,6 @@ export interface ColorPaletteProps {
   /** `'asc'` (default) or `'desc'`. */
   sortDir?: SortDir;
 }
-
-const styles = {
-  group: {
-    marginBottom: 20,
-  } satisfies React.CSSProperties,
-  groupHeader: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    opacity: 0.6,
-    marginBottom: 8,
-  } satisfies React.CSSProperties,
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-    gap: 8,
-  } satisfies React.CSSProperties,
-  card: {
-    border: BORDER_DEFAULT,
-    borderRadius: 6,
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
-  } satisfies React.CSSProperties,
-  swatch: {
-    height: 56,
-    width: '100%',
-    borderBottom: BORDER_FAINT,
-  } satisfies React.CSSProperties,
-  meta: {
-    padding: '8px 10px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 2,
-  } satisfies React.CSSProperties,
-  leaf: {
-    fontFamily: MONO_STACK,
-    fontSize: 12,
-  } satisfies React.CSSProperties,
-  value: {
-    fontFamily: MONO_STACK,
-    fontSize: 11,
-    opacity: 0.7,
-  } satisfies React.CSSProperties,
-};
 
 interface Swatch {
   path: string;
@@ -127,13 +81,6 @@ export function ColorPalette({
     const entries = sortTokens(filtered, { by: sortBy, dir: sortDir });
 
     const maxDepth = entries.reduce((m, [p]) => Math.max(m, p.split('.').length), 0);
-    /**
-     * Auto-derive: group one level below the filter's fixed prefix, but
-     * clamp so each swatch retains at least one leaf segment. A filter
-     * like `color.ref.blue.*` (fixed length 3) with only 4-segment tokens
-     * would try groupBy=4 → one-per-group; clamp to `maxDepth - 1` so the
-     * whole ramp lands in one group with each shade as a leaf.
-     */
     const effectiveGroupBy =
       groupBy ?? Math.min(fixedPrefixLength(filter) + 1, Math.max(maxDepth - 1, 1));
 
@@ -176,21 +123,25 @@ export function ColorPalette({
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {groups.map(([group, swatches]) => (
-        <section key={group} style={styles.group}>
-          <div style={styles.groupHeader}>{group}</div>
-          <div style={styles.grid}>
+        <section key={group} className="sb-color-palette__group">
+          <div className="sb-color-palette__group-header">{group}</div>
+          <div className="sb-color-palette__grid">
             {swatches.map((swatch) => (
-              <div key={swatch.path} style={styles.card}>
-                <div style={{ ...styles.swatch, background: swatch.cssVar }} aria-hidden />
-                <div style={styles.meta}>
-                  <span style={styles.leaf}>{swatch.leaf}</span>
-                  <span style={styles.value}>
+              <div key={swatch.path} className="sb-color-palette__card">
+                <div
+                  className="sb-color-palette__swatch"
+                  style={{ background: swatch.cssVar }}
+                  aria-hidden
+                />
+                <div className="sb-color-palette__meta">
+                  <span className="sb-color-palette__leaf">{swatch.leaf}</span>
+                  <span className="sb-color-palette__value">
                     {swatch.value}
                     {swatch.outOfGamut && (
                       <span
                         title="Out of sRGB gamut for this format"
                         aria-label="out of gamut"
-                        style={{ marginLeft: 4 }}
+                        className="sb-color-palette__gamut-warn"
                       >
                         {' '}
                         ⚠
