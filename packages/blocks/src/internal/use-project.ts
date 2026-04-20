@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { useActiveAxes, useActiveTheme, useOptionalSwatchbookData } from '#/contexts.ts';
-import { ensureBlockResetStylesheet } from '#/internal/block-reset.ts';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
 import {
   axes as virtualAxes,
@@ -103,9 +102,6 @@ function snapshotToData(snapshot: ProjectSnapshot): ProjectData {
 export function useProject(): ProjectData {
   const snapshot = useOptionalSwatchbookData();
   const fallback = useVirtualModuleFallback(snapshot === null);
-  useEffect(() => {
-    ensureBlockResetStylesheet();
-  }, []);
   return snapshot !== null ? snapshotToData(snapshot) : fallback;
 }
 

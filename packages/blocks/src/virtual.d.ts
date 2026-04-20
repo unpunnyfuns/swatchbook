@@ -53,3 +53,5 @@ declare module 'virtual:swatchbook/tokens' {
   export const css: string;
   export const cssVarPrefix: string;
 }
+
+declare module '*.css';
