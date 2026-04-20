@@ -1,7 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
-import { styles } from '#/token-detail/styles.ts';
 import { useTokenDetailData } from '#/token-detail/internal.ts';
 
 export interface CompositePreviewProps {
@@ -41,8 +40,8 @@ export function CompositePreviewContent({
     const base = cssVar.replace(/^var\(/, '').replace(/\)$/, '');
     return (
       <div
+        className="sb-token-detail__typography-sample"
         style={{
-          ...styles.typographySample,
           fontFamily: `var(${base}-font-family)`,
           fontSize: `var(${base}-font-size)`,
           fontWeight: `var(${base}-font-weight)` as unknown as number,
@@ -55,18 +54,22 @@ export function CompositePreviewContent({
     );
   }
   if (type === 'shadow') {
-    return <div style={{ ...styles.shadowSample, boxShadow: cssVar }} aria-hidden />;
+    return (
+      <div className="sb-token-detail__shadow-sample" style={{ boxShadow: cssVar }} aria-hidden />
+    );
   }
   if (type === 'border') {
-    return <div style={{ ...styles.borderSample, border: cssVar }} aria-hidden />;
+    return (
+      <div className="sb-token-detail__border-sample" style={{ border: cssVar }} aria-hidden />
+    );
   }
   if (type === 'transition') {
     return <TransitionSample transition={cssVar} />;
   }
   if (type === 'dimension') {
     return (
-      <div style={styles.dimensionTrack}>
-        <div style={{ ...styles.dimensionBar, width: cssVar }} aria-hidden />
+      <div className="sb-token-detail__dimension-track">
+        <div className="sb-token-detail__dimension-bar" style={{ width: cssVar }} aria-hidden />
       </div>
     );
   }
@@ -74,15 +77,17 @@ export function CompositePreviewContent({
     return <TransitionSample transition={`left ${cssVar} ease`} />;
   }
   if (type === 'fontFamily') {
-    return <div style={{ ...styles.fontFamilySample, fontFamily: cssVar }}>{PANGRAM}</div>;
+    return (
+      <div className="sb-token-detail__font-family-sample" style={{ fontFamily: cssVar }}>
+        {PANGRAM}
+      </div>
+    );
   }
   if (type === 'fontWeight') {
     return (
       <div
-        style={{
-          ...styles.fontWeightSample,
-          fontWeight: cssVar as unknown as number,
-        }}
+        className="sb-token-detail__font-weight-sample"
+        style={{ fontWeight: cssVar as unknown as number }}
       >
         Aa
       </div>
@@ -94,7 +99,8 @@ export function CompositePreviewContent({
   if (type === 'gradient') {
     return (
       <div
-        style={{ ...styles.gradientSample, background: `linear-gradient(to right, ${cssVar})` }}
+        className="sb-token-detail__gradient-sample"
+        style={{ background: `linear-gradient(to right, ${cssVar})` }}
         aria-hidden
       />
     );
@@ -104,9 +110,9 @@ export function CompositePreviewContent({
   }
   if (type === 'color') {
     return (
-      <div style={styles.colorSwatchRow} aria-hidden>
-        <div style={{ ...styles.colorSwatchLight, background: cssVar }} />
-        <div style={{ ...styles.colorSwatchDark, background: cssVar }} />
+      <div className="sb-token-detail__color-swatch-row" aria-hidden>
+        <div className="sb-token-detail__color-swatch-light" style={{ background: cssVar }} />
+        <div className="sb-token-detail__color-swatch-dark" style={{ background: cssVar }} />
       </div>
     );
   }
@@ -117,10 +123,8 @@ function StrokeStylePreview({ value }: { value: unknown }): ReactElement {
   if (typeof value === 'string' && STROKE_STYLE_STRINGS.has(value)) {
     return (
       <div
-        style={{
-          ...styles.strokeStyleLine,
-          borderTopStyle: value as CSSProperties['borderTopStyle'],
-        }}
+        className="sb-token-detail__stroke-style-line"
+        style={{ borderTopStyle: value as CSSProperties['borderTopStyle'] }}
         aria-hidden
       />
     );
@@ -133,7 +137,7 @@ function StrokeStylePreview({ value }: { value: unknown }): ReactElement {
     const lengths = asDashLengths(v.dashArray);
     if (lengths.length === 0) {
       return (
-        <div style={styles.strokeStyleFallback}>
+        <div className="sb-token-detail__stroke-style-fallback">
           Object-form strokeStyle with no resolvable dashArray.
         </div>
       );
@@ -141,7 +145,7 @@ function StrokeStylePreview({ value }: { value: unknown }): ReactElement {
     const cap = typeof v.lineCap === 'string' ? v.lineCap : 'butt';
     return (
       <svg
-        style={styles.strokeStyleSvg}
+        className="sb-token-detail__stroke-style-svg"
         viewBox="0 0 220 24"
         preserveAspectRatio="none"
         aria-hidden
@@ -159,7 +163,11 @@ function StrokeStylePreview({ value }: { value: unknown }): ReactElement {
       </svg>
     );
   }
-  return <div style={styles.strokeStyleFallback}>strokeStyle value could not be previewed.</div>;
+  return (
+    <div className="sb-token-detail__stroke-style-fallback">
+      strokeStyle value could not be previewed.
+    </div>
+  );
 }
 
 function asDashLengths(raw: unknown): number[] {
@@ -196,17 +204,17 @@ function TransitionSample({ transition }: { transition: string }): ReactElement 
 
   if (reduced) {
     return (
-      <div style={styles.reducedMotion}>
+      <div className="sb-token-detail__reduced-motion">
         Animation suppressed by `prefers-reduced-motion: reduce`.
       </div>
     );
   }
 
   return (
-    <div style={styles.motionTrack}>
+    <div className="sb-token-detail__motion-track">
       <div
+        className="sb-token-detail__motion-ball"
         style={{
-          ...styles.motionBall,
           left: phase === 1 ? 'calc(100% - 28px)' : '4px',
           transition,
         }}

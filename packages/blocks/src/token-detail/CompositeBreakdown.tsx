@@ -1,7 +1,6 @@
 import type { ReactElement } from 'react';
 import { useColorFormat } from '#/contexts.ts';
 import { type ColorFormat, formatColor } from '#/format-color.ts';
-import { styles } from '#/token-detail/styles.ts';
 import { useTokenDetailData } from '#/token-detail/internal.ts';
 
 export interface CompositeBreakdownProps {
@@ -66,12 +65,14 @@ export function CompositeBreakdownContent({
     const layers = Array.isArray(rawValue) ? rawValue : [rawValue];
     const multi = layers.length > 1;
     return (
-      <div style={styles.breakdownSection}>
+      <div className="sb-token-detail__breakdown-section">
         {layers.map((layer, i) => {
           const v = layer as Record<string, unknown>;
           return (
             <div key={shadowLayerKey(v, i)} style={{ display: 'contents' }}>
-              {multi && <div style={styles.breakdownLayerHeader}>Layer {i + 1}</div>}
+              {multi && (
+                <div className="sb-token-detail__breakdown-layer-header">Layer {i + 1}</div>
+              )}
               <KeyValueRow label="color" value={formatColorSubValue(v['color'], colorFormat)} />
               <KeyValueRow label="offsetX" value={formatDimensionValue(v['offsetX'])} />
               <KeyValueRow label="offsetY" value={formatDimensionValue(v['offsetY'])} />
@@ -89,7 +90,7 @@ export function CompositeBreakdownContent({
     const stops = Array.isArray(rawValue) ? rawValue : [];
     if (stops.length === 0) return null;
     return (
-      <div style={styles.breakdownSection}>
+      <div className="sb-token-detail__breakdown-section">
         {stops.map((stop, i) => {
           const v = stop as Record<string, unknown>;
           const position = typeof v['position'] === 'number' ? v['position'] : 0;
@@ -110,7 +111,7 @@ export function CompositeBreakdownContent({
 
 function renderKeyValueList(rows: Array<[string, string | null]>): ReactElement {
   return (
-    <div style={styles.breakdownSection}>
+    <div className="sb-token-detail__breakdown-section">
       {rows
         .filter(([, v]) => v !== null)
         .map(([k, v]) => (
@@ -123,7 +124,7 @@ function renderKeyValueList(rows: Array<[string, string | null]>): ReactElement 
 function KeyValueRow({ label, value }: { label: string; value: string | null }): ReactElement {
   return (
     <>
-      <span style={styles.breakdownKey}>{label}</span>
+      <span className="sb-token-detail__breakdown-key">{label}</span>
       <span>{value ?? '—'}</span>
     </>
   );

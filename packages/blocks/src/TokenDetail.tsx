@@ -1,3 +1,4 @@
+import cx from 'clsx';
 import type { ReactElement } from 'react';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
@@ -9,10 +10,10 @@ import { AxisVariance } from '#/token-detail/AxisVariance.tsx';
 import { CompositeBreakdown } from '#/token-detail/CompositeBreakdown.tsx';
 import { CompositePreview } from '#/token-detail/CompositePreview.tsx';
 import { ConsumerOutput } from '#/token-detail/ConsumerOutput.tsx';
-import { styles } from '#/token-detail/styles.ts';
 import { TokenHeader } from '#/token-detail/TokenHeader.tsx';
 import { TokenUsageSnippet } from '#/token-detail/TokenUsageSnippet.tsx';
 import { useTokenDetailData } from '#/token-detail/internal.ts';
+import '#/token-detail/styles.css';
 
 export interface TokenDetailProps {
   /** Full dot-path of the token to inspect. */
@@ -24,11 +25,12 @@ export interface TokenDetailProps {
 export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
   const { token, cssVar, activeTheme, cssVarPrefix } = useTokenDetailData(path);
   const colorFormat = useColorFormat();
+  const theme = themeAttrs(cssVarPrefix, activeTheme);
 
   if (!token) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)} style={styles.wrapper}>
-        <div style={styles.missing}>
+      <div {...theme} className={cx(theme['className'], 'sb-token-detail')}>
+        <div className="sb-token-detail__missing">
           Token <code>{path}</code> not found in theme <strong>{activeTheme}</strong>.
         </div>
       </div>
@@ -41,14 +43,16 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
   const outOfGamut = gamut?.outOfGamut ?? false;
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)} style={styles.wrapper}>
+    <div {...theme} className={cx(theme['className'], 'sb-token-detail')}>
       <TokenHeader path={path} {...(heading !== undefined && { heading })} />
 
-      <div style={styles.sectionHeader}>Resolved value · {activeTheme}</div>
+      <div className="sb-token-detail__section-header">Resolved value · {activeTheme}</div>
       <CompositePreview path={path} />
       <CompositeBreakdown path={path} />
-      <div style={styles.chain}>
-        {isColor && <span style={{ ...styles.swatch, background: cssVar }} aria-hidden />}
+      <div className="sb-token-detail__chain">
+        {isColor && (
+          <span className="sb-token-detail__swatch" style={{ background: cssVar }} aria-hidden />
+        )}
         <span>{value}</span>
         {outOfGamut && (
           <span

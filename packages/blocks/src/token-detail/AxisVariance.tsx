@@ -4,7 +4,6 @@ import { useColorFormat } from '#/contexts.ts';
 import type { ColorFormat } from '#/format-color.ts';
 import { dataAttr } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
-import { styles } from '#/token-detail/styles.ts';
 import {
   type DetailToken,
   type VirtualAxisLike,
@@ -44,12 +43,18 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
     const value = anyTheme ? formatFn(themesResolved[anyTheme.name]?.[path]) : '—';
     return (
       <>
-        <div style={styles.sectionHeader}>Values across axes</div>
-        <table style={styles.themeTable} data-testid="token-detail-values">
+        <div className="sb-token-detail__section-header">Values across axes</div>
+        <table className="sb-token-detail__theme-table" data-testid="token-detail-values">
           <tbody>
-            <tr style={styles.themeRow}>
-              <td style={styles.themeCell} data-testid="token-detail-constant">
-                {isColor && <span style={{ ...styles.swatch, background: cssVar }} aria-hidden />}
+            <tr className="sb-token-detail__theme-row">
+              <td className="sb-token-detail__theme-cell" data-testid="token-detail-constant">
+                {isColor && (
+                  <span
+                    className="sb-token-detail__swatch"
+                    style={{ background: cssVar }}
+                    aria-hidden
+                  />
+                )}
                 {value}
                 <span style={{ opacity: 0.6, marginLeft: 8 }}>
                   same across all {themes.length} tuples
@@ -82,16 +87,24 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
     });
     return (
       <>
-        <div style={styles.sectionHeader}>Varies with {axisName}</div>
-        <table style={styles.themeTable} data-testid="token-detail-values">
+        <div className="sb-token-detail__section-header">Varies with {axisName}</div>
+        <table className="sb-token-detail__theme-table" data-testid="token-detail-values">
           <tbody>
             {contextValues.map((row) => (
-              <tr key={row.ctx} style={styles.themeRow} data-axis={axisName} data-context={row.ctx}>
-                <td style={{ ...styles.themeCell, width: '30%' }}>{row.ctx}</td>
-                <td style={styles.themeCell}>
+              <tr
+                key={row.ctx}
+                className="sb-token-detail__theme-row"
+                data-axis={axisName}
+                data-context={row.ctx}
+              >
+                <td className="sb-token-detail__theme-cell" style={{ width: '30%' }}>
+                  {row.ctx}
+                </td>
+                <td className="sb-token-detail__theme-cell">
                   {isColor && row.themeName && (
                     <span
-                      style={{ ...styles.swatch, background: cssVar }}
+                      className="sb-token-detail__swatch"
+                      style={{ background: cssVar }}
                       {...{ [dataAttr(cssVarPrefix, 'theme')]: row.themeName }}
                       aria-hidden
                     />
@@ -115,15 +128,21 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
 
   return (
     <>
-      <div style={styles.sectionHeader}>Varies with {variance.varyingAxes.join(' × ')}</div>
-      <table style={styles.themeTable} data-testid="token-detail-values">
+      <div className="sb-token-detail__section-header">
+        Varies with {variance.varyingAxes.join(' × ')}
+      </div>
+      <table className="sb-token-detail__theme-table" data-testid="token-detail-values">
         <thead>
-          <tr style={styles.themeRow}>
-            <th style={{ ...styles.themeCell, textAlign: 'left', opacity: 0.7 }}>
+          <tr className="sb-token-detail__theme-row">
+            <th className="sb-token-detail__theme-cell" style={{ textAlign: 'left', opacity: 0.7 }}>
               {rowAxis.name} \ {colAxis.name}
             </th>
             {colAxis.contexts.map((col) => (
-              <th key={col} style={{ ...styles.themeCell, textAlign: 'left', opacity: 0.7 }}>
+              <th
+                key={col}
+                className="sb-token-detail__theme-cell"
+                style={{ textAlign: 'left', opacity: 0.7 }}
+              >
                 {col}
               </th>
             ))}
@@ -131,8 +150,8 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
         </thead>
         <tbody>
           {rowAxis.contexts.map((row) => (
-            <tr key={row} style={styles.themeRow}>
-              <td style={styles.themeCell}>{row}</td>
+            <tr key={row} className="sb-token-detail__theme-row">
+              <td className="sb-token-detail__theme-cell">{row}</td>
               {colAxis.contexts.map((col) => {
                 const target: Record<string, string> = {
                   ...activeAxes,
@@ -142,10 +161,16 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                 const name = tupleName(themes, target);
                 const value = name ? formatFn(themesResolved[name]?.[path]) : '—';
                 return (
-                  <td key={col} style={styles.themeCell} data-row={row} data-col={col}>
+                  <td
+                    key={col}
+                    className="sb-token-detail__theme-cell"
+                    data-row={row}
+                    data-col={col}
+                  >
                     {isColor && name && (
                       <span
-                        style={{ ...styles.swatch, background: cssVar }}
+                        className="sb-token-detail__swatch"
+                        style={{ background: cssVar }}
                         {...{ [dataAttr(cssVarPrefix, 'theme')]: name }}
                         aria-hidden
                       />
@@ -159,7 +184,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
         </tbody>
       </table>
       {extra.length > 0 && (
-        <div style={{ ...styles.aliasedByTruncated, marginTop: 6 }}>
+        <div className="sb-token-detail__aliased-by-truncated" style={{ marginTop: 6 }}>
           Values also vary with {extra.map((a) => a.name).join(', ')}; matrix shows the slice for
           the active selection.
         </div>
