@@ -17,13 +17,22 @@ import { create, themes } from 'storybook/theming';
 const preferDark =
   typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
+// Storybook's `brandImage` replaces the title; passing HTML to
+// `brandTitle` is the documented way to get logo + wordmark side by
+// side. Inline sizing on the `<img>` keeps it a small icon.
+const brandMarkup = `
+  <span style="display:inline-flex;align-items:center;gap:8px;">
+    <img src="./logo.svg" alt="" style="height:24px;width:auto;" />
+    <span>swatchbook</span>
+  </span>
+`;
+
 addons.setConfig({
   theme: create({
     ...(preferDark ? themes.dark : themes.light),
     base: preferDark ? 'dark' : 'light',
-    brandTitle: 'swatchbook',
+    brandTitle: brandMarkup,
     brandUrl: 'https://unpunnyfuns.github.io/swatchbook/',
-    brandImage: './logo.svg',
     brandTarget: '_self',
   }),
 });
