@@ -182,6 +182,29 @@
   color: var(--swatchbook-text-muted, CanvasText);
 }
 
+.sb-token-detail__breakdown-value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sb-token-detail__breakdown-alias {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.sb-token-detail__breakdown-alias-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .sb-token-detail__breakdown-layer-header {
   grid-column: 1 / -1;
   font-size: 10px;
