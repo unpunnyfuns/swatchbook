@@ -63,14 +63,14 @@ const config: Config = {
           editUrl: 'https://github.com/unpunnyfuns/swatchbook/tree/main/apps/docs/',
           includeCurrentVersion: true,
           ...(hasReleasedVersion && {
-            // `lastVersion: 'current'` pins main-branch docs to / so visitors
-            // land on the active work rather than the last cut release. The
-            // released snapshots remain reachable at /<version>/ via the
-            // version dropdown. Suppress the default "unreleased" banner on
-            // current — nothing to warn about when current *is* the headline.
-            lastVersion: 'current',
+            // Once a snapshot exists, the newest released version in
+            // versions.json becomes the implicit lastVersion and serves at /,
+            // so visitors shipping against `@unpunnyfuns/swatchbook-*@X.Y.Z`
+            // land on docs that match their installed code. Main-branch docs
+            // move to /next/ with an "unreleased" banner that warns visitors
+            // they're on pre-release content.
             versions: {
-              current: { label: 'Next', banner: 'none' },
+              current: { label: 'Next', path: 'next', banner: 'unreleased' },
             },
           }),
         },
