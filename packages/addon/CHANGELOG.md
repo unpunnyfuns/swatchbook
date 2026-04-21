@@ -1,5 +1,13 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.10.0
+
+### Patch Changes
+
+- @unpunnyfuns/swatchbook-core@0.10.0
+- @unpunnyfuns/swatchbook-blocks@0.10.0
+- @unpunnyfuns/swatchbook-switcher@0.10.0
+
 ## 0.9.0
 
 ### Minor Changes
