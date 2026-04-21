@@ -5,10 +5,10 @@ import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
-// Docs versioning: current (main) renders as "Next 🚧" at /next/ with an
-// unreleased banner, and the newest snapshot under versioned_docs/ serves as
-// the default at /. Before the first snapshot exists, skip the versions map
-// entirely so current keeps serving at /.
+// Docs versioning: current (main) is the default at /. Released snapshots
+// under versioned_docs/ each mount at /<version>/ and stay browsable via the
+// version dropdown. Before the first snapshot exists, skip the versions map
+// entirely so current keeps serving at / without the dropdown.
 //
 // Resolve relative to the config file itself — `./versions.json` vs
 // `process.cwd()` is brittle in CI (Turbo / docusaurus CLI can shift cwd),
@@ -63,8 +63,14 @@ const config: Config = {
           editUrl: 'https://github.com/unpunnyfuns/swatchbook/tree/main/apps/docs/',
           includeCurrentVersion: true,
           ...(hasReleasedVersion && {
+            // `lastVersion: 'current'` pins main-branch docs to / so visitors
+            // land on the active work rather than the last cut release. The
+            // released snapshots remain reachable at /<version>/ via the
+            // version dropdown. Suppress the default "unreleased" banner on
+            // current — nothing to warn about when current *is* the headline.
+            lastVersion: 'current',
             versions: {
-              current: { label: 'Next 🚧', path: 'next', banner: 'unreleased' },
+              current: { label: 'Next', banner: 'none' },
             },
           }),
         },
@@ -87,37 +93,17 @@ const config: Config = {
         src: 'img/logo.svg',
       },
       items: [
-        // Per-category top-level entries so readers can jump straight to
-        // the section they want rather than landing on Intro and fishing
-        // through the sidebar. Each entry points at the first page in its
-        // sidebar group; `activeBaseRegex` highlights the nav pill across
-        // the whole section. Reference excludes `/reference/blocks/*`
-        // because Blocks has its own top-level entry.
-        { to: '/quickstart', label: 'Quickstart', position: 'left' },
-        {
-          to: '/concepts/theming-inputs',
-          label: 'Concepts',
-          position: 'left',
-          activeBaseRegex: '^/(?:next/)?concepts(?:/|$)',
-        },
-        {
-          to: '/reference/blocks/',
-          label: 'Blocks',
-          position: 'left',
-          activeBaseRegex: '^/(?:next/)?reference/blocks(?:/|$)',
-        },
-        {
-          to: '/guides/multi-axis-walkthrough',
-          label: 'Guides',
-          position: 'left',
-          activeBaseRegex: '^/(?:next/)?guides(?:/|$)',
-        },
-        {
-          to: '/reference/addon',
-          label: 'Reference',
-          position: 'left',
-          activeBaseRegex: '^/(?:next/)?reference/(?!blocks)(?:$|.*)',
-        },
+        // Per-section top-level entries bound to a sidebar via
+        // `type: 'docSidebar'` + `sidebarId`. Docusaurus auto-links to
+        // the first doc in the bound sidebar and keeps the nav pill
+        // active across every doc in it — no `activeBaseRegex` needed,
+        // and the left rail shows only the current section's pages
+        // rather than duplicating the navbar's category list.
+        { type: 'docSidebar', sidebarId: 'home', position: 'left', label: 'Quickstart' },
+        { type: 'docSidebar', sidebarId: 'concepts', position: 'left', label: 'Concepts' },
+        { type: 'docSidebar', sidebarId: 'blocks', position: 'left', label: 'Blocks' },
+        { type: 'docSidebar', sidebarId: 'guides', position: 'left', label: 'Guides' },
+        { type: 'docSidebar', sidebarId: 'reference', position: 'left', label: 'Reference' },
         { href: 'pathname:///storybook/', label: 'Live Storybook', position: 'left' },
         ...(hasReleasedVersion
           ? [{ type: 'docsVersionDropdown' as const, position: 'right' as const }]
