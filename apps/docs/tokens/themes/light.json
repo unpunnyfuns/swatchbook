@@ -24,6 +24,21 @@
     "code": {
       "bg":     { "$value": "{color.palette.neutral.100}" },
       "border": { "$value": "{color.palette.neutral.200}" }
+    },
+    "accessible": {
+      "$description": "High-contrast alternates for Light. The a11y overlay aliases role tokens to this namespace so it stays mode-agnostic at the file level while the resolved values remain mode-aware. Darker neutrals for text, deeper brand shades for primary — pushes link/muted-text contrast up from AA-borderline to AAA on white surfaces.",
+      "text": {
+        "muted": { "$value": "{color.palette.neutral.700}" }
+      },
+      "primary": {
+        "lightest": { "$value": "{color.palette.brand.500}" },
+        "lighter":  { "$value": "{color.palette.brand.600}" },
+        "light":    { "$value": "{color.palette.brand.700}" },
+        "default":  { "$value": "{color.palette.brand.800}" },
+        "dark":     { "$value": "{color.palette.brand.900}" },
+        "darker":   { "$value": "{color.palette.brand.900}" },
+        "darkest":  { "$value": "{color.palette.brand.900}" }
+      }
     }
   },
   "font": {
