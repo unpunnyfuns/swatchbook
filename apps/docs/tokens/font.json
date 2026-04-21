@@ -26,6 +26,22 @@
           "Liberation Mono",
           "monospace"
         ]
+      },
+      "comic-mono": {
+        "$description": "Playful monospace stack for the Monotype typeface overlay — prefers comic-flavoured monospace faces if the reader has them locally installed (Comic Mono, Fantasque Sans Mono, Comic Shanns Mono), then falls through to Comic Sans MS (widely installed on consumer machines), then the same system-monospace fallback as `mono` so rendering never regresses past a plain fixed-pitch face.",
+        "$value": [
+          "Comic Mono",
+          "Fantasque Sans Mono",
+          "Comic Shanns Mono",
+          "Comic Sans MS",
+          "ui-monospace",
+          "SFMono-Regular",
+          "SF Mono",
+          "Menlo",
+          "Consolas",
+          "Liberation Mono",
+          "monospace"
+        ]
       }
     }
   }
