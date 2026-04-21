@@ -67,17 +67,22 @@ jobs:
 
       - name: Lint / format / typecheck / test / build
         id: checks
+        # Container image's default shell is `sh` (dash), which has no
+        # `set -o pipefail`. Force bash so the pipe exit code propagates.
+        shell: bash
         run: |
           set -o pipefail
           pnpm turbo run lint format:check typecheck test build 2>&1 | tee .ci-checks.log
 
       - name: Storybook interaction tests
+        shell: bash
         run: |
           set -o pipefail
           pnpm turbo run test:storybook 2>&1 | tee .ci-storybook.log
 
       - name: Test results summary
         if: always()
+        shell: bash
         run: |
           {
             echo "## Test results"
