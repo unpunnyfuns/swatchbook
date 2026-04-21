@@ -6,8 +6,8 @@
  * small `tokens.snapshot.json` next to it so the navbar switcher can
  * render axes / presets without re-parsing tokens at runtime.
  *
- * `custom.css` imports the CSS; `src/ThemeSwitcher/` imports the JSON.
- * Changes in `apps/docs/tokens/*.json` flow into both outputs on
+ * `custom.css` imports the CSS; `SwatchbookSwitcherContext` imports the
+ * JSON. Changes in `apps/docs/tokens/*.json` flow into both outputs on
  * rebuild (no manual Infima hex retyping, no snapshot drift).
  *
  * Runs as a prebuild / prestart step from `apps/docs/package.json`.

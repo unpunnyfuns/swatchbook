@@ -2,11 +2,13 @@
  * Hook Docusaurus's Infima theme variables up to swatchbook tokens.
  *
  * `tokens.generated.css` is emitted from `apps/docs/tokens/*.json` by
- * `scripts/build-tokens.ts` (runs as prebuild / prestart). It writes
- * `--sb-color-*` vars at `:root` and flips per-mode values based on
- * `[data-theme="light"]` / `[data-theme="dark"]` — the same attribute
- * Docusaurus toggles on `<html>` — so the Infima mapping below only
- * needs one declaration block per variable.
+ * `scripts/build-tokens.mts` (runs as prebuild / prestart). It writes
+ * `--sb-color-*` / `--sb-font-*` vars at `:root` and flips per-tuple
+ * values via compound attribute selectors — `[data-theme]` for mode
+ * (owned by Docusaurus) plus `[data-sb-<axis>]` for a11y + brand
+ * (owned by `SwatchbookSwitcherProvider`). The Infima mapping below
+ * only needs one declaration block per variable; the underlying
+ * swatchbook vars do the flipping.
  */
 @import './tokens.generated.css';
 

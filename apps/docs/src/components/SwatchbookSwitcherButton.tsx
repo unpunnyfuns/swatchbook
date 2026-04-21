@@ -97,8 +97,6 @@ export function SwatchbookSwitcherButton(): React.ReactElement {
     [modeAxis, setColorMode, applyNonModeFromPreset, setLastApplied],
   );
 
-  // With the built-in colour-mode toggle removed from the navbar, this
-  // popover owns every axis the project ships.
   if (axes.length === 0 && presets.length === 0) return <></>;
 
   return (
