@@ -1,21 +1,15 @@
-import OriginalColorModeToggle from '@theme-original/ColorModeToggle';
-import type ColorModeToggleType from '@theme/ColorModeToggle';
 import React from 'react';
 import { SwatchbookSwitcherButton } from '../../components/SwatchbookSwitcherButton';
 
-type ColorModeToggleProps = React.ComponentProps<typeof ColorModeToggleType>;
-
 /**
- * ColorModeToggle swizzle (wrap) — renders the original Docusaurus
- * light/dark toggle unchanged, and appends the swatchbook switcher
- * button next to it. The navbar config is untouched; the trigger
- * hitches a ride on the existing colour-mode slot.
+ * ColorModeToggle swizzle (full replacement) — Docusaurus reserves a
+ * navbar slot for the colour-mode toggle. Replacing the component keeps
+ * the slot and lets the swatchbook switcher inherit its placement
+ * instead of adding a separate navbar item. Mode (Light / Dark) is
+ * still reachable as an axis inside the switcher popover; the provider
+ * bridges it to Docusaurus's `useColorMode` so `[data-theme]` on
+ * `<html>` stays in lockstep.
  */
-export default function ColorModeToggle(props: ColorModeToggleProps): React.ReactElement {
-  return (
-    <>
-      <OriginalColorModeToggle {...props} />
-      <SwatchbookSwitcherButton />
-    </>
-  );
+export default function ColorModeToggle(): React.ReactElement {
+  return <SwatchbookSwitcherButton />;
 }

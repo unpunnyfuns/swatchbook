@@ -16,23 +16,30 @@ type AxesSnapshot = {
   cssVarPrefix: string;
 };
 
+/**
+ * The `mode` axis is bridged to Docusaurus's `useColorMode` inside the
+ * switcher button (where we're guaranteed to be under the ColorMode
+ * provider). This context covers every *other* axis + presets + colour
+ * format, and lives at the Root swizzle so the state survives page
+ * navigations and renders before the colour-mode provider mounts.
+ */
+export const MODE_AXIS = 'mode';
+
 const LOCAL_STORAGE_KEY = 'swatchbook-docs-switcher';
 
-/**
- * `color.mode` is driven by Docusaurus's built-in colour-mode toggle, which
- * also controls the `[data-theme]` attribute on `<html>` plus `prefers-colour-scheme`
- * styling elsewhere in the site. The switcher keeps axis-aware UX for every
- * *other* axis (today: a11y); mode stays lowercase via Docusaurus so the
- * two don't fight over the `<html>` attribute.
- */
-const DOCUSAURUS_MODE_AXIS = 'mode';
-
-interface SwatchbookSwitcherContextValue extends AxesSnapshot {
-  activeTuple: Record<string, string>;
+interface SwatchbookSwitcherContextValue {
+  axes: SwitcherAxis[];
+  presets: SwitcherPreset[];
+  defaults: Record<string, string>;
+  cssVarPrefix: string;
+  /** Tuple of every axis except `mode`, keyed by axis name. */
+  nonModeTuple: Record<string, string>;
   activeColorFormat: SwitcherColorFormat;
   lastApplied: string | null;
-  setAxis(axisName: string, next: string): void;
-  applyPreset(preset: SwitcherPreset): void;
+  setNonModeAxis(axisName: string, next: string): void;
+  /** Apply each non-mode axis from the preset; mode is applied by the button. */
+  applyNonModeFromPreset(preset: SwitcherPreset): void;
+  setLastApplied(name: string | null): void;
   setColorFormat(next: SwitcherColorFormat): void;
 }
 
@@ -41,18 +48,20 @@ const SwatchbookSwitcherContext = createContext<SwatchbookSwitcherContextValue |
 export function useSwatchbookSwitcher(): SwatchbookSwitcherContextValue {
   const ctx = useContext(SwatchbookSwitcherContext);
   if (!ctx) {
-    throw new Error(
-      'useSwatchbookSwitcher must be called inside <SwatchbookSwitcherProvider>',
-    );
+    throw new Error('useSwatchbookSwitcher must be called inside <SwatchbookSwitcherProvider>');
   }
   return ctx;
 }
 
-function readPersistedTuple(
+function readPersistedNonModeTuple(
   axes: readonly SwitcherAxis[],
   defaults: Record<string, string>,
 ): Record<string, string> {
-  const tuple: Record<string, string> = { ...defaults };
+  const tuple: Record<string, string> = {};
+  for (const axis of axes) {
+    if (axis.name === MODE_AXIS) continue;
+    tuple[axis.name] = defaults[axis.name] ?? axis.default;
+  }
   if (typeof window === 'undefined') return tuple;
   try {
     const raw = window.localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -60,7 +69,7 @@ function readPersistedTuple(
     const parsed = JSON.parse(raw) as { tuple?: Record<string, unknown> };
     if (parsed && typeof parsed.tuple === 'object' && parsed.tuple !== null) {
       for (const axis of axes) {
-        if (axis.name === DOCUSAURUS_MODE_AXIS) continue;
+        if (axis.name === MODE_AXIS) continue;
         const candidate = parsed.tuple[axis.name];
         if (typeof candidate === 'string' && axis.contexts.includes(candidate)) {
           tuple[axis.name] = candidate;
@@ -73,7 +82,7 @@ function readPersistedTuple(
   return tuple;
 }
 
-function persistTuple(tuple: Record<string, string>): void {
+function persistNonModeTuple(tuple: Record<string, string>): void {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ tuple }));
@@ -84,18 +93,16 @@ function persistTuple(tuple: Record<string, string>): void {
 
 /**
  * Writes each non-mode axis onto `<html>` as `data-sb-<axis>="<context>"`.
- * The emitted CSS under `src/css/tokens.generated.css` uses these
- * attributes directly (multi-axis compound selectors like
- * `[data-theme="dark"][data-sb-a11y="High-contrast"]`). Mode stays on
- * `data-theme` and is owned by Docusaurus's own colour-mode toggle.
+ * Mode stays on Docusaurus's own `[data-theme]`; the emitted compound
+ * selectors in `tokens.generated.css` combine the two.
  */
-function syncTupleToDocument(
+function syncNonModeTupleToDocument(
   axes: readonly SwitcherAxis[],
   tuple: Record<string, string>,
 ): void {
   if (typeof document === 'undefined') return;
   for (const axis of axes) {
-    if (axis.name === DOCUSAURUS_MODE_AXIS) continue;
+    if (axis.name === MODE_AXIS) continue;
     document.documentElement.setAttribute(
       `data-sb-${axis.name}`,
       tuple[axis.name] ?? axis.default,
@@ -108,43 +115,33 @@ export function SwatchbookSwitcherProvider({
 }: {
   children: React.ReactNode;
 }): React.ReactElement {
-  const axes = useMemo<SwitcherAxis[]>(
-    () => (snapshot as AxesSnapshot).axes,
-    [],
-  );
-  const presets = useMemo<SwitcherPreset[]>(
-    () => (snapshot as AxesSnapshot).presets,
-    [],
-  );
-  const defaults = useMemo<Record<string, string>>(
-    () => (snapshot as AxesSnapshot).defaults,
-    [],
-  );
+  const axes = useMemo<SwitcherAxis[]>(() => (snapshot as AxesSnapshot).axes, []);
+  const presets = useMemo<SwitcherPreset[]>(() => (snapshot as AxesSnapshot).presets, []);
+  const defaults = useMemo<Record<string, string>>(() => (snapshot as AxesSnapshot).defaults, []);
   const cssVarPrefix = (snapshot as AxesSnapshot).cssVarPrefix;
 
-  const [tuple, setTuple] = useState<Record<string, string>>(() =>
-    readPersistedTuple(axes, defaults),
+  const [nonModeTuple, setNonModeTupleState] = useState<Record<string, string>>(() =>
+    readPersistedNonModeTuple(axes, defaults),
   );
   const [activeColorFormat, setColorFormat] = useState<SwitcherColorFormat>('hex');
   const [lastApplied, setLastApplied] = useState<string | null>(null);
 
   useEffect(() => {
-    syncTupleToDocument(axes, tuple);
-    persistTuple(tuple);
-  }, [axes, tuple]);
+    syncNonModeTupleToDocument(axes, nonModeTuple);
+    persistNonModeTuple(nonModeTuple);
+  }, [axes, nonModeTuple]);
 
-  const setAxis = useCallback(
-    (axisName: string, next: string) => {
-      setTuple((prev) => ({ ...prev, [axisName]: next }));
-    },
-    [],
-  );
+  const setNonModeAxis = useCallback((axisName: string, next: string) => {
+    if (axisName === MODE_AXIS) return;
+    setNonModeTupleState((prev) => ({ ...prev, [axisName]: next }));
+  }, []);
 
-  const applyPreset = useCallback(
+  const applyNonModeFromPreset = useCallback(
     (preset: SwitcherPreset) => {
-      setTuple((prev) => {
+      setNonModeTupleState((prev) => {
         const next: Record<string, string> = { ...prev };
         for (const axis of axes) {
+          if (axis.name === MODE_AXIS) continue;
           const candidate = preset.axes[axis.name];
           if (candidate !== undefined && axis.contexts.includes(candidate)) {
             next[axis.name] = candidate;
@@ -152,7 +149,6 @@ export function SwatchbookSwitcherProvider({
         }
         return next;
       });
-      setLastApplied(preset.name);
     },
     [axes],
   );
@@ -163,14 +159,25 @@ export function SwatchbookSwitcherProvider({
       presets,
       defaults,
       cssVarPrefix,
-      activeTuple: tuple,
+      nonModeTuple,
       activeColorFormat,
       lastApplied,
-      setAxis,
-      applyPreset,
+      setNonModeAxis,
+      applyNonModeFromPreset,
+      setLastApplied,
       setColorFormat,
     }),
-    [axes, presets, defaults, cssVarPrefix, tuple, activeColorFormat, lastApplied, setAxis, applyPreset],
+    [
+      axes,
+      presets,
+      defaults,
+      cssVarPrefix,
+      nonModeTuple,
+      activeColorFormat,
+      lastApplied,
+      setNonModeAxis,
+      applyNonModeFromPreset,
+    ],
   );
 
   return (

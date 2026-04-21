@@ -1,30 +1,45 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ThemeSwitcher } from '@unpunnyfuns/swatchbook-switcher';
-import { useSwatchbookSwitcher } from './SwatchbookSwitcherContext';
+import { useColorMode } from '@docusaurus/theme-common';
+import { type SwitcherPreset, ThemeSwitcher } from '@unpunnyfuns/swatchbook-switcher';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { MODE_AXIS, useSwatchbookSwitcher } from './SwatchbookSwitcherContext';
 import './SwatchbookSwitcherButton.css';
 
+type DocusaurusMode = 'light' | 'dark';
+
+function toDocusaurusMode(context: string): DocusaurusMode {
+  return context.toLowerCase() === 'dark' ? 'dark' : 'light';
+}
+
+function toSwatchbookMode(colorMode: DocusaurusMode, contexts: readonly string[]): string {
+  const match = contexts.find((ctx) => ctx.toLowerCase() === colorMode);
+  return match ?? contexts[0] ?? 'Light';
+}
+
 /**
- * Navbar trigger + popover for the docs-site theme switcher. Mounts next
- * to Docusaurus's built-in colour-mode toggle via the `ColorModeToggle`
- * wrap swizzle. State lives in `SwatchbookSwitcherContext` (provided by
- * the `Root` wrap swizzle).
+ * Navbar trigger + popover for the docs-site theme switcher. Replaces
+ * Docusaurus's built-in colour-mode toggle (via the `ColorModeToggle`
+ * swizzle) and hosts every axis the project ships — including `mode`,
+ * which is bridged to `useColorMode` here so `[data-theme]` on `<html>`
+ * stays in lockstep.
  *
- * The popover is an absolutely-positioned div anchored to the trigger
- * button — no portal, no popper.js dep. Close on outside click, Escape,
- * or selection inside.
+ * Runs strictly under `<ColorModeProvider>`, which is why the
+ * `useColorMode` call lives in the button rather than the Root-level
+ * provider (Root sits outside the colour-mode context during SSR).
  */
 export function SwatchbookSwitcherButton(): React.ReactElement {
   const {
     axes,
     presets,
     defaults,
-    activeTuple,
+    nonModeTuple,
     activeColorFormat,
     lastApplied,
-    setAxis,
-    applyPreset,
+    setNonModeAxis,
+    applyNonModeFromPreset,
+    setLastApplied,
     setColorFormat,
   } = useSwatchbookSwitcher();
+  const { colorMode, setColorMode } = useColorMode();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
@@ -54,13 +69,39 @@ export function SwatchbookSwitcherButton(): React.ReactElement {
     }
   }, []);
 
-  // `SwatchbookSwitcherContext` exposes every axis including `mode`; the
-  // popover UI should focus on what we actually own here (i.e. the a11y
-  // axis). Mode stays driven by Docusaurus's built-in toggle next door.
-  const switcherAxes = axes.filter((axis) => axis.name !== 'mode');
-  const hasSwitchableContent = switcherAxes.length > 0 || presets.length > 0;
+  const modeAxis = useMemo(() => axes.find((axis) => axis.name === MODE_AXIS), [axes]);
+  const activeTuple = useMemo<Record<string, string>>(() => {
+    const tuple: Record<string, string> = { ...nonModeTuple };
+    if (modeAxis) tuple[MODE_AXIS] = toSwatchbookMode(colorMode, modeAxis.contexts);
+    return tuple;
+  }, [nonModeTuple, modeAxis, colorMode]);
 
-  if (!hasSwitchableContent) return <></>;
+  const onAxisChange = useCallback(
+    (axisName: string, next: string) => {
+      if (axisName === MODE_AXIS) {
+        setColorMode(toDocusaurusMode(next));
+        return;
+      }
+      setNonModeAxis(axisName, next);
+    },
+    [setColorMode, setNonModeAxis],
+  );
+
+  const onPresetApply = useCallback(
+    (preset: SwitcherPreset) => {
+      const nextMode = preset.axes[MODE_AXIS];
+      if (typeof nextMode === 'string' && modeAxis?.contexts.includes(nextMode)) {
+        setColorMode(toDocusaurusMode(nextMode));
+      }
+      applyNonModeFromPreset(preset);
+      setLastApplied(preset.name);
+    },
+    [modeAxis, setColorMode, applyNonModeFromPreset, setLastApplied],
+  );
+
+  // With the built-in colour-mode toggle removed from the navbar, this
+  // popover owns every axis the project ships.
+  if (axes.length === 0 && presets.length === 0) return <></>;
 
   return (
     <div ref={wrapperRef} className="sb-docs-switcher">
@@ -77,14 +118,14 @@ export function SwatchbookSwitcherButton(): React.ReactElement {
       {open && (
         <div className="sb-docs-switcher__popover">
           <ThemeSwitcher
-            axes={switcherAxes}
+            axes={axes}
             presets={presets}
             defaults={defaults}
             activeTuple={activeTuple}
             activeColorFormat={activeColorFormat}
             lastApplied={lastApplied}
-            onAxisChange={setAxis}
-            onPresetApply={applyPreset}
+            onAxisChange={onAxisChange}
+            onPresetApply={onPresetApply}
             onColorFormatChange={setColorFormat}
             onKeyDown={onKeyDown}
           />
