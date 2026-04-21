@@ -50,9 +50,14 @@
       "outputs": []
     },
     "typecheck": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "build:tokens"],
       "inputs": ["src/**", "tsconfig*.json"],
       "outputs": []
+    },
+    "build:tokens": {
+      "dependsOn": ["^build"],
+      "inputs": ["tokens/**", "scripts/build-tokens.*"],
+      "outputs": ["src/css/tokens.generated.css", "src/tokens.snapshot.json"]
     },
     "storybook": {
       "dependsOn": ["^build"],
