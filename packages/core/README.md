@@ -10,6 +10,8 @@ Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses 
 npm install @unpunnyfuns/swatchbook-core
 ```
 
+Install directly when you're using `loadProject` / `emitCss` outside Storybook (build scripts, CLIs, docs-site generators). Storybook consumers already get core transitively via `@unpunnyfuns/swatchbook-addon` — no separate install needed unless you're calling the loader from your own tooling.
+
 ## Public API
 
 | Export | Purpose |

@@ -7,14 +7,10 @@ Published as `@unpunnyfuns/swatchbook-addon`. Storybook 10 addon for DTCG design
 ## Install
 
 ```sh
-npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
+npm install -D @unpunnyfuns/swatchbook-addon
 ```
 
-This gives you the toolbar, Design Tokens panel (hierarchical tree view with diagnostics), preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `SwatchbookProvider`, block-side hooks) live in the sibling package — add it alongside if you want them:
-
-```sh
-npm install @unpunnyfuns/swatchbook-blocks
-```
+One package pulls the whole React surface — toolbar, preview decorator, `useToken()`, every MDX doc block (`TokenTable`, `ColorPalette`, `TokenDetail`, `SwatchbookProvider`, block-side hooks), and the standalone `ThemeSwitcher`. `swatchbook-core`, `-blocks`, and `-switcher` come along transitively; each is still independently installable for slice-only consumers.
 
 Peer requirements: `storybook@^10.3`, `react` / `react-dom` 18+.
 
@@ -64,7 +60,7 @@ export default definePreview({
 ## `useToken`
 
 ```ts
-import { useToken } from '@unpunnyfuns/swatchbook-addon/hooks';
+import { useToken } from '@unpunnyfuns/swatchbook-addon';
 
 function Card() {
   const bg = useToken('color.surface.default');
