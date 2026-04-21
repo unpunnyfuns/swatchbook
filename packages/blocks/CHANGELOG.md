@@ -1,5 +1,25 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.11.3
+
+### Patch Changes
+
+- c50f0ab: docs(tokens): separate a11y from typeface in the docs-site fixture
+
+  `high-contrast.json` used to also swap the base font family to `{font.family.comic}` — a leftover from when a11y carried a typography signal on top of its contrast role. Now that the `typeface` axis owns font-family independently (Variable vs Monotype), having a11y also touch it meant `typeface=Variable + a11y=High-contrast` reshuffled the font regardless of the reader's typeface pick.
+
+  Drops the `font.family` block from the a11y overlay. a11y now owns **contrast only** — amber primary ramp via alias indirection, neutral shifts for muted text, plus the 108% base-size bump kept as a readability signal. Font family is entirely the typeface axis's domain: Variable ⇒ system, Monotype ⇒ comic-mono, regardless of a11y.
+
+- c50f0ab: docs(tokens): rename `brand` axis to `typeface`, swap a11y primary to amber, route Monotype through a comic-monospace stack
+
+  Three coordinated edits on the docs-site fixture that bring the axes' names in line with what they actually do and sharpen the accessibility signal:
+
+  - **Axis rename.** `brand` was never a brand axis — it chose between a variable-width and a monospaced typeface. Renamed to `typeface` with contexts `Variable` / `Monotype`; the data-attribute selector becomes `[data-sb-typeface="…"]`. The storybook reference fixture's `brand` axis (an actual brand variation) is unchanged.
+  - **A11y primary → amber.** `color.accessible.primary.*` in both mode files now aliases to a new `color.palette.amber.*` ramp instead of `color.palette.brand.*`. a11y=High-contrast gets yellow/burnt-orange links that read as high-visibility accessibility signal rather than brand voice — burnt-orange (amber.800) on white for Light + High-contrast, bright yellow (amber.300) on dark for Dark + High-contrast, both well above AAA contrast.
+  - **Monotype = comic-monospace.** New `font.family.comic-mono` fontFamily stack that prefers playful free monospaces (Comic Mono, Fantasque Sans Mono, Comic Shanns Mono) then falls through to Comic Sans MS and the system monospace. The Monotype overlay uses this stack, so toggling typeface=Monotype now reads as slightly-unhinged teletype rather than plain code font.
+
+  No bundled font files — readers with Comic Mono / Fantasque Sans Mono installed locally get the playful face, everyone else gets Comic Sans MS or the system monospace fallback.
+
 ## 0.11.2
 
 ### Patch Changes
