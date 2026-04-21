@@ -17,6 +17,7 @@ Two things in one:
 | [`@unpunnyfuns/swatchbook-core`](./packages/core) | Framework-free DTCG loader. Emits CSS variables and TypeScript types. |
 | [`@unpunnyfuns/swatchbook-blocks`](./packages/blocks) | MDX doc blocks. Color swatches, dimension bars, typography samples, composite previews, per-token detail. |
 | [`@unpunnyfuns/swatchbook-switcher`](./packages/switcher) | Framework-agnostic axis / preset popover UI. Used by the addon toolbar and by the docs-site navbar. |
+| [`@unpunnyfuns/swatchbook-mcp`](./packages/mcp) | Model Context Protocol server exposing a DTCG project's tokens, axes, and diagnostics to AI agents. Runs without Storybook. |
 
 ## Install
 

@@ -36,6 +36,10 @@ Swatchbook isn't a runtime theme-switcher for production apps, a CSS-variable fr
 - **Toolbar** — a single Swatchbook icon button opens a popover with preset pills, one dropdown per modifier axis (so a reader can browse tokens in every context), and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`) that controls how blocks display colors.
 - **`useToken` hook** — typed lookups from component code, reactive to the active theme.
 
+## For AI agents
+
+The optional [`@unpunnyfuns/swatchbook-mcp`](./reference/mcp) package ships a stdio [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes your token graph — paths, axes, alias chains, diagnostics, per-theme resolved values — to AI assistants like Claude Desktop or Claude Code. Point it at your `swatchbook.config.ts` (or a bare DTCG resolver) and an agent can introspect and reason about the system without spinning up Storybook. Twelve read-only tools; live-reloads on token edits.
+
 ## See it live
 
 The [live Storybook](pathname:///storybook/) runs the addon against this repo's [`tokens-reference`](https://github.com/unpunnyfuns/swatchbook/tree/main/packages/tokens-reference) fixture — a multi-file DTCG token set organized per-`$type` (one file for each of `color`, `size`, `typography`, `motion`, `border`, `shadow`, `gradient`, `stroke`, `font`, `number`), with resolver-driven `mode × brand × contrast` axes. Every block, panel, and toolbar control is wired up against those tokens.
@@ -46,7 +50,8 @@ The [live Storybook](pathname:///storybook/) runs the addon against this repo's 
 - **Blocks** — the MDX doc blocks you'll spend most of your time with: the [reference](./reference/blocks) lists what's available and the [authoring guide](./guides/authoring-doc-stories) walks through composing them.
 - **Concepts** — the mental model: [why axes, not themes](./concepts/axes-vs-themes), [theming inputs](./concepts/theming-inputs), [axes](./concepts/axes), [theme reactivity](./concepts/theme-reactivity), [presets](./concepts/presets), [diagnostics](./concepts/diagnostics).
 - **Guides** — the [multi-axis walkthrough](./guides/multi-axis-walkthrough) covers one-time setup.
-- **Reference** — API surface for the remaining packages (`addon`, `core`, `config`).
+- **Reference** — API surface for the remaining packages (`addon`, `core`, `config`, `mcp`).
+- **Developers** — contributing to swatchbook itself: [architecture](./developers/architecture) and [sharp corners](./developers/sharp-corners).
 
 ## What these docs assume
 
