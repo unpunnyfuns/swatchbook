@@ -12,7 +12,10 @@ Exposes a swatchbook DTCG project to AI agents — `describe_project`,
 compound `[data-…]` selector + HTML attrs), `get_color_formats` (hex
 / rgb / hsl / oklch / raw, each with an out-of-gamut flag),
 `list_axes`, `get_diagnostics`, `emit_css`. Runs without Storybook,
-parses the project once at startup via `@unpunnyfuns/swatchbook-core`.
+parses the project via `@unpunnyfuns/swatchbook-core`, and watches
+resolved source files + the config so token edits flow into subsequent
+tool calls without restarting the transport (opt out with
+`--no-watch`).
 
 Consume as a CLI:
 
@@ -24,4 +27,6 @@ npx @unpunnyfuns/swatchbook-mcp --config tokens/resolver.json
 
 Or wire into an MCP client (Claude Desktop, etc.) via the same
 command. Ships with `createServer` + `loadFromConfig` exports for
-programmatic embedding in larger toolchains.
+programmatic embedding in larger toolchains; `createServer(project)`
+returns the server augmented with a `setProject(next)` method for
+callers that want to orchestrate their own reload policy.

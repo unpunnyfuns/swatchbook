@@ -36,6 +36,7 @@ CLI flags:
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
 | `--config <path>`  | Required. A `swatchbook.config.{ts,mts,js,mjs}` (full config) or a DTCG `resolver.json` (bare — other options at defaults).       |
 | `--cwd <path>`     | Override the working directory for resolving relative `resolver` / `tokens` paths.                                                |
+| `--no-watch`       | Disable live-reload. By default the server watches the config + resolved source files and swaps in fresh data on edits.           |
 | `--help`, `-h`     | Print usage and exit.                                                                                                             |
 
 ## Wire into an MCP client
@@ -92,7 +93,7 @@ const server = createServer(project);
 await server.connect(new StdioServerTransport());
 ```
 
-`loadFromConfig` accepts the same `.ts` / `.mts` / `.js` / `.mjs` / `.json` shapes the CLI does. `createServer(project)` is stateless beyond the project reference — rebind with a fresh `Project` to pick up token edits without restarting the MCP transport.
+`loadFromConfig` accepts the same `.ts` / `.mts` / `.js` / `.mjs` / `.json` shapes the CLI does. `createServer(project)` returns the server augmented with `setProject(next)` — call it after re-loading the project to swap in fresh data without restarting the MCP transport. The CLI uses this to live-reload on token edits.
 
 ## See also
 

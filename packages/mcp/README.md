@@ -33,6 +33,7 @@ CLI flags:
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `--config <path>` | Required. Either a `swatchbook.config.{ts,mts,js,mjs}` (full config) or a DTCG `resolver.json` (bare — other options at defaults). |
 | `--cwd <path>`    | Override the working directory for resolving relative `resolver` / `tokens` paths.                                                |
+| `--no-watch`      | Disable live-reload. By default the server watches the config + resolved source files and swaps in fresh data on edits.            |
 | `--help`          | Print usage and exit.                                                                                                            |
 
 ## Tools

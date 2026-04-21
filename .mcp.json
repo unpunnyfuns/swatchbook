@@ -5,6 +5,16 @@
       "type": "http",
       "url": "http://localhost:6006/mcp",
       "description": "Storybook MCP server for swatchbook. Only reachable while `pnpm dev` (turbo run storybook) is running."
+    },
+    "swatchbook": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "packages/mcp/dist/bin.mjs",
+        "--config",
+        "apps/storybook/swatchbook.config.ts"
+      ],
+      "description": "swatchbook-mcp — DTCG project introspection (tokens, axes, aliases, diagnostics) backed by the apps/storybook config. Requires packages/mcp to be built (pnpm -r build)."
     }
   }
 }
