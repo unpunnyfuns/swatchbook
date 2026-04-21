@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './GradientPalette.css';
+import { useColorFormat } from '#/contexts.ts';
+import { formatColor } from '#/format-color.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
@@ -69,6 +71,7 @@ export function GradientPalette({
   sortDir = 'asc',
 }: GradientPaletteProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const colorFormat = useColorFormat();
 
   const rows = useMemo<Row[]>(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
@@ -116,7 +119,7 @@ export function GradientPalette({
                   style={{ background: stopCssColor(stop) }}
                   aria-hidden
                 />
-                <span>{stopCssColor(stop)}</span>
+                <span>{formatColor(stop.color, colorFormat).value}</span>
                 <span className="sb-gradient-palette__stop-position">
                   @ {((stop.position ?? 0) * 100).toFixed(0)}%
                 </span>

@@ -2,6 +2,8 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './BorderPreview.css';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
+import { useColorFormat } from '#/contexts.ts';
+import { type ColorFormat, formatColor } from '#/format-color.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
@@ -49,18 +51,9 @@ function formatDimension(raw: unknown): string {
   return JSON.stringify(raw);
 }
 
-function formatColor(raw: unknown): string {
+function formatSubColor(raw: unknown, format: ColorFormat): string {
   if (raw == null) return '—';
-  if (typeof raw === 'string') return raw;
-  if (typeof raw === 'object') {
-    const v = raw as { components?: unknown; alpha?: unknown; colorSpace?: unknown };
-    if (Array.isArray(v.components) && typeof v.colorSpace === 'string') {
-      const parts = v.components.map((c) => (typeof c === 'number' ? c.toFixed(3) : String(c)));
-      const alpha = typeof v.alpha === 'number' && v.alpha !== 1 ? `, ${v.alpha}` : '';
-      return `${v.colorSpace}(${parts.join(' ')}${alpha})`;
-    }
-  }
-  return JSON.stringify(raw);
+  return formatColor(raw, format).value;
 }
 
 export function BorderPreview({
@@ -70,6 +63,7 @@ export function BorderPreview({
   sortDir = 'asc',
 }: BorderPreviewProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const colorFormat = useColorFormat();
 
   const rows = useMemo<Row[]>(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
@@ -113,7 +107,7 @@ export function BorderPreview({
             <span className="sb-border-preview__breakdown-key">style</span>
             <span>{row.value.style != null ? String(row.value.style) : '—'}</span>
             <span className="sb-border-preview__breakdown-key">color</span>
-            <span>{formatColor(row.value.color)}</span>
+            <span>{formatSubColor(row.value.color, colorFormat)}</span>
           </div>
         </div>
       ))}
