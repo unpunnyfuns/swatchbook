@@ -34,6 +34,23 @@ export const MotionTypes = meta.story({
   args: { type: ['duration', 'cubicBezier', 'transition'], initiallyExpanded: 2 },
 });
 
+/**
+ * Regression — typing a `root` / `type` arg that matches nothing used to
+ * flip the component below a hook-order boundary and throw
+ * "Rendered fewer hooks than expected." Verifies the empty-state render
+ * runs after every hook has been called.
+ */
+export const NoMatches = meta.story({
+  args: { root: 'does-not-exist' },
+  play: async ({ canvasElement }) => {
+    await waitFor(() => {
+      if (!canvasElement.textContent?.includes('No tokens under "does-not-exist"')) {
+        throw new Error('expected empty-state caption for a nonexistent root');
+      }
+    });
+  },
+});
+
 function RecordingNavigator() {
   const [last, setLast] = useState<string | null>(null);
   return (
