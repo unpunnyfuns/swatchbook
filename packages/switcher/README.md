@@ -1,4 +1,4 @@
-# Switcher
+# swatchbook-switcher
 
 Published as `@unpunnyfuns/swatchbook-switcher`. Framework-agnostic theme-switcher UI for swatchbook — axis pills, preset pills, color-format selector. Consumed by the Storybook addon toolbar and by any React host that knows how to set `data-*` attributes on the document to drive per-theme CSS.
 
