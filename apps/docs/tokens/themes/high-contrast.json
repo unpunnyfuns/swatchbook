@@ -1,0 +1,23 @@
+{
+  "$description": "High-contrast a11y overlay — deepens text/bg separation, thickens primary against light surfaces, and neutralises muted-text opacity tricks. Composes on top of the light/dark mode tokens.",
+  "color": {
+    "$type": "color",
+    "text": {
+      "default": { "$value": "{color.palette.neutral.950}" },
+      "muted":   { "$value": "{color.palette.neutral.700}" },
+      "heading": { "$value": "{color.palette.neutral.950}" }
+    },
+    "primary": {
+      "default":  { "$value": "{color.palette.brand.800}" },
+      "dark":     { "$value": "{color.palette.brand.900}" },
+      "darker":   { "$value": "{color.palette.brand.900}" },
+      "darkest":  { "$value": "{color.palette.brand.900}" },
+      "light":    { "$value": "{color.palette.brand.700}" },
+      "lighter":  { "$value": "{color.palette.brand.600}" },
+      "lightest": { "$value": "{color.palette.brand.500}" }
+    },
+    "code": {
+      "border": { "$value": "{color.palette.neutral.500}" }
+    }
+  }
+}
