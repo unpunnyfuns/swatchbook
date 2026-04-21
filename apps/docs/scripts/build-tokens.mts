@@ -24,7 +24,7 @@ const project = await loadProject(
   {
     tokens: ['tokens/**/*.json'],
     resolver: 'tokens/resolver.json',
-    default: { mode: 'Light', a11y: 'Normal' },
+    default: { mode: 'Light', a11y: 'Normal', brand: 'Default' },
     cssVarPrefix: 'sb',
   },
   docsRoot,
@@ -40,12 +40,12 @@ const rawCss = projectCss(project);
 /**
  * Rewrite swatchbook's emitter selectors so `mode` tracks Docusaurus's
  * built-in `[data-theme]` toggle on `<html>` (lowercased), while the
- * `a11y` axis keeps its prefixed `data-sb-a11y` attribute that we own
- * ourselves from the navbar switcher.
+ * non-mode axes (`a11y`, `brand`) keep their prefixed `data-sb-<axis>`
+ * attributes that the navbar switcher provider owns.
  *
  * Single-axis projects key everything on `theme` regardless of the
- * resolver's axis name (see `selectorFor` in core). Multi-axis keeps the
- * axis name (`mode`, `a11y`). Cover both shapes.
+ * resolver's axis name (see `selectorFor` in core). Multi-axis keeps
+ * the axis name (`mode`, `a11y`, `brand`). Cover both shapes.
  */
 const css = rawCss
   .replaceAll('[data-sb-theme="Light"]', '[data-theme="light"]')

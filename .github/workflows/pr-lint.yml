@@ -33,6 +33,7 @@ jobs:
             core
             addon
             blocks
+            switcher
             tokens-reference
             tokens-starter
             storybook
