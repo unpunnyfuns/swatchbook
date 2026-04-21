@@ -30,6 +30,11 @@
   --ifm-color-primary-lighter: var(--sb-color-primary-lighter);
   --ifm-color-primary-lightest: var(--sb-color-primary-lightest);
 
+  /* Typography — swaps to the comic family + bumps base size on
+     a11y=High-contrast via the generated CSS. */
+  --ifm-font-family-base: var(--sb-font-family-base);
+  --ifm-font-size-base: var(--sb-font-size-base);
+
   /* Code chrome */
   --ifm-code-background: var(--sb-color-code-bg);
   --ifm-code-font-size: 95%;

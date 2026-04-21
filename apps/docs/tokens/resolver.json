@@ -5,8 +5,8 @@
   "description": "Docusaurus-site tokens. A brand ramp + per-mode surface/text/primary/code roles that the Infima layer in src/css/custom.css reads through `var(--sb-color-*)`. Second axis (`a11y`) layers a high-contrast overlay on top of the mode tokens.",
   "sets": {
     "tokens": {
-      "description": "Palette primitives.",
-      "sources": [{ "$ref": "./color.json" }]
+      "description": "Palette + font-family primitives.",
+      "sources": [{ "$ref": "./color.json" }, { "$ref": "./font.json" }]
     }
   },
   "modifiers": {

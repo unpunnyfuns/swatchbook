@@ -1,0 +1,21 @@
+{
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "system": {
+        "$value": [
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica",
+          "Arial",
+          "sans-serif"
+        ]
+      },
+      "comic": {
+        "$value": ["Comic Sans MS", "Comic Neue", "Chalkboard SE", "Marker Felt", "cursive"]
+      }
+    }
+  }
+}

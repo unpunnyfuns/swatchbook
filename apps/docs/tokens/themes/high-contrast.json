@@ -1,12 +1,7 @@
 {
-  "$description": "High-contrast a11y overlay — deepens text/bg separation, thickens primary against light surfaces, and neutralises muted-text opacity tricks. Composes on top of the light/dark mode tokens.",
+  "$description": "High-contrast a11y overlay — intensifies the primary ramp, swaps the base font family for a comic display face, and bumps base size. Intentionally leaves text / surface colour alone: mode already sets them to opposite ends of the neutral ramp, so layering another mode-agnostic override on top risks dark-on-dark when a11y composes with Dark.",
   "color": {
     "$type": "color",
-    "text": {
-      "default": { "$value": "{color.palette.neutral.950}" },
-      "muted":   { "$value": "{color.palette.neutral.700}" },
-      "heading": { "$value": "{color.palette.neutral.950}" }
-    },
     "primary": {
       "default":  { "$value": "{color.palette.brand.800}" },
       "dark":     { "$value": "{color.palette.brand.900}" },
@@ -18,6 +13,16 @@
     },
     "code": {
       "border": { "$value": "{color.palette.neutral.500}" }
+    }
+  },
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "base": { "$value": "{font.family.comic}" }
+    },
+    "size": {
+      "$type": "dimension",
+      "base": { "$value": { "value": 108, "unit": "%" } }
     }
   }
 }
