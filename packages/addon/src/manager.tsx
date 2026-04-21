@@ -281,11 +281,10 @@ function AxesToolbar(): ReactElement {
     onPresetApply: applyPreset,
     onKeyDown: handleKeyDown,
     /**
-     * Color-format is Storybook-addon-specific chrome — the pill row
-     * drives how swatchbook blocks stringify colors inside stories and
-     * docs. The shared switcher doesn't render it by default; it slots
-     * in through the `footer` escape hatch so the toolbar popover keeps
-     * the same layout it had pre-extraction.
+     * Color format is addon-local chrome — drives how swatchbook blocks
+     * stringify colors inside stories and docs. Slotted through the
+     * switcher's `footer` escape hatch so shared theming UI stays free
+     * of this concern.
      */
     footer: h(ColorFormatSelector, {
       active: activeColorFormat,
