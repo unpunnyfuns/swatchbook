@@ -30,11 +30,25 @@ Swatchbook isn't a runtime theme-switcher for production apps, a CSS-variable fr
 
 ## What the addon gives you
 
-- **No external compile step** — tokens reach the blocks through a Vite virtual module the addon publishes, not a prebuild script. No generated CSS files to check in, no config drift. Edit a token and the preview repaints. DTCG parsing is powered by [Terrazzo](https://terrazzo.app/) under the hood; see [the token pipeline](./concepts/token-pipeline) for the full mechanism.
-- **One install, full surface** — `@unpunnyfuns/swatchbook-addon` pulls in the toolbar, preview decorator, MDX doc blocks, `ThemeSwitcher`, `useToken()`, and the supporting core / blocks / switcher packages transitively. `import { TokenTable, ThemeSwitcher, useToken } from '@unpunnyfuns/swatchbook-addon'` works from any consumer file. Sub-packages stay independently installable for slice-only consumers (e.g. a Docusaurus site rendering just the switcher).
-- **Doc blocks** — `TokenDetail`, `TokenTable`, `TokenNavigator`, `ColorPalette`, `TypographyScale`, `FontFamilySample`, `FontWeightScale`, `StrokeStyleSample`, `Diagnostics`, motion/shadow/border previews. Once the addon is wired up, *authoring pages with these blocks is the primary day-to-day swatchbook interaction*. See the [blocks reference](./reference/blocks), the [authoring guide](./guides/authoring-doc-stories), and the [token-dashboard template](./guides/token-dashboard) for a turnkey browsable tree + diagnostics + table composition.
-- **Toolbar** — a single Swatchbook icon button opens a popover with preset pills, one dropdown per modifier axis (so a reader can browse tokens in every context), and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`) that controls how blocks display colors.
-- **`useToken` hook** — typed lookups from component code, reactive to the active theme.
+### Installation
+
+`@unpunnyfuns/swatchbook-addon` is the top-level entry point. Registering it in `.storybook/main.ts` brings in the toolbar, preview decorator, MDX blocks, `ThemeSwitcher`, and `useToken()`, along with `swatchbook-core`, `swatchbook-blocks`, and `swatchbook-switcher` as transitive dependencies. `import { TokenTable, ThemeSwitcher, useToken } from '@unpunnyfuns/swatchbook-addon'` resolves from any consumer file. The sub-packages remain independently installable for slice use — a Docusaurus site that only needs the switcher, or a build script that wants `swatchbook-core`'s loader without any React.
+
+### No external compile step
+
+Tokens reach the Storybook preview through a Vite virtual module the addon publishes on demand. Nothing is written to disk, no prebuild step runs, and edits to token files flow through Vite's HMR. Parsing itself is [Terrazzo](https://terrazzo.app/); [the token pipeline](./concepts/token-pipeline) covers the mechanism.
+
+### Doc blocks
+
+Most authoring happens in MDX. The blocks — `TokenDetail`, `TokenTable`, `TokenNavigator`, `ColorPalette`, `TypographyScale`, `FontFamilySample`, `FontWeightScale`, `StrokeStyleSample`, `Diagnostics`, and the motion, shadow, border, and gradient previews — are React components that read the active tuple from the preview decorator's provider and re-render when the toolbar flips an axis. They accept filter, scoping, and sort props; `<ColorPalette filter="color.*" />` renders the full swatch grid. The [blocks reference](./reference/blocks) lists each block's props; the [authoring guide](./guides/authoring-doc-stories) covers composition; the [token-dashboard template](./guides/token-dashboard) is an example assembly.
+
+### Toolbar
+
+A single Swatchbook icon in the Storybook toolbar opens a popover with preset pills, one dropdown per modifier axis, and a color-format picker (`hex`, `rgb`, `hsl`, `oklch`, `raw`) that governs how blocks render colors.
+
+### `useToken` hook
+
+`useToken(path)` returns `{ value, cssVar, type?, description? }` and reacts to the active theme. Paths come from a generated `.swatchbook/tokens.d.ts`.
 
 ## For AI agents
 
