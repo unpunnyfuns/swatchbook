@@ -8,13 +8,14 @@ import { matchPath } from '#/match.ts';
 /**
  * Build a swatchbook MCP server bound to a loaded project. Tools expose the
  * project's tokens, axes, and diagnostics so an AI agent can query them
- * without running Storybook. The server is stateless beyond the project
- * reference — all tools operate on the supplied snapshot.
- *
- * Exported as a factory so callers can reload the project on config changes
- * and rebind without restarting the MCP transport.
+ * without running Storybook. Tool handlers close over a live `project`
+ * reference — call the returned `setProject` to swap in a freshly loaded
+ * project (e.g. after token edits) without re-binding the transport.
  */
-export function createServer(project: Project): McpServer {
+export function createServer(initial: Project): McpServer & {
+  setProject: (next: Project) => void;
+} {
+  let project = initial;
   const server = new McpServer(
     {
       name: '@unpunnyfuns/swatchbook-mcp',
@@ -24,7 +25,10 @@ export function createServer(project: Project): McpServer {
       instructions:
         'Query a swatchbook DTCG project: list tokens by path glob, inspect individual tokens (value, $type, alias chain, per-theme resolved values), read axes / presets, and inspect diagnostics.',
     },
-  );
+  ) as McpServer & { setProject: (next: Project) => void };
+  server.setProject = (next: Project) => {
+    project = next;
+  };
 
   server.registerTool(
     'describe_project',
