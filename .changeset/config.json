@@ -16,7 +16,6 @@
   "updateInternalDependencies": "patch",
   "ignore": [
     "@unpunnyfuns/swatchbook-storybook",
-    "@unpunnyfuns/swatchbook-tokens-reference",
     "@unpunnyfuns/swatchbook-tokens"
   ]
 }

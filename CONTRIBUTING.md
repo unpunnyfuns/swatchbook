@@ -24,7 +24,7 @@ pnpm install
 pnpm dev                     # = turbo run storybook — serves apps/storybook on :6006
 ```
 
-The dogfood Storybook at `http://localhost:6006` runs the addon against `packages/tokens-reference` — a multi-axis DTCG fixture. Every block you're changing renders there against real data.
+The dogfood Storybook at `http://localhost:6006` runs the addon against `packages/tokens` — a multi-axis DTCG fixture. Every block you're changing renders there against real data.
 
 ## Running the checks
 
@@ -80,7 +80,7 @@ Format: `<type>(<scope>): <description>`.
 
 **Types:** `feat` / `fix` / `chore` / `docs` / `test` / `ci` / `refactor` / `perf` / `build` / `revert`.
 
-**Scopes:** one of `core`, `addon`, `blocks`, `tokens-reference`, `tokens-starter`, `storybook`, `docs`, `ci` — or omitted when a change spans multiple packages.
+**Scopes:** one of `core`, `addon`, `blocks`, `switcher`, `tokens`, `storybook`, `docs`, `ci` — or omitted when a change spans multiple packages.
 
 **Subject:** imperative verb first, lowercase even for proper nouns. `feat(addon): rebind keyboard shortcut` — not `Feat(Addon): Rebinding the keyboard shortcut`.
 

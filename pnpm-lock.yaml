@@ -127,9 +127,9 @@ importers:
       '@unpunnyfuns/swatchbook-core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@unpunnyfuns/swatchbook-tokens-reference':
+      '@unpunnyfuns/swatchbook-tokens':
         specifier: workspace:*
-        version: link:../../packages/tokens-reference
+        version: link:../../packages/tokens
       '@vitejs/plugin-react':
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1))
@@ -262,9 +262,9 @@ importers:
       '@types/node':
         specifier: ^25.6.0
         version: 25.6.0
-      '@unpunnyfuns/swatchbook-tokens-reference':
+      '@unpunnyfuns/swatchbook-tokens':
         specifier: workspace:*
-        version: link:../tokens-reference
+        version: link:../tokens
       '@vitest/ui':
         specifier: ^4.1.4
         version: 4.1.4(vitest@4.1.4)
@@ -315,23 +315,11 @@ importers:
         specifier: ^4.1.4
         version: 4.1.4(@types/node@25.6.0)(@vitest/browser-playwright@4.1.4)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(jsdom@29.0.2)(vite@8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1))
 
-  packages/tokens-reference:
+  packages/tokens:
     devDependencies:
       '@types/node':
         specifier: ^25.6.0
         version: 25.6.0
-      typescript:
-        specifier: ^6.0.0
-        version: 6.0.3
-
-  packages/tokens-starter:
-    devDependencies:
-      '@types/node':
-        specifier: ^25.6.0
-        version: 25.6.0
-      '@unpunnyfuns/swatchbook-core':
-        specifier: workspace:*
-        version: link:../core
       typescript:
         specifier: ^6.0.0
         version: 6.0.3

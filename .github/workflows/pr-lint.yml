@@ -34,8 +34,7 @@ jobs:
             addon
             blocks
             switcher
-            tokens-reference
-            tokens-starter
+            tokens
             storybook
             docs
             ci

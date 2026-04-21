@@ -1,6 +1,6 @@
 import { beforeAll, expect, it } from 'vitest';
 import { dirname } from 'node:path';
-import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens-reference';
+import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { CHROME_ROLES, DEFAULT_CHROME_MAP, validateChrome } from '#/chrome';
 import { projectCss } from '#/emit';
 import { loadProject } from '#/load';

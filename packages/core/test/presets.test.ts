@@ -1,6 +1,6 @@
 import { dirname } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens-reference';
+import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { loadProject } from '#/load';
 import { validatePresets } from '#/presets';
 import type { Axis, Preset, Project } from '#/types';

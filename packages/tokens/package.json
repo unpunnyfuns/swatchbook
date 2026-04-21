@@ -1,7 +1,7 @@
 {
-  "name": "@unpunnyfuns/swatchbook-tokens-reference",
+  "name": "@unpunnyfuns/swatchbook-tokens",
   "version": "0.0.0",
-  "description": "Exhaustive DTCG pyramid used as the swatchbook test bed.",
+  "description": "Exhaustive DTCG token set — the dogfood fixture the reference Storybook renders against, and a reference for consumers structuring their own token projects.",
   "private": true,
   "type": "module",
   "engines": {

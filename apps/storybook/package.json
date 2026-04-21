@@ -37,7 +37,7 @@
     "@unpunnyfuns/swatchbook-addon": "workspace:*",
     "@unpunnyfuns/swatchbook-blocks": "workspace:*",
     "@unpunnyfuns/swatchbook-core": "workspace:*",
-    "@unpunnyfuns/swatchbook-tokens-reference": "workspace:*",
+    "@unpunnyfuns/swatchbook-tokens": "workspace:*",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/browser-playwright": "^4.1.4",
     "@vitest/coverage-v8": "^4.1.4",
