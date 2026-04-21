@@ -8,18 +8,34 @@ sidebar_position: 4
 
 Lower-level than the per-type overview blocks — these render the visual for **one** token by path. Useful for custom MDX layouts that don't want the full overview chrome, and for embedding a single sample next to prose.
 
-## `<MotionSample path speed? runKey? />`
+## MotionSample
+
+```tsx
+<MotionSample path="transition.enter" />
+```
 
 Animated ball + track for one `transition` / `duration` / `cubicBezier`. `speed?: 0.25 | 0.5 | 1 | 2` (default `1`); `runKey?: number` forces a restart when it changes.
 
-## `<ShadowSample path />`
+## ShadowSample
+
+```tsx
+<ShadowSample path="shadow.md" />
+```
 
 Surface rectangle with the token's shadow applied as `box-shadow`.
 
-## `<BorderSample path />`
+## BorderSample
+
+```tsx
+<BorderSample path="border.default" />
+```
 
 Surface rectangle with the token's border applied.
 
-## `<DimensionBar path kind? />`
+## DimensionBar
+
+```tsx
+<DimensionBar path="size.md" kind="length" />
+```
 
 Width-driven bar, border-radius square, or sized square for one `dimension` token. `kind?: 'length' | 'radius' | 'size'` (default `'length'`).
