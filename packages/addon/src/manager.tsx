@@ -168,19 +168,9 @@ function AxesToolbar(): ReactElement {
 
   useEffect(() => {
     if (presets.length === 0) return;
-    /**
-     * `alt+shift+C` cycles through the project's presets, applying the
-     * next one each press. When no preset has been applied yet, starts
-     * from the first. Stays out of Storybook's core shortcut surface —
-     * the earlier default (`alt+T`) collided with the built-in "toggle
-     * addon panel" binding on some platforms. Users can still rebind it
-     * through Storybook's own keyboard-shortcuts panel.
-     *
-     * Only registers when the project actually defines presets. For
-     * projects without presets the cycle would have nothing to cycle
-     * through, so the shortcut disappears entirely rather than sitting
-     * dead in the menu.
-     */
+    // `alt+shift+C` rather than `alt+T` — the latter conflicts with
+    // Storybook's built-in "toggle addon panel" binding on some
+    // platforms. Rebindable from Storybook's keyboard-shortcuts panel.
     api.setAddonShortcut(ADDON_ID, {
       label: `Cycle swatchbook presets (${presets.length})`,
       defaultShortcut: ['alt', 'shift', 'C'],
