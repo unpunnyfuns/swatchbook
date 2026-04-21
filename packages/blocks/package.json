@@ -12,7 +12,6 @@
     "directory": "packages/blocks"
   },
   "keywords": [
-    "storybook-addon",
     "storybook-blocks",
     "storybook",
     "design-tokens",
