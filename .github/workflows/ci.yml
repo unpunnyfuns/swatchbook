@@ -65,10 +65,45 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm turbo run lint format:check typecheck test build
+      - name: Lint / format / typecheck / test / build
+        id: checks
+        # Container image's default shell is `sh` (dash), which has no
+        # `set -o pipefail`. Force bash so the pipe exit code propagates.
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm turbo run lint format:check typecheck test build 2>&1 | tee .ci-checks.log
 
       - name: Storybook interaction tests
-        run: pnpm turbo run test:storybook
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm turbo run test:storybook 2>&1 | tee .ci-storybook.log
+
+      - name: Test results summary
+        if: always()
+        shell: bash
+        run: |
+          # Vitest colorizes its summary; strip ANSI so the markdown code
+          # block reads as plain text instead of `\x1b[2m Test Files …`.
+          strip_ansi='sed -E s/\x1B\[[0-9;]*[A-Za-z]//g'
+          {
+            echo "## Test results"
+            echo ""
+            echo "### Unit tests (vitest)"
+            echo ""
+            echo '```'
+            grep -E " (Test Files|Tests) +" .ci-checks.log 2>/dev/null | $strip_ansi || echo "(no summary lines parsed — see job log)"
+            echo '```'
+            echo ""
+            echo "### Storybook interaction tests"
+            echo ""
+            echo '```'
+            grep -E " (Test Files|Tests) +" .ci-storybook.log 2>/dev/null | $strip_ansi || echo "(no summary lines parsed — see job log)"
+            echo '```'
+            echo ""
+            echo "Failure annotations (if any) appear inline on the **Files changed** tab via Vitest's auto-wired \`github-actions\` reporter."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Build Storybook
         run: pnpm turbo run build:storybook
