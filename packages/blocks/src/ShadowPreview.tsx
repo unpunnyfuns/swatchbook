@@ -2,6 +2,8 @@ import cx from 'clsx';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './ShadowPreview.css';
+import { useColorFormat } from '#/contexts.ts';
+import { type ColorFormat, formatColor } from '#/format-color.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
@@ -53,18 +55,9 @@ function formatDimension(raw: unknown): string {
   return JSON.stringify(raw);
 }
 
-function formatColor(raw: unknown): string {
+function formatSubColor(raw: unknown, format: ColorFormat): string {
   if (raw == null) return '—';
-  if (typeof raw === 'string') return raw;
-  if (typeof raw === 'object') {
-    const v = raw as { components?: unknown; alpha?: unknown; colorSpace?: unknown };
-    if (Array.isArray(v.components) && typeof v.colorSpace === 'string') {
-      const parts = v.components.map((c) => (typeof c === 'number' ? c.toFixed(3) : String(c)));
-      const alpha = typeof v.alpha === 'number' && v.alpha !== 1 ? `, ${v.alpha}` : '';
-      return `${v.colorSpace}(${parts.join(' ')}${alpha})`;
-    }
-  }
-  return JSON.stringify(raw);
+  return formatColor(raw, format).value;
 }
 
 function asLayers(raw: unknown): ShadowLayer[] {
@@ -87,6 +80,7 @@ export function ShadowPreview({
   sortDir = 'asc',
 }: ShadowPreviewProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const colorFormat = useColorFormat();
 
   const rows = useMemo<Row[]>(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
@@ -126,13 +120,14 @@ export function ShadowPreview({
           </div>
           <div className="sb-shadow-preview__breakdown">
             {row.layers.length === 1
-              ? renderLayer(row.layers[0])
+              ? renderLayer(row.layers[0], colorFormat)
               : row.layers.map((layer, i) => (
                   <Layer
                     key={layerKey(row.path, layer, i)}
                     layer={layer}
                     index={i}
                     total={row.layers.length}
+                    colorFormat={colorFormat}
                   />
                 ))}
           </div>
@@ -142,13 +137,13 @@ export function ShadowPreview({
   );
 }
 
-function renderLayer(layer: ShadowLayer | undefined): ReactElement[] {
+function renderLayer(layer: ShadowLayer | undefined, format: ColorFormat): ReactElement[] {
   if (!layer) return [];
   const entries: [string, string][] = [
     ['offset', `${formatDimension(layer.offsetX)} ${formatDimension(layer.offsetY)}`],
     ['blur', formatDimension(layer.blur)],
     ['spread', formatDimension(layer.spread)],
-    ['color', formatColor(layer.color)],
+    ['color', formatSubColor(layer.color, format)],
   ];
   if (layer.inset) entries.push(['inset', String(layer.inset)]);
   return entries.flatMap(([k, v]) => [
@@ -163,10 +158,12 @@ function Layer({
   layer,
   index,
   total,
+  colorFormat,
 }: {
   layer: ShadowLayer;
   index: number;
   total: number;
+  colorFormat: ColorFormat;
 }): ReactElement {
   return (
     <div className="sb-shadow-preview__layer">
@@ -174,7 +171,7 @@ function Layer({
         layer {index + 1} of {total}
       </div>
       <div className={cx('sb-shadow-preview__breakdown', 'sb-shadow-preview__layer-breakdown')}>
-        {renderLayer(layer)}
+        {renderLayer(layer, colorFormat)}
       </div>
     </div>
   );
