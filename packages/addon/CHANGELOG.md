@@ -1,5 +1,66 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.8.0
+
+### Minor Changes
+
+- cd64451: feat: partial HMR for token edits — no more full preview reload
+
+  Saving a token file in dev mode now re-renders the preview in place
+  instead of blowing away the iframe. Toolbar state, story args, scroll
+  position, and any open overlays survive the refresh.
+
+  Under the hood:
+
+  - The addon's Vite plugin now sends a custom HMR event
+    (`swatchbook/tokens-updated`) carrying the fresh virtual-module
+    payload when source files change, instead of firing a `full-reload`.
+  - The preview subscribes via `import.meta.hot.on`, re-injects the
+    generated stylesheet, and forwards the payload on Storybook's
+    channel as `TOKENS_UPDATED_EVENT`.
+  - A new `useTokenSnapshot()` hook in blocks mirrors the
+    `channel-globals` pattern — subscribes to the channel via
+    `useSyncExternalStore` and exposes a live snapshot that `useProject`
+    reads from. Token edits propagate through React's normal
+    re-render path; no block-specific wiring per consumer required.
+  - Outside Storybook (the docs-site path, unit tests, production
+    builds) the channel never fires and consumers keep seeing the
+    initial values baked into the virtual module at build time — same
+    behavior as before.
+
+### Patch Changes
+
+- cd64451: fix(addon): pick up token edits when tokens live in a sibling workspace package
+
+  Two overlapping bugs in the virtual-module plugin's dev-server watcher
+  conspired to drop every token edit on the floor when tokens lived
+  outside the Storybook project's own directory:
+
+  1. `configureServer` runs **before** `buildStart` in Vite's plugin
+     lifecycle, so `project` (and therefore `project.sourceFiles`) was
+     still undefined when we derived the watcher set. For configs that
+     supply a `resolver` but no `tokens` glob — which the reference
+     Storybook and most real-world consumers ship — every `$ref` target
+     silently dropped; only the resolver file itself was watched. Force
+     an initial `refresh()` at the top of `configureServer` so
+     `sourceFiles` is populated before the watcher wiring runs.
+
+  2. Even with `sourceFiles` populated, `server.watcher.add()` is rooted
+     at the dev server's project directory; absolute paths added outside
+     that root don't reliably emit change events across pnpm-symlinked
+     package boundaries. Replace the Vite dir-level watch with a direct
+     `node:fs.watch` on each source file — native, no root constraint,
+     fires on every save.
+
+  Saves to any token file pulled in by the resolver now invalidate the
+  `virtual:swatchbook/tokens` module and trigger a single full-reload in
+  the preview — no dev-server restart required.
+
+- Updated dependencies [cd64451]
+  - @unpunnyfuns/swatchbook-blocks@0.8.0
+  - @unpunnyfuns/swatchbook-core@0.8.0
+  - @unpunnyfuns/swatchbook-switcher@0.8.0
+
 ## 0.7.0
 
 ### Patch Changes
