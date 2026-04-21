@@ -8,17 +8,27 @@ import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
  * redundancy the old single `docs` sidebar had (the navbar already
  * names the section).
  *
- * `home` covers the landing pages — Introduction and Quickstart — so
- * visitors on `/` or `/quickstart` get a minimal two-item sidebar
- * instead of the full flattened graph.
+ * `home` covers the landing — Introduction, Quickstart, and the
+ * concept pages — all reachable from the navbar logo since Quickstart
+ * + Concepts aren't pulled out as separate navbar entries. Three
+ * bookending top-level nav items (Blocks / Guides / Reference) plus
+ * the logo-home group keeps the bar light.
  */
 const sidebars: SidebarsConfig = {
-  home: ['intro', 'quickstart'],
-  concepts: [
-    'concepts/theming-inputs',
-    'concepts/axes',
-    'concepts/presets',
-    'concepts/diagnostics',
+  home: [
+    'intro',
+    'quickstart',
+    {
+      type: 'category',
+      label: 'Concepts',
+      collapsed: false,
+      items: [
+        'concepts/theming-inputs',
+        'concepts/axes',
+        'concepts/presets',
+        'concepts/diagnostics',
+      ],
+    },
   ],
   blocks: [
     'reference/blocks/blocks',
@@ -26,10 +36,12 @@ const sidebars: SidebarsConfig = {
     'reference/blocks/inspector',
     'reference/blocks/samples',
     'reference/blocks/utility',
+  ],
+  guides: [
     'guides/authoring-doc-stories',
     'guides/token-dashboard',
+    'guides/multi-axis-walkthrough',
   ],
-  guides: ['guides/multi-axis-walkthrough'],
   reference: ['reference/addon', 'reference/core', 'reference/config'],
 };
 

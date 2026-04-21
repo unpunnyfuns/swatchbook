@@ -1,0 +1,13 @@
+{
+  "$description": "High-contrast a11y overlay — swaps the base font family for a comic display face and bumps base size. Intentionally leaves colour alone: layering mode-agnostic colour overrides on top of mode (which picks opposite ends of the neutral / brand ramps for Light vs Dark) dragged primary into dark-on-dark territory on Dark + High-contrast. Contrast comes from mode's own role tokens; a11y carries the typography signal.",
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "base": { "$value": "{font.family.comic}" }
+    },
+    "size": {
+      "$type": "dimension",
+      "base": { "$value": { "value": 108, "unit": "%" } }
+    }
+  }
+}

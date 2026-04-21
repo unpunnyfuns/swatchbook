@@ -91,16 +91,15 @@ const config: Config = {
       logo: {
         alt: 'swatchbook logo',
         src: 'img/logo.svg',
+        href: '/',
       },
       items: [
-        // Per-section top-level entries bound to a sidebar via
-        // `type: 'docSidebar'` + `sidebarId`. Docusaurus auto-links to
-        // the first doc in the bound sidebar and keeps the nav pill
-        // active across every doc in it — no `activeBaseRegex` needed,
-        // and the left rail shows only the current section's pages
-        // rather than duplicating the navbar's category list.
-        { type: 'docSidebar', sidebarId: 'home', position: 'left', label: 'Quickstart' },
-        { type: 'docSidebar', sidebarId: 'concepts', position: 'left', label: 'Concepts' },
+        // The navbar surfaces top-level sections that stand on their
+        // own — Blocks, Guides, Reference. Quickstart + Concepts are
+        // entry points into the landing narrative, so they live in the
+        // `home` sidebar reachable via the logo / title (both link to
+        // Introduction at `/`) rather than as separate nav pills that
+        // duplicate what the left rail already shows.
         { type: 'docSidebar', sidebarId: 'blocks', position: 'left', label: 'Blocks' },
         { type: 'docSidebar', sidebarId: 'guides', position: 'left', label: 'Guides' },
         { type: 'docSidebar', sidebarId: 'reference', position: 'left', label: 'Reference' },

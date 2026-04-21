@@ -1,0 +1,9 @@
+{
+  "$description": "Brand `Monotype` overlay — swaps the base font family to a monospaced stack so the whole docs site reads as code. Pure typography variation; leaves colour roles alone so it composes cleanly with mode + a11y.",
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "base": { "$value": "{font.family.mono}" }
+    }
+  }
+}

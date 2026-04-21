@@ -41,9 +41,15 @@ importers:
       '@docusaurus/preset-classic':
         specifier: 3.10.0
         version: 3.10.0(@algolia/client-search@5.50.2)(@docusaurus/faster@3.10.0(@docusaurus/types@3.10.0(@swc/core@1.15.26)(esbuild@0.27.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(esbuild@0.27.7))(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.5))(@rspack/core@1.7.11)(@swc/core@1.15.26)(@types/react@19.2.14)(esbuild@0.27.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(search-insights@2.17.3)(typescript@6.0.3)
+      '@docusaurus/theme-common':
+        specifier: 3.10.0
+        version: 3.10.0(@docusaurus/plugin-content-docs@3.10.0(@docusaurus/faster@3.10.0(@docusaurus/types@3.10.0(@swc/core@1.15.26)(esbuild@0.27.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(esbuild@0.27.7))(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.5))(@rspack/core@1.7.11)(@swc/core@1.15.26)(esbuild@0.27.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@6.0.3))(@swc/core@1.15.26)(esbuild@0.27.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@mdx-js/react':
         specifier: ^3.0.0
         version: 3.1.1(@types/react@19.2.14)(react@19.2.5)
+      '@unpunnyfuns/swatchbook-switcher':
+        specifier: workspace:*
+        version: link:../../packages/switcher
       clsx:
         specifier: ^2.0.0
         version: 2.1.1

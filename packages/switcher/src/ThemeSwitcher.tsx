@@ -1,15 +1,7 @@
 import cx from 'clsx';
 import React, { type KeyboardEvent, type ReactElement } from 'react';
 import './ThemeSwitcher.css';
-import type { SwitcherAxis, SwitcherColorFormat, SwitcherPreset, SwitcherTheme } from '#/types.ts';
-
-const COLOR_FORMAT_OPTIONS: readonly { id: SwitcherColorFormat; label: string }[] = [
-  { id: 'hex', label: 'Hex' },
-  { id: 'rgb', label: 'RGB' },
-  { id: 'hsl', label: 'HSL' },
-  { id: 'oklch', label: 'OKLCH' },
-  { id: 'raw', label: 'Raw (JSON)' },
-];
+import type { SwitcherAxis, SwitcherPreset, SwitcherTheme } from '#/types.ts';
 
 export interface ThemeSwitcherProps {
   /** Project axes the UI renders one section per. */
@@ -22,26 +14,29 @@ export interface ThemeSwitcherProps {
   activeTuple: Readonly<Record<string, string>>;
   /** Default tuple used to fill in omitted preset axes. */
   defaults: Readonly<Record<string, string>>;
-  /** Active display format for color sub-values. */
-  activeColorFormat: SwitcherColorFormat;
   /** Name of the most recently applied preset, or null. Drives the "modified" dot. */
   lastApplied: string | null;
   /** Receives an axis name + new context. */
   onAxisChange(axisName: string, next: string): void;
   /** Called with the full preset object when the user clicks a preset pill. */
   onPresetApply(preset: SwitcherPreset): void;
-  /** Called with the new color format when the user picks one. */
-  onColorFormatChange(next: SwitcherColorFormat): void;
   /** Optional key handler, usually used by consumers to close a popover on Escape. */
   onKeyDown?(event: KeyboardEvent<HTMLDivElement>): void;
+  /** Host-specific content rendered after the axes (e.g. the Storybook addon's color-format picker). */
+  footer?: ReactElement | null;
 }
 
 /**
  * Popover body for the swatchbook theme switcher. Renders preset pills
- * (when the project ships any), one row per axis, and a color-format
- * picker. Consumers own the trigger + positioning — the switcher just
- * draws the menu. Uses classic JSX so it survives embedding in
- * Storybook's manager bundle (which doesn't expose `react/jsx-runtime`).
+ * (when the project ships any) and one row per axis. Color-format
+ * selection is specific to the Storybook addon (it toggles how blocks
+ * stringify colors); hosts that need it slot
+ * `<ColorFormatSelector>` into the `footer` prop rather than it being
+ * baked into every consumer.
+ *
+ * Consumers own the trigger + positioning — the switcher just draws
+ * the menu. Uses classic JSX so it survives embedding in Storybook's
+ * manager bundle (which doesn't expose `react/jsx-runtime`).
  */
 export function ThemeSwitcher({
   axes,
@@ -49,12 +44,11 @@ export function ThemeSwitcher({
   themes = [],
   activeTuple,
   defaults,
-  activeColorFormat,
   lastApplied,
   onAxisChange,
   onPresetApply,
-  onColorFormatChange,
   onKeyDown,
+  footer,
 }: ThemeSwitcherProps): ReactElement {
   return (
     <div
@@ -88,9 +82,12 @@ export function ThemeSwitcher({
         />
       ))}
 
-      {axes.length > 0 && <div className="sb-switcher__divider" />}
-
-      <ColorFormatSection active={activeColorFormat} onSelect={onColorFormatChange} />
+      {footer && (
+        <>
+          <div className="sb-switcher__divider" />
+          {footer}
+        </>
+      )}
     </div>
   );
 }
@@ -186,29 +183,6 @@ function AxisSection({ axis, active, onSelect }: AxisSectionProps): ReactElement
             label={ctx}
             active={ctx === active}
             onClick={() => onSelect(ctx)}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-interface ColorFormatSectionProps {
-  active: SwitcherColorFormat;
-  onSelect(next: SwitcherColorFormat): void;
-}
-
-function ColorFormatSection({ active, onSelect }: ColorFormatSectionProps): ReactElement {
-  return (
-    <div>
-      <div className="sb-switcher__section-label">Color format</div>
-      <div className="sb-switcher__section-body">
-        {COLOR_FORMAT_OPTIONS.map((opt) => (
-          <OptionPill
-            key={`color-format/${opt.id}`}
-            label={opt.label}
-            active={opt.id === active}
-            onClick={() => onSelect(opt.id)}
           />
         ))}
       </div>

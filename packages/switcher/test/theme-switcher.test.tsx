@@ -20,11 +20,9 @@ function baseProps() {
     axes: AXES,
     activeTuple: { mode: 'Light' },
     defaults: { mode: 'Light' },
-    activeColorFormat: 'hex' as const,
     lastApplied: null,
     onAxisChange: vi.fn(),
     onPresetApply: vi.fn(),
-    onColorFormatChange: vi.fn(),
   };
 }
 
@@ -51,14 +49,6 @@ describe('ThemeSwitcher', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Dark' }));
     expect(props.onAxisChange).toHaveBeenCalledWith('mode', 'Dark');
-  });
-
-  it('calls onColorFormatChange when a color-format pill is picked', () => {
-    const props = baseProps();
-    render(<ThemeSwitcher {...props} />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'OKLCH' }));
-    expect(props.onColorFormatChange).toHaveBeenCalledWith('oklch');
   });
 
   it('renders a preset pill and wires its click through to onPresetApply', () => {
@@ -89,5 +79,11 @@ describe('ThemeSwitcher', () => {
     const modifiedBtn = screen.getByRole('button', { name: /Brand A Light/ });
     expect(modifiedBtn.className).not.toContain('sb-switcher__pill--active');
     expect(modifiedBtn.querySelector('.sb-switcher__pill-modified')).not.toBeNull();
+  });
+
+  it('renders an externally-supplied footer (for host-specific UI) when passed', () => {
+    const props = baseProps();
+    render(<ThemeSwitcher {...props} footer={<div data-testid="extra">host extra</div>} />);
+    expect(screen.getByTestId('extra').textContent).toBe('host extra');
   });
 });

@@ -25,5 +25,15 @@
       "bg":     { "$value": "{color.palette.neutral.100}" },
       "border": { "$value": "{color.palette.neutral.200}" }
     }
+  },
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "base": { "$value": "{font.family.system}" }
+    },
+    "size": {
+      "$type": "dimension",
+      "base": { "$value": { "value": 100, "unit": "%" } }
+    }
   }
 }
