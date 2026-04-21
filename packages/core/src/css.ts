@@ -7,9 +7,10 @@ export interface EmitCssOptions {
   /** Override the prefix from project config (default: `config.cssVarPrefix ?? ''`). */
   prefix?: string;
   /**
-   * Project axes used to key per-tuple blocks on compound attribute selectors
-   * (`[data-<prefix>-mode="Dark"][data-<prefix>-brand="Brand A"] { … }`). When
-   * omitted or single-axis, emission collapses to the simpler single-attribute
+   * Project axes. Multi-axis projects key per-tuple blocks on compound
+   * attribute selectors
+   * (`[data-<prefix>-mode="Dark"][data-<prefix>-brand="Brand A"] { … }`).
+   * Omitted or single-axis projects collapse to the simpler single-attribute
    * form `[data-<prefix>-theme="…"]`.
    */
   axes?: Axis[];

@@ -4,15 +4,14 @@ import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
  * One sidebar per top-nav section. The navbar uses `type: 'docSidebar'`
  * entries bound by `sidebarId`, which auto-link to each sidebar's first
  * doc and keep the nav pill active across all docs in that sidebar.
- * Splitting the sidebar per section removes the category-header
- * redundancy the old single `docs` sidebar had (the navbar already
- * names the section).
+ * Per-section sidebars keep category headers out of the doc tree — the
+ * navbar already labels each section.
  *
- * `home` covers the landing — Introduction, Quickstart, and the
- * concept pages — all reachable from the navbar logo since Quickstart
- * + Concepts aren't pulled out as separate navbar entries. Three
- * bookending top-level nav items (Blocks / Guides / Reference) plus
- * the logo-home group keeps the bar light.
+ * `home` covers the landing — Introduction, Quickstart, and the concept
+ * pages — all reachable from the navbar logo since Quickstart +
+ * Concepts aren't pulled out as separate navbar entries. Three top-level
+ * nav items (Blocks / Guides / Reference) plus the logo-home group keep
+ * the bar light.
  */
 const sidebars: SidebarsConfig = {
   home: [
