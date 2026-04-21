@@ -1,5 +1,6 @@
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
 import { loadProject, projectCss } from '@unpunnyfuns/swatchbook-core';
+import { type FSWatcher, watch as fsWatch } from 'node:fs';
 import { dirname, isAbsolute, resolve as resolvePath, sep } from 'node:path';
 import picomatch from 'picomatch';
 import type { Plugin } from 'vite';
@@ -78,6 +79,30 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
       });
       server.watcher.on('unlink', (changed) => {
         if (matches(changed)) void invalidate();
+      });
+
+      /**
+       * Belt-and-suspenders file-level watch. Vite's `server.watcher` is
+       * rooted at the dev server's project dir; paths added via
+       * `.add(absolute)` land outside that root when tokens live in a
+       * sibling workspace package, and the events don't always propagate
+       * through pnpm-symlinked chains. Watching each source file directly
+       * with `node:fs` catches the saves those dir-level watches miss.
+       */
+      const fileWatchers: FSWatcher[] = [];
+      const sourceFiles = project?.sourceFiles ?? [];
+      for (const file of sourceFiles) {
+        try {
+          const w = fsWatch(file, { persistent: false }, (eventType) => {
+            if (eventType === 'change' || eventType === 'rename') void invalidate();
+          });
+          fileWatchers.push(w);
+        } catch {
+          // unreadable path — skip. Next loadProject pass will report it.
+        }
+      }
+      server.httpServer?.once('close', () => {
+        for (const w of fileWatchers) w.close();
       });
     },
   };
