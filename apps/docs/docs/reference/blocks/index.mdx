@@ -16,7 +16,7 @@ npm install -D @unpunnyfuns/swatchbook-blocks
 
 Inside Storybook, register `@unpunnyfuns/swatchbook-addon` alongside these blocks — its preview decorator mounts a `SwatchbookProvider` (exported from this package) that the blocks read from. Outside Storybook, wrap your tree in `SwatchbookProvider` and pass a `ProjectSnapshot` directly.
 
-`SwatchbookProvider`, `useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the backing contexts (`SwatchbookContext`, `ThemeContext`, `AxesContext`, `ColorFormatContext`) are exported from **`@unpunnyfuns/swatchbook-blocks` only**. The addon does not re-export them.
+`SwatchbookProvider`, `useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the backing contexts (`SwatchbookContext`, `ThemeContext`, `AxesContext`, `ColorFormatContext`) live in `@unpunnyfuns/swatchbook-blocks`. `@unpunnyfuns/swatchbook-addon` re-exports them verbatim, so either import path works depending on which packages your consumer already pulls in.
 
 ## Usage
 
@@ -62,25 +62,7 @@ Four groups by shape of use:
 
 Most overview blocks take `filter?` (path glob), `sortBy?`, `sortDir?`, and `caption?`.
 
-## Hooks
-
-All hooks live in this package — they are **not** re-exported from `@unpunnyfuns/swatchbook-addon`. They read from the nearest `SwatchbookProvider` (mounted automatically by the addon's preview decorator inside Storybook).
-
-### `useSwatchbookData()`
-
-Returns the full `ProjectSnapshot` the provider is holding (themes, axes, presets, tokens, diagnostics, …). Useful for custom blocks that need graph-level information the canned blocks don't expose.
-
-### `useActiveTheme()`
-
-Returns the current composed permutation ID as a string (e.g. `"Dark · Brand A"`).
-
-### `useActiveAxes()`
-
-Returns the active tuple as `Readonly<Record<string, string>>`.
-
-### `useColorFormat()`
-
-Returns the active color format (`'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw'`) — the display setting toggled from the toolbar popover. Pair with `formatColor(value, format)` (also exported) to render colors the same way the built-in blocks do. `hex` falls back to space-separated `rgb()` for out-of-gamut colors, marked with a ⚠ warning.
+For authoring custom blocks against the same provider the built-ins read from, see the [**Hooks reference**](./hooks) — `useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`.
 
 ## Reactivity
 
@@ -91,4 +73,4 @@ All blocks subscribe to Storybook's `globalsUpdated` channel event and re-render
 - ✅ Use blocks in MDX `*.mdx` docs pages for rich token references.
 - ✅ Filter aggressively — `<TokenTable filter="color.*" type="color" />` beats unfiltered tables for browsability.
 - ✅ Use blocks outside Storybook by wrapping the tree in `SwatchbookProvider` and passing a `ProjectSnapshot`. The blocks themselves are framework-free.
-- ❌ Don't import block-side hooks or contexts from `@unpunnyfuns/swatchbook-addon` — they live in this package only.
+- ✅ Either `@unpunnyfuns/swatchbook-blocks` or `@unpunnyfuns/swatchbook-addon` works as an import source — the addon re-exports the blocks surface so you don't have to pin a second dependency in consumer projects that already have the addon.

@@ -36,6 +36,7 @@ const sidebars: SidebarsConfig = {
     'reference/blocks/inspector',
     'reference/blocks/samples',
     'reference/blocks/utility',
+    'reference/blocks/hooks',
   ],
   guides: [
     'guides/authoring-doc-stories',
