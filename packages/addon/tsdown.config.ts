@@ -17,6 +17,7 @@ export default defineConfig({
       /^vite($|\/)/,
       /^@storybook\//,
       /^virtual:/,
+      /^@unpunnyfuns\/swatchbook-/,
       'storybook',
       'react',
       'react-dom',

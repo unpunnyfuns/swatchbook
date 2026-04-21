@@ -13,17 +13,18 @@ Two things in one:
 
 | Package | Purpose |
 | --- | --- |
+| [`@unpunnyfuns/swatchbook-addon`](./packages/addon) | Storybook 10 addon. Toolbar, preview decorator, `useToken()`. Re-exports the full blocks + switcher React surface so consumers can install just this one. |
 | [`@unpunnyfuns/swatchbook-core`](./packages/core) | Framework-free DTCG loader. Emits CSS variables and TypeScript types. |
-| [`@unpunnyfuns/swatchbook-addon`](./packages/addon) | Storybook 10 addon. Toolbar, preview decorator, `useToken()` hook. |
 | [`@unpunnyfuns/swatchbook-blocks`](./packages/blocks) | MDX doc blocks. Color swatches, dimension bars, typography samples, composite previews, per-token detail. |
+| [`@unpunnyfuns/swatchbook-switcher`](./packages/switcher) | Framework-agnostic axis / preset popover UI. Used by the addon toolbar and by the docs-site navbar. |
 
 ## Install
 
 ```sh
-npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
-# plus blocks if you want MDX doc blocks:
-npm install -D @unpunnyfuns/swatchbook-blocks
+npm install -D @unpunnyfuns/swatchbook-addon
 ```
+
+One package pulls the whole React surface — toolbar, preview decorator, MDX doc blocks, `ThemeSwitcher`, `useToken()`. The sibling packages (`-core`, `-blocks`, `-switcher`) come along transitively and stay independently installable for slice-only consumers (e.g. a Docusaurus site that only renders the switcher).
 
 Register the addon in `.storybook/main.ts`:
 
@@ -70,7 +71,7 @@ import {
   TokenDetail,
   TokenNavigator,
   TokenTable,
-} from '@unpunnyfuns/swatchbook-blocks';
+} from '@unpunnyfuns/swatchbook-addon';
 
 <Meta title="Docs/Tokens" />
 

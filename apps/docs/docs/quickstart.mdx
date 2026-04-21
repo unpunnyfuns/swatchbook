@@ -10,17 +10,13 @@ Takes ~5 minutes if you already have a Storybook project.
 
 ## Install
 
-Install the addon for the toolbar, preview decorator, and `useToken()` hook:
+One package pulls the whole surface — toolbar, preview decorator, `useToken()`, every MDX doc block, the standalone `ThemeSwitcher`:
 
 ```bash
-npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
+npm install -D @unpunnyfuns/swatchbook-addon
 ```
 
-Install the blocks package too if you want the MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `SwatchbookProvider`, and the block-side hooks):
-
-```bash
-npm install -D @unpunnyfuns/swatchbook-blocks
-```
+`swatchbook-core`, `-blocks`, and `-switcher` come along transitively. If you only need a slice (say, the switcher in a Docusaurus site), each is also published independently.
 
 Peer requirements: Storybook 10.3+ on the Vite builder, React 18+, Node 24+.
 
@@ -82,7 +78,7 @@ import {
   TokenDetail,
   TokenNavigator,
   TokenTable,
-} from '@unpunnyfuns/swatchbook-blocks';
+} from '@unpunnyfuns/swatchbook-addon';
 
 <Meta title="Docs/Tokens" />
 

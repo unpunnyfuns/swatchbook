@@ -6,11 +6,13 @@ Published as `@unpunnyfuns/swatchbook-blocks`. Storybook MDX doc blocks for DTCG
 
 ## Install
 
+Most consumers pick this up transitively via `@unpunnyfuns/swatchbook-addon` — the addon re-exports the full blocks API, so `import { TokenTable } from '@unpunnyfuns/swatchbook-addon'` works and you don't need a second install line. Reach for this package directly when you want blocks *without* the Storybook addon (unit tests, a standalone React app wrapping tokens in a custom surface):
+
 ```sh
 npm install @unpunnyfuns/swatchbook-blocks
 ```
 
-Blocks read the token graph from a `SwatchbookProvider`. Inside Storybook, register `@unpunnyfuns/swatchbook-addon` alongside these blocks — its preview decorator mounts the provider automatically. Outside Storybook, wrap your tree in `SwatchbookProvider` and pass a `ProjectSnapshot` directly (see [Outside Storybook](#outside-storybook) below).
+Blocks read the token graph from a `SwatchbookProvider`. Inside Storybook, the addon's preview decorator mounts the provider automatically. Outside Storybook, wrap your tree in `SwatchbookProvider` and pass a `ProjectSnapshot` directly (see [Outside Storybook](#outside-storybook) below).
 
 ## Blocks
 
@@ -46,7 +48,7 @@ Shared: every block accepts a `caption` override and renders against the addon's
 The addon's preview decorator wraps every story in a `SwatchbookProvider` for you, so MDX and story authors drop blocks in directly:
 
 ```mdx
-import { TokenTable, ColorPalette, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
+import { TokenTable, ColorPalette, TokenDetail } from '@unpunnyfuns/swatchbook-addon';
 
 # Color tokens
 
