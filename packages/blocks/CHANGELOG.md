@@ -1,5 +1,43 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.6.2
+
+### Patch Changes
+
+- 1971275: fix(blocks): honor the color-format selector in Shadow/Border/Gradient previews
+
+  `<ShadowPreview>`, `<BorderPreview>`, and `<GradientPalette>` each shipped
+  a local `formatColor` helper that ignored the toolbar's color-format
+  selector — their sub-value text stayed in `colorSpace(components…)` or
+  `rgb(%)` regardless of what the user picked. Now they route through the
+  shared `formatColor` from `@unpunnyfuns/swatchbook-blocks`, subscribing
+  to `useColorFormat()` the same way `<ColorPalette>` and
+  `<CompositeBreakdown>` do.
+
+  Flipping the toolbar between hex / rgb / hsl / oklch / raw now updates
+  the breakdown labels in all three blocks.
+
+- 97a32bb: fix(blocks): surface sub-value alias chains in `<CompositeBreakdown>`
+
+  When a composite token (`border`, `shadow`, `transition`, `typography`,
+  `gradient`) references another token by alias on one of its sub-values,
+  the `<TokenDetail>` drawer now shows the full alias chain next to that
+  row — the same way top-level token aliases are surfaced by
+  `<AliasChain>`. Previously a border whose `color` aliased another color
+  token rendered only the resolved hex, with no indication that the value
+  had been authored as an alias.
+
+  Chains walk transitively via Terrazzo's `partialAliasOf` + the target
+  token's own `aliasChain`, so authors see the full `borderColorAlias →
+colorRole → colorPrimitive` path.
+
+- 1b5989c: fix(blocks): align detail-overlay close button with panel padding
+
+  The slide-over close button was pinned at `top: 8px; right: 8px` — half
+  the 16px panel padding — so it sat tucked against the corner instead of
+  aligning with the content. Bumped both to `16px` so the button sits
+  inside the visual inset, flush with the heading.
+
 ## 0.6.1
 
 ## 0.6.0
