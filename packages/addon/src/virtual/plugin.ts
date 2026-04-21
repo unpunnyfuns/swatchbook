@@ -57,7 +57,15 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
       ].join('\n');
     },
 
-    configureServer(server) {
+    async configureServer(server) {
+      // `configureServer` fires before `buildStart` in Vite's plugin
+      // lifecycle, so `project` is still undefined when consumers only
+      // set `config.resolver` (no `tokens` glob). Force an initial load
+      // here so the watcher setup below sees a populated `sourceFiles`
+      // list — otherwise only the resolver file itself gets watched,
+      // and saves to any `$ref` target silently drop.
+      if (!project) await refresh();
+
       const watchPaths = collectWatchPaths(config, project, cwd);
       for (const p of watchPaths) server.watcher.add(p);
 
