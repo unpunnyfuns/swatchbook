@@ -1,6 +1,7 @@
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
 import { loadProject, projectCss } from '@unpunnyfuns/swatchbook-core';
-import { dirname, isAbsolute, resolve as resolvePath, sep } from 'node:path';
+import { type FSWatcher, watch as fsWatch } from 'node:fs';
+import { basename, dirname, isAbsolute, resolve as resolvePath } from 'node:path';
 import picomatch from 'picomatch';
 import type { Plugin } from 'vite';
 import { RESOLVED_VIRTUAL_MODULE_ID, VIRTUAL_MODULE_ID } from '#/constants.ts';
@@ -56,28 +57,78 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
       ].join('\n');
     },
 
-    configureServer(server) {
-      const watchPaths = collectWatchPaths(config, project, cwd);
-      for (const p of watchPaths) server.watcher.add(p);
+    async configureServer(server) {
+      // `configureServer` fires before `buildStart` in Vite's plugin
+      // lifecycle, so `project` is still undefined when consumers only
+      // set `config.resolver` (no `tokens` glob). Force an initial load
+      // here so the watcher setup below sees a populated `sourceFiles`
+      // list — otherwise only the resolver file itself gets watched,
+      // and saves to any `$ref` target silently drop.
+      if (!project) await refresh();
 
-      const invalidate = async (): Promise<void> => {
-        await refresh();
-        const mod = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_MODULE_ID);
-        if (mod) server.moduleGraph.invalidateModule(mod);
-        server.ws.send({ type: 'full-reload' });
+      /**
+       * Editors typically emit two or three filesystem events per save
+       * (atomic rename + rewrite + metadata). A 100 ms trailing debounce
+       * coalesces those into a single reload while staying well under
+       * user-perceptible latency.
+       */
+      let pending: ReturnType<typeof setTimeout> | null = null;
+      const invalidate = (): void => {
+        if (pending) clearTimeout(pending);
+        pending = setTimeout(() => {
+          pending = null;
+          void (async () => {
+            await refresh();
+            const tokenCount = project
+              ? Object.keys(project.themesResolved[project.themes[0]?.name ?? ''] ?? {}).length
+              : 0;
+            const diagCount = project?.diagnostics.length ?? 0;
+            server.config.logger.info(
+              `\x1b[36m[swatchbook]\x1b[0m tokens reloaded — ${tokenCount} tokens, ${diagCount} diagnostic${diagCount === 1 ? '' : 's'}`,
+              { clear: false, timestamp: true },
+            );
+            const mod = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_MODULE_ID);
+            if (mod) server.moduleGraph.invalidateModule(mod);
+            server.ws.send({ type: 'full-reload' });
+          })();
+        }, 100);
       };
 
-      const matches = (changed: string): boolean =>
-        watchPaths.some((p) => changed === p || changed.startsWith(`${p}${sep}`));
+      /**
+       * Watch each source file's *parent directory* rather than the file
+       * itself. File-level `fs.watch` is fragile: atomic-save editors
+       * unlink the old inode and write a new one, so the original
+       * watcher either fires a one-shot 'rename' and goes deaf, or on
+       * some platforms loops on ghost events for the old inode. Watching
+       * the dir sidesteps both — the dir inode is stable across the
+       * rename dance — and filename filtering keeps event volume low.
+       *
+       * Vite's `server.watcher` still wouldn't carry these events across
+       * pnpm symlink boundaries, so we keep running our own watchers.
+       */
+      const byDir = new Map<string, Set<string>>();
+      for (const file of project?.sourceFiles ?? []) {
+        const dir = dirname(file);
+        const set = byDir.get(dir) ?? new Set<string>();
+        set.add(basename(file));
+        byDir.set(dir, set);
+      }
 
-      server.watcher.on('change', (changed) => {
-        if (matches(changed)) void invalidate();
-      });
-      server.watcher.on('add', (changed) => {
-        if (matches(changed)) void invalidate();
-      });
-      server.watcher.on('unlink', (changed) => {
-        if (matches(changed)) void invalidate();
+      const fileWatchers: FSWatcher[] = [];
+      for (const [dir, names] of byDir) {
+        try {
+          const w = fsWatch(dir, { persistent: false }, (eventType, filename) => {
+            if (!filename) return;
+            if (!names.has(filename)) return;
+            if (eventType === 'change' || eventType === 'rename') invalidate();
+          });
+          fileWatchers.push(w);
+        } catch {
+          // unwatchable dir — skip. Next loadProject pass will report it.
+        }
+      }
+      server.httpServer?.once('close', () => {
+        for (const w of fileWatchers) w.close();
       });
     },
   };
