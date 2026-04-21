@@ -48,6 +48,8 @@
   },
   "scripts": {
     "build": "tsdown",
+    "start": "node dist/bin.mjs --config ../../apps/storybook/swatchbook.config.ts",
+    "inspect": "mcp-inspector node dist/bin.mjs --config ../../apps/storybook/swatchbook.config.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -63,6 +65,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@modelcontextprotocol/inspector": "^0.21.2",
     "@types/node": "^25.6.0",
     "tsdown": "^0.21.9",
     "typescript": "^6.0.0",
