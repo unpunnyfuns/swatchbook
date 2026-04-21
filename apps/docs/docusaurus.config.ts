@@ -103,6 +103,7 @@ const config: Config = {
         { type: 'docSidebar', sidebarId: 'blocks', position: 'left', label: 'Blocks' },
         { type: 'docSidebar', sidebarId: 'guides', position: 'left', label: 'Guides' },
         { type: 'docSidebar', sidebarId: 'reference', position: 'left', label: 'Reference' },
+        { type: 'docSidebar', sidebarId: 'developers', position: 'left', label: 'Developers' },
         { href: 'pathname:///storybook/', label: 'Live Storybook', position: 'left' },
         ...(hasReleasedVersion
           ? [{ type: 'docsVersionDropdown' as const, position: 'right' as const }]
