@@ -59,7 +59,7 @@ jobs:
         with:
           # `pnpm run <script>` disambiguates from pnpm's built-ins
           # (`pnpm version` would hit the built-in and silently no-op).
-          # `version` → `changeset version`; `release` builds the three
+          # `version` → `changeset version`; `release` builds the
           # fixed-group packages and runs `changeset publish`.
           publish: pnpm run release
           version: pnpm run version
@@ -67,11 +67,50 @@ jobs:
           title: 'chore(release): version packages'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Trusted publishing is configured on npm for all three
-          # packages — no NPM_TOKEN / NODE_AUTH_TOKEN needed; npm picks
-          # up the GitHub OIDC token via id-token: write and exchanges
-          # it for a short-lived publish token at publish time.
+          # Trusted publishing is configured on npm for every published
+          # fixed-group package (core, addon, blocks, switcher, mcp). No
+          # NPM_TOKEN / NODE_AUTH_TOKEN needed; npm picks up the GitHub
+          # OIDC token via id-token: write and exchanges it for a
+          # short-lived publish token at publish time.
           NPM_CONFIG_PROVENANCE: true
+
+      # The action opens the Version Packages PR with a static title
+      # ("chore(release): version packages") and a body that leads with a
+      # "This PR was opened by the Changesets release GitHub action…"
+      # boilerplate paragraph. Neither carries the proposed version, and
+      # the boilerplate is static noise once you've seen it once. Retitle
+      # with the computed next version and trim the boilerplate so the PR
+      # (and the eventual squash-merge commit on main) is informative at
+      # a glance.
+      - name: Polish Version Packages PR title + body
+        if: steps.changesets.outputs.pullRequestNumber && steps.changesets.outputs.published != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.changesets.outputs.pullRequestNumber }}
+        run: |
+          set -e
+          git fetch origin changeset-release/main
+          next_version=$(git show origin/changeset-release/main:packages/core/package.json | jq -r .version)
+          if [ -z "$next_version" ] || [ "$next_version" = "null" ]; then
+            echo "Could not read next version — leaving PR #$PR_NUMBER alone."
+            exit 0
+          fi
+
+          echo "Retitling PR #$PR_NUMBER to v$next_version"
+
+          current_body=$(gh pr view "$PR_NUMBER" --json body --jq .body)
+          # Drop everything before the "# Releases" heading that
+          # changesets always emits — the preceding paragraph is the
+          # boilerplate we want gone. Fall back to the original body if
+          # the heading isn't present (defensive; it always is today).
+          trimmed_body=$(printf '%s\n' "$current_body" | awk 'found{print; next} /^# Releases[[:space:]]*$/{found=1; print}')
+          if [ -z "$trimmed_body" ]; then
+            trimmed_body="$current_body"
+          fi
+
+          gh pr edit "$PR_NUMBER" \
+            --title "chore(release): v$next_version" \
+            --body "$trimmed_body"
 
       # changesets/action maintains a `changeset-release/main` branch and
       # keeps the Version Packages PR open across runs. When the branch's
