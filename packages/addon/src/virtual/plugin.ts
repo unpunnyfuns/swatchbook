@@ -4,7 +4,7 @@ import { type FSWatcher, watch as fsWatch } from 'node:fs';
 import { basename, dirname, isAbsolute, resolve as resolvePath } from 'node:path';
 import picomatch from 'picomatch';
 import type { Plugin } from 'vite';
-import { RESOLVED_VIRTUAL_MODULE_ID, VIRTUAL_MODULE_ID } from '#/constants.ts';
+import { HMR_EVENT, RESOLVED_VIRTUAL_MODULE_ID, VIRTUAL_MODULE_ID } from '#/constants.ts';
 
 export interface SwatchbookPluginOptions {
   config: Config;
@@ -79,17 +79,40 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
           pending = null;
           void (async () => {
             await refresh();
-            const tokenCount = project
-              ? Object.keys(project.themesResolved[project.themes[0]?.name ?? ''] ?? {}).length
-              : 0;
-            const diagCount = project?.diagnostics.length ?? 0;
+            if (!project) return;
+            const tokenCount = Object.keys(
+              project.themesResolved[project.themes[0]?.name ?? ''] ?? {},
+            ).length;
+            const diagCount = project.diagnostics.length;
             server.config.logger.info(
               `\x1b[36m[swatchbook]\x1b[0m tokens reloaded — ${tokenCount} tokens, ${diagCount} diagnostic${diagCount === 1 ? '' : 's'}`,
               { clear: false, timestamp: true },
             );
             const mod = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_MODULE_ID);
             if (mod) server.moduleGraph.invalidateModule(mod);
-            server.ws.send({ type: 'full-reload' });
+            /**
+             * Send the fresh snapshot as a custom HMR event instead of a
+             * full-reload. The preview subscribes and re-broadcasts to
+             * blocks via the Storybook channel so the React tree
+             * re-renders in place without losing toolbar / args / scroll
+             * state. Field shape matches the INIT_EVENT payload so the
+             * preview can hand it straight through.
+             */
+            server.ws.send({
+              type: 'custom',
+              event: HMR_EVENT,
+              data: {
+                axes: project.axes,
+                disabledAxes: project.disabledAxes,
+                presets: project.presets,
+                themes: project.themes,
+                defaultTheme: project.themes[0]?.name ?? null,
+                themesResolved: project.themesResolved,
+                diagnostics: project.diagnostics,
+                css,
+                cssVarPrefix: config.cssVarPrefix ?? '',
+              },
+            });
           })();
         }, 100);
       };

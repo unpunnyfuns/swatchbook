@@ -1,15 +1,7 @@
 import { useEffect } from 'react';
 import { useActiveAxes, useActiveTheme, useOptionalSwatchbookData } from '#/contexts.ts';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
-import {
-  axes as virtualAxes,
-  css as generatedCss,
-  cssVarPrefix,
-  defaultTheme,
-  diagnostics as virtualDiagnostics,
-  themes,
-  themesResolved,
-} from 'virtual:swatchbook/tokens';
+import { useTokenSnapshot } from '#/internal/channel-tokens.ts';
 import type {
   ProjectSnapshot,
   VirtualAxis,
@@ -109,39 +101,47 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
   const contextTheme = useActiveTheme();
   const contextAxes = useActiveAxes();
   const channelGlobals = useChannelGlobals();
+  /**
+   * Subscribe to the live token snapshot rather than reading the virtual
+   * module's module-level exports directly. Initial values come from
+   * `virtual:swatchbook/tokens` at load time; subsequent dev-time edits
+   * flow through the addon's HMR channel and update this snapshot in
+   * place so blocks re-render without a full preview reload.
+   */
+  const tokens = useTokenSnapshot();
 
   useEffect(() => {
     if (!enabled) return;
-    ensureStylesheet(generatedCss);
-  }, [enabled]);
+    ensureStylesheet(tokens.css);
+  }, [enabled, tokens.css]);
 
   const hasContextAxes = Object.keys(contextAxes).length > 0;
   const activeAxes: Record<string, string> = hasContextAxes
     ? { ...contextAxes }
-    : (channelGlobals.axes ?? defaultTuple(virtualAxes));
+    : (channelGlobals.axes ?? defaultTuple(tokens.axes));
 
-  const derivedName = nameForTuple(themes, activeAxes);
+  const derivedName = nameForTuple(tokens.themes, activeAxes);
   const channelTheme = channelGlobals.theme;
   const fallbackTupleName =
-    channelTheme && tupleForName(themes, channelTheme) ? channelTheme : null;
+    channelTheme && tupleForName(tokens.themes, channelTheme) ? channelTheme : null;
   const activeTheme =
     contextTheme ||
     derivedName ||
     fallbackTupleName ||
     channelTheme ||
-    defaultTheme ||
-    themes[0]?.name ||
+    tokens.defaultTheme ||
+    tokens.themes[0]?.name ||
     '';
 
   return {
     activeTheme,
     activeAxes,
-    axes: virtualAxes,
-    themes,
-    themesResolved,
-    resolved: themesResolved[activeTheme] ?? {},
-    diagnostics: virtualDiagnostics,
-    cssVarPrefix,
+    axes: tokens.axes,
+    themes: tokens.themes,
+    themesResolved: tokens.themesResolved,
+    resolved: tokens.themesResolved[activeTheme] ?? {},
+    diagnostics: tokens.diagnostics,
+    cssVarPrefix: tokens.cssVarPrefix,
   };
 }
 
