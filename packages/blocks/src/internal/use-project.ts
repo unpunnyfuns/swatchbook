@@ -82,13 +82,13 @@ function snapshotToData(snapshot: ProjectSnapshot): ProjectData {
 /**
  * Reads project data either from a mounted {@link SwatchbookProvider}
  * (preferred — the addon's preview decorator installs one around every
- * story) or — as a back-compat fallback — directly from the virtual
- * module plus Storybook globals.
+ * story) or, when no provider is present, from the virtual module plus
+ * Storybook globals directly.
  *
- * The fallback path is what makes the hook safe to call from MDX doc
- * blocks and autodocs renders where no story is active. It self-mounts
- * the virtual module's per-theme CSS and tracks the active tuple via the
- * `globalsUpdated` channel event; {@link useGlobals} from
+ * The provider-less path is what makes the hook safe to call from MDX
+ * doc blocks and autodocs renders where no story is active. It
+ * self-mounts the virtual module's per-theme CSS and tracks the active
+ * tuple via the `globalsUpdated` channel event; {@link useGlobals} from
  * `storybook/preview-api` would throw outside a story render.
  */
 export function useProject(): ProjectData {

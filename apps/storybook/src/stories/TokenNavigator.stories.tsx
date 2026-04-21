@@ -35,10 +35,10 @@ export const MotionTypes = meta.story({
 });
 
 /**
- * Regression — typing a `root` / `type` arg that matches nothing used to
- * flip the component below a hook-order boundary and throw
- * "Rendered fewer hooks than expected." Verifies the empty-state render
- * runs after every hook has been called.
+ * Empty-state render for a `root` / `type` arg that matches no tokens.
+ * Exercises the path where the component's early return fires after every
+ * hook has run — a shape that's easy to regress on if a hook gets added
+ * below the empty-state guard.
  */
 export const NoMatches = meta.story({
   args: { root: 'does-not-exist' },

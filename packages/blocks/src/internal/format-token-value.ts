@@ -5,9 +5,6 @@ import { type ColorFormat, formatColor } from '#/format-color.ts';
  * respecting the active color format for color-typed tokens and the
  * color sub-values of composite types (border, shadow, gradient).
  *
- * Replaces the old `formatValue` one-shot that hex-short-circuited
- * colors and fell through to raw JSON for known composites.
- *
  * Shape by type:
  * - `color`              → `formatColor(value, colorFormat)` — e.g. `#3b82f6`, `oklch(...)`, `raw` JSON.
  * - `dimension|duration` → `value + unit` — e.g. `16px`, `200ms`.
