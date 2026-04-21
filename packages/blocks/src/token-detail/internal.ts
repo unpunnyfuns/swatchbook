@@ -7,6 +7,15 @@ export interface DetailToken {
   aliasOf?: string;
   aliasChain?: readonly string[];
   aliasedBy?: readonly string[];
+  /**
+   * Terrazzo-populated sub-value alias map for composite tokens. Shape
+   * varies by $type: object-valued composites (`border`, `typography`,
+   * `transition`) use `Record<string, string | undefined>` keyed by
+   * sub-key; array-valued composites (`shadow`, `gradient`) use an array
+   * of such records indexed per layer / stop. Carried through `unknown`
+   * here so each consumer narrows at use-site.
+   */
+  partialAliasOf?: unknown;
 }
 
 export interface VirtualAxisLike {
