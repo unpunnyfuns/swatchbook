@@ -22,10 +22,12 @@ const sidebars: SidebarsConfig = {
       label: 'Concepts',
       collapsed: false,
       items: [
+        'concepts/axes-vs-themes',
         'concepts/theming-inputs',
         'concepts/axes',
         'concepts/presets',
         'concepts/diagnostics',
+        'concepts/theme-reactivity',
         'concepts/token-pipeline',
       ],
     },

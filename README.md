@@ -4,7 +4,7 @@ A Storybook addon and MDX blocks for documenting [DTCG](https://www.designtokens
 
 Two things in one:
 
-- **Doc blocks** — `TokenNavigator`, `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail`, and more. Drop them into MDX pages and your token reference writes itself.
+- **Doc blocks** — `TokenNavigator`, `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail`, and per-type previews for motion, shadow, border, and gradient. React components for MDX.
 - **A multi-axis theme switcher** — flip dark mode, brand, contrast, density, whatever dimensions your design system has, from one toolbar button. Each dimension is a DTCG resolver modifier; each becomes a dropdown inside a single popover. (See [*why axes, not themes*](https://unpunnyfuns.github.io/swatchbook/concepts/axes-vs-themes).)
 
 **Documentation:** [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/) · **Live Storybook:** [/storybook](https://unpunnyfuns.github.io/swatchbook/storybook/)
