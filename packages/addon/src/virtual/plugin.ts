@@ -1,7 +1,7 @@
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
 import { loadProject, projectCss } from '@unpunnyfuns/swatchbook-core';
 import { type FSWatcher, watch as fsWatch } from 'node:fs';
-import { dirname, isAbsolute, resolve as resolvePath } from 'node:path';
+import { basename, dirname, isAbsolute, resolve as resolvePath } from 'node:path';
 import picomatch from 'picomatch';
 import type { Plugin } from 'vite';
 import { RESOLVED_VIRTUAL_MODULE_ID, VIRTUAL_MODULE_ID } from '#/constants.ts';
@@ -68,7 +68,7 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
 
       /**
        * Editors typically emit two or three filesystem events per save
-       * (atomic rename + rewrite + metadata). A small trailing debounce
+       * (atomic rename + rewrite + metadata). A 100 ms trailing debounce
        * coalesces those into a single reload while staying well under
        * user-perceptible latency.
        */
@@ -83,27 +83,40 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
             if (mod) server.moduleGraph.invalidateModule(mod);
             server.ws.send({ type: 'full-reload' });
           })();
-        }, 50);
+        }, 100);
       };
 
       /**
-       * Watch each source file directly via `node:fs`. Vite's
-       * `server.watcher` is rooted at the dev server's project dir, and
-       * absolute paths added via `.add()` don't reliably emit change
-       * events when they live in a sibling workspace package (pnpm
-       * symlink chains, cross-root boundaries). The native file watcher
-       * has no root constraint and fires cleanly on every save.
+       * Watch each source file's *parent directory* rather than the file
+       * itself. File-level `fs.watch` is fragile: atomic-save editors
+       * unlink the old inode and write a new one, so the original
+       * watcher either fires a one-shot 'rename' and goes deaf, or on
+       * some platforms loops on ghost events for the old inode. Watching
+       * the dir sidesteps both — the dir inode is stable across the
+       * rename dance — and filename filtering keeps event volume low.
+       *
+       * Vite's `server.watcher` still wouldn't carry these events across
+       * pnpm symlink boundaries, so we keep running our own watchers.
        */
+      const byDir = new Map<string, Set<string>>();
+      for (const file of project?.sourceFiles ?? []) {
+        const dir = dirname(file);
+        const set = byDir.get(dir) ?? new Set<string>();
+        set.add(basename(file));
+        byDir.set(dir, set);
+      }
+
       const fileWatchers: FSWatcher[] = [];
-      const sourceFiles = project?.sourceFiles ?? [];
-      for (const file of sourceFiles) {
+      for (const [dir, names] of byDir) {
         try {
-          const w = fsWatch(file, { persistent: false }, (eventType) => {
+          const w = fsWatch(dir, { persistent: false }, (eventType, filename) => {
+            if (!filename) return;
+            if (!names.has(filename)) return;
             if (eventType === 'change' || eventType === 'rename') invalidate();
           });
           fileWatchers.push(w);
         } catch {
-          // unreadable path — skip. Next loadProject pass will report it.
+          // unwatchable dir — skip. Next loadProject pass will report it.
         }
       }
       server.httpServer?.once('close', () => {
