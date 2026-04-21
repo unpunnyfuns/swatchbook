@@ -1,5 +1,80 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.7.0
+
+### Patch Changes
+
+- a9d1a1c: docs: serve main-branch docs at `/` instead of the last-cut release
+
+  Pre-1.0, pinning the docs default at the last release means visitors
+  see a snapshot that's often behind what's actually on `main`. Flip
+  `lastVersion: 'current'` so the main-branch docs mount at `/` with a
+  plain "Next" label (no more "unreleased" banner — nothing to warn
+  about when current _is_ the headline). Released snapshots keep working
+  at `/<version>/` through the version dropdown.
+
+- 94b1b3e: docs: add a DTCG-aware theme switcher to the docs-site navbar
+
+  Extends `apps/docs/tokens/` with a second axis (`a11y: Normal |
+High-contrast`) layered on top of the existing `mode` axis, and mounts
+  a live theme-switcher popover next to Docusaurus's built-in colour-mode
+  toggle. The popover is rendered through the shared
+  `@unpunnyfuns/swatchbook-switcher` package — same component the
+  Storybook addon toolbar uses, so the two surfaces stay in lockstep on
+  any future axis additions.
+
+  State lives in a `SwatchbookSwitcherProvider` (installed via a Root
+  swizzle), persists to `localStorage`, and flips `data-sb-<axis>`
+  attributes on `<html>` so the already-emitted multi-axis CSS picks up
+  the new tuple. The build script now also emits
+  `src/tokens.snapshot.json` alongside the generated CSS, which the
+  context provider reads at build time — no runtime fetch, no manual
+  axis list.
+
+  Colour-mode stays on Docusaurus's `[data-theme]` attribute; the two
+  systems bridge cleanly via the compound CSS selectors the swatchbook
+  emitter produces (`[data-theme="dark"][data-sb-a11y="High-contrast"]`
+  etc.).
+
+- b947c99: docs: wire Docusaurus Infima theming through a swatchbook token pipeline
+
+  `apps/docs/tokens/` now holds a minimal DTCG set — a brand / neutral
+  palette plus per-mode surface, text, primary, and code role tokens.
+  A small build-time script (`apps/docs/scripts/build-tokens.mts`) loads
+  it through `loadProject` / `projectCss` from swatchbook-core and emits
+  `apps/docs/src/css/tokens.generated.css`, post-processing the
+  `[data-sb-theme="…"]` selectors into Docusaurus's `[data-theme="…"]`
+  shape so the per-mode vars track the Infima toggle on `<html>`.
+
+  `custom.css` drops its hand-tuned hex values and maps Infima variables
+  onto the emitted `--sb-color-*` vars (primary ramp, surfaces, text,
+  code chrome). Changes to `apps/docs/tokens/*.json` now flow into the
+  live Infima theme on rebuild — the docs site dogfoods the addon's own
+  token pipeline instead of maintaining a parallel colour list.
+
+- e571197: docs: split Docs nav into per-category top-level entries
+
+  The Docusaurus navbar now exposes Quickstart, Concepts, Blocks, Guides,
+  and Reference as discrete top-level items instead of a single collapsed
+  "Docs" link. `activeBaseRegex` on each entry highlights the pill for the
+  whole section — Reference excludes `/reference/blocks/*` so the Blocks
+  entry keeps the active style while browsing block pages.
+
+- 887cb0a: docs: split docs sidebar per section so left rail stops duplicating navbar
+
+  The left sidebar listed every category (Blocks / Concepts / Guides /
+  Reference) as a collapsible header, which mirrored the navbar entries
+  added in the previous patch. Split the single `docs` sidebar into five
+  section-scoped sidebars (`home`, `concepts`, `blocks`, `guides`,
+  `reference`) and bind each navbar entry with `type: 'docSidebar'` +
+  `sidebarId`. The left rail now lists only the pages in the current
+  section.
+
+  Versioned sidebar snapshots (0.4 / 0.5 / 0.6) were rewritten to the new
+  shape — navbar `docSidebar` entries resolve per-version, so leaving
+  older versions on the old `docs` sidebar would 500 every page under
+  `/0.4/…` etc.
+
 ## 0.6.2
 
 ### Patch Changes
