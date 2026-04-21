@@ -18,6 +18,8 @@
     "storybook": "turbo run storybook",
     "build:storybook": "turbo run build:storybook",
     "dev": "turbo run storybook",
+    "mcp": "turbo run build --filter=@unpunnyfuns/swatchbook-mcp >/dev/null && node packages/mcp/dist/bin.mjs --config apps/storybook/swatchbook.config.ts",
+    "mcp:inspect": "turbo run build --filter=@unpunnyfuns/swatchbook-mcp >/dev/null && npx @modelcontextprotocol/inspector node packages/mcp/dist/bin.mjs --config apps/storybook/swatchbook.config.ts",
     "changeset": "changeset",
     "version": "changeset version && node scripts/snapshot-docs-version.mjs",
     "release": "turbo run build --filter=@unpunnyfuns/swatchbook-core --filter=@unpunnyfuns/swatchbook-addon --filter=@unpunnyfuns/swatchbook-blocks && changeset publish"

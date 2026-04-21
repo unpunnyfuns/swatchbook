@@ -17,7 +17,16 @@ export async function loadFromConfig(
   const absolute = isAbsolute(configPath) ? configPath : resolve(process.cwd(), configPath);
   const cwd = cwdOverride ?? resolve(absolute, '..');
 
-  const jiti = createJiti(pathToFileURL(absolute).href, {
+  /**
+   * jiti's first arg is a directory-shaped "from" URL it uses to resolve
+   * the target's relative imports. Passing a file URL leaves jiti
+   * unsure whether to treat the path as a dir, which on some Node
+   * versions falls through to a plain JSON read and surfaces as
+   * `Unexpected token 'i', "import { d"...`. A trailing slash on a
+   * directory URL avoids the ambiguity.
+   */
+  const fromUrl = new URL('./', pathToFileURL(absolute));
+  const jiti = createJiti(fromUrl.href, {
     interopDefault: true,
     moduleCache: false,
   });
