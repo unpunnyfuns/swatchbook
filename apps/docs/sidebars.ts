@@ -27,6 +27,7 @@ const sidebars: SidebarsConfig = {
         'concepts/axes',
         'concepts/presets',
         'concepts/diagnostics',
+        'concepts/token-pipeline',
       ],
     },
   ],
