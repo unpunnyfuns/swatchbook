@@ -69,6 +69,9 @@ importers:
       '@types/react':
         specifier: ^19.0.0
         version: 19.2.14
+      '@unpunnyfuns/swatchbook-core':
+        specifier: workspace:*
+        version: link:../../packages/core
       typescript:
         specifier: ~6.0.2
         version: 6.0.3
