@@ -1,4 +1,4 @@
-# Blocks
+# swatchbook-blocks
 
 Published as `@unpunnyfuns/swatchbook-blocks`. Storybook MDX doc blocks for DTCG design tokens. React components for rendering token documentation inside `.mdx` pages or regular stories. Self-mount the addon's CSS and react to axis changes from the toolbar; work inside the docs container even though story decorators don't.
 

@@ -1,4 +1,4 @@
-# Core
+# swatchbook-core
 
 Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via [Terrazzo](https://terrazzo.app/), resolves aliases, composes themes through a DTCG 2025.10 resolver, and emits CSS variables and TypeScript types.
 

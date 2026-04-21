@@ -1,4 +1,4 @@
-# Addon
+# swatchbook-addon
 
 Published as `@unpunnyfuns/swatchbook-addon`. Storybook 10 addon for DTCG design tokens. Loads your tokens at config time (via `@unpunnyfuns/swatchbook-core`), exposes the resolved graph to the preview through a virtual module, renders a toolbar popover with one dropdown per modifier axis (`mode`, `brand`, and so on) alongside preset pills and a color-format picker, and ships a `useToken()` hook with typed paths. Re-exports the full blocks + switcher React surface so `import { TokenTable, ThemeSwitcher, useToken } from '@unpunnyfuns/swatchbook-addon'` works without a second install.
 
