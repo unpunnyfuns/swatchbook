@@ -227,6 +227,16 @@ export function TokenNavigator({
   );
 
   const typeLabel = typeFilter ? ` · ${[...typeFilter].map((t) => `$type=${t}`).join(', ')}` : '';
+  const trimmedQuery = query.trim();
+  // Must run every render — React's rules of hooks forbid the earlier empty-state
+  // early return from skipping it, or the next non-empty render throws
+  // "Rendered fewer hooks than expected".
+  const matchCount = useMemo(() => {
+    if (!searchExpanded) return 0;
+    let n = 0;
+    for (const node of visibleTree) n += countLeaves(node);
+    return n;
+  }, [visibleTree, searchExpanded]);
 
   if (tree.length === 0) {
     return (
@@ -241,14 +251,6 @@ export function TokenNavigator({
       </div>
     );
   }
-
-  const trimmedQuery = query.trim();
-  const matchCount = useMemo(() => {
-    if (!searchExpanded) return 0;
-    let n = 0;
-    for (const node of visibleTree) n += countLeaves(node);
-    return n;
-  }, [visibleTree, searchExpanded]);
 
   return (
     <div {...themeAttrs(cssVarPrefix, activeTheme)}>
