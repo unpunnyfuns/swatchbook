@@ -1,5 +1,25 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.10.1
+
+### Patch Changes
+
+- 548b041: chore(blocks): drop misleading "storybook-addon" npm keyword
+
+  `@unpunnyfuns/swatchbook-blocks` ships MDX doc blocks; the Storybook addon surface lives in the sibling `@unpunnyfuns/swatchbook-addon` package. Keeping the `storybook-addon` keyword here surfaced blocks in npm searches people really wanted the addon for.
+
+- 9722153: docs(blocks): move hooks into a dedicated reference page; correct stale "not re-exported from addon" claims
+
+  The addon has re-exported the full blocks surface (hooks, provider, contexts) since the one-stop-install work landed, so `import { useSwatchbookData } from '@unpunnyfuns/swatchbook-addon'` works the same as importing from blocks. The intro page and do/don't list still asserted the opposite; updated both. Hooks now have their own reference page under Blocks → Hooks.
+
+- c1e6b98: fix(blocks): TokenNavigator hooks run before empty-state early return
+
+  Typing a `root` or `type` arg that matches zero tokens used to cross a
+  hook-order boundary — the `matchCount` `useMemo` sat after the
+  `tree.length === 0` early return, so the first non-empty render threw
+  "Rendered fewer hooks than expected". Hoisted the memo above the
+  guard. Added a `NoMatches` story as a regression check.
+
 ## 0.10.0
 
 ## 0.9.0
