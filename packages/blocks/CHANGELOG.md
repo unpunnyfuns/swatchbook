@@ -1,5 +1,28 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.11.6
+
+### Patch Changes
+
+- 4fd054c: docs: strip remaining pitch residue from the intro's "What the addon includes" section
+
+  Follow-up to the prose conversion. A second read found eight smaller tells still reading as marketing framing: section heading ("gives you" → "includes"), action verbs ("brings in" → "includes"), tour-guide framing ("Most authoring happens in MDX"), a mid-prose `<ColorPalette filter="color.*" />` example that acted as a sales moment, an emphasised "A single Swatchbook icon" ("single" → dropped), a redundant gloss after the color-format selector's own name, and a three-parallel-clauses "nothing is written / no prebuild / HMR propagates" stack that worked as a strawman — consolidated to one descriptive clause. Section now reads as a reference entry.
+
+- 3cff041: docs: rewrite the intro's "What the addon gives you" section as prose under subheadings
+
+  Replaces the five **bold** — em-dash — sentence bullets with short subheaded paragraphs (Installation, No external compile step, Doc blocks, Toolbar, `useToken` hook). Also strips the editorial scaffolding — phrases like "Day-to-day authoring", "ready-made starting point", "without per-page wiring", "so typos surface at compile time rather than runtime" — that read as sales framing rather than description. The subsections now state what each feature is and where to read more, without pitching.
+
+- 77c5f23: docs: prose sweep + adopt two orphaned concept pages into the sidebar
+
+  **Prose sweep.** An audit across every live `.mdx` and each package README surfaced six clear pitch-language tells. Fixed five (kept two borderline "why axes, not themes" link-title italics as-is since they're page titles, not strawman setups):
+
+  - Root README and intro both had "Drop them into MDX pages and your token reference writes itself" — replaced with descriptive version naming the per-type previews explicitly.
+  - Addon reference: "those hooks just work wherever the addon is registered" → "the hooks resolve wherever the addon is registered".
+  - Authoring guide: "the blocks just work inside MDX" → "the blocks render inside MDX".
+  - Quickstart: "Takes ~5 minutes if you already have a Storybook project." → "Assumes an existing Storybook 10 project with the Vite builder. Install, register, author the first doc page."
+
+  **Orphan adoption.** `concepts/axes-vs-themes` and `concepts/theme-reactivity` existed as pages and were linked from the intro, but weren't listed in the home sidebar's Concepts category. Clicking those links landed on pages with no sidebar highlighting or breadcrumb context. Added both to the Concepts category; `axes-vs-themes` goes first (foundational "why"), `theme-reactivity` goes between diagnostics and token-pipeline (implementation-facing after the concept tour).
+
 ## 0.11.5
 
 ### Patch Changes
