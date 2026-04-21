@@ -1,5 +1,22 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.11.1
+
+### Patch Changes
+
+- b0ce33e: docs: surface the full package set across indexes
+
+  Several places still listed the pre-v0.10 three-package story (core / addon / blocks) and omitted switcher + mcp:
+
+  - Root `README.md` — added the `mcp` row to the package table.
+  - `CONTRIBUTING.md` — expanded the "everything user-facing lives under…" list and the changeset rule to cover all five published packages.
+  - `packages/switcher/README.md` — created from scratch; the package shipped without one. Covers install, usage, exported surface, and where it's consumed inside the repo.
+  - `apps/docs/docs/intro.mdx` — added a short "For AI agents" section pointing at the MCP server, plus updated "How to read these docs" to include `mcp` in the Reference list and added the new Developers section.
+
+- a294673: docs: restore `swatchbook-*` in each package README's title header
+
+  Every package README was headed with a one-word title (`# Addon`, `# Blocks`, `# Core`, `# MCP`). On npm's package page that renders as a standalone word stripped of context — a reader who lands on the tarball's own page via a search, deep link, or alert sees "# Addon" and has to hunt for what it's an addon _of_. Restored the `swatchbook-*` prefix so each README's title matches its published package name and re-establishes context on first scroll.
+
 ## 0.11.0
 
 ### Patch Changes
