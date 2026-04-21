@@ -17,7 +17,11 @@ Most blocks in this group take:
 
 ## Across types
 
-### `<TokenNavigator root? type? initiallyExpanded? searchable? onSelect? />`
+### TokenNavigator
+
+```tsx
+<TokenNavigator root="color" />
+```
 
 Expandable tree of the token graph. Each interior group shows its child count; each leaf shows its `$type` pill plus an inline preview (color swatch, dimension bar, shadow / border / motion sample, or a formatted value). A search input at the top filters by path substring — matching leaves survive, groups on the way to them auto-expand. Clicking a leaf opens a slide-over with the full `<TokenDetail>`; pass `onSelect` to own the click follow-up instead.
 
@@ -29,7 +33,11 @@ Props:
 - `searchable?: boolean` — render a runtime search input above the tree. Defaults to `true`. Pass `false` to hide the input (the `root` / `type` props still apply at authoring time).
 - `onSelect?(path: string): void` — receives a leaf's full dot-path on click; suppresses the built-in overlay.
 
-### `<TokenTable filter? type? caption? sortBy? sortDir? searchable? onSelect? />`
+### TokenTable
+
+```tsx
+<TokenTable type="color" />
+```
 
 Compact two-column table: **Path** and **Value** (with inline type pill + color swatch). A search input at the top narrows rows by path, type, or value substring. Clicking a row opens the same slide-over `<TokenDetail>` the tree uses; pass `onSelect` to own the follow-up. Columns follow content with per-column `min-width` floors, so the table breathes in narrow containers.
 
@@ -47,44 +55,84 @@ Props:
 
 Every block in this group scopes to one DTCG `$type`, filters / sorts, and renders a type-specific visual. All accept `filter?: string`, `sortBy?`, `sortDir?`, and `caption?: string`.
 
-### `<ColorPalette filter? groupBy? caption? sortBy? sortDir? />`
+### ColorPalette
+
+```tsx
+<ColorPalette filter="color.palette.*" />
+```
 
 Swatch grid grouped by dot-path prefix. `groupBy` is auto-derived from the filter's fixed-prefix depth but can be overridden. Default sort is `'path'`; `'value'` orders colors perceptually via oklch **L → C → H** so ramps read light → dark and warm → cool.
 
-### `<TypographyScale filter? sample? caption? sortBy? sortDir? />`
+### TypographyScale
+
+```tsx
+<TypographyScale />
+```
 
 One sample line per `typography` composite, rendered with the token's own `fontFamily` / `fontSize` / `fontWeight` / `lineHeight` / `letterSpacing`. `sample?: string` overrides the text.
 
-### `<DimensionScale filter? kind? caption? sortBy? sortDir? />`
+### DimensionScale
+
+```tsx
+<DimensionScale kind="length" />
+```
 
 Width-driven bar (default), radius-sample square, or size-sample square per `dimension` token. Defaults to `sortBy: 'value'` — ordered numerically by the rendered pixel size.
 
 - `kind?: 'length' | 'radius' | 'size'` — visualization mode (default `'length'`).
 
-### `<FontFamilySample filter? sample? caption? sortBy? sortDir? />`
+### FontFamilySample
+
+```tsx
+<FontFamilySample />
+```
 
 Pangram rendered per `fontFamily` primitive. `sample?: string` overrides the text.
 
-### `<FontWeightScale filter? sample? caption? sortBy? sortDir? />`
+### FontWeightScale
+
+```tsx
+<FontWeightScale />
+```
 
 Same sample text rendered at each `fontWeight` primitive. Defaults to `sortBy: 'value'` — ordered 100 → 900.
 
-### `<BorderPreview filter? caption? sortBy? sortDir? />`
+### BorderPreview
+
+```tsx
+<BorderPreview />
+```
 
 One framed `<BorderSample>` per `border` composite token.
 
-### `<ShadowPreview filter? caption? sortBy? sortDir? />`
+### ShadowPreview
+
+```tsx
+<ShadowPreview />
+```
 
 One `<ShadowSample>` surface per `shadow` composite token.
 
-### `<MotionPreview filter? caption? sortBy? sortDir? />`
+### MotionPreview
+
+```tsx
+<MotionPreview />
+```
 
 One animated `<MotionSample>` per `transition` / `duration` / `cubicBezier` token. Respects `prefers-reduced-motion`.
 
-### `<StrokeStyleSample filter? caption? sortBy? sortDir? />`
+### StrokeStyleSample
+
+```tsx
+<StrokeStyleSample />
+```
 
 Border rendered per `strokeStyle` primitive. Supports string forms (`solid`, `dashed`, `dotted`, `double`) natively; object forms (`dashArray` / `lineCap`) fall back to a textual summary.
 
-### `<GradientPalette filter? caption? sortBy? sortDir? />`
+### GradientPalette
+
+```tsx
+<GradientPalette />
+```
 
 Wide sample per `gradient` token (linear, left → right by default) with a stop list. DTCG gradients are stop arrays — the gradient *function* is a rendering choice the consumer makes.
