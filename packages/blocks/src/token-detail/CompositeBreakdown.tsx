@@ -112,11 +112,7 @@ export function CompositeBreakdownContent({
                 alias={layerAliasFor(i, 'spread')}
               />
               {'inset' in v && (
-                <KeyValueRow
-                  label="inset"
-                  value={formatPrimitive(v['inset'])}
-                  alias={undefined}
-                />
+                <KeyValueRow label="inset" value={formatPrimitive(v['inset'])} alias={undefined} />
               )}
             </div>
           );
