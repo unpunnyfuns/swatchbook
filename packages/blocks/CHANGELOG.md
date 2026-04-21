@@ -1,5 +1,34 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.11.0
+
+### Patch Changes
+
+- 4d6a946: docs(tokens): give the docs-site's high-contrast axis real contrast boost
+
+  The a11y axis on the docs-site tokens used to only swap the base font to a comic display face and bump font size by 8%. Colors stayed identical — which undersold the accessibility signal and didn't meaningfully improve the site's contrast on either Light or Dark.
+
+  Adds mode-aware contrast-boosted values via alias indirection: each mode file (`themes/light.json`, `themes/dark.json`) now carries a parallel `color.accessible.*` namespace with darker-on-light / brighter-on-dark variants of `text.muted` and the full primary ramp. `themes/high-contrast.json` aliases role tokens to that namespace, so the a11y overlay stays mode-agnostic at the file level while the resolved values remain mode-aware.
+
+  Visible outcomes on a11y=High-contrast:
+
+  - Light: `primary.default` from `brand.600` (contrast ~4.8:1 on white) to `brand.800` (~9.5:1); `text.muted` from `neutral.500` (~4.5:1) to `neutral.700` (~10:1).
+  - Dark: `primary.default` from `brand.500` to `brand.300`; `text.muted` from `neutral.300` to `neutral.100`.
+
+  No change to Normal-contrast Light or Dark — this is purely the a11y overlay gaining colour where before it only carried typography.
+
+- 50e5d3a: docs: explain the no-external-compile-step property
+
+  New "The token pipeline" concept page under Concepts, covering how tokens reach the blocks through the addon's Vite virtual module rather than a separate prebuild step. Includes how HMR works against the virtual module, why the module doesn't extend to production consumer apps (and what to use instead — `emitCss` from core), and the Terrazzo parser credit. Linked from a new bullet in the intro.
+
+- 60a9c76: fix(docs): route latest release at `/` and main-branch at `/next/`
+
+  The docusaurus site's versioning config had drifted — `lastVersion: 'current'` pinned the main-branch docs to `/`, which caused Docusaurus to flag the released 0.10 snapshot as "out of date" even though 0.10 is the currently-shipping version. Visitors landing on `/` were reading unreleased content by default.
+
+  Now matches the intent described in CLAUDE.md: `/` serves the latest released snapshot (implicit `lastVersion` from the first entry in `versions.json`); main-branch docs move to `/next/` with an "unreleased documentation" banner. Visitors shipping against `@unpunnyfuns/swatchbook-*@0.10.2` land on docs that match their installed code.
+
+  No content changes — this is a routing-config fix.
+
 ## 0.10.2
 
 ### Patch Changes
