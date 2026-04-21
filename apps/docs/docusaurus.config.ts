@@ -5,10 +5,10 @@ import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
-// Docs versioning: current (main) renders as "Next 🚧" at /next/ with an
-// unreleased banner, and the newest snapshot under versioned_docs/ serves as
-// the default at /. Before the first snapshot exists, skip the versions map
-// entirely so current keeps serving at /.
+// Docs versioning: current (main) is the default at /. Released snapshots
+// under versioned_docs/ each mount at /<version>/ and stay browsable via the
+// version dropdown. Before the first snapshot exists, skip the versions map
+// entirely so current keeps serving at / without the dropdown.
 //
 // Resolve relative to the config file itself — `./versions.json` vs
 // `process.cwd()` is brittle in CI (Turbo / docusaurus CLI can shift cwd),
@@ -63,8 +63,14 @@ const config: Config = {
           editUrl: 'https://github.com/unpunnyfuns/swatchbook/tree/main/apps/docs/',
           includeCurrentVersion: true,
           ...(hasReleasedVersion && {
+            // `lastVersion: 'current'` pins main-branch docs to / so visitors
+            // land on the active work rather than the last cut release. The
+            // released snapshots remain reachable at /<version>/ via the
+            // version dropdown. Suppress the default "unreleased" banner on
+            // current — nothing to warn about when current *is* the headline.
+            lastVersion: 'current',
             versions: {
-              current: { label: 'Next 🚧', path: 'next', banner: 'unreleased' },
+              current: { label: 'Next', banner: 'none' },
             },
           }),
         },
