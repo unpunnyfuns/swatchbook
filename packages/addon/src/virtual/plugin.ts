@@ -1,7 +1,7 @@
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
 import { loadProject, projectCss } from '@unpunnyfuns/swatchbook-core';
 import { type FSWatcher, watch as fsWatch } from 'node:fs';
-import { dirname, isAbsolute, resolve as resolvePath, sep } from 'node:path';
+import { dirname, isAbsolute, resolve as resolvePath } from 'node:path';
 import picomatch from 'picomatch';
 import type { Plugin } from 'vite';
 import { RESOLVED_VIRTUAL_MODULE_ID, VIRTUAL_MODULE_ID } from '#/constants.ts';
@@ -66,43 +66,40 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
       // and saves to any `$ref` target silently drop.
       if (!project) await refresh();
 
-      const watchPaths = collectWatchPaths(config, project, cwd);
-      for (const p of watchPaths) server.watcher.add(p);
-
-      const invalidate = async (): Promise<void> => {
-        await refresh();
-        const mod = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_MODULE_ID);
-        if (mod) server.moduleGraph.invalidateModule(mod);
-        server.ws.send({ type: 'full-reload' });
+      /**
+       * Editors typically emit two or three filesystem events per save
+       * (atomic rename + rewrite + metadata). A small trailing debounce
+       * coalesces those into a single reload while staying well under
+       * user-perceptible latency.
+       */
+      let pending: ReturnType<typeof setTimeout> | null = null;
+      const invalidate = (): void => {
+        if (pending) clearTimeout(pending);
+        pending = setTimeout(() => {
+          pending = null;
+          void (async () => {
+            await refresh();
+            const mod = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_MODULE_ID);
+            if (mod) server.moduleGraph.invalidateModule(mod);
+            server.ws.send({ type: 'full-reload' });
+          })();
+        }, 50);
       };
 
-      const matches = (changed: string): boolean =>
-        watchPaths.some((p) => changed === p || changed.startsWith(`${p}${sep}`));
-
-      server.watcher.on('change', (changed) => {
-        if (matches(changed)) void invalidate();
-      });
-      server.watcher.on('add', (changed) => {
-        if (matches(changed)) void invalidate();
-      });
-      server.watcher.on('unlink', (changed) => {
-        if (matches(changed)) void invalidate();
-      });
-
       /**
-       * Belt-and-suspenders file-level watch. Vite's `server.watcher` is
-       * rooted at the dev server's project dir; paths added via
-       * `.add(absolute)` land outside that root when tokens live in a
-       * sibling workspace package, and the events don't always propagate
-       * through pnpm-symlinked chains. Watching each source file directly
-       * with `node:fs` catches the saves those dir-level watches miss.
+       * Watch each source file directly via `node:fs`. Vite's
+       * `server.watcher` is rooted at the dev server's project dir, and
+       * absolute paths added via `.add()` don't reliably emit change
+       * events when they live in a sibling workspace package (pnpm
+       * symlink chains, cross-root boundaries). The native file watcher
+       * has no root constraint and fires cleanly on every save.
        */
       const fileWatchers: FSWatcher[] = [];
       const sourceFiles = project?.sourceFiles ?? [];
       for (const file of sourceFiles) {
         try {
           const w = fsWatch(file, { persistent: false }, (eventType) => {
-            if (eventType === 'change' || eventType === 'rename') void invalidate();
+            if (eventType === 'change' || eventType === 'rename') invalidate();
           });
           fileWatchers.push(w);
         } catch {
