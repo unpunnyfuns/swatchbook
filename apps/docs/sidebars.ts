@@ -36,10 +36,12 @@ const sidebars: SidebarsConfig = {
     'reference/blocks/inspector',
     'reference/blocks/samples',
     'reference/blocks/utility',
+  ],
+  guides: [
     'guides/authoring-doc-stories',
     'guides/token-dashboard',
+    'guides/multi-axis-walkthrough',
   ],
-  guides: ['guides/multi-axis-walkthrough'],
   reference: ['reference/addon', 'reference/core', 'reference/config'],
 };
 
