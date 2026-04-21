@@ -8,8 +8,8 @@ import { TokenDetail } from '#/TokenDetail.tsx';
  * and `<TokenTable />` so both land on the same opener and the same styling.
  *
  * Dismisses on backdrop click, Escape, and the close button. `role="dialog"`
- * + `aria-modal="true"` hints to AT that focus is trapped here; actual focus
- * management is tracked in the open-issue #253.
+ * + `aria-modal="true"` hints to AT that focus is trapped here, but full
+ * focus-trap implementation is still outstanding.
  */
 
 export interface DetailOverlayProps {
