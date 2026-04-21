@@ -6,7 +6,8 @@
     [
       "@unpunnyfuns/swatchbook-core",
       "@unpunnyfuns/swatchbook-addon",
-      "@unpunnyfuns/swatchbook-blocks"
+      "@unpunnyfuns/swatchbook-blocks",
+      "@unpunnyfuns/swatchbook-switcher"
     ]
   ],
   "linked": [],

@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Classic JSX (React.createElement) rather than the automatic runtime.
+    // Storybook's manager bundle doesn't expose `react/jsx-runtime`, so any
+    // consumer that embeds the switcher in manager code (the swatchbook
+    // addon does exactly this) would crash with
+    // "Cannot read properties of undefined (reading 'recentlyCreatedOwnerStacks')"
+    // on automatic-runtime output. Classic JSX emits `React.createElement`
+    // calls the manager can resolve against the React it already exposes.
+    "jsx": "react",
+    "types": []
+  },
+  "include": ["src", "test", "vitest.config.ts"]
+}
