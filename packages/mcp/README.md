@@ -39,6 +39,7 @@ CLI flags:
 
 | Tool                  | Inputs                                                   | Returns                                                                                                       |
 | --------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `describe_project`    | (none)                                                    | High-level overview — token counts, axes, themes, presets, diagnostic counts, `$type`s present.                |
 | `list_tokens`         | `filter?` path glob, `type?` DTCG `$type`, `theme?` name | Array of `{ path, type?, value }` from the named theme (or default). Use first to discover paths.             |
 | `get_token`           | `path`                                                    | Full detail: per-theme value, alias chain, aliased-by list, CSS var reference.                                |
 | `get_alias_chain`     | `path`                                                    | Forward alias chain per theme (`path → ... → primitive`). Empty when the token is a primitive.                |
@@ -47,6 +48,7 @@ CLI flags:
 | `get_color_formats`   | `path`, `theme?`                                          | Color token rendered in `hex` / `rgb` / `hsl` / `oklch` / `raw`, each with an `outOfGamut` flag.                |
 | `list_axes`           | (none)                                                    | Axes + contexts + themes + presets from the project config.                                                   |
 | `get_diagnostics`     | `severity?` `'error' \| 'warn' \| 'info'`                 | Parser / resolver / validation diagnostics.                                                                   |
+| `emit_css`            | (none)                                                    | Full project stylesheet — `:root` default + per-tuple compound-selector blocks. |
 
 Path globs accept `*` (one segment), `**` (any number of segments trailing or mid-path), or exact dot-paths.
 

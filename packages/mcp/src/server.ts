@@ -1,4 +1,5 @@
 import type { Project } from '@unpunnyfuns/swatchbook-core';
+import { projectCss } from '@unpunnyfuns/swatchbook-core';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { formatColorEveryWay } from '#/format-color.ts';
@@ -23,6 +24,53 @@ export function createServer(project: Project): McpServer {
       instructions:
         'Query a swatchbook DTCG project: list tokens by path glob, inspect individual tokens (value, $type, alias chain, per-theme resolved values), read axes / presets, and inspect diagnostics.',
     },
+  );
+
+  server.registerTool(
+    'describe_project',
+    {
+      description:
+        'High-level summary of the project — total token count per theme, axes (with contexts) and how they compose, preset list, diagnostic counts by severity, css-var prefix, and the DTCG `$type`s present. Good first call for an agent that needs an orientation before querying specifics.',
+      inputSchema: {},
+    },
+    () => {
+      const typeCounts: Record<string, number> = {};
+      const tokensPerTheme: Record<string, number> = {};
+      for (const theme of project.themes) {
+        const tokens = project.themesResolved[theme.name] ?? {};
+        tokensPerTheme[theme.name] = Object.keys(tokens).length;
+        for (const token of Object.values(tokens)) {
+          if (token.$type) typeCounts[token.$type] = (typeCounts[token.$type] ?? 0) + 1;
+        }
+      }
+      const diagBySeverity = { error: 0, warn: 0, info: 0 } as Record<string, number>;
+      for (const d of project.diagnostics) {
+        diagBySeverity[d.severity] = (diagBySeverity[d.severity] ?? 0) + 1;
+      }
+      return jsonResult({
+        cssVarPrefix: project.config.cssVarPrefix ?? '',
+        axes: project.axes.map((a) => ({ name: a.name, contexts: a.contexts, default: a.default })),
+        themes: project.themes.map((t) => t.name),
+        defaultTheme: project.themes[0]?.name ?? null,
+        presets: project.presets.map((p) => p.name),
+        tokensPerTheme,
+        types: typeCounts,
+        diagnostics: {
+          counts: diagBySeverity,
+          total: project.diagnostics.length,
+        },
+      });
+    },
+  );
+
+  server.registerTool(
+    'emit_css',
+    {
+      description:
+        'Return the full project CSS — a `:root` block with the default tuple plus one compound-selector block per non-default axis combination. Same output the addon injects into Storybook and the docs-site chrome pipeline writes to disk. Useful when an agent needs to inline the stylesheet into a generated artifact.',
+      inputSchema: {},
+    },
+    () => textResult(projectCss(project)),
   );
 
   server.registerTool(
