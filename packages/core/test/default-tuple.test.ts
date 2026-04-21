@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolverPath } from '@unpunnyfuns/swatchbook-tokens-reference';
+import { resolverPath } from '@unpunnyfuns/swatchbook-tokens';
 import { loadProject } from '#/load';
 import { fixtureCwd } from './_helpers';
 

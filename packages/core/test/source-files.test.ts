@@ -1,6 +1,6 @@
 import { dirname, resolve as resolvePath } from 'node:path';
 import { expect, it } from 'vitest';
-import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens-reference';
+import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { loadProject } from '#/load';
 import { fixtureCwd } from './_helpers';
 

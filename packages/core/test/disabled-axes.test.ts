@@ -1,6 +1,6 @@
 import { dirname } from 'node:path';
 import { beforeAll, expect, it } from 'vitest';
-import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens-reference';
+import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { projectCss } from '#/emit';
 import { loadProject } from '#/load';
 import { validateDisabledAxes } from '#/disabled-axes';

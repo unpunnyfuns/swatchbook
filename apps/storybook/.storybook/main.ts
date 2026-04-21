@@ -1,7 +1,7 @@
 import { defineMain } from '@storybook/react-vite/node';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { resolverPath } from '@unpunnyfuns/swatchbook-tokens-reference';
+import { resolverPath } from '@unpunnyfuns/swatchbook-tokens';
 
 function pkg(name: string): string {
   return dirname(fileURLToPath(import.meta.resolve(`${name}/package.json`)));

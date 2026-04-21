@@ -1,5 +1,5 @@
 import { dirname } from 'node:path';
-import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens-reference';
+import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { loadProject } from '#/load';
 import type { Project } from '#/types';
 
