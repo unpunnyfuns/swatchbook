@@ -1,30 +1,43 @@
 /**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+ * Hook Docusaurus's Infima theme variables up to swatchbook tokens.
+ *
+ * `tokens.generated.css` is emitted from `apps/docs/tokens/*.json` by
+ * `scripts/build-tokens.ts` (runs as prebuild / prestart). It writes
+ * `--sb-color-*` vars at `:root` and flips per-mode values based on
+ * `[data-theme="light"]` / `[data-theme="dark"]` — the same attribute
+ * Docusaurus toggles on `<html>` — so the Infima mapping below only
+ * needs one declaration block per variable.
  */
+@import './tokens.generated.css';
 
-/* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  /* Surfaces */
+  --ifm-background-color: var(--sb-color-surface-default);
+  --ifm-background-surface-color: var(--sb-color-surface-raised);
+
+  /* Text */
+  --ifm-color-content: var(--sb-color-text-default);
+  --ifm-color-content-secondary: var(--sb-color-text-muted);
+  --ifm-heading-color: var(--sb-color-text-heading);
+
+  /* Primary — full ramp so Infima buttons, links, and focus rings all
+     pull from the same brand source. */
+  --ifm-color-primary: var(--sb-color-primary-default);
+  --ifm-color-primary-dark: var(--sb-color-primary-dark);
+  --ifm-color-primary-darker: var(--sb-color-primary-darker);
+  --ifm-color-primary-darkest: var(--sb-color-primary-darkest);
+  --ifm-color-primary-light: var(--sb-color-primary-light);
+  --ifm-color-primary-lighter: var(--sb-color-primary-lighter);
+  --ifm-color-primary-lightest: var(--sb-color-primary-lightest);
+
+  /* Code chrome */
+  --ifm-code-background: var(--sb-color-code-bg);
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-hr-border-color: var(--sb-color-code-border);
+
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.08);
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.08);
 }

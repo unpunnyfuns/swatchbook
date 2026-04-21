@@ -1,0 +1,29 @@
+{
+  "$description": "Dark theme role tokens the Docusaurus Infima layer maps onto.",
+  "color": {
+    "$type": "color",
+    "surface": {
+      "default": { "$value": "{color.palette.neutral.900}" },
+      "raised":  { "$value": "{color.palette.neutral.800}" },
+      "muted":   { "$value": "{color.palette.neutral.950}" }
+    },
+    "text": {
+      "default": { "$value": "{color.palette.neutral.100}" },
+      "muted":   { "$value": "{color.palette.neutral.300}" },
+      "heading": { "$value": "{color.palette.neutral.0}" }
+    },
+    "primary": {
+      "lightest": { "$value": "{color.palette.brand.200}" },
+      "lighter":  { "$value": "{color.palette.brand.300}" },
+      "light":    { "$value": "{color.palette.brand.400}" },
+      "default":  { "$value": "{color.palette.brand.500}" },
+      "dark":     { "$value": "{color.palette.brand.600}" },
+      "darker":   { "$value": "{color.palette.brand.700}" },
+      "darkest":  { "$value": "{color.palette.brand.800}" }
+    },
+    "code": {
+      "bg":     { "$value": "{color.palette.neutral.800}" },
+      "border": { "$value": "{color.palette.neutral.700}" }
+    }
+  }
+}

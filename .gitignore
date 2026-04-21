@@ -11,6 +11,7 @@ coverage
 
 # Generated per-app
 apps/storybook/src/generated
+apps/docs/src/css/tokens.generated.css
 
 # Tooling
 .turbo

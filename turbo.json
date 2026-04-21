@@ -12,6 +12,7 @@
         "versioned_sidebars/**",
         "versions.json",
         "static/**",
+        "scripts/**",
         "docusaurus.config.ts",
         "sidebars.ts",
         "package.json",

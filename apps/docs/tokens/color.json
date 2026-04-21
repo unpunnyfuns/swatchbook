@@ -1,0 +1,31 @@
+{
+  "color": {
+    "$type": "color",
+    "palette": {
+      "brand": {
+        "50":  { "$value": { "colorSpace": "srgb", "components": [0.9373, 0.9647, 1] } },
+        "100": { "$value": { "colorSpace": "srgb", "components": [0.8588, 0.9176, 0.9961] } },
+        "200": { "$value": { "colorSpace": "srgb", "components": [0.749, 0.8588, 0.9961] } },
+        "300": { "$value": { "colorSpace": "srgb", "components": [0.5765, 0.7725, 0.9922] } },
+        "400": { "$value": { "colorSpace": "srgb", "components": [0.3765, 0.6471, 0.9804] } },
+        "500": { "$value": { "colorSpace": "srgb", "components": [0.2314, 0.5098, 0.9647] } },
+        "600": { "$value": { "colorSpace": "srgb", "components": [0.1451, 0.3882, 0.9216] } },
+        "700": { "$value": { "colorSpace": "srgb", "components": [0.1137, 0.3059, 0.8471] } },
+        "800": { "$value": { "colorSpace": "srgb", "components": [0.1176, 0.251, 0.6863] } },
+        "900": { "$value": { "colorSpace": "srgb", "components": [0.1176, 0.2275, 0.5412] } }
+      },
+      "neutral": {
+        "0":   { "$value": { "colorSpace": "srgb", "components": [1, 1, 1] } },
+        "50":  { "$value": { "colorSpace": "srgb", "components": [0.9725, 0.9804, 0.9882] } },
+        "100": { "$value": { "colorSpace": "srgb", "components": [0.9451, 0.9608, 0.9765] } },
+        "200": { "$value": { "colorSpace": "srgb", "components": [0.8863, 0.9098, 0.9412] } },
+        "300": { "$value": { "colorSpace": "srgb", "components": [0.7961, 0.8353, 0.8824] } },
+        "500": { "$value": { "colorSpace": "srgb", "components": [0.3922, 0.4549, 0.5451] } },
+        "700": { "$value": { "colorSpace": "srgb", "components": [0.2, 0.2549, 0.3333] } },
+        "800": { "$value": { "colorSpace": "srgb", "components": [0.1176, 0.1608, 0.2314] } },
+        "900": { "$value": { "colorSpace": "srgb", "components": [0.0588, 0.0902, 0.1647] } },
+        "950": { "$value": { "colorSpace": "srgb", "components": [0.0235, 0.0431, 0.0902] } }
+      }
+    }
+  }
+}
