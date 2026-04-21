@@ -106,7 +106,6 @@ export const DarkBrandA = meta.story({
 
 - ✅ Use `useToken` for typed lookups when you need the resolved value at runtime (aria labels, conditional rendering, …).
 - ✅ Prefer `var(--…)` in CSS; `useToken().cssVar` gives you the right string programmatically.
-- ❌ Don't combine `parameters.swatchbook.theme` *and* the toolbar for the same story — the parameter wins and the toolbar change won't stick.
 
 ## See also
 
