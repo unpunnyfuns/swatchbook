@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import type { Decorator, Preview } from '@storybook/react-vite';
 import { useEffect, useMemo } from 'react';
 import { addons } from 'storybook/preview-api';
@@ -26,11 +27,13 @@ import {
   AXES_GLOBAL_KEY,
   COLOR_FORMAT_GLOBAL_KEY,
   GLOBAL_KEY,
+  HMR_EVENT,
   INIT_EVENT,
   INIT_REQUEST_EVENT,
   PREVIEW_MOUSEDOWN_EVENT,
   PARAM_KEY,
   STYLE_ELEMENT_ID,
+  TOKENS_UPDATED_EVENT,
 } from '#/constants.ts';
 
 /** CSS var name with the active prefix applied. */
@@ -372,3 +375,57 @@ function installPreviewMouseDownBridge(): void {
 }
 
 installPreviewMouseDownBridge();
+
+/**
+ * Wire the dev-time token-refresh HMR path. The plugin emits `HMR_EVENT`
+ * with the fresh virtual-module payload whenever a watched source file
+ * changes; we re-inject the stylesheet and forward to the Storybook
+ * channel so the toolbar re-renders and blocks can re-subscribe with
+ * the new snapshot — no full preview reload, so args / scroll / open
+ * overlays survive the refresh. No-ops in production where
+ * `import.meta.hot` is undefined.
+ */
+interface HmrSnapshot {
+  axes: typeof virtualAxes;
+  disabledAxes: typeof virtualDisabledAxes;
+  presets: typeof virtualPresets;
+  themes: typeof themes;
+  defaultTheme: typeof defaultTheme;
+  themesResolved: typeof themesResolved;
+  diagnostics: typeof diagnostics;
+  css: string;
+  cssVarPrefix: string;
+}
+if (import.meta.hot) {
+  import.meta.hot.on(HMR_EVENT, (payload: HmrSnapshot) => {
+    if (typeof document !== 'undefined') {
+      const bodyRules = `
+html, body {
+  background: var(${payload.cssVarPrefix ? `--${payload.cssVarPrefix}-` : '--'}color-surface-default, Canvas);
+  color: var(${payload.cssVarPrefix ? `--${payload.cssVarPrefix}-` : '--'}color-text-default, CanvasText);
+  margin: 0;
+}
+`;
+      const text = `${payload.css}\n${bodyRules}`;
+      let style = document.getElementById(STYLE_ELEMENT_ID) as HTMLStyleElement | null;
+      if (!style) {
+        style = document.createElement('style');
+        style.id = STYLE_ELEMENT_ID;
+        document.head.appendChild(style);
+      }
+      if (style.textContent !== text) style.textContent = text;
+    }
+    const channel = addons.getChannel();
+    channel.emit(INIT_EVENT, {
+      axes: payload.axes,
+      disabledAxes: payload.disabledAxes,
+      presets: payload.presets,
+      themes: payload.themes,
+      defaultTheme: payload.defaultTheme,
+      themesResolved: payload.themesResolved,
+      diagnostics: payload.diagnostics,
+      cssVarPrefix: payload.cssVarPrefix,
+    });
+    channel.emit(TOKENS_UPDATED_EVENT, payload);
+  });
+}
