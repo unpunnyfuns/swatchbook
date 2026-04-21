@@ -13,9 +13,6 @@
           "sans-serif"
         ]
       },
-      "comic": {
-        "$value": ["Comic Sans MS", "Comic Neue", "Chalkboard SE", "Marker Felt", "cursive"]
-      },
       "mono": {
         "$value": [
           "ui-monospace",
@@ -27,8 +24,12 @@
           "monospace"
         ]
       },
+      "comic": {
+        "$description": "Variable-width comic stack, used as the a11y=High-contrast escalation for typeface=Variable.",
+        "$value": ["Comic Sans MS", "Comic Neue", "Chalkboard SE", "Marker Felt", "cursive"]
+      },
       "comic-mono": {
-        "$description": "Playful monospace stack for the Monotype typeface overlay — prefers comic-flavoured monospace faces if the reader has them locally installed (Comic Mono, Fantasque Sans Mono, Comic Shanns Mono), then falls through to Comic Sans MS (widely installed on consumer machines), then the same system-monospace fallback as `mono` so rendering never regresses past a plain fixed-pitch face.",
+        "$description": "Comic-flavoured monospace stack, used as the a11y=High-contrast escalation for typeface=Monotype — prefers Comic Mono / Fantasque Sans Mono / Comic Shanns Mono if installed locally, falls through to Comic Sans MS and the system monospace so rendering never regresses past a plain fixed-pitch face.",
         "$value": [
           "Comic Mono",
           "Fantasque Sans Mono",
