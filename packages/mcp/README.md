@@ -41,6 +41,8 @@ CLI flags:
 | --------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `describe_project`    | (none)                                                    | High-level overview — token counts, axes, themes, presets, diagnostic counts, `$type`s present.                |
 | `list_tokens`         | `filter?` path glob, `type?` DTCG `$type`, `theme?` name | Array of `{ path, type?, value }` from the named theme (or default). Use first to discover paths.             |
+| `search_tokens`       | `query`, `theme?`, `limit?`                               | Case-insensitive substring search across paths, descriptions, and values. Returns matches + `matchedIn` hint. |
+| `resolve_theme`       | `tuple`, `filter?`, `type?`                               | Resolved token map for an axis tuple (`{ mode: "Dark", brand: "…" }`). Fills omitted axes from defaults.      |
 | `get_token`           | `path`                                                    | Full detail: per-theme value, alias chain, aliased-by list, CSS var reference.                                |
 | `get_alias_chain`     | `path`                                                    | Forward alias chain per theme (`path → ... → primitive`). Empty when the token is a primitive.                |
 | `get_aliased_by`      | `path`, `maxDepth?`                                       | Backward alias tree — every token that resolves through this path. Breadth-first with cycle protection; default max depth 6. |

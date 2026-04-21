@@ -295,6 +295,113 @@ export function createServer(project: Project): McpServer {
   );
 
   server.registerTool(
+    'search_tokens',
+    {
+      description:
+        'Case-insensitive substring search across token paths, `$description`, and stringified values. Returns matches with a short snippet pointing at where the match hit. Use when you know what you want but not the path — `search_tokens("radius")` finds every token whose path / description / value mentions radius. Scopes to a single theme (default: project default).',
+      inputSchema: {
+        query: z.string().min(1).describe('Substring to search for (case-insensitive).'),
+        theme: z
+          .string()
+          .optional()
+          .describe('Theme name to search within. Defaults to the project default.'),
+        limit: z.number().int().positive().optional().describe('Cap the result count. Default 50.'),
+      },
+    },
+    ({ query, theme, limit }) => {
+      const themeName = theme ?? project.themes[0]?.name;
+      if (!themeName) return textResult('No themes in project.');
+      const tokens = project.themesResolved[themeName] ?? {};
+      const needle = query.toLowerCase();
+      const max = limit ?? 50;
+      const hits: {
+        path: string;
+        type?: string;
+        matchedIn: ('path' | 'description' | 'value')[];
+        snippet: string;
+      }[] = [];
+
+      for (const [path, token] of Object.entries(tokens)) {
+        const matchedIn: ('path' | 'description' | 'value')[] = [];
+        if (path.toLowerCase().includes(needle)) matchedIn.push('path');
+        const desc = token.$description?.toLowerCase();
+        if (desc?.includes(needle)) matchedIn.push('description');
+        const value = stringifyValue(token.$value);
+        if (value.toLowerCase().includes(needle)) matchedIn.push('value');
+        if (matchedIn.length === 0) continue;
+        const snippet = matchedIn.includes('description')
+          ? (token.$description ?? path)
+          : matchedIn.includes('value')
+            ? `${path} = ${value}`
+            : path;
+        const entry: (typeof hits)[number] = { path, matchedIn, snippet };
+        if (token.$type !== undefined) entry.type = token.$type;
+        hits.push(entry);
+        if (hits.length >= max) break;
+      }
+      hits.sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true }));
+      return jsonResult({
+        query,
+        theme: themeName,
+        count: hits.length,
+        truncated: hits.length === max,
+        hits,
+      });
+    },
+  );
+
+  server.registerTool(
+    'resolve_theme',
+    {
+      description:
+        'Resolve the full token map for a given axis tuple. Agent passes a partial tuple (`{ mode: "Dark", brand: "Brand A" }`); any axis omitted falls back to that axis\'s default. Returns the matching theme name, the complete tuple after filling defaults, and the resolved `{ path: { value, type, aliasOf?, aliasChain? } }` map — effectively "what do all tokens look like if I pin this combination".',
+      inputSchema: {
+        tuple: z
+          .record(z.string(), z.string())
+          .describe('Partial axis tuple, e.g. `{ mode: "Dark", brand: "Brand A" }`.'),
+        filter: z.string().optional().describe('Optional path glob to scope the returned map.'),
+        type: z.string().optional().describe('Optional DTCG `$type` to scope the returned map.'),
+      },
+    },
+    ({ tuple, filter, type }) => {
+      const active: Record<string, string> = {};
+      for (const axis of project.axes) {
+        const candidate = tuple[axis.name];
+        active[axis.name] =
+          candidate && axis.contexts.includes(candidate) ? candidate : axis.default;
+      }
+      const themeName =
+        project.themes.find((t) => {
+          for (const axis of project.axes) {
+            if ((t.input as Record<string, string>)[axis.name] !== active[axis.name]) {
+              return false;
+            }
+          }
+          return true;
+        })?.name ?? project.themes[0]?.name;
+      if (!themeName) return textResult('No matching theme.');
+      const tokens = project.themesResolved[themeName] ?? {};
+      const resolved: Record<
+        string,
+        { value: string; type?: string; aliasOf?: string; aliasChain?: readonly string[] }
+      > = {};
+      let count = 0;
+      for (const [path, token] of Object.entries(tokens)) {
+        if (type && token.$type !== type) continue;
+        if (!matchPath(path, filter)) continue;
+        resolved[path] = {
+          value: stringifyValue(token.$value),
+          ...(token.$type !== undefined && { type: token.$type }),
+          ...(token.aliasOf !== undefined && { aliasOf: token.aliasOf }),
+          ...(token.aliasChain !== undefined && { aliasChain: token.aliasChain }),
+        };
+        count++;
+      }
+      return jsonResult({ theme: themeName, tuple: active, count, tokens: resolved });
+    },
+  );
+
+  server.registerTool(
     'get_consumer_output',
     {
       description:
