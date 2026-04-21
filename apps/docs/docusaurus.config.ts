@@ -87,7 +87,37 @@ const config: Config = {
         src: 'img/logo.svg',
       },
       items: [
-        { type: 'docSidebar', sidebarId: 'docs', position: 'left', label: 'Docs' },
+        // Per-category top-level entries so readers can jump straight to
+        // the section they want rather than landing on Intro and fishing
+        // through the sidebar. Each entry points at the first page in its
+        // sidebar group; `activeBaseRegex` highlights the nav pill across
+        // the whole section. Reference excludes `/reference/blocks/*`
+        // because Blocks has its own top-level entry.
+        { to: '/quickstart', label: 'Quickstart', position: 'left' },
+        {
+          to: '/concepts/theming-inputs',
+          label: 'Concepts',
+          position: 'left',
+          activeBaseRegex: '^/(?:next/)?concepts(?:/|$)',
+        },
+        {
+          to: '/reference/blocks/',
+          label: 'Blocks',
+          position: 'left',
+          activeBaseRegex: '^/(?:next/)?reference/blocks(?:/|$)',
+        },
+        {
+          to: '/guides/multi-axis-walkthrough',
+          label: 'Guides',
+          position: 'left',
+          activeBaseRegex: '^/(?:next/)?guides(?:/|$)',
+        },
+        {
+          to: '/reference/addon',
+          label: 'Reference',
+          position: 'left',
+          activeBaseRegex: '^/(?:next/)?reference/(?!blocks)(?:$|.*)',
+        },
         { href: 'pathname:///storybook/', label: 'Live Storybook', position: 'left' },
         ...(hasReleasedVersion
           ? [{ type: 'docsVersionDropdown' as const, position: 'right' as const }]
