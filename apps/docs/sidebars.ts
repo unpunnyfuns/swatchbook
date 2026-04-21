@@ -42,7 +42,7 @@ const sidebars: SidebarsConfig = {
     'guides/token-dashboard',
     'guides/multi-axis-walkthrough',
   ],
-  reference: ['reference/addon', 'reference/core', 'reference/config'],
+  reference: ['reference/addon', 'reference/core', 'reference/config', 'reference/mcp'],
 };
 
 export default sidebars;

@@ -27,7 +27,7 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "test/**", "tokens/**", "vitest.config.*"],
+      "inputs": ["src/**", "test/**", "tokens/**", "vitest.config.*", "package.json"],
       "outputs": []
     },
     "test:storybook": {
@@ -37,25 +37,40 @@
       "passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"]
     },
     "lint": {
-      "inputs": ["src/**", "$TURBO_ROOT$/.oxlintrc.json"],
+      "inputs": ["src/**", "test/**", "$TURBO_ROOT$/.oxlintrc.json"],
       "outputs": []
     },
     "format:check": {
-      "inputs": ["src/**", "$TURBO_ROOT$/.oxfmtrc.json"],
+      "inputs": ["src/**", "test/**", "$TURBO_ROOT$/.oxfmtrc.json"],
       "outputs": []
     },
     "format": {
       "cache": false,
-      "inputs": ["src/**", "$TURBO_ROOT$/.oxfmtrc.json"],
+      "inputs": ["src/**", "test/**", "$TURBO_ROOT$/.oxfmtrc.json"],
       "outputs": []
     },
     "typecheck": {
-      "dependsOn": ["^build"],
-      "inputs": ["src/**", "tsconfig*.json"],
+      "dependsOn": ["^build", "build:tokens"],
+      "inputs": ["src/**", "test/**", "tsconfig*.json"],
       "outputs": []
+    },
+    "build:tokens": {
+      "dependsOn": ["^build"],
+      "inputs": ["tokens/**", "scripts/build-tokens.*"],
+      "outputs": ["src/css/tokens.generated.css", "src/tokens.snapshot.json"]
     },
     "storybook": {
       "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "inspect": {
+      "dependsOn": ["build"],
       "cache": false,
       "persistent": true
     }
