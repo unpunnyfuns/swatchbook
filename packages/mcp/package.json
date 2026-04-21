@@ -49,7 +49,7 @@
   "scripts": {
     "build": "tsdown",
     "start": "node dist/bin.mjs --config ../../apps/storybook/swatchbook.config.ts",
-    "inspect": "mcp-inspector node dist/bin.mjs --config ../../apps/storybook/swatchbook.config.ts",
+    "inspect": "mcp-inspector node dist/bin.mjs -- --config ../../apps/storybook/swatchbook.config.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
