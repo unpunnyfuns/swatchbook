@@ -15,6 +15,17 @@
       },
       "comic": {
         "$value": ["Comic Sans MS", "Comic Neue", "Chalkboard SE", "Marker Felt", "cursive"]
+      },
+      "mono": {
+        "$value": [
+          "ui-monospace",
+          "SFMono-Regular",
+          "SF Mono",
+          "Menlo",
+          "Consolas",
+          "Liberation Mono",
+          "monospace"
+        ]
       }
     }
   }

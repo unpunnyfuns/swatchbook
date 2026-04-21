@@ -2,7 +2,7 @@
   "$schema": "https://design-tokens.org/tr/2025/drafts/resolver/",
   "version": "2025.10",
   "name": "swatchbook-docs",
-  "description": "Docusaurus-site tokens. A brand ramp + per-mode surface/text/primary/code roles that the Infima layer in src/css/custom.css reads through `var(--sb-color-*)`. Second axis (`a11y`) layers a high-contrast overlay on top of the mode tokens.",
+  "description": "Docusaurus-site tokens. Mode (Light / Dark) picks surface + text + primary role tokens; a11y layers a comic-font High-contrast overlay on top; brand adds a Monotype variation that swaps the base font to a monospaced stack. All three compose cleanly because the overlays stay in their lanes (mode owns colour, a11y owns comic-font accessibility signal, brand owns font-family variation).",
   "sets": {
     "tokens": {
       "description": "Palette + font-family primitives.",
@@ -23,11 +23,19 @@
         "High-contrast": [{ "$ref": "./themes/high-contrast.json" }]
       },
       "default": "Normal"
+    },
+    "brand": {
+      "contexts": {
+        "Default": [],
+        "Monotype": [{ "$ref": "./themes/monotype.json" }]
+      },
+      "default": "Default"
     }
   },
   "resolutionOrder": [
     { "$ref": "#/sets/tokens" },
     { "$ref": "#/modifiers/mode" },
-    { "$ref": "#/modifiers/a11y" }
+    { "$ref": "#/modifiers/a11y" },
+    { "$ref": "#/modifiers/brand" }
   ]
 }
