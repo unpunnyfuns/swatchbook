@@ -1,4 +1,4 @@
-# MCP
+# swatchbook-mcp
 
 Published as `@unpunnyfuns/swatchbook-mcp`. Model Context Protocol server for swatchbook — exposes a DTCG project's tokens, axes, and diagnostics to AI agents without running Storybook.
 

@@ -1,4 +1,4 @@
-# Tokens
+# swatchbook-tokens
 
 Internal workspace package (`@unpunnyfuns/swatchbook-tokens`). Exhaustive DTCG 2025.10 fixture used as swatchbook's internal test bed and as a reference for consumers structuring their own token projects. Private — not published.
 
