@@ -79,6 +79,14 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
           pending = null;
           void (async () => {
             await refresh();
+            const tokenCount = project
+              ? Object.keys(project.themesResolved[project.themes[0]?.name ?? ''] ?? {}).length
+              : 0;
+            const diagCount = project?.diagnostics.length ?? 0;
+            server.config.logger.info(
+              `\x1b[36m[swatchbook]\x1b[0m tokens reloaded — ${tokenCount} tokens, ${diagCount} diagnostic${diagCount === 1 ? '' : 's'}`,
+              { clear: false, timestamp: true },
+            );
             const mod = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_MODULE_ID);
             if (mod) server.moduleGraph.invalidateModule(mod);
             server.ws.send({ type: 'full-reload' });
