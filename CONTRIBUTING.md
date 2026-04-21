@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for considering a contribution. Swatchbook is a Storybook addon for DTCG design tokens; everything user-facing lives under `packages/core`, `packages/addon`, `packages/blocks`, with a dogfood Storybook in `apps/storybook` and the docs site in `apps/docs`.
+Thanks for considering a contribution. Swatchbook is a Storybook addon for DTCG design tokens; everything user-facing lives under `packages/core`, `packages/addon`, `packages/blocks`, `packages/switcher`, and `packages/mcp`, with a dogfood Storybook in `apps/storybook` and the docs site in `apps/docs`.
 
 By participating, you agree to the [Code of Conduct](./CODE_OF_CONDUCT.md).
 
@@ -102,13 +102,13 @@ All PRs are squash-merged. One PR → one commit on `main`.
 
 ## Changesets
 
-Any PR with a user-visible change to `@unpunnyfuns/swatchbook-core`, `@unpunnyfuns/swatchbook-addon`, or `@unpunnyfuns/swatchbook-blocks` carries a changeset:
+Any PR with a user-visible change to `@unpunnyfuns/swatchbook-core`, `@unpunnyfuns/swatchbook-addon`, `@unpunnyfuns/swatchbook-blocks`, `@unpunnyfuns/swatchbook-switcher`, or `@unpunnyfuns/swatchbook-mcp` carries a changeset:
 
 ```sh
 pnpm changeset
 ```
 
-Pick a bump level and write a short description. The three published packages are a **fixed group** (always the same version), so the bump level you pick applies to all of them.
+Pick a bump level and write a short description. All five published packages are a **fixed group** (always the same version), so the bump level you pick applies to every one of them.
 
 **Bump levels, pre-1.0:**
 
