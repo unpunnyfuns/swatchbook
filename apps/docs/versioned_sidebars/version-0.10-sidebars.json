@@ -32,5 +32,10 @@
     "reference/core",
     "reference/config",
     "reference/mcp"
+  ],
+  "developers": [
+    "developers/developers",
+    "developers/architecture",
+    "developers/sharp-corners"
   ]
 }
