@@ -44,6 +44,11 @@ const sidebars: SidebarsConfig = {
     'guides/multi-axis-walkthrough',
   ],
   reference: ['reference/addon', 'reference/core', 'reference/config', 'reference/mcp'],
+  developers: [
+    'developers/developers',
+    'developers/architecture',
+    'developers/sharp-corners',
+  ],
 };
 
 export default sidebars;
