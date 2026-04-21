@@ -79,6 +79,7 @@
   "dependencies": {
     "@unpunnyfuns/swatchbook-blocks": "workspace:*",
     "@unpunnyfuns/swatchbook-core": "workspace:*",
+    "@unpunnyfuns/swatchbook-switcher": "workspace:*",
     "jiti": "^2.4.0",
     "picomatch": "^4.0.4"
   },

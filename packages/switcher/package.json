@@ -1,0 +1,73 @@
+{
+  "name": "@unpunnyfuns/swatchbook-switcher",
+  "version": "0.6.2",
+  "description": "Framework-agnostic theme-switcher UI for swatchbook — axis pills, preset pills, color-format selector. Consumed by the Storybook addon toolbar and any React host that knows how to set data-attributes on the document.",
+  "license": "MIT",
+  "author": "unpunnyfuns <unpunnyfuns@gmail.com>",
+  "homepage": "https://unpunnyfuns.github.io/swatchbook/",
+  "bugs": "https://github.com/unpunnyfuns/swatchbook/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unpunnyfuns/swatchbook.git",
+    "directory": "packages/switcher"
+  },
+  "keywords": [
+    "swatchbook",
+    "design-tokens",
+    "dtcg",
+    "theme-switcher",
+    "react"
+  ],
+  "type": "module",
+  "engines": {
+    "node": ">=24.14.0"
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src test",
+    "format": "oxfmt -c ../../.oxfmtrc.json src test",
+    "format:check": "oxfmt --check -c ../../.oxfmtrc.json src test"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@tsdown/css": "^0.21.9",
+    "@types/react": "^19.2.14",
+    "@vitejs/plugin-react": "^6.0.1",
+    "jsdom": "^29.0.2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tsdown": "^0.21.9",
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.4"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1"
+  }
+}

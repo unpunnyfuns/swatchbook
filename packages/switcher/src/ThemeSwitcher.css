@@ -1,0 +1,84 @@
+.sb-switcher {
+  min-width: 260px;
+  padding: 4px 0;
+  outline: none;
+}
+
+.sb-switcher__section-label {
+  padding: 8px 12px 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.6;
+}
+
+.sb-switcher__section-body {
+  padding: 0 12px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.sb-switcher__axis-row {
+  padding: 0 12px 10px;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 12px;
+  row-gap: 4px;
+  align-items: center;
+}
+
+.sb-switcher__axis-label {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.sb-switcher__axis-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.sb-switcher__pill {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 18px;
+  /* Longhand border properties (not the `border` shorthand) so active →
+     inactive only updates `border-color`'s value instead of *removing* the
+     key from inline style — an inherited theme border-color would otherwise
+     paint through on the previously-selected pill. */
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  outline: none;
+  box-shadow: none;
+}
+
+.sb-switcher__pill--active {
+  font-weight: 600;
+  background: rgba(0, 122, 255, 0.12);
+  border-color: rgba(0, 122, 255, 0.45);
+}
+
+.sb-switcher__pill-modified {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+  vertical-align: middle;
+}
+
+.sb-switcher__divider {
+  height: 1px;
+  background: currentColor;
+  opacity: 0.1;
+  margin: 2px 8px;
+}
