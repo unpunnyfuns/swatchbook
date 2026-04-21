@@ -2,7 +2,7 @@
   "$schema": "https://design-tokens.org/tr/2025/drafts/resolver/",
   "version": "2025.10",
   "name": "swatchbook-docs",
-  "description": "Docusaurus-site tokens. Mode (Light / Dark) picks surface + text + primary role tokens; a11y layers a comic-font High-contrast overlay on top; brand adds a Monotype variation that swaps the base font to a monospaced stack. All three compose cleanly because the overlays stay in their lanes (mode owns colour, a11y owns comic-font accessibility signal, brand owns font-family variation).",
+  "description": "Docusaurus-site tokens. Mode (Light / Dark) picks surface + text + primary role tokens; a11y layers a High-contrast overlay that bumps colour contrast and swaps link shades to amber for a sharper accessibility signal; typeface adds a Monotype variation that swaps the base font to a comic-monospace stack. All three compose cleanly because the overlays stay in their lanes (mode owns colour, a11y reinforces contrast via amber primary, typeface owns font-family variation).",
   "sets": {
     "tokens": {
       "description": "Palette + font-family primitives.",
@@ -24,18 +24,18 @@
       },
       "default": "Normal"
     },
-    "brand": {
+    "typeface": {
       "contexts": {
-        "Default": [],
+        "Variable": [],
         "Monotype": [{ "$ref": "./themes/monotype.json" }]
       },
-      "default": "Default"
+      "default": "Variable"
     }
   },
   "resolutionOrder": [
     { "$ref": "#/sets/tokens" },
     { "$ref": "#/modifiers/mode" },
     { "$ref": "#/modifiers/a11y" },
-    { "$ref": "#/modifiers/brand" }
+    { "$ref": "#/modifiers/typeface" }
   ]
 }
