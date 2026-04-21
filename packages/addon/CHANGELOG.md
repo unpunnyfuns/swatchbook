@@ -1,5 +1,25 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.11.1
+
+### Patch Changes
+
+- 8de4d5d: docs(addon): drop the removed Design Tokens panel from the README
+
+  The addon's README still described a "unified Design Tokens panel (hierarchical tree + diagnostics)" that got removed in v0.3.0. Also had a lingering "Go through `useToken` / the panel / the doc blocks" bullet in the do-don't list that pointed consumers at an API surface that no longer exists.
+
+  Rewrote the intro paragraph to describe the current toolbar (axis dropdowns + preset pills + color-format picker) and call out the addon's re-export of the full blocks + switcher surface. Trimmed "the panel" from the do-don't rule.
+
+- a294673: docs: restore `swatchbook-*` in each package README's title header
+
+  Every package README was headed with a one-word title (`# Addon`, `# Blocks`, `# Core`, `# MCP`). On npm's package page that renders as a standalone word stripped of context — a reader who lands on the tarball's own page via a search, deep link, or alert sees "# Addon" and has to hunt for what it's an addon _of_. Restored the `swatchbook-*` prefix so each README's title matches its published package name and re-establishes context on first scroll.
+
+- Updated dependencies [b0ce33e]
+- Updated dependencies [a294673]
+  - @unpunnyfuns/swatchbook-blocks@0.11.1
+  - @unpunnyfuns/swatchbook-core@0.11.1
+  - @unpunnyfuns/swatchbook-switcher@0.11.1
+
 ## 0.11.0
 
 ### Patch Changes
