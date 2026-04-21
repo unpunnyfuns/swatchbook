@@ -25,7 +25,10 @@ function parseArgs(argv: readonly string[]): { config?: string; cwd?: string } {
       console.log(`swatchbook-mcp — Model Context Protocol server for swatchbook projects
 
 Usage:
-  swatchbook-mcp --config <path>              Load a swatchbook.config.{ts,mts,js,mjs}
+  swatchbook-mcp --config <path>              Point at a swatchbook.config.{ts,mts,js,mjs}
+                                              or a DTCG resolver.json directly. Bare
+                                              resolvers boot with every other config
+                                              option at defaults.
   swatchbook-mcp --config <path> --cwd <path> Override the project cwd for relative paths
 
 Tools exposed:

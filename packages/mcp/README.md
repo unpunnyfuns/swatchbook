@@ -6,7 +6,7 @@ Published as `@unpunnyfuns/swatchbook-mcp`. Model Context Protocol server for sw
 
 ## What it's for
 
-Agents that need to reason about your design tokens — figma-to-token round-trips, alias-chain navigation, CI lint hooks, AI-assisted authoring — without spinning up a Storybook iframe. Point it at your `swatchbook.config.{ts,mts,js,mjs}` and it parses the project on startup, then answers MCP tool calls against the resolved graph.
+Agents that need to reason about your design tokens — figma-to-token round-trips, alias-chain navigation, CI lint hooks, AI-assisted authoring — without spinning up a Storybook iframe. Point it at a `swatchbook.config.{ts,mts,js,mjs}` or a bare DTCG `resolver.json` and it parses the project on startup, then answers MCP tool calls against the resolved graph.
 
 ## Install & run
 
@@ -29,11 +29,11 @@ Or wire it into an MCP client's config. Claude Desktop (`~/Library/Application S
 
 CLI flags:
 
-| Flag             | What                                                                                      |
-| ---------------- | ----------------------------------------------------------------------------------------- |
-| `--config <path>` | Required. Path to a `swatchbook.config.{ts,mts,js,mjs}`.                                  |
-| `--cwd <path>`    | Override the working directory for resolving relative `resolver` / `tokens` paths.         |
-| `--help`          | Print usage and exit.                                                                     |
+| Flag             | What                                                                                                                             |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `--config <path>` | Required. Either a `swatchbook.config.{ts,mts,js,mjs}` (full config) or a DTCG `resolver.json` (bare — other options at defaults). |
+| `--cwd <path>`    | Override the working directory for resolving relative `resolver` / `tokens` paths.                                                |
+| `--help`          | Print usage and exit.                                                                                                            |
 
 ## Tools
 

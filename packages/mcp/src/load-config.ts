@@ -1,14 +1,24 @@
-import { isAbsolute, resolve } from 'node:path';
+import { extname, isAbsolute, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
 import { loadProject } from '@unpunnyfuns/swatchbook-core';
 import { createJiti } from 'jiti';
 
 /**
- * Discover and load a swatchbook project from a config file path. Accepts
- * `.ts`, `.mts`, `.js`, `.mjs` — jiti handles them all. The `cwd` returned
- * is the directory the config lives in, which `loadProject` uses to resolve
- * relative token / resolver paths.
+ * Load a swatchbook project from either a full config module or a bare
+ * DTCG resolver JSON.
+ *
+ * `.ts` / `.mts` / `.js` / `.mjs` → jiti imports the module and uses
+ * its default export as the swatchbook {@link Config}.
+ *
+ * `.json` → treated as a DTCG resolver file; the CLI constructs a
+ * minimal `{ resolver: path }` config so agents can point at a raw
+ * resolver without authoring a wrapper. Every other config option
+ * (presets, chrome map, disabled axes, css-var prefix) falls back to
+ * `loadProject` defaults.
+ *
+ * The `cwd` returned is the directory the config / resolver lives in.
+ * `loadProject` uses it to resolve relative token references.
  */
 export async function loadFromConfig(
   configPath: string,
@@ -16,7 +26,16 @@ export async function loadFromConfig(
 ): Promise<{ project: Project; cwd: string; config: Config }> {
   const absolute = isAbsolute(configPath) ? configPath : resolve(process.cwd(), configPath);
   const cwd = cwdOverride ?? resolve(absolute, '..');
+  const ext = extname(absolute).toLowerCase();
 
+  const config =
+    ext === '.json' ? ({ resolver: absolute } satisfies Config) : await loadTsConfig(absolute);
+
+  const project = await loadProject(config, cwd);
+  return { project, cwd, config };
+}
+
+async function loadTsConfig(absolute: string): Promise<Config> {
   /**
    * jiti's first arg is a directory-shaped "from" URL it uses to resolve
    * the target's relative imports. Passing a file URL leaves jiti
@@ -30,8 +49,5 @@ export async function loadFromConfig(
     interopDefault: true,
     moduleCache: false,
   });
-  const loaded = (await jiti.import(absolute, { default: true })) as Config;
-
-  const project = await loadProject(loaded, cwd);
-  return { project, cwd, config: loaded };
+  return (await jiti.import(absolute, { default: true })) as Config;
 }

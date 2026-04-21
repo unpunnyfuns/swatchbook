@@ -1,25 +1,27 @@
 ---
 '@unpunnyfuns/swatchbook-mcp': minor
-'@unpunnyfuns/swatchbook-addon': minor
 ---
 
 feat(mcp): new `@unpunnyfuns/swatchbook-mcp` Model Context Protocol server
 
-Exposes a swatchbook DTCG project to AI agents — `list_tokens` (filter
-by path glob + `$type`), `get_token` (full detail + alias chain +
-per-theme resolved values + CSS var reference), `list_axes` (axes /
-themes / presets), `get_diagnostics`. Runs without Storybook, parses
-the project once at startup via `@unpunnyfuns/swatchbook-core`.
+Exposes a swatchbook DTCG project to AI agents — `describe_project`,
+`list_tokens` (filter by path glob + `$type`), `search_tokens`
+(case-insensitive substring across paths / descriptions / values),
+`resolve_theme` (resolved token map for an axis tuple), `get_token`,
+`get_alias_chain`, `get_aliased_by`, `get_consumer_output` (CSS var +
+compound `[data-…]` selector + HTML attrs), `get_color_formats` (hex
+/ rgb / hsl / oklch / raw, each with an out-of-gamut flag),
+`list_axes`, `get_diagnostics`, `emit_css`. Runs without Storybook,
+parses the project once at startup via `@unpunnyfuns/swatchbook-core`.
 
 Consume as a CLI:
 
 ```sh
 npx @unpunnyfuns/swatchbook-mcp --config swatchbook.config.ts
+# or point straight at a DTCG resolver — no wrapper config needed:
+npx @unpunnyfuns/swatchbook-mcp --config tokens/resolver.json
 ```
 
 Or wire into an MCP client (Claude Desktop, etc.) via the same
 command. Ships with `createServer` + `loadFromConfig` exports for
 programmatic embedding in larger toolchains.
-
-Joins the fixed-version group alongside core / addon / blocks /
-switcher so the whole set releases together.
