@@ -17,19 +17,19 @@
       },
       "default": "Light"
     },
-    "a11y": {
-      "contexts": {
-        "Normal": [],
-        "High-contrast": [{ "$ref": "./themes/high-contrast.json" }]
-      },
-      "default": "Normal"
-    },
     "typeface": {
       "contexts": {
         "Variable": [],
         "Monotype": [{ "$ref": "./themes/monotype.json" }]
       },
       "default": "Variable"
+    },
+    "a11y": {
+      "contexts": {
+        "Normal": [],
+        "High-contrast": [{ "$ref": "./themes/high-contrast.json" }]
+      },
+      "default": "Normal"
     }
   },
   "resolutionOrder": [
