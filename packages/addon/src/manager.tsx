@@ -1,4 +1,8 @@
-import { ThemeSwitcher, type SwitcherColorFormat } from '@unpunnyfuns/swatchbook-switcher';
+import {
+  ColorFormatSelector,
+  type SwitcherColorFormat,
+  ThemeSwitcher,
+} from '@unpunnyfuns/swatchbook-switcher';
 import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { IconButton, WithTooltipPure } from 'storybook/internal/components';
 import { addons, types, useGlobals, useStorybookApi } from 'storybook/manager-api';
@@ -275,12 +279,21 @@ function AxesToolbar(): ReactElement {
     themes,
     activeTuple,
     defaults,
-    activeColorFormat,
     lastApplied,
     onAxisChange: setAxis,
     onPresetApply: applyPreset,
-    onColorFormatChange: (next) => updateGlobals({ [COLOR_FORMAT_GLOBAL_KEY]: next }),
     onKeyDown: handleKeyDown,
+    /**
+     * Color-format is Storybook-addon-specific chrome — the pill row
+     * drives how swatchbook blocks stringify colors inside stories and
+     * docs. The shared switcher doesn't render it by default; it slots
+     * in through the `footer` escape hatch so the toolbar popover keeps
+     * the same layout it had pre-extraction.
+     */
+    footer: h(ColorFormatSelector, {
+      active: activeColorFormat,
+      onSelect: (next: SwitcherColorFormat) => updateGlobals({ [COLOR_FORMAT_GLOBAL_KEY]: next }),
+    }),
   });
 
   return h(

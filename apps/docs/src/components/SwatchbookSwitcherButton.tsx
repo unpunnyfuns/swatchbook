@@ -32,12 +32,10 @@ export function SwatchbookSwitcherButton(): React.ReactElement {
     presets,
     defaults,
     nonModeTuple,
-    activeColorFormat,
     lastApplied,
     setNonModeAxis,
     applyNonModeFromPreset,
     setLastApplied,
-    setColorFormat,
   } = useSwatchbookSwitcher();
   const { colorMode, setColorMode } = useColorMode();
   const [open, setOpen] = useState(false);
@@ -122,11 +120,9 @@ export function SwatchbookSwitcherButton(): React.ReactElement {
             presets={presets}
             defaults={defaults}
             activeTuple={activeTuple}
-            activeColorFormat={activeColorFormat}
             lastApplied={lastApplied}
             onAxisChange={onAxisChange}
             onPresetApply={onPresetApply}
-            onColorFormatChange={setColorFormat}
             onKeyDown={onKeyDown}
           />
         </div>

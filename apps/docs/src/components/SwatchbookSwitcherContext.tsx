@@ -1,9 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import type {
-  SwitcherAxis,
-  SwitcherColorFormat,
-  SwitcherPreset,
-} from '@unpunnyfuns/swatchbook-switcher';
+import type { SwitcherAxis, SwitcherPreset } from '@unpunnyfuns/swatchbook-switcher';
 // Bundled at build time by `scripts/build-tokens.mts` from the DTCG tokens
 // under `apps/docs/tokens/`. Keeps the navbar switcher in sync with the CSS
 // the Infima layer reads — no runtime fetch needed.
@@ -19,9 +15,9 @@ type AxesSnapshot = {
 /**
  * The `mode` axis is bridged to Docusaurus's `useColorMode` inside the
  * switcher button (where we're guaranteed to be under the ColorMode
- * provider). This context covers every *other* axis + presets + colour
- * format, and lives at the Root swizzle so the state survives page
- * navigations and renders before the colour-mode provider mounts.
+ * provider). This context covers every *other* axis + presets, and
+ * lives at the Root swizzle so the state survives page navigations and
+ * renders before the colour-mode provider mounts.
  */
 export const MODE_AXIS = 'mode';
 
@@ -34,13 +30,11 @@ interface SwatchbookSwitcherContextValue {
   cssVarPrefix: string;
   /** Tuple of every axis except `mode`, keyed by axis name. */
   nonModeTuple: Record<string, string>;
-  activeColorFormat: SwitcherColorFormat;
   lastApplied: string | null;
   setNonModeAxis(axisName: string, next: string): void;
   /** Apply each non-mode axis from the preset; mode is applied by the button. */
   applyNonModeFromPreset(preset: SwitcherPreset): void;
   setLastApplied(name: string | null): void;
-  setColorFormat(next: SwitcherColorFormat): void;
 }
 
 const SwatchbookSwitcherContext = createContext<SwatchbookSwitcherContextValue | null>(null);
@@ -123,7 +117,6 @@ export function SwatchbookSwitcherProvider({
   const [nonModeTuple, setNonModeTupleState] = useState<Record<string, string>>(() =>
     readPersistedNonModeTuple(axes, defaults),
   );
-  const [activeColorFormat, setColorFormat] = useState<SwitcherColorFormat>('hex');
   const [lastApplied, setLastApplied] = useState<string | null>(null);
 
   useEffect(() => {
@@ -160,12 +153,10 @@ export function SwatchbookSwitcherProvider({
       defaults,
       cssVarPrefix,
       nonModeTuple,
-      activeColorFormat,
       lastApplied,
       setNonModeAxis,
       applyNonModeFromPreset,
       setLastApplied,
-      setColorFormat,
     }),
     [
       axes,
@@ -173,7 +164,6 @@ export function SwatchbookSwitcherProvider({
       defaults,
       cssVarPrefix,
       nonModeTuple,
-      activeColorFormat,
       lastApplied,
       setNonModeAxis,
       applyNonModeFromPreset,
