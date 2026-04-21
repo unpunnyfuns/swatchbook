@@ -1,5 +1,20 @@
 {
-  "$description": "High-contrast a11y overlay — swaps the base font family for a comic display face and bumps base size. Intentionally leaves colour alone: layering mode-agnostic colour overrides on top of mode (which picks opposite ends of the neutral / brand ramps for Light vs Dark) dragged primary into dark-on-dark territory on Dark + High-contrast. Contrast comes from mode's own role tokens; a11y carries the typography signal.",
+  "$description": "High-contrast a11y overlay. Typography signal — swaps the base font family for a comic display face and bumps base size — plus colour boosts via alias indirection: role tokens re-route through each mode's `color.accessible.*` namespace so the resolved values stay mode-aware (darker on Light, brighter on Dark) without this file having to branch per mode.",
+  "color": {
+    "$type": "color",
+    "text": {
+      "muted": { "$value": "{color.accessible.text.muted}" }
+    },
+    "primary": {
+      "lightest": { "$value": "{color.accessible.primary.lightest}" },
+      "lighter":  { "$value": "{color.accessible.primary.lighter}" },
+      "light":    { "$value": "{color.accessible.primary.light}" },
+      "default":  { "$value": "{color.accessible.primary.default}" },
+      "dark":     { "$value": "{color.accessible.primary.dark}" },
+      "darker":   { "$value": "{color.accessible.primary.darker}" },
+      "darkest":  { "$value": "{color.accessible.primary.darkest}" }
+    }
+  },
   "font": {
     "family": {
       "$type": "fontFamily",

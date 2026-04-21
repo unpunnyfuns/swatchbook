@@ -24,6 +24,21 @@
     "code": {
       "bg":     { "$value": "{color.palette.neutral.800}" },
       "border": { "$value": "{color.palette.neutral.700}" }
+    },
+    "accessible": {
+      "$description": "High-contrast alternates for Dark. Lighter neutrals for muted text, lighter brand shades for primary — pushes link/muted-text contrast up against the dark surface ramp. Parallel shape to light's `color.accessible`; the a11y overlay aliases role tokens to this namespace and the active mode's definitions decide the resolved value.",
+      "text": {
+        "muted": { "$value": "{color.palette.neutral.100}" }
+      },
+      "primary": {
+        "lightest": { "$value": "{color.palette.brand.100}" },
+        "lighter":  { "$value": "{color.palette.brand.200}" },
+        "light":    { "$value": "{color.palette.brand.300}" },
+        "default":  { "$value": "{color.palette.brand.300}" },
+        "dark":     { "$value": "{color.palette.brand.400}" },
+        "darker":   { "$value": "{color.palette.brand.500}" },
+        "darkest":  { "$value": "{color.palette.brand.600}" }
+      }
     }
   },
   "font": {
