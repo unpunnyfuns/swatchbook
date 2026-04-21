@@ -6,6 +6,9 @@
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "build": "docusaurus build",
+    "prestart": "pnpm build:tokens",
+    "prebuild": "pnpm build:tokens",
+    "build:tokens": "node scripts/build-tokens.mts",
     "swizzle": "docusaurus swizzle",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
@@ -26,6 +29,7 @@
     "@docusaurus/tsconfig": "3.10.0",
     "@docusaurus/types": "3.10.0",
     "@types/react": "^19.0.0",
+    "@unpunnyfuns/swatchbook-core": "workspace:*",
     "typescript": "~6.0.2"
   },
   "browserslist": {
