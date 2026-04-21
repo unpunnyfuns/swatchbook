@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ColorFormatSelector, type SwitcherAxis, ThemeSwitcher } from '#/index.ts';
+import { type SwitcherAxis, ThemeSwitcher } from '#/index.ts';
 
 // Classic-JSX compile: every file using `<…/>` needs React in scope.
 void React;
@@ -51,14 +51,6 @@ describe('ThemeSwitcher', () => {
     expect(props.onAxisChange).toHaveBeenCalledWith('mode', 'Dark');
   });
 
-  it('does not render any color-format UI by default', () => {
-    const props = baseProps();
-    render(<ThemeSwitcher {...props} />);
-
-    expect(screen.queryByRole('button', { name: 'OKLCH' })).toBeNull();
-    expect(screen.queryByText('Color format')).toBeNull();
-  });
-
   it('renders a preset pill and wires its click through to onPresetApply', () => {
     const props = baseProps();
     const preset = { name: 'Brand A Dark', axes: { mode: 'Dark' } };
@@ -89,34 +81,9 @@ describe('ThemeSwitcher', () => {
     expect(modifiedBtn.querySelector('.sb-switcher__pill-modified')).not.toBeNull();
   });
 
-  it('renders an externally-supplied footer (e.g. ColorFormatSelector) when passed', () => {
+  it('renders an externally-supplied footer (for host-specific UI) when passed', () => {
     const props = baseProps();
-    const onSelect = vi.fn();
-    render(
-      <ThemeSwitcher
-        {...props}
-        footer={<ColorFormatSelector active="hex" onSelect={onSelect} />}
-      />,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'OKLCH' }));
-    expect(onSelect).toHaveBeenCalledWith('oklch');
-  });
-});
-
-describe('ColorFormatSelector', () => {
-  afterEach(() => {
-    cleanup();
-  });
-
-  it('marks the active format and calls onSelect when another is picked', () => {
-    const onSelect = vi.fn();
-    render(<ColorFormatSelector active="rgb" onSelect={onSelect} />);
-
-    const rgbPill = screen.getByRole('button', { name: 'RGB' });
-    expect(rgbPill.className).toContain('sb-switcher__pill--active');
-
-    fireEvent.click(screen.getByRole('button', { name: 'Hex' }));
-    expect(onSelect).toHaveBeenCalledWith('hex');
+    render(<ThemeSwitcher {...props} footer={<div data-testid="extra">host extra</div>} />);
+    expect(screen.getByTestId('extra').textContent).toBe('host extra');
   });
 });

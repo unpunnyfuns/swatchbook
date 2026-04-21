@@ -1,8 +1,5 @@
-import {
-  ColorFormatSelector,
-  type SwitcherColorFormat,
-  ThemeSwitcher,
-} from '@unpunnyfuns/swatchbook-switcher';
+import { ThemeSwitcher } from '@unpunnyfuns/swatchbook-switcher';
+import { type ColorFormat, ColorFormatSelector } from '#/ColorFormatSelector.tsx';
 import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { IconButton, WithTooltipPure } from 'storybook/internal/components';
 import { addons, types, useGlobals, useStorybookApi } from 'storybook/manager-api';
@@ -133,7 +130,7 @@ function AxesToolbar(): ReactElement {
   const [lastApplied, setLastApplied] = useState<string | null>(null);
   const globalTuple = globals[AXES_GLOBAL_KEY] as Record<string, string> | undefined;
   const activeColorFormat = ((globals[COLOR_FORMAT_GLOBAL_KEY] as string | undefined) ??
-    'hex') as SwitcherColorFormat;
+    'hex') as ColorFormat;
 
   const activeTuple = useMemo<Record<string, string>>(() => {
     const out: Record<string, string> = { ...defaults };
@@ -292,7 +289,7 @@ function AxesToolbar(): ReactElement {
      */
     footer: h(ColorFormatSelector, {
       active: activeColorFormat,
-      onSelect: (next: SwitcherColorFormat) => updateGlobals({ [COLOR_FORMAT_GLOBAL_KEY]: next }),
+      onSelect: (next: ColorFormat) => updateGlobals({ [COLOR_FORMAT_GLOBAL_KEY]: next }),
     }),
   });
 

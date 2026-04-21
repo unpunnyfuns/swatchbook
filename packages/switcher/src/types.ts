@@ -23,5 +23,3 @@ export interface SwitcherTheme {
   name: string;
   input: Record<string, string>;
 }
-
-export type SwitcherColorFormat = 'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw';
