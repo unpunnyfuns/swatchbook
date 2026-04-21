@@ -1,5 +1,62 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.7.0
+
+### Patch Changes
+
+- cecfdff: feat(switcher): extract theme-switcher popover into a standalone package
+
+  Introduce `@unpunnyfuns/swatchbook-switcher`, a framework-agnostic
+  React component that renders the axis / preset / color-format popover
+  swatchbook's Storybook toolbar used to own inline. Consumers pass in
+  `axes`, `presets`, `activeTuple`, and change callbacks; the component
+  owns the pill UI + keyboard-accessible menu. Compiled with classic JSX
+  (`React.createElement`) so it embeds cleanly in Storybook's manager
+  bundle (which does not expose `react/jsx-runtime`).
+
+  The addon's `AxesToolbar` now composes `<ThemeSwitcher>` inside its
+  existing `WithTooltipPure` popover — no user-visible change; the same
+  icon button, shortcuts, and behavior stay in place.
+
+  Ships the switcher in the fixed-version group alongside core / addon /
+  blocks so the four release together.
+
+- 0240cb4: fix(addon): pick up token edits when tokens live in a sibling workspace package
+
+  Two overlapping bugs in the virtual-module plugin's dev-server watcher
+  conspired to drop every token edit on the floor when tokens lived
+  outside the Storybook project's own directory:
+
+  1. `configureServer` runs **before** `buildStart` in Vite's plugin
+     lifecycle, so `project` (and therefore `project.sourceFiles`) was
+     still undefined when we derived the watcher set. For configs that
+     supply a `resolver` but no `tokens` glob — which the reference
+     Storybook and most real-world consumers ship — every `$ref` target
+     silently dropped; only the resolver file itself was watched. Force
+     an initial `refresh()` at the top of `configureServer` so
+     `sourceFiles` is populated before the watcher wiring runs.
+
+  2. Even with `sourceFiles` populated, `server.watcher.add()` is rooted
+     at the dev server's project directory; absolute paths added outside
+     that root don't reliably emit change events across pnpm-symlinked
+     package boundaries. Replace the Vite dir-level watch with a direct
+     `node:fs.watch` on each source file — native, no root constraint,
+     fires on every save.
+
+  Saves to any token file pulled in by the resolver now invalidate the
+  `virtual:swatchbook/tokens` module and trigger a single full-reload in
+  the preview — no dev-server restart required.
+
+- Updated dependencies [a9d1a1c]
+- Updated dependencies [94b1b3e]
+- Updated dependencies [cecfdff]
+- Updated dependencies [b947c99]
+- Updated dependencies [e571197]
+- Updated dependencies [887cb0a]
+  - @unpunnyfuns/swatchbook-core@0.7.0
+  - @unpunnyfuns/swatchbook-switcher@0.7.0
+  - @unpunnyfuns/swatchbook-blocks@0.7.0
+
 ## 0.6.2
 
 ### Patch Changes

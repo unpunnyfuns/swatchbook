@@ -545,8 +545,7 @@ export const TokenDetailMissing = meta.story({
 /**
  * `TokenDetail` for a token that varies only with the `brand` axis must
  * render a compact 1-axis values table listing each brand context
- * (Default, Brand A) exactly once — matching the axis-aware view from
- * issue #136.
+ * (Default, Brand A) exactly once.
  */
 export const TokenDetailOneAxisBrand = meta.story({
   render: () => <TokenDetail path="color.accent.bg" />,
