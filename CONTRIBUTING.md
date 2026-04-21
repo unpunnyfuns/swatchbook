@@ -80,7 +80,7 @@ Format: `<type>(<scope>): <description>`.
 
 **Types:** `feat` / `fix` / `chore` / `docs` / `test` / `ci` / `refactor` / `perf` / `build` / `revert`.
 
-**Scopes:** one of `core`, `addon`, `blocks`, `switcher`, `tokens`, `storybook`, `docs`, `ci` — or omitted when a change spans multiple packages.
+**Scopes:** one of `core`, `addon`, `blocks`, `switcher`, `mcp`, `tokens`, `storybook`, `docs`, `ci` — or omitted when a change spans multiple packages.
 
 **Subject:** imperative verb first, lowercase even for proper nouns. `feat(addon): rebind keyboard shortcut` — not `Feat(Addon): Rebinding the keyboard shortcut`.
 

@@ -1,0 +1,71 @@
+{
+  "name": "@unpunnyfuns/swatchbook-mcp",
+  "version": "0.8.0",
+  "description": "Model Context Protocol server for swatchbook — exposes a DTCG project's tokens, axes, and diagnostics to AI agents without running Storybook.",
+  "license": "MIT",
+  "author": "unpunnyfuns <unpunnyfuns@gmail.com>",
+  "homepage": "https://unpunnyfuns.github.io/swatchbook/",
+  "bugs": "https://github.com/unpunnyfuns/swatchbook/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unpunnyfuns/swatchbook.git",
+    "directory": "packages/mcp"
+  },
+  "keywords": [
+    "swatchbook",
+    "design-tokens",
+    "dtcg",
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "llm"
+  ],
+  "type": "module",
+  "engines": {
+    "node": ">=24.14.0"
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "bin": {
+    "swatchbook-mcp": "./dist/bin.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src test",
+    "format": "oxfmt -c ../../.oxfmtrc.json src test",
+    "format:check": "oxfmt --check -c ../../.oxfmtrc.json src test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@unpunnyfuns/swatchbook-core": "workspace:*",
+    "colorjs.io": "0.6.1",
+    "jiti": "^2.4.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "tsdown": "^0.21.9",
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.4"
+  }
+}
