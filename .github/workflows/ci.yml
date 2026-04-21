@@ -84,19 +84,22 @@ jobs:
         if: always()
         shell: bash
         run: |
+          # Vitest colorizes its summary; strip ANSI so the markdown code
+          # block reads as plain text instead of `\x1b[2m Test Files …`.
+          strip_ansi='sed -E s/\x1B\[[0-9;]*[A-Za-z]//g'
           {
             echo "## Test results"
             echo ""
             echo "### Unit tests (vitest)"
             echo ""
             echo '```'
-            grep -E " (Test Files|Tests) +" .ci-checks.log 2>/dev/null || echo "(no summary lines parsed — see job log)"
+            grep -E " (Test Files|Tests) +" .ci-checks.log 2>/dev/null | $strip_ansi || echo "(no summary lines parsed — see job log)"
             echo '```'
             echo ""
             echo "### Storybook interaction tests"
             echo ""
             echo '```'
-            grep -E " (Test Files|Tests) +" .ci-storybook.log 2>/dev/null || echo "(no summary lines parsed — see job log)"
+            grep -E " (Test Files|Tests) +" .ci-storybook.log 2>/dev/null | $strip_ansi || echo "(no summary lines parsed — see job log)"
             echo '```'
             echo ""
             echo "Failure annotations (if any) appear inline on the **Files changed** tab via Vitest's auto-wired \`github-actions\` reporter."
