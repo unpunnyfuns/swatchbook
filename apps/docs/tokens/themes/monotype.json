@@ -1,9 +1,10 @@
 {
-  "$description": "`typeface = Monotype` overlay — swaps the base font family to the comic-monospace stack so the whole docs site reads as slightly-unhinged teletype. Pure typography variation; leaves colour roles alone so it composes cleanly with mode + a11y.",
+  "$description": "`typeface = Monotype` overlay. Sets the base font to the plain monospace stack for a11y=Normal, and declares `font.family.base-accessible` = comic-monospace as the escalation slot the a11y=High-contrast overlay re-routes to. The active-mode's light.json / dark.json sets the Variable-context defaults for the same two slots (system + comic), so toggling a11y=High-contrast flips each typeface into its playful-accessibility variant without this file branching per a11y context.",
   "font": {
     "family": {
       "$type": "fontFamily",
-      "base": { "$value": "{font.family.comic-mono}" }
+      "base":            { "$value": "{font.family.mono}" },
+      "base-accessible": { "$value": "{font.family.comic-mono}" }
     }
   }
 }

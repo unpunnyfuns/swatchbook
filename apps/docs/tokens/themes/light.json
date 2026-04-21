@@ -44,7 +44,8 @@
   "font": {
     "family": {
       "$type": "fontFamily",
-      "base": { "$value": "{font.family.system}" }
+      "base":            { "$value": "{font.family.system}" },
+      "base-accessible": { "$value": "{font.family.comic}" }
     },
     "size": {
       "$type": "dimension",

@@ -1,5 +1,5 @@
 {
-  "$description": "High-contrast a11y overlay. Owns contrast only — no typography changes beyond a small base-size bump for readability. Colour boosts use alias indirection: role tokens re-route through each mode's `color.accessible.*` namespace so the resolved values stay mode-aware (darker amber on Light, bright amber on Dark) without this file having to branch per mode. Typeface (Variable vs Monotype) is a separate axis.",
+  "$description": "High-contrast a11y overlay. Colour boosts re-route role tokens through each mode's `color.accessible.*` namespace (amber primary; darker neutrals for muted text). Font-family boosts re-route the base font through `font.family.base-accessible`, which each typeface declares — Variable ⇒ comic, Monotype ⇒ comic-mono — so escalation stays typeface-aware without this file branching. Plus a 108% base-size bump as a readability signal.",
   "color": {
     "$type": "color",
     "text": {
@@ -16,6 +16,10 @@
     }
   },
   "font": {
+    "family": {
+      "$type": "fontFamily",
+      "base": { "$value": "{font.family.base-accessible}" }
+    },
     "size": {
       "$type": "dimension",
       "base": { "$value": { "value": 108, "unit": "%" } }
