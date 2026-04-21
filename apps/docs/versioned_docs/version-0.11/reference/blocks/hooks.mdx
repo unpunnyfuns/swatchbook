@@ -1,0 +1,31 @@
+---
+id: hooks
+title: Hooks
+sidebar_position: 6
+---
+
+# Hooks
+
+Context-reading hooks for authoring custom blocks. Source of truth lives in `@unpunnyfuns/swatchbook-blocks`; `@unpunnyfuns/swatchbook-addon` re-exports everything so a one-stop `import { useSwatchbookData } from '@unpunnyfuns/swatchbook-addon'` works too. Either entry reads from the nearest `SwatchbookProvider` (mounted automatically by the addon's preview decorator inside Storybook).
+
+Outside Storybook, wrap the tree in `SwatchbookProvider` and pass a `ProjectSnapshot` so the hooks have something to resolve against — see the [blocks intro](./) for the wiring.
+
+## `useSwatchbookData()`
+
+Returns the full `ProjectSnapshot` the provider is holding (themes, axes, presets, tokens, diagnostics, …). Useful for custom blocks that need graph-level information the canned blocks don't expose.
+
+## `useActiveTheme()`
+
+Returns the current composed permutation ID as a string (e.g. `"Dark · Brand A"`).
+
+## `useActiveAxes()`
+
+Returns the active tuple as `Readonly<Record<string, string>>`.
+
+## `useColorFormat()`
+
+Returns the active color format (`'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw'`) — the display setting toggled from the toolbar popover. Pair with `formatColor(value, format)` (also exported) to render colors the same way the built-in blocks do. `hex` falls back to space-separated `rgb()` for out-of-gamut colors, marked with a ⚠ warning.
+
+## Reactivity
+
+Hook consumers re-render on the same Storybook `globalsUpdated` channel event the built-in blocks subscribe to, so the active axis tuple and color format both stay in sync without a story re-render. This works both inside story renders and inside MDX doc blocks (where the preview HooksContext isn't available — we use the channel directly).
