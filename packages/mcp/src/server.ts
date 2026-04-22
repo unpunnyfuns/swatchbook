@@ -1,5 +1,5 @@
 import type { Project } from '@unpunnyfuns/swatchbook-core';
-import { projectCss } from '@unpunnyfuns/swatchbook-core';
+import { analyzeAxisVariance, projectCss } from '@unpunnyfuns/swatchbook-core';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { computeContrast } from '#/contrast.ts';
@@ -349,6 +349,25 @@ export function createServer(initial: Project): McpServer & {
         background: { path: background, value: stringifyValue(bgTok.$value) },
         ...result,
       });
+    },
+  );
+
+  server.registerTool(
+    'get_axis_variance',
+    {
+      description:
+        "Classify how a token's resolved value depends on the project's axes. Returns `kind` — `constant` (same across every tuple), `single` (varies with exactly one axis, e.g. mode only), or `multi` (varies across two or more axes). Also returns `varyingAxes` / `constantAcrossAxes` plus a `perAxis` breakdown with each context's stringified value (holding other axes at their defaults). Use when reasoning about whether a token is theme-independent, whether a refactor changed an axis dependency, or to confirm that (say) a role token only varies with `contrast`.",
+      inputSchema: {
+        path: z.string().describe('Dot-path of the token to analyse, e.g. `color.text.default`.'),
+      },
+    },
+    ({ path }) => {
+      if (project.themes.length === 0) return textResult('No themes in project.');
+      const exists = project.themes.some((t) => project.themesResolved[t.name]?.[path]);
+      if (!exists) return textResult(`Token not found in any theme: ${path}`);
+      return jsonResult(
+        analyzeAxisVariance(path, project.axes, project.themes, project.themesResolved),
+      );
     },
   );
 

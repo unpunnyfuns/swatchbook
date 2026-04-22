@@ -157,11 +157,11 @@ npx @unpunnyfuns/swatchbook-mcp --config swatchbook.config.ts
  StdioServerTransport → MCP client (Claude Desktop, Claude Code, …)
 ```
 
-Thirteen tools, all stateless reads against the in-memory `Project`:
+Fourteen tools, all stateless reads against the in-memory `Project`:
 
 - Orientation: `describe_project`, `list_axes`, `get_diagnostics`
 - Discovery: `list_tokens`, `search_tokens`, `resolve_theme`
-- Detail: `get_token`, `get_alias_chain`, `get_aliased_by`, `get_color_formats`, `get_color_contrast`, `get_consumer_output`
+- Detail: `get_token`, `get_alias_chain`, `get_aliased_by`, `get_color_formats`, `get_color_contrast`, `get_axis_variance`, `get_consumer_output`
 - Emission: `emit_css`
 
 `createServer` returns the server augmented with `setProject(next)` so live-reload (the default) can swap in a fresh project without restarting the transport. See [Reference → MCP](../reference/mcp) for the tool signatures.

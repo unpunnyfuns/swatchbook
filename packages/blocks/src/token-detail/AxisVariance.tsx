@@ -1,3 +1,5 @@
+import { analyzeAxisVariance } from '@unpunnyfuns/swatchbook-core/variance';
+import type { Axis as CoreAxis, Theme as CoreTheme, TokenMap } from '@unpunnyfuns/swatchbook-core';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
@@ -29,10 +31,22 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
   const isColor = tokenType === 'color';
   const formatFn = (t: DetailToken | undefined): string => valueFor(t, tokenType, colorFormat);
 
-  const variance = useMemo(
-    () => analyzeVariance(path, axes, themes, themesResolved),
-    [path, axes, themes, themesResolved],
-  );
+  const variance = useMemo<Variance>(() => {
+    const result = analyzeAxisVariance(
+      path,
+      axes as unknown as readonly CoreAxis[],
+      themes as unknown as readonly CoreTheme[],
+      themesResolved as unknown as Record<string, TokenMap>,
+    );
+    // Map core's terse kind vocabulary to the block's display-ready one.
+    const kind =
+      result.kind === 'constant'
+        ? 'constant'
+        : result.kind === 'single'
+          ? 'one-axis'
+          : 'multi-axis';
+    return { kind, varyingAxes: result.varyingAxes };
+  }, [path, axes, themes, themesResolved]);
 
   if (themes.length === 0) {
     return <></>;
@@ -202,22 +216,6 @@ function valueFor(
   return formatTokenValue(token.$value, $type, format);
 }
 
-/**
- * Stable key for variance detection — compares structural equality across
- * themes, not a display string. We pin `raw` so color representation
- * changes (the toolbar's format dropdown) don't artificially make axes
- * look like they vary.
- */
-function varianceKey(
-  themesResolved: Record<string, Record<string, DetailToken>>,
-  themeName: string,
-  path: string,
-): string {
-  const t = themesResolved[themeName]?.[path];
-  if (!t) return '';
-  return JSON.stringify(t.$value);
-}
-
 function tupleName(
   themes: readonly VirtualThemeLike[],
   tuple: Record<string, string>,
@@ -228,38 +226,4 @@ function tupleName(
     return keys.every((k) => input[k] === tuple[k]);
   });
   return match?.name;
-}
-
-function analyzeVariance(
-  path: string,
-  axes: readonly VirtualAxisLike[],
-  themes: readonly VirtualThemeLike[],
-  themesResolved: Record<string, Record<string, DetailToken>>,
-): Variance {
-  const varyingAxes: string[] = [];
-  for (const axis of axes) {
-    const byOthers = new Map<string, Map<string, string>>();
-    for (const theme of themes) {
-      const others = axes
-        .filter((a) => a.name !== axis.name)
-        .map((a) => `${a.name}=${theme.input[a.name] ?? ''}`)
-        .join('|');
-      const ctx = theme.input[axis.name] ?? '';
-      const bucket = byOthers.get(others) ?? new Map<string, string>();
-      bucket.set(ctx, varianceKey(themesResolved, theme.name, path));
-      byOthers.set(others, bucket);
-    }
-    let varies = false;
-    for (const bucket of byOthers.values()) {
-      const values = new Set(bucket.values());
-      if (values.size > 1) {
-        varies = true;
-        break;
-      }
-    }
-    if (varies) varyingAxes.push(axis.name);
-  }
-  if (varyingAxes.length === 0) return { kind: 'constant', varyingAxes };
-  if (varyingAxes.length === 1) return { kind: 'one-axis', varyingAxes };
-  return { kind: 'multi-axis', varyingAxes };
 }
