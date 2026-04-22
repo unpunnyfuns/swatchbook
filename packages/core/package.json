@@ -55,9 +55,11 @@
   "dependencies": {
     "@terrazzo/json-schema-tools": "^0.2.1",
     "@terrazzo/parser": "^2.0.3",
+    "@terrazzo/plugin-css": "^2.0.3",
     "@terrazzo/token-tools": "^2.0.3"
   },
   "devDependencies": {
+    "@terrazzo/plugin-css-in-js": "^2.0.3",
     "@types/node": "^25.6.0",
     "@unpunnyfuns/swatchbook-tokens": "workspace:*",
     "@vitest/ui": "^4.1.4",

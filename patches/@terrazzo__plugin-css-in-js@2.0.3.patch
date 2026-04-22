@@ -1,0 +1,16 @@
+diff --git a/dist/index.js b/dist/index.js
+index 008390252771549de2bc1d7bf00f9035e301ef96..14473bbf8948344520c581d9545ee27da83a11bb 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -20,8 +20,9 @@ function cssInJs({ filename = "vars.js" } = {}) {
+ 				const parts = token.id.split(".");
+ 				const last = parts.pop();
+ 				for (const next of parts) {
+-					if (!(next in node)) node[camelCase(next)] = {};
+-					node = node[next];
++					const key = camelCase(next);
++					if (!(key in node)) node[key] = {};
++					node = node[key];
+ 				}
+ 				let tokenValue = `var(${token.localID})`;
+ 				if (token.token.$type === "typography" && token.type === "MULTI_VALUE") {
