@@ -80,7 +80,7 @@ Format: `<type>(<scope>): <description>`.
 
 **Types:** `feat` / `fix` / `chore` / `docs` / `test` / `ci` / `refactor` / `perf` / `build` / `revert`.
 
-**Scopes:** one of `core`, `addon`, `blocks`, `switcher`, `mcp`, `tokens`, `storybook`, `docs`, `ci` — or omitted when a change spans multiple packages.
+**Scopes:** one of `core`, `addon`, `blocks`, `switcher`, `mcp`, `tokens`, `storybook`, `docs`, `ci`, `a11y` — or omitted when a change spans multiple packages. `a11y` is the accessibility scope — use it for cross-cutting WCAG / axe / focus / contrast / keyboard-nav fixes that don't sit neatly inside one package.
 
 **Subject:** imperative verb first, lowercase even for proper nouns. `feat(addon): rebind keyboard shortcut` — not `Feat(Addon): Rebinding the keyboard shortcut`.
 

@@ -39,6 +39,7 @@ jobs:
             storybook
             docs
             ci
+            a11y
           requireScope: false
           subjectPattern: ^(?![A-Z]).+$
           subjectPatternError: |
