@@ -1,5 +1,13 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.14.0
+
+### Patch Changes
+
+- 249e448: Docs: stop documenting `emitCss`, `projectCss`, and `emitViaTerrazzo` as user-facing APIs. They remain exported by `@unpunnyfuns/swatchbook-core` so existing callers don't break, but the README, reference pages, concept pages, and integration guides no longer promote them. Users who want production asset emission should run Terrazzo's CLI against the same DTCG sources.
+- Updated dependencies [171c9aa]
+  - @unpunnyfuns/swatchbook-core@0.14.0
+
 ## 0.13.1
 
 ### Patch Changes
