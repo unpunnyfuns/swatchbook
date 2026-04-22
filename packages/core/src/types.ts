@@ -180,9 +180,12 @@ export interface Project {
 /**
  * Pass-through bag of the three values `@terrazzo/parser`'s `build()`
  * requires alongside a config. Retained verbatim from `loadResolver()`
- * so the wrapper call is zero-I/O. Consumers should treat this as opaque
- * (feed the whole object into `build()`); swatchbook itself does not read
- * individual fields.
+ * so the addon-internal Terrazzo emission wrapper can re-run builds
+ * without re-parsing from disk.
+ *
+ * @internal Consumers should not depend on this shape. It exists for
+ * the addon + integrations; external consumers driving their own build
+ * should use Terrazzo's CLI against the DTCG sources directly.
  */
 export interface ParserInput {
   tokens: Record<string, TokenNormalized>;

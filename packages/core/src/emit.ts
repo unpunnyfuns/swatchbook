@@ -1,7 +1,14 @@
 import type { Project } from '#/types.ts';
 import { emitCss, type EmitCssOptions } from '#/css.ts';
 
-/** Emit the full CSS stylesheet for a project. */
+/**
+ * Emit the full CSS stylesheet for a project.
+ *
+ * @internal Consumers should not depend on this function. The addon calls
+ * it to populate the Storybook virtual module; external consumers driving
+ * their own build pipeline should use Terrazzo's CLI against the DTCG
+ * sources directly.
+ */
 export function projectCss(project: Project, options: EmitCssOptions = {}): string {
   const merged: EmitCssOptions = { ...options };
   if (merged.prefix === undefined && project.config.cssVarPrefix) {
@@ -20,6 +27,11 @@ export function projectCss(project: Project, options: EmitCssOptions = {}): stri
  * Emit a TypeScript module exporting typed unions for token paths and theme
  * names. The preset writes this to `<outDir>/tokens.d.ts` so `useToken()` can
  * autocomplete against the loaded project.
+ *
+ * @internal Consumers should not depend on this function. The addon preset
+ * calls it to populate a generated `.d.ts` for `useToken()` autocomplete;
+ * external consumers should drive their own typegen from the loaded
+ * `Project` if they need something different.
  */
 export function emitTypes(project: Project): string {
   const allPaths = new Set<string>();
