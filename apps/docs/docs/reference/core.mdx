@@ -81,6 +81,39 @@ permutationID({ mode: 'Dark', brand: 'Brand A' }); // → "Dark · Brand A"
 permutationID({ theme: 'Light' }); // → "Light"
 ```
 
+### `emitViaTerrazzo(project, options?)`
+
+Axis-aware wrapper around Terrazzo's programmatic `build()`. Derives compound-selector permutations from `project.themes` (or `project.presets` via `selection`), pins `@terrazzo/plugin-css`'s `variableName` to the project's `cssVarPrefix`, and runs whatever additional Terrazzo plugins you pass — `plugin-css-in-js`, `plugin-tailwind`, `plugin-swift`, `plugin-js`, `plugin-sass`, `plugin-vanilla-extract`, `plugin-token-listing`.
+
+```ts
+import { loadProject, emitViaTerrazzo } from '@unpunnyfuns/swatchbook-core';
+import cssInJsPlugin from '@terrazzo/plugin-css-in-js';
+import tailwindPlugin from '@terrazzo/plugin-tailwind';
+
+const project = await loadProject(config, cwd);
+const files = await emitViaTerrazzo(project, {
+  cssOptions: { filename: 'tokens.css' },
+  plugins: [
+    cssInJsPlugin({ filename: 'tokens.js' }),
+    tailwindPlugin({ filename: 'tailwind.tokens.css' }),
+  ],
+  selection: 'themes', // default — full cartesian fan-out for runtime CSS
+});
+// files → [{ filename, contents }, ...]
+```
+
+Options:
+
+| Option | What |
+| --- | --- |
+| `selection` | `'themes'` (default, full cartesian), `'presets'` (one entry per declared preset), or explicit `Array<{ input, name? }>`. Library consumers (MUI / Vuetify) usually want `'presets'`. |
+| `cssOptions` | Extra `@terrazzo/plugin-css` options (filename, include / exclude, transform, utility, colorDepth). `permutations` and `variableName` are managed internally — passing them here is a no-op. |
+| `plugins` | Additional Terrazzo plugins to run alongside `plugin-css`. |
+
+**Requires a resolver-backed project.** Layered (`config.axes`) and plain-parse paths don't populate `parserInput`; the wrapper throws with a clear error on those.
+
+**Not the addon's emission path.** Storybook's runtime CSS still comes from `projectCss` with chrome aliases. `emitViaTerrazzo` is for library-level consumers driving their own build or for future display-side integrations.
+
 ## Types
 
 ### `Config`
@@ -152,9 +185,41 @@ interface Project {
   graph: TokenMap; // default theme's resolved tokens
   /** Absolute paths of every file loaded while building the project (resolver + `$ref` targets, overlay files, or globbed plain-parse files). */
   sourceFiles: string[];
+  /** Loader cwd — what all config-relative paths resolved against. */
+  cwd: string;
+  /** Retained Terrazzo parse output for `emitViaTerrazzo`. Present for resolver-backed projects; undefined for layered / plain-parse paths. */
+  parserInput?: ParserInput;
   diagnostics: Diagnostic[];
 }
 ```
+
+### `ParserInput`
+
+Pass-through bag of the three values Terrazzo's programmatic `build()` needs. Consumers treat it as opaque — feed the whole object into `build()` (or into `emitViaTerrazzo`, which handles that for you).
+
+```ts
+interface ParserInput {
+  tokens: Record<string, TokenNormalized>; // unified pre-permutation token graph
+  sources: InputSourceWithDocument[];       // parser's input sources
+  resolver: Resolver;                        // the Terrazzo resolver object
+}
+```
+
+### `SwatchbookIntegration`
+
+Contract for display-side integrations plugged into the addon via its `integrations[]` option. An integration names a virtual module; the addon's Vite plugin serves whatever `render(project)` produces.
+
+```ts
+interface SwatchbookIntegration {
+  name: string;
+  virtualModule?: {
+    virtualId: string;                 // e.g. 'virtual:swatchbook/tailwind.css'
+    render(project: Project): string;  // produce the module body
+  };
+}
+```
+
+See the [Integrations section](../integrations/) for factories that build these for Tailwind and CSS-in-JS.
 
 ### `Theme`
 

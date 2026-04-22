@@ -50,6 +50,8 @@ interface Project {
   themesResolved: Record<string, TokenMap>; // theme.name → resolved tokens
   graph: TokenMap;             // default theme's resolved tokens
   sourceFiles: string[];       // every file that fed the build (for watchers)
+  cwd: string;                 // loader cwd — config-relative paths resolve here
+  parserInput?: ParserInput;   // raw Terrazzo parse output (resolver path only) — see `emitViaTerrazzo`
   diagnostics: Diagnostic[];   // parser / validator / resolver findings
 }
 ```
@@ -60,8 +62,27 @@ Properties:
 - **`sourceFiles` is the canonical watch set.** The addon's Vite plugin and the MCP server both use it to decide what to watch for HMR / live-reload.
 - **Diagnostics flow as data, not exceptions.** Parse errors, unresolved aliases, invalid preset axis values — all land in `project.diagnostics` with a severity. The `<Diagnostics />` block renders them.
 - **One axis type.** `Axis.source` is `'resolver'` (DTCG resolver modifier), `'layered'` (authored per-axis layer globs), or `'synthetic'` (single-axis fallback for projects without a resolver or layers). Everything downstream treats them uniformly.
+- **`parserInput` is the Terrazzo escape hatch.** The `{ tokens, sources, resolver }` triple Terrazzo's programmatic `build()` wants. Retained on the Project so [`emitViaTerrazzo`](../reference/core.mdx) drives the Terrazzo plugin pipeline without re-parsing. Undefined for layered + plain-parse paths; resolver-backed only.
 
 `ProjectSnapshot` (in `packages/blocks/src/types.ts`) is the JSON-safe slice of `Project` that the addon's virtual module and provider deal in. It's intentionally pruned — no raw Terrazzo `TokenNormalized` shapes, just the fields blocks need.
+
+## Display-side integrations
+
+The addon is tool-agnostic. Third-party integrations (Tailwind v4, CSS-in-JS for emotion / styled-components, future emitters) ship as separate packages under `@unpunnyfuns/swatchbook-integrations/*` and plug into the addon via its `integrations: SwatchbookIntegration[]` option.
+
+```ts
+interface SwatchbookIntegration {
+  name: string;
+  virtualModule?: {
+    virtualId: string;
+    render(project: Project): string;
+  };
+}
+```
+
+The addon's Vite plugin iterates `integrations[]`, resolves each `virtualId`, serves whatever `render(project)` produces, and invalidates every integration-contributed module on HMR alongside `virtual:swatchbook/tokens`. The addon itself learns nothing about Tailwind, emotion, or anything else — integrations own their library-specific logic.
+
+The `Project` snapshot passed to `render` carries everything: axes, themes, presets, resolved maps, `cssVarPrefix`, plus `parserInput` for integrations that want to drive Terrazzo's plugin pipeline. See the [Integrations section](../integrations/) for factory usage.
 
 ## Data flow — static build path
 
