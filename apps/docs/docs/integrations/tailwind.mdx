@@ -18,9 +18,9 @@ Tailwind v4's Vite plugin is required to process the `@theme` block the integrat
 
 ## Wire
 
-**`.storybook/main.ts`** — plug the integration into the addon options and add Tailwind's Vite plugin:
+Plug the integration into the addon options and add Tailwind's Vite plugin to your Storybook config:
 
-```ts
+```ts title=".storybook/main.ts"
 import tailwindcss from '@tailwindcss/vite';
 import { defineMain } from '@storybook/react-vite/node';
 import tailwindIntegration from '@unpunnyfuns/swatchbook-integrations/tailwind';
@@ -43,17 +43,11 @@ export default defineMain({
 });
 ```
 
-**`.storybook/preview.tsx`** — import the virtual module:
-
-```ts
-import 'virtual:swatchbook/tailwind.css';
-```
-
-That's it. No hand-written `tailwind.css`, no `@theme` block to keep in sync.
+That's it — the addon auto-injects Tailwind's `@theme` block into the preview. No hand-written `tailwind.css`, no manual `@theme` block to keep in sync, no extra import in `preview.tsx`.
 
 ## What gets generated
 
-With `cssVarPrefix: 'sb'` in your swatchbook config, the virtual module serves an `@theme` block like:
+With `cssVarPrefix: 'sb'` in your swatchbook config, the addon serves an `@theme` block like:
 
 ```css
 @import 'tailwindcss';
@@ -111,10 +105,10 @@ The map replaces the default entirely — what you list is what you get. Tailwin
 
 ## HMR
 
-Editing any token file in your swatchbook project re-renders the `@theme` block and invalidates the virtual module. Tailwind's compiler picks up the change on the next request, utilities regenerate, and the preview repaints — no server restart.
+Editing any token file in your swatchbook project re-renders the `@theme` block. Tailwind's compiler picks up the change on the next request, utilities regenerate, and the preview repaints — no server restart.
 
 ## What this doesn't do
 
-- **Doesn't write `tailwind.css` to disk.** The integration serves a virtual module for the Storybook preview. For your production build you run Tailwind's CLI / Vite plugin against your own `@theme` source.
+- **Doesn't produce production CSS.** The integration feeds the Storybook preview only. For your production build you run Tailwind's CLI / Vite plugin against your own `@theme` source.
 - **Doesn't enable `@tailwindcss/vite` outside Storybook.** You wire Tailwind's Vite plugin once in the Storybook config; your app's own build is independent.
 - **Doesn't proxy Tailwind's own plugin system.** Variants, plugins, darkMode config, arbitrary values — all pass through to Tailwind untouched.

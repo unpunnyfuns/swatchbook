@@ -11,6 +11,18 @@ export const COLOR_FORMAT_GLOBAL_KEY = 'swatchbookColorFormat';
 export const VIRTUAL_MODULE_ID = 'virtual:swatchbook/tokens';
 export const RESOLVED_VIRTUAL_MODULE_ID = `\0${VIRTUAL_MODULE_ID}`;
 
+/**
+ * Aggregate virtual module the addon's preview always imports. Its body
+ * is a sequence of side-effect imports — one per integration that
+ * declared `virtualModule.autoInject: true`. Integrations contributing
+ * global stylesheets (Tailwind's `@theme` block, a rules-heavy CSS
+ * file) can opt into this path so consumers never hand-write an
+ * `import 'virtual:swatchbook/…'` line themselves; the body is empty
+ * when no integration opts in.
+ */
+export const INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID = 'virtual:swatchbook/integration-side-effects';
+export const RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID = `\0${INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID}`;
+
 export const STYLE_ELEMENT_ID = 'swatchbook-tokens';
 
 /** Channel event: preview → manager, carries theme list + mode. */

@@ -4,7 +4,13 @@ import { type FSWatcher, watch as fsWatch } from 'node:fs';
 import { basename, dirname, isAbsolute, resolve as resolvePath } from 'node:path';
 import picomatch from 'picomatch';
 import type { Plugin } from 'vite';
-import { HMR_EVENT, RESOLVED_VIRTUAL_MODULE_ID, VIRTUAL_MODULE_ID } from '#/constants.ts';
+import {
+  HMR_EVENT,
+  INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID,
+  RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID,
+  RESOLVED_VIRTUAL_MODULE_ID,
+  VIRTUAL_MODULE_ID,
+} from '#/constants.ts';
 
 export interface SwatchbookPluginOptions {
   config: Config;
@@ -39,10 +45,13 @@ export function swatchbookTokensPlugin({
 
   /** Map of resolvedId → integration, indexed once. */
   const integrationById = new Map<string, SwatchbookIntegration>();
+  /** Virtual IDs the preview auto-imports as side effects (global CSS). */
+  const autoInjectIds: string[] = [];
   for (const integration of integrations) {
     const vm = integration.virtualModule;
     if (!vm) continue;
     integrationById.set(resolvedId(vm.virtualId), integration);
+    if (vm.autoInject) autoInjectIds.push(vm.virtualId);
   }
 
   return {
@@ -55,6 +64,9 @@ export function swatchbookTokensPlugin({
 
     resolveId(id) {
       if (id === VIRTUAL_MODULE_ID) return RESOLVED_VIRTUAL_MODULE_ID;
+      if (id === INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID) {
+        return RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID;
+      }
       for (const integration of integrations) {
         if (integration.virtualModule?.virtualId === id) {
           return resolvedId(integration.virtualModule.virtualId);
@@ -64,6 +76,11 @@ export function swatchbookTokensPlugin({
     },
 
     load(id) {
+      if (id === RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID) {
+        // Aggregate side-effect imports. Empty when no integration
+        // opted in — still a valid ESM module, just a no-op.
+        return autoInjectIds.map((vid) => `import ${JSON.stringify(vid)};`).join('\n');
+      }
       const integration = integrationById.get(id);
       if (integration?.virtualModule) {
         if (!project) return '';

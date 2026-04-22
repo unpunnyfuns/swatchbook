@@ -60,6 +60,11 @@ export default function tailwindIntegration(
     virtualModule: {
       virtualId,
       render: (project) => renderTailwindTheme(project, roles),
+      // Tailwind's `@theme` block is a global stylesheet — exactly the
+      // kind of payload the addon should auto-inject into the preview,
+      // so consumers don't hand-write a second `import` line after
+      // plugging the integration in.
+      autoInject: true,
     },
   };
 }

@@ -235,5 +235,14 @@ export interface SwatchbookIntegration {
     virtualId: string;
     /** Produce the module body for the currently-loaded project. */
     render(project: Project): string;
+    /**
+     * When `true`, the addon's preset auto-injects a side-effect import
+     * (`import '<virtualId>';`) into the Storybook preview. Appropriate
+     * for integrations that contribute global CSS (Tailwind's `@theme`
+     * block, a stylesheet full of rules). Integrations exposing named
+     * exports that consumers import per-site (e.g. `import { theme }
+     * from '...'`) should leave this `false`. Defaults to `false`.
+     */
+    autoInject?: boolean;
   };
 }
