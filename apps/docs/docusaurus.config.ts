@@ -102,6 +102,23 @@ const config: Config = {
         // duplicate what the left rail already shows.
         { type: 'docSidebar', sidebarId: 'blocks', position: 'left', label: 'Blocks' },
         { type: 'docSidebar', sidebarId: 'guides', position: 'left', label: 'Guides' },
+        // `href` with the fully-qualified `/next/integrations` path —
+        // the integrations docs currently only exist on the unreleased
+        // (Next) version; older versioned snapshots predate the
+        // integrations package. `href` is treated as an absolute URL
+        // so Docusaurus doesn't version-resolve it, and consumers on
+        // any doc version end up on the current-state integrations
+        // overview.
+        //
+        // Once a released version snapshots the integrations docs,
+        // swap this for `{ type: 'docSidebar', sidebarId: 'integrations' }`
+        // (which will version-resolve correctly because the sidebar
+        // will then exist in every versioned_sidebars/*.json).
+        {
+          href: '/swatchbook/next/integrations/',
+          label: 'Integrations',
+          position: 'left',
+        },
         { type: 'docSidebar', sidebarId: 'reference', position: 'left', label: 'Reference' },
         { type: 'docSidebar', sidebarId: 'developers', position: 'left', label: 'Developers' },
         { href: 'pathname:///storybook/', label: 'Live Storybook', position: 'left' },
