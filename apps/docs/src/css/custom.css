@@ -48,3 +48,24 @@
 [data-theme='dark'] {
   --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.08);
 }
+
+/*
+ * Accessibility — WCAG 2.1 SC 1.4.1 (Use of Color) + 1.4.11 (Non-text
+ * Contrast). Axe reported that links in body content weren't
+ * distinguishable from surrounding text without colour, and that the
+ * a11y=High-contrast amber primary (light yellow on light-text
+ * neutral) fell below the 3:1 link-vs-surrounding-text contrast
+ * threshold. Underlining body links sidesteps both: colour is no
+ * longer the sole distinguisher, and the 1.4.11 ratio requirement
+ * only applies when colour is carrying the signal.
+ *
+ * Scoped to rendered MDX content (`.markdown`) so navbar / sidebar /
+ * footer / button-style links stay untouched — those land
+ * affordances via position and chrome rather than inline prose
+ * context.
+ */
+.markdown a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: from-font;
+}
