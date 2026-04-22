@@ -8,7 +8,8 @@
       "@unpunnyfuns/swatchbook-addon",
       "@unpunnyfuns/swatchbook-blocks",
       "@unpunnyfuns/swatchbook-switcher",
-      "@unpunnyfuns/swatchbook-mcp"
+      "@unpunnyfuns/swatchbook-mcp",
+      "@unpunnyfuns/swatchbook-integrations"
     ]
   ],
   "linked": [],
