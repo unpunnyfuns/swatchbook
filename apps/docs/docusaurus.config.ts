@@ -96,24 +96,14 @@ const config: Config = {
       items: [
         // Quickstart lives in the `home` sidebar reachable via the
         // logo/title; every other section gets a navbar pill.
-        //
-        // Concepts and Integrations use `href` pointing at the /next/
-        // path rather than `type: 'docSidebar'` because the matching
-        // sidebars don't exist in every versioned_sidebars/*.json
-        // snapshot (Integrations is new; Concepts was restructured).
-        // Swap both to `docSidebar` entries after the upcoming 0.13
-        // release is cut and older versioned snapshots are retired.
-        {
-          href: '/swatchbook/next/concepts/axes-vs-themes/',
-          label: 'Concepts',
-          position: 'left',
-        },
+        { type: 'docSidebar', sidebarId: 'concepts', position: 'left', label: 'Concepts' },
         { type: 'docSidebar', sidebarId: 'blocks', position: 'left', label: 'Blocks' },
         { type: 'docSidebar', sidebarId: 'guides', position: 'left', label: 'Guides' },
         {
-          href: '/swatchbook/next/integrations/',
-          label: 'Integrations',
+          type: 'docSidebar',
+          sidebarId: 'integrations',
           position: 'left',
+          label: 'Integrations',
         },
         { type: 'docSidebar', sidebarId: 'reference', position: 'left', label: 'Reference' },
         { type: 'docSidebar', sidebarId: 'developers', position: 'left', label: 'Developers' },
