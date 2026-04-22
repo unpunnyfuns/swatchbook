@@ -2,7 +2,7 @@ import preview from '../../.storybook/preview.tsx';
 import { Card } from '../components/Card.tsx';
 
 const meta = preview.meta({
-  title: 'Components/Card',
+  title: 'Integrations/CSS/Card',
   component: Card,
   tags: ['autodocs'],
   args: {

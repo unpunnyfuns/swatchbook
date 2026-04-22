@@ -2,7 +2,7 @@ import preview from '../../.storybook/preview.tsx';
 import { Button } from '../components/Button.tsx';
 
 const meta = preview.meta({
-  title: 'Components/Button',
+  title: 'Integrations/CSS/Button',
   component: Button,
   tags: ['autodocs'],
   argTypes: {

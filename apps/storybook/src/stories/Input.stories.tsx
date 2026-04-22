@@ -2,7 +2,7 @@ import preview from '../../.storybook/preview.tsx';
 import { Input } from '../components/Input.tsx';
 
 const meta = preview.meta({
-  title: 'Components/Input',
+  title: 'Integrations/CSS/Input',
   component: Input,
   tags: ['autodocs'],
   args: { placeholder: 'Type a theme name…' },
