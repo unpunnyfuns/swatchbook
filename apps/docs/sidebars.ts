@@ -45,6 +45,11 @@ const sidebars: SidebarsConfig = {
     'guides/token-dashboard',
     'guides/multi-axis-walkthrough',
   ],
+  integrations: [
+    'integrations/integrations',
+    'integrations/tailwind',
+    'integrations/css-in-js',
+  ],
   reference: ['reference/addon', 'reference/core', 'reference/config', 'reference/mcp'],
   developers: [
     'developers/developers',
