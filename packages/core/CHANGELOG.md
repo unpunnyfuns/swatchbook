@@ -1,5 +1,18 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.13.0
+
+### Minor Changes
+
+- f03161f: Add `emitViaTerrazzo(project, options)` — axis-aware wrapper around `@terrazzo/parser`'s programmatic `build()`. Auto-derives compound-selector permutations from `project.themes` (or `project.presets`, via `selection`), pins `variableName` to `cssVarPrefix`, and runs `@terrazzo/plugin-css` alongside any additional Terrazzo plugins the caller passes. Foundational for library-level platform emission (Tailwind `@theme`, CSS-in-JS accessors, Swift, Sass, …) without users re-deriving axis composition per plugin.
+
+  Also ships a pnpm patch for `@terrazzo/plugin-css-in-js@2.0.3` fixing a one-line bug where dashed path segments (`number.line-height.loose`, `color.accent.bg-hover`) crash the build. File upstream separately.
+
+### Patch Changes
+
+- 018f518: Add `get_axis_variance` MCP tool + extract the variance algorithm into `@unpunnyfuns/swatchbook-core` (`analyzeAxisVariance`). The algorithm now lives in one place and drives both the `AxisVariance` doc block and the new MCP tool, which classifies a token's axis dependence (`constant` / `single` / `multi`) and returns the per-axis breakdown of values seen in each context.
+- 74e755c: Retain Terrazzo's parser output on `Project.parserInput` (`{ tokens, sources, resolver }`) and the loader's `cwd` on `Project.cwd`. Adds `SwatchbookIntegration` to the public type surface. All additive — no behaviour change for existing consumers. Unblocks library-level emission wrappers that drive Terrazzo's programmatic `build()` without re-parsing.
+
 ## 0.12.0
 
 ## 0.11.6

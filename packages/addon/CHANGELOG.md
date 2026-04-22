@@ -1,5 +1,34 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.13.0
+
+### Minor Changes
+
+- 19d9948: Display-side integration plugin system. The addon's Vite plugin now iterates a new `integrations: SwatchbookIntegration[]` option, serving each integration's virtual module and invalidating it on HMR. The addon itself stays tool-neutral — integrations ship as separate packages.
+
+  First integration published as `@unpunnyfuns/swatchbook-integrations/tailwind`: a virtual module (`virtual:swatchbook/tailwind.css`) whose `@theme` block aliases Tailwind v4 utility scales to the project's DTCG tokens via `var(--<cssVarPrefix>-*)` references, nested under the same prefix so they never collide with Tailwind's shipped scales. Users import it from `.storybook/preview` and the switch-toolbar flips every Tailwind utility via cascade.
+
+### Patch Changes
+
+- e9ce3ed: Docs: add README for the `@unpunnyfuns/swatchbook-integrations` package — covers the two shipping subpaths (`/tailwind` and `/css-in-js`), install + wiring pattern, the `SwatchbookIntegration` contract for custom integrations, and explicit scope boundaries (display-side only, no production artifact writes, MUI-shape deferred).
+- 8fe014a: Add `@unpunnyfuns/swatchbook-integrations/css-in-js` subpath. Contributes `virtual:swatchbook/theme` — a typed JS accessor whose leaves are `var(--<cssVarPrefix>-*)` references. Drop-in for styled-components / emotion / any ThemeProvider that passes its theme object through as-is; values stay stable across tuples and the swatchbook toolbar flips everything via CSS cascade.
+
+  Covers the JSX-provider recipes in `@storybook/addon-themes` except MUI (which needs resolved-value emission — deferred until demand surfaces).
+
+- Updated dependencies [018f518]
+- Updated dependencies [ecc4e74]
+- Updated dependencies [fea3791]
+- Updated dependencies [34a71e7]
+- Updated dependencies [4349d23]
+- Updated dependencies [f2914ae]
+- Updated dependencies [f03161f]
+- Updated dependencies [a6d6f97]
+- Updated dependencies [851d791]
+- Updated dependencies [74e755c]
+  - @unpunnyfuns/swatchbook-core@0.13.0
+  - @unpunnyfuns/swatchbook-blocks@0.13.0
+  - @unpunnyfuns/swatchbook-switcher@0.13.0
+
 ## 0.12.0
 
 ### Patch Changes

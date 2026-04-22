@@ -1,0 +1,90 @@
+---
+id: integrations
+title: Integrations
+sidebar_position: 1
+---
+
+# Integrations
+
+Display-side integrations that plug swatchbook's DTCG tokens into third-party tooling running inside Storybook. Each integration ships as a subpath of [`@unpunnyfuns/swatchbook-integrations`](https://www.npmjs.com/package/@unpunnyfuns/swatchbook-integrations) and contributes a virtual module the preview imports.
+
+## Philosophy
+
+Swatchbook's purpose is **displaying DTCG tokens in Storybook**, not replacing downstream build pipelines. Integrations wire the token graph into whichever runtime library a story needs — Tailwind's `@theme` block, a JS theme accessor for CSS-in-JS, and so on — without requiring the addon itself to know anything about that library. The addon runs the integration's `render(project)` and serves the output as a virtual module; the integration package owns the library-specific logic.
+
+Production artifacts (writing `tokens.js` / `tailwind.config.css` to disk for a consumer's own build) are not swatchbook's job — `emitViaTerrazzo` in `@unpunnyfuns/swatchbook-core` gives you the same plumbing programmatically if you need artifacts outside Storybook.
+
+## Available integrations
+
+| Subpath | Covers | What it contributes |
+| --- | --- | --- |
+| [`/tailwind`](./tailwind.mdx) | Tailwind v4 | `virtual:swatchbook/tailwind.css` — an `@theme` block aliasing Tailwind utility scales to `var(--<cssVarPrefix>-*)` references |
+| [`/css-in-js`](./css-in-js.mdx) | emotion, styled-components, any ThemeProvider consuming a JS theme object | `virtual:swatchbook/theme` — typed JS accessor with `var(--<cssVarPrefix>-*)` leaves |
+
+## Recipe coverage
+
+Mapped against the `@storybook/addon-themes` getting-started recipes — swatchbook's toolbar replaces `addon-themes` outright (multi-axis, DTCG-native), and integrations cover the emitter side:
+
+| Library | Covered by |
+| --- | --- |
+| Tailwind | `/tailwind` integration |
+| Bootstrap | CSS-var consumption + toolbar `data-*` attrs (no integration needed — Bootstrap's `$theme-colors` aliases `--<prefix>-*` directly) |
+| PostCSS | CSS-var consumption + toolbar `data-*` attrs (same) |
+| emotion | `/css-in-js` integration |
+| styled-components | `/css-in-js` integration |
+| MUI | not covered — needs resolved-value emission at factory time. See the note in [`/css-in-js`](./css-in-js) |
+
+## Wiring an integration
+
+All integrations plug into the addon's options in `.storybook/main.ts`:
+
+```ts
+import { defineMain } from '@storybook/react-vite/node';
+import tailwindIntegration from '@unpunnyfuns/swatchbook-integrations/tailwind';
+import cssInJsIntegration from '@unpunnyfuns/swatchbook-integrations/css-in-js';
+
+export default defineMain({
+  addons: [
+    {
+      name: '@unpunnyfuns/swatchbook-addon',
+      options: {
+        configPath: '../swatchbook.config.ts',
+        integrations: [tailwindIntegration(), cssInJsIntegration()],
+      },
+    },
+  ],
+});
+```
+
+Each integration contributes a virtual module the preview imports:
+
+```ts
+// .storybook/preview.tsx
+import 'virtual:swatchbook/tailwind.css';    // from /tailwind
+import { theme } from 'virtual:swatchbook/theme';  // from /css-in-js
+```
+
+The addon's Vite plugin resolves the virtual IDs, runs `render(project)` on load, and invalidates the modules on token-file edits so the output stays in lockstep with the toolbar.
+
+## Writing your own integration
+
+An integration is a factory returning a `SwatchbookIntegration`:
+
+```ts
+import type { SwatchbookIntegration } from '@unpunnyfuns/swatchbook-core';
+
+export default function myIntegration(): SwatchbookIntegration {
+  return {
+    name: 'my-integration',
+    virtualModule: {
+      virtualId: 'virtual:swatchbook/my-module',
+      render: (project) => {
+        // Derive whatever string you want from the loaded Project.
+        return `/* generated from ${project.themes.length} themes */`;
+      },
+    },
+  };
+}
+```
+
+The `render` function receives the loaded `Project` — axes, themes, presets, resolved token maps, the configured `cssVarPrefix`, and the retained Terrazzo `parserInput` for plugin-pipeline emission. Return whatever string the virtual module should serve. The addon handles the rest.

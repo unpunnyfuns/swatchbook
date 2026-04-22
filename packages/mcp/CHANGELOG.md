@@ -1,5 +1,18 @@
 # @unpunnyfuns/swatchbook-mcp
 
+## 0.13.0
+
+### Minor Changes
+
+- 018f518: Add `get_axis_variance` MCP tool + extract the variance algorithm into `@unpunnyfuns/swatchbook-core` (`analyzeAxisVariance`). The algorithm now lives in one place and drives both the `AxisVariance` doc block and the new MCP tool, which classifies a token's axis dependence (`constant` / `single` / `multi`) and returns the per-axis breakdown of values seen in each context.
+
+### Patch Changes
+
+- Updated dependencies [018f518]
+- Updated dependencies [f03161f]
+- Updated dependencies [74e755c]
+  - @unpunnyfuns/swatchbook-core@0.13.0
+
 ## 0.12.0
 
 ### Minor Changes
