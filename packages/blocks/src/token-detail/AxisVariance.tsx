@@ -1,4 +1,4 @@
-import { analyzeAxisVariance } from '@unpunnyfuns/swatchbook-core';
+import { analyzeAxisVariance } from '@unpunnyfuns/swatchbook-core/variance';
 import type { Axis as CoreAxis, Theme as CoreTheme, TokenMap } from '@unpunnyfuns/swatchbook-core';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
