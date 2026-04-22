@@ -1,5 +1,36 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.13.0
+
+### Patch Changes
+
+- 018f518: Add `get_axis_variance` MCP tool + extract the variance algorithm into `@unpunnyfuns/swatchbook-core` (`analyzeAxisVariance`). The algorithm now lives in one place and drives both the `AxisVariance` doc block and the new MCP tool, which classifies a token's axis dependence (`constant` / `single` / `multi`) and returns the per-axis breakdown of values seen in each context.
+- ecc4e74: Docs: new guide for migrating from `@storybook/addon-themes` — decorator-by-decorator mapping to the swatchbook equivalent, coverage for class-based / data-attribute / JSX-provider patterns, honest notes on what's lost (MUI-style resolved-value factories) and what's gained.
+- fea3791: Docs: add Integrations entry to the top navbar. Previously the section was only reachable via the intro page's reading guide, so users on `/next/` landed on the docs without any surfaced path to the integrations recipes.
+- 34a71e7: Docs: new Integrations section covering the `@unpunnyfuns/swatchbook-integrations` package. Overview page with the recipe-coverage table + philosophy, plus per-subpath recipes for `/tailwind` and `/css-in-js` (wiring, generated output, prefix collision story, customisation hooks).
+- 4349d23: Docs: reference/core gains an `emitViaTerrazzo` section, `ParserInput` + `SwatchbookIntegration` type documentation, and the new `Project.cwd` + `Project.parserInput` fields. Architecture doc picks up `parserInput` + the display-side integrations plugin system.
+- f2914ae: Docs reorg:
+
+  - Concepts promoted to a top-level navbar entry (was nested in the home sidebar).
+  - `concepts/theme-reactivity` → `guides/consuming-the-active-theme`, retitled and tone-shifted to guide register (how-to, not concept).
+  - `concepts/diagnostics` folded into the `<Diagnostics />` block reference in `reference/blocks/utility.mdx`, where its usage context lives. The `Diagnostic` type remains in `reference/core.mdx`.
+  - Root README + docs intro updated to surface integrations + the reordered navigation.
+
+- a6d6f97: Docs: raise contrast on light-theme Prism syntax highlighting for `.token.function`, `.keyword`, `.deleted`, `.builtin`, and `.attr-name` from `#d73a49` (4.29:1 against `#f6f8fa` — below WCAG AA) to `#b31d28` (~6.4:1). Axe-reported in bash code blocks like `npm install …`.
+- 851d791: fix(tokens): resolve dark-mode accent contrast failure + push High-contrast to AAA across the board
+
+  Two related contrast fixes on the Storybook reference fixture, surfaced by the new `get_color_contrast` MCP tool against `color.accent.bg` / `color.surface.default` pairs:
+
+  - **Dark · Default · Normal** — `color.accent.bg` inherited `blue.700` from base, collided with the dark neutral.900 surface at a **2.66:1** ratio (below even the 3:1 non-text threshold). `dark.json` now overrides `accent.bg` to `blue.500` and `accent.bg-hover` to `blue.300` for a lift-on-hover dark-mode button. Lands at **4.85:1** — clear 3:1 non-text and AA for large text.
+  - **Dark · Default · High** and **Light · Default · High** — brought to AAA across the board via alias indirection. Each mode file now declares a `color.accessible.accent.*` namespace (Light: deep blue.900 button + white text; Dark: inverted blue.100 button + neutral.900 dark text), and `contrast-high.json` aliases `color.accent.bg / bg-hover / fg` to that namespace. `contrast-high.json` stays mode-agnostic; each mode owns its own AAA values. Resolved ratios: **10.36:1** (Light + HC) and **14.63:1** (Dark + HC) — AAA for both accent-bg-vs-surface and accent-fg-vs-accent-bg.
+
+  Same alias-indirection pattern already used in the docs-site's a11y overlay (`color.accessible.primary.*` → a11y = High-contrast). Applied here to the Storybook reference fixture's accent scale.
+
+- Updated dependencies [018f518]
+- Updated dependencies [f03161f]
+- Updated dependencies [74e755c]
+  - @unpunnyfuns/swatchbook-core@0.13.0
+
 ## 0.12.0
 
 ### Patch Changes
