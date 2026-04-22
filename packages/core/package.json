@@ -53,6 +53,7 @@
     "format:check": "oxfmt --check -c ../../.oxfmtrc.json src"
   },
   "dependencies": {
+    "@terrazzo/json-schema-tools": "^0.2.1",
     "@terrazzo/parser": "^2.0.3",
     "@terrazzo/token-tools": "^2.0.3"
   },

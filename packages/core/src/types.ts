@@ -1,4 +1,5 @@
-import type { TokenNormalized } from '@terrazzo/parser';
+import type { InputSourceWithDocument } from '@terrazzo/json-schema-tools';
+import type { Resolver, TokenNormalized } from '@terrazzo/parser';
 
 export type TokenMap = Record<string, TokenNormalized>;
 
@@ -158,7 +159,35 @@ export interface Project {
    * (the addon's Vite plugin does exactly that).
    */
   sourceFiles: string[];
+  /**
+   * Absolute path of the directory all config-relative paths (resolver,
+   * token globs, layered overlays) resolved against. Passed into
+   * `loadProject(config, cwd)`; retained here because downstream emitters
+   * need it for `defineConfig({ cwd })` in Terrazzo's JS API.
+   */
+  cwd: string;
+  /**
+   * Raw Terrazzo parse output retained so downstream emitters can drive
+   * Terrazzo's plugin pipeline (`emitViaTerrazzo(project, [...plugins])`)
+   * without re-parsing from disk. Present for resolver-backed projects;
+   * currently `undefined` for layered + plain-parse paths — those would
+   * need a synthesized resolver before `build()` accepts them.
+   */
+  parserInput?: ParserInput;
   diagnostics: Diagnostic[];
+}
+
+/**
+ * Pass-through bag of the three values `@terrazzo/parser`'s `build()`
+ * requires alongside a config. Retained verbatim from `loadResolver()`
+ * so the wrapper call is zero-I/O. Consumers should treat this as opaque
+ * (feed the whole object into `build()`); swatchbook itself does not read
+ * individual fields.
+ */
+export interface ParserInput {
+  tokens: Record<string, TokenNormalized>;
+  sources: InputSourceWithDocument[];
+  resolver: Resolver;
 }
 
 /**
@@ -178,4 +207,33 @@ export function permutationID(input: Record<string, string>): string {
 export interface ResolvedTheme {
   name: string;
   tokens: TokenMap;
+}
+
+/**
+ * Display-side integration the Storybook addon exposes for a third-party
+ * tool (Tailwind v4, emotion, vanilla-extract, bootstrap, whatever).
+ * Each integration contributes at most one virtual module whose body is
+ * derived from the loaded `Project`. The addon's Vite plugin serves the
+ * virtual module under `integration.virtualModule.virtualId` and
+ * re-renders it on HMR so the output stays in lockstep with whatever
+ * the toolbar / config / tokens currently say.
+ *
+ * Integrations are published as their own packages
+ * (`@unpunnyfuns/swatchbook-integrations/tailwind`, …) and composed into
+ * the addon via its options; the addon itself stays tool-agnostic.
+ */
+export interface SwatchbookIntegration {
+  /** Stable identifier for logs + diagnostics. */
+  name: string;
+  /**
+   * Optional virtual module this integration serves. Users import
+   * `virtualId` from their preview (or main) and receive whatever
+   * `render(project)` produces for the current project state.
+   */
+  virtualModule?: {
+    /** e.g. `'virtual:swatchbook/tailwind.css'`. Must be unique. */
+    virtualId: string;
+    /** Produce the module body for the currently-loaded project. */
+    render(project: Project): string;
+  };
 }

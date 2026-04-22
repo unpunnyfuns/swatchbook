@@ -92,6 +92,8 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     themesResolved: filteredResolved,
     graph,
     sourceFiles: normalized.sourceFiles,
+    cwd,
+    ...(normalized.parserInput !== undefined && { parserInput: normalized.parserInput }),
     diagnostics: [
       ...toDiagnostics(logger),
       ...normalized.diagnostics,
