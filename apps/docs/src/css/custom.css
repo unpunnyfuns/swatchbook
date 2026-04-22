@@ -69,3 +69,22 @@
   text-underline-offset: 0.15em;
   text-decoration-thickness: from-font;
 }
+
+/*
+ * Accessibility — WCAG 2.1 SC 1.4.3 (Contrast). The default Prism
+ * `github` theme colours several token classes (`function`, `keyword`,
+ * `deleted`, `built-in`, `attr-name`) with `#d73a49`, which hits only
+ * 4.29:1 against the code-block background `#f6f8fa` — axe flags this
+ * as failing the 4.5:1 AA threshold for text. Darkening to `#b31d28`
+ * (GitHub's own "danger" red) clears AA at ~6.4:1 while staying
+ * visually in-family with the rest of the light Prism palette.
+ *
+ * Light-theme only; the `dracula` dark theme is unaffected.
+ */
+html:not([data-theme='dark']) .prism-code .token.function,
+html:not([data-theme='dark']) .prism-code .token.keyword,
+html:not([data-theme='dark']) .prism-code .token.deleted,
+html:not([data-theme='dark']) .prism-code .token.builtin,
+html:not([data-theme='dark']) .prism-code .token.attr-name {
+  color: #b31d28;
+}
