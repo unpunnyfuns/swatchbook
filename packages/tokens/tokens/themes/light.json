@@ -14,6 +14,14 @@
       "muted":   { "$value": "{color.palette.neutral.600}" },
       "subtle":  { "$value": "{color.palette.neutral.500}" },
       "inverse": { "$value": "{color.palette.neutral.0}" }
+    },
+    "accessible": {
+      "$description": "AAA-contrast accent alternates for Light mode. Deep blue button background retains white text at AAA-normal contrast. The contrast-high overlay aliases role tokens to this namespace so each mode owns its own AAA values without contrast-high branching per mode.",
+      "accent": {
+        "bg":       { "$value": "{color.palette.blue.900}" },
+        "bg-hover": { "$value": "{color.palette.blue.900}" },
+        "fg":       { "$value": "{color.palette.neutral.0}" }
+      }
     }
   }
 }

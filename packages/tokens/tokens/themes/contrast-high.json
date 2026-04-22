@@ -1,7 +1,7 @@
 {
   "color": {
     "$type": "color",
-    "$description": "High-contrast overlay — strengthens borders and focus rings. Typography shifts to a Comic-family stack; irregular letterforms are easier to parse for some dyslexic readers. Surfaces and accents stay in mode/brand's lane.",
+    "$description": "High-contrast overlay — strengthens borders and focus rings, escalates the accent to AAA contrast via each mode's `color.accessible.accent.*` slot (alias indirection keeps this file mode-agnostic; Light picks up a deep-blue button, Dark an inverted light-blue-with-dark-text button). Typography shifts to a Comic-family stack for irregular-letterform legibility.",
     "border": {
       "default": { "$value": "{color.palette.neutral.700}" },
       "strong":  { "$value": "{color.palette.neutral.900}" },
@@ -10,6 +10,11 @@
     "text": {
       "muted":  { "$value": "{color.palette.neutral.700}" },
       "subtle": { "$value": "{color.palette.neutral.600}" }
+    },
+    "accent": {
+      "bg":       { "$value": "{color.accessible.accent.bg}" },
+      "bg-hover": { "$value": "{color.accessible.accent.bg-hover}" },
+      "fg":       { "$value": "{color.accessible.accent.fg}" }
     }
   },
   "typography": {
