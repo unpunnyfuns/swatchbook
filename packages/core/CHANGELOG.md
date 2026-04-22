@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.14.1
+
+### Patch Changes
+
+- b5976cd: Mark `emitCss`, `projectCss`, `emitTypes`, `emitViaTerrazzo`, and their associated option / result types (`EmitCssOptions`, `EmitViaTerrazzoOptions`, `EmitSelectionEntry`, `EmittedFile`, `ParserInput`) as `@internal`. Exports stay in place to preserve 0.13-era call sites, but editors that honour the tag will stop suggesting them to consumers. Actual removal waits for a future breaking window.
+
 ## 0.14.0
 
 ### Minor Changes
