@@ -31,7 +31,13 @@ export async function viteFinal(
   await writeTokenCodegen(config, cwd, options);
 
   const plugins = Array.isArray(viteConfig.plugins) ? [...viteConfig.plugins] : [];
-  plugins.push(swatchbookTokensPlugin({ config, cwd }));
+  plugins.push(
+    swatchbookTokensPlugin({
+      config,
+      cwd,
+      ...(options.integrations !== undefined && { integrations: options.integrations }),
+    }),
+  );
 
   return { ...viteConfig, plugins };
 }
