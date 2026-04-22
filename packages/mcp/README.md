@@ -49,6 +49,7 @@ CLI flags:
 | `get_aliased_by`      | `path`, `maxDepth?`                                       | Backward alias tree — every token that resolves through this path. Breadth-first with cycle protection; default max depth 6. |
 | `get_consumer_output` | `path`, `tuple?`                                          | CSS var, resolved value, compound `[data-…]` selector + HTML attrs needed to pin the tuple on `<html>`.        |
 | `get_color_formats`   | `path`, `theme?`                                          | Color token rendered in `hex` / `rgb` / `hsl` / `oklch` / `raw`, each with an `outOfGamut` flag.                |
+| `get_color_contrast`  | `foreground`, `background`, `theme?`, `algorithm?`        | Pair-wise contrast between two color tokens. `wcag21` returns the 1–21 ratio + AA/AAA pass flags (normal + large text); `apca` returns the signed Lc + body / large-text / non-text pass flags. |
 | `list_axes`           | (none)                                                    | Axes + contexts + themes + presets from the project config.                                                   |
 | `get_diagnostics`     | `severity?` `'error' \| 'warn' \| 'info'`                 | Parser / resolver / validation diagnostics.                                                                   |
 | `emit_css`            | (none)                                                    | Full project stylesheet — `:root` default + per-tuple compound-selector blocks. |

@@ -2,6 +2,7 @@ import type { Project } from '@unpunnyfuns/swatchbook-core';
 import { projectCss } from '@unpunnyfuns/swatchbook-core';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { computeContrast } from '#/contrast.ts';
 import { formatColorEveryWay } from '#/format-color.ts';
 import { matchPath } from '#/match.ts';
 
@@ -294,6 +295,59 @@ export function createServer(initial: Project): McpServer & {
         path,
         theme: themeName,
         formats: formatColorEveryWay(token.$value),
+      });
+    },
+  );
+
+  server.registerTool(
+    'get_color_contrast',
+    {
+      description:
+        'Compute the contrast between two color tokens for a given theme. WCAG 2.1 returns the ratio (1–21) plus AA/AAA pass flags for normal + large text; APCA returns the signed Lc value plus body / large-text / non-text pass flags (absolute-value thresholds 75 / 60 / 45). Use this when reasoning about text legibility, focus-ring visibility, border contrast, etc., without having to reimplement the luminance math in the agent. Per-theme so the same pair can be checked against Light, Dark, High-contrast, etc.',
+      inputSchema: {
+        foreground: z
+          .string()
+          .describe('Dot-path of the foreground color token, e.g. `color.text.default`.'),
+        background: z
+          .string()
+          .describe('Dot-path of the background color token, e.g. `color.surface.default`.'),
+        theme: z.string().optional().describe('Theme name. Defaults to the project default theme.'),
+        algorithm: z
+          .enum(['wcag21', 'apca'])
+          .optional()
+          .describe(
+            'Contrast algorithm. `wcag21` is the classic 4.5:1 ratio; `apca` is the perceptually-weighted Silver-draft successor. Defaults to `wcag21`.',
+          ),
+      },
+    },
+    ({ foreground, background, theme, algorithm }) => {
+      const themeName = theme ?? project.themes[0]?.name;
+      if (!themeName) return textResult('No themes in project.');
+      const fgTok = project.themesResolved[themeName]?.[foreground];
+      const bgTok = project.themesResolved[themeName]?.[background];
+      if (!fgTok) return textResult(`Foreground token not found: ${foreground}`);
+      if (!bgTok) return textResult(`Background token not found: ${background}`);
+      if (fgTok.$type !== 'color') {
+        return textResult(
+          `Foreground ${foreground} is not a color (got $type=${fgTok.$type ?? 'unknown'}).`,
+        );
+      }
+      if (bgTok.$type !== 'color') {
+        return textResult(
+          `Background ${background} is not a color (got $type=${bgTok.$type ?? 'unknown'}).`,
+        );
+      }
+      const result = computeContrast(fgTok.$value, bgTok.$value, algorithm ?? 'wcag21');
+      if (!result) {
+        return textResult(
+          'Could not compute contrast — one or both values failed to parse as a color.',
+        );
+      }
+      return jsonResult({
+        theme: themeName,
+        foreground: { path: foreground, value: stringifyValue(fgTok.$value) },
+        background: { path: background, value: stringifyValue(bgTok.$value) },
+        ...result,
       });
     },
   );

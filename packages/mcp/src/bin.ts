@@ -54,6 +54,7 @@ Tools exposed:
   get_aliased_by      Backward alias tree.
   get_consumer_output CSS var + data-attribute activation for a tuple.
   get_color_formats   hex / rgb / hsl / oklch / raw for a color token.
+  get_color_contrast  Pair-wise contrast (WCAG 2.1 ratio or APCA Lc) + pass flags.
   list_axes           Axes + contexts + themes + presets.
   get_diagnostics     Project diagnostics (optional severity filter).
   emit_css            Full project stylesheet.`);
