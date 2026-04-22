@@ -86,7 +86,7 @@ See *MDX doc blocks cannot use Storybook preview hooks* above — same shape, di
 
 **Shape:** every import in this repo names the file extension — `.ts`, `.tsx`, `.css`, `.json`, `.svg`. No inference, no "fake `.js`".
 
-**Rule:** `import { emitCss } from '#/css.ts'` — not `'#/css'` or `'../css'`. Vite, Vitest, tsdown, and Node strip-types all resolve TS-extension specifiers natively.
+**Rule:** `import { loadProject } from '#/load.ts'` — not `'#/load'` or `'../load'`. Vite, Vitest, tsdown, and Node strip-types all resolve TS-extension specifiers natively.
 
 ### Use `#/*` for internal paths
 
