@@ -27,6 +27,10 @@
       "types": "./dist/tailwind.d.mts",
       "import": "./dist/tailwind.mjs"
     },
+    "./css-in-js": {
+      "types": "./dist/css-in-js.d.mts",
+      "import": "./dist/css-in-js.mjs"
+    },
     "./package.json": "./package.json"
   },
   "imports": {
@@ -40,7 +44,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown src/tailwind.ts --format esm --dts --clean --sourcemap",
+    "build": "tsdown src/tailwind.ts src/css-in-js.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
