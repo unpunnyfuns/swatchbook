@@ -113,11 +113,7 @@ function invokeLoad(
   );
 }
 
-function integration(
-  name: string,
-  virtualId: string,
-  autoInject: boolean,
-): SwatchbookIntegration {
+function integration(name: string, virtualId: string, autoInject: boolean): SwatchbookIntegration {
   return {
     name,
     virtualModule: {
@@ -145,9 +141,7 @@ describe('integration-side-effects aggregate virtual module', () => {
     const plugin = swatchbookTokensPlugin({
       config: NOOP_CONFIG,
       cwd: CWD,
-      integrations: [
-        integration('opaque', 'virtual:swatchbook/opaque', false),
-      ],
+      integrations: [integration('opaque', 'virtual:swatchbook/opaque', false)],
     });
     expect(invokeLoad(plugin, RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID)).toBe('');
   });
