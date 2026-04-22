@@ -52,12 +52,11 @@
     "format": "oxfmt -c ../../.oxfmtrc.json src test",
     "format:check": "oxfmt --check -c ../../.oxfmtrc.json src test"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@unpunnyfuns/swatchbook-core": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
-    "@unpunnyfuns/swatchbook-core": "workspace:*",
     "@unpunnyfuns/swatchbook-tokens": "workspace:*",
     "tsdown": "^0.21.9",
     "typescript": "^6.0.0",
