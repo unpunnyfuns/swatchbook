@@ -19,6 +19,18 @@
     "border": {
       "default": { "$value": "{color.palette.neutral.700}" },
       "strong":  { "$value": "{color.palette.neutral.500}" }
+    },
+    "accent": {
+      "bg":       { "$value": "{color.palette.blue.500}" },
+      "bg-hover": { "$value": "{color.palette.blue.300}" }
+    },
+    "accessible": {
+      "$description": "AAA-contrast accent alternates for Dark mode. Inverted pattern — light-blue button background carries dark text. The contrast-high overlay aliases role tokens to this namespace so each mode owns its own AAA values without contrast-high branching per mode.",
+      "accent": {
+        "bg":       { "$value": "{color.palette.blue.100}" },
+        "bg-hover": { "$value": "{color.palette.blue.50}" },
+        "fg":       { "$value": "{color.palette.neutral.900}" }
+      }
     }
   }
 }
