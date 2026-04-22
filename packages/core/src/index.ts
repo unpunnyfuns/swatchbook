@@ -13,9 +13,11 @@ export type {
   Config,
   Diagnostic,
   DiagnosticSeverity,
+  ParserInput,
   Preset,
   Project,
   ResolvedTheme,
+  SwatchbookIntegration,
   Theme,
   TokenMap,
 } from '#/types.ts';

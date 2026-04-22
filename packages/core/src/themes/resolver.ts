@@ -2,7 +2,14 @@ import { readFile } from 'node:fs/promises';
 import { isAbsolute, resolve as resolvePath } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { defineConfig as defineTerrazzoConfig, loadResolver, parse } from '@terrazzo/parser';
-import { permutationID, type Axis, type Diagnostic, type Theme, type TokenMap } from '#/types.ts';
+import {
+  permutationID,
+  type Axis,
+  type Diagnostic,
+  type ParserInput,
+  type Theme,
+  type TokenMap,
+} from '#/types.ts';
 import type { BufferedLogger } from '#/diagnostics.ts';
 import { collectGlobbedFiles } from '#/themes/util.ts';
 
@@ -11,6 +18,8 @@ export interface ResolverLoadResult {
   themes: Theme[];
   resolved: Record<string, TokenMap>;
   sourceFiles: string[];
+  /** Retained Terrazzo parse output for downstream plugin emission. */
+  parserInput?: ParserInput;
   diagnostics: Diagnostic[];
 }
 
@@ -87,11 +96,16 @@ export async function loadResolverThemes(
       themes: [{ name, input: { theme: name }, sources: tokenFiles }],
       resolved: { [name]: parsed.tokens },
       sourceFiles: tokenFiles,
+      parserInput: {
+        tokens: parsed.tokens,
+        sources: parsed.sources,
+        resolver: parsed.resolver,
+      },
       diagnostics: [],
     };
   }
 
-  const { resolver } = loaded;
+  const { resolver, tokens: baseTokens, sources: parsedSources } = loaded;
   const permutations = resolver.listPermutations();
 
   const diagnostics: Diagnostic[] = [];
@@ -137,5 +151,12 @@ export async function loadResolverThemes(
   // want HMR to watch directories broader than the resolver references.
   for (const f of tokenFiles) if (!sourceFiles.includes(f)) sourceFiles.push(f);
 
-  return { axes, themes, resolved, sourceFiles: sourceFiles.toSorted(), diagnostics };
+  return {
+    axes,
+    themes,
+    resolved,
+    sourceFiles: sourceFiles.toSorted(),
+    parserInput: { tokens: baseTokens, sources: parsedSources, resolver },
+    diagnostics,
+  };
 }

@@ -1,13 +1,15 @@
 import type { BufferedLogger } from '#/diagnostics.ts';
 import { loadLayeredThemes } from '#/themes/layered.ts';
 import { loadResolverThemes } from '#/themes/resolver.ts';
-import type { Axis, Config, Diagnostic, Theme, TokenMap } from '#/types.ts';
+import type { Axis, Config, Diagnostic, ParserInput, Theme, TokenMap } from '#/types.ts';
 
 export interface NormalizedThemes {
   axes: Axis[];
   themes: Theme[];
   resolved: Record<string, TokenMap>;
   sourceFiles: string[];
+  /** Present for resolver + plain-parse paths; undefined for layered. */
+  parserInput?: ParserInput;
   diagnostics: Diagnostic[];
 }
 
