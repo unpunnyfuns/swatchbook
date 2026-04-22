@@ -26,7 +26,7 @@ If your system has exactly one dimension and no plans for more, [`@storybook/add
 
 ## What it's not
 
-Swatchbook isn't a runtime theme-switcher for production apps, a CSS-variable framework, or a component styling system. It emits CSS variables and `data-<prefix>-*` attributes on `<html>` inside the Storybook preview so tokens repaint when an author toggles an axis. For production theme switching, use your framework's theming tools or call `@unpunnyfuns/swatchbook-core`'s `emitCss` at build time and wire it up yourself — the emitted CSS is the same shape either way. For how your stories react to toolbar flips, see [theme reactivity](./concepts/theme-reactivity).
+Swatchbook isn't a runtime theme-switcher for production apps, a CSS-variable framework, or a component styling system. It emits CSS variables and `data-<prefix>-*` attributes on `<html>` inside the Storybook preview so tokens repaint when an author toggles an axis. For production theme switching, use your framework's theming tools or call `@unpunnyfuns/swatchbook-core`'s `emitCss` at build time and wire it up yourself — the emitted CSS is the same shape either way. For how your stories react to toolbar flips, see [consuming the active theme](./guides/consuming-the-active-theme.mdx).
 
 ## What the addon includes
 
@@ -62,7 +62,7 @@ The [live Storybook](pathname:///storybook/) runs the addon against this repo's 
 
 - **[Quickstart](./quickstart)** — install, configure, run.
 - **Blocks** — the MDX doc blocks you'll spend most of your time with: the [reference](./reference/blocks) lists what's available and the [authoring guide](./guides/authoring-doc-stories) walks through composing them.
-- **Concepts** — the mental model: [why axes, not themes](./concepts/axes-vs-themes), [theming inputs](./concepts/theming-inputs), [axes](./concepts/axes), [theme reactivity](./concepts/theme-reactivity), [presets](./concepts/presets), [diagnostics](./concepts/diagnostics).
+- **Concepts** — the mental model: [why axes, not themes](./concepts/axes-vs-themes.mdx), [theming inputs](./concepts/theming-inputs.mdx), [axes](./concepts/axes.mdx), [presets](./concepts/presets.mdx), [the token pipeline](./concepts/token-pipeline.mdx).
 - **Guides** — the [multi-axis walkthrough](./guides/multi-axis-walkthrough) covers one-time setup.
 - **Integrations** — [wiring swatchbook tokens into Tailwind / styled-components / emotion / any ThemeProvider-consumer](./integrations/) via the `@unpunnyfuns/swatchbook-integrations` package.
 - **Reference** — API surface for the remaining packages (`addon`, `core`, `config`, `mcp`).

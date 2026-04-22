@@ -8,12 +8,62 @@ sidebar_position: 5
 
 Blocks that surface project-level state rather than tokens themselves.
 
-## Diagnostics
+## `<Diagnostics />`
 
 ```tsx
 <Diagnostics />
 ```
 
-Project load diagnostics (parser errors, resolver warnings, disabled-axis validation) as a collapsible list. Green **OK** badge when clean; auto-expands with a severity summary on warnings or errors. See the [diagnostics concept](../../concepts/diagnostics) for severity semantics.
+Project-load diagnostics (parser errors, resolver warnings, disabled-axis validation) as a collapsible list. Green **OK** badge when clean; auto-expands with a severity summary when warnings or errors are present.
 
 Props: `caption?: string` — overrides the summary heading.
+
+### The `Diagnostic` shape
+
+Every `loadProject()` call returns a `diagnostics: Diagnostic[]` list. The block renders it directly.
+
+```ts
+interface Diagnostic {
+  severity: 'error' | 'warn' | 'info';
+  group: string;
+  message: string;
+  filename?: string;
+  line?: number;
+  column?: number;
+}
+```
+
+`group` identifies the subsystem that produced the diagnostic:
+
+- `parser` — Terrazzo's token-file parser (malformed JSON, invalid `$value`, wrong `$type`, …).
+- `resolver` — resolver-file issues (missing `$ref`, unknown modifier, context with no files).
+- `swatchbook/presets` — preset validation (unknown axis key, invalid context value).
+- Plugin-originated groups — depends on your setup.
+
+### Severities
+
+- **`error`** — something is structurally broken. A token may be missing from the graph, an alias may be unresolved. The block shows these with a red badge.
+- **`warn`** — something is unusual or probably-a-mistake but the project loaded. Example: a preset with an unknown axis key is dropped and produces a warn.
+- **`info`** — diagnostic for the curious. Rare.
+
+### Reading common diagnostics
+
+- **`parser: Could not resolve alias "{color.palette.blue.500}"`** — the alias target doesn't exist in the merged graph. Check for a typo in the path, or a missing token file that wasn't included in `tokens` globs.
+- **`parser: Invalid token value for $type "color"`** — the `$value` doesn't parse as the declared `$type`. Usually a string missing a unit or a color in the wrong format.
+- **`swatchbook/presets: Preset "X" has unknown axis key "Y"`** — a preset references an axis that doesn't exist on the project. Either the axis name was renamed or the preset predates the resolver change.
+
+### Failing CI on errors
+
+The block surfaces diagnostics without failing the Storybook build. For CI that should fail on `error`-severity diagnostics, check them in a pre-build script:
+
+```ts
+import { loadProject } from '@unpunnyfuns/swatchbook-core';
+import config from './swatchbook.config.ts';
+
+const project = await loadProject(config, process.cwd());
+const errors = project.diagnostics.filter((d) => d.severity === 'error');
+if (errors.length > 0) {
+  console.error(errors);
+  process.exit(1);
+}
+```
