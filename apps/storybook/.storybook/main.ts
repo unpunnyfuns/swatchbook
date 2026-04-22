@@ -2,6 +2,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineMain } from '@storybook/react-vite/node';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import cssInJsIntegration from '@unpunnyfuns/swatchbook-integrations/css-in-js';
 import tailwindIntegration from '@unpunnyfuns/swatchbook-integrations/tailwind';
 
 function pkg(name: string): string {
@@ -21,12 +22,14 @@ export default defineMain({
       name: '@unpunnyfuns/swatchbook-addon',
       options: {
         configPath: '../swatchbook.config.ts',
-        // Plug the Tailwind integration into the addon. It contributes
-        // `virtual:swatchbook/tailwind.css`, whose `@theme` block aliases
-        // Tailwind utilities to the project's DTCG tokens and stays in
-        // lockstep with `cssVarPrefix` — prefix-mismatch becomes
-        // structurally impossible.
-        integrations: [tailwindIntegration()],
+        // Dogfood both integrations side by side: the Tailwind
+        // integration contributes `virtual:swatchbook/tailwind.css`
+        // (aliases Tailwind utility scales to our `--sb-*` vars) and
+        // the CSS-in-JS integration contributes `virtual:swatchbook/theme`
+        // (typed JS accessor consumed by styled-components / emotion /
+        // any ThemeProvider). Both stay in lockstep with `cssVarPrefix`
+        // because their outputs are rendered from the loaded project.
+        integrations: [tailwindIntegration(), cssInJsIntegration()],
       },
     },
   ],
