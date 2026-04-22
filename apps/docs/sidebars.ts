@@ -7,30 +7,17 @@ import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
  * Per-section sidebars keep category headers out of the doc tree — the
  * navbar already labels each section.
  *
- * `home` covers the landing — Introduction, Quickstart, and the concept
- * pages — all reachable from the navbar logo since Quickstart +
- * Concepts aren't pulled out as separate navbar entries. Three top-level
- * nav items (Blocks / Guides / Reference) plus the logo-home group keep
- * the bar light.
+ * `home` covers just the landing — Introduction + Quickstart — reachable
+ * from the navbar logo. Every other section gets its own navbar pill.
  */
 const sidebars: SidebarsConfig = {
-  home: [
-    'intro',
-    'quickstart',
-    {
-      type: 'category',
-      label: 'Concepts',
-      collapsed: false,
-      items: [
-        'concepts/axes-vs-themes',
-        'concepts/theming-inputs',
-        'concepts/axes',
-        'concepts/presets',
-        'concepts/diagnostics',
-        'concepts/theme-reactivity',
-        'concepts/token-pipeline',
-      ],
-    },
+  home: ['intro', 'quickstart'],
+  concepts: [
+    'concepts/axes-vs-themes',
+    'concepts/theming-inputs',
+    'concepts/axes',
+    'concepts/presets',
+    'concepts/token-pipeline',
   ],
   blocks: [
     'reference/blocks/blocks',
@@ -44,12 +31,8 @@ const sidebars: SidebarsConfig = {
     'guides/authoring-doc-stories',
     'guides/token-dashboard',
     'guides/multi-axis-walkthrough',
+    'guides/consuming-the-active-theme',
     'guides/migrating-from-addon-themes',
-  ],
-  integrations: [
-    'integrations/integrations',
-    'integrations/tailwind',
-    'integrations/css-in-js',
   ],
   integrations: [
     'integrations/integrations',

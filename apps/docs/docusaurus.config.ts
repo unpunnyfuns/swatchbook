@@ -94,26 +94,22 @@ const config: Config = {
         href: '/',
       },
       items: [
-        // The navbar surfaces top-level sections that stand on their
-        // own — Blocks, Guides, Reference. Quickstart + Concepts are
-        // entry points into the landing narrative, so they live in the
-        // `home` sidebar reachable via the logo / title (both link to
-        // Introduction at `/`) rather than as separate nav pills that
-        // duplicate what the left rail already shows.
+        // Quickstart lives in the `home` sidebar reachable via the
+        // logo/title; every other section gets a navbar pill.
+        //
+        // Concepts and Integrations use `href` pointing at the /next/
+        // path rather than `type: 'docSidebar'` because the matching
+        // sidebars don't exist in every versioned_sidebars/*.json
+        // snapshot (Integrations is new; Concepts was restructured).
+        // Swap both to `docSidebar` entries after the upcoming 0.13
+        // release is cut and older versioned snapshots are retired.
+        {
+          href: '/swatchbook/next/concepts/axes-vs-themes/',
+          label: 'Concepts',
+          position: 'left',
+        },
         { type: 'docSidebar', sidebarId: 'blocks', position: 'left', label: 'Blocks' },
         { type: 'docSidebar', sidebarId: 'guides', position: 'left', label: 'Guides' },
-        // `href` with the fully-qualified `/next/integrations` path —
-        // the integrations docs currently only exist on the unreleased
-        // (Next) version; older versioned snapshots predate the
-        // integrations package. `href` is treated as an absolute URL
-        // so Docusaurus doesn't version-resolve it, and consumers on
-        // any doc version end up on the current-state integrations
-        // overview.
-        //
-        // Once a released version snapshots the integrations docs,
-        // swap this for `{ type: 'docSidebar', sidebarId: 'integrations' }`
-        // (which will version-resolve correctly because the sidebar
-        // will then exist in every versioned_sidebars/*.json).
         {
           href: '/swatchbook/next/integrations/',
           label: 'Integrations',

@@ -17,6 +17,7 @@ Two things in one:
 | [`@unpunnyfuns/swatchbook-core`](./packages/core) | Framework-free DTCG loader. Emits CSS variables and TypeScript types. |
 | [`@unpunnyfuns/swatchbook-blocks`](./packages/blocks) | MDX doc blocks. Color swatches, dimension bars, typography samples, composite previews, per-token detail. |
 | [`@unpunnyfuns/swatchbook-switcher`](./packages/switcher) | Framework-agnostic axis / preset popover UI. Used by the addon toolbar and by the docs-site navbar. |
+| [`@unpunnyfuns/swatchbook-integrations`](./packages/integrations) | Display-side integrations plugging DTCG tokens into third-party tooling inside Storybook. Subpaths for Tailwind v4 (`/tailwind`) and CSS-in-JS consumers like emotion / styled-components (`/css-in-js`). |
 | [`@unpunnyfuns/swatchbook-mcp`](./packages/mcp) | Model Context Protocol server exposing a DTCG project's tokens, axes, and diagnostics to AI agents. Runs without Storybook. |
 
 ## Install
@@ -94,6 +95,17 @@ import {
 ```
 
 Each block takes filter / scoping props — `filter` (path glob), `type` (DTCG `$type`), `root` (subtree). Type-specific blocks (`<TypographyScale>`, `<DimensionScale>`, `<FontFamilySample>`, `<FontWeightScale>`, `<BorderPreview>`, `<ShadowPreview>`, `<GradientPalette>`, `<MotionPreview>`, `<StrokeStyleSample>`) ship alongside the cross-type ones and render with built-in samples. See the [blocks reference](https://unpunnyfuns.github.io/swatchbook/reference/blocks) for the full prop list per block.
+
+## Integrations
+
+Wire your DTCG tokens into third-party tooling inside Storybook via `@unpunnyfuns/swatchbook-integrations`:
+
+- **Tailwind v4** — `/tailwind` subpath contributes a virtual `@theme` block aliasing Tailwind utility scales to your `--<prefix>-*` vars. `bg-<prefix>-surface-default`, `p-<prefix>-md`, etc.
+- **CSS-in-JS** — `/css-in-js` subpath serves a typed JS accessor for emotion, styled-components, or any ThemeProvider consuming a JS theme object.
+
+See the [integrations docs](https://unpunnyfuns.github.io/swatchbook/integrations) for wiring recipes and the "write your own integration" story.
+
+## Documentation
 
 See the [documentation](https://unpunnyfuns.github.io/swatchbook/) for concepts, guides, chrome theming, and the full API reference.
 
