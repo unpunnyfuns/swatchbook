@@ -1,6 +1,6 @@
 # swatchbook-core
 
-Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via [Terrazzo](https://terrazzo.app/), resolves aliases, composes themes through a DTCG 2025.10 resolver, and emits CSS variables and TypeScript types.
+Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via [Terrazzo](https://terrazzo.app/), resolves aliases, and composes themes through a DTCG 2025.10 resolver or authored layered axes.
 
 > **Documentation:** [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/).
 
@@ -10,7 +10,9 @@ Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses 
 npm install @unpunnyfuns/swatchbook-core
 ```
 
-Install directly when you're using `loadProject` / `emitCss` outside Storybook (build scripts, CLIs, docs-site generators). Storybook consumers already get core transitively via `@unpunnyfuns/swatchbook-addon` — no separate install needed unless you're calling the loader from your own tooling.
+Install directly when you're using `loadProject` outside Storybook — build scripts, CLIs, docs-site generators, your own tooling that needs the axis-composed token graph. Storybook consumers get core transitively via `@unpunnyfuns/swatchbook-addon` and don't need a separate install.
+
+For production asset emission (CSS variables, JS theme objects, Tailwind config, Swift constants, …), run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources. This package's job ends at the composed `Project`; downstream targets are Terrazzo's ecosystem.
 
 ## Public API
 
@@ -19,12 +21,8 @@ Install directly when you're using `loadProject` / `emitCss` outside Storybook (
 | `defineSwatchbookConfig(config)` | Identity helper for a typed `swatchbook.config.ts`. |
 | `loadProject(config, cwd?)` | Parse + resolve — returns `Project { axes, themes, themesResolved, graph, diagnostics, … }`. |
 | `resolveTheme(project, name)` | Pick a single composed theme out of a project. |
-| `emitCss(themes, themesResolved, options?)` | Concatenated stylesheet — `:root` for the default tuple plus one compound-selector block per non-default tuple (`[data-swatch-mode="Dark"][data-swatch-brand="Brand A"] { … }`). Attribute names are prefixed with `cssVarPrefix` (default `swatch`); set `cssVarPrefix: ''` for bare `data-mode` / `data-theme`. |
-| `projectCss(project)` | Same as `emitCss` with project defaults (prefix + axes) applied. |
-| `dataAttr(prefix, key)` | Compose a prefixed `data-*` attribute name. Exported so consumer code that has to set the attrs manually (rare — the addon does it in Storybook) stays in lockstep with emitted selectors. |
-| `emitTypes(project)` | TypeScript source declaring the token-path union + `SwatchbookTokenMap`. |
 | `permutationID(input)` | Stringify a tuple (`{ mode: 'Dark', brand: 'Brand A' }` → `"Dark · Brand A"`) to the form used as `Theme.name` and CSS data-attribute values. |
-| Types | `Axis`, `AxisConfig`, `Config`, `Preset`, `Theme`, `Project`, `ResolvedTheme`, `TokenMap`, `Diagnostic`, `DiagnosticSeverity`. |
+| Types | `Axis`, `AxisConfig`, `Config`, `Preset`, `Theme`, `Project`, `ResolvedTheme`, `TokenMap`, `Diagnostic`, `DiagnosticSeverity`, `SwatchbookIntegration`. |
 
 ## Minimal config
 
@@ -80,18 +78,16 @@ export default defineSwatchbookConfig({
 - ❌ Setting both `resolver` and `axes` is an error. Pick one.
 - ❌ Setting neither falls back to a single synthetic `theme` axis (unchanged behavior).
 
-## Load + emit
+## Load
 
 ```ts
-import { loadProject, projectCss, emitTypes } from '@unpunnyfuns/swatchbook-core';
+import { loadProject } from '@unpunnyfuns/swatchbook-core';
 
 const project = await loadProject(config, process.cwd());
-
-const css = projectCss(project);
-const dts = emitTypes(project);
+// project.themesResolved[themeName] — ready to read, no further I/O.
 ```
 
-`project.diagnostics` is always populated — severity is `'error' | 'warn' | 'info'`. The addon surfaces these in its Design Tokens panel (diagnostics section); your own pipeline can inspect / `throw` on `severity === 'error'` as fits.
+`project.diagnostics` is always populated — severity is `'error' | 'warn' | 'info'`. The addon surfaces these in its Design Tokens panel; your own pipeline can inspect / `throw` on `severity === 'error'` as fits.
 
 ## Axes and theme naming
 
@@ -131,27 +127,12 @@ export default defineSwatchbookConfig({
 - Unknown axis names produce `warn` diagnostics (group `swatchbook/disabled-axes`) and are ignored.
 - Config-level only — there's no runtime toggle.
 
-## CSS emission
-
-Multi-axis projects emit one `:root` block with the default-tuple values, plus one block per non-default combination of axis contexts keyed on a compound attribute selector in `Project.axes` order. Attribute names are namespaced with `cssVarPrefix` (default `swatch`) so swatchbook's scaffolding doesn't collide with other libs that claim bare `data-mode` / `data-theme`:
-
-```css
-:root { --swatch-color-surface-default: rgb(255 255 255); … }
-[data-swatch-mode="Dark"][data-swatch-brand="Default"] { --swatch-color-surface-default: rgb(17 17 17); … }
-[data-swatch-mode="Light"][data-swatch-brand="Brand A"] { … }
-[data-swatch-mode="Dark"][data-swatch-brand="Brand A"] { … }
-```
-
-Every var is redeclared inside every block (flat emission). Nested cascading would be smaller but breaks whenever axes collide at the same token path. Inside Storybook the addon's preview decorator writes the matching `data-<prefix>-<axis>` attributes onto `<html>` automatically; outside Storybook, set them yourself — or pass `cssVarPrefix: ''` to opt out and get the bare `data-<axis>` form.
-
-Single-axis projects (one resolver modifier, or the synthetic `theme` axis) keep the familiar single-attribute shape — `[data-swatch-theme="…"]` with the default prefix, `[data-theme="…"]` if you opt out.
-
 ## Do / don't
 
 - ✅ Use this package at build time — Node, scripts, SSR, storybook presets. It has no DOM or React dependency.
-- ✅ Treat `emitCss` output as the source of truth for CSS vars; don't parallel-hand-write them.
+- ✅ Use Terrazzo's CLI for production artifact emission against the same DTCG sources.
 - ❌ Don't import from `@terrazzo/parser` directly unless you need features core doesn't expose. Stay on the core surface so upgrades don't churn your code.
-- ❌ Don't ship the `Project` object to the browser — it's node-parsed and carries full raw-AST references. Use `emitCss` / `emitTypes` / `themesResolved` projections instead.
+- ❌ Don't ship the `Project` object to the browser — it's node-parsed and carries full raw-AST references. Use `themesResolved` projections instead.
 
 ## Credits
 

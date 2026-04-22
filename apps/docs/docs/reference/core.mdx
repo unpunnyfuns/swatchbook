@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # Core
 
-Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via Terrazzo, resolves aliases, composes themes through a resolver or layered-axes config, and emits CSS variables + TypeScript types. No React, no Storybook dependency.
+Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via Terrazzo, resolves aliases, composes themes through a resolver or layered-axes config. No React, no Storybook dependency.
 
 ## Install
 
@@ -51,27 +51,6 @@ const { tokens } = resolveTheme(project, 'Light · Default');
 
 Throws with a helpful "known themes" message if the name is unknown.
 
-### `emitCss(themes, themesResolved, options?)`
-
-Concatenated stylesheet. With `options.axes` supplied (or when called through `projectCss`), emits `:root` for the default tuple plus one compound-selector block per non-default tuple.
-
-```ts
-const css = emitCss(project.themes, project.themesResolved, {
-  prefix: 'ds',
-  axes: project.axes,
-});
-```
-
-Single-axis projects keep the familiar single-attribute shape — `[data-<prefix>-theme="…"]` with a prefix set (default `swatch`), `[data-theme="…"]` when you opt out with `cssVarPrefix: ''`.
-
-### `projectCss(project)`
-
-`emitCss` with project defaults applied (prefix + axes). The form you almost always want.
-
-### `emitTypes(project)`
-
-TypeScript source declaring the token-path union + `SwatchbookTokenMap`. The addon preset writes this to `.swatchbook/tokens.d.ts` so `useToken()` has typed paths.
-
 ### `permutationID(input)`
 
 Stringify a tuple to the form used as `Theme.name` and CSS data-attribute values:
@@ -80,39 +59,6 @@ Stringify a tuple to the form used as `Theme.name` and CSS data-attribute values
 permutationID({ mode: 'Dark', brand: 'Brand A' }); // → "Dark · Brand A"
 permutationID({ theme: 'Light' }); // → "Light"
 ```
-
-### `emitViaTerrazzo(project, options?)`
-
-Axis-aware wrapper around Terrazzo's programmatic `build()`. Derives compound-selector permutations from `project.themes` (or `project.presets` via `selection`), pins `@terrazzo/plugin-css`'s `variableName` to the project's `cssVarPrefix`, and runs whatever additional Terrazzo plugins you pass — `plugin-css-in-js`, `plugin-tailwind`, `plugin-swift`, `plugin-js`, `plugin-sass`, `plugin-vanilla-extract`, `plugin-token-listing`.
-
-```ts
-import { loadProject, emitViaTerrazzo } from '@unpunnyfuns/swatchbook-core';
-import cssInJsPlugin from '@terrazzo/plugin-css-in-js';
-import tailwindPlugin from '@terrazzo/plugin-tailwind';
-
-const project = await loadProject(config, cwd);
-const files = await emitViaTerrazzo(project, {
-  cssOptions: { filename: 'tokens.css' },
-  plugins: [
-    cssInJsPlugin({ filename: 'tokens.js' }),
-    tailwindPlugin({ filename: 'tailwind.tokens.css' }),
-  ],
-  selection: 'themes', // default — full cartesian fan-out for runtime CSS
-});
-// files → [{ filename, contents }, ...]
-```
-
-Options:
-
-| Option | What |
-| --- | --- |
-| `selection` | `'themes'` (default, full cartesian), `'presets'` (one entry per declared preset), or explicit `Array<{ input, name? }>`. Library consumers (MUI / Vuetify) usually want `'presets'`. |
-| `cssOptions` | Extra `@terrazzo/plugin-css` options (filename, include / exclude, transform, utility, colorDepth). `permutations` and `variableName` are managed internally — passing them here is a no-op. |
-| `plugins` | Additional Terrazzo plugins to run alongside `plugin-css`. |
-
-**Requires a resolver-backed project.** Layered (`config.axes`) and plain-parse paths don't populate `parserInput`; the wrapper throws with a clear error on those.
-
-**Not the addon's emission path.** Storybook's runtime CSS still comes from `projectCss` with chrome aliases. `emitViaTerrazzo` is for library-level consumers driving their own build or for future display-side integrations.
 
 ## Types
 
@@ -187,21 +133,7 @@ interface Project {
   sourceFiles: string[];
   /** Loader cwd — what all config-relative paths resolved against. */
   cwd: string;
-  /** Retained Terrazzo parse output for `emitViaTerrazzo`. Present for resolver-backed projects; undefined for layered / plain-parse paths. */
-  parserInput?: ParserInput;
   diagnostics: Diagnostic[];
-}
-```
-
-### `ParserInput`
-
-Pass-through bag of the three values Terrazzo's programmatic `build()` needs. Consumers treat it as opaque — feed the whole object into `build()` (or into `emitViaTerrazzo`, which handles that for you).
-
-```ts
-interface ParserInput {
-  tokens: Record<string, TokenNormalized>; // unified pre-permutation token graph
-  sources: InputSourceWithDocument[];       // parser's input sources
-  resolver: Resolver;                        // the Terrazzo resolver object
 }
 ```
 
@@ -247,6 +179,5 @@ interface Diagnostic {
 ## Do / don't
 
 - ✅ Use this package at build time — Node scripts, SSR, Storybook presets. It has no DOM dependency.
-- ✅ Treat `emitCss` output as the source of truth for CSS vars; don't parallel-hand-write them.
 - ❌ Don't import from `@terrazzo/parser` directly unless you need features core doesn't expose.
 - ❌ Don't ship `Project` objects to the browser — they carry full raw-AST references. Use `themesResolved` projections instead.

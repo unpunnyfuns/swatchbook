@@ -56,7 +56,7 @@ The virtual module lives inside Vite's module graph. Vite builds your Storybook 
 
 For **Storybook**, the virtual module is the tokens' runtime home: the preview reads CSS from it, the MDX doc blocks read the resolved graph from it, the toolbar reads the axes from it. No compile step needed.
 
-For **production**, you want CSS variables baked into your framework's asset pipeline the normal way. `@unpunnyfuns/swatchbook-core` exports `emitCss(project)` for that — call it at build time, write the result to a file, include it in your bundle. The loader itself is built on [Terrazzo](https://terrazzo.app/), so anything Terrazzo's ecosystem can do against a parsed DTCG graph works against a swatchbook `Project` too.
+For **production**, you want CSS variables baked into your framework's asset pipeline the normal way. Run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources — swatchbook is built on Terrazzo's parser, and Terrazzo's ecosystem of platform plugins (`plugin-css`, `plugin-js`, `plugin-tailwind`, `plugin-swift`, `plugin-sass`, …) covers every downstream target.
 
 ## Where the same no-compile-step property holds
 
@@ -72,4 +72,4 @@ For **production**, you want CSS variables baked into your framework's asset pip
 
 ## TL;DR
 
-Tokens reach the blocks through a Vite virtual module the addon publishes — no generated files, no separate build step, no config drift. Edit a token, see the preview repaint. For production CSS, call `emitCss` from `@unpunnyfuns/swatchbook-core` in your own pipeline.
+Tokens reach the blocks through a Vite virtual module the addon publishes — no generated files, no separate build step, no config drift. Edit a token, see the preview repaint. For production CSS, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources.

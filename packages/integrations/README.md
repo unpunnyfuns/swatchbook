@@ -73,12 +73,11 @@ Return one from a factory in your own package; drop it into `integrations[]`. Th
 
 ## What this package does not do
 
-- **Does not write artifacts to disk.** The integrations serve virtual modules during Storybook dev/build only. For your application's production build, use `emitViaTerrazzo` in `@unpunnyfuns/swatchbook-core` or Terrazzo's own CLI.
-- **Does not support layered (`config.axes`) projects** for integrations that drive Terrazzo's plugin pipeline. `/tailwind` and `/css-in-js` work with any loader path; future Terrazzo-backed integrations require a resolver-backed project (see decision 2026-04-22 in the repo's `decisions.md`).
-- **Does not cover MUI / Vuetify / Bootstrap SCSS factories.** Those need resolved values per named theme, not `var()` references. Deferred until demand surfaces.
+- **Does not write artifacts to disk.** The integrations serve virtual modules during Storybook dev/build only. For your application's production build, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources.
+- **Does not cover MUI / Vuetify / Bootstrap SCSS factories.** Those need resolved values per named theme, not `var()` references. Run Terrazzo's CLI with `@terrazzo/plugin-js` for that case; display-side integrations are out of scope.
 
 ## See also
 
-- [`@unpunnyfuns/swatchbook-core`](../core) — `SwatchbookIntegration` type, `Project` shape, `emitViaTerrazzo` for library-level emission.
+- [`@unpunnyfuns/swatchbook-core`](../core) — `SwatchbookIntegration` type, `Project` shape, the loader your integrations' `render(project)` consumes.
 - [`@unpunnyfuns/swatchbook-addon`](../addon) — Storybook addon consuming `integrations[]`.
 - [Integrations docs](https://unpunnyfuns.github.io/swatchbook/next/integrations) — per-subpath recipes.

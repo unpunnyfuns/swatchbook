@@ -96,7 +96,7 @@ If you want the class form instead, keep swatchbook's data attributes as the pri
 .dark { /* your overrides */ }
 ```
 
-**Option B: Emit CSS vars with `projectCss`.** The cleaner migration — once your DTCG tokens are authored, swatchbook emits per-tuple CSS that redefines `--<prefix>-*` vars under `[data-<prefix>-*]` selectors. Your components reference the vars directly; class names stop mattering for theming. See [the token pipeline](../concepts/token-pipeline.mdx).
+**Option B: Consume swatchbook's CSS vars directly.** The cleaner migration — once your DTCG tokens are authored, swatchbook emits per-tuple CSS that redefines `--<prefix>-*` vars under `[data-<prefix>-*]` selectors inside Storybook. Your components reference the vars directly; class names stop mattering for theming. See [the token pipeline](../concepts/token-pipeline.mdx).
 
 #### Were you using `withThemeByDataAttribute`?
 
@@ -128,7 +128,7 @@ You have a real theme-object shape the provider expects (emotion's `{ colors: {�
 
 - **If the provider just passes the theme through to `useTheme()` / `props.theme` and your styled components read values from it** — emotion, styled-components, and hand-rolled providers — use the [CSS-in-JS integration](../integrations/css-in-js.mdx). It ships a `virtual:swatchbook/theme` module with `var(--sb-*)` string leaves; drop-in for any provider, toolbar flip handled by cascade.
 
-- **If the provider derives dependent values from the theme at factory time** — MUI's `createTheme` computing `palette.primary.light` / `contrastText` from a base — you need per-tuple resolved values, not var refs. Swatchbook doesn't ship that integration yet; the machinery exists in [`emitViaTerrazzo`](../reference/core.mdx) (resolver-backed projects, `selection: 'presets'`, paired with `@terrazzo/plugin-js`), but you'd be wiring it yourself.
+- **If the provider derives dependent values from the theme at factory time** — MUI's `createTheme` computing `palette.primary.light` / `contrastText` from a base — you need per-tuple resolved values, not var refs. Run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources with `@terrazzo/plugin-js` to produce the resolved theme objects; swatchbook doesn't bundle that path.
 
 - **Vuetify theme config, bootstrap SCSS** — same caveat as MUI. Same workaround.
 
