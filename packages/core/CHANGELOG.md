@@ -1,5 +1,7 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.12.0
+
 ## 0.11.6
 
 ## 0.11.5
