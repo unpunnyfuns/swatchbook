@@ -6,20 +6,20 @@ sidebar_position: 1
 
 # Integrations
 
-Display-side integrations that plug swatchbook's DTCG tokens into third-party tooling running inside Storybook. Each integration ships as a subpath of [`@unpunnyfuns/swatchbook-integrations`](https://www.npmjs.com/package/@unpunnyfuns/swatchbook-integrations) and contributes a virtual module the preview imports.
+Display-side integrations that plug swatchbook's DTCG tokens into third-party tooling running inside Storybook. Each integration ships as a subpath of [`@unpunnyfuns/swatchbook-integrations`](https://www.npmjs.com/package/@unpunnyfuns/swatchbook-integrations) and hooks into the addon via the `integrations[]` option in `.storybook/main.ts`.
 
 ## Philosophy
 
-Swatchbook's purpose is **displaying DTCG tokens in Storybook**, not replacing downstream build pipelines. Integrations wire the token graph into whichever runtime library a story needs — Tailwind's `@theme` block, a JS theme accessor for CSS-in-JS, and so on — without requiring the addon itself to know anything about that library. The addon runs the integration's `render(project)` and serves the output as a virtual module; the integration package owns the library-specific logic.
+Swatchbook's purpose is **displaying DTCG tokens in Storybook**, not replacing downstream build pipelines. Integrations wire the token graph into whichever runtime library a story needs — Tailwind's `@theme` block, a JS theme accessor for CSS-in-JS, and so on — without requiring the addon itself to know anything about that library. Integration packages own the library-specific logic.
 
 Production artifacts (writing `tokens.js` / `tailwind.config.css` to disk for a consumer's own build) are not swatchbook's job — run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources if you need artifacts outside Storybook.
 
 ## Available integrations
 
-| Subpath | Covers | What it contributes |
+| Subpath | Covers | How consumers use it |
 | --- | --- | --- |
-| [`/tailwind`](./tailwind.mdx) | Tailwind v4 | `virtual:swatchbook/tailwind.css` — an `@theme` block aliasing Tailwind utility scales to `var(--<cssVarPrefix>-*)` references |
-| [`/css-in-js`](./css-in-js.mdx) | emotion, styled-components, any ThemeProvider consuming a JS theme object | `virtual:swatchbook/theme` — typed JS accessor with `var(--<cssVarPrefix>-*)` leaves |
+| [`/tailwind`](./tailwind.mdx) | Tailwind v4 | Plug in, write `bg-<prefix>-surface-default` / `p-<prefix>-md` utilities anywhere. The addon auto-applies the generated `@theme` block. |
+| [`/css-in-js`](./css-in-js.mdx) | emotion, styled-components, any ThemeProvider consuming a JS theme object | Plug in, then `import { theme, color, space } from 'virtual:swatchbook/theme'` where needed. Named exports, explicit import. |
 
 ## Recipe coverage
 
@@ -38,7 +38,7 @@ Mapped against the `@storybook/addon-themes` getting-started recipes — swatchb
 
 All integrations plug into the addon's options in `.storybook/main.ts`:
 
-```ts
+```ts title=".storybook/main.ts"
 import { defineMain } from '@storybook/react-vite/node';
 import tailwindIntegration from '@unpunnyfuns/swatchbook-integrations/tailwind';
 import cssInJsIntegration from '@unpunnyfuns/swatchbook-integrations/css-in-js';
@@ -56,35 +56,10 @@ export default defineMain({
 });
 ```
 
-Each integration contributes a virtual module the preview imports:
+Some integrations (Tailwind) are purely global stylesheet contributions and the addon applies them to the preview automatically. Others (CSS-in-JS) expose named JS exports for consumers to import where they want them. The per-integration page documents which pattern applies.
 
-```ts
-// .storybook/preview.tsx
-import 'virtual:swatchbook/tailwind.css';    // from /tailwind
-import { theme } from 'virtual:swatchbook/theme';  // from /css-in-js
-```
-
-The addon's Vite plugin resolves the virtual IDs, runs `render(project)` on load, and invalidates the modules on token-file edits so the output stays in lockstep with the toolbar.
+Token-file edits flow through HMR: each integration's output stays in lockstep with the active project without a server restart.
 
 ## Writing your own integration
 
-An integration is a factory returning a `SwatchbookIntegration`:
-
-```ts
-import type { SwatchbookIntegration } from '@unpunnyfuns/swatchbook-core';
-
-export default function myIntegration(): SwatchbookIntegration {
-  return {
-    name: 'my-integration',
-    virtualModule: {
-      virtualId: 'virtual:swatchbook/my-module',
-      render: (project) => {
-        // Derive whatever string you want from the loaded Project.
-        return `/* generated from ${project.themes.length} themes */`;
-      },
-    },
-  };
-}
-```
-
-The `render` function receives the loaded `Project` — axes, themes, presets, resolved token maps, the configured `cssVarPrefix`, and the retained Terrazzo `parserInput` for plugin-pipeline emission. Return whatever string the virtual module should serve. The addon handles the rest.
+The mechanism is sketched in the [architecture doc](../developers/architecture.mdx). In short: implement the `SwatchbookIntegration` contract from `@unpunnyfuns/swatchbook-core`, export a factory from your package, drop the factory's result into `integrations[]`.

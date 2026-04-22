@@ -3,6 +3,10 @@ import type { Decorator, Preview } from '@storybook/react-vite';
 import { useEffect, useMemo } from 'react';
 import { addons } from 'storybook/preview-api';
 import { dataAttr } from '#/data-attr.ts';
+// Side-effect import for integrations that opted into `autoInject`
+// (e.g. Tailwind's `@theme` block). When no integration opts in, the
+// virtual module body is empty — still a valid no-op.
+import 'virtual:swatchbook/integration-side-effects';
 import {
   axes as virtualAxes,
   css,

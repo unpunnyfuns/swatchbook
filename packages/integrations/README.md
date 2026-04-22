@@ -1,15 +1,15 @@
 # swatchbook-integrations
 
-Published as `@unpunnyfuns/swatchbook-integrations`. Display-side integrations for the swatchbook Storybook addon. Each subpath ships a factory that plugs into the addon's `integrations[]` option as a `SwatchbookIntegration` and contributes a virtual module the preview imports.
+Published as `@unpunnyfuns/swatchbook-integrations`. Display-side integrations for the swatchbook Storybook addon. Each subpath ships a factory that plugs into the addon's `integrations[]` option as a `SwatchbookIntegration`.
 
-> **Documentation:** [unpunnyfuns.github.io/swatchbook/next/integrations](https://unpunnyfuns.github.io/swatchbook/next/integrations). The addon itself stays tool-agnostic — integrations own their library-specific logic.
+> **Documentation:** [unpunnyfuns.github.io/swatchbook/integrations](https://unpunnyfuns.github.io/swatchbook/integrations). The addon stays tool-agnostic — integrations own their library-specific logic.
 
 ## Available subpaths
 
-| Subpath | Covers | Virtual module |
+| Subpath | Covers | Consumer usage |
 | --- | --- | --- |
-| `./tailwind` | Tailwind v4 | `virtual:swatchbook/tailwind.css` — `@theme` block aliasing Tailwind utility scales to DTCG tokens |
-| `./css-in-js` | emotion, styled-components, any ThemeProvider consuming a JS theme object | `virtual:swatchbook/theme` — typed JS accessor with `var(--<cssVarPrefix>-*)` leaves |
+| `./tailwind` | Tailwind v4 | Plug in; the addon auto-applies the generated `@theme` block. Write `bg-<prefix>-surface-default` / `p-<prefix>-md` utilities anywhere. |
+| `./css-in-js` | emotion, styled-components, any ThemeProvider consuming a JS theme object | Plug in, then `import { theme, color, space } from 'virtual:swatchbook/theme'` where needed. Named exports, explicit import site. |
 
 ## Install
 
@@ -25,9 +25,7 @@ npm install -D tailwindcss @tailwindcss/vite
 
 ## Wiring
 
-Plug integrations into the addon options in `.storybook/main.ts`:
-
-```ts
+```ts title=".storybook/main.ts"
 import { defineMain } from '@storybook/react-vite/node';
 import tailwindIntegration from '@unpunnyfuns/swatchbook-integrations/tailwind';
 import cssInJsIntegration from '@unpunnyfuns/swatchbook-integrations/css-in-js';
@@ -45,39 +43,19 @@ export default defineMain({
 });
 ```
 
-Each integration contributes a virtual module the preview imports:
-
-```ts
-// .storybook/preview.tsx
-import 'virtual:swatchbook/tailwind.css';             // from /tailwind
-import { theme } from 'virtual:swatchbook/theme';    // from /css-in-js
-```
-
-The addon's Vite plugin resolves the virtual IDs, runs `render(project)` on load, and invalidates the modules on HMR so outputs stay in lockstep with the toolbar.
+The [per-subpath docs](https://unpunnyfuns.github.io/swatchbook/integrations) cover the consumer-facing usage for each one.
 
 ## Writing your own integration
 
-A `SwatchbookIntegration` is a tiny shape exported from `@unpunnyfuns/swatchbook-core`:
-
-```ts
-interface SwatchbookIntegration {
-  name: string;
-  virtualModule?: {
-    virtualId: string;
-    render(project: Project): string;
-  };
-}
-```
-
-Return one from a factory in your own package; drop it into `integrations[]`. The addon handles resolution, HMR invalidation, and serving. See the [architecture doc](https://unpunnyfuns.github.io/swatchbook/next/developers/architecture) for the full contract.
+The mechanism is sketched in the [architecture doc](https://unpunnyfuns.github.io/swatchbook/developers/architecture). In short: implement the `SwatchbookIntegration` contract from `@unpunnyfuns/swatchbook-core`, export a factory from your package, drop the factory's result into `integrations[]`.
 
 ## What this package does not do
 
-- **Does not write artifacts to disk.** The integrations serve virtual modules during Storybook dev/build only. For your application's production build, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources.
+- **Does not write artifacts to disk.** The integrations feed the Storybook preview only. For your application's production build, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources.
 - **Does not cover MUI / Vuetify / Bootstrap SCSS factories.** Those need resolved values per named theme, not `var()` references. Run Terrazzo's CLI with `@terrazzo/plugin-js` for that case; display-side integrations are out of scope.
 
 ## See also
 
 - [`@unpunnyfuns/swatchbook-core`](../core) — `SwatchbookIntegration` type, `Project` shape, the loader your integrations' `render(project)` consumes.
 - [`@unpunnyfuns/swatchbook-addon`](../addon) — Storybook addon consuming `integrations[]`.
-- [Integrations docs](https://unpunnyfuns.github.io/swatchbook/next/integrations) — per-subpath recipes.
+- [Integrations docs](https://unpunnyfuns.github.io/swatchbook/integrations) — per-subpath recipes.
