@@ -11,6 +11,10 @@ jobs:
   conventional-title:
     name: Conventional Commits title
     runs-on: ubuntu-latest
+    # Skip for Changesets' auto-generated release PRs — their title
+    # (`chore(release): vX.Y.Z`) is produced by the Changesets action,
+    # not authored by a human, and rejecting it serves no purpose.
+    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
     permissions:
       pull-requests: read
     steps:
@@ -40,6 +44,8 @@ jobs:
             docs
             ci
             a11y
+            integrations
+            guides
           requireScope: false
           subjectPattern: ^(?![A-Z]).+$
           subjectPatternError: |
@@ -50,6 +56,9 @@ jobs:
   linked-issue:
     name: Linked issue
     runs-on: ubuntu-latest
+    # Same rationale as conventional-title: Changesets' release PRs
+    # bundle queued changesets and don't correspond to a single issue.
+    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
     permissions:
       pull-requests: read
     steps:
