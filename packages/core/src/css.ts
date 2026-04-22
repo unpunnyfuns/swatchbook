@@ -3,6 +3,7 @@ import { generateShorthand, makeCSSVar, transformCSSValue } from '@terrazzo/toke
 import { CHROME_ROLES, CHROME_VAR_PREFIX, DEFAULT_CHROME_MAP } from '#/chrome.ts';
 import type { Axis, Theme, TokenMap } from '#/types.ts';
 
+/** @internal Addon-internal CSS emitter options. Not part of the public API. */
 export interface EmitCssOptions {
   /** Override the prefix from project config (default: `config.cssVarPrefix ?? ''`). */
   prefix?: string;
@@ -35,6 +36,11 @@ export interface EmitCssOptions {
  *
  * For single-axis projects (resolver with one modifier, or synthetic `theme`),
  * emission keeps the familiar `[data-theme="…"]` shape.
+ *
+ * @internal Consumers should not depend on this function. The addon calls
+ * it to populate the Storybook virtual module; external consumers driving
+ * their own build pipeline should use Terrazzo's CLI against the DTCG
+ * sources directly.
  */
 export function emitCss(
   themes: Theme[],

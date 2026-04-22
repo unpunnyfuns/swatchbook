@@ -8,12 +8,16 @@ import type { Axis, Project, Theme } from '#/types.ts';
  * subset of axis names → context values); `name` is optional display metadata
  * downstream emitters may pick up. Matches the shape of `Theme` / `Preset`
  * without forcing consumers to construct a full project type.
+ *
+ * @internal Used by the addon + integrations for axis-aware emission.
+ * Not part of the public API.
  */
 export interface EmitSelectionEntry {
   input: Record<string, string>;
   name?: string;
 }
 
+/** @internal Options for the addon-internal Terrazzo emission wrapper. */
 export interface EmitViaTerrazzoOptions {
   /**
    * Which tuples to fan out across. Defaults to `'themes'` — the full
@@ -45,6 +49,7 @@ export interface EmitViaTerrazzoOptions {
   plugins?: readonly Plugin[];
 }
 
+/** @internal Output file shape from the Terrazzo emission wrapper. */
 export interface EmittedFile {
   filename: string;
   contents: string | Uint8Array;
@@ -62,6 +67,11 @@ export interface EmittedFile {
  * (layered / plain-parse paths). Resolver-backed projects work out of the
  * box because `loadResolver()` already returns the unified `{ tokens,
  * sources, resolver }` triple we thread onto `Project.parserInput`.
+ *
+ * @internal Consumers should not depend on this function. It exists for
+ * the addon + integrations to drive Terrazzo's plugin pipeline with
+ * swatchbook's axis composition. External consumers driving their own
+ * build should use Terrazzo's CLI against the DTCG sources directly.
  */
 export async function emitViaTerrazzo(
   project: Project,
