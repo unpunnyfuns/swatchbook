@@ -1,5 +1,15 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.14.1
+
+### Patch Changes
+
+- 3ff8741: Add unit tests for the integration-side-effects aggregate virtual module. Covers `resolveId` mapping, empty-integration bodies (no integrations + all opted-out), auto-inject filtering across a mixed list, and the fall-through path for unrelated IDs. Closes a hole where the aggregation logic added in 0.14 was only exercised end-to-end through Storybook builds.
+- Updated dependencies [b5976cd]
+  - @unpunnyfuns/swatchbook-core@0.14.1
+  - @unpunnyfuns/swatchbook-blocks@0.14.1
+  - @unpunnyfuns/swatchbook-switcher@0.14.1
+
 ## 0.14.0
 
 ### Minor Changes
