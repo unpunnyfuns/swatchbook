@@ -1,4 +1,4 @@
-import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
+import type { Config, Project, SwatchbookIntegration } from '@unpunnyfuns/swatchbook-core';
 import { loadProject, projectCss } from '@unpunnyfuns/swatchbook-core';
 import { type FSWatcher, watch as fsWatch } from 'node:fs';
 import { basename, dirname, isAbsolute, resolve as resolvePath } from 'node:path';
@@ -9,6 +9,13 @@ import { HMR_EVENT, RESOLVED_VIRTUAL_MODULE_ID, VIRTUAL_MODULE_ID } from '#/cons
 export interface SwatchbookPluginOptions {
   config: Config;
   cwd: string;
+  /** Display-side integrations — each may contribute a virtual module the preview imports. */
+  integrations?: readonly SwatchbookIntegration[];
+}
+
+/** `\0<virtualId>` — Vite convention for resolved virtual module IDs. */
+function resolvedId(virtualId: string): string {
+  return `\0${virtualId}`;
 }
 
 /**
@@ -17,13 +24,25 @@ export interface SwatchbookPluginOptions {
  * and diagnostics. Watches the token files + resolver for changes and
  * invalidates the module so HMR reloads the preview with fresh data.
  */
-export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions): Plugin {
+export function swatchbookTokensPlugin({
+  config,
+  cwd,
+  integrations = [],
+}: SwatchbookPluginOptions): Plugin {
   let project: Project | undefined;
   let css = '';
 
   async function refresh(): Promise<void> {
     project = await loadProject(config, cwd);
     css = projectCss(project);
+  }
+
+  /** Map of resolvedId → integration, indexed once. */
+  const integrationById = new Map<string, SwatchbookIntegration>();
+  for (const integration of integrations) {
+    const vm = integration.virtualModule;
+    if (!vm) continue;
+    integrationById.set(resolvedId(vm.virtualId), integration);
   }
 
   return {
@@ -36,10 +55,20 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
 
     resolveId(id) {
       if (id === VIRTUAL_MODULE_ID) return RESOLVED_VIRTUAL_MODULE_ID;
+      for (const integration of integrations) {
+        if (integration.virtualModule?.virtualId === id) {
+          return resolvedId(integration.virtualModule.virtualId);
+        }
+      }
       return null;
     },
 
     load(id) {
+      const integration = integrationById.get(id);
+      if (integration?.virtualModule) {
+        if (!project) return '';
+        return integration.virtualModule.render(project);
+      }
       if (id !== RESOLVED_VIRTUAL_MODULE_ID) return null;
       if (!project) return 'export default null;';
       // Emit a typed ESM module. Values are JSON-stringified for stability.
@@ -90,6 +119,13 @@ export function swatchbookTokensPlugin({ config, cwd }: SwatchbookPluginOptions)
             );
             const mod = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_MODULE_ID);
             if (mod) server.moduleGraph.invalidateModule(mod);
+            // Invalidate every integration-contributed virtual module so
+            // its body re-renders against the fresh project on the next
+            // request.
+            for (const resolvedIntegrationId of integrationById.keys()) {
+              const m = server.moduleGraph.getModuleById(resolvedIntegrationId);
+              if (m) server.moduleGraph.invalidateModule(m);
+            }
             /**
              * Send the fresh snapshot as a custom HMR event instead of a
              * full-reload. The preview subscribes and re-broadcasts to
