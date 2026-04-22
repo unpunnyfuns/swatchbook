@@ -44,6 +44,7 @@ const sidebars: SidebarsConfig = {
     'guides/authoring-doc-stories',
     'guides/token-dashboard',
     'guides/multi-axis-walkthrough',
+    'guides/migrating-from-addon-themes',
   ],
   integrations: [
     'integrations/integrations',
