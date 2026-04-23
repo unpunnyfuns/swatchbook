@@ -1,4 +1,4 @@
-import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core';
+import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import cx from 'clsx';
 import type { ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';

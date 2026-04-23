@@ -1,10 +1,6 @@
 import type { Project } from '@unpunnyfuns/swatchbook-core';
-import {
-  analyzeAxisVariance,
-  fuzzyFilter,
-  fuzzyMatches,
-  projectCss,
-} from '@unpunnyfuns/swatchbook-core';
+import { analyzeAxisVariance, projectCss } from '@unpunnyfuns/swatchbook-core';
+import { fuzzyFilter, fuzzyMatches } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { computeContrast } from '#/contrast.ts';

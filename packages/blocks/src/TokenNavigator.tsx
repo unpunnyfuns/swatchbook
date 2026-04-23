@@ -1,4 +1,4 @@
-import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core';
+import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import type { KeyboardEvent, ReactElement } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import './TokenNavigator.css';
