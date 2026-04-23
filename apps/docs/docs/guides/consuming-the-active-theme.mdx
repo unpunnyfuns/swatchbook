@@ -26,7 +26,7 @@ Swatchbook emits CSS custom properties keyed on the active tuple. A component re
 
 No JavaScript, no subscriptions, no observers. The cascade does the work. If your stories already use CSS variables for theming, you're done — the rest of this page is for component libraries that read their theme as a JS object at render time.
 
-For CSS-in-JS libraries whose theme values can be `var(--…)` strings (styled-components, emotion with a `var(...)`-based theme), see the [CSS-in-JS integration](../integrations/css-in-js.mdx) — it publishes a ready-made theme accessor without either of the paths below.
+For CSS-in-JS libraries whose theme values can be `var(--…)` strings (styled-components, emotion with a `var(...)`-based theme), see the [CSS-in-JS integration](./integrations#css-in-js) — it publishes a ready-made theme accessor without either of the paths below.
 
 ## React hook inside the preview
 
@@ -102,7 +102,7 @@ Any change to this shape is a breaking change. The DOM is the API.
 ## Known gotchas
 
 **Component library theme is a JS object — can it read the `--<prefix>-*` CSS variables directly?**
-Only if the library consumes CSS variables natively. Tailwind v4 does (see the [Tailwind integration](../integrations/tailwind.mdx)); any provider whose theme values are `var(--…)` strings does (see the [CSS-in-JS integration](../integrations/css-in-js.mdx)). If the theme is a JS object *read* at render time (MUI's `createTheme`, Chakra, Mantine), use `useActiveAxes()` in React, or the DOM-observation path elsewhere, to rebuild the theme object on axis flips.
+Only if the library consumes CSS variables natively. Tailwind v4 does (see the [Tailwind integration](./integrations#tailwind)); any provider whose theme values are `var(--…)` strings does (see the [CSS-in-JS integration](./integrations#css-in-js)). If the theme is a JS object *read* at render time (MUI's `createTheme`, Chakra, Mantine), use `useActiveAxes()` in React, or the DOM-observation path elsewhere, to rebuild the theme object on axis flips.
 
 **Tailwind's `dark:` variant isn't responding to swatchbook.**
 Tailwind looks for `.dark` on an ancestor, or `data-theme="dark"` in its attribute mode. Swatchbook writes `data-<prefix>-mode="Dark"` — the attribute shape and name don't match. Either configure Tailwind to key on swatchbook's attribute (`@custom-variant dark (&:where([data-<prefix>-mode=Dark], [data-<prefix>-mode=Dark] *));`), or have the preview decorator mirror a `.dark` class via the DOM-observation path.
@@ -112,6 +112,5 @@ That's `@storybook/theming`, which controls Storybook's UI chrome — a separate
 
 ## See also
 
-- [Axes](../concepts/axes.mdx) — the runtime model for tuples and attribute composition.
-- [Why axes, not themes](../concepts/axes-vs-themes.mdx) — the shape that makes this contract expressive across multiple dimensions.
-- [Tailwind integration](../integrations/tailwind.mdx) + [CSS-in-JS integration](../integrations/css-in-js.mdx) — zero-code paths for the two most common patterns.
+- [Axes reference](../reference/axes) — the runtime model for tuples and attribute composition.
+- [Integrations](./integrations) — zero-code paths for Tailwind and CSS-in-JS.

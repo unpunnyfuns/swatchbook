@@ -14,7 +14,7 @@ Published as `@unpunnyfuns/swatchbook-addon`. Storybook addon. Loads your config
 npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
 ```
 
-This gives you the toolbar, preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `Diagnostics`, `SwatchbookProvider`, block-side hooks) live in `@unpunnyfuns/swatchbook-blocks` — install it alongside if you want them. See the [token-dashboard guide](../guides/token-dashboard) for the recommended MDX composition.
+This gives you the toolbar, preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `Diagnostics`, `SwatchbookProvider`, block-side hooks) live in `@unpunnyfuns/swatchbook-blocks` — install it alongside if you want them. See the [authoring guide](../guides/authoring-doc-stories) for MDX composition patterns.
 
 Peer requirements: Storybook 10.3+ on the Vite builder, React 18+.
 
@@ -57,7 +57,7 @@ export default definePreview({
 - **Preview decorator** — reads the active axis tuple, writes `data-<prefix>-<axis>="<context>"` attributes (plus `data-<prefix>-theme="<composed id>"`) on `<html>` + story wrapper, mounts the per-theme CSS, emits `INIT_EVENT` to the manager. The prefix follows `cssVarPrefix` (default `swatch`).
 - **Toolbar tool** — a single Swatchbook `IconButton`. Clicking opens a popover containing preset pills, one dropdown per axis, and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`). Escape and outside-click close it.
 
-For a browsable tree + diagnostics surface, compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` on an MDX page — see the [token-dashboard guide](../guides/token-dashboard).
+For a browsable tree + diagnostics surface, compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` on an MDX page — see the [authoring guide](../guides/authoring-doc-stories)'s dashboard example.
 
 ## Globals
 

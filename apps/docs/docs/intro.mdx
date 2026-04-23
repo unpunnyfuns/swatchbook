@@ -7,67 +7,54 @@ sidebar_position: 1
 
 # swatchbook
 
-A Storybook addon and MDX blocks for **documenting [DTCG design tokens](https://design-tokens.org/tr/2025/drafts/)**.
+A Storybook addon and MDX doc blocks for visualising [DTCG design tokens](https://design-tokens.org/tr/2025/drafts/). Two things in one package:
 
-Two things in one:
+- **Doc blocks.** React components for MDX: `TokenDetail`, `TokenTable`, `TokenNavigator`, `ColorPalette`, `TypographyScale`, and per-type previews for motion, shadow, border, gradient, stroke style.
+- **A toolbar theme switcher.** One dropdown per modifier axis in your DTCG resolver. Flip mode, brand, contrast, density — whatever your system has — and tokens repaint live.
 
-- **Doc blocks.** `TokenNavigator`, `TokenTable`, `ColorPalette`, `TypographyScale`, `TokenDetail`, and per-type previews for motion, shadow, border, and gradient. React components for MDX.
-- **A multi-axis theme switcher.** Flip dark mode, brand, contrast, density — whatever dimensions your design system has — from one toolbar button. Each dimension is a DTCG resolver modifier; each becomes a dropdown in a single popover. Tokens repaint live as readers flip axes. See [**why axes, not themes**](./concepts/axes-vs-themes) for the shape.
+If your existing stories already style with CSS variables, they'll pick up the switcher's flips automatically. That's mostly what the tool does.
 
-:::tip[Try it right here]
-The yinyang icon in the top-right of this page drives the same switcher against this docs site's own DTCG tokens — flip **mode**, **a11y**, or **typeface** to see the concept in action on the page you're reading.
+:::tip[Try it here]
+The yinyang icon in the top-right of this page drives the same switcher against this docs site's own tokens. Flip **mode**, **a11y**, or **typeface** to see.
 :::
 
 ## Who it's for
 
-Design-system authors who already have DTCG tokens (or are authoring them) — especially systems with more than one independent dimension (brand × mode, contrast × mode, density, and so on) — and want a browsable, interactive reference without building a custom docs site.
+Design-system authors with DTCG tokens, especially systems with more than one independent dimension (brand × mode, contrast × mode, density). If your system has exactly one dimension and no plans for more, [`@storybook/addon-themes`](https://storybook.js.org/addons/@storybook/addon-themes)' single-string-ID model is simpler and a better fit.
 
-If your system has exactly one dimension and no plans for more, [`@storybook/addon-themes`](https://storybook.js.org/addons/@storybook/addon-themes)' single-string-ID model is simpler and probably a better fit.
+## What it isn't
 
-## What it's not
+Not a runtime theme-switcher for production apps, not a CSS-variable framework, not a token build tool. Swatchbook emits CSS variables and `data-<prefix>-*` attributes inside the Storybook preview so tokens repaint when an author flips an axis. For production theme switching, use your framework's theming tools. For production CSS / Swift / Android / etc. emission, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources — swatchbook is built on Terrazzo's parser and [aligns with its options](./guides/sharing-terrazzo-options) when both pipelines run.
 
-Swatchbook isn't a runtime theme-switcher for production apps, a CSS-variable framework, or a component styling system. It emits CSS variables and `data-<prefix>-*` attributes on `<html>` inside the Storybook preview so tokens repaint when an author toggles an axis. For production theme switching, use your framework's theming tools or [Terrazzo](https://terrazzo.app/)'s build plugins against the same DTCG sources. For how your stories react to toolbar flips, see [consuming the active theme](./guides/consuming-the-active-theme.mdx).
+## Installation
 
-## What the addon includes
+Register `@unpunnyfuns/swatchbook-addon` in `.storybook/main.ts`. It pulls in `swatchbook-core`, `swatchbook-blocks`, and `swatchbook-switcher` transitively. `import { TokenTable, ThemeSwitcher, useToken } from '@unpunnyfuns/swatchbook-addon'` resolves from any consumer file. See the [Quickstart](./quickstart) for a complete setup.
 
-### Installation
+Each sub-package is also publishable on its own — the switcher in a Docusaurus navbar, the core loader in a build script without React.
 
-Register `@unpunnyfuns/swatchbook-addon` in `.storybook/main.ts`. It includes the toolbar, preview decorator, MDX blocks, `ThemeSwitcher`, and `useToken()`, and takes `swatchbook-core`, `swatchbook-blocks`, and `swatchbook-switcher` as transitive dependencies. `import { TokenTable, ThemeSwitcher, useToken } from '@unpunnyfuns/swatchbook-addon'` resolves from any consumer file. Each sub-package is also publishable on its own for projects that want only a slice — the switcher in a Docusaurus navbar, say, or the core loader in a build script without React.
+## No external build step
 
-### No external compile step
-
-The addon publishes tokens to the Storybook preview through a Vite virtual module, recomputed on each reload. Edits to token files propagate via Vite's HMR. Parsing uses [Terrazzo](https://terrazzo.app/); [the token pipeline](./concepts/token-pipeline) covers the mechanism.
-
-### Doc blocks
-
-The blocks are React components for MDX: `TokenDetail`, `TokenTable`, `TokenNavigator`, `ColorPalette`, `TypographyScale`, `FontFamilySample`, `FontWeightScale`, `StrokeStyleSample`, `Diagnostics`, and per-type previews for motion, shadow, border, and gradient. They read the active tuple from the preview decorator's provider and re-render when the toolbar flips an axis. Filter, scoping, and sort props are supported. See the [blocks reference](./reference/blocks), the [authoring guide](./guides/authoring-doc-stories), and the [token-dashboard template](./guides/token-dashboard).
-
-### Toolbar
-
-The Swatchbook icon in Storybook's toolbar opens a popover containing preset pills, one dropdown per modifier axis, and a color-format selector: `hex`, `rgb`, `hsl`, `oklch`, or `raw`.
-
-### `useToken` hook
-
-`useToken(path)` returns `{ value, cssVar, type?, description? }` and re-runs on theme change. Paths come from a generated `.swatchbook/tokens.d.ts`.
+The addon publishes tokens to the preview through a Vite virtual module, recomputed on each reload. Edits to token files propagate via HMR. See the [token pipeline](./reference/token-pipeline) for the mechanism.
 
 ## For AI agents
 
-The optional [`@unpunnyfuns/swatchbook-mcp`](./reference/mcp) package ships a stdio [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes your token graph — paths, axes, alias chains, diagnostics, per-theme resolved values — to AI assistants like Claude Desktop or Claude Code. Point it at your `swatchbook.config.ts` (or a bare DTCG resolver) and an agent can introspect and reason about the system without spinning up Storybook. Fourteen read-only tools; live-reloads on token edits.
+The optional [`@unpunnyfuns/swatchbook-mcp`](./reference/mcp) package ships a stdio [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes the token graph — paths, axes, alias chains, diagnostics, per-theme resolved values — to AI assistants like Claude Desktop or Claude Code. Fourteen read-only tools; live-reloads on token edits.
 
 ## See it live
 
-The [live Storybook](pathname:///storybook/) runs the addon against this repo's [`tokens-reference`](https://github.com/unpunnyfuns/swatchbook/tree/main/packages/tokens-reference) fixture — a multi-file DTCG token set organized per-`$type` (one file for each of `color`, `size`, `typography`, `motion`, `border`, `shadow`, `gradient`, `stroke`, `font`, `number`), with resolver-driven `mode × brand × contrast` axes. Every block, panel, and toolbar control is wired up against those tokens.
+The [live Storybook](pathname:///storybook/) runs the addon against this repo's reference fixture — a multi-file DTCG token set with resolver-driven `mode × brand × contrast` axes.
 
 ## How to read these docs
 
 - **[Quickstart](./quickstart)** — install, configure, run.
-- **Blocks** — the MDX doc blocks you'll spend most of your time with: the [reference](./reference/blocks) lists what's available and the [authoring guide](./guides/authoring-doc-stories) walks through composing them.
-- **Concepts** — the mental model: [why axes, not themes](./concepts/axes-vs-themes.mdx), [theming inputs](./concepts/theming-inputs.mdx), [axes](./concepts/axes.mdx), [presets](./concepts/presets.mdx), [the token pipeline](./concepts/token-pipeline.mdx).
-- **Guides** — the [multi-axis walkthrough](./guides/multi-axis-walkthrough) covers one-time setup.
-- **Integrations** — [wiring swatchbook tokens into Tailwind / styled-components / emotion / any ThemeProvider-consumer](./integrations/) via the `@unpunnyfuns/swatchbook-integrations` package.
-- **Reference** — API surface for the remaining packages (`addon`, `core`, `config`, `mcp`).
-- **Developers** — contributing to swatchbook itself: [architecture](./developers/architecture) and [sharp corners](./developers/sharp-corners).
+- **[Guides](./guides/authoring-doc-stories)** — MDX doc-story composition, consuming the active theme from stories, third-party library integrations, aligning with a production Terrazzo build.
+- **[Reference](./reference/addon)** — API surface for each published package, the axis model, the token-pipeline mechanism, the config shape.
+- **[Developers](./developers/)** — contributing to swatchbook itself: architecture and sharp corners.
+
+## Migrating from `@storybook/addon-themes`
+
+If you're coming from `@storybook/addon-themes` and have one or two flat theme IDs, translate each ID to an axes tuple — `"brand-a-dark"` becomes `{ brand: 'Brand A', mode: 'Dark' }` — then declare `mode` and `brand` as resolver modifiers. The axes model composes the cartesian product automatically, so no enumerating all combinations. See [axes reference](./reference/axes) for details.
 
 ## What these docs assume
 
-You're comfortable with Storybook (CSF, decorators, MDX docs). For DTCG itself, you've skimmed the [2025.10 spec](https://design-tokens.org/tr/2025/drafts/) or at least seen `$value` / `$type` / alias syntax before — we won't re-teach the spec here.
+You're comfortable with Storybook (CSF, decorators, MDX docs). For DTCG itself, you've skimmed the [2025.10 spec](https://design-tokens.org/tr/2025/drafts/) or at least seen `$value` / `$type` / alias syntax — we don't re-teach the spec.

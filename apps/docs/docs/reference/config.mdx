@@ -136,9 +136,9 @@ interface Preset {
 
 Partial tuples are legal — omitted axes resolve to the axis's `default` when the preset is applied. `loadProject` validates presets: unknown axis keys and invalid context values surface as `warn` diagnostics (group `swatchbook/presets`) and are sanitized out, but the preset itself stays in `Project.presets` (an empty preset is still a valid tuple — it resolves to all defaults).
 
-See [Presets](../concepts/presets) for the runtime UX.
+### `disabledAxes`
 
-### `disabledAxes?: string[]`
+Type: `string[]` — optional.
 
 Axis names to suppress from this Storybook session. Each listed axis is **pinned to its `default` context**: the toolbar dropdown disappears, the axis drops out of `Project.axes`, non-default tuples fold away, and CSS emission stops including the axis in compound selectors. The Design Tokens panel still shows a small pinned indicator so authors don't forget the modifier is being suppressed.
 
@@ -152,7 +152,9 @@ defineSwatchbookConfig({
 
 Config-level only — there's no runtime toggle. Disabling an axis is the cleanest way to hide a work-in-progress modifier (or an experimental axis you don't want surfaced yet) without editing the resolver document. Unknown axis names produce `warn` diagnostics (group `swatchbook/disabled-axes`) and are ignored; the filtered list lands on `Project.disabledAxes` for downstream tooling.
 
-### `chrome?: Record<string, string>`
+### `chrome`
+
+Type: `Record<string, string>` — optional.
 
 Override one or more of swatchbook's ten block-chrome roles. Block components (`<TokenTable>`, `<ColorPalette>`, etc.) read a fixed `--swatchbook-*` CSS variable namespace for their surfaces, text, and accents — independent of `cssVarPrefix`, so your token namespace never collides with chrome reads. Every role is always declared: by default, to the hard-coded literals in `DEFAULT_CHROME_MAP` (which use `light-dark()` so chrome auto-flips with the active `color-scheme` — Storybook's light/dark preference, the OS, whatever). Any role you set in `chrome` replaces that literal with a `var(--<prefix>-<your-token>)` reference so chrome reflows with your own theme switches instead.
 
@@ -208,7 +210,9 @@ Produces a single `:root` chrome block with all ten roles declared — overrides
 
 Unknown role keys (outside the ten above) and target paths that don't resolve to any token or composite sub-field in any theme produce `warn` diagnostics (group `swatchbook/chrome`) and are dropped — the corresponding chrome slot falls back to its hard-coded literal default. The validated entries land on `Project.chrome` for downstream tooling.
 
-### `cssOptions?: Omit<CSSPluginOptions, 'variableName' | 'permutations' | 'filename' | 'skipBuild'>`
+### `cssOptions`
+
+Type: `Omit<CSSPluginOptions, 'variableName' | 'permutations' | 'filename' | 'skipBuild'>` — optional.
 
 Options forwarded to the `@terrazzo/plugin-css` instance swatchbook runs internally — for the stylesheet it emits for the Storybook preview and for the Token Listing's `names.css` derivation. Use this when your production Terrazzo build passes non-default options to `plugin-css` (`legacyHex`, a custom `transform`, `include` / `exclude` globs, etc.) and you want the docs-side output to match.
 
@@ -231,7 +235,9 @@ defineSwatchbookConfig({
 
 See [Aligning with your token build](../guides/sharing-terrazzo-options) for the end-to-end shared-options pattern.
 
-### `listingOptions?: Omit<TokenListingPluginOptions, 'filename'>`
+### `listingOptions`
+
+Type: `Omit<TokenListingPluginOptions, 'filename'>` — optional.
 
 Options forwarded to `@terrazzo/plugin-token-listing`. The listing is how swatchbook surfaces authoritative per-token metadata (plugin-css-computed CSS variable names, preview values, alias chains, source file + line references) into `Project.listing` and the block-side `ProjectSnapshot.listing`. Use `listingOptions.platforms` to register additional platforms beyond the built-in `css` entry:
 
@@ -255,7 +261,9 @@ Each `platforms` entry names a Terrazzo plugin whose identifier-naming logic der
 
 `filename` is managed internally (the listing is captured in memory, not written to disk) and is stripped from the option type.
 
-### `terrazzoPlugins?: readonly Plugin[]`
+### `terrazzoPlugins`
+
+Type: `readonly Plugin[]` — optional.
 
 Additional Terrazzo plugins loaded alongside swatchbook's internal `plugin-css` + `plugin-token-listing`. Required when `listingOptions.platforms` references anything beyond the built-in `css` — the referenced plugin has to actually run in the same build for the listing to resolve its naming. Plugins whose output swatchbook doesn't consume are harmless — they run, their output files land in the in-memory output set, nothing else happens.
 
@@ -265,7 +273,6 @@ See [Sharing Terrazzo options](../guides/sharing-terrazzo-options) for the patte
 
 ## See also
 
-- [Theming inputs](../concepts/theming-inputs) — when to pick resolver vs layered.
-- [Axes](../concepts/axes) — the runtime model for selection.
+- [Axes reference](./axes) — the runtime model for selection.
 - [Reference: core](./core) — the loader APIs this config drives.
 - [Sharing Terrazzo options](../guides/sharing-terrazzo-options) — keep the swatchbook build aligned with a production Terrazzo CLI.

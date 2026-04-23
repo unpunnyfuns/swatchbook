@@ -6,7 +6,7 @@ sidebar_position: 2
 
 # Authoring doc stories
 
-The doc blocks from `@unpunnyfuns/swatchbook-blocks` are React components that render against the active token graph. Use them in MDX stories to compose a proper reference page — a ColorPalette, a TypographyScale, a TokenTable filtered to a subpath — all of which live-update as the toolbar changes axes.
+The doc blocks from `@unpunnyfuns/swatchbook-blocks` are React components that render against the active token graph. Use them in MDX stories to compose reference pages — a `ColorPalette`, a `TypographyScale`, a `TokenTable` filtered to a subpath — all of which update live as the toolbar changes axes.
 
 ## Prerequisite
 
@@ -16,7 +16,7 @@ Install the blocks package:
 npm install -D @unpunnyfuns/swatchbook-blocks
 ```
 
-The blocks read the active token graph from a `SwatchbookProvider`. The addon's preview decorator mounts that provider for every story, so the blocks render inside MDX as long as `@unpunnyfuns/swatchbook-addon` is registered in your Storybook.
+The blocks read the active token graph from a `SwatchbookProvider`. The addon's preview decorator mounts that provider for every story, so blocks render inside MDX as long as `@unpunnyfuns/swatchbook-addon` is registered in your Storybook.
 
 ## A minimal docs page
 
@@ -28,20 +28,39 @@ import { ColorPalette, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 
 # Colors
 
-Our color tokens live under a single flat namespace. Semantic slots like
-`color.surface.default` carry mode- and brand-varied values through the
-resolver, so components style themselves against `color.*` directly.
-
 ## Primitive palette
 
-<ColorPalette filter="color.*" />
+<ColorPalette filter="color.palette.*" />
 
 ## Semantic slots
 
 <TokenTable filter="color.*" type="color" />
 ```
 
-Restart your Storybook dev server (if HMR doesn't pick up new MDX files) and visit `Docs / Colors`. The palette swatches and table values update live as you flip the toolbar.
+Visit `Docs / Colors`. The palette swatches and table values update as you flip the toolbar.
+
+## A dashboard composition
+
+One page with diagnostics, tree, and table gives a top-to-bottom view — project health, browsable hierarchy, searchable lookup:
+
+```mdx title="src/docs/tokens.mdx"
+import { Meta } from '@storybook/addon-docs/blocks';
+import { Diagnostics, TokenNavigator, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
+
+<Meta title="Docs/Tokens" />
+
+# Design Tokens
+
+<Diagnostics />
+
+## Tree
+<TokenNavigator />
+
+## Table
+<TokenTable />
+```
+
+`Diagnostics` auto-collapses on clean loads, so it's safe at the top of every page without adding noise. Scope the tree or table with a prop: `<TokenNavigator root="color" />`, `<TokenTable filter="space.*" />`.
 
 ## Blocks at a glance
 
@@ -49,21 +68,23 @@ Restart your Storybook dev server (if HMR doesn't pick up new MDX files) and vis
 | --- | --- |
 | `TokenDetail` | A single token's full picture — alias chain, aliased-by tree, per-axis variance, composite preview. |
 | `TokenTable` | Filterable table of tokens. Supports path glob and `$type` filters. |
+| `TokenNavigator` | Expandable tree; scope to a subtree or `$type`. |
 | `ColorPalette` | Swatch grid grouped by sub-path. |
-| `TypographyScale` | Renders each typography-typed token as a sample line using its own value. |
-| `FontFamilySample` | Pangram rendered per `fontFamily` primitive. |
+| `TypographyScale` | Each `typography` token as a sample line using its own value. |
+| `FontFamilySample` | Pangram per `fontFamily` primitive. |
 | `FontWeightScale` | Same "Aa" sample at each `fontWeight`. |
 | `StrokeStyleSample` | Border rendered per `strokeStyle` primitive. |
-| Motion / shadow / border previews | Inside `TokenDetail`'s composite rendering. |
+| `Diagnostics` | Collapsible list of parser / resolver warnings; auto-opens on non-zero. |
+| Motion / shadow / border / gradient previews | Inside `TokenDetail`'s composite rendering, or standalone blocks. |
 
-See [Reference: blocks](../reference/blocks) for the full prop surface.
+See the [blocks reference](../reference/blocks) for the full prop surface.
 
 ## Typed token access from components
 
-If you're writing a component that needs a token's resolved value (not just a CSS var reference), use the `useToken` hook. It reads from the virtual graph + active axis tuple and returns `{ value, cssVar, type, description }` with typed paths:
+If you need a token's resolved value (not just a CSS var reference), use `useToken`. It reads from the virtual graph + active tuple and returns `{ value, cssVar, type, description }` with typed paths:
 
 ```tsx
-import { useToken } from '@unpunnyfuns/swatchbook-addon/hooks';
+import { useToken } from '@unpunnyfuns/swatchbook-addon';
 
 function Badge({ level }: { level: 'info' | 'warn' }) {
   const tokenName = level === 'info' ? 'color.accent.bg' : 'color.warning.bg';
@@ -74,7 +95,7 @@ function Badge({ level }: { level: 'info' | 'warn' }) {
 
 `cssVar` is stable across themes; `value` reflects the active tuple. Paths autocomplete from a generated `.swatchbook/tokens.d.ts` once the addon has run.
 
-## Overriding the axes on a specific doc
+## Overriding axes on a specific doc
 
 Force a specific tuple on a single doc page:
 
@@ -82,11 +103,11 @@ Force a specific tuple on a single doc page:
 <Meta title="Docs/Colors (Dark)" parameters={{ swatchbook: { axes: { mode: 'Dark' } } }} />
 ```
 
-The addon's toolbar still reflects the story's active tuple, so readers can tell what they're seeing. Any axis you omit falls back to its default.
+The toolbar still reflects the story's active tuple, so readers see what they're looking at. Any axis you omit falls back to its default.
 
 ## What MDX can't do
 
-Storybook's preview hooks (`useGlobals`, `useArgs`, `useChannel`) throw when called from an MDX doc block — the preview HooksContext only exists while a story is rendering. The blocks in this package avoid those by subscribing to Storybook's channel directly. If you write a custom block for your project, follow the same pattern:
+Storybook's preview hooks (`useGlobals`, `useArgs`, `useChannel`) throw when called from an MDX doc block — the preview `HooksContext` only exists while a story is rendering. The blocks in this package subscribe to Storybook's channel directly instead. If you write a custom block for your project, same pattern:
 
 ```ts
 import { addons } from 'storybook/preview-api';
@@ -101,4 +122,4 @@ channel.on('globalsUpdated', (payload) => {
 
 - [Reference: blocks](../reference/blocks) — every block's props.
 - [Reference: addon](../reference/addon) — `useToken` and the other hooks.
-- [Live Storybook](pathname:///storybook/) — real doc stories you can steal from.
+- [Live Storybook](pathname:///storybook/) — doc stories you can steal from.

@@ -96,15 +96,7 @@ const config: Config = {
       items: [
         // Quickstart lives in the `home` sidebar reachable via the
         // logo/title; every other section gets a navbar pill.
-        { type: 'docSidebar', sidebarId: 'concepts', position: 'left', label: 'Concepts' },
-        { type: 'docSidebar', sidebarId: 'blocks', position: 'left', label: 'Blocks' },
         { type: 'docSidebar', sidebarId: 'guides', position: 'left', label: 'Guides' },
-        {
-          type: 'docSidebar',
-          sidebarId: 'integrations',
-          position: 'left',
-          label: 'Integrations',
-        },
         { type: 'docSidebar', sidebarId: 'reference', position: 'left', label: 'Reference' },
         { type: 'docSidebar', sidebarId: 'developers', position: 'left', label: 'Developers' },
         { href: 'pathname:///storybook/', label: 'Live Storybook', position: 'left' },
