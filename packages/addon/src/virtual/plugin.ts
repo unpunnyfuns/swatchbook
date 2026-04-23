@@ -1,4 +1,10 @@
-import type { Config, Project, SwatchbookIntegration } from '@unpunnyfuns/swatchbook-core';
+import type {
+  Config,
+  ListedToken,
+  Project,
+  SwatchbookIntegration,
+  TokenListingByPath,
+} from '@unpunnyfuns/swatchbook-core';
 import { loadProject, projectCss } from '@unpunnyfuns/swatchbook-core';
 import { type FSWatcher, watch as fsWatch } from 'node:fs';
 import { basename, dirname, isAbsolute, resolve as resolvePath } from 'node:path';
@@ -100,6 +106,7 @@ export function swatchbookTokensPlugin({
         `export const diagnostics = ${JSON.stringify(project.diagnostics)};`,
         `export const css = ${JSON.stringify(css)};`,
         `export const cssVarPrefix = ${JSON.stringify(config.cssVarPrefix ?? '')};`,
+        `export const listing = ${JSON.stringify(slimListing(project.listing))};`,
       ].join('\n');
     },
 
@@ -164,6 +171,7 @@ export function swatchbookTokensPlugin({
                 diagnostics: project.diagnostics,
                 css,
                 cssVarPrefix: config.cssVarPrefix ?? '',
+                listing: slimListing(project.listing),
               },
             });
           })();
@@ -243,4 +251,28 @@ export function collectWatchPaths(
 function resolveFromCwd(p: string, cwd: string): string {
   if (isAbsolute(p)) return p;
   return resolvePath(cwd, p);
+}
+
+type SlimListedToken = Pick<
+  ListedToken['$extensions']['app.terrazzo.listing'],
+  'names' | 'previewValue' | 'source'
+>;
+
+/**
+ * Reduce the full Token Listing surface down to the fields blocks read.
+ * Drops `originalValue` (large, not needed for display), `$value`, `$type`,
+ * `mode`, `subtype` for now — the blocks don't consume them yet. Keeps the
+ * virtual module payload lean, especially for large projects where each
+ * token's raw listing entry can weigh a few KB.
+ */
+function slimListing(listing: TokenListingByPath): Record<string, SlimListedToken> {
+  const out: Record<string, SlimListedToken> = {};
+  for (const [path, entry] of Object.entries(listing)) {
+    const ext = entry.$extensions['app.terrazzo.listing'];
+    const slim: SlimListedToken = { names: ext.names };
+    if (ext.previewValue !== undefined) slim.previewValue = ext.previewValue;
+    if (ext.source !== undefined) slim.source = ext.source;
+    out[path] = slim;
+  }
+  return out;
 }

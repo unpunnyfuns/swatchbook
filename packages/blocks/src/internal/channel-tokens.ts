@@ -6,10 +6,12 @@ import {
   cssVarPrefix as initialCssVarPrefix,
   defaultTheme as initialDefaultTheme,
   diagnostics as initialDiagnostics,
+  listing as initialListing,
   presets as initialPresets,
   themes as initialThemes,
   themesResolved as initialThemesResolved,
 } from 'virtual:swatchbook/tokens';
+import type { VirtualTokenListingShape } from '#/contexts.ts';
 import type { VirtualAxis, VirtualDiagnostic, VirtualTheme, VirtualToken } from '#/types.ts';
 
 /**
@@ -44,6 +46,7 @@ export interface TokenSnapshot {
   readonly diagnostics: readonly VirtualDiagnostic[];
   readonly css: string;
   readonly cssVarPrefix: string;
+  readonly listing: Readonly<Record<string, VirtualTokenListingShape>>;
   /** Monotonic counter, bumped on each update. Useful as a React key. */
   readonly version: number;
 }
@@ -57,6 +60,7 @@ let snapshot: TokenSnapshot = {
   diagnostics: initialDiagnostics,
   css: initialCss,
   cssVarPrefix: initialCssVarPrefix,
+  listing: initialListing ?? {},
   version: 0,
 };
 
@@ -77,6 +81,7 @@ function ensureSubscribed(): void {
       diagnostics: payload.diagnostics ?? snapshot.diagnostics,
       css: payload.css ?? snapshot.css,
       cssVarPrefix: payload.cssVarPrefix ?? snapshot.cssVarPrefix,
+      listing: payload.listing ?? snapshot.listing,
       version: snapshot.version + 1,
     };
     for (const cb of listeners) cb();

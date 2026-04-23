@@ -10,6 +10,7 @@ declare module 'virtual:swatchbook/tokens' {
   import type {
     VirtualAxis,
     VirtualDiagnostic,
+    VirtualListingEntry,
     VirtualPreset,
     VirtualTheme,
     VirtualToken,
@@ -24,6 +25,7 @@ declare module 'virtual:swatchbook/tokens' {
   export const diagnostics: readonly VirtualDiagnostic[];
   export const css: string;
   export const cssVarPrefix: string;
+  export const listing: Readonly<Record<string, VirtualListingEntry>>;
 }
 
 declare module 'virtual:swatchbook/integration-side-effects';

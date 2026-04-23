@@ -12,6 +12,7 @@ export {
   type EmitSelectionEntry,
   type EmittedFile,
 } from '#/emit-via-terrazzo.ts';
+export { type ListedToken, type TokenListingByPath } from '#/token-listing.ts';
 
 export type {
   Axis,

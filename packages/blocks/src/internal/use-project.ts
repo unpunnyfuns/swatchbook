@@ -1,5 +1,6 @@
 import { makeCSSVar } from '@terrazzo/token-tools/css';
 import { useEffect } from 'react';
+import type { VirtualTokenListingShape } from '#/contexts.ts';
 import { useActiveAxes, useActiveTheme, useOptionalSwatchbookData } from '#/contexts.ts';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
 import { useTokenSnapshot } from '#/internal/channel-tokens.ts';
@@ -22,6 +23,13 @@ export interface ProjectData {
   themesResolved: Record<string, ResolvedTokens>;
   diagnostics: readonly VirtualDiagnostic[];
   cssVarPrefix: string;
+  /**
+   * Path-indexed Token Listing data. Empty when absent (non-resolver
+   * projects, hand-built snapshots that don't populate it). Blocks read
+   * authoritative CSS var names from `listing[path].names.css` and
+   * preview strings from `listing[path].previewValue`.
+   */
+  listing: Readonly<Record<string, VirtualTokenListingShape>>;
 }
 
 const STYLE_ELEMENT_ID = 'swatchbook-tokens';
@@ -77,6 +85,7 @@ function snapshotToData(snapshot: ProjectSnapshot): ProjectData {
     resolved: snapshot.themesResolved[snapshot.activeTheme] ?? {},
     diagnostics: snapshot.diagnostics,
     cssVarPrefix: snapshot.cssVarPrefix,
+    listing: snapshot.listing ?? {},
   };
 }
 
@@ -143,6 +152,7 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
     resolved: tokens.themesResolved[activeTheme] ?? {},
     diagnostics: tokens.diagnostics,
     cssVarPrefix: tokens.cssVarPrefix,
+    listing: tokens.listing,
   };
 }
 
@@ -154,6 +164,20 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
  */
 export function makeCssVar(path: string, prefix: string): string {
   return prefix ? makeCSSVar(path, { prefix, wrapVar: true }) : makeCSSVar(path, { wrapVar: true });
+}
+
+/**
+ * Resolve a token's CSS var reference, preferring the authoritative name
+ * emitted by `@terrazzo/plugin-css` (as recorded by
+ * `@terrazzo/plugin-token-listing` in the snapshot's `listing` field).
+ * Falls back to `makeCssVar` when the listing lacks an entry for this
+ * path — covers non-resolver projects, hand-built snapshots, and any
+ * listing-plugin miss.
+ */
+export function resolveCssVar(path: string, project: ProjectData): string {
+  const listed = project.listing[path]?.names?.['css'];
+  if (listed) return `var(${listed})`;
+  return makeCssVar(path, project.cssVarPrefix);
 }
 
 /**

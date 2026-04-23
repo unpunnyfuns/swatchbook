@@ -14,6 +14,7 @@ import {
   defaultTheme,
   diagnostics,
   disabledAxes as virtualDisabledAxes,
+  listing as virtualListing,
   presets as virtualPresets,
   themes,
   themesResolved,
@@ -260,6 +261,7 @@ const themedDecorator: Decorator = (Story, context) => {
       cssVarPrefix,
       diagnostics,
       css,
+      listing: virtualListing,
     }),
     [themeName, tuple],
   );
@@ -399,6 +401,7 @@ interface HmrSnapshot {
   diagnostics: typeof diagnostics;
   css: string;
   cssVarPrefix: string;
+  listing: typeof virtualListing;
 }
 if (import.meta.hot) {
   import.meta.hot.on(HMR_EVENT, (payload: HmrSnapshot) => {

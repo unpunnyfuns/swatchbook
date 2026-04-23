@@ -44,6 +44,18 @@ declare module 'virtual:swatchbook/tokens' {
     description?: string;
   }
 
+  interface VirtualListingEntry {
+    names: Record<string, string>;
+    previewValue?: string | number;
+    source?: {
+      resource: string;
+      loc?: {
+        start: { line: number; column: number; offset: number };
+        end: { line: number; column: number; offset: number };
+      };
+    };
+  }
+
   export const axes: readonly VirtualAxis[];
   export const presets: readonly VirtualPreset[];
   export const themes: readonly VirtualTheme[];
@@ -52,6 +64,7 @@ declare module 'virtual:swatchbook/tokens' {
   export const diagnostics: readonly VirtualDiagnostic[];
   export const css: string;
   export const cssVarPrefix: string;
+  export const listing: Readonly<Record<string, VirtualListingEntry>>;
 }
 
 declare module '*.css';

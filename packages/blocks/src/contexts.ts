@@ -43,6 +43,27 @@ export interface VirtualTokenShape {
   aliasedBy?: readonly string[];
 }
 
+/**
+ * Subset of `@terrazzo/plugin-token-listing`'s `ListedToken` that the
+ * snapshot carries. Blocks read `names.css` for the authoritative CSS
+ * variable name and `previewValue` for the display-ready CSS string.
+ * `source.loc` enables "jump to authoring source" affordances.
+ *
+ * Only the fields blocks consume are typed here; the plugin's full shape
+ * lives in `@unpunnyfuns/swatchbook-core`.
+ */
+export interface VirtualTokenListingShape {
+  names: Record<string, string>;
+  previewValue?: string | number;
+  source?: {
+    resource: string;
+    loc?: {
+      start: { line: number; column: number; offset: number };
+      end: { line: number; column: number; offset: number };
+    };
+  };
+}
+
 export interface VirtualPresetShape {
   name: string;
   axes: Partial<Record<string, string>>;
@@ -66,6 +87,14 @@ export interface ProjectSnapshot {
   cssVarPrefix: string;
   diagnostics: readonly VirtualDiagnosticShape[];
   css: string;
+  /**
+   * Path-indexed Token Listing data produced by
+   * `@terrazzo/plugin-token-listing`. Blocks prefer reading authoritative
+   * CSS var names and preview values from here; empty for non-resolver
+   * projects. Treat as enrichment — fall back gracefully when a path is
+   * absent.
+   */
+  listing?: Readonly<Record<string, VirtualTokenListingShape>>;
 }
 
 /**

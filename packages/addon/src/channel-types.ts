@@ -62,3 +62,15 @@ export interface InitPayload {
   diagnostics: readonly VirtualDiagnostic[];
   cssVarPrefix: string;
 }
+
+export interface VirtualListingEntry {
+  names: Record<string, string>;
+  previewValue?: string | number;
+  source?: {
+    resource: string;
+    loc?: {
+      start: { line: number; column: number; offset: number };
+      end: { line: number; column: number; offset: number };
+    };
+  };
+}

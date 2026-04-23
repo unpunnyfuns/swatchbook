@@ -284,6 +284,9 @@ importers:
       '@terrazzo/plugin-css':
         specifier: ^2.0.3
         version: 2.0.3(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))(@terrazzo/parser@2.0.3(yaml-to-momoa@0.0.9))
+      '@terrazzo/plugin-token-listing':
+        specifier: 0.1.0-alpha.1
+        version: 0.1.0-alpha.1(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))
       '@terrazzo/token-tools':
         specifier: ^2.0.3
         version: 2.0.3
@@ -3964,6 +3967,11 @@ packages:
     peerDependencies:
       '@terrazzo/cli': ^2.0.3
       '@terrazzo/parser': ^2.0.3
+
+  '@terrazzo/plugin-token-listing@0.1.0-alpha.1':
+    resolution: {integrity: sha512-hAL2mAGYBwMaHj+GeXbJinLqo1xYLazLBu8Dji8Us8OKWXHPhuJY71RZpT0oul70jOBXGRFii+pM7Tqe6T7Fuw==}
+    peerDependencies:
+      '@terrazzo/cli': ^2.0.0-alpha.3
 
   '@terrazzo/token-tools@2.0.3':
     resolution: {integrity: sha512-/5Mbqcq3hXWOz4G/AjhYY/PHU00TJJJOJrZS2Fosg4sOkb18VaDHU9Sbj1g8M/R86OmSibQF99zB3DkUSjAYFA==}
@@ -13329,6 +13337,12 @@ snapshots:
       '@terrazzo/cli': 2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)
       '@terrazzo/parser': 2.0.3(yaml-to-momoa@0.0.9)
       '@terrazzo/token-tools': 2.0.3
+
+  '@terrazzo/plugin-token-listing@0.1.0-alpha.1(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))':
+    dependencies:
+      '@terrazzo/cli': 2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)
+      '@terrazzo/token-tools': 2.0.3
+      wildcard-match: 5.1.4
 
   '@terrazzo/token-tools@2.0.3':
     dependencies:
