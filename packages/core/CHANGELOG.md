@@ -1,5 +1,38 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.19.0
+
+### Minor Changes
+
+- 785486c: Tighten `Config.cssOptions`: `filename` and `skipBuild` are now stripped from the allowed type in addition to `variableName` and `permutations`. Neither was ever honored end-to-end — `filename` is overridden to the in-memory capture name, and `skipBuild: true` would silently null out the listing's `previewValue`. Removing them from the type turns a silent no-op into a compile-time signal.
+
+  Deprecated plugin-css knobs (`baseSelector`, `baseScheme`, `modeSelectors`) are still type-accepted because they sit on `CSSPluginOptions`, but are runtime-inert under swatchbook's permutation-based emission. Setting any of them now produces a `swatchbook/css-options` warn diagnostic that lists the offending keys and points at the replacement, matching the validation pattern already used for `default` / `presets` / `chrome` / `disabledAxes`.
+
+  Breaking (pre-1.0, minor): configs that were setting `filename` or `skipBuild` on `cssOptions` — which had no effect in practice — will now fail to typecheck. Delete the field.
+
+### Patch Changes
+
+- ba41ead: Declare `@terrazzo/parser` and `@terrazzo/plugin-css` as peer dependencies on swatchbook-core (still listed under `dependencies` too). Terrazzo's ecosystem plugins — `@terrazzo/plugin-swift`, `-android`, `-sass`, `-js`, etc. — all peer-depend on `@terrazzo/parser`. Without the peer declaration on our side, a user installing `plugin-swift@3.x` next to our `parser@2.x` would hit silent API-shape mismatches (parser 3 and plugin 3 talk one protocol; parser 2 talks another). Now pnpm can hoist to a single shared parser instance and surface version mismatches at install time instead of at render time.
+
+  No runtime behavior change; installs that already satisfy the range see no difference.
+
+- 785486c: Expand the "Aligning with your token build" guide (`guides/sharing-terrazzo-options`) from a short shared-options recipe into a full primer: per-knob notes for `cssOptions` / `listingOptions` / `terrazzoPlugins`, what swatchbook owns vs what passes through, the soft-inert `baseSelector` / `baseScheme` / `modeSelectors` trio, per-platform identifier display via `terrazzoPlugins` + `listingOptions.platforms`, monorepo layout guidance, a Style Dictionary section covering DTCG-source alignment and the "don't try to match names" counterpoint, and a common-pitfalls section. Guide now appears in the sidebar; cross-linked from `concepts/token-pipeline` and `integrations/`.
+- 9fde68e: Correct the "Consuming the active theme" guide: swatchbook does ship React hooks (`useActiveAxes` / `useActiveTheme` / `useColorFormat` from `@unpunnyfuns/swatchbook-addon`), and for React story / block / decorator code inside the Storybook preview they're the ergonomic path — the previous guide framed DOM-observation as the only option and claimed "no framework-specific hooks" which is wrong. DOM observation is now positioned as the cross-framework / out-of-preview fallback, and the intro lists three paths (CSS variables → React hook → DOM observation) in order of preference. Non-React bindings are still explicitly not shipped — that part is unchanged.
+- 91c9901: Add a "Terrazzo dependencies" mini-section to the Quickstart. Clarifies that `@terrazzo/parser`, `plugin-css`, and `plugin-token-listing` come with `swatchbook-core` transitively (no extra install for the default setup), and flags the two cases where explicit Terrazzo installs are warranted: pinning matching versions alongside a production `@terrazzo/cli`, or installing additional ecosystem plugins (`plugin-swift`, `-android`, `-sass`, `-js`) to populate per-platform names in `<TokenDetail>`.
+- 40f3a68: Restructure the documentation: consolidate sprawling sections, drop duplicate and pre-emptive pages, tighten the register. Sidebar drops from six nav pills to three (Guides / Reference / Developers). Page count drops from twenty-three to fifteen.
+
+  - `concepts/axes-vs-themes` + `concepts/axes` merged into `reference/axes` — one page, the runtime model plus a short framing paragraph, no separate "why" page.
+  - `guides/token-dashboard` merged into `guides/authoring-doc-stories` as a composition example; tutorial framing retained.
+  - `integrations/{index,tailwind,css-in-js}` merged into `guides/integrations` — two integrations are small enough to live as sections on one page, not three.
+  - `concepts/token-pipeline` moved to `reference/token-pipeline` and rewritten for tighter register.
+  - `concepts/presets` and `concepts/theming-inputs` dropped — content already covered in `reference/config`.
+  - `guides/migrating-from-addon-themes` dropped — the migration story is two sentences in the intro.
+  - `guides/multi-axis-walkthrough` dropped — the axes reference + resolver docs carry the load.
+  - Intro + quickstart trimmed: pitchier phrasings replaced with direct descriptions. Less "powerful" / "seamless" voice, more "a tool for visualising your design tokens." Register matches the rest of the reference material.
+  - Every cross-link and anchor updated across the remaining pages; docs build passes cleanly.
+
+- ca1e52a: Tighten the framing on `<TokenDetail>`'s per-platform Consumer Output rows and the alignment guide's per-platform section so it's clear: swatchbook doesn't transform tokens, it displays what the consumer's configured transformers emit. The rows match production naming only when the plugin invocations match (pass `plugin-swift({ yourProductionOptions })`, not `plugin-swift()`). No behaviour change; the caveat makes the "preview host, not token transformer" scope explicit in-docs so users don't read the displayed defaults as authoritative.
+
 ## 0.18.0
 
 ### Minor Changes

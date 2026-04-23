@@ -1,5 +1,26 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.19.0
+
+### Minor Changes
+
+- 52a5660: `<ConsumerOutput>` (and therefore `<TokenDetail>`, which composes it) now renders one extra row per non-CSS platform that appears in the Token Listing. Loading `@terrazzo/plugin-swift` / `-android` / `-sass` / `-js` through `config.terrazzoPlugins` and naming it in `config.listingOptions.platforms` is all it takes — rows with labels like "Swift", "Android", "Sass", "Js" appear automatically with each plugin's authoritative identifier, copy-to-clipboard included.
+
+  Cashes in the per-platform half of the Token Listing migration. The data was already flowing through the addon → blocks plumbing; this change surfaces it.
+
+  Exports `VirtualTokenListingShape` from `@unpunnyfuns/swatchbook-blocks` for consumers building custom per-platform blocks.
+
+### Patch Changes
+
+- Updated dependencies [ba41ead]
+- Updated dependencies [785486c]
+- Updated dependencies [9fde68e]
+- Updated dependencies [91c9901]
+- Updated dependencies [40f3a68]
+- Updated dependencies [ca1e52a]
+- Updated dependencies [785486c]
+  - @unpunnyfuns/swatchbook-core@0.19.0
+
 ## 0.18.0
 
 ### Minor Changes
