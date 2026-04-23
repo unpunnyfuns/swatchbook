@@ -8,14 +8,23 @@ export interface TailwindIntegrationOptions {
    */
   virtualId?: string;
   /**
-   * Override or extend the default role map. Keys are Tailwind scale
-   * names (`color`, `spacing`, `radius`, `shadow`); values are ordered
-   * `[tailwindEntryName, dtcgPath]` pairs. Supplied map **replaces**
-   * the default — pass your own to customise which roles land in
-   * `@theme`. Omit to use the curated default.
+   * Override the auto-derived role map. Keys are Tailwind scale names
+   * (`color`, `spacing`, `radius`, `shadow`, `font`); values are ordered
+   * `[tailwindEntryName, dtcgPath]` pairs. Supplied map **replaces** the
+   * derived one — pass your own to pin exact entries, restrict the
+   * universe of emitted utilities, or name scales the derivation doesn't
+   * cover.
+   *
+   * Omit to let the integration derive a role map from the project at
+   * render time: every `color` token lands under the `color` scale,
+   * every `dimension` token under `spacing` / `radius` based on its
+   * path prefix, every `shadow` under `shadow`, every `fontFamily` under
+   * `font`. Works for any DTCG project without a configuration step.
    */
   roles?: Readonly<Record<string, readonly (readonly [string, string])[]>>;
 }
+
+type RoleMap = Readonly<Record<string, readonly (readonly [string, string])[]>>;
 
 /**
  * Preview-only Tailwind v4 integration for the swatchbook Storybook
@@ -56,13 +65,13 @@ export default function tailwindIntegration(
   options: TailwindIntegrationOptions = {},
 ): SwatchbookIntegration {
   const virtualId = options.virtualId ?? 'virtual:swatchbook/tailwind.css';
-  const roles = options.roles ?? DEFAULT_ROLES;
+  const userRoles = options.roles;
 
   return {
     name: 'tailwind',
     virtualModule: {
       virtualId,
-      render: (project) => renderTailwindTheme(project, roles),
+      render: (project) => renderTailwindTheme(project, userRoles ?? deriveRoles(project)),
       // Tailwind's `@theme` block is a global stylesheet — exactly the
       // kind of payload the addon should auto-inject into the preview,
       // so consumers don't hand-write a second `import` line after
@@ -72,16 +81,14 @@ export default function tailwindIntegration(
   };
 }
 
-function renderTailwindTheme(
-  project: Project,
-  roles: Readonly<Record<string, readonly (readonly [string, string])[]>>,
-): string {
+function renderTailwindTheme(project: Project, roles: RoleMap): string {
   const prefix = project.config.cssVarPrefix ?? '';
   const sourcePrefix = prefix ? `${prefix}-` : '';
   const scopePrefix = prefix ? `${prefix}-` : '';
 
   const entries: string[] = [];
   for (const [scale, names] of Object.entries(roles)) {
+    if (names.length === 0) continue;
     entries.push(`  /* ${scale} */`);
     for (const [themeKey, sourcePath] of names) {
       const sourceVar = `--${sourcePrefix}${sourcePath.replaceAll('.', '-')}`;
@@ -105,58 +112,91 @@ function renderTailwindTheme(
 }
 
 /**
- * Example role map derived from the reference fixture's semantic paths.
- * Consumers with divergent paths pass their own map through
- * `tailwindIntegration({ roles })`. The default is not a general-purpose
- * schema — it's the concrete shape that makes the addon's own Storybook
- * run usefully, and a convenient starting point to copy and edit.
+ * Walk the project's default-theme token graph and classify each entry
+ * into a Tailwind scale based on its `$type` + path. Returns a role map
+ * shaped the same as a user-supplied `roles` option.
+ *
+ * Scale assignment:
+ * - `$type: 'color'`     → `color`, role = path minus `color.` prefix
+ * - `$type: 'dimension'` → `spacing` (default), `radius` (if path starts with
+ *   `radius.`, `borderRadius.`, or `border-radius.`), or nothing (skipped)
+ *   for dimensions that look like font sizes (`font.size.*`, `text.*`), since
+ *   Tailwind's `--text-*` scale needs size + line-height pairs this preview
+ *   integration doesn't synthesize
+ * - `$type: 'shadow'`      → `shadow`, role = path minus `shadow.` prefix
+ * - `$type: 'fontFamily'`  → `font`, role = path minus `font.` / `font.family.` / `fontFamily.` prefix
+ *
+ * Other `$type`s are skipped — they don't have a natural single-value
+ * Tailwind utility and would produce broken output.
  */
-const DEFAULT_ROLES: Readonly<Record<string, readonly (readonly [string, string])[]>> = {
-  color: [
-    ['surface-default', 'color.surface.default'],
-    ['surface-muted', 'color.surface.muted'],
-    ['surface-raised', 'color.surface.raised'],
-    ['surface-subtle', 'color.surface.subtle'],
-    ['surface-inverse', 'color.surface.inverse'],
-    ['text-default', 'color.text.default'],
-    ['text-muted', 'color.text.muted'],
-    ['text-subtle', 'color.text.subtle'],
-    ['text-inverse', 'color.text.inverse'],
-    ['text-accent', 'color.text.accent'],
-    ['accent-bg', 'color.accent.bg'],
-    ['accent-bg-hover', 'color.accent.bg-hover'],
-    ['accent-fg', 'color.accent.fg'],
-    ['border-default', 'color.border.default'],
-    ['border-strong', 'color.border.strong'],
-    ['border-focus', 'color.border.focus'],
-    ['status-danger-bg', 'color.status.danger-bg'],
-    ['status-danger-fg', 'color.status.danger-fg'],
-    ['status-success-bg', 'color.status.success-bg'],
-    ['status-success-fg', 'color.status.success-fg'],
-    ['status-warning-bg', 'color.status.warning-bg'],
-    ['status-warning-fg', 'color.status.warning-fg'],
-  ],
-  spacing: [
-    ['none', 'space.none'],
-    ['2xs', 'space.2xs'],
-    ['xs', 'space.xs'],
-    ['sm', 'space.sm'],
-    ['md', 'space.md'],
-    ['lg', 'space.lg'],
-    ['xl', 'space.xl'],
-    ['2xl', 'space.2xl'],
-    ['3xl', 'space.3xl'],
-  ],
-  radius: [
-    ['sm', 'radius.sm'],
-    ['md', 'radius.md'],
-    ['lg', 'radius.lg'],
-    ['xl', 'radius.xl'],
-    ['pill', 'radius.pill'],
-  ],
-  shadow: [
-    ['sm', 'shadow.sm'],
-    ['md', 'shadow.md'],
-    ['lg', 'shadow.lg'],
-  ],
-};
+function deriveRoles(project: Project): RoleMap {
+  const scales: Record<string, [string, string][]> = {
+    color: [],
+    spacing: [],
+    radius: [],
+    shadow: [],
+    font: [],
+  };
+
+  for (const [path, token] of Object.entries(project.graph)) {
+    const classification = classify(path, token.$type);
+    if (!classification) continue;
+    const { scale, role } = classification;
+    if (!role) continue;
+    scales[scale]?.push([role, path]);
+  }
+
+  const out: Record<string, readonly (readonly [string, string])[]> = {};
+  for (const [scale, entries] of Object.entries(scales)) {
+    if (entries.length === 0) continue;
+    entries.sort(([a], [b]) => a.localeCompare(b, 'en'));
+    out[scale] = entries;
+  }
+  return out;
+}
+
+const SPACING_ROOTS = ['space', 'spacing'] as const;
+const RADIUS_ROOTS = ['radius', 'borderRadius', 'border-radius'] as const;
+const FONT_PREFIXES = ['font.family.', 'fontFamily.', 'font.'] as const;
+
+function classify(path: string, type: string | undefined): { scale: string; role: string } | null {
+  switch (type) {
+    case 'color':
+      return { scale: 'color', role: stripPrefix(path, 'color.') };
+    case 'shadow':
+      return { scale: 'shadow', role: stripPrefix(path, 'shadow.') };
+    case 'fontFamily': {
+      for (const prefix of FONT_PREFIXES) {
+        if (path.startsWith(prefix)) {
+          return { scale: 'font', role: pathToRole(path.slice(prefix.length)) };
+        }
+      }
+      return { scale: 'font', role: pathToRole(path) };
+    }
+    case 'dimension': {
+      const head = path.split('.', 1)[0] ?? '';
+      if ((RADIUS_ROOTS as readonly string[]).includes(head)) {
+        return { scale: 'radius', role: pathToRole(path.slice(head.length + 1)) };
+      }
+      if ((SPACING_ROOTS as readonly string[]).includes(head)) {
+        return { scale: 'spacing', role: pathToRole(path.slice(head.length + 1)) };
+      }
+      // Font-size-ish dimensions are skipped — Tailwind's `--text-*` entries
+      // expect a size+line-height pair that this integration doesn't build.
+      if (head === 'font' && /size|text/i.test(path)) return null;
+      if (head === 'text') return null;
+      // Default-bucket any other dimension under spacing — safer than guessing.
+      return { scale: 'spacing', role: pathToRole(path) };
+    }
+    default:
+      return null;
+  }
+}
+
+function stripPrefix(path: string, prefix: string): string {
+  return pathToRole(path.startsWith(prefix) ? path.slice(prefix.length) : path);
+}
+
+function pathToRole(remainder: string): string {
+  return remainder.replaceAll('.', '-');
+}

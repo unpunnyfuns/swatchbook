@@ -81,9 +81,36 @@ Every entry in the `@theme` block is nested under your project's `cssVarPrefix`.
 
 This matters because Tailwind v4's `max-w-<name>` / `w-<name>` / `size-<name>` utilities read from the `--spacing-*` namespace. Without the prefix, a swatchbook entry named `--spacing-sm` would shadow Tailwind's default `--container-sm`, making `max-w-sm` tiny. The double-prefix (`--spacing-sb-sm`) sidesteps that collision entirely.
 
-## Customising the role map
+## How the role map is built
 
-The integration ships a curated default role map covering the semantic DTCG roles — surface / text / accent / border / status colours, a 9-stop spacing scale, radii, shadows. If your project has different paths, pass your own map:
+With zero configuration, the integration walks your project's default-theme token graph at render time and classifies every token into a Tailwind scale based on its `$type` + path:
+
+| DTCG `$type` | Path shape | Tailwind scale | Role name |
+| --- | --- | --- | --- |
+| `color` | any | `color` | path minus `color.` prefix |
+| `dimension` | `space.*` / `spacing.*` | `spacing` | path minus that prefix |
+| `dimension` | `radius.*` / `borderRadius.*` / `border-radius.*` | `radius` | path minus that prefix |
+| `dimension` | anything else | `spacing` | full path dot→dash |
+| `shadow` | any | `shadow` | path minus `shadow.` prefix |
+| `fontFamily` | any | `font` | path minus `font.` / `font.family.` / `fontFamily.` prefix |
+
+Font-size-ish dimensions (`font.size.*`, `text.*`) are intentionally skipped — Tailwind's `--text-*` entries want size+line-height pairs and this preview integration doesn't synthesize those.
+
+The result:
+
+- Every color token the project has becomes a `bg-<prefix>-*` / `text-<prefix>-*` / etc. utility.
+- Every spacing dimension becomes a `p-<prefix>-*` / `m-<prefix>-*` / etc. utility.
+- Same for radius, shadow, and font-family.
+
+So a project whose paths are `color.surface.default`, `space.md`, `radius.pill` gets the same `--color-sb-surface-default`, `--spacing-sb-md`, `--radius-sb-pill` output as before. A project using `color.background.subtle`, `spacing.small`, `borderRadius.round` gets `--color-sb-background-subtle`, `--spacing-sb-small`, `--radius-sb-round`. No hand-maintained map either way.
+
+### Overriding the derivation
+
+Pass a `roles` map to replace the derivation outright. Useful when:
+
+- You want to restrict the emitted utilities to a curated subset (faster compile, tidier Intellisense in Storybook).
+- Your paths don't fit the classification rules above and you want to name them explicitly.
+- You want to emit into a Tailwind scale the derivation doesn't cover (e.g. `--animate-*`).
 
 ```ts
 tailwindIntegration({
@@ -101,7 +128,7 @@ tailwindIntegration({
 });
 ```
 
-The map replaces the default entirely — what you list is what you get. Tailwind scale names (`color`, `spacing`, `radius`, `shadow`) are keys; each entry is `[tailwindEntryName, dtcgPath]`.
+The map replaces the derivation entirely — what you list is what you get. Tailwind scale names are keys; each entry is `[tailwindEntryName, dtcgPath]`.
 
 ## HMR
 
