@@ -78,7 +78,7 @@ export function TokenTable({
       return {
         path,
         type: token.$type ?? '',
-        value: formatTokenValue(token.$value, token.$type, colorFormat),
+        value: formatTokenValue(token.$value, token.$type, colorFormat, project.listing[path]),
         outOfGamut: color?.outOfGamut ?? false,
         cssVar: resolveCssVar(path, project),
         isColor,

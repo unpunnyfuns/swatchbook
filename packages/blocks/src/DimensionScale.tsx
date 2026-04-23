@@ -81,7 +81,7 @@ export function DimensionScale({
       return {
         path,
         cssVar: resolveCssVar(path, project),
-        displayValue: formatTokenValue(token.$value, token.$type, 'raw'),
+        displayValue: formatTokenValue(token.$value, token.$type, 'raw', project.listing[path]),
         pxValue,
         capped: Number.isFinite(pxValue) && pxValue > MAX_RENDER_PX,
       };

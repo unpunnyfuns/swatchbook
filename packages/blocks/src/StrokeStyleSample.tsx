@@ -64,7 +64,7 @@ export function StrokeStyleSample({
     return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
       path,
       cssVar: resolveCssVar(path, project),
-      displayValue: formatTokenValue(token.$value, token.$type, 'raw'),
+      displayValue: formatTokenValue(token.$value, token.$type, 'raw', project.listing[path]),
       cssStyle: extractCssStyle(token.$value),
     }));
   }, [resolved, filter, project, sortBy, sortDir]);
