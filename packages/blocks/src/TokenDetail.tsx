@@ -2,6 +2,7 @@ import cx from 'clsx';
 import type { ReactElement } from 'react';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
+import { CopyButton } from '#/internal/CopyButton.tsx';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { AliasChain } from '#/token-detail/AliasChain.tsx';
@@ -63,6 +64,7 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
             ⚠
           </span>
         )}
+        <CopyButton value={value} label={`Copy value ${value}`} />
       </div>
 
       <AliasChain path={path} />
