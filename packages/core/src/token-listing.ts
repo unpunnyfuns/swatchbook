@@ -2,6 +2,7 @@ import { pathToFileURL } from 'node:url';
 import { build, defineConfig, Logger } from '@terrazzo/parser';
 import cssPlugin from '@terrazzo/plugin-css';
 import tokenListingPlugin, { type ListedToken } from '@terrazzo/plugin-token-listing';
+import { makeCSSVar } from '@terrazzo/token-tools/css';
 import type { ParserInput } from '#/types.ts';
 
 export type { ListedToken } from '@terrazzo/plugin-token-listing';
@@ -47,8 +48,8 @@ export async function computeTokenListing(
             filename: 'tokens.css',
             variableName: (token) =>
               prefix
-                ? `--${prefix}-${String(token.id).replaceAll('.', '-')}`
-                : `--${String(token.id).replaceAll('.', '-')}`,
+                ? makeCSSVar(String(token.id), { prefix })
+                : makeCSSVar(String(token.id)),
           }),
           tokenListingPlugin({
             filename: 'tokens.listing.json',
