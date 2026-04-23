@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from 'react';
 import './TokenTable.css';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
+import { CopyButton } from '#/internal/CopyButton.tsx';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
@@ -188,6 +189,18 @@ export function TokenTable({
                       ⚠
                     </span>
                   )}
+                  <span
+                    className="sb-token-table__copy-wrap"
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    role="presentation"
+                  >
+                    <CopyButton
+                      value={row.value}
+                      label={`Copy value ${row.value}`}
+                      className="sb-token-table__copy"
+                    />
+                  </span>
                 </span>
               </td>
             </tr>

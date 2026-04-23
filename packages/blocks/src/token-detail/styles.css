@@ -96,6 +96,14 @@
   font-size: 12px;
   white-space: pre;
   overflow: auto;
+  flex: 1;
+  min-width: 0;
+}
+
+.sb-token-detail__snippet-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .sb-token-detail__missing {
