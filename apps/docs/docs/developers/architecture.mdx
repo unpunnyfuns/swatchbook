@@ -80,7 +80,7 @@ interface SwatchbookIntegration {
 
 The addon's Vite plugin iterates `integrations[]`, resolves each `virtualId`, serves whatever `render(project)` produces, and invalidates every integration-contributed module on HMR alongside `virtual:swatchbook/tokens`. The addon itself learns nothing about Tailwind, emotion, or anything else — integrations own their library-specific logic.
 
-The `Project` snapshot passed to `render` carries everything: axes, themes, presets, resolved maps, `cssVarPrefix`. See the [Integrations section](../integrations/) for factory usage.
+The `Project` snapshot passed to `render` carries everything: axes, themes, presets, resolved maps, `cssVarPrefix`. See the [Integrations guide](../guides/integrations) for factory usage.
 
 ## Data flow — static build path
 

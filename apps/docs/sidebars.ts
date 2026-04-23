@@ -12,40 +12,27 @@ import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
  */
 const sidebars: SidebarsConfig = {
   home: ['intro', 'quickstart'],
-  concepts: [
-    'concepts/axes-vs-themes',
-    'concepts/theming-inputs',
-    'concepts/axes',
-    'concepts/presets',
-    'concepts/token-pipeline',
+  guides: [
+    'guides/authoring-doc-stories',
+    'guides/consuming-the-active-theme',
+    'guides/integrations',
+    'guides/sharing-terrazzo-options',
   ],
-  blocks: [
+  reference: [
+    'reference/addon',
     'reference/blocks/blocks',
     'reference/blocks/overview',
     'reference/blocks/inspector',
     'reference/blocks/samples',
     'reference/blocks/utility',
     'reference/blocks/hooks',
+    'reference/core',
+    'reference/config',
+    'reference/axes',
+    'reference/token-pipeline',
+    'reference/mcp',
   ],
-  guides: [
-    'guides/authoring-doc-stories',
-    'guides/token-dashboard',
-    'guides/multi-axis-walkthrough',
-    'guides/consuming-the-active-theme',
-    'guides/sharing-terrazzo-options',
-    'guides/migrating-from-addon-themes',
-  ],
-  integrations: [
-    'integrations/integrations',
-    'integrations/tailwind',
-    'integrations/css-in-js',
-  ],
-  reference: ['reference/addon', 'reference/core', 'reference/config', 'reference/mcp'],
-  developers: [
-    'developers/developers',
-    'developers/architecture',
-    'developers/sharp-corners',
-  ],
+  developers: ['developers/developers', 'developers/architecture', 'developers/sharp-corners'],
 };
 
 export default sidebars;

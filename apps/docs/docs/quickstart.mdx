@@ -149,7 +149,7 @@ The MDX doc blocks read their surfaces, text, and accent colours from a fixed `-
 },
 ```
 
-With a `chrome` map in place the blocks track every toolbar flip — switch brand or contrast and the block chrome repaints alongside your stories. The closed set of roles (and what each maps to internally) is in the [`chrome` config reference](./reference/config#chrome-recordstring-string).
+With a `chrome` map in place the blocks track every toolbar flip — switch brand or contrast and the block chrome repaints alongside your stories. The closed set of roles (and what each maps to internally) is in the [`chrome` config reference](./reference/config#chrome).
 
 ## No resolver yet?
 
@@ -172,10 +172,10 @@ export default defineSwatchbookConfig({
 });
 ```
 
-Each context names an ordered list of file paths (or globs) that layer on top of the base `tokens` files for that context. See [theming inputs](./concepts/theming-inputs) for when to pick which.
+Each context names an ordered list of file paths (or globs) that layer on top of the base `tokens` files for that context. See the [config reference](./reference/config) for the resolver vs layered trade-off.
 
 ## Next
 
-- Read [theming inputs](./concepts/theming-inputs) to understand the resolver vs layered trade-off.
 - Embed [doc blocks in MDX stories](./guides/authoring-doc-stories) to build a proper reference page.
+- Read the [axes reference](./reference/axes) for the runtime model behind the toolbar.
 - Poke at the [live Storybook](pathname:///storybook/) to see the addon running against a real multi-axis fixture.
