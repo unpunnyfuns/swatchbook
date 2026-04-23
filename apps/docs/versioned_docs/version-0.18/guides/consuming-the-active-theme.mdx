@@ -1,0 +1,97 @@
+---
+id: consuming-the-active-theme
+title: Consuming the active theme
+sidebar_position: 5
+---
+
+# Consuming the active theme
+
+Swatchbook's toolbar flips the active tuple. Stories that render under it need a way to pick up the change. This guide covers the two paths — CSS variables (recommended, zero-code) and DOM observation (for JS-theme-object consumers).
+
+## CSS variables — recommended
+
+Swatchbook emits CSS custom properties keyed on the active tuple. A component reading those variables updates automatically when the toolbar flips an axis:
+
+```css
+.my-button {
+  background: var(--<prefix>-color-accent-bg);
+  color: var(--<prefix>-color-accent-fg);
+  border: 1px solid var(--<prefix>-color-border-default);
+}
+```
+
+No JavaScript, no subscriptions, no observers. The cascade does the work. If your stories already use CSS variables for theming, you're done — the rest of this page is for component libraries that read their theme as a JS object at render time.
+
+## DOM observation — for JS-theme-object libraries
+
+When your components consume a theme via a provider (styled-components, emotion, MUI, Chakra, Mantine, …), the theme value isn't a CSS variable chain — it's a JS object your provider re-evaluates on change. Subscribe to the active tuple via `MutationObserver`:
+
+```ts
+function readAxes(): Record<string, string> {
+  const el = document.documentElement;
+  const out: Record<string, string> = {};
+  for (const name of el.getAttributeNames()) {
+    if (name.startsWith('data-<prefix>-')) {
+      out[name.slice('data-<prefix>-'.length)] = el.getAttribute(name) ?? '';
+    }
+  }
+  return out;
+}
+
+const observer = new MutationObserver(() => apply(readAxes()));
+observer.observe(document.documentElement, { attributes: true });
+apply(readAxes());
+```
+
+Wrap that in whatever idiom your framework uses. A React bridge into a `ThemeProvider`:
+
+```tsx
+function useSwatchbookAxes(): Record<string, string> {
+  const [axes, setAxes] = useState(readAxes);
+  useEffect(() => {
+    const observer = new MutationObserver(() => setAxes(readAxes()));
+    observer.observe(document.documentElement, { attributes: true });
+    return () => observer.disconnect();
+  }, []);
+  return axes;
+}
+
+function ThemeBridge({ children }: { children: ReactNode }) {
+  const axes = useSwatchbookAxes();
+  const theme = mapAxesToMyTheme(axes);
+  return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
+}
+```
+
+Same pattern for Vue (`onMounted` + `ref`), Angular (a service with RxJS or a signal), Svelte (`onMount` + a writable store), plain HTML (attach to application state directly). The DOM contract is identical across frameworks.
+
+## What the DOM contract guarantees
+
+1. **`data-<prefix>-<axisName>="<context>"` attributes on `<html>`** — one per active axis, plus `data-<prefix>-theme` holding the composed tuple string (`"Dark · Brand A · Normal"`). `<prefix>` follows your `cssVarPrefix` config (default `swatch`).
+2. **The same attributes on each story's wrapper element.** Redundant with `<html>` in most cases, but useful if your story iframe hosts multiple wrappers.
+3. **Per-tuple CSS** emitted under compound attribute selectors — `[data-<prefix>-mode="Dark"][data-<prefix>-brand="Brand A"] { … }`. One block per tuple, with the default tuple's values in `:root` as the fallback.
+4. **Attributes update on toolbar flip.** Synchronously, before the next paint — observers fire on the microtask queue.
+
+Any change to this shape is a breaking change. The DOM is the API.
+
+## What swatchbook doesn't ship
+
+- **No framework-specific hooks.** No `useSwatchbookAxes()` from `@unpunnyfuns/swatchbook-addon`, no Vue composable, no Angular service. The core package is pure TypeScript; the addon's preview code is DOM-only. If you need a reusable hook inside your project, write the ten lines above — fewer lines than importing a package and pinning its version.
+- **No recipes per component library.** MUI, Chakra, Mantine, styled-components, emotion, Tailwind class-mode — each has its own theming model. The DOM contract above is the starting point; your component library's theming docs are the rest.
+
+## Known gotchas
+
+**Component library theme is a JS object — can it read the `--<prefix>-*` CSS variables directly?**
+Only if the library consumes CSS variables natively. Tailwind v4 does (see the [Tailwind integration](../integrations/tailwind.mdx)); any provider whose theme values are `var(--…)` strings does (see the [CSS-in-JS integration](../integrations/css-in-js.mdx)). If the theme is a JS object *read* at render time (MUI's `createTheme`, Chakra, Mantine), you need the DOM-observation path.
+
+**Tailwind's `dark:` variant isn't responding to swatchbook.**
+Tailwind looks for `.dark` on an ancestor, or `data-theme="dark"` in its attribute mode. Swatchbook writes `data-<prefix>-mode="Dark"` — the attribute shape and name don't match. Either configure Tailwind to key on swatchbook's attribute (`@custom-variant dark (&:where([data-<prefix>-mode=Dark], [data-<prefix>-mode=Dark] *));`), or have the preview decorator mirror a `.dark` class via the DOM-observation path.
+
+**Storybook's own manager theme (light/dark chrome around the preview) doesn't flip.**
+That's `@storybook/theming`, which controls Storybook's UI chrome — a separate concern. See [Storybook's manager theming docs](https://storybook.js.org/docs/configure/user-interface/theming).
+
+## See also
+
+- [Axes](../concepts/axes.mdx) — the runtime model for tuples and attribute composition.
+- [Why axes, not themes](../concepts/axes-vs-themes.mdx) — the shape that makes this contract expressive across multiple dimensions.
+- [Tailwind integration](../integrations/tailwind.mdx) + [CSS-in-JS integration](../integrations/css-in-js.mdx) — zero-code paths for the two most common patterns.
