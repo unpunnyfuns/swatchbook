@@ -134,7 +134,9 @@ export function ColorTable({
         <caption className="sb-color-table__caption">{captionText}</caption>
         <thead>
           <tr>
-            <th className="sb-color-table__th sb-color-table__th--swatch" aria-label="Swatch" />
+            <th className="sb-color-table__th sb-color-table__th--swatch">
+              <span className="sb-color-table__sr-only">Swatch</span>
+            </th>
             <th className="sb-color-table__th sb-color-table__th--path">Name</th>
             <th className="sb-color-table__th">HEX</th>
             <th className="sb-color-table__th">HSL</th>
