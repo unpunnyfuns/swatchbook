@@ -31,6 +31,7 @@ export {
   type VirtualDiagnosticShape,
   type VirtualPresetShape,
   type VirtualThemeShape,
+  type VirtualTokenListingShape,
   type VirtualTokenShape,
 } from '#/contexts.ts';
 export {

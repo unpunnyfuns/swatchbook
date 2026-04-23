@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import { useState } from 'react';
+import { useProject } from '#/internal/use-project.ts';
 import { useTokenDetailData } from '#/token-detail/internal.ts';
 
 export interface ConsumerOutputProps {
@@ -9,12 +10,23 @@ export interface ConsumerOutputProps {
 
 export function ConsumerOutput({ path }: ConsumerOutputProps): ReactElement | null {
   const { token, cssVar, activeAxes } = useTokenDetailData(path);
+  const { listing } = useProject();
 
   if (!token) return null;
 
   const tupleLabel = Object.entries(activeAxes)
     .map(([k, v]) => `${k}=${v}`)
     .join(', ');
+
+  // Platforms beyond `css`. Populated only when the consumer has loaded
+  // extra plugins (`@terrazzo/plugin-swift`, `-android`, `-sass`, …) via
+  // `config.terrazzoPlugins` + `config.listingOptions.platforms`. Always
+  // empty otherwise — the row set falls back to Path + CSS exactly like
+  // before listing adoption.
+  const names = listing[path]?.names ?? {};
+  const extraPlatforms = Object.keys(names)
+    .filter((platform) => platform !== 'css' && names[platform])
+    .toSorted();
 
   return (
     <>
@@ -26,8 +38,21 @@ export function ConsumerOutput({ path }: ConsumerOutputProps): ReactElement | nu
       )}
       <OutputRow label="Path" value={path} testId="consumer-output-path" />
       <OutputRow label="CSS" value={cssVar} testId="consumer-output-css" />
+      {extraPlatforms.map((platform) => (
+        <OutputRow
+          key={platform}
+          label={formatPlatformLabel(platform)}
+          value={names[platform]!}
+          testId={`consumer-output-${platform}`}
+        />
+      ))}
     </>
   );
+}
+
+function formatPlatformLabel(platform: string): string {
+  if (platform.length === 0) return platform;
+  return platform[0]!.toUpperCase() + platform.slice(1);
 }
 
 interface OutputRowProps {
