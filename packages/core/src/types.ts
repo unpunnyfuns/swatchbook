@@ -115,15 +115,18 @@ export interface Config {
    * Options forwarded to the `@terrazzo/plugin-css` instance swatchbook
    * runs internally (for the stylesheet it emits and for the Token
    * Listing's `names.css` derivation). Line this up with the consumer's
-   * own `plugin-css` options — `legacyHex`, `transform`, `colorDepth`,
+   * own `plugin-css` options — `legacyHex`, `transform`, `include`,
    * and similar — so docs-side names and values match what the
    * consumer's production build emits.
    *
-   * The `variableName` and `permutations` fields are managed internally
-   * and cannot be overridden — swatchbook's axis composition depends on
-   * them. Everything else is passed through.
+   * `variableName` / `permutations` / `filename` / `skipBuild` are
+   * managed internally and cannot be overridden — swatchbook's
+   * axis-aware emission and in-memory listing capture depend on them.
+   * Passing deprecated knobs (`baseSelector`, `baseScheme`,
+   * `modeSelectors`) produces a `swatchbook/css-options` warn diagnostic
+   * because they're superseded by permutations in newer plugin-css.
    */
-  cssOptions?: Omit<CSSPluginOptions, 'variableName' | 'permutations'>;
+  cssOptions?: Omit<CSSPluginOptions, 'variableName' | 'permutations' | 'filename' | 'skipBuild'>;
   /**
    * Options forwarded to `@terrazzo/plugin-token-listing`. Use
    * `platforms` to register additional platforms beyond `css` (e.g.

@@ -36,7 +36,7 @@ export type TokenListingByPath = Record<string, ListedToken>;
  */
 export interface ComputeTokenListingOptions {
   /** Extra options forwarded to the internal `plugin-css` instance. */
-  cssOptions?: Omit<CSSPluginOptions, 'variableName' | 'permutations'>;
+  cssOptions?: Omit<CSSPluginOptions, 'variableName' | 'permutations' | 'filename' | 'skipBuild'>;
   /** Extra options forwarded to the internal `plugin-token-listing` instance. */
   listingOptions?: Omit<TokenListingPluginOptions, 'filename'>;
   /** Extra plugins loaded into the build — referenced by `listingOptions.platforms`. */

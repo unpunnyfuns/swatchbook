@@ -208,19 +208,28 @@ Produces a single `:root` chrome block with all ten roles declared — overrides
 
 Unknown role keys (outside the ten above) and target paths that don't resolve to any token or composite sub-field in any theme produce `warn` diagnostics (group `swatchbook/chrome`) and are dropped — the corresponding chrome slot falls back to its hard-coded literal default. The validated entries land on `Project.chrome` for downstream tooling.
 
-### `cssOptions?: Omit<CSSPluginOptions, 'variableName' | 'permutations'>`
+### `cssOptions?: Omit<CSSPluginOptions, 'variableName' | 'permutations' | 'filename' | 'skipBuild'>`
 
-Options forwarded to the `@terrazzo/plugin-css` instance swatchbook runs internally — for the stylesheet it emits for the Storybook preview and for the Token Listing's `names.css` derivation. Use this when your production Terrazzo build passes non-default options to `plugin-css` (`legacyHex`, `colorDepth`, a custom `transform`, etc.) and you want the docs-side output to match.
+Options forwarded to the `@terrazzo/plugin-css` instance swatchbook runs internally — for the stylesheet it emits for the Storybook preview and for the Token Listing's `names.css` derivation. Use this when your production Terrazzo build passes non-default options to `plugin-css` (`legacyHex`, a custom `transform`, `include` / `exclude` globs, etc.) and you want the docs-side output to match.
 
-`variableName` and `permutations` are managed internally — swatchbook's axis-aware multi-theme emission depends on them — and are stripped from the option type. Everything else passes through.
+Four fields are managed internally and stripped from the allowed type:
+
+- `variableName` — swatchbook routes naming through `@terrazzo/token-tools/css.makeCSSVar` with your `cssVarPrefix`; overriding this would desync the listing's `names.css` from the emitted stylesheet.
+- `permutations` — synthesized one-per-theme so CSS emission is axis-aware; overriding breaks the preview's toolbar cascade.
+- `filename` — the internal stylesheet is captured in memory, never written to disk.
+- `skipBuild` — setting `true` would null out the listing's `previewValue` derivation, breaking every block that displays a value.
+
+Everything else passes through. Deprecated knobs (`baseSelector`, `baseScheme`, `modeSelectors`) still pass the type check but do nothing under swatchbook's permutation-based emission; setting any of them produces a `swatchbook/css-options` warn diagnostic with a pointer to what to use instead.
 
 ```ts
 defineSwatchbookConfig({
   resolver: 'tokens/resolver.json',
   cssVarPrefix: 'ds',
-  cssOptions: { legacyHex: true, colorDepth: 24 },
+  cssOptions: { legacyHex: true, include: ['color.*', 'space.*'] },
 });
 ```
+
+See [Aligning with your token build](../guides/sharing-terrazzo-options) for the end-to-end shared-options pattern.
 
 ### `listingOptions?: Omit<TokenListingPluginOptions, 'filename'>`
 
