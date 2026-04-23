@@ -287,7 +287,6 @@ function GroupRow({
               ? `Collapse ${group.base}`
               : `Expand ${group.base}`
         }
-        aria-expanded={onSelect ? undefined : expanded}
         data-testid="color-table-row"
         data-path={active.path}
         data-base={group.base}

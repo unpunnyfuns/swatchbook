@@ -260,7 +260,7 @@ describe('ColorTable — expansion', () => {
       fireEvent.click(row);
     });
     expect(screen.getByTestId('color-table-detail')).toBeDefined();
-    expect(row.getAttribute('aria-expanded')).toBe('true');
+    expect(row.getAttribute('aria-label')).toBe('Collapse color.text.default');
 
     act(() => {
       fireEvent.click(row);
