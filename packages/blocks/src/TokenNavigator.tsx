@@ -1,3 +1,4 @@
+import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import type { KeyboardEvent, ReactElement } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import './TokenNavigator.css';
@@ -31,11 +32,12 @@ export interface TokenNavigatorProps {
    */
   initiallyExpanded?: number;
   /**
-   * Render a runtime search input above the tree. Matches are
-   * case-insensitive substrings against a leaf's token path; groups
-   * that contain no matching leaves collapse out, and every group on
-   * the path to a match auto-expands so hits are visible without
-   * clicking. Defaults to `true`.
+   * Render a runtime search input above the tree. Matches are fuzzy
+   * (case-insensitive, out-of-order terms, single-character typo
+   * tolerance) against a leaf's token path; groups that contain no
+   * matching leaves collapse out, and every group on the path to a
+   * match auto-expands so hits are visible without clicking. Defaults
+   * to `true`.
    */
   searchable?: boolean;
   /**
@@ -140,19 +142,29 @@ function countLeaves(node: TreeNode): number {
   return n;
 }
 
+function collectLeafPaths(nodes: TreeNode[], out: string[]): void {
+  for (const node of nodes) {
+    if (node.kind === 'leaf') out.push(node.path);
+    else collectLeafPaths(node.children, out);
+  }
+}
+
 /**
- * Return a pruned copy of the tree containing only leaves whose path
- * matches `needle` (case-insensitive substring) plus the groups on the
- * way to them. Every surviving group's path is added to `expandOut` so
- * callers can force those groups open.
+ * Return a pruned copy of the tree keeping only leaves whose path is in
+ * `matches`, plus the groups on the way to them. Every surviving group's
+ * path is added to `expandOut` so callers can force those groups open.
  */
-function pruneTreeForSearch(nodes: TreeNode[], needle: string, expandOut: Set<string>): TreeNode[] {
+function pruneTreeForMatches(
+  nodes: TreeNode[],
+  matches: ReadonlySet<string>,
+  expandOut: Set<string>,
+): TreeNode[] {
   const out: TreeNode[] = [];
   for (const node of nodes) {
     if (node.kind === 'leaf') {
-      if (node.path.toLowerCase().includes(needle)) out.push(node);
+      if (matches.has(node.path)) out.push(node);
     } else {
-      const children = pruneTreeForSearch(node.children, needle, expandOut);
+      const children = pruneTreeForMatches(node.children, matches, expandOut);
       if (children.length > 0) {
         expandOut.add(node.path);
         out.push({ ...node, children });
@@ -196,9 +208,11 @@ export function TokenNavigator({
     if (!searchable || query.trim() === '') {
       return { visibleTree: tree, searchExpanded: null as Set<string> | null };
     }
-    const needle = query.trim().toLowerCase();
+    const leafPaths: string[] = [];
+    collectLeafPaths(tree, leafPaths);
+    const matches = new Set(fuzzyFilter(leafPaths, query, (p) => p));
     const expandOut = new Set<string>();
-    const pruned = pruneTreeForSearch(tree, needle, expandOut);
+    const pruned = matches.size === 0 ? [] : pruneTreeForMatches(tree, matches, expandOut);
     return { visibleTree: pruned, searchExpanded: expandOut };
   }, [tree, query, searchable]);
 

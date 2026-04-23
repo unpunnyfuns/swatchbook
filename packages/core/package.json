@@ -34,6 +34,10 @@
     "./variance": {
       "types": "./dist/variance.d.mts",
       "import": "./dist/variance.mjs"
+    },
+    "./fuzzy": {
+      "types": "./dist/fuzzy.d.mts",
+      "import": "./dist/fuzzy.mjs"
     }
   },
   "imports": {
@@ -44,7 +48,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsdown src/index.ts src/variance.ts --format esm --dts --clean --sourcemap",
+    "build": "tsdown src/index.ts src/variance.ts src/fuzzy.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -53,6 +57,7 @@
     "format:check": "oxfmt --check -c ../../.oxfmtrc.json src"
   },
   "dependencies": {
+    "@leeoniya/ufuzzy": "1.0.19",
     "@terrazzo/json-schema-tools": "^0.2.1",
     "@terrazzo/parser": "^2.0.3",
     "@terrazzo/plugin-css": "^2.0.3",

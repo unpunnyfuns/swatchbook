@@ -1,3 +1,4 @@
+import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import cx from 'clsx';
 import type { ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';
@@ -34,10 +35,11 @@ export interface TokenTableProps {
   sortDir?: SortDir;
   /**
    * Render a runtime search input above the table that narrows rows by
-   * case-insensitive substring against the token path, type, or value.
-   * Defaults to `true` because browsing a multi-hundred-token reference
-   * without search is painful. Pass `false` to hide the input (the
-   * `filter` / `type` props still apply at authoring time).
+   * fuzzy match (case-insensitive, out-of-order terms, single-character
+   * typo tolerance) against the token path, type, or value. Defaults to
+   * `true` because browsing a multi-hundred-token reference without
+   * search is painful. Pass `false` to hide the input (the `filter` /
+   * `type` props still apply at authoring time).
    */
   searchable?: boolean;
   /**
@@ -85,13 +87,7 @@ export function TokenTable({
 
   const visibleRows = useMemo(() => {
     if (!searchable || query.trim() === '') return rows;
-    const needle = query.trim().toLowerCase();
-    return rows.filter(
-      (row) =>
-        row.path.toLowerCase().includes(needle) ||
-        row.type.toLowerCase().includes(needle) ||
-        row.value.toLowerCase().includes(needle),
-    );
+    return fuzzyFilter(rows, query, (row) => `${row.path} ${row.type} ${row.value}`);
   }, [rows, query, searchable]);
 
   const handleRowClick = useCallback(
@@ -128,7 +124,7 @@ export function TokenTable({
             placeholder="Search tokens…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            aria-label="Search tokens by path, type, or value"
+            aria-label="Fuzzy-search tokens by path, type, or value"
             data-testid="token-table-search"
           />
         </div>
