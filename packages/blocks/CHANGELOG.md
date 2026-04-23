@@ -1,5 +1,12 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.19.2
+
+### Patch Changes
+
+- Updated dependencies [b876729]
+  - @unpunnyfuns/swatchbook-core@0.19.2
+
 ## 0.19.1
 
 ### Patch Changes
