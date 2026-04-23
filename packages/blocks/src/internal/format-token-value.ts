@@ -1,3 +1,4 @@
+import type { VirtualTokenListingShape } from '#/contexts.ts';
 import { type ColorFormat, formatColor } from '#/format-color.ts';
 
 /**
@@ -24,10 +25,24 @@ export function formatTokenValue(
   value: unknown,
   $type: string | undefined,
   colorFormat: ColorFormat,
+  listingEntry?: VirtualTokenListingShape,
 ): string {
   if (value == null) return '';
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
     return String(value);
+  }
+
+  // Prefer plugin-css's authoritative `previewValue` when available. For
+  // non-color types that's always authoritative (`"16px"`, `"1px solid
+  // #e2e8f0"`, `"cubic-bezier(…)"`). For color tokens we only take it when
+  // the active toolbar format matches plugin-css's output (hex) — other
+  // formats (rgb / hsl / oklch / raw) are the user's inspection choice
+  // and fall through to local colorjs.io conversion.
+  const preview = listingEntry?.previewValue;
+  if (preview !== undefined) {
+    const previewStr = typeof preview === 'string' ? preview : String(preview);
+    if ($type !== 'color') return previewStr;
+    if (colorFormat === 'hex') return previewStr;
   }
 
   switch ($type) {

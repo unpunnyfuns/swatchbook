@@ -5,6 +5,7 @@ import { formatColor } from '#/format-color.ts';
 import { CopyButton } from '#/internal/CopyButton.tsx';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
+import { useProject } from '#/internal/use-project.ts';
 import { AliasChain } from '#/token-detail/AliasChain.tsx';
 import { AliasedBy } from '#/token-detail/AliasedBy.tsx';
 import { AxisVariance } from '#/token-detail/AxisVariance.tsx';
@@ -38,9 +39,10 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
     );
   }
 
+  const { listing } = useProject();
   const isColor = token.$type === 'color';
   const gamut = isColor ? formatColor(token.$value, colorFormat) : null;
-  const value = formatTokenValue(token.$value, token.$type, colorFormat);
+  const value = formatTokenValue(token.$value, token.$type, colorFormat, listing[path]);
   const outOfGamut = gamut?.outOfGamut ?? false;
 
   return (

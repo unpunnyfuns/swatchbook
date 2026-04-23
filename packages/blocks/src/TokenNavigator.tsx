@@ -415,7 +415,7 @@ function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
     return (
       <span className="sb-token-navigator__preview-box">
         <span className="sb-token-navigator__value">
-          {formatTokenValue(token.$value, type, colorFormat)}
+          {formatTokenValue(token.$value, type, colorFormat, project.listing[path])}
         </span>
         <span
           className="sb-token-navigator__color-swatch"
@@ -429,7 +429,7 @@ function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
     return (
       <span className="sb-token-navigator__preview-box">
         <span className="sb-token-navigator__value">
-          {formatTokenValue(token.$value, type, colorFormat)}
+          {formatTokenValue(token.$value, type, colorFormat, project.listing[path])}
         </span>
         <span className="sb-token-navigator__preview-dimension">
           <DimensionBar path={path} kind="length" />
@@ -468,7 +468,7 @@ function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
   return (
     <span className="sb-token-navigator__preview-box">
       <span className="sb-token-navigator__value">
-        {formatTokenValue(token.$value, type, colorFormat)}
+        {formatTokenValue(token.$value, type, colorFormat, project.listing[path])}
       </span>
     </span>
   );
