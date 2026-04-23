@@ -168,7 +168,9 @@ If the shared module imports from other workspace packages, make sure your bundl
 
 The Token Listing records `names.<platform>` for every platform registered in `listingOptions.platforms`, using the named plugin's own identifier-naming logic. Blocks read these without duplicating any rules.
 
-Load the plugin in `terrazzoPlugins`, name it in `listingOptions.platforms`, and `listing[path].names.swift` (or `.android`, `.js`, `.sass`, …) populates automatically. Writing a per-platform column in a custom block becomes a one-liner:
+Load the plugin in `terrazzoPlugins`, name it in `listingOptions.platforms`, and `listing[path].names.swift` (or `.android`, `.js`, `.sass`, …) populates automatically. `<TokenDetail>` / `<ConsumerOutput>` pick up the extra platforms and render one row per platform in the Consumer Output section — no block-writing required for the common display case.
+
+For custom blocks, the data is on the project snapshot:
 
 ```tsx
 const swiftName = project.listing?.[path]?.names?.swift;

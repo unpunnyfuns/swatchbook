@@ -117,6 +117,12 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.2.4
         version: 4.2.4(vite@8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(terser@5.46.1)(yaml@2.8.3))
+      '@terrazzo/plugin-js':
+        specifier: 2.0.3
+        version: 2.0.3(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))(@terrazzo/parser@2.0.3(yaml-to-momoa@0.0.9))
+      '@terrazzo/plugin-sass':
+        specifier: 2.0.3
+        version: 2.0.3(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))(@terrazzo/parser@2.0.3(yaml-to-momoa@0.0.9))(@terrazzo/plugin-css@2.0.3(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))(@terrazzo/parser@2.0.3(yaml-to-momoa@0.0.9)))
       '@types/node':
         specifier: ^25.6.0
         version: 25.6.0
@@ -3967,6 +3973,19 @@ packages:
     peerDependencies:
       '@terrazzo/cli': ^2.0.3
       '@terrazzo/parser': ^2.0.3
+
+  '@terrazzo/plugin-js@2.0.3':
+    resolution: {integrity: sha512-uDVt6K7p9wZwenpWtSLYP06h2SoeyMraQWcITCKiiplIq4HpkEGg1IRMcdb7iYtg5MfnqU9lU12pnuGFXCLHYQ==}
+    peerDependencies:
+      '@terrazzo/cli': ^2.0.3
+      '@terrazzo/parser': ^2.0.3
+
+  '@terrazzo/plugin-sass@2.0.3':
+    resolution: {integrity: sha512-ITgGR1k8RwEuKdbm8+ZGgtEzvcOoWXLHCrr39rgGSIqL8ecDuNSUk4Y0ZDD71MuOVUMU0wBV67FcLH2xOjdOeQ==}
+    peerDependencies:
+      '@terrazzo/cli': ^2.0.3
+      '@terrazzo/parser': ^2.0.3
+      '@terrazzo/plugin-css': ^2.0.3
 
   '@terrazzo/plugin-token-listing@0.1.0-alpha.1':
     resolution: {integrity: sha512-hAL2mAGYBwMaHj+GeXbJinLqo1xYLazLBu8Dji8Us8OKWXHPhuJY71RZpT0oul70jOBXGRFii+pM7Tqe6T7Fuw==}
@@ -13336,6 +13355,19 @@ snapshots:
     dependencies:
       '@terrazzo/cli': 2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)
       '@terrazzo/parser': 2.0.3(yaml-to-momoa@0.0.9)
+      '@terrazzo/token-tools': 2.0.3
+
+  '@terrazzo/plugin-js@2.0.3(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))(@terrazzo/parser@2.0.3(yaml-to-momoa@0.0.9))':
+    dependencies:
+      '@terrazzo/cli': 2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)
+      '@terrazzo/parser': 2.0.3(yaml-to-momoa@0.0.9)
+      scule: 1.3.0
+
+  '@terrazzo/plugin-sass@2.0.3(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))(@terrazzo/parser@2.0.3(yaml-to-momoa@0.0.9))(@terrazzo/plugin-css@2.0.3(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))(@terrazzo/parser@2.0.3(yaml-to-momoa@0.0.9)))':
+    dependencies:
+      '@terrazzo/cli': 2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)
+      '@terrazzo/parser': 2.0.3(yaml-to-momoa@0.0.9)
+      '@terrazzo/plugin-css': 2.0.3(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))(@terrazzo/parser@2.0.3(yaml-to-momoa@0.0.9))
       '@terrazzo/token-tools': 2.0.3
 
   '@terrazzo/plugin-token-listing@0.1.0-alpha.1(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))':
