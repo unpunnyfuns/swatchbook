@@ -20,6 +20,17 @@ npm install -D @unpunnyfuns/swatchbook-addon
 
 Peer requirements: Storybook 10.3+ on the Vite builder, React 18+, Node 24+.
 
+### Terrazzo dependencies
+
+Swatchbook is built on [Terrazzo](https://terrazzo.app/)'s parser. `@terrazzo/parser`, `@terrazzo/plugin-css`, and `@terrazzo/plugin-token-listing` come along with `swatchbook-core` transitively — you don't install them separately for the default setup. `swatchbook-core` publishes `@terrazzo/parser` and `@terrazzo/plugin-css` as peer deps on top of its own deps, so pnpm hoists to a single shared parser instance across our internal build and any Terrazzo plugins you add yourself.
+
+Two cases where you'll install more packages explicitly:
+
+- **You already run `@terrazzo/cli` in production.** Pin matching versions of `@terrazzo/cli`, `plugin-css`, etc. in your own `package.json` so both pipelines agree on options. See [Aligning with your token build](./guides/sharing-terrazzo-options) for the shared-options module pattern.
+- **You want per-platform names (Swift, Android, Sass, JS, …) shown in doc blocks.** Install `@terrazzo/plugin-swift` / `-android` / `-sass` / `-js` at a version compatible with swatchbook's peer range, then load them via `config.terrazzoPlugins` + `config.listingOptions.platforms`. `<TokenDetail>`'s Consumer Output picks them up automatically.
+
+When in doubt, skip this section — the zero-config install is enough for everything on this page.
+
 ## Configure
 
 Register the addon with an inline config in `.storybook/main.ts`:
