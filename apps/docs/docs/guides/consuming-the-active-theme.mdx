@@ -6,7 +6,11 @@ sidebar_position: 5
 
 # Consuming the active theme
 
-Swatchbook's toolbar flips the active tuple. Stories that render under it need a way to pick up the change. This guide covers the two paths — CSS variables (recommended, zero-code) and DOM observation (for JS-theme-object consumers).
+Swatchbook's toolbar flips the active tuple. Stories that render under it need a way to pick up the change. Three paths, in order of ergonomic preference:
+
+1. **CSS variables** — zero-code, recommended for any component reading tokens through `var(--…)`.
+2. **The React hook `useActiveAxes()`** — inside the Storybook preview, the addon already publishes a React context the blocks and decorators use; story code can read from it directly.
+3. **DOM observation** — the framework-agnostic fallback for Vue / Angular / Svelte / plain HTML, or for React trees outside the preview's provider.
 
 ## CSS variables — recommended
 
@@ -22,9 +26,29 @@ Swatchbook emits CSS custom properties keyed on the active tuple. A component re
 
 No JavaScript, no subscriptions, no observers. The cascade does the work. If your stories already use CSS variables for theming, you're done — the rest of this page is for component libraries that read their theme as a JS object at render time.
 
-## DOM observation — for JS-theme-object libraries
+For CSS-in-JS libraries whose theme values can be `var(--…)` strings (styled-components, emotion with a `var(...)`-based theme), see the [CSS-in-JS integration](../integrations/css-in-js.mdx) — it publishes a ready-made theme accessor without either of the paths below.
 
-When your components consume a theme via a provider (styled-components, emotion, MUI, Chakra, Mantine, …), the theme value isn't a CSS variable chain — it's a JS object your provider re-evaluates on change. Subscribe to the active tuple via `MutationObserver`:
+## React hook inside the preview
+
+If the consumer is a React story / block / decorator running inside the Storybook preview, use the hooks the addon already ships:
+
+```tsx
+import { useActiveAxes, useActiveTheme, useColorFormat } from '@unpunnyfuns/swatchbook-addon';
+
+function ThemeBridge({ children }: { children: ReactNode }) {
+  const axes = useActiveAxes();   // { mode: 'Dark', brand: 'Brand A', contrast: 'Normal' }
+  const theme = mapAxesToMyTheme(axes);
+  return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
+}
+```
+
+`useActiveAxes()` reads from the same React context the blocks package publishes. It's populated by swatchbook's preview decorator, so anything inside a story tree sees it. Reactive — components re-render when the toolbar flips an axis; no observer, no manual subscription.
+
+`useActiveTheme()` gives the composed tuple string (`"Dark · Brand A · Normal"`); `useColorFormat()` gives the active color-format selection. Same shape, same context.
+
+## DOM observation — for everything else
+
+The hooks above require React and the preview's provider tree. When your consumer is neither — a Vue / Angular / Svelte app, plain HTML, or a React tree outside swatchbook's provider — subscribe to the active tuple via `MutationObserver` on the DOM contract instead:
 
 ```ts
 function readAxes(): Record<string, string> {
@@ -43,7 +67,9 @@ observer.observe(document.documentElement, { attributes: true });
 apply(readAxes());
 ```
 
-Wrap that in whatever idiom your framework uses. A React bridge into a `ThemeProvider`:
+Wrap that in whatever idiom your framework uses. Vue (`onMounted` + `ref`), Angular (a service with RxJS or a signal), Svelte (`onMount` + a writable store), plain HTML (attach to application state directly). The DOM contract is identical across frameworks.
+
+For React outside the preview's provider tree, the same pattern applies:
 
 ```tsx
 function useSwatchbookAxes(): Record<string, string> {
@@ -55,15 +81,9 @@ function useSwatchbookAxes(): Record<string, string> {
   }, []);
   return axes;
 }
-
-function ThemeBridge({ children }: { children: ReactNode }) {
-  const axes = useSwatchbookAxes();
-  const theme = mapAxesToMyTheme(axes);
-  return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
-}
 ```
 
-Same pattern for Vue (`onMounted` + `ref`), Angular (a service with RxJS or a signal), Svelte (`onMount` + a writable store), plain HTML (attach to application state directly). The DOM contract is identical across frameworks.
+Inside the preview, prefer `useActiveAxes()` — it's reactive without the observer cost and pools updates with the blocks' own re-renders.
 
 ## What the DOM contract guarantees
 
@@ -76,13 +96,13 @@ Any change to this shape is a breaking change. The DOM is the API.
 
 ## What swatchbook doesn't ship
 
-- **No framework-specific hooks.** No `useSwatchbookAxes()` from `@unpunnyfuns/swatchbook-addon`, no Vue composable, no Angular service. The core package is pure TypeScript; the addon's preview code is DOM-only. If you need a reusable hook inside your project, write the ten lines above — fewer lines than importing a package and pinning its version.
-- **No recipes per component library.** MUI, Chakra, Mantine, styled-components, emotion, Tailwind class-mode — each has its own theming model. The DOM contract above is the starting point; your component library's theming docs are the rest.
+- **No Vue, Angular, or Svelte bindings.** React is the only framework with shipped hooks (`useActiveAxes` / `useActiveTheme` / `useColorFormat`), because swatchbook's blocks are React and the addon's preview decorator publishes a React context. Other frameworks consume the DOM contract directly — ten lines of observer code, pick the idiom (`ref`, signal, store) that fits.
+- **No recipes per component library.** MUI, Chakra, Mantine, styled-components, emotion, Tailwind class-mode — each has its own theming model. The CSS-variable and DOM-attribute contracts above are the starting points; your component library's theming docs are the rest.
 
 ## Known gotchas
 
 **Component library theme is a JS object — can it read the `--<prefix>-*` CSS variables directly?**
-Only if the library consumes CSS variables natively. Tailwind v4 does (see the [Tailwind integration](../integrations/tailwind.mdx)); any provider whose theme values are `var(--…)` strings does (see the [CSS-in-JS integration](../integrations/css-in-js.mdx)). If the theme is a JS object *read* at render time (MUI's `createTheme`, Chakra, Mantine), you need the DOM-observation path.
+Only if the library consumes CSS variables natively. Tailwind v4 does (see the [Tailwind integration](../integrations/tailwind.mdx)); any provider whose theme values are `var(--…)` strings does (see the [CSS-in-JS integration](../integrations/css-in-js.mdx)). If the theme is a JS object *read* at render time (MUI's `createTheme`, Chakra, Mantine), use `useActiveAxes()` in React, or the DOM-observation path elsewhere, to rebuild the theme object on axis flips.
 
 **Tailwind's `dark:` variant isn't responding to swatchbook.**
 Tailwind looks for `.dark` on an ancestor, or `data-theme="dark"` in its attribute mode. Swatchbook writes `data-<prefix>-mode="Dark"` — the attribute shape and name don't match. Either configure Tailwind to key on swatchbook's attribute (`@custom-variant dark (&:where([data-<prefix>-mode=Dark], [data-<prefix>-mode=Dark] *));`), or have the preview decorator mirror a `.dark` class via the DOM-observation path.
