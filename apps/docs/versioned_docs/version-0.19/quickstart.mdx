@@ -67,6 +67,15 @@ export default definePreview({
 
 Inline `config` is the primary path. If you'd rather keep the config in its own file (useful when the same config is consumed by a CLI or CI lint outside Storybook), write a `swatchbook.config.ts` and point at it with `options.configPath: '../swatchbook.config.ts'` — see [config reference](./reference/config) for details.
 
+### If your stories use Tailwind or a CSS-in-JS library
+
+Stories that already use CSS variables need no extra wiring — the swatchbook toolbar flips `--<prefix>-*` vars via cascade and the stories repaint automatically. Two library-specific shortcuts for everything else:
+
+- **Tailwind v4.** Add [`@unpunnyfuns/swatchbook-integrations/tailwind`](./guides/integrations/tailwind) to the addon's `integrations[]` and `@tailwindcss/vite` to Storybook's Vite plugins. Utility classes like `bg-<prefix>-surface-default` / `p-<prefix>-md` resolve through swatchbook's tokens automatically.
+- **emotion / styled-components / any `ThemeProvider`.** Add [`@unpunnyfuns/swatchbook-integrations/css-in-js`](./guides/integrations/css-in-js) to `integrations[]`. Stories `import { theme } from 'virtual:swatchbook/theme'` and hand it to their provider.
+
+Both integrations are preview-only — they let utility classes and theme accessors resolve correctly inside Storybook, nothing else. See the [Integrations guide](./guides/integrations) for the full picture.
+
 Start Storybook:
 
 ```bash
