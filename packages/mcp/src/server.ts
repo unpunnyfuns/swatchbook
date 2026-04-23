@@ -1,5 +1,10 @@
 import type { Project } from '@unpunnyfuns/swatchbook-core';
-import { analyzeAxisVariance, projectCss } from '@unpunnyfuns/swatchbook-core';
+import {
+  analyzeAxisVariance,
+  fuzzyFilter,
+  fuzzyMatches,
+  projectCss,
+} from '@unpunnyfuns/swatchbook-core';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { computeContrast } from '#/contrast.ts';
@@ -375,9 +380,9 @@ export function createServer(initial: Project): McpServer & {
     'search_tokens',
     {
       description:
-        'Case-insensitive substring search across token paths, `$description`, and stringified values. Returns matches with a short snippet pointing at where the match hit. Use when you know what you want but not the path — `search_tokens("radius")` finds every token whose path / description / value mentions radius. Scopes to a single theme (default: project default).',
+        'Fuzzy search across token paths, `$description`, and stringified values. Case-insensitive, tolerates a single-character typo per term, and accepts out-of-order terms (`"blue palette"` finds `color.palette.blue.500`). Returns matches ranked by relevance with a short snippet pointing at where the match hit. Use when you know what you want but not the exact path. Scopes to a single theme (default: project default).',
       inputSchema: {
-        query: z.string().min(1).describe('Substring to search for (case-insensitive).'),
+        query: z.string().min(1).describe('Fuzzy query (case-insensitive).'),
         theme: z
           .string()
           .optional()
@@ -389,34 +394,34 @@ export function createServer(initial: Project): McpServer & {
       const themeName = theme ?? project.themes[0]?.name;
       if (!themeName) return textResult('No themes in project.');
       const tokens = project.themesResolved[themeName] ?? {};
-      const needle = query.toLowerCase();
       const max = limit ?? 50;
-      const hits: {
-        path: string;
-        type?: string;
-        matchedIn: ('path' | 'description' | 'value')[];
-        snippet: string;
-      }[] = [];
 
-      for (const [path, token] of Object.entries(tokens)) {
-        const matchedIn: ('path' | 'description' | 'value')[] = [];
-        if (path.toLowerCase().includes(needle)) matchedIn.push('path');
-        const desc = token.$description?.toLowerCase();
-        if (desc?.includes(needle)) matchedIn.push('description');
+      const candidates = Object.entries(tokens).map(([path, token]) => {
+        const description = token.$description ?? '';
         const value = stringifyValue(token.$value);
-        if (value.toLowerCase().includes(needle)) matchedIn.push('value');
-        if (matchedIn.length === 0) continue;
+        return { path, token, description, value, composite: `${path} ${description} ${value}` };
+      });
+      const ranked = fuzzyFilter(candidates, query, (c) => c.composite, { limit: max });
+      const hits = ranked.map((c) => {
+        const matchedIn: ('path' | 'description' | 'value')[] = [];
+        if (fuzzyMatches(c.path, query)) matchedIn.push('path');
+        if (c.description && fuzzyMatches(c.description, query)) matchedIn.push('description');
+        if (fuzzyMatches(c.value, query)) matchedIn.push('value');
+        if (matchedIn.length === 0) matchedIn.push('path');
         const snippet = matchedIn.includes('description')
-          ? (token.$description ?? path)
+          ? (c.token.$description ?? c.path)
           : matchedIn.includes('value')
-            ? `${path} = ${value}`
-            : path;
-        const entry: (typeof hits)[number] = { path, matchedIn, snippet };
-        if (token.$type !== undefined) entry.type = token.$type;
-        hits.push(entry);
-        if (hits.length >= max) break;
-      }
-      hits.sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true }));
+            ? `${c.path} = ${c.value}`
+            : c.path;
+        const entry: { path: string; type?: string; matchedIn: typeof matchedIn; snippet: string } =
+          {
+            path: c.path,
+            matchedIn,
+            snippet,
+          };
+        if (c.token.$type !== undefined) entry.type = c.token.$type;
+        return entry;
+      });
       return jsonResult({
         query,
         theme: themeName,

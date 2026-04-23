@@ -47,7 +47,7 @@ Usage:
 Tools exposed:
   describe_project    Orientation — counts, axes, themes, presets, diagnostics.
   list_tokens         List tokens by path glob / \`$type\`.
-  search_tokens       Substring search across paths, descriptions, values.
+  search_tokens       Fuzzy search across paths, descriptions, values.
   resolve_theme       Full resolved token map for an axis tuple.
   get_token           Full detail for one token path.
   get_alias_chain     Forward alias chain per theme.
