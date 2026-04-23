@@ -1,0 +1,138 @@
+---
+id: overview
+title: Overview blocks
+sidebar_position: 2
+---
+
+# Overview blocks
+
+Survey many tokens at once. The first two work across every `$type` in the graph; the rest scope to one DTCG type and render a type-specific visual.
+
+Most blocks in this group take:
+
+- `filter?: string` — path glob (see the [globMatch rules](#) on each block's implementation).
+- `sortBy?: 'path' | 'value' | 'none'` — default `'path'` (exceptions noted per block).
+- `sortDir?: 'asc' | 'desc'` — default `'asc'`.
+- `caption?: string` — override the default summary caption.
+
+## Across types
+
+### TokenNavigator
+
+```tsx
+<TokenNavigator root="color" />
+```
+
+Expandable tree of the token graph. Each interior group shows its child count; each leaf shows its `$type` pill plus an inline preview (color swatch, dimension bar, shadow / border / motion sample, or a formatted value). A search input at the top filters by path substring — matching leaves survive, groups on the way to them auto-expand. Clicking a leaf opens a slide-over with the full `<TokenDetail>`; pass `onSelect` to own the click follow-up instead.
+
+Props:
+
+- `root?: string` — mount at this subtree (e.g. `"color"`, `"typography"`). Omit to show everything.
+- `type?: string | readonly string[]` — restrict to one DTCG `$type` (`type="color"`) or a small-multiples set (`type={['duration', 'cubicBezier', 'transition']}`). Composes with `root` — both constraints must hold.
+- `initiallyExpanded?: number` — depth open on first render. `0` all collapsed, `1` top-level groups open (default), `2` one deeper, etc.
+- `searchable?: boolean` — render a runtime search input above the tree. Defaults to `true`. Pass `false` to hide the input (the `root` / `type` props still apply at authoring time).
+- `onSelect?(path: string): void` — receives a leaf's full dot-path on click; suppresses the built-in overlay.
+
+### TokenTable
+
+```tsx
+<TokenTable type="color" />
+```
+
+Compact two-column table: **Path** and **Value** (with inline type pill + color swatch). A search input at the top narrows rows by path, type, or value substring. Clicking a row opens the same slide-over `<TokenDetail>` the tree uses; pass `onSelect` to own the follow-up. Columns follow content with per-column `min-width` floors, so the table breathes in narrow containers.
+
+Props:
+
+- `filter?: string` — path glob.
+- `type?: string` — DTCG `$type` filter (`"color"`, `"dimension"`, …).
+- `caption?: string` — override the caption.
+- `sortBy?: 'path' | 'value' | 'none'` — default `'path'`.
+- `sortDir?: 'asc' | 'desc'` — default `'asc'`.
+- `searchable?: boolean` — render a runtime search input above the table. Defaults to `true`.
+- `onSelect?(path: string): void` — suppress the built-in drawer.
+
+## Per-type
+
+Every block in this group scopes to one DTCG `$type`, filters / sorts, and renders a type-specific visual. All accept `filter?: string`, `sortBy?`, `sortDir?`, and `caption?: string`.
+
+### ColorPalette
+
+```tsx
+<ColorPalette filter="color.palette.*" />
+```
+
+Swatch grid grouped by dot-path prefix. `groupBy` is auto-derived from the filter's fixed-prefix depth but can be overridden. Default sort is `'path'`; `'value'` orders colors perceptually via oklch **L → C → H** so ramps read light → dark and warm → cool.
+
+### TypographyScale
+
+```tsx
+<TypographyScale />
+```
+
+One sample line per `typography` composite, rendered with the token's own `fontFamily` / `fontSize` / `fontWeight` / `lineHeight` / `letterSpacing`. `sample?: string` overrides the text.
+
+### DimensionScale
+
+```tsx
+<DimensionScale kind="length" />
+```
+
+Width-driven bar (default), radius-sample square, or size-sample square per `dimension` token. Defaults to `sortBy: 'value'` — ordered numerically by the rendered pixel size.
+
+- `kind?: 'length' | 'radius' | 'size'` — visualization mode (default `'length'`).
+
+### FontFamilySample
+
+```tsx
+<FontFamilySample />
+```
+
+Pangram rendered per `fontFamily` primitive. `sample?: string` overrides the text.
+
+### FontWeightScale
+
+```tsx
+<FontWeightScale />
+```
+
+Same sample text rendered at each `fontWeight` primitive. Defaults to `sortBy: 'value'` — ordered 100 → 900.
+
+### BorderPreview
+
+```tsx
+<BorderPreview />
+```
+
+One framed `<BorderSample>` per `border` composite token.
+
+### ShadowPreview
+
+```tsx
+<ShadowPreview />
+```
+
+One `<ShadowSample>` surface per `shadow` composite token.
+
+### MotionPreview
+
+```tsx
+<MotionPreview />
+```
+
+One animated `<MotionSample>` per `transition` / `duration` / `cubicBezier` token. Respects `prefers-reduced-motion`.
+
+### StrokeStyleSample
+
+```tsx
+<StrokeStyleSample />
+```
+
+Border rendered per `strokeStyle` primitive. Supports string forms (`solid`, `dashed`, `dotted`, `double`) natively; object forms (`dashArray` / `lineCap`) fall back to a textual summary.
+
+### GradientPalette
+
+```tsx
+<GradientPalette />
+```
+
+Wide sample per `gradient` token (linear, left → right by default) with a stop list. DTCG gradients are stop arrays — the gradient *function* is a rendering choice the consumer makes.
