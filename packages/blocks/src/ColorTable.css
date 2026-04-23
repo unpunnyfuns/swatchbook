@@ -52,6 +52,10 @@
   min-width: 200px;
 }
 
+.sb-color-table__th--expand {
+  width: 28px;
+}
+
 .sb-color-table__row {
   cursor: pointer;
 }
@@ -61,10 +65,18 @@
   outline-offset: -2px;
 }
 
+.sb-color-table__row--expanded {
+  background: var(--swatchbook-surface-muted, rgba(128, 128, 128, 0.06));
+}
+
 .sb-color-table__td {
   padding: 8px 12px;
   border-bottom: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.15));
   vertical-align: middle;
+}
+
+.sb-color-table__row--expanded > .sb-color-table__td {
+  border-bottom: 0;
 }
 
 .sb-color-table__path {
@@ -78,18 +90,49 @@
   vertical-align: middle;
 }
 
+.sb-color-table__variant-pills {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
 .sb-color-table__variant-pill {
   display: inline-block;
-  margin-left: 6px;
   padding: 1px 6px;
+  margin: 0;
   border-radius: 4px;
+  border: 0;
   font-family: inherit;
   font-size: 10px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   background: var(--swatchbook-surface-muted, rgba(128, 128, 128, 0.15));
   color: var(--swatchbook-text-muted, CanvasText);
-  vertical-align: middle;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.sb-color-table__variant-pill:hover {
+  background: var(--swatchbook-surface-raised, rgba(128, 128, 128, 0.25));
+  color: var(--swatchbook-text-default, CanvasText);
+}
+
+.sb-color-table__variant-pill:focus-visible {
+  outline: 2px solid var(--swatchbook-accent-bg, #1d4ed8);
+  outline-offset: 1px;
+}
+
+.sb-color-table__variant-pill--active {
+  background: var(--swatchbook-accent-bg, #1d4ed8);
+  color: var(--swatchbook-accent-fg, white);
+}
+
+.sb-color-table__variant-pill--active:hover {
+  background: var(--swatchbook-accent-bg, #1d4ed8);
+  color: var(--swatchbook-accent-fg, white);
 }
 
 .sb-color-table__swatch-cell {
@@ -155,6 +198,113 @@
 
 .sb-color-table__alias-empty {
   opacity: 0.4;
+}
+
+.sb-color-table__expand-cell {
+  width: 28px;
+  text-align: center;
+  color: var(--swatchbook-text-muted, CanvasText);
+}
+
+.sb-color-table__chevron {
+  display: inline-block;
+  transition: transform 120ms ease;
+}
+
+.sb-color-table__chevron--expanded {
+  transform: rotate(90deg);
+}
+
+.sb-color-table__detail-row {
+  background: var(--swatchbook-surface-muted, rgba(128, 128, 128, 0.06));
+}
+
+.sb-color-table__detail-cell {
+  padding: 12px 16px 20px;
+}
+
+.sb-color-table__detail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--swatchbook-text-default, CanvasText);
+}
+
+.sb-color-table__description {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.sb-color-table__chain {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: var(--swatchbook-text-muted, CanvasText);
+}
+
+.sb-color-table__detail-label {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 10px;
+  font-family: inherit;
+  margin-right: 4px;
+}
+
+.sb-color-table__detail-empty {
+  margin: 0;
+  color: var(--swatchbook-text-muted, CanvasText);
+  font-style: italic;
+}
+
+.sb-color-table__variant-grid {
+  margin-top: 4px;
+}
+
+.sb-color-table__variant-grid-header {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 10px;
+  color: var(--swatchbook-text-muted, CanvasText);
+  margin-bottom: 6px;
+}
+
+.sb-color-table__subtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+}
+
+.sb-color-table__subth {
+  text-align: left;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--swatchbook-text-muted, CanvasText);
+  border-bottom: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.15));
+}
+
+.sb-color-table__subtd {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.1));
+  vertical-align: middle;
+}
+
+.sb-color-table__subtd--path {
+  color: var(--swatchbook-text-muted, CanvasText);
+}
+
+.sb-color-table__subrow--active {
+  background: var(--swatchbook-surface-raised, rgba(128, 128, 128, 0.12));
+}
+
+.sb-color-table__subrow--active > .sb-color-table__subtd {
+  font-weight: 600;
+  color: var(--swatchbook-text-default, CanvasText);
 }
 
 .sb-color-table__sr-only {
