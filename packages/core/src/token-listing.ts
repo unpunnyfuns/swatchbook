@@ -47,9 +47,7 @@ export async function computeTokenListing(
           cssPlugin({
             filename: 'tokens.css',
             variableName: (token) =>
-              prefix
-                ? makeCSSVar(String(token.id), { prefix })
-                : makeCSSVar(String(token.id)),
+              prefix ? makeCSSVar(String(token.id), { prefix }) : makeCSSVar(String(token.id)),
           }),
           tokenListingPlugin({
             filename: 'tokens.listing.json',

@@ -98,9 +98,7 @@ export async function emitViaTerrazzo(
         cssPlugin({
           ...options.cssOptions,
           variableName: (token) =>
-            prefix
-              ? makeCSSVar(String(token.id), { prefix })
-              : makeCSSVar(String(token.id)),
+            prefix ? makeCSSVar(String(token.id), { prefix }) : makeCSSVar(String(token.id)),
           permutations: selection.map((entry) => ({
             input: entry.input,
             prepare: (css: string) =>
