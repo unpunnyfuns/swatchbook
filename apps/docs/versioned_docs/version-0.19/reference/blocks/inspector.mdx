@@ -1,0 +1,87 @@
+---
+id: inspector
+title: Inspector blocks
+sidebar_position: 3
+---
+
+# Inspector blocks
+
+Single-token deep-dive. `<TokenDetail>` is the composition; each subcomponent below is also exported and takes the same `path: string` prop, so MDX authors can embed just the piece they need.
+
+## TokenDetail
+
+```tsx
+<TokenDetail path="color.accent.bg" />
+```
+
+Full deep-dive: header + composite preview + composite breakdown + alias chain + aliased-by tree + per-axis variance + consumer output + usage snippet.
+
+Props: `path: string`, `heading?: string` (defaults to `path`).
+
+## TokenHeader
+
+```tsx
+<TokenHeader path="color.accent.bg" />
+```
+
+Heading + `$type` pill + cssVar reference + description. Renders a missing-token empty state when `path` isn't in the active theme.
+
+## CompositePreview
+
+```tsx
+<CompositePreview path="typography.body" />
+```
+
+Type-dispatched live preview of the token's resolved value (typography sample, shadow swatch, gradient strip, animating ball for motion, etc.).
+
+## CompositeBreakdown
+
+```tsx
+<CompositeBreakdown path="typography.body" />
+```
+
+Labelled sub-value grid for composite types (`typography`, `border`, `transition`, `shadow`, `gradient`). Renders nothing for primitives.
+
+## AliasChain
+
+```tsx
+<AliasChain path="color.accent.bg" />
+```
+
+Forward alias chain (`color.accent.bg → color.palette.blue.700`). Renders nothing for non-aliases.
+
+## AliasedBy
+
+```tsx
+<AliasedBy path="color.palette.blue.500" />
+```
+
+Backward alias tree — every token that transitively aliases this one. Truncates at depth 6.
+
+## AxisVariance
+
+```tsx
+<AxisVariance path="color.accent.bg" />
+```
+
+Per-axis value table. Collapses to one row when the value is constant, a list for one varying axis, or a matrix for two axes (extras pinned to the active selection).
+
+## TokenUsageSnippet
+
+```tsx
+<TokenUsageSnippet path="color.accent.bg" />
+```
+
+Copy-ready `color: var(--…);` reference snippet.
+
+## ConsumerOutput
+
+```tsx
+<ConsumerOutput path="color.accent.bg" />
+```
+
+Summary rows for the token's **Path** and **CSS var** with copy-to-clipboard on each. Shows the active axis tuple above the rows when more than one axis is in play.
+
+When the project's Terrazzo build loads additional plugins (`@terrazzo/plugin-swift`, `-android`, `-sass`, `-js`, …) alongside the default `plugin-css` — wired via `config.terrazzoPlugins` and named in `config.listingOptions.platforms` — one extra row appears per platform, carrying that plugin's authoritative identifier for the token (`Color.accentBg`, `@color/accent_bg`, `$accent-bg`, …). See [Aligning with your token build](../../guides/sharing-terrazzo-options) for the setup pattern.
+
+**The displayed names are whatever your plugin config produces.** Swatchbook doesn't transform tokens — it displays the identifiers the plugins you configured emit. If you pass `sassPlugin()` with defaults, you see default Sass naming; if you pass `sassPlugin(yourProductionOptions)`, you see the names your production build ships. The shared-options module pattern is how you keep the two in lockstep — otherwise the row labelled `Sass` is showing *a* plausible identifier, not *your* identifier.
