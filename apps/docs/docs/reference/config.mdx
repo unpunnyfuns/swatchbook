@@ -208,8 +208,55 @@ Produces a single `:root` chrome block with all ten roles declared — overrides
 
 Unknown role keys (outside the ten above) and target paths that don't resolve to any token or composite sub-field in any theme produce `warn` diagnostics (group `swatchbook/chrome`) and are dropped — the corresponding chrome slot falls back to its hard-coded literal default. The validated entries land on `Project.chrome` for downstream tooling.
 
+### `cssOptions?: Omit<CSSPluginOptions, 'variableName' | 'permutations'>`
+
+Options forwarded to the `@terrazzo/plugin-css` instance swatchbook runs internally — for the stylesheet it emits for the Storybook preview and for the Token Listing's `names.css` derivation. Use this when your production Terrazzo build passes non-default options to `plugin-css` (`legacyHex`, `colorDepth`, a custom `transform`, etc.) and you want the docs-side output to match.
+
+`variableName` and `permutations` are managed internally — swatchbook's axis-aware multi-theme emission depends on them — and are stripped from the option type. Everything else passes through.
+
+```ts
+defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  cssVarPrefix: 'ds',
+  cssOptions: { legacyHex: true, colorDepth: 24 },
+});
+```
+
+### `listingOptions?: Omit<TokenListingPluginOptions, 'filename'>`
+
+Options forwarded to `@terrazzo/plugin-token-listing`. The listing is how swatchbook surfaces authoritative per-token metadata (plugin-css-computed CSS variable names, preview values, alias chains, source file + line references) into `Project.listing` and the block-side `ProjectSnapshot.listing`. Use `listingOptions.platforms` to register additional platforms beyond the built-in `css` entry:
+
+```ts
+import swiftPlugin from '@terrazzo/plugin-swift';
+
+defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  cssVarPrefix: 'ds',
+  listingOptions: {
+    platforms: {
+      css:   { name: '@terrazzo/plugin-css' },
+      swift: { name: '@terrazzo/plugin-swift', description: 'UIColor' },
+    },
+  },
+  terrazzoPlugins: [swiftPlugin({ /* swift plugin options */ })],
+});
+```
+
+Each `platforms` entry names a Terrazzo plugin whose identifier-naming logic derives the token's identifier on that platform. The plugin has to be loaded in the build for the reference to resolve — see `terrazzoPlugins` below.
+
+`filename` is managed internally (the listing is captured in memory, not written to disk) and is stripped from the option type.
+
+### `terrazzoPlugins?: readonly Plugin[]`
+
+Additional Terrazzo plugins loaded alongside swatchbook's internal `plugin-css` + `plugin-token-listing`. Required when `listingOptions.platforms` references anything beyond the built-in `css` — the referenced plugin has to actually run in the same build for the listing to resolve its naming. Plugins whose output swatchbook doesn't consume are harmless — they run, their output files land in the in-memory output set, nothing else happens.
+
+Common use: load `@terrazzo/plugin-swift` / `-android` / `-js` / `-sass` alongside so their naming logic populates `listing[path].names.<platform>` for block consumption.
+
+See [Sharing Terrazzo options](../guides/sharing-terrazzo-options) for the pattern of sharing one options file between `terrazzo.config.ts` and `swatchbook.config.ts`.
+
 ## See also
 
 - [Theming inputs](../concepts/theming-inputs) — when to pick resolver vs layered.
 - [Axes](../concepts/axes) — the runtime model for selection.
 - [Reference: core](./core) — the loader APIs this config drives.
+- [Sharing Terrazzo options](../guides/sharing-terrazzo-options) — keep the swatchbook build aligned with a production Terrazzo CLI.

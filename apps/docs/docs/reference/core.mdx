@@ -133,9 +133,28 @@ interface Project {
   sourceFiles: string[];
   /** Loader cwd — what all config-relative paths resolved against. */
   cwd: string;
+  /**
+   * Path-indexed Token Listing data from `@terrazzo/plugin-token-listing`.
+   * Each entry carries authoritative plugin-css-emitted CSS variable names,
+   * a CSS-ready `previewValue`, `originalValue` (pre-resolution), and
+   * `source.loc` pointing back to the authoring file + line. Populated for
+   * resolver-backed projects; empty `{}` for layered / plain-parse paths.
+   * Downstream blocks prefer this over re-deriving values locally.
+   */
+  listing: TokenListingByPath;
   diagnostics: Diagnostic[];
 }
 ```
+
+### `TokenListingByPath`
+
+Path-indexed alias over `@terrazzo/plugin-token-listing`'s `ListedToken` shape. Blocks read authoritative CSS variable names from `listing[path].$extensions['app.terrazzo.listing'].names.css` and preview strings from `.previewValue`. The full entry carries `originalValue` (pre-resolution, aliases preserved) and `source.loc` (file + line range pointing at the authoring source).
+
+```ts
+type TokenListingByPath = Record<string, ListedToken>;
+```
+
+See [Sharing Terrazzo options](../guides/sharing-terrazzo-options) for registering extra platforms (swift, android, …) so additional `names.<platform>` entries populate.
 
 ### `SwatchbookIntegration`
 
