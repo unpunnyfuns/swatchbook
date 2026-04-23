@@ -8,7 +8,7 @@ sidebar_position: 6
 
 Context-reading hooks for authoring custom blocks. Source of truth lives in `@unpunnyfuns/swatchbook-blocks`; `@unpunnyfuns/swatchbook-addon` re-exports everything so a one-stop `import { useSwatchbookData } from '@unpunnyfuns/swatchbook-addon'` works too. Either entry reads from the nearest `SwatchbookProvider` (mounted automatically by the addon's preview decorator inside Storybook).
 
-Outside Storybook, wrap the tree in `SwatchbookProvider` and pass a `ProjectSnapshot` so the hooks have something to resolve against — see the [blocks intro](./) for the wiring.
+Outside Storybook, wrap the tree in `SwatchbookProvider` and pass a `ProjectSnapshot` so the hooks have something to resolve against — see the [blocks intro](./index.mdx) for the wiring.
 
 ## `useSwatchbookData()`
 
