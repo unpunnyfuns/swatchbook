@@ -5,7 +5,7 @@ import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
-import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
+import { globMatch, resolveCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface GradientPaletteProps {
   /**
@@ -70,7 +70,8 @@ export function GradientPalette({
   sortBy = 'path',
   sortDir = 'asc',
 }: GradientPaletteProps): ReactElement {
-  const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const project = useProject();
+  const { resolved, activeTheme, cssVarPrefix } = project;
   const colorFormat = useColorFormat();
 
   const rows = useMemo<Row[]>(() => {
@@ -80,10 +81,10 @@ export function GradientPalette({
     });
     return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
       path,
-      cssVar: makeCssVar(path, cssVarPrefix),
+      cssVar: resolveCssVar(path, project),
       stops: asStops(token.$value),
     }));
-  }, [resolved, filter, cssVarPrefix, sortBy, sortDir]);
+  }, [resolved, filter, project, sortBy, sortDir]);
 
   const captionText =
     caption ??

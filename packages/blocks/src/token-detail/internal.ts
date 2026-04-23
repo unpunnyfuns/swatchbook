@@ -1,4 +1,4 @@
-import { makeCssVar, useProject } from '#/internal/use-project.ts';
+import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface DetailToken {
   $type?: string;
@@ -43,12 +43,12 @@ export interface TokenDetailData {
 }
 
 export function useTokenDetailData(path: string): TokenDetailData {
-  const { activeTheme, activeAxes, axes, themes, themesResolved, resolved, cssVarPrefix } =
-    useProject();
+  const project = useProject();
+  const { activeTheme, activeAxes, axes, themes, themesResolved, resolved, cssVarPrefix } = project;
   const typedResolved = resolved as Record<string, DetailToken>;
   return {
     token: typedResolved[path],
-    cssVar: makeCssVar(path, cssVarPrefix),
+    cssVar: resolveCssVar(path, project),
     activeTheme,
     activeAxes,
     axes,

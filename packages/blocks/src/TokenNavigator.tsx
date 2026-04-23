@@ -9,7 +9,7 @@ import { themeAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { EmptyState } from '#/internal/styles.tsx';
-import { makeCssVar, useProject } from '#/internal/use-project.ts';
+import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
 import type { VirtualToken } from '#/types.ts';
@@ -406,12 +406,12 @@ interface LeafPreviewProps {
 }
 
 function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
-  const { cssVarPrefix } = useProject();
+  const project = useProject();
   const colorFormat = useColorFormat();
   const type = token.$type;
 
   if (type === 'color') {
-    const cssVar = makeCssVar(path, cssVarPrefix);
+    const cssVar = resolveCssVar(path, project);
     return (
       <span className="sb-token-navigator__preview-box">
         <span className="sb-token-navigator__value">

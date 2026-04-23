@@ -1,6 +1,7 @@
 import { pathToFileURL } from 'node:url';
 import { build, defineConfig, Logger, type Plugin } from '@terrazzo/parser';
 import cssPlugin, { type CSSPluginOptions } from '@terrazzo/plugin-css';
+import { makeCSSVar } from '@terrazzo/token-tools/css';
 import type { Axis, Project, Theme } from '#/types.ts';
 
 /**
@@ -97,9 +98,7 @@ export async function emitViaTerrazzo(
         cssPlugin({
           ...options.cssOptions,
           variableName: (token) =>
-            prefix
-              ? `--${prefix}-${String(token.id).replaceAll('.', '-')}`
-              : `--${String(token.id).replaceAll('.', '-')}`,
+            prefix ? makeCSSVar(String(token.id), { prefix }) : makeCSSVar(String(token.id)),
           permutations: selection.map((entry) => ({
             input: entry.input,
             prepare: (css: string) =>

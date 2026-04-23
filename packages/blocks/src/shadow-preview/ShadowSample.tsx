@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { BORDER_FAINT, SURFACE_RAISED } from '#/internal/styles.tsx';
-import { makeCssVar, useProject } from '#/internal/use-project.ts';
+import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface ShadowSampleProps {
   /** Full dot-path of the shadow token to preview. */
@@ -16,7 +16,7 @@ const sampleStyle: CSSProperties = {
 };
 
 export function ShadowSample({ path }: ShadowSampleProps): ReactElement {
-  const { cssVarPrefix } = useProject();
-  const cssVar = makeCssVar(path, cssVarPrefix);
+  const project = useProject();
+  const cssVar = resolveCssVar(path, project);
   return <div style={{ ...sampleStyle, boxShadow: cssVar }} aria-hidden />;
 }

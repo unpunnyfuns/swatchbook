@@ -8,7 +8,7 @@ import { type ColorFormat, formatColor, type NormalizedColor } from '#/format-co
 import { CopyButton } from '#/internal/CopyButton.tsx';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
-import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
+import { globMatch, resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
 
 const BASE_LABEL = 'base';
 const COLUMN_COUNT = 6;
@@ -96,7 +96,8 @@ export function ColorTable({
   onSelect,
   variants,
 }: ColorTableProps): ReactElement {
-  const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const project = useProject();
+  const { resolved, activeTheme, cssVarPrefix } = project;
   const colorFormat = useColorFormat();
   const [query, setQuery] = useState('');
   const [selectedByBase, setSelectedByBase] = useState<Record<string, string>>({});
@@ -114,7 +115,7 @@ export function ColorTable({
     const groupMap = new Map<string, { base: string; variants: Variant[] }>();
     for (const [path, token] of sorted) {
       const raw = token.$value as NormalizedColor;
-      const hex = formatColor(raw, 'hex');
+      const hex = resolveColorValue(path, raw, 'hex', project);
       const hsl = formatColor(raw, 'hsl');
       const oklch = formatColor(raw, 'oklch');
       const active = pickActiveFormat(raw, colorFormat, hex, hsl, oklch);
@@ -122,7 +123,7 @@ export function ColorTable({
       const variant: Variant = {
         label: match?.label ?? BASE_LABEL,
         path,
-        cssVar: makeCssVar(path, cssVarPrefix),
+        cssVar: resolveCssVar(path, project),
         value: active.value,
         outOfGamut: active.outOfGamut,
         hex: hex.value,
@@ -145,7 +146,7 @@ export function ColorTable({
       out.push({ base, variants: vs, searchText });
     }
     return out;
-  }, [resolved, filter, cssVarPrefix, sortBy, sortDir, defs, colorFormat]);
+  }, [resolved, filter, project, sortBy, sortDir, defs, colorFormat]);
 
   const visibleGroups = useMemo(() => {
     if (!searchable || query.trim() === '') return groups;

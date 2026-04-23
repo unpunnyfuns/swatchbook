@@ -1,5 +1,6 @@
 import type { InputSourceWithDocument } from '@terrazzo/json-schema-tools';
 import type { Resolver, TokenNormalized } from '@terrazzo/parser';
+import type { TokenListingByPath } from '#/token-listing.ts';
 
 export type TokenMap = Record<string, TokenNormalized>;
 
@@ -174,6 +175,18 @@ export interface Project {
    * need a synthesized resolver before `build()` accepts them.
    */
   parserInput?: ParserInput;
+  /**
+   * Path-indexed Token Listing data from `@terrazzo/plugin-token-listing`.
+   * Each entry carries the plugin-css-authoritative var name under
+   * `$extensions["app.terrazzo.listing"].names.css`, a `previewValue`
+   * string, the original aliased value, and the source file + line range.
+   * Empty when the project isn't resolver-backed (layered / plain-parse
+   * paths don't run the build), or when the listing plugin errored.
+   *
+   * Treat as enrichment: consumers should fall back gracefully when a
+   * given path is absent.
+   */
+  listing: TokenListingByPath;
   diagnostics: Diagnostic[];
 }
 

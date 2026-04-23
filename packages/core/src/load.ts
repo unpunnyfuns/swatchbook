@@ -4,6 +4,7 @@ import { validateDisabledAxes } from '#/disabled-axes.ts';
 import { validatePresets } from '#/presets.ts';
 import { resolveDefaultTuple } from '#/themes/default.ts';
 import { normalizeThemes } from '#/themes/normalize.ts';
+import { computeTokenListing } from '#/token-listing.ts';
 import {
   permutationID,
   type Axis,
@@ -82,6 +83,15 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     });
   }
 
+  const listing =
+    normalized.parserInput !== undefined
+      ? await computeTokenListing(
+          normalized.parserInput,
+          cwd,
+          configWithDefaults.cssVarPrefix ?? '',
+        )
+      : {};
+
   return {
     config: configWithDefaults,
     axes: filteredAxes,
@@ -94,6 +104,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     sourceFiles: normalized.sourceFiles,
     cwd,
     ...(normalized.parserInput !== undefined && { parserInput: normalized.parserInput }),
+    listing,
     diagnostics: [
       ...toDiagnostics(logger),
       ...normalized.diagnostics,

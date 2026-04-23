@@ -61,6 +61,7 @@
     "@terrazzo/json-schema-tools": "^0.2.1",
     "@terrazzo/parser": "^2.0.3",
     "@terrazzo/plugin-css": "^2.0.3",
+    "@terrazzo/plugin-token-listing": "0.1.0-alpha.1",
     "@terrazzo/token-tools": "^2.0.3"
   },
   "devDependencies": {
