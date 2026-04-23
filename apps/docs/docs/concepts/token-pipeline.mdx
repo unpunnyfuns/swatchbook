@@ -56,7 +56,7 @@ The virtual module lives inside Vite's module graph. Vite builds your Storybook 
 
 For **Storybook**, the virtual module is the tokens' runtime home: the preview reads CSS from it, the MDX doc blocks read the resolved graph from it, the toolbar reads the axes from it. No compile step needed.
 
-For **production**, you want CSS variables baked into your framework's asset pipeline the normal way. Run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources — swatchbook is built on Terrazzo's parser, and Terrazzo's ecosystem of platform plugins (`plugin-css`, `plugin-js`, `plugin-tailwind`, `plugin-swift`, `plugin-sass`, …) covers every downstream target.
+For **production**, you want CSS variables baked into your framework's asset pipeline the normal way. Run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources — swatchbook is built on Terrazzo's parser, and Terrazzo's ecosystem of platform plugins (`plugin-css`, `plugin-js`, `plugin-tailwind`, `plugin-swift`, `plugin-sass`, …) covers every downstream target. When both pipelines run, [align their options](../guides/sharing-terrazzo-options) so the values swatchbook shows match the values your apps ship.
 
 ## Where the same no-compile-step property holds
 

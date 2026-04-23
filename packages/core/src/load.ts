@@ -2,6 +2,7 @@ import { validateChrome } from '#/chrome.ts';
 import { BufferedLogger, toDiagnostics } from '#/diagnostics.ts';
 import { validateDisabledAxes } from '#/disabled-axes.ts';
 import { validatePresets } from '#/presets.ts';
+import { validateCssOptions } from '#/terrazzo-options.ts';
 import { resolveDefaultTuple } from '#/themes/default.ts';
 import { normalizeThemes } from '#/themes/normalize.ts';
 import { computeTokenListing } from '#/token-listing.ts';
@@ -69,6 +70,8 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     filteredResolved,
   );
 
+  const { diagnostics: cssOptionsDiagnostics } = validateCssOptions(config.cssOptions);
+
   // A misconfigured `disabledAxes` (e.g. pinning an axis whose default
   // context has no theme rows) can filter every theme out. We still return
   // an empty project so the addon can render diagnostics instead of
@@ -117,6 +120,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
       ...defaultDiagnostics,
       ...presetDiagnostics,
       ...chromeDiagnostics,
+      ...cssOptionsDiagnostics,
       ...projectDiagnostics,
     ],
   };

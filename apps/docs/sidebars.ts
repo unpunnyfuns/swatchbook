@@ -32,6 +32,7 @@ const sidebars: SidebarsConfig = {
     'guides/token-dashboard',
     'guides/multi-axis-walkthrough',
     'guides/consuming-the-active-theme',
+    'guides/sharing-terrazzo-options',
     'guides/migrating-from-addon-themes',
   ],
   integrations: [
