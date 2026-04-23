@@ -43,3 +43,10 @@ export const SortedPerceptually = meta.story({
   args: { sortBy: 'value' },
   play: async ({ canvasElement }) => assertTableRenders(canvasElement),
 });
+export const WithVariantPills = meta.story({
+  args: {
+    filter: 'color.*',
+    variants: { hover: 'h', disabled: 'd', active: 'a' },
+  },
+  play: async ({ canvasElement }) => assertTableRenders(canvasElement),
+});

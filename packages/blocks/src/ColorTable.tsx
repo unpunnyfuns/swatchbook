@@ -39,6 +39,18 @@ export interface ColorTableProps {
    * `<TokenDetail>` drawer is suppressed — the consumer owns follow-up UI.
    */
   onSelect?(path: string): void;
+  /**
+   * Map from a display label to a path-suffix matched against the final
+   * hyphen segment of each leaf. A row whose leaf ends in `-<suffix>` gets
+   * the matching label rendered as a pill after the token name.
+   *
+   * Longest-suffix-wins: given `{ hover: 'h', hoverDark: 'h-dark' }`, a path
+   * ending in `-h-dark` picks `hoverDark`, not `hover`. Tokens that don't
+   * match any suffix render with no pill — configuration is purely additive.
+   *
+   * Empty map (default) → no pills; the block behaves exactly as before.
+   */
+  variants?: Record<string, string>;
 }
 
 interface Row {
@@ -49,6 +61,7 @@ interface Row {
   oklch: string;
   hexOutOfGamut: boolean;
   aliasOf?: string;
+  variant?: string;
 }
 
 export function ColorTable({
@@ -58,10 +71,13 @@ export function ColorTable({
   sortDir = 'asc',
   searchable = true,
   onSelect,
+  variants,
 }: ColorTableProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+
+  const variantIndex = useMemo(() => buildVariantIndex(variants), [variants]);
 
   const rows = useMemo<Row[]>(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
@@ -74,6 +90,7 @@ export function ColorTable({
       const hex = formatColor(raw, 'hex');
       const hsl = formatColor(raw, 'hsl');
       const oklch = formatColor(raw, 'oklch');
+      const variant = matchVariant(path, variantIndex);
       return {
         path,
         cssVar: makeCssVar(path, cssVarPrefix),
@@ -82,9 +99,10 @@ export function ColorTable({
         oklch: oklch.value,
         hexOutOfGamut: hex.outOfGamut,
         ...(token.aliasOf !== undefined && { aliasOf: token.aliasOf }),
+        ...(variant !== undefined && { variant }),
       };
     });
-  }, [resolved, filter, cssVarPrefix, sortBy, sortDir]);
+  }, [resolved, filter, cssVarPrefix, sortBy, sortDir, variantIndex]);
 
   const visibleRows = useMemo(() => {
     if (!searchable || query.trim() === '') return rows;
@@ -176,7 +194,18 @@ export function ColorTable({
                   aria-hidden
                 />
               </td>
-              <td className={cx('sb-color-table__td', 'sb-color-table__path')}>{row.path}</td>
+              <td className={cx('sb-color-table__td', 'sb-color-table__path')}>
+                <span className="sb-color-table__path-text">{row.path}</span>
+                {row.variant !== undefined && (
+                  <span
+                    className="sb-color-table__variant-pill"
+                    data-variant={row.variant}
+                    data-testid="color-table-variant"
+                  >
+                    {row.variant}
+                  </span>
+                )}
+              </td>
               <ValueCell value={row.hex} label={`Copy HEX ${row.hex}`}>
                 {row.hexOutOfGamut && (
                   <span
@@ -241,4 +270,42 @@ function ValueCell({
       </span>
     </td>
   );
+}
+
+interface VariantEntry {
+  label: string;
+  suffix: string;
+}
+
+/**
+ * Pre-sort the variants map by descending suffix length so the first
+ * `endsWith` hit during matching is always the longest. Empty suffixes are
+ * dropped — they'd match every path and make the feature meaningless.
+ */
+function buildVariantIndex(variants: Record<string, string> | undefined): readonly VariantEntry[] {
+  if (!variants) return [];
+  const entries: VariantEntry[] = [];
+  for (const [label, suffix] of Object.entries(variants)) {
+    if (suffix.length === 0) continue;
+    entries.push({ label, suffix });
+  }
+  entries.sort((a, b) => b.suffix.length - a.suffix.length);
+  return entries;
+}
+
+/**
+ * Resolve the variant label for a token path, if any. The leaf (last
+ * dot-segment) must end in `-<suffix>` — the leading hyphen is required, so
+ * suffix `h` matches `hi-h` but not `neutral-900` (by character), and does
+ * not match `highlight` (where `h` isn't preceded by a boundary). Entries
+ * are tried longest-first, so `h-dark` wins over `dark` when both are
+ * configured and the path ends in `-h-dark`.
+ */
+function matchVariant(path: string, variantIndex: readonly VariantEntry[]): string | undefined {
+  if (variantIndex.length === 0) return undefined;
+  const leaf = path.split('.').at(-1) ?? path;
+  for (const entry of variantIndex) {
+    if (leaf.endsWith(`-${entry.suffix}`)) return entry.label;
+  }
+  return undefined;
 }

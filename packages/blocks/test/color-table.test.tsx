@@ -123,6 +123,57 @@ describe('ColorTable', () => {
     expect(await findByTestId('color-table-overlay')).toBeDefined();
   });
 
+  it('renders variant pills from the variants map (longest suffix wins)', () => {
+    const snapshot = makeSnapshot();
+    snapshot.themesResolved['Light'] = {
+      ...snapshot.themesResolved['Light'],
+      'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
+      'color.bg.hi-h': { $type: 'color', $value: { hex: '#222222' } },
+      'color.bg.hi-d': { $type: 'color', $value: { hex: '#333333' } },
+      'color.bg.hi-h-dark': { $type: 'color', $value: { hex: '#444444' } },
+    };
+
+    render(
+      <SwatchbookProvider value={snapshot}>
+        <ColorTable
+          filter="color.bg.*"
+          variants={{ hover: 'h', disabled: 'd', hoverDark: 'h-dark' }}
+        />
+      </SwatchbookProvider>,
+    );
+
+    const byPath = new Map<string, string | null>();
+    for (const row of screen.getAllByTestId('color-table-row')) {
+      const path = row.getAttribute('data-path') ?? '';
+      const pill = row.querySelector('[data-testid="color-table-variant"]');
+      byPath.set(path, pill?.textContent ?? null);
+    }
+
+    expect(byPath.get('color.bg.hi')).toBeNull();
+    expect(byPath.get('color.bg.hi-h')).toBe('hover');
+    expect(byPath.get('color.bg.hi-d')).toBe('disabled');
+    expect(byPath.get('color.bg.hi-h-dark')).toBe('hoverDark');
+  });
+
+  it('ignores variants that would match characters inside a segment (neutral-900 ≠ suffix 0)', () => {
+    render(
+      <SwatchbookProvider value={makeSnapshot()}>
+        <ColorTable filter="color.palette.*" variants={{ zero: '0' }} />
+      </SwatchbookProvider>,
+    );
+    const pills = screen.queryAllByTestId('color-table-variant');
+    expect(pills.length).toBe(0);
+  });
+
+  it('renders no pills when the variants prop is omitted', () => {
+    render(
+      <SwatchbookProvider value={makeSnapshot()}>
+        <ColorTable />
+      </SwatchbookProvider>,
+    );
+    expect(screen.queryAllByTestId('color-table-variant').length).toBe(0);
+  });
+
   it('clicking a copy button does not bubble into the row click', () => {
     const picks: string[] = [];
     render(

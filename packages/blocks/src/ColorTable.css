@@ -73,6 +73,25 @@
   white-space: nowrap;
 }
 
+.sb-color-table__path-text {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.sb-color-table__variant-pill {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: var(--swatchbook-surface-muted, rgba(128, 128, 128, 0.15));
+  color: var(--swatchbook-text-muted, CanvasText);
+  vertical-align: middle;
+}
+
 .sb-color-table__swatch-cell {
   width: 32px;
 }
