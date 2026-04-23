@@ -3,14 +3,15 @@ import cx from 'clsx';
 import type { ReactElement } from 'react';
 import { Fragment, useCallback, useMemo, useState } from 'react';
 import './ColorTable.css';
-import { formatColor, type NormalizedColor } from '#/format-color.ts';
+import { useColorFormat } from '#/contexts.ts';
+import { type ColorFormat, formatColor, type NormalizedColor } from '#/format-color.ts';
 import { CopyButton } from '#/internal/CopyButton.tsx';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
 
 const BASE_LABEL = 'base';
-const COLUMN_COUNT = 8;
+const COLUMN_COUNT = 6;
 
 export interface ColorTableProps {
   /**
@@ -68,10 +69,13 @@ interface Variant {
   label: string;
   path: string;
   cssVar: string;
+  /** The display value in the currently-active color format. */
+  value: string;
+  outOfGamut: boolean;
+  /** Hex / HSL / OKLCH breakdown — retained for the expanded sub-table. */
   hex: string;
   hsl: string;
   oklch: string;
-  hexOutOfGamut: boolean;
   description?: string;
   aliasOf?: string;
   aliasChain?: readonly string[];
@@ -93,6 +97,7 @@ export function ColorTable({
   variants,
 }: ColorTableProps): ReactElement {
   const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const colorFormat = useColorFormat();
   const [query, setQuery] = useState('');
   const [selectedByBase, setSelectedByBase] = useState<Record<string, string>>({});
   const [expandedByBase, setExpandedByBase] = useState<ReadonlySet<string>>(() => new Set());
@@ -112,15 +117,17 @@ export function ColorTable({
       const hex = formatColor(raw, 'hex');
       const hsl = formatColor(raw, 'hsl');
       const oklch = formatColor(raw, 'oklch');
+      const active = pickActiveFormat(raw, colorFormat, hex, hsl, oklch);
       const match = matchVariant(path, defs.matchOrder);
       const variant: Variant = {
         label: match?.label ?? BASE_LABEL,
         path,
         cssVar: makeCssVar(path, cssVarPrefix),
+        value: active.value,
+        outOfGamut: active.outOfGamut,
         hex: hex.value,
         hsl: hsl.value,
         oklch: oklch.value,
-        hexOutOfGamut: hex.outOfGamut,
         ...(token.$description !== undefined && { description: token.$description }),
         ...(token.aliasOf !== undefined && { aliasOf: token.aliasOf }),
         ...(token.aliasChain !== undefined && { aliasChain: token.aliasChain }),
@@ -134,11 +141,11 @@ export function ColorTable({
     const out: Group[] = [];
     for (const { base, variants: vs } of groupMap.values()) {
       vs.sort((a, b) => orderIndex(a.label, defs) - orderIndex(b.label, defs));
-      const searchText = vs.map((v) => `${v.path} ${v.hex} ${v.hsl} ${v.oklch}`).join(' ');
+      const searchText = vs.map((v) => `${v.path} ${v.value}`).join(' ');
       out.push({ base, variants: vs, searchText });
     }
     return out;
-  }, [resolved, filter, cssVarPrefix, sortBy, sortDir, defs]);
+  }, [resolved, filter, cssVarPrefix, sortBy, sortDir, defs, colorFormat]);
 
   const visibleGroups = useMemo(() => {
     if (!searchable || query.trim() === '') return groups;
@@ -201,9 +208,7 @@ export function ColorTable({
               <span className="sb-color-table__sr-only">Swatch</span>
             </th>
             <th className="sb-color-table__th sb-color-table__th--path">Name</th>
-            <th className="sb-color-table__th">HEX</th>
-            <th className="sb-color-table__th">HSL</th>
-            <th className="sb-color-table__th">OKLCH</th>
+            <th className="sb-color-table__th">Value</th>
             <th className="sb-color-table__th">CSS var</th>
             <th className="sb-color-table__th">Alias</th>
             <th className="sb-color-table__th sb-color-table__th--expand">
@@ -321,10 +326,10 @@ function GroupRow({
             </span>
           )}
         </td>
-        <ValueCell value={active.hex} label={`Copy HEX ${active.hex}`}>
-          {active.hexOutOfGamut && (
+        <ValueCell value={active.value} label={`Copy value ${active.value}`}>
+          {active.outOfGamut && (
             <span
-              title="Out of sRGB gamut"
+              title="Out of sRGB gamut for this format"
               aria-label="out of gamut"
               className="sb-color-table__gamut-warn"
             >
@@ -332,8 +337,6 @@ function GroupRow({
             </span>
           )}
         </ValueCell>
-        <ValueCell value={active.hsl} label={`Copy HSL ${active.hsl}`} />
-        <ValueCell value={active.oklch} label={`Copy OKLCH ${active.oklch}`} />
         <ValueCell value={active.cssVar} label={`Copy CSS var ${active.cssVar}`} />
         <td className="sb-color-table__td sb-color-table__alias">
           {active.aliasOf ? (
@@ -447,6 +450,36 @@ function ValueCell({
       </span>
     </td>
   );
+}
+
+type FormatColorResult = ReturnType<typeof formatColor>;
+
+/**
+ * Pick the value + gamut flag to display in the single Value column based
+ * on the active color-format context. We pre-compute hex/hsl/oklch for the
+ * expanded sub-table regardless; the extras (`rgb`, `raw`) take a fresh
+ * `formatColor` pass. Keeps the hot path fast while staying honest about
+ * out-of-gamut warnings per-format.
+ */
+function pickActiveFormat(
+  raw: NormalizedColor,
+  colorFormat: ColorFormat,
+  hex: FormatColorResult,
+  hsl: FormatColorResult,
+  oklch: FormatColorResult,
+): { value: string; outOfGamut: boolean } {
+  switch (colorFormat) {
+    case 'hex':
+      return { value: hex.value, outOfGamut: hex.outOfGamut };
+    case 'hsl':
+      return { value: hsl.value, outOfGamut: hsl.outOfGamut };
+    case 'oklch':
+      return { value: oklch.value, outOfGamut: oklch.outOfGamut };
+    default: {
+      const extra = formatColor(raw, colorFormat);
+      return { value: extra.value, outOfGamut: extra.outOfGamut };
+    }
+  }
 }
 
 interface VariantEntry {

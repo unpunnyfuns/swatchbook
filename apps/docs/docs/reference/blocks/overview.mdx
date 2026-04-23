@@ -69,9 +69,9 @@ Swatch grid grouped by dot-path prefix. `groupBy` is auto-derived from the filte
 <ColorTable filter="color.*" />
 ```
 
-Tabular, color-only companion to `TokenTable`. One row per `$type: color` token with swatch, name, HEX, HSL, OKLCH, CSS var, and alias-target columns side-by-side — independent of the global color-format toggle, because this block's reason for existing is density. Each value cell has a hover-revealed copy-to-clipboard button. Fuzzy search across path + any format value.
+Tabular, color-only companion to `TokenTable`. One row per `$type: color` token with swatch, name, value (in the active color format from the toolbar toggle), CSS var, and alias-target columns. Each value cell has a hover-revealed copy-to-clipboard button. Fuzzy search across path + value.
 
-Clicking a row expands it inline — the detail panel surfaces `$description`, the token's alias chain, and (for grouped variants) a sub-table comparing every variant's values. No separate drawer.
+Clicking a row expands it inline — the detail panel surfaces `$description`, the token's alias chain, and (for grouped variants) a sub-table comparing every variant's HEX / HSL / OKLCH at once. That side-by-side comparison is the one place per-format density earns its weight; the collapsed row only shows the format the user already picked.
 
 **Variant grouping** — pass a `variants` map to collapse sibling tokens that share a base path into a single row with a pill selector. Clicking a pill swaps the displayed values to that variant:
 

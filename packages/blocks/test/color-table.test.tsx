@@ -60,7 +60,7 @@ describe('ColorTable — base rendering', () => {
     ]);
   });
 
-  it('shows HEX, HSL, OKLCH, CSS var, and alias columns per row', () => {
+  it('shows the active-format value, CSS var, and alias columns per row', () => {
     render(
       <SwatchbookProvider value={makeSnapshot()}>
         <ColorTable filter="color.text.default" />
@@ -68,11 +68,13 @@ describe('ColorTable — base rendering', () => {
     );
 
     const row = screen.getByTestId('color-table-row');
+    // Default color-format context is 'hex' — so the single value column is the hex.
     expect(within(row).getByText('#111111')).toBeDefined();
     expect(within(row).getByText(/var\(--sb-color-text-default\)/)).toBeDefined();
     expect(within(row).getByText('color.palette.neutral.900')).toBeDefined();
-    expect(within(row).queryByLabelText(/Copy HSL/)).not.toBeNull();
-    expect(within(row).queryByLabelText(/Copy OKLCH/)).not.toBeNull();
+    // Per-format HSL / OKLCH copy buttons shouldn't exist on the collapsed row.
+    expect(within(row).queryByLabelText(/Copy HSL/)).toBeNull();
+    expect(within(row).queryByLabelText(/Copy OKLCH/)).toBeNull();
   });
 
   it('renders an em-dash in the alias column for non-aliased tokens', () => {
@@ -127,7 +129,7 @@ describe('ColorTable — base rendering', () => {
         <ColorTable onSelect={(p) => picks.push(p)} filter="color.surface.*" />
       </SwatchbookProvider>,
     );
-    const copy = screen.getAllByLabelText(/Copy HEX/)[0];
+    const copy = screen.getAllByLabelText(/Copy value/)[0];
     copy?.click();
     expect(picks.length).toBe(0);
   });
