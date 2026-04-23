@@ -2,6 +2,7 @@ import { makeCSSVar } from '@terrazzo/token-tools/css';
 import { useEffect } from 'react';
 import type { VirtualTokenListingShape } from '#/contexts.ts';
 import { useActiveAxes, useActiveTheme, useOptionalSwatchbookData } from '#/contexts.ts';
+import { type ColorFormat, formatColor, type FormatColorResult } from '#/format-color.ts';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
 import { useTokenSnapshot } from '#/internal/channel-tokens.ts';
 import type {
@@ -178,6 +179,33 @@ export function resolveCssVar(path: string, project: ProjectData): string {
   const listed = project.listing[path]?.names?.['css'];
   if (listed) return `var(${listed})`;
   return makeCssVar(path, project.cssVarPrefix);
+}
+
+/**
+ * Resolve a color value's display string + gamut flag, preferring the
+ * listing's `previewValue` when the user's active color-format matches
+ * plugin-css's output (hex). For any other format we fall back to
+ * `formatColor` so the toolbar's inspection modes (rgb / hsl / oklch /
+ * raw) keep working — the listing has only one canonical format.
+ *
+ * Pass `path === undefined` when resolving a sub-color inside a composite
+ * (shadow / border / gradient stop): composites' `previewValue` covers
+ * the whole token's rendering, not the individual channel, so there's no
+ * listing entry to key against.
+ */
+export function resolveColorValue(
+  path: string | undefined,
+  raw: unknown,
+  colorFormat: ColorFormat,
+  project: ProjectData,
+): FormatColorResult {
+  if (path !== undefined && colorFormat === 'hex') {
+    const listed = project.listing[path]?.previewValue;
+    if (typeof listed === 'string') {
+      return { value: listed, outOfGamut: false };
+    }
+  }
+  return formatColor(raw, colorFormat);
 }
 
 /**

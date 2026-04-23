@@ -5,7 +5,7 @@ import { DimensionBar, type DimensionKind } from '#/dimension-scale/DimensionBar
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
-import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
+import { globMatch, resolveCssVar, useProject } from '#/internal/use-project.ts';
 
 export type { DimensionKind };
 
@@ -68,7 +68,8 @@ export function DimensionScale({
   sortBy = 'value',
   sortDir = 'asc',
 }: DimensionScaleProps): ReactElement {
-  const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const project = useProject();
+  const { resolved, activeTheme, cssVarPrefix } = project;
 
   const rows = useMemo<Row[]>(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
@@ -79,13 +80,13 @@ export function DimensionScale({
       const pxValue = toPixels(token.$value);
       return {
         path,
-        cssVar: makeCssVar(path, cssVarPrefix),
+        cssVar: resolveCssVar(path, project),
         displayValue: formatTokenValue(token.$value, token.$type, 'raw'),
         pxValue,
         capped: Number.isFinite(pxValue) && pxValue > MAX_RENDER_PX,
       };
     });
-  }, [resolved, filter, cssVarPrefix, sortBy, sortDir]);
+  }, [resolved, filter, project, sortBy, sortDir]);
 
   const captionText =
     caption ??

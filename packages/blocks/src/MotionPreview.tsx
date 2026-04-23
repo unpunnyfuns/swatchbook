@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import './MotionPreview.css';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
-import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
+import { globMatch, resolveCssVar, useProject } from '#/internal/use-project.ts';
 import {
   MotionSample,
   type MotionSpeed,
@@ -45,7 +45,8 @@ function formatSpec(row: Row): string {
 }
 
 export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactElement {
-  const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const project = useProject();
+  const { resolved, activeTheme, cssVarPrefix } = project;
   const [speed, setSpeed] = useState<MotionSpeed>(1);
   const [run, setRun] = useState(0);
   const reducedMotion = usePrefersReducedMotion();
@@ -63,7 +64,7 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
       if (!spec) continue;
       collected.push({
         path,
-        cssVar: makeCssVar(path, cssVarPrefix),
+        cssVar: resolveCssVar(path, project),
         durationMs: spec.durationMs,
         easing: spec.easing,
         kind,
@@ -74,7 +75,7 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
       return a.path.localeCompare(b.path, undefined, { numeric: true });
     });
     return collected;
-  }, [resolved, filter, cssVarPrefix]);
+  }, [resolved, filter, project]);
 
   const captionText =
     caption ??

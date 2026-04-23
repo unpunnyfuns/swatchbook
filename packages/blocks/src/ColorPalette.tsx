@@ -2,10 +2,9 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './ColorPalette.css';
 import { useColorFormat } from '#/contexts.ts';
-import { formatColor } from '#/format-color.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
-import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
+import { globMatch, resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface ColorPaletteProps {
   /**
@@ -70,7 +69,8 @@ export function ColorPalette({
   sortBy = 'path',
   sortDir = 'asc',
 }: ColorPaletteProps): ReactElement {
-  const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const project = useProject();
+  const { resolved, activeTheme, cssVarPrefix } = project;
   const colorFormat = useColorFormat();
 
   const groups = useMemo(() => {
@@ -90,11 +90,11 @@ export function ColorPalette({
       const groupKey = segments.slice(0, effectiveGroupBy).join('.');
       const leaf = segments.slice(effectiveGroupBy).join('.') || segments.at(-1) || path;
       const list = bucket.get(groupKey) ?? [];
-      const formatted = formatColor(token.$value, colorFormat);
+      const formatted = resolveColorValue(path, token.$value, colorFormat, project);
       list.push({
         path,
         leaf,
-        cssVar: makeCssVar(path, cssVarPrefix),
+        cssVar: resolveCssVar(path, project),
         value: formatted.value,
         outOfGamut: formatted.outOfGamut,
       });
@@ -104,7 +104,7 @@ export function ColorPalette({
     return [...bucket.entries()].toSorted(([a], [b]) =>
       a.localeCompare(b, undefined, { numeric: true }),
     );
-  }, [resolved, filter, groupBy, cssVarPrefix, colorFormat, sortBy, sortDir]);
+  }, [resolved, filter, groupBy, project, colorFormat, sortBy, sortDir]);
 
   const totalCount = groups.reduce((acc, [, swatches]) => acc + swatches.length, 0);
   const captionText =

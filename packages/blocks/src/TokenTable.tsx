@@ -4,13 +4,12 @@ import type { ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import './TokenTable.css';
 import { useColorFormat } from '#/contexts.ts';
-import { formatColor } from '#/format-color.ts';
 import { CopyButton } from '#/internal/CopyButton.tsx';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
-import { globMatch, makeCssVar, useProject } from '#/internal/use-project.ts';
+import { globMatch, resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface TokenTableProps {
   /**
@@ -60,7 +59,8 @@ export function TokenTable({
   searchable = true,
   onSelect,
 }: TokenTableProps): ReactElement {
-  const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const project = useProject();
+  const { resolved, activeTheme, cssVarPrefix } = project;
   const colorFormat = useColorFormat();
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -74,17 +74,17 @@ export function TokenTable({
     const entries = sortTokens(filtered, { by: sortBy, dir: sortDir });
     return entries.map(([path, token]) => {
       const isColor = token.$type === 'color';
-      const color = isColor ? formatColor(token.$value, colorFormat) : null;
+      const color = isColor ? resolveColorValue(path, token.$value, colorFormat, project) : null;
       return {
         path,
         type: token.$type ?? '',
         value: formatTokenValue(token.$value, token.$type, colorFormat),
         outOfGamut: color?.outOfGamut ?? false,
-        cssVar: makeCssVar(path, cssVarPrefix),
+        cssVar: resolveCssVar(path, project),
         isColor,
       };
     });
-  }, [resolved, filter, type, cssVarPrefix, colorFormat, sortBy, sortDir]);
+  }, [resolved, filter, type, project, colorFormat, sortBy, sortDir]);
 
   const visibleRows = useMemo(() => {
     if (!searchable || query.trim() === '') return rows;

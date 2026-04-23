@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { BORDER_STRONG } from '#/internal/styles.tsx';
-import { makeCssVar, useProject } from '#/internal/use-project.ts';
+import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 
 export type DimensionKind = 'length' | 'radius' | 'size';
 
@@ -61,8 +61,9 @@ function toPixels(raw: unknown): number {
 }
 
 export function DimensionBar({ path, kind = 'length' }: DimensionBarProps): ReactElement {
-  const { resolved, cssVarPrefix } = useProject();
-  const cssVar = makeCssVar(path, cssVarPrefix);
+  const project = useProject();
+  const { resolved } = project;
+  const cssVar = resolveCssVar(path, project);
   const token = resolved[path];
   const pxValue = toPixels(token?.$value);
   const capped = Number.isFinite(pxValue) && pxValue > MAX_RENDER_PX;
