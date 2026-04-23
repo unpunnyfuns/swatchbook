@@ -155,6 +155,33 @@ describe('ColorTable', () => {
     expect(byPath.get('color.bg.hi-h-dark')).toBe('hoverDark');
   });
 
+  it('matches DTCG-idiomatic dot-segment variants (hi.disabled)', () => {
+    const snapshot = makeSnapshot();
+    snapshot.themesResolved['Light'] = {
+      ...snapshot.themesResolved['Light'],
+      'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
+      'color.bg.hi.disabled': { $type: 'color', $value: { hex: '#222222' } },
+      'color.bg.hi.hover': { $type: 'color', $value: { hex: '#333333' } },
+    };
+
+    render(
+      <SwatchbookProvider value={snapshot}>
+        <ColorTable filter="color.bg.*" variants={{ hover: 'hover', disabled: 'disabled' }} />
+      </SwatchbookProvider>,
+    );
+
+    const byPath = new Map<string, string | null>();
+    for (const row of screen.getAllByTestId('color-table-row')) {
+      const path = row.getAttribute('data-path') ?? '';
+      const pill = row.querySelector('[data-testid="color-table-variant"]');
+      byPath.set(path, pill?.textContent ?? null);
+    }
+
+    expect(byPath.get('color.bg.hi')).toBeNull();
+    expect(byPath.get('color.bg.hi.disabled')).toBe('disabled');
+    expect(byPath.get('color.bg.hi.hover')).toBe('hover');
+  });
+
   it('ignores variants that would match characters inside a segment (neutral-900 ≠ suffix 0)', () => {
     render(
       <SwatchbookProvider value={makeSnapshot()}>

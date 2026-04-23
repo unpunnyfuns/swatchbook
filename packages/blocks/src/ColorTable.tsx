@@ -40,13 +40,20 @@ export interface ColorTableProps {
    */
   onSelect?(path: string): void;
   /**
-   * Map from a display label to a path-suffix matched against the final
-   * hyphen segment of each leaf. A row whose leaf ends in `-<suffix>` gets
-   * the matching label rendered as a pill after the token name.
+   * Map from a display label to a suffix matched against each token's
+   * trailing path segment. A row whose leaf matches one of the suffixes
+   * gets the corresponding label rendered as a pill after the token name.
    *
-   * Longest-suffix-wins: given `{ hover: 'h', hoverDark: 'h-dark' }`, a path
-   * ending in `-h-dark` picks `hoverDark`, not `hover`. Tokens that don't
-   * match any suffix render with no pill — configuration is purely additive.
+   * Accepts both DTCG-idiomatic and Backmarket-style conventions:
+   * - **Dot segment** (`color.bg.hi.disabled`): the last dot-segment equals
+   *   the suffix exactly (`suffix === 'disabled'`).
+   * - **Hyphen tail** (`color.bg.hi-d`): the last dot-segment ends in
+   *   `-<suffix>` (`suffix === 'd'`).
+   *
+   * Longest-suffix-wins: `{ hover: 'h', hoverDark: 'h-dark' }` picks
+   * `hoverDark` for a path ending in `-h-dark`. The hyphen-tail form
+   * requires an actual hyphen boundary — suffix `0` does not match
+   * `neutral-900`. Tokens that don't match any suffix render with no pill.
    *
    * Empty map (default) → no pills; the block behaves exactly as before.
    */
@@ -295,17 +302,19 @@ function buildVariantIndex(variants: Record<string, string> | undefined): readon
 
 /**
  * Resolve the variant label for a token path, if any. The leaf (last
- * dot-segment) must end in `-<suffix>` — the leading hyphen is required, so
- * suffix `h` matches `hi-h` but not `neutral-900` (by character), and does
- * not match `highlight` (where `h` isn't preceded by a boundary). Entries
- * are tried longest-first, so `h-dark` wins over `dark` when both are
- * configured and the path ends in `-h-dark`.
+ * dot-segment) must either equal the suffix outright (`hi.disabled`
+ * matches suffix `disabled`) or end in `-<suffix>` (`hi-d` matches `d`).
+ * The leading hyphen is required for the tail form, so suffix `h` matches
+ * `hi-h` but not `highlight` or `neutral-900` — the whole trailing token
+ * has to be the suffix, not a character within it. Entries are tried
+ * longest-first, so `h-dark` wins over `dark` when both are configured
+ * and the path ends in `-h-dark`.
  */
 function matchVariant(path: string, variantIndex: readonly VariantEntry[]): string | undefined {
   if (variantIndex.length === 0) return undefined;
   const leaf = path.split('.').at(-1) ?? path;
   for (const entry of variantIndex) {
-    if (leaf.endsWith(`-${entry.suffix}`)) return entry.label;
+    if (leaf === entry.suffix || leaf.endsWith(`-${entry.suffix}`)) return entry.label;
   }
   return undefined;
 }
