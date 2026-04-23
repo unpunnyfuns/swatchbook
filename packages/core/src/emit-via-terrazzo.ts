@@ -92,11 +92,18 @@ export async function emitViaTerrazzo(
   const prefix = project.config.cssVarPrefix ?? '';
   const selection = resolveSelection(project, options.selection ?? 'themes');
 
+  // Merge per-call options over the project-wide config. Per-call wins
+  // because integrations (Tailwind, css-in-js) may want to override the
+  // consumer's global plugin-css shape for their specific emission.
+  const mergedCssOptions = { ...project.config.cssOptions, ...options.cssOptions };
+  const projectPlugins = project.config.terrazzoPlugins ?? [];
+  const extraPlugins = options.plugins ?? [];
+
   const config = defineConfig(
     {
       plugins: [
         cssPlugin({
-          ...options.cssOptions,
+          ...mergedCssOptions,
           variableName: (token) =>
             prefix ? makeCSSVar(String(token.id), { prefix }) : makeCSSVar(String(token.id)),
           permutations: selection.map((entry) => ({
@@ -105,7 +112,8 @@ export async function emitViaTerrazzo(
               `${compoundSelector(entry.input, project.axes, prefix)} {\n${css}\n}\n`,
           })),
         }),
-        ...(options.plugins ?? []),
+        ...projectPlugins,
+        ...extraPlugins,
       ],
     },
     { logger, cwd: cwdURL },

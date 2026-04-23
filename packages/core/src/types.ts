@@ -1,5 +1,7 @@
 import type { InputSourceWithDocument } from '@terrazzo/json-schema-tools';
-import type { Resolver, TokenNormalized } from '@terrazzo/parser';
+import type { Plugin, Resolver, TokenNormalized } from '@terrazzo/parser';
+import type { CSSPluginOptions } from '@terrazzo/plugin-css';
+import type { TokenListingPluginOptions } from '@terrazzo/plugin-token-listing';
 import type { TokenListingByPath } from '#/token-listing.ts';
 
 export type TokenMap = Record<string, TokenNormalized>;
@@ -109,6 +111,40 @@ export interface Config {
    * fall back to the `Canvas` / `CanvasText` system colors.
    */
   chrome?: Record<string, string>;
+  /**
+   * Options forwarded to the `@terrazzo/plugin-css` instance swatchbook
+   * runs internally (for the stylesheet it emits and for the Token
+   * Listing's `names.css` derivation). Line this up with the consumer's
+   * own `plugin-css` options — `legacyHex`, `transform`, `colorDepth`,
+   * and similar — so docs-side names and values match what the
+   * consumer's production build emits.
+   *
+   * The `variableName` and `permutations` fields are managed internally
+   * and cannot be overridden — swatchbook's axis composition depends on
+   * them. Everything else is passed through.
+   */
+  cssOptions?: Omit<CSSPluginOptions, 'variableName' | 'permutations'>;
+  /**
+   * Options forwarded to `@terrazzo/plugin-token-listing`. Use
+   * `platforms` to register additional platforms beyond `css` (e.g.
+   * `swift`, `android`, `figma`) — each entry's `name` is a reference
+   * to a loaded plugin. For the reference to resolve, that plugin has
+   * to be loaded into the build, which is what `terrazzoPlugins` below
+   * is for.
+   *
+   * `filename` is managed internally (the listing is captured in
+   * memory, not written to disk).
+   */
+  listingOptions?: Omit<TokenListingPluginOptions, 'filename'>;
+  /**
+   * Additional Terrazzo plugins to load alongside swatchbook's own
+   * `plugin-css` + `plugin-token-listing`. The listing can reference
+   * any of these by name in its `platforms` map to derive per-platform
+   * identifiers. Plugins whose outputs swatchbook doesn't consume are
+   * simply ignored — they run, their files land in the in-memory
+   * output set, nothing else happens.
+   */
+  terrazzoPlugins?: readonly Plugin[];
 }
 
 export type DiagnosticSeverity = 'error' | 'warn' | 'info';

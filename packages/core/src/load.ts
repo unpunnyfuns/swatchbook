@@ -89,6 +89,11 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
           normalized.parserInput,
           cwd,
           configWithDefaults.cssVarPrefix ?? '',
+          {
+            ...(config.cssOptions !== undefined && { cssOptions: config.cssOptions }),
+            ...(config.listingOptions !== undefined && { listingOptions: config.listingOptions }),
+            ...(config.terrazzoPlugins !== undefined && { extraPlugins: config.terrazzoPlugins }),
+          },
         )
       : {};
 

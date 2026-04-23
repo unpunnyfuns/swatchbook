@@ -1,7 +1,10 @@
 import { pathToFileURL } from 'node:url';
-import { build, defineConfig, Logger } from '@terrazzo/parser';
-import cssPlugin from '@terrazzo/plugin-css';
-import tokenListingPlugin, { type ListedToken } from '@terrazzo/plugin-token-listing';
+import { build, defineConfig, Logger, type Plugin } from '@terrazzo/parser';
+import cssPlugin, { type CSSPluginOptions } from '@terrazzo/plugin-css';
+import tokenListingPlugin, {
+  type ListedToken,
+  type TokenListingPluginOptions,
+} from '@terrazzo/plugin-token-listing';
 import { makeCSSVar } from '@terrazzo/token-tools/css';
 import type { ParserInput } from '#/types.ts';
 
@@ -31,29 +34,47 @@ export type TokenListingByPath = Record<string, ListedToken>;
  * error, plugin crash). The caller treats listing data as optional
  * enrichment; losing it shouldn't block `loadProject`.
  */
+export interface ComputeTokenListingOptions {
+  /** Extra options forwarded to the internal `plugin-css` instance. */
+  cssOptions?: Omit<CSSPluginOptions, 'variableName' | 'permutations'>;
+  /** Extra options forwarded to the internal `plugin-token-listing` instance. */
+  listingOptions?: Omit<TokenListingPluginOptions, 'filename'>;
+  /** Extra plugins loaded into the build — referenced by `listingOptions.platforms`. */
+  extraPlugins?: readonly Plugin[];
+}
+
 export async function computeTokenListing(
   parserInput: ParserInput,
   cwd: string,
   prefix: string,
+  options: ComputeTokenListingOptions = {},
 ): Promise<TokenListingByPath> {
   try {
     const { tokens, sources, resolver } = parserInput;
     const logger = new Logger({ level: 'warn' });
     const cwdURL = pathToFileURL(`${cwd}/`);
 
+    // User-supplied `platforms` overrides the default CSS entry when
+    // present — otherwise the built-in `css` platform is the only one
+    // registered, matching the earlier default behavior.
+    const platforms = options.listingOptions?.platforms ?? {
+      css: { name: '@terrazzo/plugin-css', description: 'CSS custom properties' },
+    };
+
     const config = defineConfig(
       {
         plugins: [
           cssPlugin({
+            ...options.cssOptions,
             filename: 'tokens.css',
             variableName: (token) =>
               prefix ? makeCSSVar(String(token.id), { prefix }) : makeCSSVar(String(token.id)),
           }),
+          ...(options.extraPlugins ?? []),
           tokenListingPlugin({
+            ...options.listingOptions,
             filename: 'tokens.listing.json',
-            platforms: {
-              css: { name: '@terrazzo/plugin-css', description: 'CSS custom properties' },
-            },
+            platforms,
           }),
         ],
       },
