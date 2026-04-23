@@ -1,0 +1,75 @@
+---
+id: token-pipeline
+title: The token pipeline
+sidebar_position: 6
+---
+
+# The token pipeline
+
+## "Do I need a separate build step for the tokens?"
+
+No. That's the short answer. Swatchbook emits the CSS variables *inside Storybook*, on demand, without a separate compile step or generated files in your repo.
+
+The long answer is this page. It matters because most "design tokens in Storybook" setups ask you to generate CSS as a prebuild step, commit the output, keep the generator config in sync with your DTCG source, and rebuild whenever a token changes. That's the usual tax for tokens in front-end tooling.
+
+Swatchbook skips that tax. Here's the mechanism.
+
+## A virtual module, not a build artifact
+
+The addon ships a Vite plugin that publishes a **virtual ESM module** named `virtual:swatchbook/tokens`. The Storybook preview imports from it like any other module:
+
+```ts
+import { themesResolved, axes, diagnostics, css } from 'virtual:swatchbook/tokens';
+```
+
+"Virtual" means there's no file on disk. Vite asks the plugin to materialize the module on each preview build, and the plugin does this by calling `loadProject(config, cwd)` from `@unpunnyfuns/swatchbook-core` and serializing the result into ESM exports:
+
+```
+swatchbook.config.ts               ← your config
+       ↓
+ Vite plugin buildStart
+       ↓
+ loadProject(config, cwd)          ← parses DTCG, resolves axes, emits CSS
+       ↓
+ Project snapshot
+       ↓
+ Vite plugin load('virtual:swatchbook/tokens')
+       ↓
+ export const themesResolved = { … }
+ export const axes = [ … ]
+ export const css = '…'            ← preview decorator injects as <style>
+```
+
+Nothing is written to disk. No `tokens.generated.css` lands in your repo. No `predev` script fires. You edit your config or a token file, Vite notices, the plugin re-runs `loadProject`, and the preview sees fresh values over HMR.
+
+## What HMR looks like
+
+The Vite plugin watches every file your config loaded (the resolver, every `$ref` target, every token file the globs matched) and triggers a reload on any change. Reload here is cheap — it's one `loadProject` call and one module invalidation, not a Vite full-page reload — so the preview re-renders in place without losing toolbar state, story args, or scroll position.
+
+A short-form HMR event rides Storybook's channel to push the fresh snapshot into running blocks. The token graph updates in under a second on a typical save; for a feel for it, edit a token while the [live Storybook](pathname:///storybook/) is open.
+
+See [consuming the active theme](../guides/consuming-the-active-theme.mdx) for how individual stories react to axis changes, which is a related but distinct plumbing.
+
+## Why this works for Storybook but isn't a production theming API
+
+The virtual module lives inside Vite's module graph. Vite builds your Storybook preview; anything the preview imports can resolve the virtual name. But your consumer apps — Next.js, a Vite SPA, a Remix app — don't see it. That's intentional.
+
+For **Storybook**, the virtual module is the tokens' runtime home: the preview reads CSS from it, the MDX doc blocks read the resolved graph from it, the toolbar reads the axes from it. No compile step needed.
+
+For **production**, you want CSS variables baked into your framework's asset pipeline the normal way. Run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources — swatchbook is built on Terrazzo's parser, and Terrazzo's ecosystem of platform plugins (`plugin-css`, `plugin-js`, `plugin-tailwind`, `plugin-swift`, `plugin-sass`, …) covers every downstream target.
+
+## Where the same no-compile-step property holds
+
+- **Storybook preview** — the primary case (described above).
+- **Docs site blocks outside Storybook** — the blocks package works outside Storybook too, given a `ProjectSnapshot` through `SwatchbookProvider`. This docs site you're reading does exactly that — a small build step computes the snapshot JSON once and ships it as a regular import. That's not the virtual module path, but it keeps the no-generated-CSS-file property: there's one `snapshot.json` artifact that's part of the docs build, not a checked-in CSS file.
+- **MCP server** — `@unpunnyfuns/swatchbook-mcp` loads the project directly via `loadProject` at startup, exposes twelve MCP tools against the in-memory graph, and watches the same source files for live-reload. No intermediate build step here either.
+
+## Sharp edges worth knowing
+
+- The virtual module is **addon-internal plumbing**. Its shape, export set, and event names can change between minor versions without a changeset entry. Consumers must not import from `virtual:swatchbook/tokens` directly — go through `SwatchbookProvider` + the exported hooks.
+- **Vite is required.** The addon bundles the plugin for Storybook's Vite integration. Webpack-based Storybook setups won't get the virtual module materialized; they'd fall back to a pre-built snapshot or switch to the Vite builder. Storybook 10's default is Vite, so this only bites older setups.
+- File-system edits flow through a **dir-level `fs.watch`** (not a file-level watcher) so atomic-save editors survive. This is invisible to consumers but shapes what kinds of filesystem operations reliably trigger a reload.
+
+## TL;DR
+
+Tokens reach the blocks through a Vite virtual module the addon publishes — no generated files, no separate build step, no config drift. Edit a token, see the preview repaint. For production CSS, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources.
