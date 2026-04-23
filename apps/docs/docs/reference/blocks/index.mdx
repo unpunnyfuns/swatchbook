@@ -23,9 +23,10 @@ Inside Storybook, register `@unpunnyfuns/swatchbook-addon` alongside these block
 ### Inside Storybook
 
 ```tsx
-import { ColorPalette, TokenTable, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
+import { ColorPalette, ColorTable, TokenTable, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
 
 <ColorPalette filter="color.*" />
+<ColorTable filter="color.*" />
 <TokenTable filter="size.*" type="dimension" />
 <TokenDetail path="color.accent.bg" />
 ```
@@ -55,7 +56,7 @@ export function TokenDocs() {
 
 Four groups by shape of use:
 
-- [**Overview blocks**](./overview) — survey many tokens at once. `TokenNavigator`, `TokenTable`, plus the per-type scales and palettes.
+- [**Overview blocks**](./overview) — survey many tokens at once. `TokenNavigator`, `TokenTable`, `ColorTable`, plus the per-type scales and palettes.
 - [**Inspector blocks**](./inspector) — single-token deep-dive. `TokenDetail` and its subparts.
 - [**Sample blocks**](./samples) — one-token visual atoms you can drop inline.
 - [**Utility blocks**](./utility) — `Diagnostics`.

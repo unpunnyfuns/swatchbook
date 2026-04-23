@@ -23,7 +23,7 @@ Most blocks in this group take:
 <TokenNavigator root="color" />
 ```
 
-Expandable tree of the token graph. Each interior group shows its child count; each leaf shows its `$type` pill plus an inline preview (color swatch, dimension bar, shadow / border / motion sample, or a formatted value). A search input at the top filters by path substring — matching leaves survive, groups on the way to them auto-expand. Clicking a leaf opens a slide-over with the full `<TokenDetail>`; pass `onSelect` to own the click follow-up instead.
+Expandable tree of the token graph. Each interior group shows its child count; each leaf shows its `$type` pill plus an inline preview (color swatch, dimension bar, shadow / border / motion sample, or a formatted value). A fuzzy-search input at the top filters leaves by path — case-insensitive, out-of-order terms, single-character typo tolerance. Matching leaves survive, groups on the way to them auto-expand. Clicking a leaf opens a slide-over with the full `<TokenDetail>`; pass `onSelect` to own the click follow-up instead.
 
 Props:
 
@@ -39,7 +39,7 @@ Props:
 <TokenTable type="color" />
 ```
 
-Compact two-column table: **Path** and **Value** (with inline type pill + color swatch). A search input at the top narrows rows by path, type, or value substring. Clicking a row opens the same slide-over `<TokenDetail>` the tree uses; pass `onSelect` to own the follow-up. Columns follow content with per-column `min-width` floors, so the table breathes in narrow containers.
+Compact two-column table: **Path** and **Value** (with inline type pill + color swatch). A fuzzy-search input at the top narrows rows by path, type, or value — case-insensitive, out-of-order terms, single-character typo tolerance. Each value cell has a hover-revealed copy-to-clipboard button. Clicking a row opens the same slide-over `<TokenDetail>` the tree uses; pass `onSelect` to own the follow-up. Columns follow content with per-column `min-width` floors, so the table breathes in narrow containers.
 
 Props:
 
@@ -62,6 +62,24 @@ Every block in this group scopes to one DTCG `$type`, filters / sorts, and rende
 ```
 
 Swatch grid grouped by dot-path prefix. `groupBy` is auto-derived from the filter's fixed-prefix depth but can be overridden. Default sort is `'path'`; `'value'` orders colors perceptually via oklch **L → C → H** so ramps read light → dark and warm → cool.
+
+### ColorTable
+
+```tsx
+<ColorTable filter="color.*" />
+```
+
+Tabular, color-only companion to `TokenTable`. One row per `$type: color` token with swatch, name, HEX, HSL, OKLCH, CSS var, and alias-target columns side-by-side — independent of the global color-format toggle, because this block's reason for existing is density. Each value cell has a hover-revealed copy-to-clipboard button. Fuzzy search across path + any format value; row click opens the same `<TokenDetail>` drawer `TokenTable` uses.
+
+Props:
+
+- `filter?: string` — path glob. Defaults to every `$type: color` token.
+- `caption?: string` — override the caption.
+- `sortBy?: 'path' | 'value' | 'none'` — default `'path'`. `'value'` orders perceptually (oklch L → C → H).
+- `sortDir?: 'asc' | 'desc'` — default `'asc'`.
+- `searchable?: boolean` — render a fuzzy-search input above the table. Defaults to `true`.
+- `onSelect?(path: string): void` — suppress the built-in drawer.
+- `variants?: Record<string, string>` — map from display label to trailing-segment suffix. Rows whose leaf ends in `-<suffix>` (hyphen tail) or whose last dot-segment equals `<suffix>` (DTCG-idiomatic) render the label as a pill after the name. Longest-suffix-wins, leading hyphen required for tails (`0` won't hit `neutral-900`). Example: `variants={{ hover: 'hover', disabled: 'disabled' }}` tags `color.bg.hi.disabled` and `color.bg.hi-disabled` identically.
 
 ### TypographyScale
 
