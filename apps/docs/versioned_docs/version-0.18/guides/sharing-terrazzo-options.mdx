@@ -1,0 +1,96 @@
+---
+id: sharing-terrazzo-options
+title: Sharing Terrazzo options
+sidebar_position: 5
+---
+
+# Sharing Terrazzo options with a production build
+
+If you run `@terrazzo/cli` in production alongside swatchbook's Storybook-time rendering, you want both pipelines to agree on the `plugin-css` options they consume — otherwise the hex values / CSS variable names / per-platform identifiers the docs show can drift from what actually ships.
+
+Swatchbook exposes three config props that forward into its internal Terrazzo build: [`cssOptions`](../reference/config#cssoptions-omitcsspluginoptions-variablename--permutations), [`listingOptions`](../reference/config#listingoptions-omittokenlistingpluginoptions-filename), and [`terrazzoPlugins`](../reference/config#terrazzoplugins-readonly-plugin). The idiomatic way to consume them is a single shared options module that both your `terrazzo.config.ts` and `swatchbook.config.ts` import.
+
+## The pattern
+
+```ts title="shared-terrazzo-options.ts"
+import cssPlugin from '@terrazzo/plugin-css';
+import swiftPlugin from '@terrazzo/plugin-swift';
+import type { CSSPluginOptions, TokenListingPluginOptions } from '@terrazzo/plugin-css';
+import type { Plugin } from '@terrazzo/parser';
+
+export const sharedCssOptions: CSSPluginOptions = {
+  legacyHex: true,
+  colorDepth: 24,
+  // transform: ..., etc.
+};
+
+export const sharedPlugins: readonly Plugin[] = [
+  swiftPlugin({ /* swift plugin options */ }),
+];
+
+export const sharedListingOptions: TokenListingPluginOptions = {
+  platforms: {
+    css:   { name: '@terrazzo/plugin-css' },
+    swift: { name: '@terrazzo/plugin-swift', description: 'UIColor' },
+  },
+};
+
+// Re-exported so terrazzo.config.ts can build plugin-css + plugin-swift with
+// the same option objects swatchbook.config.ts hands to swatchbook.
+export { cssPlugin, swiftPlugin };
+```
+
+```ts title="terrazzo.config.ts"
+import { defineConfig } from '@terrazzo/parser';
+import tokenListingPlugin from '@terrazzo/plugin-token-listing';
+import {
+  cssPlugin,
+  sharedCssOptions,
+  sharedListingOptions,
+  sharedPlugins,
+} from './shared-terrazzo-options';
+
+export default defineConfig({
+  tokens: 'tokens/**/*.json',
+  outDir: 'dist',
+  plugins: [
+    cssPlugin(sharedCssOptions),
+    ...sharedPlugins,
+    tokenListingPlugin(sharedListingOptions),
+  ],
+});
+```
+
+```ts title="swatchbook.config.ts"
+import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
+import {
+  sharedCssOptions,
+  sharedListingOptions,
+  sharedPlugins,
+} from './shared-terrazzo-options';
+
+export default defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  cssVarPrefix: 'ds',
+  cssOptions: sharedCssOptions,
+  listingOptions: sharedListingOptions,
+  terrazzoPlugins: sharedPlugins,
+});
+```
+
+Both configs now consume the same objects. Any change to `sharedCssOptions` (a new transform, a `colorDepth` flip, a `legacyHex` toggle) reaches the production CLI and the Storybook-time build together.
+
+## What alignment buys you
+
+- **CSS variable names.** `plugin-css`'s `variableName` policy is one source of truth. `listing[path].names.css` matches the variable name your production CSS emits — the swatches in `<TokenTable>` / `<ColorTable>` / `<TokenDetail>` reference the same var your consumers import.
+- **Preview values.** `listing[path].previewValue` is a plugin-css-computed CSS string — hex form honors `legacyHex`, channel precision honors `colorDepth`. Blocks that display values pick this up verbatim instead of running a parallel conversion.
+- **Per-platform identifiers.** `listing[path].names.swift` / `names.android` / etc. come from the plugin you loaded. A future column in `<ColorTable>` (or a block you write yourself) can render them directly — no duplication of the naming rule.
+
+## When you don't need this
+
+If you don't run `@terrazzo/cli` separately, leave all three props unset. Swatchbook loads `plugin-css` with defaults and `plugin-token-listing` with a single `css` platform — the rest of the block-display pipeline continues to work exactly as before. Drift isn't a concern when there's only one pipeline.
+
+## See also
+
+- [Config reference: `cssOptions` / `listingOptions` / `terrazzoPlugins`](../reference/config) — the prop-by-prop contract.
+- [`@terrazzo/plugin-token-listing` source](https://github.com/terrazzoapp/terrazzo/tree/main/packages/plugin-token-listing) — the listing format swatchbook consumes.

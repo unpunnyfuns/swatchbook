@@ -1,5 +1,25 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.18.0
+
+### Minor Changes
+
+- 9496c82: New config props on `defineSwatchbookConfig` for sharing Terrazzo plugin options with the internal build pipeline: `cssOptions`, `listingOptions`, and `terrazzoPlugins`. Consumers who run their own Terrazzo CLI in production can now align swatchbook's docs-side emission with whatever their production build produces — no more drift between the hex values / CSS variable names / per-platform identifiers the docs show and what actually ships.
+
+  - `cssOptions?: Omit<CSSPluginOptions, 'variableName' | 'permutations'>` forwards to the internal `plugin-css` instance. `legacyHex`, `colorDepth`, `transform`, and everything else plugin-css accepts flow through; `variableName` and `permutations` stay managed because swatchbook's axis composition depends on them.
+  - `listingOptions?: Omit<TokenListingPluginOptions, 'filename'>` forwards to the internal `plugin-token-listing`. Register platforms beyond `css` (swift, android, figma, custom name functions) and `listing[path].names.<platform>` populates for block consumption.
+  - `terrazzoPlugins?: readonly Plugin[]` adds extra Terrazzo plugins alongside swatchbook's internal two. Required when `listingOptions.platforms` references anything outside the built-in `css` entry — the referenced plugin has to be loaded in the build.
+
+  Consumers who don't run a separate Terrazzo build leave all three unset and nothing changes. The idiomatic share-across-configs pattern is a single file that exports the shared options and imports into both `terrazzo.config.ts` and `swatchbook.config.ts`.
+
+- 44483af: Adopt `@terrazzo/plugin-token-listing` as the authoritative source for per-token metadata. `loadProject` now runs the plugin alongside Terrazzo's build for resolver-backed projects and attaches a path-indexed `listing` map to `Project`. Each entry carries the plugin-css-emitted CSS variable name (`names.css`), a CSS-ready `previewValue`, the original aliased value, and `source.loc` pointing back to the authoring file + line.
+
+  Closes the drift risk Sidnioulz flagged: the block-display surface no longer reinvents naming or value-string generation where Terrazzo already has an opinion. `ColorTable` now reads its CSS var strings from the listing when available, falling back to the local Terrazzo-wrapping `makeCssVar` when a listing entry is missing (non-resolver projects, listing-plugin errors).
+
+  The snapshot flowing through the addon's virtual module and HMR channel includes the listing slice under a new `listing` field — consumers building blocks against `ProjectSnapshot` get the same data.
+
+  This is step 3 of the staged Terrazzo alignment. Step 1 (`makeCssVar` → Terrazzo) landed in the prior release; color value conversion and per-platform names (Swift/Android) are follow-ups that reuse the same listing pipeline.
+
 ## 0.17.0
 
 ## 0.16.0

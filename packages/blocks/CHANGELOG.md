@@ -1,5 +1,29 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.18.0
+
+### Minor Changes
+
+- 44483af: Adopt `@terrazzo/plugin-token-listing` as the authoritative source for per-token metadata. `loadProject` now runs the plugin alongside Terrazzo's build for resolver-backed projects and attaches a path-indexed `listing` map to `Project`. Each entry carries the plugin-css-emitted CSS variable name (`names.css`), a CSS-ready `previewValue`, the original aliased value, and `source.loc` pointing back to the authoring file + line.
+
+  Closes the drift risk Sidnioulz flagged: the block-display surface no longer reinvents naming or value-string generation where Terrazzo already has an opinion. `ColorTable` now reads its CSS var strings from the listing when available, falling back to the local Terrazzo-wrapping `makeCssVar` when a listing entry is missing (non-resolver projects, listing-plugin errors).
+
+  The snapshot flowing through the addon's virtual module and HMR channel includes the listing slice under a new `listing` field — consumers building blocks against `ProjectSnapshot` get the same data.
+
+  This is step 3 of the staged Terrazzo alignment. Step 1 (`makeCssVar` → Terrazzo) landed in the prior release; color value conversion and per-platform names (Swift/Android) are follow-ups that reuse the same listing pipeline.
+
+### Patch Changes
+
+- bc67608: Document the Terrazzo-alignment work that landed in 0.15–0.17: the three new `defineSwatchbookConfig` props (`cssOptions`, `listingOptions`, `terrazzoPlugins`) in the config reference, the `Project.listing` + `ProjectSnapshot.listing` surface in the core and hooks references, and a new guide page on the `shared-terrazzo-options.ts` pattern for consumers who run `@terrazzo/cli` alongside swatchbook.
+- 20909fa: Route the block-side `makeCssVar` through Terrazzo's `makeCSSVar` from `@terrazzo/token-tools/css` — same function `packages/core/src/css.ts` already uses when emitting the stylesheet. Removes a parallel kebab-casing implementation that would have drifted from Terrazzo's own naming rules over time. No behavior change for current inputs; future naming-policy shifts in Terrazzo now propagate to both emission and block display in one step.
+- dfe4d0b: Thread the Token Listing entry through `formatTokenValue` so composite display strings (shadow / border / gradient / typography / transition) prefer `listing[path].previewValue` when available. Before this PR, value stringification for composite types was still stitched locally — listing's authoritative plugin-css-computed string was ignored. The gate: non-color types always prefer listing; color tokens prefer listing only when the active color format is `'hex'` (other formats stay as colorjs.io inspection output). Closes the last drift surface from the Token Listing adoption.
+
+  Callers updated: `TokenTable`, `TokenDetail`, `TokenNavigator`, `DimensionScale`, `StrokeStyleSample`. `AxisVariance` deliberately keeps local formatting because it renders per-theme resolved values and listing entries carry one canonical representation.
+
+- Updated dependencies [9496c82]
+- Updated dependencies [44483af]
+  - @unpunnyfuns/swatchbook-core@0.18.0
+
 ## 0.17.0
 
 ### Minor Changes

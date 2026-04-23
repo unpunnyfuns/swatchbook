@@ -1,6 +1,6 @@
 {
   "name": "@unpunnyfuns/swatchbook-addon",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "Storybook addon for DTCG design tokens — toolbar, panel, and useToken hook.",
   "license": "MIT",
   "author": "unpunnyfuns <unpunnyfuns@gmail.com>",
