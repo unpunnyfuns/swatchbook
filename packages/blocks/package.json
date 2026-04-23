@@ -74,6 +74,7 @@
     "vitest": "^4.1.4"
   },
   "dependencies": {
+    "@terrazzo/token-tools": "^2.0.3",
     "@unpunnyfuns/swatchbook-core": "workspace:*",
     "clsx": "^2.1.1",
     "colorjs.io": "0.6.1"

@@ -1,3 +1,4 @@
+import { makeCSSVar } from '@terrazzo/token-tools/css';
 import { useEffect } from 'react';
 import { useActiveAxes, useActiveTheme, useOptionalSwatchbookData } from '#/contexts.ts';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
@@ -145,16 +146,14 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
   };
 }
 
+/**
+ * Thin wrapper around Terrazzo's `makeCSSVar` so the block-display surface
+ * and `packages/core/src/css.ts`'s emitter share one implementation. Any
+ * future naming-policy shift in Terrazzo (casing, unicode, prefix handling)
+ * reaches both surfaces at once instead of needing a parallel update here.
+ */
 export function makeCssVar(path: string, prefix: string): string {
-  // Match Terrazzo's emitter: split on `.`, kebab-case each segment (so
-  // camelCase segments like `cubicBezier` become `cubic-bezier`), then join
-  // with `-`. Without this the block-side reference drifts from the
-  // emitted CSS var name whenever a segment carries capitals.
-  const tail = path
-    .split('.')
-    .map((segment) => segment.replaceAll(/([a-z\d])([A-Z])/g, '$1-$2').toLowerCase())
-    .join('-');
-  return prefix ? `var(--${prefix}-${tail})` : `var(--${tail})`;
+  return prefix ? makeCSSVar(path, { prefix, wrapVar: true }) : makeCSSVar(path, { wrapVar: true });
 }
 
 /**
