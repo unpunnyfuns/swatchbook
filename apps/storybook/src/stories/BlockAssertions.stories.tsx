@@ -50,7 +50,7 @@ async function waitForContent(root: ParentNode, selector: string): Promise<Eleme
  * swatch card whose background resolves to a non-transparent CSS value.
  */
 export const ColorPaletteRenders = meta.story({
-  render: () => <ColorPalette filter="color.surface.*" groupBy={3} />,
+  render: () => <ColorPalette filter="color.surface.*" groupBy={2} />,
   play: async ({ canvasElement }) => {
     const section = await waitForContent(canvasElement, 'section');
     const swatch = section.querySelector<HTMLElement>('[aria-hidden="true"]');

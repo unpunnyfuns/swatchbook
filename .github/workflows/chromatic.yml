@@ -34,8 +34,14 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Build Storybook
-        run: pnpm --filter=@unpunnyfuns/swatchbook-storybook build:storybook
+      - name: Build Storybook (turbo runs workspace-package builds first)
+        # pnpm filter on its own bypasses turbo's task graph, so the
+        # workspace packages (core / addon / blocks / switcher /
+        # integrations) aren't built before Storybook tries to resolve
+        # them from dist. Going through turbo pulls in the ^build
+        # dependency declared on build:storybook in turbo.json and
+        # produces the dist/ output each package needs.
+        run: pnpm turbo run build:storybook --filter=@unpunnyfuns/swatchbook-storybook
 
       - name: Publish to Chromatic
         uses: chromaui/action@latest
