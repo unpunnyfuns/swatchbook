@@ -1,6 +1,6 @@
 import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import cx from 'clsx';
-import type { ReactElement } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import { Fragment, useCallback, useMemo, useState } from 'react';
 import './ColorTable.css';
 import { useColorFormat } from '#/contexts.ts';
@@ -295,7 +295,7 @@ function GroupRow({
         <td className="sb-color-table__td sb-color-table__swatch-cell">
           <span
             className="sb-color-table__swatch"
-            style={{ background: active.cssVar }}
+            style={{ '--sb-color-table-swatch-color': active.cssVar } as CSSProperties}
             aria-hidden
           />
         </td>

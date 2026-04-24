@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
 import './ColorPalette.css';
 import { useColorFormat } from '#/contexts.ts';
@@ -130,7 +130,7 @@ export function ColorPalette({
               <div key={swatch.path} className="sb-color-palette__card">
                 <div
                   className="sb-color-palette__swatch"
-                  style={{ background: swatch.cssVar }}
+                  style={{ '--sb-color-palette-swatch-color': swatch.cssVar } as CSSProperties}
                   aria-hidden
                 />
                 <div className="sb-color-palette__meta">

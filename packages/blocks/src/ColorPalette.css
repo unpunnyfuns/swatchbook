@@ -26,9 +26,31 @@
 }
 
 .sb-color-palette__swatch {
+  position: relative;
   height: 56px;
   width: 100%;
   border-bottom: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.15));
+  /* Checkerboard backdrop so colors with alpha read as transparent.
+     Opaque colors fully cover it — no visual cost. */
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, rgba(0, 0, 0, 0.08) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0, 0, 0, 0.08) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.08) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.08) 75%);
+  background-size: 12px 12px;
+  background-position:
+    0 0,
+    0 6px,
+    6px -6px,
+    -6px 0;
+}
+
+.sb-color-palette__swatch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--sb-color-palette-swatch-color);
 }
 
 .sb-color-palette__meta {
