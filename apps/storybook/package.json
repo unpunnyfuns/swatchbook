@@ -13,7 +13,7 @@
   "scripts": {
     "storybook": "storybook dev -p 6006 --no-open",
     "build:storybook": "storybook build",
-    "chromatic": "chromatic --exit-zero-on-changes",
+    "chromatic": "chromatic --exit-zero-on-changes --build-script-name=build:storybook",
     "test:storybook": "vitest run",
     "test:storybook:watch": "vitest",
     "typecheck": "tsc --noEmit",
