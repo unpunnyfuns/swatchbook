@@ -26,7 +26,7 @@ const config: Config = {
   future: {
     v4: {
       siteStorageNamespacing: true,
-      fasterByDefault: false,
+      fasterByDefault: true,
       mdx1CompatDisabledByDefault: true,
       useCssCascadeLayers: true,
       removeLegacyPostBuildHeadAttribute: true,
