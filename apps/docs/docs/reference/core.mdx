@@ -18,7 +18,7 @@ npm install @unpunnyfuns/swatchbook-core
 
 ### `defineSwatchbookConfig(config)`
 
-Identity helper for a typed `swatchbook.config.ts`. No runtime effect — just TypeScript ergonomics. See the [Config reference](./config) for every field's semantics.
+Identity helper for a typed `swatchbook.config.ts`. No runtime effect — just TypeScript ergonomics. See the [Config reference](./config.mdx) for every field's semantics.
 
 ```ts
 import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
@@ -154,7 +154,7 @@ Path-indexed alias over `@terrazzo/plugin-token-listing`'s `ListedToken` shape. 
 type TokenListingByPath = Record<string, ListedToken>;
 ```
 
-See [Sharing Terrazzo options](../guides/sharing-terrazzo-options) for registering extra platforms (swift, android, …) so additional `names.<platform>` entries populate.
+See [Sharing Terrazzo options](../guides/sharing-terrazzo-options.mdx) for registering extra platforms (swift, android, …) so additional `names.<platform>` entries populate.
 
 ### `SwatchbookIntegration`
 
@@ -170,7 +170,7 @@ interface SwatchbookIntegration {
 }
 ```
 
-See the [Integrations guide](../guides/integrations) for factories that build these for Tailwind and CSS-in-JS.
+See the [Integrations guide](../guides/integrations/index.mdx) for factories that build these for Tailwind and CSS-in-JS.
 
 ### `Theme`
 
