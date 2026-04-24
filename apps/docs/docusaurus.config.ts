@@ -124,7 +124,7 @@ const config: Config = {
           title: 'Project',
           items: [
             { label: 'GitHub', href: 'https://github.com/unpunnyfuns/swatchbook' },
-            { label: 'DTCG spec', href: 'https://design-tokens.org/tr/2025/drafts/' },
+            { label: 'DTCG spec', href: 'https://www.designtokens.org/TR/2025.10/' },
           ],
         },
       ],

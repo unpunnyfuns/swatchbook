@@ -78,7 +78,7 @@ Glob patterns (relative to the config's cwd) for base DTCG token files.
 
 ### `resolver?: string`
 
-Path to a [DTCG 2025.10 resolver](https://design-tokens.org/tr/2025/drafts/resolver/) document. Mutually exclusive with `axes`.
+Path to a [DTCG 2025.10 resolver](https://www.designtokens.org/TR/2025.10/resolver/) document. Mutually exclusive with `axes`.
 
 Terrazzo normalizes the document, then Swatchbook enumerates permutations via `resolver.listPermutations()` and realizes each with `resolver.apply()`. One `Axis` surfaces per modifier; the resolver file itself and every `$ref` target it pulls in land on `Project.sourceFiles`.
 

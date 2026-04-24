@@ -1,5 +1,5 @@
 {
-  "$schema": "https://design-tokens.org/tr/2025/drafts/resolver/",
+  "$schema": "https://www.designtokens.org/TR/2025.10/resolver/",
   "version": "2025.10",
   "name": "swatchbook-reference",
   "description": "DTCG 2025.10 native resolver. Flat token paths organized per `$type` — color, size/space/radius, font, typography, motion, border, shadow, gradient, stroke, number — plus three independent modifiers: `mode` (light/dark baseline), `brand` (default/Brand A accent), and `contrast` (normal/high border + focus emphasis).",

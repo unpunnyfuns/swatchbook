@@ -36,7 +36,7 @@ export default defineSwatchbookConfig({
 });
 ```
 
-The resolver file is the spec-defined document describing how token sets compose into named themes — see [the DTCG 2025.10 resolver draft](https://design-tokens.org/tr/2025/drafts/resolver/). Every token file the resolver references via `$ref` is loaded automatically; the addon's Vite plugin derives HMR watch paths from that set, so no separate `tokens` glob is needed for resolver-backed projects.
+The resolver file is the spec-defined document describing how token sets compose into named themes — see [the DTCG 2025.10 resolver draft](https://www.designtokens.org/TR/2025.10/resolver/). Every token file the resolver references via `$ref` is loaded automatically; the addon's Vite plugin derives HMR watch paths from that set, so no separate `tokens` glob is needed for resolver-backed projects.
 
 If you want HMR to watch a directory broader than the resolver references directly — say, to pick up a new token file the moment it's added — supply `tokens: ['tokens/**/*.json']` alongside `resolver` and the plugin will union the two.
 
