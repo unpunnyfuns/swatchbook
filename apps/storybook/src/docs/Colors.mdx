@@ -28,11 +28,41 @@ in the toolbar to see every swatch repaint.
 
 ## Semantic roles (variant-grouped)
 
-Same tokens, but suffix variants (`-hover`, `-disabled`) collapse onto
-their base row with a pill selector. Click a row to expand every
-variant side-by-side.
+One row per role, with the leaf segments (`default` / `muted` / `raised`
+/ …) as pills under each base. Click a row to expand every variant
+side-by-side. The `status` row bundles its `-bg` / `-fg` hyphen pairs
+under each status name.
 
-<ColorTable filter="color.*" />
+<ColorTable
+  filter="color.surface.*"
+  variants={{
+    default: 'default',
+    muted: 'muted',
+    raised: 'raised',
+    subtle: 'subtle',
+    inverse: 'inverse',
+  }}
+/>
+
+<ColorTable
+  filter="color.text.*"
+  variants={{
+    default: 'default',
+    muted: 'muted',
+    subtle: 'subtle',
+    inverse: 'inverse',
+    accent: 'accent',
+  }}
+/>
+
+<ColorTable filter="color.accent.*" variants={{ bg: 'bg', fg: 'fg', hover: '-hover' }} />
+
+<ColorTable
+  filter="color.border.*"
+  variants={{ default: 'default', strong: 'strong', focus: 'focus' }}
+/>
+
+<ColorTable filter="color.status.*" variants={{ bg: '-bg', fg: '-fg' }} />
 
 ## Palette
 
