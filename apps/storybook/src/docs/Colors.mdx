@@ -1,5 +1,5 @@
 import { Meta } from '@storybook/addon-docs/blocks';
-import { ColorPalette, ColorTable, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
+import { ColorPalette, ColorTable, OpacityScale, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 
 <Meta title="Docs/Colors" />
 
@@ -77,3 +77,16 @@ The same tokens as rows with resolved values, types, and CSS var names —
 handy when you know the path you're looking for.
 
 <TokenTable filter="color.*" type="color" />
+
+## Opacity
+
+Opacity tokens live under `number.opacity.*` — `$type: 'number'`, values
+in `[0, 1]`. The bare number (`0.4`) tells you less than the visible
+effect; `<OpacityScale>` renders each token as the sample colour at that
+opacity over a checkerboard so the transparency reads.
+
+<OpacityScale filter="number.opacity.*" />
+
+The swatch colour is `color.accent.bg` by default. Pass `sampleColor` to
+demo the token against whatever surface role matters — scrims against
+`color.text.inverse`, muted text against `color.text.default`, etc.
