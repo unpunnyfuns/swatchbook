@@ -14,13 +14,13 @@ Published as `@unpunnyfuns/swatchbook-addon`. Storybook addon. Loads your config
 npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
 ```
 
-This gives you the toolbar, preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `Diagnostics`, `SwatchbookProvider`, block-side hooks) live in `@unpunnyfuns/swatchbook-blocks` — install it alongside if you want them. See the [authoring guide](../guides/authoring-doc-stories) for MDX composition patterns.
+This gives you the toolbar, preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `Diagnostics`, `SwatchbookProvider`, block-side hooks) live in `@unpunnyfuns/swatchbook-blocks` — install it alongside if you want them. See the [authoring guide](../guides/authoring-doc-stories.mdx) for MDX composition patterns.
 
 Peer requirements: Storybook 10.3+ on the Vite builder, React 18+.
 
 ## Registration
 
-Register the addon in `main.ts#addons` with your config (inline `config` preferred; `configPath` also works — see the [config reference](./config)):
+Register the addon in `main.ts#addons` with your config (inline `config` preferred; `configPath` also works — see the [config reference](./config.mdx)):
 
 ```ts title=".storybook/main.ts"
 import { defineMain } from '@storybook/react-vite/node';
@@ -57,7 +57,7 @@ export default definePreview({
 - **Preview decorator** — reads the active axis tuple, writes `data-<prefix>-<axis>="<context>"` attributes (plus `data-<prefix>-theme="<composed id>"`) on `<html>` + story wrapper, mounts the per-theme CSS, emits `INIT_EVENT` to the manager. The prefix follows `cssVarPrefix` (default `swatch`).
 - **Toolbar tool** — a single Swatchbook `IconButton`. Clicking opens a popover containing preset pills, one dropdown per axis, and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`). Escape and outside-click close it.
 
-For a browsable tree + diagnostics surface, compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` on an MDX page — see the [authoring guide](../guides/authoring-doc-stories)'s dashboard example.
+For a browsable tree + diagnostics surface, compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` on an MDX page — see the [authoring guide](../guides/authoring-doc-stories.mdx)'s dashboard example.
 
 ## Globals
 
@@ -104,7 +104,7 @@ Paths autocomplete from the generated `.swatchbook/tokens.d.ts`. Add `"include":
 
 ### Block-side hooks live in `@unpunnyfuns/swatchbook-blocks`
 
-`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the contexts that back them (`SwatchbookContext`, `ThemeContext`, `AxesContext`, `ColorFormatContext`) are exported from `@unpunnyfuns/swatchbook-blocks` — see the [blocks reference](./blocks). They are **not** re-exported from the addon; import them from blocks.
+`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the contexts that back them (`SwatchbookContext`, `ThemeContext`, `AxesContext`, `ColorFormatContext`) are exported from `@unpunnyfuns/swatchbook-blocks` — see the [blocks reference](./blocks/index.mdx). They are **not** re-exported from the addon; import them from blocks.
 
 The preview decorator mounts a `SwatchbookProvider` (from blocks) that populates every context, so the hooks resolve wherever the addon is registered.
 

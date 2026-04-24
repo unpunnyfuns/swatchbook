@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # Architecture
 
-Map of the repo, the one data structure everything revolves around, and how data moves from a DTCG token file on disk to a rendered doc block. Written for contributors — if you're consuming swatchbook as a user, the [Reference](../reference/core) section is the right door.
+Map of the repo, the one data structure everything revolves around, and how data moves from a DTCG token file on disk to a rendered doc block. Written for contributors — if you're consuming swatchbook as a user, the [Reference](../reference/core.mdx) section is the right door.
 
 ## Repo map
 
@@ -80,7 +80,7 @@ interface SwatchbookIntegration {
 
 The addon's Vite plugin iterates `integrations[]`, resolves each `virtualId`, serves whatever `render(project)` produces, and invalidates every integration-contributed module on HMR alongside `virtual:swatchbook/tokens`. The addon itself learns nothing about Tailwind, emotion, or anything else — integrations own their library-specific logic.
 
-The `Project` snapshot passed to `render` carries everything: axes, themes, presets, resolved maps, `cssVarPrefix`. See the [Integrations guide](../guides/integrations) for factory usage.
+The `Project` snapshot passed to `render` carries everything: axes, themes, presets, resolved maps, `cssVarPrefix`. See the [Integrations guide](../guides/integrations/index.mdx) for factory usage.
 
 ## Data flow — static build path
 
@@ -183,7 +183,7 @@ Fourteen tools, all stateless reads against the in-memory `Project`:
 - Detail: `get_token`, `get_alias_chain`, `get_aliased_by`, `get_color_formats`, `get_color_contrast`, `get_axis_variance`, `get_consumer_output`
 - Emission: `emit_css`
 
-`createServer` returns the server augmented with `setProject(next)` so live-reload (the default) can swap in a fresh project without restarting the transport. See [Reference → MCP](../reference/mcp) for the tool signatures.
+`createServer` returns the server augmented with `setProject(next)` so live-reload (the default) can swap in a fresh project without restarting the transport. See [Reference → MCP](../reference/mcp.mdx) for the tool signatures.
 
 ## Where to read next
 
@@ -194,4 +194,4 @@ Fourteen tools, all stateless reads against the in-memory `Project`:
 - `packages/blocks/src/internal/use-project.ts` — the hook every block pulls state through.
 - `packages/mcp/src/server.ts` — the twelve MCP tools in one file.
 
-And the companion [Sharp corners](./sharp-corners) page for the "don't step there" list.
+And the companion [Sharp corners](./sharp-corners.mdx) page for the "don't step there" list.

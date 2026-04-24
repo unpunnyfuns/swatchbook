@@ -7,7 +7,7 @@ sidebar_position: 1
 
 # swatchbook
 
-A Storybook addon and MDX doc blocks for visualising [DTCG design tokens](https://design-tokens.org/tr/2025/drafts/), built on [Terrazzo](https://terrazzo.app/)'s parser. Your production build runs Terrazzo's CLI against the same DTCG source; swatchbook reads it too, inside Storybook, and keeps the two [aligned](./guides/sharing-terrazzo-options).
+A Storybook addon and MDX doc blocks for visualising [DTCG design tokens](https://www.designtokens.org/TR/2025.10/), built on [Terrazzo](https://terrazzo.app/)'s parser. Your production build runs Terrazzo's CLI against the same DTCG source; swatchbook reads it too, inside Storybook, and keeps the two [aligned](./guides/sharing-terrazzo-options.mdx).
 
 Two things in one package:
 
@@ -30,17 +30,17 @@ Not a runtime theme-switcher for production apps, not a CSS-variable framework, 
 
 ## Installation
 
-Register `@unpunnyfuns/swatchbook-addon` in `.storybook/main.ts`. It pulls in `swatchbook-core`, `swatchbook-blocks`, and `swatchbook-switcher` transitively. `import { TokenTable, ThemeSwitcher, useToken } from '@unpunnyfuns/swatchbook-addon'` resolves from any consumer file. See the [Quickstart](./quickstart) for a complete setup.
+Register `@unpunnyfuns/swatchbook-addon` in `.storybook/main.ts`. It pulls in `swatchbook-core`, `swatchbook-blocks`, and `swatchbook-switcher` transitively. `import { TokenTable, ThemeSwitcher, useToken } from '@unpunnyfuns/swatchbook-addon'` resolves from any consumer file. See the [Quickstart](./quickstart.mdx) for a complete setup.
 
 Each sub-package is also publishable on its own — the switcher in a Docusaurus navbar, the core loader in a build script without React.
 
 ## No external build step
 
-The addon publishes tokens to the preview through a Vite virtual module, recomputed on each reload. Edits to token files propagate via HMR. See the [token pipeline](./reference/token-pipeline) for the mechanism.
+The addon publishes tokens to the preview through a Vite virtual module, recomputed on each reload. Edits to token files propagate via HMR. See the [token pipeline](./reference/token-pipeline.mdx) for the mechanism.
 
 ## For AI agents
 
-The optional [`@unpunnyfuns/swatchbook-mcp`](./reference/mcp) package ships a stdio [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes the token graph — paths, axes, alias chains, diagnostics, per-theme resolved values — to AI assistants like Claude Desktop or Claude Code. Fourteen read-only tools; live-reloads on token edits.
+The optional [`@unpunnyfuns/swatchbook-mcp`](./reference/mcp.mdx) package ships a stdio [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes the token graph — paths, axes, alias chains, diagnostics, per-theme resolved values — to AI assistants like Claude Desktop or Claude Code. Fourteen read-only tools; live-reloads on token edits.
 
 ## See it live
 
@@ -48,15 +48,15 @@ The [live Storybook](pathname:///storybook/) runs the addon against this repo's 
 
 ## How to read these docs
 
-- **[Quickstart](./quickstart)** — install, configure, run.
-- **[Guides](./guides/authoring-doc-stories)** — MDX doc-story composition, consuming the active theme from stories, third-party library integrations, aligning with a production Terrazzo build.
-- **[Reference](./reference/addon)** — API surface for each published package, the axis model, the token-pipeline mechanism, the config shape.
-- **[Developers](./developers/)** — contributing to swatchbook itself: architecture and sharp corners.
+- **[Quickstart](./quickstart.mdx)** — install, configure, run.
+- **[Guides](./guides/authoring-doc-stories.mdx)** — MDX doc-story composition, consuming the active theme from stories, third-party library integrations, aligning with a production Terrazzo build.
+- **[Reference](./reference/addon.mdx)** — API surface for each published package, the axis model, the token-pipeline mechanism, the config shape.
+- **[Developers](./developers/index.mdx)** — contributing to swatchbook itself: architecture and sharp corners.
 
 ## Migrating from `@storybook/addon-themes`
 
-If you're coming from `@storybook/addon-themes` and have one or two flat theme IDs, translate each ID to an axes tuple — `"brand-a-dark"` becomes `{ brand: 'Brand A', mode: 'Dark' }` — then declare `mode` and `brand` as resolver modifiers. The axes model composes the cartesian product automatically, so no enumerating all combinations. See [axes reference](./reference/axes) for details.
+If you're coming from `@storybook/addon-themes` and have one or two flat theme IDs, translate each ID to an axes tuple — `"brand-a-dark"` becomes `{ brand: 'Brand A', mode: 'Dark' }` — then declare `mode` and `brand` as resolver modifiers. The axes model composes the cartesian product automatically, so no enumerating all combinations. See [axes reference](./reference/axes.mdx) for details.
 
 ## What these docs assume
 
-You're comfortable with Storybook (CSF, decorators, MDX docs). For DTCG itself, you've skimmed the [2025.10 spec](https://design-tokens.org/tr/2025/drafts/) or at least seen `$value` / `$type` / alias syntax — we don't re-teach the spec.
+You're comfortable with Storybook (CSF, decorators, MDX docs). For DTCG itself, you've skimmed the [2025.10 spec](https://www.designtokens.org/TR/2025.10/) or at least seen `$value` / `$type` / alias syntax — we don't re-teach the spec.

@@ -22,7 +22,7 @@ The blocks read the active token graph from a `SwatchbookProvider`. The addon's 
 
 ```mdx title="src/docs/colors.mdx"
 import { Meta } from '@storybook/addon-docs/blocks';
-import { ColorPalette, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
+import { ColorPalette, ColorTable, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 
 <Meta title="Docs/Colors" />
 
@@ -34,10 +34,14 @@ import { ColorPalette, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 
 ## Semantic slots
 
+<ColorTable filter="color.*" />
+
+## Everything as a table
+
 <TokenTable filter="color.*" type="color" />
 ```
 
-Visit `Docs / Colors`. The palette swatches and table values update as you flip the toolbar.
+`ColorTable` groups variants under their base path — `color.accent.bg` + `color.accent.bg-hover` collapse to one `accent.bg` row with a `default` / `hover` pill selector, and each row expands inline to show all variants side-by-side. `<TokenTable>` is the flat view for comparison. Visit `Docs / Colors`; swatches and values update as you flip the toolbar.
 
 ## A dashboard composition
 
@@ -70,6 +74,7 @@ import { Diagnostics, TokenNavigator, TokenTable } from '@unpunnyfuns/swatchbook
 | `TokenTable` | Filterable table of tokens. Supports path glob and `$type` filters. |
 | `TokenNavigator` | Expandable tree; scope to a subtree or `$type`. |
 | `ColorPalette` | Swatch grid grouped by sub-path. |
+| `ColorTable` | Color-specific table; variant suffixes (`-hover`, `-disabled`) collapse onto the base row with a pill selector + inline expand. |
 | `TypographyScale` | Each `typography` token as a sample line using its own value. |
 | `FontFamilySample` | Pangram per `fontFamily` primitive. |
 | `FontWeightScale` | Same "Aa" sample at each `fontWeight`. |
@@ -77,7 +82,7 @@ import { Diagnostics, TokenNavigator, TokenTable } from '@unpunnyfuns/swatchbook
 | `Diagnostics` | Collapsible list of parser / resolver warnings; auto-opens on non-zero. |
 | Motion / shadow / border / gradient previews | Inside `TokenDetail`'s composite rendering, or standalone blocks. |
 
-See the [blocks reference](../reference/blocks) for the full prop surface.
+See the [blocks reference](../reference/blocks/index.mdx) for the full prop surface.
 
 ## Typed token access from components
 
@@ -120,6 +125,6 @@ channel.on('globalsUpdated', (payload) => {
 
 ## See also
 
-- [Reference: blocks](../reference/blocks) — every block's props.
-- [Reference: addon](../reference/addon) — `useToken` and the other hooks.
+- [Reference: blocks](../reference/blocks/index.mdx) — every block's props.
+- [Reference: addon](../reference/addon.mdx) — `useToken` and the other hooks.
 - [Live Storybook](pathname:///storybook/) — doc stories you can steal from.
