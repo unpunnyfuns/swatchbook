@@ -8,10 +8,10 @@ sidebar_position: 1
 
 Preview-side adapters that let stories use third-party styling libraries against swatchbook's tokens. Two integrations ship today, both under [`@unpunnyfuns/swatchbook-integrations`](https://www.npmjs.com/package/@unpunnyfuns/swatchbook-integrations):
 
-- [**Tailwind**](./tailwind) — alias Tailwind v4 utility scales to your DTCG tokens, so `bg-sb-surface-default` / `p-sb-md` work in stories.
-- [**CSS-in-JS**](./css-in-js) — a typed JS theme accessor for emotion, styled-components, or any `ThemeProvider` consuming a plain object.
+- [**Tailwind**](./tailwind.mdx) — alias Tailwind v4 utility scales to your DTCG tokens, so `bg-sb-surface-default` / `p-sb-md` work in stories.
+- [**CSS-in-JS**](./css-in-js.mdx) — a typed JS theme accessor for emotion, styled-components, or any `ThemeProvider` consuming a plain object.
 
-Both are preview-only. They let utility classes and theme accessors resolve correctly inside Storybook; they don't replace your production build. For production artifacts, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources. Keep both pipelines in step with [shared Terrazzo options](../sharing-terrazzo-options).
+Both are preview-only. They let utility classes and theme accessors resolve correctly inside Storybook; they don't replace your production build. For production artifacts, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources. Keep both pipelines in step with [shared Terrazzo options](../sharing-terrazzo-options.mdx).
 
 ## Wiring
 
@@ -39,4 +39,4 @@ Tailwind contributes a global `@theme` block the addon auto-injects into the pre
 
 ## Writing your own integration
 
-Implement the `SwatchbookIntegration` contract from `@unpunnyfuns/swatchbook-core`, export a factory from your package, drop the factory's result into `integrations[]`. Mechanism sketched in the [architecture doc](../../developers/architecture).
+Implement the `SwatchbookIntegration` contract from `@unpunnyfuns/swatchbook-core`, export a factory from your package, drop the factory's result into `integrations[]`. Mechanism sketched in the [architecture doc](../../developers/architecture.mdx).

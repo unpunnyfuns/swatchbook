@@ -34,9 +34,9 @@ Swatchbook loads its own in-memory Terrazzo build at preview boot. That build co
 
 | Config field | Forwards to | Controls |
 | --- | --- | --- |
-| [`cssOptions`](../reference/config#cssoptions) | `@terrazzo/plugin-css` | value formatting (hex vs `color()`), transforms, include/exclude globs, utility groups |
-| [`listingOptions`](../reference/config#listingoptions) | `@terrazzo/plugin-token-listing` | per-platform naming, mode metadata, `previewValue` / `subtype` hooks |
-| [`terrazzoPlugins`](../reference/config#terrazzoplugins) | additional plugins in the build | which plugin naming logic is available to the listing |
+| [`cssOptions`](../reference/config.mdx#cssoptions) | `@terrazzo/plugin-css` | value formatting (hex vs `color()`), transforms, include/exclude globs, utility groups |
+| [`listingOptions`](../reference/config.mdx#listingoptions) | `@terrazzo/plugin-token-listing` | per-platform naming, mode metadata, `previewValue` / `subtype` hooks |
+| [`terrazzoPlugins`](../reference/config.mdx#terrazzoplugins) | additional plugins in the build | which plugin naming logic is available to the listing |
 
 Set all three from a single shared module and your terrazzo.config.ts and swatchbook.config.ts stay in lockstep forever.
 
@@ -179,7 +179,7 @@ const swiftName = project.listing?.[path]?.names?.swift;
 // "SwiftKit.Color.surfaceDefault"
 ```
 
-See [`useSwatchbookData`](../reference/blocks/hooks#useswatchbookdata) for the `ProjectSnapshot.listing` shape in the block context.
+See [`useSwatchbookData`](../reference/blocks/hooks.mdx#useswatchbookdata) for the `ProjectSnapshot.listing` shape in the block context.
 
 The output files those plugins produce (`tokens.swift`, `tokens.xml`, …) land in the in-memory output set and are discarded. Swatchbook doesn't write them to disk — `terrazzoPlugins` runs plugins purely for their *naming contribution* to the listing, not for file emission.
 
@@ -265,7 +265,7 @@ If you don't run a production token build alongside swatchbook — the tokens ex
 
 ## See also
 
-- [Config reference: `cssOptions` / `listingOptions` / `terrazzoPlugins`](../reference/config) — the prop-by-prop contract.
-- [The token pipeline](../reference/token-pipeline) — how swatchbook's virtual module differs from a file-emitting build.
+- [Config reference: `cssOptions` / `listingOptions` / `terrazzoPlugins`](../reference/config.mdx) — the prop-by-prop contract.
+- [The token pipeline](../reference/token-pipeline.mdx) — how swatchbook's virtual module differs from a file-emitting build.
 - [`@terrazzo/plugin-token-listing` source](https://github.com/terrazzoapp/terrazzo/tree/main/packages/plugin-token-listing) — the listing format swatchbook consumes.
 - [Style Dictionary docs](https://styledictionary.com/) — DTCG support landed in 4.0; alignment-friendly configurations start there.
