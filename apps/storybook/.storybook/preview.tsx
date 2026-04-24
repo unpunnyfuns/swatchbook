@@ -15,20 +15,10 @@ export default definePreview({
     backgrounds: { disable: true },
     // Chromatic snapshots capture a single frame; animated elements
     // land on a different pixel each run and surface as a false
-    // "visual change" on every PR. Two layers:
-    //
-    //   - `pauseAnimationAtEnd: true` holds CSS animations / transitions
-    //     on the final frame — fine for transitions that have a defined
-    //     end (FadeIn, slide-to-rest, etc.).
-    //   - `prefersReducedMotion: true` forces the OS-level reduce-motion
-    //     hint, which MotionSample / MotionPreview already respect by
-    //     rendering a static fallback instead of the looping ball. Covers
-    //     JS-driven loops (`setInterval`-based ping-pong) that have no
-    //     "end" for pauseAnimationAtEnd to hook.
-    //
-    // Both are capture-phase only — no effect on local dev, addon-vitest
-    // play functions, or the manual Storybook experience.
-    chromatic: { pauseAnimationAtEnd: true, prefersReducedMotion: true },
+    // "visual change" on every PR. `pauseAnimationAtEnd: true` holds
+    // CSS animations / transitions on the final frame for deterministic
+    // capture. Capture-phase only.
+    chromatic: { pauseAnimationAtEnd: true },
     options: {
       storySort: {
         order: [
