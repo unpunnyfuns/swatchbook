@@ -101,7 +101,15 @@ export const LightBrandA = meta.story({
  * work keys on these.
  */
 export const PerAxisDataAttrs = meta.story({
-  parameters: { swatchbook: { axes: { mode: 'Dark', brand: 'Brand A' } } },
+  // Assertion-only story — validates the preview decorator's per-axis
+  // data-attribute emission. No unique visual payload vs the other
+  // ThemeSwitch stories; skip Chromatic's snapshot so visual-diff runs
+  // stay focused on stories whose pixels matter. Still runs in the
+  // addon-vitest path, which is the right home for DOM assertions.
+  parameters: {
+    swatchbook: { axes: { mode: 'Dark', brand: 'Brand A' } },
+    chromatic: { disableSnapshot: true },
+  },
   play: async ({ canvasElement }) => {
     const wrapper = canvasElement.querySelector<HTMLElement>('[data-sb-mode]');
     if (!wrapper) throw new Error('expected story wrapper with data-sb-mode attribute');

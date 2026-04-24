@@ -1,0 +1,52 @@
+name: Chromatic
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Chromatic reviews depend on commit history to deduplicate snapshots.
+# Full depth fetch lets it baseline against the merge target rather than
+# replaying every snapshot from scratch.
+jobs:
+  chromatic:
+    runs-on: ubuntu-latest
+    # Don't block on a missing secret — forks and draft PRs without
+    # access to CHROMATIC_PROJECT_TOKEN should skip cleanly.
+    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v5
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build Storybook
+        run: pnpm --filter=@unpunnyfuns/swatchbook-storybook build:storybook
+
+      - name: Publish to Chromatic
+        uses: chromaui/action@latest
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          workingDir: apps/storybook
+          storybookBuildDir: storybook-static
+          exitZeroOnChanges: true
+          onlyChanged: true
+          # Return as soon as the upload is done; Chromatic's GitHub
+          # integration reports the visual-diff status asynchronously via
+          # a check, so blocking on server-side comparison just makes the
+          # job hang.
+          exitOnceUploaded: true
