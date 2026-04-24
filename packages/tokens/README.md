@@ -1,10 +1,14 @@
 # swatchbook-tokens
 
-Internal workspace package (`@unpunnyfuns/swatchbook-tokens`). Exhaustive DTCG 2025.10 fixture used as swatchbook's internal test bed and as a reference for consumers structuring their own token projects. Private — not published.
+The reference DTCG fixture for [swatchbook](https://github.com/unpunnyfuns/swatchbook).
 
-## Theming compositions
+An exhaustive DTCG 2025.10 token project — palette primitives, semantic roles, typography composites, motion, shadow, border, gradient, stroke — used as swatchbook's own internal test bed and as a worked example for projects structuring their own token trees.
 
-`tokens/resolver.json` — a DTCG 2025.10 native resolver (`sets` + `modifiers` + `resolutionOrder`). Three independent modifiers compose into named themes: every combination of `mode` (Light/Dark), `brand` (Default/Brand A), and `contrast` (Normal/High).
+Private workspace package. Not published.
+
+## Composition
+
+`tokens/resolver.json` is a DTCG 2025.10 native resolver (`sets` + `modifiers` + `resolutionOrder`). Three independent modifiers compose into named themes: every combination of `mode` (Light/Dark), `brand` (Default/Brand A), and `contrast` (Normal/High).
 
 ## Consumption
 
@@ -12,5 +16,5 @@ Internal workspace package (`@unpunnyfuns/swatchbook-tokens`). Exhaustive DTCG 2
 import { tokensDir, resolverPath } from '@unpunnyfuns/swatchbook-tokens';
 ```
 
-✅ Use the exported path helpers — they're `import.meta`-resolved and survive `node_modules` hoisting.
-❌ Don't hard-code `node_modules/@unpunnyfuns/swatchbook-tokens/tokens/...` in consuming code.
+- ✅ Use the exported path helpers — `import.meta`-resolved, survives `node_modules` hoisting.
+- ❌ Don't hard-code `node_modules/@unpunnyfuns/swatchbook-tokens/tokens/...` paths.
