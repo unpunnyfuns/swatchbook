@@ -45,3 +45,8 @@ jobs:
           storybookBuildDir: storybook-static
           exitZeroOnChanges: true
           onlyChanged: true
+          # Return as soon as the upload is done; Chromatic's GitHub
+          # integration reports the visual-diff status asynchronously via
+          # a check, so blocking on server-side comparison just makes the
+          # job hang.
+          exitOnceUploaded: true
