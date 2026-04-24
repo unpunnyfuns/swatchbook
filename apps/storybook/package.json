@@ -13,6 +13,7 @@
   "scripts": {
     "storybook": "storybook dev -p 6006 --no-open",
     "build:storybook": "storybook build",
+    "chromatic": "chromatic --exit-zero-on-changes",
     "test:storybook": "vitest run",
     "test:storybook:watch": "vitest",
     "typecheck": "tsc --noEmit",
@@ -45,6 +46,7 @@
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/browser-playwright": "^4.1.4",
     "@vitest/coverage-v8": "^4.1.4",
+    "chromatic": "^16.6.0",
     "playwright": "^1.59.1",
     "storybook": "^10.3.5",
     "tailwindcss": "^4.2.4",
