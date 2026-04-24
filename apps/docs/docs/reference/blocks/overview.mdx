@@ -128,6 +128,18 @@ Pangram rendered per `fontFamily` primitive. `sample?: string` overrides the tex
 
 Same sample text rendered at each `fontWeight` primitive. Defaults to `sortBy: 'value'` — ordered 100 → 900.
 
+### OpacityScale
+
+```tsx
+<OpacityScale filter="number.opacity.*" />
+```
+
+One card per opacity token: the sample colour rendered at that opacity over a checkerboard backdrop, so the transparency reads visually. Only `$type: 'number'` (or `'opacity'`) tokens whose `$value` is a finite number in `[0, 1]` are picked up — non-opacity `number` siblings (`line-height`, `z-index`) fall out naturally.
+
+- `filter?: string` — path glob; defaults to `'**.opacity.*'` so common layouts (`number.opacity.*`, `opacity.*`) work without configuration.
+- `type?: 'number' | 'opacity'` — default `'number'`.
+- `sampleColor?: string` — the colour the sample layer uses. Default `'color.accent.bg'`.
+
 ### BorderPreview
 
 ```tsx

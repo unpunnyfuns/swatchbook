@@ -13,6 +13,12 @@ export default definePreview({
     },
     a11y: { test: 'error' },
     backgrounds: { disable: true },
+    // Chromatic snapshots capture a single frame; animated elements
+    // land on a different pixel each run and surface as a false
+    // "visual change" on every PR. `pauseAnimationAtEnd: true` holds
+    // CSS animations / transitions on the final frame for deterministic
+    // capture. Capture-phase only.
+    chromatic: { pauseAnimationAtEnd: true },
     options: {
       storySort: {
         order: [
