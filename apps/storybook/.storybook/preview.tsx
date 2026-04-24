@@ -13,6 +13,14 @@ export default definePreview({
     },
     a11y: { test: 'error' },
     backgrounds: { disable: true },
+    // Chromatic snapshots capture a single frame; any animated element
+    // can land on a different pixel each run and surface as a false
+    // "visual change" on every PR. `pauseAnimationAtEnd: true` runs CSS
+    // animations / transitions through and holds on the end frame, so
+    // snapshots of motion / transition / cubicBezier demos are
+    // deterministic. Doesn't affect interactive stories or assertion
+    // play functions — only Chromatic's capture phase.
+    chromatic: { pauseAnimationAtEnd: true },
     options: {
       storySort: {
         order: [
