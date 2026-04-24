@@ -8,9 +8,9 @@ import { globMatch, resolveCssVar, useProject } from '#/internal/use-project.ts'
 export interface OpacityScaleProps {
   /**
    * Token-path filter. Use `"number.opacity.*"` or `"opacity.*"` depending
-   * on your layout. Defaults to `"**.opacity.*"` which picks up the most
-   * common organisations — `number.opacity.*` in a type-rooted tree,
-   * `opacity.*` in a flatter one.
+   * on your layout. Omit to match every `$type: 'number'` token whose
+   * value is in `[0, 1]` — the value-range check (applied alongside
+   * the glob) keeps line-heights / z-indexes out.
    */
   filter?: string;
   /**
@@ -61,7 +61,7 @@ function toOpacity(raw: unknown): number {
  * `z-index`) fall out naturally.
  */
 export function OpacityScale({
-  filter = '**.opacity.*',
+  filter,
   type = 'number',
   sampleColor = 'color.accent.bg',
   caption,
