@@ -1,5 +1,12 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.19.6
+
+### Patch Changes
+
+- d8937d3: Add `<ColorTable>` to the colors example in the authoring guide and to the "Blocks at a glance" table. The example now shows `ColorPalette` + `ColorTable` + `TokenTable` together — the three natural shapes for a colors doc page (swatch grid, variant-aware grouped table, flat list).
+- d8937d3: Add explicit `.mdx` extensions to every internal doc-to-doc markdown link. Docusaurus only rewrites relative links to doc slugs when the source has an `.md`/`.mdx` extension; without it, the link becomes a raw URL resolved against the current page at click time — so `[text](./guides/integrations/tailwind)` from `/quickstart/` could land on `/quickstart/guides/integrations/tailwind` instead of `/guides/integrations/tailwind`. Seventy-something links across the docs corrected; directory-style links (`./developers/`, `./reference/blocks`, `./guides/integrations`) now point at the explicit index file (`./developers/index.mdx` etc.). No content changes; navigation robustness fix.
+
 ## 0.19.5
 
 ### Patch Changes
