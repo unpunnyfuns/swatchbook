@@ -1,12 +1,10 @@
 # swatchbook-mcp
 
-Published as `@unpunnyfuns/swatchbook-mcp`. Model Context Protocol server for swatchbook — exposes a DTCG project's tokens, axes, and diagnostics to AI agents without running Storybook.
+A [Model Context Protocol](https://modelcontextprotocol.io/) server for [swatchbook](https://github.com/unpunnyfuns/swatchbook).
 
-> **Documentation:** [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/). Token parsing powered by [Terrazzo](https://terrazzo.app/) via `@unpunnyfuns/swatchbook-core`.
+Exposes a DTCG project's tokens, axes, alias chains, and diagnostics to AI agents without running Storybook. Useful for agents doing figma-to-token round-trips, alias-chain navigation, CI lint hooks, AI-assisted token authoring.
 
-## What it's for
-
-Agents that need to reason about your design tokens — figma-to-token round-trips, alias-chain navigation, CI lint hooks, AI-assisted authoring — without spinning up a Storybook iframe. Point it at a `swatchbook.config.{ts,mts,js,mjs}` or a bare DTCG `resolver.json` and it parses the project on startup, then answers MCP tool calls against the resolved graph.
+Point it at a swatchbook config (or a bare DTCG `resolver.json`) and it parses the project on startup, then answers MCP tool calls against the resolved graph.
 
 ## Install & run
 
@@ -14,7 +12,7 @@ Agents that need to reason about your design tokens — figma-to-token round-tri
 npx @unpunnyfuns/swatchbook-mcp --config swatchbook.config.ts
 ```
 
-Or wire it into an MCP client's config. Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+Or wire it into an MCP client. Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
 
 ```json
 {
@@ -27,39 +25,11 @@ Or wire it into an MCP client's config. Claude Desktop (`~/Library/Application S
 }
 ```
 
-CLI flags:
-
-| Flag             | What                                                                                                                             |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `--config <path>` | Required. Either a `swatchbook.config.{ts,mts,js,mjs}` (full config) or a DTCG `resolver.json` (bare — other options at defaults). |
-| `--cwd <path>`    | Override the working directory for resolving relative `resolver` / `tokens` paths.                                                |
-| `--no-watch`      | Disable live-reload. By default the server watches the config + resolved source files and swaps in fresh data on edits.            |
-| `--help`          | Print usage and exit.                                                                                                            |
-
-## Tools
-
-| Tool                  | Inputs                                                   | Returns                                                                                                       |
-| --------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `describe_project`    | (none)                                                    | High-level overview — token counts, axes, themes, presets, diagnostic counts, `$type`s present.                |
-| `list_tokens`         | `filter?` path glob, `type?` DTCG `$type`, `theme?` name | Array of `{ path, type?, value }` from the named theme (or default). Use first to discover paths.             |
-| `search_tokens`       | `query`, `theme?`, `limit?`                               | Case-insensitive substring search across paths, descriptions, and values. Returns matches + `matchedIn` hint. |
-| `resolve_theme`       | `tuple`, `filter?`, `type?`                               | Resolved token map for an axis tuple (`{ mode: "Dark", brand: "…" }`). Fills omitted axes from defaults.      |
-| `get_token`           | `path`                                                    | Full detail: per-theme value, alias chain, aliased-by list, CSS var reference.                                |
-| `get_alias_chain`     | `path`                                                    | Forward alias chain per theme (`path → ... → primitive`). Empty when the token is a primitive.                |
-| `get_aliased_by`      | `path`, `maxDepth?`                                       | Backward alias tree — every token that resolves through this path. Breadth-first with cycle protection; default max depth 6. |
-| `get_consumer_output` | `path`, `tuple?`                                          | CSS var, resolved value, compound `[data-…]` selector + HTML attrs needed to pin the tuple on `<html>`.        |
-| `get_color_formats`   | `path`, `theme?`                                          | Color token rendered in `hex` / `rgb` / `hsl` / `oklch` / `raw`, each with an `outOfGamut` flag.                |
-| `get_color_contrast`  | `foreground`, `background`, `theme?`, `algorithm?`        | Pair-wise contrast between two color tokens. `wcag21` returns the 1–21 ratio + AA/AAA pass flags (normal + large text); `apca` returns the signed Lc + body / large-text / non-text pass flags. |
-| `get_axis_variance`   | `path`                                                    | Classify how the token's resolved value depends on each axis. Returns `kind` (`constant` / `single` / `multi`), varying vs constant axes, and a per-axis breakdown with the value seen in each context. |
-| `list_axes`           | (none)                                                    | Axes + contexts + themes + presets from the project config.                                                   |
-| `get_diagnostics`     | `severity?` `'error' \| 'warn' \| 'info'`                 | Parser / resolver / validation diagnostics.                                                                   |
-| `emit_css`            | (none)                                                    | Full project stylesheet — `:root` default + per-tuple compound-selector blocks. |
-
-Path globs accept `*` (one segment), `**` (any number of segments trailing or mid-path), or exact dot-paths.
+Live-reload is on by default — the server watches the config and resolved source files, swapping in fresh data on edits. Pass `--no-watch` to disable.
 
 ## Programmatic use
 
-You can also construct the server in-process — useful if you're embedding the MCP handler in a larger toolchain:
+For embedding the MCP handler in a larger toolchain:
 
 ```ts
 import { createServer, loadFromConfig } from '@unpunnyfuns/swatchbook-mcp';
@@ -70,8 +40,14 @@ const server = createServer(project);
 await server.connect(new StdioServerTransport());
 ```
 
-## See also
+## Tools
 
-- [`@unpunnyfuns/swatchbook-core`](../core) — the loader this server wraps.
-- [Project README](../../README.md) — install and wiring flow for the whole toolchain.
-- [Model Context Protocol](https://modelcontextprotocol.io/) — the upstream spec.
+Fourteen read-only tools covering token listing, search, theme resolution, alias chains, color formats + contrast, axis variance, and diagnostics. Full catalogue in the [MCP reference](https://unpunnyfuns.github.io/swatchbook/reference/mcp).
+
+## Credits
+
+Token parsing and resolver evaluation come from [Terrazzo](https://terrazzo.app/) by the [Terrazzo team](https://github.com/terrazzoapp) via `@unpunnyfuns/swatchbook-core`.
+
+## Documentation
+
+[unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/) — concepts, guides, and full API reference.

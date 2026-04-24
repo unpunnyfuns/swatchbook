@@ -1,15 +1,8 @@
 # swatchbook-integrations
 
-Published as `@unpunnyfuns/swatchbook-integrations`. Display-side integrations for the swatchbook Storybook addon. Each subpath ships a factory that plugs into the addon's `integrations[]` option as a `SwatchbookIntegration`.
+Preview-side adapters that let your Storybook stories use [Tailwind v4](./src/tailwind.ts) or a [CSS-in-JS library](./src/css-in-js.ts) against [swatchbook](https://github.com/unpunnyfuns/swatchbook)'s tokens.
 
-> **Documentation:** [unpunnyfuns.github.io/swatchbook/integrations](https://unpunnyfuns.github.io/swatchbook/integrations). The addon stays tool-agnostic — integrations own their library-specific logic.
-
-## Available subpaths
-
-| Subpath | Covers | Consumer usage |
-| --- | --- | --- |
-| `./tailwind` | Tailwind v4 | Plug in; the addon auto-applies the generated `@theme` block. Write `bg-<prefix>-surface-default` / `p-<prefix>-md` utilities anywhere. |
-| `./css-in-js` | emotion, styled-components, any ThemeProvider consuming a JS theme object | Plug in, then `import { theme, color, space } from 'virtual:swatchbook/theme'` where needed. Named exports, explicit import site. |
+Not a replacement for your production build. Integrations are preview-only — they let `bg-sb-surface-default` or `theme.color.accent.bg` resolve correctly inside Storybook; for production artifacts, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources.
 
 ## Install
 
@@ -17,16 +10,15 @@ Published as `@unpunnyfuns/swatchbook-integrations`. Display-side integrations f
 npm install -D @unpunnyfuns/swatchbook-integrations
 ```
 
-Tailwind's Vite plugin is an additional dep for the `/tailwind` subpath:
+The `/tailwind` subpath wants Tailwind's Vite plugin too:
 
 ```sh
 npm install -D tailwindcss @tailwindcss/vite
 ```
 
-## Wiring
+## Usage
 
 ```ts title=".storybook/main.ts"
-import { defineMain } from '@storybook/react-vite/node';
 import tailwindIntegration from '@unpunnyfuns/swatchbook-integrations/tailwind';
 import cssInJsIntegration from '@unpunnyfuns/swatchbook-integrations/css-in-js';
 
@@ -43,19 +35,13 @@ export default defineMain({
 });
 ```
 
-The [per-subpath docs](https://unpunnyfuns.github.io/swatchbook/integrations) cover the consumer-facing usage for each one.
+Per-integration wiring details live in the [Integrations guide](https://unpunnyfuns.github.io/swatchbook/guides/integrations/) — Tailwind's Vite plugin setup, the CSS-in-JS `virtual:swatchbook/theme` import, role-map overrides, and how to write your own integration against the `SwatchbookIntegration` contract.
 
-## Writing your own integration
+## Boundaries
 
-The mechanism is sketched in the [architecture doc](https://unpunnyfuns.github.io/swatchbook/developers/architecture). In short: implement the `SwatchbookIntegration` contract from `@unpunnyfuns/swatchbook-core`, export a factory from your package, drop the factory's result into `integrations[]`.
+- ✅ Preview-side use inside Storybook. Stories that style with utility classes or theme accessors pick up the swatchbook toolbar's axis flips via CSS cascade.
+- ❌ No MUI / Vuetify / Bootstrap SCSS factories. Those need resolved values per named theme — run Terrazzo's CLI with `@terrazzo/plugin-js` for that case.
 
-## What this package does not do
+## Documentation
 
-- **Does not write artifacts to disk.** The integrations feed the Storybook preview only. For your application's production build, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources.
-- **Does not cover MUI / Vuetify / Bootstrap SCSS factories.** Those need resolved values per named theme, not `var()` references. Run Terrazzo's CLI with `@terrazzo/plugin-js` for that case; display-side integrations are out of scope.
-
-## See also
-
-- [`@unpunnyfuns/swatchbook-core`](../core) — `SwatchbookIntegration` type, `Project` shape, the loader your integrations' `render(project)` consumes.
-- [`@unpunnyfuns/swatchbook-addon`](../addon) — Storybook addon consuming `integrations[]`.
-- [Integrations docs](https://unpunnyfuns.github.io/swatchbook/integrations) — per-subpath recipes.
+[unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/) — concepts, guides, and full API reference.
