@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-docs
 
+## 0.0.30
+
+### Patch Changes
+
+- @unpunnyfuns/swatchbook-switcher@0.19.7
+
 ## 0.0.29
 
 ### Patch Changes
