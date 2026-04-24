@@ -1,6 +1,6 @@
 {
   "name": "@unpunnyfuns/swatchbook-switcher",
-  "version": "0.19.3",
+  "version": "0.19.4",
   "description": "Framework-agnostic theme-switcher UI for swatchbook — axis pills, preset pills, color-format selector. Consumed by the Storybook addon toolbar and any React host that knows how to set data-attributes on the document.",
   "license": "MIT",
   "author": "unpunnyfuns <unpunnyfuns@gmail.com>",

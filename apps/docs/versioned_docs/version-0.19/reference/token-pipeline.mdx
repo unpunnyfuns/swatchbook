@@ -42,11 +42,11 @@ The Vite plugin watches every file your config loaded (the resolver, every `$ref
 
 A short-form HMR event rides Storybook's channel to push the fresh snapshot into running blocks. Token graph updates in under a second on a typical save; edit a token with the [live Storybook](pathname:///storybook/) open to see it.
 
-See [consuming the active theme](../guides/consuming-the-active-theme) for how stories react to axis flips — related but distinct plumbing.
+See [consuming the active theme](../guides/consuming-the-active-theme.mdx) for how stories react to axis flips — related but distinct plumbing.
 
 ## Not a production theming API
 
-The virtual module lives inside Vite's module graph — the Storybook preview resolves it, consumer apps (Next.js, a Vite SPA, Remix) don't. For production, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources; its plugin ecosystem (`plugin-css`, `plugin-js`, `plugin-tailwind`, `plugin-swift`, `plugin-sass`, …) covers downstream platforms. When both pipelines run, [align their options](../guides/sharing-terrazzo-options) so what swatchbook shows matches what your apps ship.
+The virtual module lives inside Vite's module graph — the Storybook preview resolves it, consumer apps (Next.js, a Vite SPA, Remix) don't. For production, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources; its plugin ecosystem (`plugin-css`, `plugin-js`, `plugin-tailwind`, `plugin-swift`, `plugin-sass`, …) covers downstream platforms. When both pipelines run, [align their options](../guides/sharing-terrazzo-options.mdx) so what swatchbook shows matches what your apps ship.
 
 ## Where the same property holds
 
