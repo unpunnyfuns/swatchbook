@@ -5,6 +5,12 @@ import preview from '../../.storybook/preview.tsx';
 const meta = preview.meta({
   title: 'Blocks/TokenTable',
   component: TokenTable,
+  // Heavy data-driven DOM settles asynchronously (fuzzy-search index,
+  // font metrics, the row-level lazy swatch cells). Chromatic would
+  // otherwise snapshot mid-settle and flag the story as unstable. A
+  // short delay lets the render land before capture — capture-phase
+  // only, doesn't touch local dev or vitest.
+  parameters: { chromatic: { delay: 400 } },
   argTypes: {
     filter: { control: 'text' },
     type: {

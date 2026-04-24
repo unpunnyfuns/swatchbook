@@ -6,6 +6,11 @@ import preview from '../../.storybook/preview.tsx';
 const meta = preview.meta({
   title: 'Blocks/TokenNavigator',
   component: TokenNavigator,
+  // Heavy data-driven DOM (full token tree, fuzzy-search index, lazy
+  // per-type previews in the tree rows). Chromatic would otherwise
+  // snapshot mid-settle and flag the story as unstable. A short delay
+  // lets the render land before capture — capture-phase only.
+  parameters: { chromatic: { delay: 400 } },
   argTypes: {
     root: { control: 'text' },
     type: { control: 'text' },
