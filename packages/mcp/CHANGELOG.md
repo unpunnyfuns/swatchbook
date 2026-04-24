@@ -1,5 +1,13 @@
 # @unpunnyfuns/swatchbook-mcp
 
+## 0.19.9
+
+### Patch Changes
+
+- 2444c4e: Rework every package README to match the docs intro's register: human-register opening sentence, line breaks for pacing, detail-dense reference material (API tables, config fields, block catalogues, CLI flag tables, MCP tool tables) pushed out to the docs site where it belongs. Each README now answers "what is this and how do I install it" in ~50 lines instead of ~120, with clear links for readers who want more. Total README line count across all packages dropped from ~700 to ~370.
+- Updated dependencies [2444c4e]
+  - @unpunnyfuns/swatchbook-core@0.19.9
+
 ## 0.19.8
 
 ### Patch Changes
