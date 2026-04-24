@@ -30,7 +30,7 @@ it('surfaces an error when the resolver points at a file that does not exist', a
 
 it('surfaces a diagnostic or error when a resolver $ref target is missing', async () => {
   writeJSON('resolver.json', {
-    $schema: 'https://design-tokens.org/tr/2025/drafts/resolver/',
+    $schema: 'https://www.designtokens.org/TR/2025.10/resolver/',
     version: '2025.10',
     sets: { ref: { sources: [{ $ref: './missing.json' }] } },
     resolutionOrder: [{ $ref: '#/sets/ref' }],
@@ -43,7 +43,7 @@ it('loads a minimal valid resolver with a single set and no modifiers', async ()
     color: { red: { $type: 'color', $value: { colorSpace: 'srgb', components: [1, 0, 0] } } },
   });
   writeJSON('resolver.json', {
-    $schema: 'https://design-tokens.org/tr/2025/drafts/resolver/',
+    $schema: 'https://www.designtokens.org/TR/2025.10/resolver/',
     version: '2025.10',
     sets: { main: { sources: [{ $ref: './tokens.json' }] } },
     resolutionOrder: [{ $ref: '#/sets/main' }],
@@ -58,7 +58,7 @@ it('loads a resolver with one modifier + two contexts (no override overlays)', a
     color: { red: { $type: 'color', $value: { colorSpace: 'srgb', components: [1, 0, 0] } } },
   });
   writeJSON('resolver.json', {
-    $schema: 'https://design-tokens.org/tr/2025/drafts/resolver/',
+    $schema: 'https://www.designtokens.org/TR/2025.10/resolver/',
     version: '2025.10',
     sets: { main: { sources: [{ $ref: './tokens.json' }] } },
     modifiers: {
@@ -81,7 +81,7 @@ it('records sourceFiles for every file pulled through $ref', async () => {
     color: { red: { $type: 'color', $value: { colorSpace: 'srgb', components: [1, 0, 0] } } },
   });
   const resolverPath = writeJSON('resolver.json', {
-    $schema: 'https://design-tokens.org/tr/2025/drafts/resolver/',
+    $schema: 'https://www.designtokens.org/TR/2025.10/resolver/',
     version: '2025.10',
     sets: { main: { sources: [{ $ref: './tokens.json' }] } },
     resolutionOrder: [{ $ref: '#/sets/main' }],
@@ -98,7 +98,7 @@ it('surfaces a warn diagnostic when a modifier has no default and no contexts', 
     color: { red: { $type: 'color', $value: { colorSpace: 'srgb', components: [1, 0, 0] } } },
   });
   writeJSON('resolver.json', {
-    $schema: 'https://design-tokens.org/tr/2025/drafts/resolver/',
+    $schema: 'https://www.designtokens.org/TR/2025.10/resolver/',
     version: '2025.10',
     sets: { main: { sources: [{ $ref: './tokens.json' }] } },
     modifiers: {
