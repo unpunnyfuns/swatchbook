@@ -201,43 +201,45 @@ export function ColorTable({
           />
         </div>
       )}
-      <table className="sb-color-table__table">
-        <caption className="sb-color-table__caption">{captionText}</caption>
-        <thead>
-          <tr>
-            <th className="sb-color-table__th sb-color-table__th--swatch">
-              <span className="sb-color-table__sr-only">Swatch</span>
-            </th>
-            <th className="sb-color-table__th sb-color-table__th--path">Name</th>
-            <th className="sb-color-table__th">Value</th>
-            <th className="sb-color-table__th">CSS var</th>
-            <th className="sb-color-table__th">Alias</th>
-            <th className="sb-color-table__th sb-color-table__th--expand">
-              <span className="sb-color-table__sr-only">Expand</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {visibleGroups.length === 0 && (
+      <div className="sb-color-table__scroll">
+        <table className="sb-color-table__table">
+          <caption className="sb-color-table__caption">{captionText}</caption>
+          <thead>
             <tr>
-              <td colSpan={COLUMN_COUNT} className="sb-color-table__td sb-color-table__empty-row">
-                No colors match "{query.trim()}".
-              </td>
+              <th className="sb-color-table__th sb-color-table__th--swatch">
+                <span className="sb-color-table__sr-only">Swatch</span>
+              </th>
+              <th className="sb-color-table__th sb-color-table__th--path">Name</th>
+              <th className="sb-color-table__th">Value</th>
+              <th className="sb-color-table__th">CSS var</th>
+              <th className="sb-color-table__th">Alias</th>
+              <th className="sb-color-table__th sb-color-table__th--expand">
+                <span className="sb-color-table__sr-only">Expand</span>
+              </th>
             </tr>
-          )}
-          {visibleGroups.map((group) => (
-            <GroupRow
-              key={group.base}
-              group={group}
-              selectedLabel={selectedByBase[group.base]}
-              expanded={expandedByBase.has(group.base)}
-              onToggleExpand={toggleExpand}
-              onSelectVariant={selectVariant}
-              {...(onSelect !== undefined && { onSelect })}
-            />
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {visibleGroups.length === 0 && (
+              <tr>
+                <td colSpan={COLUMN_COUNT} className="sb-color-table__td sb-color-table__empty-row">
+                  No colors match "{query.trim()}".
+                </td>
+              </tr>
+            )}
+            {visibleGroups.map((group) => (
+              <GroupRow
+                key={group.base}
+                group={group}
+                selectedLabel={selectedByBase[group.base]}
+                expanded={expandedByBase.has(group.base)}
+                onToggleExpand={toggleExpand}
+                onSelectVariant={selectVariant}
+                {...(onSelect !== undefined && { onSelect })}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
