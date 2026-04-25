@@ -12,7 +12,7 @@ Point it at a swatchbook config (or a bare DTCG `resolver.json`) and it parses t
 npx @unpunnyfuns/swatchbook-mcp --config swatchbook.config.ts
 ```
 
-Or wire it into an MCP client. Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+Or wire it into an MCP client by adding an entry to its server config:
 
 ```json
 {
