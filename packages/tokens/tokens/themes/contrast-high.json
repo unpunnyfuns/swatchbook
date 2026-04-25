@@ -1,15 +1,15 @@
 {
   "color": {
     "$type": "color",
-    "$description": "High-contrast overlay — strengthens borders and focus rings, escalates the accent to AAA contrast via each mode's `color.accessible.accent.*` slot (alias indirection keeps this file mode-agnostic; Light picks up a deep-blue button, Dark an inverted light-blue-with-dark-text button). Typography shifts to a Comic-family stack for irregular-letterform legibility.",
+    "$description": "High-contrast overlay — strengthens borders and focus rings, escalates the accent to AAA contrast and lifts muted/subtle text toward each mode's `color.accessible.*` slot (alias indirection keeps this file mode-agnostic; Light picks up a deep-blue button with darker muted text on light surfaces, Dark an inverted light-blue-with-dark-text button paired with lighter muted text on dark surfaces). Typography shifts to a Comic-family stack for irregular-letterform legibility.",
     "border": {
       "default": { "$value": "{color.palette.neutral.700}" },
       "strong":  { "$value": "{color.palette.neutral.900}" },
       "focus":   { "$value": "{color.palette.yellow.500}" }
     },
     "text": {
-      "muted":  { "$value": "{color.palette.neutral.700}" },
-      "subtle": { "$value": "{color.palette.neutral.600}" }
+      "muted":  { "$value": "{color.accessible.text.muted}" },
+      "subtle": { "$value": "{color.accessible.text.subtle}" }
     },
     "accent": {
       "bg":       { "$value": "{color.accessible.accent.bg}" },
