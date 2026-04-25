@@ -50,7 +50,14 @@ jobs:
           workingDir: apps/storybook
           storybookBuildDir: storybook-static
           exitZeroOnChanges: true
-          onlyChanged: true
+          # `onlyChanged: true` (TurboSnap) wants a preview-stats.json
+          # from the Storybook build that our build:storybook script
+          # doesn't produce — Chromatic disables itself with "missing
+          # stats file" error and fails the job. Re-enable once we've
+          # added `--stats-json` to the build (or sorted out the
+          # Rspack-builder stats path); capturing every story every run
+          # is fine at our scale.
+          onlyChanged: false
           # Return as soon as the upload is done; Chromatic's GitHub
           # integration reports the visual-diff status asynchronously via
           # a check, so blocking on server-side comparison just makes the
