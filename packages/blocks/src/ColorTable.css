@@ -1,3 +1,9 @@
+.sb-color-table__scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 .sb-color-table__table {
   width: 100%;
   border-collapse: collapse;
