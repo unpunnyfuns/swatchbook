@@ -1,5 +1,12 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.20.3
+
+### Patch Changes
+
+- Updated dependencies [dcdb9ee]
+  - @unpunnyfuns/swatchbook-core@0.20.3
+
 ## 0.20.2
 
 ### Patch Changes
