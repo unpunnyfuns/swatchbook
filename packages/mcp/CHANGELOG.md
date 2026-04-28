@@ -1,5 +1,12 @@
 # @unpunnyfuns/swatchbook-mcp
 
+## 0.20.2
+
+### Patch Changes
+
+- 5324d0c: Make the MCP-client wiring instructions client-agnostic across the README and the docs site (`reference/mcp`, `intro`, `developers/architecture`). Previous wording singled out one client by name and embedded a single platform-specific config path; the `mcpServers` JSON shape is the same across MCP hosts, so the wording now lets each host's own docs cover where its server-config file lives.
+  - @unpunnyfuns/swatchbook-core@0.20.2
+
 ## 0.20.1
 
 ### Patch Changes
