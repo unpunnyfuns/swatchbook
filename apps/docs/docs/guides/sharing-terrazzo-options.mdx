@@ -6,61 +6,7 @@ sidebar_position: 5
 
 # Aligning swatchbook with your production token build
 
-Swatchbook renders tokens inside Storybook by running `@terrazzo/parser` against the same DTCG source your production pipeline consumes. If that production pipeline is also Terrazzo (or, with some caveats, Style Dictionary), you can wire the two so they agree on hex formatting, CSS variable names, per-platform identifiers, and everything else downstream of the raw token graph. When they agree, the swatches, values, and usage snippets swatchbook shows match exactly what your apps ship.
-
-This guide covers:
-
-- What "aligning" actually means — the surfaces where drift bites
-- The three config knobs swatchbook exposes for this (`cssOptions`, `listingOptions`, `terrazzoPlugins`)
-- What swatchbook controls internally and you can't override — with the reasoning
-- A shared-options module pattern for Terrazzo consumers
-- Per-platform identifier display (Swift, Android, SCSS, JS, …)
-- Practical notes for Style Dictionary users
-- Common pitfalls
-
-## Why alignment matters
-
-The symptom of misalignment is subtle: everything appears to work, but the values your docs show differ from the values your apps ship. Concretely:
-
-- A `<ColorTable>` cell shows `color(display-p3 0.24 0.56 0.89)` because swatchbook's default `plugin-css` produces the modern `color()` form. Your production CSS passes `legacyHex: true` and ships `#3d8fe4`. Your designers QA the docs, sign off on the modern form, and the rollout looks different than expected.
-- `<TokenUsageSnippet>` emits `var(--ds-colour-surface-default)` using a British-spelling `variableName` policy you configured in production — but swatchbook's default policy emits `--ds-color-surface-default`. Consumer-facing code reads fine; docs snippets are wrong.
-- A future per-platform column in a block you write renders `colorSurfaceDefault` for Swift, but production Swift ships `ColorSurfaceDefault` because `@terrazzo/plugin-swift` wasn't loaded in the swatchbook build.
-
-The three config knobs below close each gap.
-
-## The three knobs
-
-Swatchbook loads its own in-memory Terrazzo build at preview boot. That build contains `@terrazzo/plugin-css` (for the stylesheet injected into stories) and `@terrazzo/plugin-token-listing` (for the metadata blocks display). Three config fields forward options into that build:
-
-| Config field | Forwards to | Controls |
-| --- | --- | --- |
-| [`cssOptions`](../reference/config.mdx#cssoptions) | `@terrazzo/plugin-css` | value formatting (hex vs `color()`), transforms, include/exclude globs, utility groups |
-| [`listingOptions`](../reference/config.mdx#listingoptions) | `@terrazzo/plugin-token-listing` | per-platform naming, mode metadata, `previewValue` / `subtype` hooks |
-| [`terrazzoPlugins`](../reference/config.mdx#terrazzoplugins) | additional plugins in the build | which plugin naming logic is available to the listing |
-
-Set all three from a single shared module and your terrazzo.config.ts and swatchbook.config.ts stay in lockstep forever.
-
-## What swatchbook owns (and you can't override)
-
-Five fields are stripped at the type level. They're load-bearing for how swatchbook emits CSS and publishes the listing; letting consumers override them breaks the preview model.
-
-- **`cssOptions.variableName`** — swatchbook routes naming through `@terrazzo/token-tools`' `makeCSSVar` with your `cssVarPrefix`, so every variable carries the prefix and kebab-cases consistently with what the listing records under `names.css`. A custom policy would make the listing's `names.css` disagree with the emitted stylesheet, which is worse than the default.
-- **`cssOptions.permutations`** — swatchbook synthesizes one permutation per resolver theme (or per layered tuple) so the emitted stylesheet declares each permutation under a compound `data-<prefix>-<axis>` selector. Overriding this defeats axis-aware rendering.
-- **`cssOptions.filename`** — the internal stylesheet is captured in memory, never written to disk.
-- **`cssOptions.skipBuild`** — setting `true` nulls out the listing's `previewValue` derivation, breaking every block that displays a value.
-- **`listingOptions.filename`** — the listing is captured in memory; the `outputFile` handler finds the entry by filename, and swatchbook owns that handshake.
-
-Everything else passes through untouched.
-
-### Soft-inert knobs (type-accepted, runtime-ignored)
-
-Three older `plugin-css` options predate permutations and pre-`permutations`-era builds still expose them:
-
-- `baseSelector`
-- `baseScheme`
-- `modeSelectors`
-
-Setting any of these doesn't hit a type error because they're still part of `CSSPluginOptions`, but swatchbook always drives emission through permutations, so they do nothing in the preview. Load emits a `swatchbook/css-options` warn diagnostic listing the offending keys — visible in the preview's diagnostic overlay and on `Project.diagnostics` for programmatic consumers — so the "my setting isn't taking effect" failure mode turns into an explicit signal.
+If you run Terrazzo's CLI in production, swatchbook can read the same value-formatting rules, plugin set, and listing metadata so the swatches, values, and snippets in Storybook match exactly what your apps ship. The pattern is one shared TypeScript module that both `terrazzo.config.ts` and `swatchbook.config.ts` import from.
 
 ## The shared-options module pattern
 
@@ -141,7 +87,13 @@ export default defineSwatchbookConfig({
 });
 ```
 
-Now any change to `sharedCssOptions.legacyHex`, or a new plugin added to `sharedPlugins`, reaches both the production CLI and swatchbook's Storybook build with one edit.
+Now any change to `sharedCssOptions.legacyHex`, or a new plugin added to `sharedPlugins`, reaches both the production CLI and swatchbook's Storybook build with one edit. Three swatchbook config fields receive the shared blocks:
+
+| Config field | Forwards to | Controls |
+| --- | --- | --- |
+| [`cssOptions`](../reference/config.mdx#cssoptions) | `@terrazzo/plugin-css` | value formatting (hex vs `color()`), transforms, include/exclude globs, utility groups |
+| [`listingOptions`](../reference/config.mdx#listingoptions) | `@terrazzo/plugin-token-listing` | per-platform naming, mode metadata, `previewValue` / `subtype` hooks |
+| [`terrazzoPlugins`](../reference/config.mdx#terrazzoplugins) | additional plugins in the build | which plugin naming logic is available to the listing |
 
 ### Monorepo layouts
 
@@ -163,6 +115,42 @@ apps/
 ```
 
 If the shared module imports from other workspace packages, make sure your bundler (tsdown / rolldown / whatever `pnpm -r build` runs) resolves those imports in source form — or publish the shared module alongside the tokens package itself.
+
+## Why this pattern, not a "read my Terrazzo config" field
+
+Swatchbook accepts plugin objects via `terrazzoPlugins` rather than ingesting a constructed `terrazzo.config.ts`. The reason is that plugin options live inside each plugin's closure once the factory runs — there's no general way for swatchbook to read `legacyHex` (or any other constructor argument) back out of a `cssPlugin({ legacyHex: true })` call. A `config.terrazzo: TerrazzoConfig` field could only inherit `tokens` + `plugins` and would silently ignore everything in `cssOptions`, which is the field most consumers expect alignment for. The shared-module pattern handles every option symmetrically and works the same way `tsconfig.json` `extends` or `vite.config` / `vitest.config` factoring does.
+
+## Drift symptoms — why this matters
+
+Without alignment, the docs and production diverge in subtle ways. Concretely:
+
+- A `<ColorTable>` cell shows `color(display-p3 0.24 0.56 0.89)` because swatchbook's default `plugin-css` produces the modern `color()` form. Your production CSS passes `legacyHex: true` and ships `#3d8fe4`. Designers QA the docs, sign off on the modern form, and the rollout looks different than expected.
+- `<TokenUsageSnippet>` emits `var(--ds-colour-surface-default)` using a British-spelling `variableName` policy you configured in production — but swatchbook's default policy emits `--ds-color-surface-default`. Consumer-facing code reads fine; docs snippets are wrong.
+- A future per-platform column in a block you write renders `colorSurfaceDefault` for Swift, but production Swift ships `ColorSurfaceDefault` because `@terrazzo/plugin-swift` wasn't loaded in the swatchbook build.
+
+The shared-options module above closes each of these gaps in one place.
+
+## What swatchbook owns (and you can't override)
+
+Five fields are stripped at the type level. They're load-bearing for how swatchbook emits CSS and publishes the listing; letting consumers override them breaks the preview model.
+
+- **`cssOptions.variableName`** — swatchbook routes naming through `@terrazzo/token-tools`' `makeCSSVar` with your `cssVarPrefix`, so every variable carries the prefix and kebab-cases consistently with what the listing records under `names.css`. A custom policy would make the listing's `names.css` disagree with the emitted stylesheet, which is worse than the default.
+- **`cssOptions.permutations`** — swatchbook synthesizes one permutation per resolver theme (or per layered tuple) so the emitted stylesheet declares each permutation under a compound `data-<prefix>-<axis>` selector. Overriding this defeats axis-aware rendering.
+- **`cssOptions.filename`** — the internal stylesheet is captured in memory, never written to disk.
+- **`cssOptions.skipBuild`** — setting `true` nulls out the listing's `previewValue` derivation, breaking every block that displays a value.
+- **`listingOptions.filename`** — the listing is captured in memory; the `outputFile` handler finds the entry by filename, and swatchbook owns that handshake.
+
+Everything else passes through untouched.
+
+### Soft-inert knobs (type-accepted, runtime-ignored)
+
+Three older `plugin-css` options predate permutations and pre-`permutations`-era builds still expose them:
+
+- `baseSelector`
+- `baseScheme`
+- `modeSelectors`
+
+Setting any of these doesn't hit a type error because they're still part of `CSSPluginOptions`, but swatchbook always drives emission through permutations, so they do nothing in the preview. Load emits a `swatchbook/css-options` warn diagnostic listing the offending keys — visible in the preview's diagnostic overlay and on `Project.diagnostics` for programmatic consumers — so the "my setting isn't taking effect" failure mode turns into an explicit signal.
 
 ## Per-platform identifier display
 
