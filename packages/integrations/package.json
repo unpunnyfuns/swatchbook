@@ -1,6 +1,6 @@
 {
   "name": "@unpunnyfuns/swatchbook-integrations",
-  "version": "0.20.2",
+  "version": "0.20.3",
   "description": "Display-side integrations for the swatchbook Storybook addon. Each subpath (./tailwind, …) exports a factory that plugs into the addon's options as a SwatchbookIntegration.",
   "license": "MIT",
   "author": "unpunnyfuns <unpunnyfuns@gmail.com>",
