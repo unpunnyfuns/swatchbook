@@ -1,10 +1,10 @@
 # swatchbook-addon
 
-The Storybook 10 side of [swatchbook](https://github.com/unpunnyfuns/swatchbook).
+Storybook 10 addon for documenting DTCG design tokens.
 
-Loads your DTCG tokens at config time, exposes the resolved graph to the preview through a virtual module, and renders a toolbar popover with one dropdown per modifier axis (`mode`, `brand`, …), preset pills, and a color-format picker. Ships a typed `useToken()` hook for stories that need a resolved value at runtime.
+Loads your token files, resolves the alias graph, and adds a toolbar that flips the active theme tuple (`mode × brand × contrast × …`). Every story and MDX doc block re-renders against the new tuple without per-story wiring — component stories and the token reference share one source of truth.
 
-One install pulls the whole React surface — toolbar, preview decorator, every MDX doc block, `ThemeSwitcher`, `useToken()`. `import { TokenTable, ThemeSwitcher, useToken } from '@unpunnyfuns/swatchbook-addon'` works without a second install line because the addon re-exports the full blocks + switcher API.
+Bundles MDX doc blocks (`<TokenTable />`, `<ColorPalette />`, `<TokenDetail />`, …), a standalone `<ThemeSwitcher>` for non-Storybook surfaces, and a typed `useToken()` hook for stories that need a resolved value at runtime. Re-exports [`@unpunnyfuns/swatchbook-blocks`](../blocks) and [`@unpunnyfuns/swatchbook-switcher`](../switcher) — a single install covers the whole React surface.
 
 ## Install
 
