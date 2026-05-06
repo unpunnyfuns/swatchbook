@@ -177,19 +177,21 @@ export const FocusVisibleRow = meta.story({
       const group = canvasElement.querySelector('[data-testid="token-navigator-group"]');
       if (!group) throw new Error('navigator did not render any group rows');
     });
-    // Tab until a treeitem (group-row or leaf-row) receives keyboard focus.
-    for (let i = 0; i < 30; i += 1) {
+    const isFocusedTreeitem = (): boolean => {
+      const el = document.activeElement;
+      return (
+        el instanceof HTMLElement &&
+        canvasElement.contains(el) &&
+        (el.classList.contains('sb-token-navigator__group-row') ||
+          el.classList.contains('sb-token-navigator__leaf-row'))
+      );
+    };
+    const tabUntilTreeitem = async (remaining: number): Promise<void> => {
+      if (isFocusedTreeitem() || remaining <= 0) return;
       await userEvent.tab();
-      const focused = document.activeElement;
-      if (
-        focused instanceof HTMLElement &&
-        canvasElement.contains(focused) &&
-        (focused.classList.contains('sb-token-navigator__group-row') ||
-          focused.classList.contains('sb-token-navigator__leaf-row'))
-      ) {
-        break;
-      }
-    }
+      await tabUntilTreeitem(remaining - 1);
+    };
+    await tabUntilTreeitem(30);
     const focused = document.activeElement;
     if (
       !(focused instanceof HTMLElement) ||

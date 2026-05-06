@@ -65,13 +65,16 @@ export const FocusVisibleRow = meta.story({
   parameters: { chromatic: { disableSnapshot: true } },
   play: async ({ canvasElement }) => {
     await assertTableRenders(canvasElement);
-    // Tab from the document root until a tbody row receives focus —
-    // keyboard-driven focus is what activates :focus-visible.
-    for (let i = 0; i < 20; i += 1) {
+    const isFocusedRow = (): boolean => {
+      const el = document.activeElement;
+      return el?.tagName === 'TR' && el !== null && canvasElement.contains(el);
+    };
+    const tabUntilRow = async (remaining: number): Promise<void> => {
+      if (isFocusedRow() || remaining <= 0) return;
       await userEvent.tab();
-      const focused = document.activeElement;
-      if (focused?.tagName === 'TR' && canvasElement.contains(focused)) break;
-    }
+      await tabUntilRow(remaining - 1);
+    };
+    await tabUntilRow(20);
     const focused = document.activeElement;
     if (!(focused instanceof HTMLElement) || focused.tagName !== 'TR') {
       throw new Error(`expected a tbody row to receive keyboard focus; got ${focused?.tagName}`);
