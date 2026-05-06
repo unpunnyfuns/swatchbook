@@ -1,5 +1,5 @@
 import { definePreviewAddon } from 'storybook/internal/csf';
-import * as previewExports from './preview.tsx';
+import * as previewExports from '#/preview.tsx';
 
 export {
   ADDON_ID,
