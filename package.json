@@ -35,7 +35,8 @@
   "pnpm": {
     "overrides": {
       "webpackbar": "7.0.0",
-      "uuid": "^14.0.0"
+      "uuid": "^14.0.0",
+      "serialize-javascript": "^7.0.5"
     },
     "patchedDependencies": {
       "@terrazzo/plugin-css-in-js@2.0.3": "patches/@terrazzo__plugin-css-in-js@2.0.3.patch"
