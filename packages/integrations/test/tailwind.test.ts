@@ -7,6 +7,8 @@ import type { Project } from '@unpunnyfuns/swatchbook-core';
 
 let project: Project;
 
+// beforeAll: loadProject against the full fixture (~1s) is shared by
+// every render-output assertion below; per-test reload would dominate.
 beforeAll(async () => {
   project = await loadProject({ resolver: resolverPath, cssVarPrefix: 'sb' }, dirname(tokensDir));
 });
