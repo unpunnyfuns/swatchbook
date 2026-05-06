@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-integrations
 
+## 0.20.4
+
+### Patch Changes
+
+- @unpunnyfuns/swatchbook-core@0.20.4
+
 ## 0.20.3
 
 ### Patch Changes
