@@ -59,6 +59,11 @@
   box-shadow: none;
 }
 
+.sb-switcher__pill:focus-visible {
+  outline: 2px solid var(--swatchbook-accent-bg, #1d4ed8);
+  outline-offset: 1px;
+}
+
 .sb-switcher__pill--active {
   font-weight: 600;
   background: rgba(0, 122, 255, 0.12);
