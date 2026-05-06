@@ -6,26 +6,17 @@ import { type ColorFormat, formatColor } from '#/format-color.ts';
  *
  * Primary path: plugin-css's `previewValue` from the Token Listing —
  * the CSS string the consumer's production stylesheet would emit for
- * this token. Inspector rendering stays in lockstep with what they
- * ship. The previewValue is run through `cleanFloatNoise` to strip
- * IEEE-754 artefacts (e.g. `55.00000000000001%` → `55%`).
+ * this token. The previewValue is run through `cleanFloatNoise` to
+ * strip IEEE-754 artefacts (e.g. `55.00000000000001%` → `55%`).
  *
  * Color tokens only take the previewValue when the active toolbar
  * format matches plugin-css's output (hex). Other formats
  * (rgb / hsl / oklch / raw) fall through to local colorjs.io.
  *
- * Fallback path (no listing entry): the local `format*` formatters
- * below produce inspector-friendly compact representations:
- * - `dimension|duration` → `value + unit` (`16px`, `200ms`)
- * - `fontFamily`         → string or array joined with `, `
- * - `cubicBezier`        → `cubic-bezier(a, b, c, d)`
- * - `shadow`             → layers joined with `, `
- * - `border`             → `width style color`
- * - `transition`         → `duration easing [delay]`
- * - `typography`         → `family / size / line-height / weight`
- * - `gradient`           → `stops joined with →`
- *
- * Unknown object shapes fall through to truncated JSON.
+ * Composite types without a listing entry fall through to truncated
+ * JSON — projects that don't run plugin-token-listing don't get
+ * pretty composite rendering, which is acceptable for the current
+ * single-user resolver-backed use case.
  */
 export function formatTokenValue(
   value: unknown,
@@ -38,24 +29,15 @@ export function formatTokenValue(
     return String(value);
   }
 
-  // Prefer plugin-css's authoritative `previewValue` whenever it's
-  // available. For non-color types it's the CSS string the consumer's
-  // production stylesheet would actually emit — keeping inspector
-  // rendering in lockstep with what they ship. For color tokens we
-  // only take it when the active toolbar format matches plugin-css's
-  // output (hex) — other formats (rgb / hsl / oklch / raw) are the
-  // user's inspection choice and fall through to local colorjs.io
-  // conversion. The local formatters (`formatGradient`,
-  // `formatTypography`, etc.) below are only reached when there is no
-  // listing entry — e.g. before plugin-token-listing has computed,
-  // or when a consumer constructs a project without a listing build.
+  // Prefer plugin-css's `previewValue`. For non-color types it's the
+  // CSS string the consumer's production stylesheet would actually
+  // emit. For color tokens we only take it when the toolbar format
+  // matches plugin-css's output (hex); other formats fall through to
+  // local colorjs.io.
   //
-  // `cleanFloatNoise` strips IEEE-754 representation artefacts that
-  // leak through plugin-css's `position * 100` arithmetic for gradient
-  // stops (e.g. `55.00000000000001%` for a 0.55 stop). Any decimal
-  // with 8+ fractional digits gets rounded to 1/1000 — preserves
-  // authored 8ths and gradient/opacity thirds while collapsing the
-  // 14th–16th-decimal noise.
+  // `cleanFloatNoise` strips IEEE-754 artefacts that leak through
+  // plugin-css's `100 * position` arithmetic for gradient stops
+  // (`@terrazzo/token-tools/css.js:190`).
   const preview = listingEntry?.previewValue;
   if (preview !== undefined) {
     const previewStr = typeof preview === 'string' ? cleanFloatNoise(preview) : String(preview);
@@ -85,12 +67,6 @@ export function formatTokenValue(
       return formatShadow(value, colorFormat);
     case 'border':
       return formatBorder(value, colorFormat);
-    case 'transition':
-      return formatTransition(value);
-    case 'typography':
-      return formatTypography(value);
-    case 'gradient':
-      return formatGradient(value, colorFormat);
     default:
       return formatUnknown(value);
   }
@@ -177,41 +153,6 @@ function formatBorder(v: unknown, colorFormat: ColorFormat): string {
   const style = formatPrimitive(b['style']);
   const color = formatColor(b['color'], colorFormat).value;
   return [width, style, color].filter((p) => p !== '').join(' ');
-}
-
-function formatTransition(v: unknown): string {
-  if (!v || typeof v !== 'object') return formatUnknown(v);
-  const t = v as Record<string, unknown>;
-  const duration = formatDimension(t['duration']);
-  const easing = formatPrimitive(t['timingFunction']);
-  const delay = formatDimension(t['delay']);
-  const parts = [duration, easing];
-  // Only emit delay when non-zero. `0ms` / `0s` clutters the one-liner.
-  if (!/^0\D/.test(delay) && delay !== '') parts.push(delay);
-  return parts.filter((p) => p !== '').join(' ');
-}
-
-function formatTypography(v: unknown): string {
-  if (!v || typeof v !== 'object') return formatUnknown(v);
-  const t = v as Record<string, unknown>;
-  const family = formatFontFamily(t['fontFamily']);
-  const size = formatDimension(t['fontSize']);
-  const lineHeight = formatPrimitive(t['lineHeight']);
-  const weight = formatPrimitive(t['fontWeight']);
-  return [family, size, lineHeight, weight].filter((p) => p !== '').join(' / ');
-}
-
-function formatGradient(v: unknown, colorFormat: ColorFormat): string {
-  if (!Array.isArray(v) || v.length === 0) return formatUnknown(v);
-  const parts = v.map((stop) => {
-    if (!stop || typeof stop !== 'object') return formatUnknown(stop);
-    const s = stop as Record<string, unknown>;
-    const position =
-      typeof s['position'] === 'number' ? `${Math.round(s['position'] * 100)}%` : '?';
-    const color = formatColor(s['color'], colorFormat).value;
-    return `${color} ${position}`;
-  });
-  return parts.join(' → ');
 }
 
 function formatUnknown(v: unknown): string {

@@ -63,35 +63,6 @@ describe('formatTokenValue', () => {
     expect(out).toMatch(/rgb/);
   });
 
-  it('formats typography as family / size / lineHeight / weight', () => {
-    const typography = {
-      fontFamily: 'Inter',
-      fontSize: { value: 16, unit: 'px' },
-      lineHeight: 1.5,
-      fontWeight: 400,
-    };
-    expect(formatTokenValue(typography, 'typography', 'hex')).toBe('Inter / 16px / 1.5 / 400');
-  });
-
-  it('formats transitions without trailing zero delay', () => {
-    const transition = {
-      duration: { value: 200, unit: 'ms' },
-      timingFunction: 'ease-out',
-      delay: { value: 0, unit: 'ms' },
-    };
-    expect(formatTokenValue(transition, 'transition', 'hex')).toBe('200ms ease-out');
-  });
-
-  it('formats gradient stops with percent positions', () => {
-    const gradient = [
-      { position: 0, color: { colorSpace: 'srgb', components: [0, 0, 0], hex: '#000' } },
-      { position: 1, color: { colorSpace: 'srgb', components: [1, 1, 1], hex: '#fff' } },
-    ];
-    const out = formatTokenValue(gradient, 'gradient', 'hex');
-    expect(out).toContain('0%');
-    expect(out).toContain('100%');
-  });
-
   it('passes plugin-css previewValue through, scrubbing IEEE-754 noise from gradient stops', () => {
     // plugin-css emits `100 * position`% without rounding, so 0.55
     // surfaces as 55.00000000000001%. cleanFloatNoise normalises that
@@ -108,15 +79,6 @@ describe('formatTokenValue', () => {
     const out = formatTokenValue(gradient, 'gradient', 'hex', listing);
     expect(out).not.toContain('55.00000000000001');
     expect(out).toBe('#fde047 0%, #ef4444 55%, #7c3aed 100%');
-  });
-
-  it('falls back to the local gradient formatter when no previewValue is available', () => {
-    const gradient = [
-      { position: 0, color: { colorSpace: 'srgb', components: [0, 0, 0], hex: '#000' } },
-      { position: 1, color: { colorSpace: 'srgb', components: [1, 1, 1], hex: '#fff' } },
-    ];
-    const out = formatTokenValue(gradient, 'gradient', 'hex');
-    expect(out).toContain('→');
   });
 
   it('preserves legitimate 3-decimal precision in previewValue numbers', () => {
