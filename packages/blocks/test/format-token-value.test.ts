@@ -92,9 +92,10 @@ describe('formatTokenValue', () => {
     expect(out).toContain('100%');
   });
 
-  it('rounds gradient stop positions instead of leaking float precision', () => {
-    // 0.55 * 100 in IEEE-754 is 55.00000000000001. plugin-css's
-    // previewValue surfaces that; the local formatter must round.
+  it('passes plugin-css previewValue through, scrubbing IEEE-754 noise from gradient stops', () => {
+    // plugin-css emits `100 * position`% without rounding, so 0.55
+    // surfaces as 55.00000000000001%. cleanFloatNoise normalises that
+    // to 55% while preserving the rest of the previewValue verbatim.
     const gradient = [
       { position: 0, color: { colorSpace: 'srgb', components: [1, 1, 0], hex: '#fde047' } },
       { position: 0.55, color: { colorSpace: 'srgb', components: [1, 0, 0], hex: '#ef4444' } },
@@ -106,13 +107,36 @@ describe('formatTokenValue', () => {
     };
     const out = formatTokenValue(gradient, 'gradient', 'hex', listing);
     expect(out).not.toContain('55.00000000000001');
-    expect(out).toContain('55%');
+    expect(out).toBe('#fde047 0%, #ef4444 55%, #7c3aed 100%');
   });
 
-  it('renders typography via the local family-first formatter, not plugin-css shorthand', () => {
-    // plugin-css emits `weight size/lh family` (CSS `font` shorthand);
-    // local formatter leads with family for inspector-table column
-    // alignment. Asserts the local form wins regardless of previewValue.
+  it('falls back to the local gradient formatter when no previewValue is available', () => {
+    const gradient = [
+      { position: 0, color: { colorSpace: 'srgb', components: [0, 0, 0], hex: '#000' } },
+      { position: 1, color: { colorSpace: 'srgb', components: [1, 1, 1], hex: '#fff' } },
+    ];
+    const out = formatTokenValue(gradient, 'gradient', 'hex');
+    expect(out).toContain('→');
+  });
+
+  it('preserves legitimate 3-decimal precision in previewValue numbers', () => {
+    // Authored values like 33.333% (gradient stop at 1/3) or 0.875rem
+    // (7/8 step) must pass through cleanFloatNoise untouched. Only
+    // strings with 8+ fractional digits are normalised.
+    const gradient = [
+      { position: 0, color: { colorSpace: 'srgb', components: [0, 0, 0], hex: '#000' } },
+      { position: 0.333, color: { colorSpace: 'srgb', components: [0.5, 0.5, 0.5], hex: '#888' } },
+      { position: 1, color: { colorSpace: 'srgb', components: [1, 1, 1], hex: '#fff' } },
+    ];
+    const listing = {
+      names: { css: '--sb-gradient-thirds' },
+      previewValue: '#000 0%, #888 33.333%, #fff 100%',
+    };
+    const out = formatTokenValue(gradient, 'gradient', 'hex', listing);
+    expect(out).toBe('#000 0%, #888 33.333%, #fff 100%');
+  });
+
+  it('renders typography via plugin-css CSS `font` shorthand', () => {
     const typography = {
       fontFamily: ['Inter', 'system-ui'],
       fontSize: { value: 1, unit: 'rem' },
@@ -124,14 +148,10 @@ describe('formatTokenValue', () => {
       previewValue: '400 1rem/1.5 "Inter", system-ui',
     };
     const out = formatTokenValue(typography, 'typography', 'hex', listing);
-    expect(out.startsWith('Inter, system-ui')).toBe(true);
-    expect(out).toContain(' / 1rem / 1.5 / 400');
+    expect(out).toBe('400 1rem/1.5 "Inter", system-ui');
   });
 
-  it('renders transition via the local formatter and strips zero delay', () => {
-    // plugin-css emits `duration delay easing` and keeps a `0ms` delay
-    // visible; local formatter produces `duration easing` (delay only
-    // when non-zero).
+  it('renders transition via plugin-css `duration delay easing` shorthand', () => {
     const transition = {
       duration: { value: 200, unit: 'ms' },
       timingFunction: 'ease-out',
@@ -142,7 +162,7 @@ describe('formatTokenValue', () => {
       previewValue: '200ms 0ms ease-out',
     };
     const out = formatTokenValue(transition, 'transition', 'hex', listing);
-    expect(out).toBe('200ms ease-out');
+    expect(out).toBe('200ms 0ms ease-out');
   });
 
   it('falls through to JSON only for unknown object shapes', () => {
