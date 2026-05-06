@@ -20,7 +20,7 @@ The blocks read the active token graph from a `SwatchbookProvider`. The addon's 
 
 ## A minimal docs page
 
-```mdx title="src/docs/colors.mdx"
+```tsx title="src/docs/colors.mdx"
 import { Meta } from '@storybook/addon-docs/blocks';
 import { ColorPalette, ColorTable, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 
@@ -47,7 +47,7 @@ import { ColorPalette, ColorTable, TokenTable } from '@unpunnyfuns/swatchbook-bl
 
 One page with diagnostics, tree, and table gives a top-to-bottom view — project health, browsable hierarchy, searchable lookup:
 
-```mdx title="src/docs/tokens.mdx"
+```tsx title="src/docs/tokens.mdx"
 import { Meta } from '@storybook/addon-docs/blocks';
 import { Diagnostics, TokenNavigator, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 
@@ -104,7 +104,7 @@ function Badge({ level }: { level: 'info' | 'warn' }) {
 
 Force a specific tuple on a single doc page:
 
-```mdx
+```tsx
 <Meta title="Docs/Colors (Dark)" parameters={{ swatchbook: { axes: { mode: 'Dark' } } }} />
 ```
 
