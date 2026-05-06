@@ -15,24 +15,30 @@ npm install @unpunnyfuns/swatchbook-switcher
 ## Usage
 
 ```tsx
-import { ThemeSwitcher } from '@unpunnyfuns/swatchbook-switcher';
+import { ThemeSwitcher, type SwitcherPreset } from '@unpunnyfuns/swatchbook-switcher';
+import '@unpunnyfuns/swatchbook-switcher/style.css';
 
 <ThemeSwitcher
   axes={axes}
   presets={presets}
   themes={themes}
-  activeAxes={{ mode: 'Dark' }}
-  colorFormat="oklch"
+  activeTuple={{ mode: 'Dark' }}
+  defaults={{ mode: 'Light', brand: 'Default', contrast: 'Normal' }}
+  lastApplied={null}
   onAxisChange={(axis, context) => {
     document.documentElement.setAttribute(`data-sb-${axis}`, context);
   }}
-  onColorFormatChange={(format) => {
-    document.documentElement.setAttribute('data-sb-color-format', format);
+  onPresetApply={(preset: SwitcherPreset) => {
+    for (const [axis, value] of Object.entries(preset.axes)) {
+      document.documentElement.setAttribute(`data-sb-${axis}`, value);
+    }
   }}
 />;
 ```
 
-The component is pure — it doesn't read or write to storage, and it doesn't bake in any particular way of applying the active tuple. The caller decides how to translate `onAxisChange` into DOM updates, routing changes, or global state.
+The component is pure — it doesn't read or write to storage, and it doesn't bake in any particular way of applying the active tuple. The caller decides how to translate `onAxisChange` / `onPresetApply` into DOM updates, routing changes, or global state.
+
+Color-format selection isn't part of the switcher — hosts that need it slot a `<ColorFormatSelector>` (or any other custom node) into the optional `footer` prop.
 
 `SwitcherAxis` / `SwitcherPreset` / `SwitcherTheme` are the accepted shapes and are cross-compatible with `Project.axes` / `.presets` / `.themes` from `@unpunnyfuns/swatchbook-core` — pass them through directly.
 
