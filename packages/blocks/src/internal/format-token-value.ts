@@ -32,18 +32,30 @@ export function formatTokenValue(
     return String(value);
   }
 
-  // Prefer plugin-css's authoritative `previewValue` when available. For
-  // most non-color types that's always authoritative (`"16px"`, `"1px solid
-  // #e2e8f0"`, `"cubic-bezier(…)"`). For color tokens we only take it when
-  // the active toolbar format matches plugin-css's output (hex) — other
-  // formats (rgb / hsl / oklch / raw) are the user's inspection choice
-  // and fall through to local colorjs.io conversion. Gradients also
-  // fall through: plugin-css formats stops as `position * 100`% without
-  // rounding, so 0.55 leaks through as `55.00000000000001%`. The local
-  // `formatGradient` Math.round-s and joins with `→`, which is what this
-  // file's docstring documents as the intended representation anyway.
+  // Prefer plugin-css's authoritative `previewValue` when the local
+  // formatter would produce the same shape (`"16px"`, `"1px solid
+  // #e2e8f0"`, `"cubic-bezier(…)"`, shadow layer lists). For color
+  // tokens we only take it when the active toolbar format matches
+  // plugin-css's output (hex) — other formats (rgb / hsl / oklch / raw)
+  // are the user's inspection choice and fall through to local
+  // colorjs.io conversion. Three composite types fall through entirely
+  // because plugin-css emits a CSS-shorthand convention that diverges
+  // from this file's docstring contract:
+  //
+  // - `gradient` — stops as `position * 100`% leak float precision
+  //   (`55.00000000000001%`); local `formatGradient` Math.round-s
+  //   and joins with `→`.
+  // - `typography` — CSS `font` shorthand (`weight size/lh family`)
+  //   buries the family at the end; local `formatTypography` leads
+  //   with `family / size / lh / weight` so columns line up across
+  //   rows in a table.
+  // - `transition` — `duration delay easing` order; local
+  //   `formatTransition` produces `duration easing [delay]` and
+  //   strips zero delay.
   const preview = listingEntry?.previewValue;
-  if (preview !== undefined && $type !== 'gradient') {
+  const isCompositeWithLocalFormatter =
+    $type === 'gradient' || $type === 'typography' || $type === 'transition';
+  if (preview !== undefined && !isCompositeWithLocalFormatter) {
     const previewStr = typeof preview === 'string' ? preview : String(preview);
     if ($type !== 'color') return previewStr;
     if (colorFormat === 'hex') return previewStr;

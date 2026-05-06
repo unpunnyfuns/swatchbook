@@ -109,6 +109,42 @@ describe('formatTokenValue', () => {
     expect(out).toContain('55%');
   });
 
+  it('renders typography via the local family-first formatter, not plugin-css shorthand', () => {
+    // plugin-css emits `weight size/lh family` (CSS `font` shorthand);
+    // local formatter leads with family for inspector-table column
+    // alignment. Asserts the local form wins regardless of previewValue.
+    const typography = {
+      fontFamily: ['Inter', 'system-ui'],
+      fontSize: { value: 1, unit: 'rem' },
+      fontWeight: 400,
+      lineHeight: 1.5,
+    };
+    const listing = {
+      names: { css: '--sb-typography-body' },
+      previewValue: '400 1rem/1.5 "Inter", system-ui',
+    };
+    const out = formatTokenValue(typography, 'typography', 'hex', listing);
+    expect(out.startsWith('Inter, system-ui')).toBe(true);
+    expect(out).toContain(' / 1rem / 1.5 / 400');
+  });
+
+  it('renders transition via the local formatter and strips zero delay', () => {
+    // plugin-css emits `duration delay easing` and keeps a `0ms` delay
+    // visible; local formatter produces `duration easing` (delay only
+    // when non-zero).
+    const transition = {
+      duration: { value: 200, unit: 'ms' },
+      timingFunction: 'ease-out',
+      delay: { value: 0, unit: 'ms' },
+    };
+    const listing = {
+      names: { css: '--sb-transition-enter' },
+      previewValue: '200ms 0ms ease-out',
+    };
+    const out = formatTokenValue(transition, 'transition', 'hex', listing);
+    expect(out).toBe('200ms ease-out');
+  });
+
   it('falls through to JSON only for unknown object shapes', () => {
     const out = formatTokenValue({ foo: 'bar' }, 'mystery', 'hex');
     expect(out).toBe('{"foo":"bar"}');
