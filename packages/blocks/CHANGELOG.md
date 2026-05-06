@@ -1,5 +1,13 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.20.5
+
+### Patch Changes
+
+- 9bdd8da: Add `./style.css` to each package's `exports` map. The CSS files were already shipped via internal side-effect imports, but consumers that wanted to deliberately link the stylesheet (extract, reorder cascade, ship as a separate `<link>`) couldn't reach it via the package map. Now `import '@unpunnyfuns/swatchbook-blocks/style.css'` and `import '@unpunnyfuns/swatchbook-switcher/style.css'` resolve explicitly. The existing side-effect import path is unchanged.
+- Updated dependencies [198d331]
+  - @unpunnyfuns/swatchbook-core@0.20.5
+
 ## 0.20.4
 
 ### Patch Changes
