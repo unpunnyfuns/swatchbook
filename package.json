@@ -36,6 +36,7 @@
     "overrides": {
       "webpackbar": "7.0.0",
       "uuid": "^14.0.0",
+      "ip-address": "^10.1.1",
       "serialize-javascript": "^7.0.5"
     },
     "patchedDependencies": {

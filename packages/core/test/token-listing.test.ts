@@ -1,5 +1,7 @@
+import { resolverPath } from '@unpunnyfuns/swatchbook-tokens';
 import { describe, expect, it } from 'vitest';
-import { loadWithPrefix } from './_helpers';
+import { loadProject } from '#/load';
+import { fixtureCwd, loadWithPrefix } from './_helpers';
 
 describe('Token Listing integration', () => {
   it('populates project.listing for resolver-backed projects', async () => {
@@ -36,5 +38,31 @@ describe('Token Listing integration', () => {
     const preview = entry?.$extensions['app.terrazzo.listing'].previewValue;
     expect(typeof preview).toBe('string');
     expect(preview).toMatch(/^#[0-9a-fA-F]{6,8}$/);
+  });
+
+  it('surfaces a swatchbook/listing warn diagnostic when a terrazzoPlugin throws', async () => {
+    const project = await loadProject(
+      {
+        resolver: resolverPath,
+        default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+        cssVarPrefix: 'sb',
+        terrazzoPlugins: [
+          {
+            name: 'test/throws',
+            transform() {
+              throw new Error('plugin asplode');
+            },
+          },
+        ],
+      },
+      fixtureCwd,
+    );
+    expect(Object.keys(project.listing)).toHaveLength(0);
+    const listingDiagnostics = project.diagnostics.filter(
+      (d) => d.group === 'swatchbook/listing',
+    );
+    expect(listingDiagnostics).toHaveLength(1);
+    expect(listingDiagnostics[0]?.severity).toBe('warn');
+    expect(listingDiagnostics[0]?.message).toContain('plugin asplode');
   });
 });

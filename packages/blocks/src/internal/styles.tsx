@@ -8,8 +8,6 @@ import type { CSSProperties, ReactElement, ReactNode } from 'react';
  * empty-state — lives in `styles.css` and is applied via class names.
  */
 
-export const MONO_STACK = 'ui-monospace, SFMono-Regular, Menlo, monospace';
-
 export const TEXT_DEFAULT = 'var(--swatchbook-text-default, CanvasText)';
 export const TEXT_MUTED = 'var(--swatchbook-text-muted, CanvasText)';
 
@@ -21,8 +19,6 @@ export const BORDER_DEFAULT = `1px solid var(--swatchbook-border-default, rgba(1
 export const BORDER_FAINT = `1px solid var(--swatchbook-border-default, rgba(128,128,128,0.15))`;
 export const BORDER_STRONG = `1px solid var(--swatchbook-border-default, rgba(128,128,128,0.3))`;
 
-export const SIZE_LABEL = 11;
-export const SIZE_META = 12;
 export const SIZE_PILL = 10;
 
 export const typePillStyle = {
