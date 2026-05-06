@@ -92,6 +92,23 @@ describe('formatTokenValue', () => {
     expect(out).toContain('100%');
   });
 
+  it('rounds gradient stop positions instead of leaking float precision', () => {
+    // 0.55 * 100 in IEEE-754 is 55.00000000000001. plugin-css's
+    // previewValue surfaces that; the local formatter must round.
+    const gradient = [
+      { position: 0, color: { colorSpace: 'srgb', components: [1, 1, 0], hex: '#fde047' } },
+      { position: 0.55, color: { colorSpace: 'srgb', components: [1, 0, 0], hex: '#ef4444' } },
+      { position: 1, color: { colorSpace: 'srgb', components: [0.5, 0, 1], hex: '#7c3aed' } },
+    ];
+    const listing = {
+      names: { css: '--sb-gradient-warn' },
+      previewValue: '#fde047 0%, #ef4444 55.00000000000001%, #7c3aed 100%',
+    };
+    const out = formatTokenValue(gradient, 'gradient', 'hex', listing);
+    expect(out).not.toContain('55.00000000000001');
+    expect(out).toContain('55%');
+  });
+
   it('falls through to JSON only for unknown object shapes', () => {
     const out = formatTokenValue({ foo: 'bar' }, 'mystery', 'hex');
     expect(out).toBe('{"foo":"bar"}');

@@ -33,13 +33,17 @@ export function formatTokenValue(
   }
 
   // Prefer plugin-css's authoritative `previewValue` when available. For
-  // non-color types that's always authoritative (`"16px"`, `"1px solid
+  // most non-color types that's always authoritative (`"16px"`, `"1px solid
   // #e2e8f0"`, `"cubic-bezier(…)"`). For color tokens we only take it when
   // the active toolbar format matches plugin-css's output (hex) — other
   // formats (rgb / hsl / oklch / raw) are the user's inspection choice
-  // and fall through to local colorjs.io conversion.
+  // and fall through to local colorjs.io conversion. Gradients also
+  // fall through: plugin-css formats stops as `position * 100`% without
+  // rounding, so 0.55 leaks through as `55.00000000000001%`. The local
+  // `formatGradient` Math.round-s and joins with `→`, which is what this
+  // file's docstring documents as the intended representation anyway.
   const preview = listingEntry?.previewValue;
-  if (preview !== undefined) {
+  if (preview !== undefined && $type !== 'gradient') {
     const previewStr = typeof preview === 'string' ? preview : String(preview);
     if ($type !== 'color') return previewStr;
     if (colorFormat === 'hex') return previewStr;
