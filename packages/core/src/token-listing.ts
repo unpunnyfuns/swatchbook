@@ -6,7 +6,7 @@ import tokenListingPlugin, {
   type TokenListingPluginOptions,
 } from '@terrazzo/plugin-token-listing';
 import { makeCSSVar } from '@terrazzo/token-tools/css';
-import type { ParserInput } from '#/types.ts';
+import type { Diagnostic, ParserInput } from '#/types.ts';
 
 export type { ListedToken } from '@terrazzo/plugin-token-listing';
 
@@ -30,9 +30,11 @@ export type TokenListingByPath = Record<string, ListedToken>;
  * so the `names.css` field in every entry matches exactly what emission
  * would produce — by construction, no parallel logic to drift.
  *
- * Returns an empty map on any failure (missing listing output, parse
- * error, plugin crash). The caller treats listing data as optional
- * enrichment; losing it shouldn't block `loadProject`.
+ * Returns `{ listing, diagnostics }`. On any failure (missing listing
+ * output, parse error, plugin crash inside a user-supplied
+ * `terrazzoPlugins` entry) returns an empty map plus a `swatchbook/listing`
+ * warn diagnostic so the caller surfaces the failure instead of silently
+ * degrading `<TokenTable>` / `<ColorTable>` previews.
  */
 export interface ComputeTokenListingOptions {
   /** Extra options forwarded to the internal `plugin-css` instance. */
@@ -43,12 +45,17 @@ export interface ComputeTokenListingOptions {
   extraPlugins?: readonly Plugin[];
 }
 
+export interface ComputeTokenListingResult {
+  listing: TokenListingByPath;
+  diagnostics: Diagnostic[];
+}
+
 export async function computeTokenListing(
   parserInput: ParserInput,
   cwd: string,
   prefix: string,
   options: ComputeTokenListingOptions = {},
-): Promise<TokenListingByPath> {
+): Promise<ComputeTokenListingResult> {
   try {
     const { tokens, sources, resolver } = parserInput;
     const logger = new Logger({ level: 'warn' });
@@ -83,21 +90,50 @@ export async function computeTokenListing(
 
     const result = await build(tokens, { config, resolver, sources, logger });
     const listingFile = result.outputFiles.find((f) => f.filename === 'tokens.listing.json');
-    if (!listingFile) return {};
+    if (!listingFile) {
+      return { listing: {}, diagnostics: [missingListingDiagnostic()] };
+    }
 
     const raw =
       typeof listingFile.contents === 'string'
         ? listingFile.contents
         : new TextDecoder().decode(listingFile.contents);
     const parsed = JSON.parse(raw) as { data?: ListedToken[] };
-    if (!Array.isArray(parsed.data)) return {};
+    if (!Array.isArray(parsed.data)) {
+      return { listing: {}, diagnostics: [malformedListingDiagnostic()] };
+    }
 
     const byPath: TokenListingByPath = {};
     for (const entry of parsed.data) {
       byPath[entry.$name] = entry;
     }
-    return byPath;
-  } catch {
-    return {};
+    return { listing: byPath, diagnostics: [] };
+  } catch (err) {
+    return { listing: {}, diagnostics: [crashedListingDiagnostic(err)] };
   }
+}
+
+function crashedListingDiagnostic(err: unknown): Diagnostic {
+  const detail = err instanceof Error ? err.message : String(err);
+  return {
+    severity: 'warn',
+    group: 'swatchbook/listing',
+    message: `Token listing build failed: ${detail}. <TokenTable> / <ColorTable> previews will fall back to raw values.`,
+  };
+}
+
+function missingListingDiagnostic(): Diagnostic {
+  return {
+    severity: 'warn',
+    group: 'swatchbook/listing',
+    message: `Token listing build emitted no \`tokens.listing.json\` output. <TokenTable> / <ColorTable> previews will fall back to raw values.`,
+  };
+}
+
+function malformedListingDiagnostic(): Diagnostic {
+  return {
+    severity: 'warn',
+    group: 'swatchbook/listing',
+    message: `Token listing JSON had no \`data\` array. <TokenTable> / <ColorTable> previews will fall back to raw values.`,
+  };
 }

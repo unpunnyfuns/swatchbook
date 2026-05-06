@@ -86,7 +86,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     });
   }
 
-  const listing =
+  const { listing, diagnostics: listingDiagnostics } =
     normalized.parserInput !== undefined
       ? await computeTokenListing(
           normalized.parserInput,
@@ -98,7 +98,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
             ...(config.terrazzoPlugins !== undefined && { extraPlugins: config.terrazzoPlugins }),
           },
         )
-      : {};
+      : { listing: {}, diagnostics: [] };
 
   return {
     config: configWithDefaults,
@@ -121,6 +121,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
       ...presetDiagnostics,
       ...chromeDiagnostics,
       ...cssOptionsDiagnostics,
+      ...listingDiagnostics,
       ...projectDiagnostics,
     ],
   };
