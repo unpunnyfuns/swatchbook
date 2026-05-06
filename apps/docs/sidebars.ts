@@ -33,6 +33,7 @@ const sidebars: SidebarsConfig = {
         'reference/addon',
         'reference/core',
         'reference/config',
+        'reference/switcher',
         'reference/mcp',
       ],
     },
