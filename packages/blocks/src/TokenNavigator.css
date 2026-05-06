@@ -51,6 +51,12 @@
   font-size: 12px;
 }
 
+.sb-token-navigator__group-row:focus-visible,
+.sb-token-navigator__leaf-row:focus-visible {
+  outline: 2px solid var(--swatchbook-accent-bg, #1d4ed8);
+  outline-offset: 1px;
+}
+
 .sb-token-navigator__leaf-row {
   display: flex;
   align-items: center;

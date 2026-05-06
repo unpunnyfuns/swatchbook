@@ -1,5 +1,5 @@
 import { TokenTable } from '@unpunnyfuns/swatchbook-blocks';
-import { expect, waitFor } from 'storybook/test';
+import { expect, userEvent, waitFor } from 'storybook/test';
 import preview from '../../.storybook/preview.tsx';
 
 const meta = preview.meta({
@@ -53,4 +53,36 @@ export const SysTypography = meta.story({ args: { filter: 'typography.*' } });
 export const DimensionsOnly = meta.story({
   args: { type: 'dimension' },
   play: async ({ canvasElement }) => assertTableRenders(canvasElement),
+});
+
+/**
+ * Pre-1.0 a11y blocker (#696). Rows have `tabIndex={0}` + click handler;
+ * verify the `:focus-visible` rule paints a non-zero outline so keyboard
+ * users get an "I am here" indicator. Chromatic skips this one — the
+ * focus state is asserted via computed style, not pixels.
+ */
+export const FocusVisibleRow = meta.story({
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async ({ canvasElement }) => {
+    await assertTableRenders(canvasElement);
+    // Tab from the document root until a tbody row receives focus —
+    // keyboard-driven focus is what activates :focus-visible.
+    for (let i = 0; i < 20; i += 1) {
+      await userEvent.tab();
+      const focused = document.activeElement;
+      if (focused?.tagName === 'TR' && canvasElement.contains(focused)) break;
+    }
+    const focused = document.activeElement;
+    if (!(focused instanceof HTMLElement) || focused.tagName !== 'TR') {
+      throw new Error(`expected a tbody row to receive keyboard focus; got ${focused?.tagName}`);
+    }
+    const computed = getComputedStyle(focused);
+    expect(computed.outlineStyle, 'focus-visible row outline must be solid (not none)').toBe(
+      'solid',
+    );
+    expect(
+      Number.parseFloat(computed.outlineWidth),
+      'focus-visible row outline-width must be > 0',
+    ).toBeGreaterThan(0);
+  },
 });

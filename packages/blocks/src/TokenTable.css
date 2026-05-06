@@ -62,6 +62,11 @@
   cursor: pointer;
 }
 
+.sb-token-table__row:focus-visible {
+  outline: 2px solid var(--swatchbook-accent-bg, #1d4ed8);
+  outline-offset: -2px;
+}
+
 .sb-token-table__td {
   padding: 8px 12px;
   border-bottom: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.15));

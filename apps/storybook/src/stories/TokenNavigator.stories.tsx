@@ -163,3 +163,52 @@ export const OnSelectFires = meta.story({
     expect(overlay).toBeNull();
   },
 });
+
+/**
+ * Pre-1.0 a11y blocker (#696). Group-row + leaf-row have `role="button"` +
+ * `tabIndex={0}` + `onKeyDown`; verify the `:focus-visible` rule paints a
+ * non-zero outline. Chromatic skips this one — the focus state is asserted
+ * via computed style, not pixels.
+ */
+export const FocusVisibleRow = meta.story({
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async ({ canvasElement }) => {
+    await waitFor(() => {
+      const group = canvasElement.querySelector('[data-testid="token-navigator-group"]');
+      if (!group) throw new Error('navigator did not render any group rows');
+    });
+    // Tab until a treeitem (group-row or leaf-row) receives keyboard focus.
+    for (let i = 0; i < 30; i += 1) {
+      await userEvent.tab();
+      const focused = document.activeElement;
+      if (
+        focused instanceof HTMLElement &&
+        canvasElement.contains(focused) &&
+        (focused.classList.contains('sb-token-navigator__group-row') ||
+          focused.classList.contains('sb-token-navigator__leaf-row'))
+      ) {
+        break;
+      }
+    }
+    const focused = document.activeElement;
+    if (
+      !(focused instanceof HTMLElement) ||
+      !(
+        focused.classList.contains('sb-token-navigator__group-row') ||
+        focused.classList.contains('sb-token-navigator__leaf-row')
+      )
+    ) {
+      throw new Error(
+        `expected a navigator row to receive keyboard focus; got ${focused?.tagName}`,
+      );
+    }
+    const computed = getComputedStyle(focused);
+    expect(computed.outlineStyle, 'focus-visible row outline must be solid (not none)').toBe(
+      'solid',
+    );
+    expect(
+      Number.parseFloat(computed.outlineWidth),
+      'focus-visible row outline-width must be > 0',
+    ).toBeGreaterThan(0);
+  },
+});
