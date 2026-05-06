@@ -2,21 +2,10 @@ import type { VirtualTokenListingShape } from '#/contexts.ts';
 import { type ColorFormat, formatColor } from '#/format-color.ts';
 
 /**
- * Produce a single-line display string for any DTCG token `$value`.
- *
- * Primary path: plugin-css's `previewValue` from the Token Listing —
- * the CSS string the consumer's production stylesheet would emit for
- * this token. The previewValue is run through `cleanFloatNoise` to
- * strip IEEE-754 artefacts (e.g. `55.00000000000001%` → `55%`).
- *
- * Color tokens only take the previewValue when the active toolbar
- * format matches plugin-css's output (hex). Other formats
- * (rgb / hsl / oklch / raw) fall through to local colorjs.io.
- *
- * Composite types without a listing entry fall through to truncated
- * JSON — projects that don't run plugin-token-listing don't get
- * pretty composite rendering, which is acceptable for the current
- * single-user resolver-backed use case.
+ * Single-line display string for any DTCG token `$value`. Prefers
+ * plugin-css's `previewValue` from the Token Listing; for color
+ * tokens only when the toolbar format is hex (other formats route
+ * through local colorjs.io).
  */
 export function formatTokenValue(
   value: unknown,
@@ -29,15 +18,6 @@ export function formatTokenValue(
     return String(value);
   }
 
-  // Prefer plugin-css's `previewValue`. For non-color types it's the
-  // CSS string the consumer's production stylesheet would actually
-  // emit. For color tokens we only take it when the toolbar format
-  // matches plugin-css's output (hex); other formats fall through to
-  // local colorjs.io.
-  //
-  // `cleanFloatNoise` strips IEEE-754 artefacts that leak through
-  // plugin-css's `100 * position` arithmetic for gradient stops
-  // (`@terrazzo/token-tools/css.js:190`).
   const preview = listingEntry?.previewValue;
   if (preview !== undefined) {
     const previewStr = typeof preview === 'string' ? cleanFloatNoise(preview) : String(preview);
@@ -81,19 +61,8 @@ function formatDimension(v: unknown): string {
   return formatUnknown(v);
 }
 
-/**
- * Strip IEEE-754 representation artefacts from inline numbers in a
- * previewValue string. plugin-css's `100 * position` arithmetic for
- * gradient stops emits `55.00000000000001%` for a 0.55 stop (see
- * `@terrazzo/token-tools/css.js:190`). Any decimal with eight or more
- * fractional digits is rounded to 1/1000 — preserves authored 8ths
- * (`0.125`, `0.875`), gradient stops at thirds (`33.333%`, `16.667%`)
- * and opacity at thirds, while collapsing IEEE-754 noise (which lives
- * at the 14th–16th decimal). Defensive layer pending upstream
- * rounding.
- */
 function cleanFloatNoise(s: string): string {
-  return s.replace(/-?\d+\.\d{8,}/g, (m) => String(Math.round(Number(m) * 1000) / 1000));
+  return s.replace(/-?\d+\.\d{8,}/g, (m) => `${+Number(m).toFixed(3)}`);
 }
 
 function formatFontFamily(v: unknown): string {
