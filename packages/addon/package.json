@@ -56,7 +56,9 @@
   "files": [
     "dist"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/preview.mjs"
+  ],
   "publishConfig": {
     "access": "public"
   },
@@ -84,9 +86,11 @@
     "picomatch": "^4.0.4"
   },
   "peerDependencies": {
+    "@storybook/react-vite": "^10.3.5",
     "react": ">=18",
     "react-dom": ">=18",
-    "storybook": "^10.3.5"
+    "storybook": "^10.3.5",
+    "vite": ">=5"
   },
   "devDependencies": {
     "@storybook/react-vite": "^10.3.5",
