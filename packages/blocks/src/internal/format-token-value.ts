@@ -2,24 +2,10 @@ import type { VirtualTokenListingShape } from '#/contexts.ts';
 import { type ColorFormat, formatColor } from '#/format-color.ts';
 
 /**
- * Produce a single-line display string for any DTCG token `$value`,
- * respecting the active color format for color-typed tokens and the
- * color sub-values of composite types (border, shadow, gradient).
- *
- * Shape by type:
- * - `color`              → `formatColor(value, colorFormat)` — e.g. `#3b82f6`, `oklch(...)`, `raw` JSON.
- * - `dimension|duration` → `value + unit` — e.g. `16px`, `200ms`.
- * - `fontFamily`         → string or array joined with `, `.
- * - `fontWeight`         → primitive.
- * - `cubicBezier`        → `cubic-bezier(a, b, c, d)`.
- * - `strokeStyle`        → primitive string, or `dashed · dashArray · lineCap` when it's the object shape.
- * - `shadow`             → one or more `offsetX offsetY blur spread color` layers joined with `, `.
- * - `border`             → `width style color`.
- * - `transition`         → `duration easing [delay]`.
- * - `typography`         → `family / size / line-height / weight`.
- * - `gradient`           → `stops joined with →` — compact representation, not a CSS gradient string (those live in GradientPalette's preview).
- *
- * Unknown object shapes fall through to truncated JSON.
+ * Single-line display string for any DTCG token `$value`. Prefers
+ * plugin-css's `previewValue` from the Token Listing; for color
+ * tokens only when the toolbar format is hex (other formats route
+ * through local colorjs.io).
  */
 export function formatTokenValue(
   value: unknown,
@@ -32,15 +18,9 @@ export function formatTokenValue(
     return String(value);
   }
 
-  // Prefer plugin-css's authoritative `previewValue` when available. For
-  // non-color types that's always authoritative (`"16px"`, `"1px solid
-  // #e2e8f0"`, `"cubic-bezier(…)"`). For color tokens we only take it when
-  // the active toolbar format matches plugin-css's output (hex) — other
-  // formats (rgb / hsl / oklch / raw) are the user's inspection choice
-  // and fall through to local colorjs.io conversion.
   const preview = listingEntry?.previewValue;
   if (preview !== undefined) {
-    const previewStr = typeof preview === 'string' ? preview : String(preview);
+    const previewStr = typeof preview === 'string' ? cleanFloatNoise(preview) : String(preview);
     if ($type !== 'color') return previewStr;
     if (colorFormat === 'hex') return previewStr;
   }
@@ -67,12 +47,6 @@ export function formatTokenValue(
       return formatShadow(value, colorFormat);
     case 'border':
       return formatBorder(value, colorFormat);
-    case 'transition':
-      return formatTransition(value);
-    case 'typography':
-      return formatTypography(value);
-    case 'gradient':
-      return formatGradient(value, colorFormat);
     default:
       return formatUnknown(value);
   }
@@ -85,6 +59,10 @@ function formatDimension(v: unknown): string {
     if (typeof d.value === 'number' && typeof d.unit === 'string') return `${d.value}${d.unit}`;
   }
   return formatUnknown(v);
+}
+
+function cleanFloatNoise(s: string): string {
+  return s.replace(/-?\d+\.\d{8,}/g, (m) => `${+Number(m).toFixed(3)}`);
 }
 
 function formatFontFamily(v: unknown): string {
@@ -144,41 +122,6 @@ function formatBorder(v: unknown, colorFormat: ColorFormat): string {
   const style = formatPrimitive(b['style']);
   const color = formatColor(b['color'], colorFormat).value;
   return [width, style, color].filter((p) => p !== '').join(' ');
-}
-
-function formatTransition(v: unknown): string {
-  if (!v || typeof v !== 'object') return formatUnknown(v);
-  const t = v as Record<string, unknown>;
-  const duration = formatDimension(t['duration']);
-  const easing = formatPrimitive(t['timingFunction']);
-  const delay = formatDimension(t['delay']);
-  const parts = [duration, easing];
-  // Only emit delay when non-zero. `0ms` / `0s` clutters the one-liner.
-  if (!/^0\D/.test(delay) && delay !== '') parts.push(delay);
-  return parts.filter((p) => p !== '').join(' ');
-}
-
-function formatTypography(v: unknown): string {
-  if (!v || typeof v !== 'object') return formatUnknown(v);
-  const t = v as Record<string, unknown>;
-  const family = formatFontFamily(t['fontFamily']);
-  const size = formatDimension(t['fontSize']);
-  const lineHeight = formatPrimitive(t['lineHeight']);
-  const weight = formatPrimitive(t['fontWeight']);
-  return [family, size, lineHeight, weight].filter((p) => p !== '').join(' / ');
-}
-
-function formatGradient(v: unknown, colorFormat: ColorFormat): string {
-  if (!Array.isArray(v) || v.length === 0) return formatUnknown(v);
-  const parts = v.map((stop) => {
-    if (!stop || typeof stop !== 'object') return formatUnknown(stop);
-    const s = stop as Record<string, unknown>;
-    const position =
-      typeof s['position'] === 'number' ? `${Math.round(s['position'] * 100)}%` : '?';
-    const color = formatColor(s['color'], colorFormat).value;
-    return `${color} ${position}`;
-  });
-  return parts.join(' → ');
 }
 
 function formatUnknown(v: unknown): string {

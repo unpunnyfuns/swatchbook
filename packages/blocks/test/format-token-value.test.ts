@@ -63,33 +63,68 @@ describe('formatTokenValue', () => {
     expect(out).toMatch(/rgb/);
   });
 
-  it('formats typography as family / size / lineHeight / weight', () => {
-    const typography = {
-      fontFamily: 'Inter',
-      fontSize: { value: 16, unit: 'px' },
-      lineHeight: 1.5,
-      fontWeight: 400,
+  it('passes plugin-css previewValue through, scrubbing IEEE-754 noise from gradient stops', () => {
+    // plugin-css emits `100 * position`% without rounding, so 0.55
+    // surfaces as 55.00000000000001%. cleanFloatNoise normalises that
+    // to 55% while preserving the rest of the previewValue verbatim.
+    const gradient = [
+      { position: 0, color: { colorSpace: 'srgb', components: [1, 1, 0], hex: '#fde047' } },
+      { position: 0.55, color: { colorSpace: 'srgb', components: [1, 0, 0], hex: '#ef4444' } },
+      { position: 1, color: { colorSpace: 'srgb', components: [0.5, 0, 1], hex: '#7c3aed' } },
+    ];
+    const listing = {
+      names: { css: '--sb-gradient-warn' },
+      previewValue: '#fde047 0%, #ef4444 55.00000000000001%, #7c3aed 100%',
     };
-    expect(formatTokenValue(typography, 'typography', 'hex')).toBe('Inter / 16px / 1.5 / 400');
+    const out = formatTokenValue(gradient, 'gradient', 'hex', listing);
+    expect(out).not.toContain('55.00000000000001');
+    expect(out).toBe('#fde047 0%, #ef4444 55%, #7c3aed 100%');
   });
 
-  it('formats transitions without trailing zero delay', () => {
+  it('preserves legitimate 3-decimal precision in previewValue numbers', () => {
+    // Authored values like 33.333% (gradient stop at 1/3) or 0.875rem
+    // (7/8 step) must pass through cleanFloatNoise untouched. Only
+    // strings with 8+ fractional digits are normalised.
+    const gradient = [
+      { position: 0, color: { colorSpace: 'srgb', components: [0, 0, 0], hex: '#000' } },
+      { position: 0.333, color: { colorSpace: 'srgb', components: [0.5, 0.5, 0.5], hex: '#888' } },
+      { position: 1, color: { colorSpace: 'srgb', components: [1, 1, 1], hex: '#fff' } },
+    ];
+    const listing = {
+      names: { css: '--sb-gradient-thirds' },
+      previewValue: '#000 0%, #888 33.333%, #fff 100%',
+    };
+    const out = formatTokenValue(gradient, 'gradient', 'hex', listing);
+    expect(out).toBe('#000 0%, #888 33.333%, #fff 100%');
+  });
+
+  it('renders typography via plugin-css CSS `font` shorthand', () => {
+    const typography = {
+      fontFamily: ['Inter', 'system-ui'],
+      fontSize: { value: 1, unit: 'rem' },
+      fontWeight: 400,
+      lineHeight: 1.5,
+    };
+    const listing = {
+      names: { css: '--sb-typography-body' },
+      previewValue: '400 1rem/1.5 "Inter", system-ui',
+    };
+    const out = formatTokenValue(typography, 'typography', 'hex', listing);
+    expect(out).toBe('400 1rem/1.5 "Inter", system-ui');
+  });
+
+  it('renders transition via plugin-css `duration delay easing` shorthand', () => {
     const transition = {
       duration: { value: 200, unit: 'ms' },
       timingFunction: 'ease-out',
       delay: { value: 0, unit: 'ms' },
     };
-    expect(formatTokenValue(transition, 'transition', 'hex')).toBe('200ms ease-out');
-  });
-
-  it('formats gradient stops with percent positions', () => {
-    const gradient = [
-      { position: 0, color: { colorSpace: 'srgb', components: [0, 0, 0], hex: '#000' } },
-      { position: 1, color: { colorSpace: 'srgb', components: [1, 1, 1], hex: '#fff' } },
-    ];
-    const out = formatTokenValue(gradient, 'gradient', 'hex');
-    expect(out).toContain('0%');
-    expect(out).toContain('100%');
+    const listing = {
+      names: { css: '--sb-transition-enter' },
+      previewValue: '200ms 0ms ease-out',
+    };
+    const out = formatTokenValue(transition, 'transition', 'hex', listing);
+    expect(out).toBe('200ms 0ms ease-out');
   });
 
   it('falls through to JSON only for unknown object shapes', () => {
