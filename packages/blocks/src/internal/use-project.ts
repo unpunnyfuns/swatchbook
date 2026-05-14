@@ -1,7 +1,7 @@
 import { makeCSSVar } from '@terrazzo/token-tools/css';
 import { useEffect } from 'react';
 import type { VirtualTokenListingShape } from '#/contexts.ts';
-import { useActiveAxes, useActiveTheme, useOptionalSwatchbookData } from '#/contexts.ts';
+import { useActiveAxes, useActivePermutation, useOptionalSwatchbookData } from '#/contexts.ts';
 import { type ColorFormat, formatColor, type FormatColorResult } from '#/format-color.ts';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
 import { useTokenSnapshot } from '#/internal/channel-tokens.ts';
@@ -9,19 +9,19 @@ import type {
   ProjectSnapshot,
   VirtualAxis,
   VirtualDiagnostic,
-  VirtualTheme,
+  VirtualPermutation,
   VirtualToken,
 } from '#/types.ts';
 
 type ResolvedTokens = Record<string, VirtualToken>;
 
 export interface ProjectData {
-  activeTheme: string;
+  activePermutation: string;
   activeAxes: Record<string, string>;
   axes: readonly VirtualAxis[];
-  themes: readonly VirtualTheme[];
+  permutations: readonly VirtualPermutation[];
   resolved: ResolvedTokens;
-  themesResolved: Record<string, ResolvedTokens>;
+  permutationsResolved: Record<string, ResolvedTokens>;
   diagnostics: readonly VirtualDiagnostic[];
   cssVarPrefix: string;
   /**
@@ -52,14 +52,6 @@ function defaultTuple(axes: readonly VirtualAxis[]): Record<string, string> {
   return out;
 }
 
-function tupleForName(
-  themesList: readonly VirtualTheme[],
-  name: string,
-): Record<string, string> | undefined {
-  const match = themesList.find((t) => t.name === name);
-  return match?.input;
-}
-
 function tuplesEqual(a: Record<string, string>, b: Record<string, string>): boolean {
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
   for (const k of keys) {
@@ -69,7 +61,7 @@ function tuplesEqual(a: Record<string, string>, b: Record<string, string>): bool
 }
 
 function nameForTuple(
-  themesList: readonly VirtualTheme[],
+  themesList: readonly VirtualPermutation[],
   tuple: Record<string, string>,
 ): string | undefined {
   const match = themesList.find((t) => tuplesEqual(t.input as Record<string, string>, tuple));
@@ -78,12 +70,12 @@ function nameForTuple(
 
 function snapshotToData(snapshot: ProjectSnapshot): ProjectData {
   return {
-    activeTheme: snapshot.activeTheme,
+    activePermutation: snapshot.activePermutation,
     activeAxes: { ...snapshot.activeAxes },
     axes: snapshot.axes,
-    themes: snapshot.themes,
-    themesResolved: snapshot.themesResolved,
-    resolved: snapshot.themesResolved[snapshot.activeTheme] ?? {},
+    permutations: snapshot.permutations,
+    permutationsResolved: snapshot.permutationsResolved,
+    resolved: snapshot.permutationsResolved[snapshot.activePermutation] ?? {},
     diagnostics: snapshot.diagnostics,
     cssVarPrefix: snapshot.cssVarPrefix,
     listing: snapshot.listing ?? {},
@@ -109,7 +101,7 @@ export function useProject(): ProjectData {
 }
 
 function useVirtualModuleFallback(enabled: boolean): ProjectData {
-  const contextTheme = useActiveTheme();
+  const contextPermutation = useActivePermutation();
   const contextAxes = useActiveAxes();
   const channelGlobals = useChannelGlobals();
   /**
@@ -131,26 +123,21 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
     ? { ...contextAxes }
     : (channelGlobals.axes ?? defaultTuple(tokens.axes));
 
-  const derivedName = nameForTuple(tokens.themes, activeAxes);
-  const channelTheme = channelGlobals.theme;
-  const fallbackTupleName =
-    channelTheme && tupleForName(tokens.themes, channelTheme) ? channelTheme : null;
-  const activeTheme =
-    contextTheme ||
+  const derivedName = nameForTuple(tokens.permutations, activeAxes);
+  const activePermutation =
+    contextPermutation ||
     derivedName ||
-    fallbackTupleName ||
-    channelTheme ||
-    tokens.defaultTheme ||
-    tokens.themes[0]?.name ||
+    tokens.defaultPermutation ||
+    tokens.permutations[0]?.name ||
     '';
 
   return {
-    activeTheme,
+    activePermutation,
     activeAxes,
     axes: tokens.axes,
-    themes: tokens.themes,
-    themesResolved: tokens.themesResolved,
-    resolved: tokens.themesResolved[activeTheme] ?? {},
+    permutations: tokens.permutations,
+    permutationsResolved: tokens.permutationsResolved,
+    resolved: tokens.permutationsResolved[activePermutation] ?? {},
     diagnostics: tokens.diagnostics,
     cssVarPrefix: tokens.cssVarPrefix,
     listing: tokens.listing,

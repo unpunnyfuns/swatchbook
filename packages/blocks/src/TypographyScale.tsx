@@ -79,7 +79,7 @@ export function TypographyScale({
   sortBy = 'path',
   sortDir = 'asc',
 }: TypographyScaleProps): ReactElement {
-  const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const { resolved, activePermutation, cssVarPrefix } = useProject();
 
   const rows = useMemo<Row[]>(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
@@ -97,18 +97,18 @@ export function TypographyScale({
 
   const captionText =
     caption ??
-    `${rows.length} typography token${rows.length === 1 ? '' : 's'}${filter && filter !== 'typography' ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
+    `${rows.length} typography token${rows.length === 1 ? '' : 's'}${filter && filter !== 'typography' ? ` matching \`${filter}\`` : ''} · ${activePermutation}`;
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+      <div {...themeAttrs(cssVarPrefix, activePermutation)}>
         <div className="sb-block__empty">No typography tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+    <div {...themeAttrs(cssVarPrefix, activePermutation)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} className="sb-typography-scale__row">

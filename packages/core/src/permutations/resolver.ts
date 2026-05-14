@@ -7,15 +7,20 @@ import {
   type Axis,
   type Diagnostic,
   type ParserInput,
-  type Theme,
+  type Permutation,
   type TokenMap,
 } from '#/types.ts';
 import type { BufferedLogger } from '#/diagnostics.ts';
-import { collectGlobbedFiles } from '#/themes/util.ts';
+import {
+  cartesianSize,
+  collectGlobbedFiles,
+  DEFAULT_MAX_PERMUTATIONS,
+  permutationGuardDiagnostic,
+} from '#/permutations/util.ts';
 
 export interface ResolverLoadResult {
   axes: Axis[];
-  themes: Theme[];
+  permutations: Permutation[];
   resolved: Record<string, TokenMap>;
   sourceFiles: string[];
   /** Retained Terrazzo parse output for downstream plugin emission. */
@@ -24,7 +29,7 @@ export interface ResolverLoadResult {
 }
 
 /**
- * Realize themes from a DTCG 2025.10 native resolver file.
+ * Realize permutations from a DTCG 2025.10 native resolver file.
  *
  * Terrazzo's `loadResolver` scans the provided input list for a resolver
  * document, normalizes it, then lets us enumerate permutations via
@@ -35,11 +40,12 @@ export interface ResolverLoadResult {
  * for HMR watch paths when the consumer's config doesn't supply an
  * explicit `tokens` glob.
  */
-export async function loadResolverThemes(
+export async function loadResolverPermutations(
   resolverPath: string | undefined,
   tokenGlobs: string[] | undefined,
   cwd: string,
   logger: BufferedLogger,
+  maxPermutations: number = DEFAULT_MAX_PERMUTATIONS,
 ): Promise<ResolverLoadResult> {
   const cwdUrl = pathToFileURL(`${cwd}/`);
   const terrazzoConfig = defineTerrazzoConfig({}, { logger, cwd: cwdUrl });
@@ -93,7 +99,7 @@ export async function loadResolverThemes(
     const name = 'default';
     return {
       axes: [{ name: 'theme', contexts: [name], default: name, source: 'synthetic' }],
-      themes: [{ name, input: { theme: name }, sources: tokenFiles }],
+      permutations: [{ name, input: { theme: name }, sources: tokenFiles }],
       resolved: { [name]: parsed.tokens },
       sourceFiles: tokenFiles,
       parserInput: {
@@ -106,7 +112,6 @@ export async function loadResolverThemes(
   }
 
   const { resolver, tokens: baseTokens, sources: parsedSources } = loaded;
-  const permutations = resolver.listPermutations();
 
   const diagnostics: Diagnostic[] = [];
   const axes: Axis[] = Object.entries(resolver.source.modifiers ?? {}).map(([name, modifier]) => {
@@ -117,7 +122,7 @@ export async function loadResolverThemes(
     // `default` nor any contexts is a malformed resolver that produces an
     // axis with empty-string `default` downstream. Flag it so users see
     // where the nonsense is coming from instead of debugging from a
-    // mysterious `""` theme name.
+    // mysterious `""` permutation name.
     if (defaultContext === undefined) {
       diagnostics.push({
         severity: 'warn',
@@ -135,14 +140,31 @@ export async function loadResolverThemes(
     };
   });
 
-  const themes: Theme[] = [];
+  const permutations: Permutation[] = [];
   const resolved: Record<string, TokenMap> = {};
 
-  for (const input of permutations) {
-    const id = permutationID(input);
-    const tokens = resolver.apply(input);
-    themes.push({ name: id, input: { ...input }, sources: [] });
+  // Guard against pathological resolvers (terrazzo#752): when the
+  // cartesian product would explode, skip `listPermutations` entirely
+  // and load only the default tuple. The resolver itself stays
+  // available on `parserInput.resolver` for on-demand `apply()` later.
+  const size = cartesianSize(axes);
+  const guardActive = maxPermutations > 0 && size > maxPermutations;
+
+  if (guardActive) {
+    diagnostics.push(permutationGuardDiagnostic(size, maxPermutations));
+    const defaultInput: Record<string, string> = {};
+    for (const axis of axes) defaultInput[axis.name] = axis.default;
+    const id = permutationID(defaultInput);
+    const tokens = resolver.apply(defaultInput);
+    permutations.push({ name: id, input: defaultInput, sources: [] });
     resolved[id] = tokens;
+  } else {
+    for (const input of resolver.listPermutations()) {
+      const id = permutationID(input);
+      const tokens = resolver.apply(input);
+      permutations.push({ name: id, input: { ...input }, sources: [] });
+      resolved[id] = tokens;
+    }
   }
 
   const sourceFiles = [...refFiles];
@@ -153,7 +175,7 @@ export async function loadResolverThemes(
 
   return {
     axes,
-    themes,
+    permutations,
     resolved,
     sourceFiles: sourceFiles.toSorted(),
     parserInput: { tokens: baseTokens, sources: parsedSources, resolver },

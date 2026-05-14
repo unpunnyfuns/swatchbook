@@ -51,7 +51,7 @@ function summaryVariant(diagnostics: readonly VirtualDiagnostic[]): 'ok' | 'erro
  * on their own MDX pages.
  */
 export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
-  const { activeTheme, cssVarPrefix, diagnostics } = useProject();
+  const { activePermutation, cssVarPrefix, diagnostics } = useProject();
 
   const hasErrorsOrWarnings = diagnostics.some(
     (d) => d.severity === 'error' || d.severity === 'warn',
@@ -60,7 +60,7 @@ export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
   const variant = summaryVariant(diagnostics);
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)} data-testid="diagnostics">
+    <div {...themeAttrs(cssVarPrefix, activePermutation)} data-testid="diagnostics">
       <details open={hasErrorsOrWarnings}>
         <summary
           className={cx(

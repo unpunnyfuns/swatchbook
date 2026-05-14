@@ -101,7 +101,7 @@ tokens/resolver.json
 
 The same `Project` also feeds:
 
-- `resolveTheme(project, name)` — look up a single theme's resolved tokens
+- `resolvePermutation(project, name)` — look up a single theme's resolved tokens
 - `project.diagnostics` — the `<Diagnostics />` block reads this
 - the MCP server's tool handlers (all twelve read straight from the project)
 - TypeScript type emission (via Terrazzo's token-tools; not currently exposed as a CLI)
@@ -150,9 +150,9 @@ addons.getChannel().emit('globalsUpdated', …)
    ↓
 useChannelGlobals() store            ← packages/blocks/src/internal/channel-globals.ts
    ↓
-useProject() recomputes activeTheme  ← packages/blocks/src/internal/use-project.ts
+useProject() recomputes activePermutation  ← packages/blocks/src/internal/use-project.ts
    ↓
-blocks re-render with new active theme / resolved tokens
+blocks re-render with new active permutation / resolved tokens
 ```
 
 Two paths through `useProject`:

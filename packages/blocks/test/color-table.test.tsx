@@ -7,8 +7,8 @@ function makeSnapshot(): ProjectSnapshot {
     axes: [{ name: 'mode', contexts: ['light'], default: 'light', source: 'resolver' }],
     disabledAxes: [],
     presets: [],
-    themes: [{ name: 'Light', input: { mode: 'light' }, sources: [] }],
-    themesResolved: {
+    permutations: [{ name: 'Light', input: { mode: 'light' }, sources: [] }],
+    permutationsResolved: {
       Light: {
         'color.surface.default': {
           $type: 'color',
@@ -31,7 +31,7 @@ function makeSnapshot(): ProjectSnapshot {
         },
       },
     },
-    activeTheme: 'Light',
+    activePermutation: 'Light',
     activeAxes: { mode: 'light' },
     cssVarPrefix: 'sb',
     diagnostics: [],
@@ -142,8 +142,8 @@ describe('ColorTable — grouping', () => {
 
   function makeVariantSnapshot(): ProjectSnapshot {
     const base = makeSnapshot();
-    base.themesResolved['Light'] = {
-      ...base.themesResolved['Light'],
+    base.permutationsResolved['Light'] = {
+      ...base.permutationsResolved['Light'],
       'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
       'color.bg.hi-h': { $type: 'color', $value: { hex: '#222222' } },
       'color.bg.hi-d': { $type: 'color', $value: { hex: '#333333' } },
@@ -214,8 +214,8 @@ describe('ColorTable — grouping', () => {
 
   it('renders DTCG dot-segment variants (hi.disabled) the same as hyphen tails', () => {
     const snap = makeSnapshot();
-    snap.themesResolved['Light'] = {
-      ...snap.themesResolved['Light'],
+    snap.permutationsResolved['Light'] = {
+      ...snap.permutationsResolved['Light'],
       'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
       'color.bg.hi.disabled': { $type: 'color', $value: { hex: '#222222' } },
       'color.bg.hi.hover': { $type: 'color', $value: { hex: '#333333' } },
@@ -284,8 +284,8 @@ describe('ColorTable — expansion', () => {
 
   it('multi-variant expansion lists all variants in a sub-table', () => {
     const snap = makeSnapshot();
-    snap.themesResolved['Light'] = {
-      ...snap.themesResolved['Light'],
+    snap.permutationsResolved['Light'] = {
+      ...snap.permutationsResolved['Light'],
       'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
       'color.bg.hi-h': { $type: 'color', $value: { hex: '#222222' } },
       'color.bg.hi-d': { $type: 'color', $value: { hex: '#333333' } },
@@ -323,8 +323,8 @@ describe('ColorTable — expansion', () => {
 
   it('clicking a pill does not toggle the row expansion', () => {
     const snap = makeSnapshot();
-    snap.themesResolved['Light'] = {
-      ...snap.themesResolved['Light'],
+    snap.permutationsResolved['Light'] = {
+      ...snap.permutationsResolved['Light'],
       'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
       'color.bg.hi-h': { $type: 'color', $value: { hex: '#222222' } },
     };

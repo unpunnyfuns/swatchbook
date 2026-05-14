@@ -1,10 +1,10 @@
 ---
-id: consuming-the-active-theme
-title: Consuming the active theme
+id: consuming-the-active-permutation
+title: Consuming the active permutation
 sidebar_position: 5
 ---
 
-# Consuming the active theme
+# Consuming the active permutation
 
 Swatchbook's toolbar flips the active tuple. Stories that render under it need a way to pick up the change. Three paths, in order of ergonomic preference:
 
@@ -33,7 +33,7 @@ For CSS-in-JS libraries whose theme values can be `var(--…)` strings (styled-c
 If the consumer is a React story / block / decorator running inside the Storybook preview, use the hooks the addon already ships:
 
 ```tsx
-import { useActiveAxes, useActiveTheme, useColorFormat } from '@unpunnyfuns/swatchbook-addon';
+import { useActiveAxes, useActivePermutation, useColorFormat } from '@unpunnyfuns/swatchbook-addon';
 
 function ThemeBridge({ children }: { children: ReactNode }) {
   const axes = useActiveAxes();   // { mode: 'Dark', brand: 'Brand A', contrast: 'Normal' }
@@ -44,7 +44,7 @@ function ThemeBridge({ children }: { children: ReactNode }) {
 
 `useActiveAxes()` reads from the same React context the blocks package publishes. It's populated by swatchbook's preview decorator, so anything inside a story tree sees it. Reactive — components re-render when the toolbar flips an axis; no observer, no manual subscription.
 
-`useActiveTheme()` gives the composed tuple string (`"Dark · Brand A · Normal"`); `useColorFormat()` gives the active color-format selection. Same shape, same context.
+`useActivePermutation()` gives the composed tuple string (`"Dark · Brand A · Normal"`); `useColorFormat()` gives the active color-format selection. Same shape, same context.
 
 ## DOM observation — for everything else
 
@@ -96,7 +96,7 @@ Any change to this shape is a breaking change. The DOM is the API.
 
 ## What swatchbook doesn't ship
 
-- **No Vue, Angular, or Svelte bindings.** React is the only framework with shipped hooks (`useActiveAxes` / `useActiveTheme` / `useColorFormat`), because swatchbook's blocks are React and the addon's preview decorator publishes a React context. Other frameworks consume the DOM contract directly — ten lines of observer code, pick the idiom (`ref`, signal, store) that fits.
+- **No Vue, Angular, or Svelte bindings.** React is the only framework with shipped hooks (`useActiveAxes` / `useActivePermutation` / `useColorFormat`), because swatchbook's blocks are React and the addon's preview decorator publishes a React context. Other frameworks consume the DOM contract directly — ten lines of observer code, pick the idiom (`ref`, signal, store) that fits.
 - **No recipes per component library.** MUI, Chakra, Mantine, styled-components, emotion, Tailwind class-mode — each has its own theming model. The CSS-variable and DOM-attribute contracts above are the starting points; your component library's theming docs are the rest.
 
 ## Known gotchas

@@ -6,14 +6,13 @@ import { addons, types, useGlobals, useStorybookApi } from 'storybook/manager-ap
 import {
   type InitPayload,
   type VirtualAxis as AxisEntry,
+  type VirtualPermutation as PermutationEntry,
   type VirtualPreset as PresetEntry,
-  type VirtualTheme as ThemeEntry,
 } from '#/channel-types.ts';
 import {
   ADDON_ID,
   AXES_GLOBAL_KEY,
   COLOR_FORMAT_GLOBAL_KEY,
-  GLOBAL_KEY,
   INIT_EVENT,
   INIT_REQUEST_EVENT,
   PREVIEW_MOUSEDOWN_EVENT,
@@ -36,7 +35,7 @@ const h = React.createElement;
 
 const EMPTY_AXES: readonly AxisEntry[] = [];
 const EMPTY_PRESETS: readonly PresetEntry[] = [];
-const EMPTY_THEMES: readonly ThemeEntry[] = [];
+const EMPTY_PERMUTATIONS: readonly PermutationEntry[] = [];
 
 /**
  * Root toolbar glyph — a split-circle ("yinyang") mark: a faint filled
@@ -53,24 +52,6 @@ function SwatchbookIcon(): ReactElement {
       fill: 'currentColor',
     }),
   );
-}
-
-function tupleMatchesInput(
-  tuple: Readonly<Record<string, string>>,
-  input: Readonly<Record<string, string>>,
-): boolean {
-  const keys = Object.keys(input);
-  if (keys.length === 0) return false;
-  return keys.every((k) => input[k] === tuple[k]);
-}
-
-function composedNameFor(
-  tuple: Readonly<Record<string, string>>,
-  themes: readonly ThemeEntry[],
-  fallback: string,
-): string {
-  const match = themes.find((t) => tupleMatchesInput(tuple, t.input));
-  return match?.name ?? fallback;
 }
 
 function defaultTupleFor(axes: readonly AxisEntry[]): Record<string, string> {
@@ -125,7 +106,7 @@ function AxesToolbar(): ReactElement {
 
   const axes = payload?.axes ?? EMPTY_AXES;
   const presets = payload?.presets ?? EMPTY_PRESETS;
-  const themes = payload?.themes ?? EMPTY_THEMES;
+  const permutations = payload?.permutations ?? EMPTY_PERMUTATIONS;
   const defaults = useMemo(() => defaultTupleFor(axes), [axes]);
   const [lastApplied, setLastApplied] = useState<string | null>(null);
   const globalTuple = globals[AXES_GLOBAL_KEY] as Record<string, string> | undefined;
@@ -148,22 +129,18 @@ function AxesToolbar(): ReactElement {
   const setAxis = useCallback(
     (axisName: string, next: string): void => {
       const tuple: Record<string, string> = { ...activeTuple, [axisName]: next };
-      const fallback = payload?.defaultTheme ?? themes[0]?.name ?? '';
-      const composed = composedNameFor(tuple, themes, fallback);
-      updateGlobals({ [AXES_GLOBAL_KEY]: tuple, [GLOBAL_KEY]: composed });
+      updateGlobals({ [AXES_GLOBAL_KEY]: tuple });
     },
-    [activeTuple, themes, payload?.defaultTheme, updateGlobals],
+    [activeTuple, updateGlobals],
   );
 
   const applyPreset = useCallback(
     (preset: PresetEntry): void => {
       const tuple = presetTuple(preset, axes, defaults);
-      const fallback = payload?.defaultTheme ?? themes[0]?.name ?? '';
-      const composed = composedNameFor(tuple, themes, fallback);
-      updateGlobals({ [AXES_GLOBAL_KEY]: tuple, [GLOBAL_KEY]: composed });
+      updateGlobals({ [AXES_GLOBAL_KEY]: tuple });
       setLastApplied(preset.name);
     },
-    [axes, defaults, themes, payload?.defaultTheme, updateGlobals],
+    [axes, defaults, updateGlobals],
   );
 
   useEffect(() => {
@@ -263,7 +240,7 @@ function AxesToolbar(): ReactElement {
   const tooltipBody = h(ThemeSwitcher, {
     axes,
     presets,
-    themes,
+    permutations,
     activeTuple,
     defaults,
     lastApplied,

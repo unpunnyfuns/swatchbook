@@ -1,15 +1,15 @@
 import cx from 'clsx';
 import React, { type KeyboardEvent, type ReactElement } from 'react';
 import './ThemeSwitcher.css';
-import type { SwitcherAxis, SwitcherPreset, SwitcherTheme } from '#/types.ts';
+import type { SwitcherAxis, SwitcherPreset, SwitcherPermutation } from '#/types.ts';
 
 export interface ThemeSwitcherProps {
   /** Project axes the UI renders one section per. */
   axes: readonly SwitcherAxis[];
   /** Saved preset snapshots rendered above the axes, if any. */
   presets?: readonly SwitcherPreset[];
-  /** Full theme list — only consulted for the "modified since preset applied" dot. */
-  themes?: readonly SwitcherTheme[];
+  /** Full permutation list — only consulted for the "modified since preset applied" dot. */
+  permutations?: readonly SwitcherPermutation[];
   /** Active axis tuple, keyed by axis name. */
   activeTuple: Readonly<Record<string, string>>;
   /** Default tuple used to fill in omitted preset axes. */
@@ -41,7 +41,7 @@ export interface ThemeSwitcherProps {
 export function ThemeSwitcher({
   axes,
   presets = [],
-  themes = [],
+  permutations = [],
   activeTuple,
   defaults,
   lastApplied,
@@ -63,7 +63,7 @@ export function ThemeSwitcher({
           <PresetsSection
             presets={presets}
             axes={axes}
-            themes={themes}
+            permutations={permutations}
             defaults={defaults}
             activeTuple={activeTuple}
             lastApplied={lastApplied}
@@ -106,7 +106,7 @@ function OptionPill({ label, active, title, onClick, trailing }: OptionPillProps
       type="button"
       title={title}
       onClick={onClick}
-      // Skip focus on mouse click so host themes that paint a :focus
+      // Skip focus on mouse click so host permutations that paint a :focus
       // border-color don't stick it on the previously-clicked pill.
       // Keyboard tabbing still lands focus normally; only preventDefault
       // on mousedown blocks the implicit focus-on-click behavior.
@@ -122,7 +122,7 @@ function OptionPill({ label, active, title, onClick, trailing }: OptionPillProps
 interface PresetsSectionProps {
   presets: readonly SwitcherPreset[];
   axes: readonly SwitcherAxis[];
-  themes: readonly SwitcherTheme[];
+  permutations: readonly SwitcherPermutation[];
   defaults: Readonly<Record<string, string>>;
   activeTuple: Readonly<Record<string, string>>;
   lastApplied: string | null;
@@ -193,11 +193,11 @@ function AxisSection({ axis, active, onSelect }: AxisSectionProps): ReactElement
 /**
  * Treat the `{ name: 'theme', source: 'synthetic' }` axis — the one core
  * fabricates for single-theme projects with no resolver — as a special case
- * that reads as "Theme". Authored single-axis resolvers keep their real
+ * that reads as "Permutation". Authored single-axis resolvers keep their real
  * name (e.g. `mode`, `brand`).
  */
 function displayLabelFor(axis: SwitcherAxis): string {
-  if (axis.source === 'synthetic' && axis.name === 'theme') return 'Theme';
+  if (axis.source === 'synthetic' && axis.name === 'theme') return 'Permutation';
   return axis.name;
 }
 

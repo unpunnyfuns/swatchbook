@@ -87,7 +87,19 @@ Omit an axis and it falls back to that axis's default. Invalid axis keys or cont
 
 A resolver may declare more modifiers than a given Storybook wants to surface. List the axis name in `config.disabledAxes` and the project behaves as if that axis didn't exist for this session: no toolbar dropdown, no extra CSS blocks, the axis pinned to its `default` context in the active tuple. The Design Tokens panel shows a faint pinned indicator so the suppression isn't invisible. See the [`disabledAxes`](./config.mdx#disabledaxes) field for details.
 
+## Scoping large modifier spaces
+
+A resolver enumerates the cartesian product of every modifier's contexts. For projects that use modifiers as **presentational space** (mode × brand × contrast — what's worth rendering side by side), the product stays small. For projects that use modifiers as **state space** (locale × density × motion-pref × keyboard-layout × …), it can reach millions. Swatchbook isn't designed to render a state-space product — the toolbar would have to surface every combination, and the consumer-side CSS would emit one selector block per tuple.
+
+Three levers, increasing scope:
+
+- **`presets`** — author named tuples for the handful of permutations that matter (`Default Light`, `Brand A Dark`, `A11y High Contrast`). Toolbar surfaces them as quick-select pills, emit pipelines can fan out on `'presets'` instead of the full cartesian. The right answer when most permutations aren't worth rendering.
+- **`disabledAxes`** — pin state-space modifiers to their defaults; they vanish from the toolbar, the cartesian shrinks, the consumer's CSS stays small. The right answer when an axis exists in the resolver but doesn't represent presentational variation.
+- **`maxPermutations`** — hard cap on the loaded cartesian (default `1024`). When tripped, `loadProject` loads only the default tuple + any declared presets, and surfaces a `swatchbook/permutations` warn diagnostic. Defensive; the actionable response is one of the first two.
+
+See [`maxPermutations`](./config.mdx#maxpermutations) for the guard details.
+
 ## See also
 
-- [Config reference](./config.mdx) — the `resolver` / `axes` / `default` / `disabledAxes` / `presets` fields.
-- [Consuming the active theme](../guides/consuming-the-active-theme.mdx) — how stories pick up axis flips.
+- [Config reference](./config.mdx) — the `resolver` / `axes` / `default` / `disabledAxes` / `presets` / `maxPermutations` fields.
+- [Consuming the active permutation](../guides/consuming-the-active-permutation.mdx) — how stories pick up axis flips.

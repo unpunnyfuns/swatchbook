@@ -26,7 +26,7 @@ const project = await loadProject(config, process.cwd());
 // project.themesResolved[themeName] — ready to read, no further I/O.
 ```
 
-The [config reference](https://unpunnyfuns.github.io/swatchbook/reference/config) covers every field; the [core reference](https://unpunnyfuns.github.io/swatchbook/reference/core) covers the `Project` shape and exported helpers (`resolveTheme`, `permutationID`, typed `Axis` / `Theme` / `Diagnostic`).
+The [config reference](https://unpunnyfuns.github.io/swatchbook/reference/config) covers every field; the [core reference](https://unpunnyfuns.github.io/swatchbook/reference/core) covers the `Project` shape and exported helpers (`resolvePermutation`, `permutationID`, typed `Axis` / `Permutation` / `Diagnostic`).
 
 ## Boundaries
 

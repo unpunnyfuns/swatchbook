@@ -6,10 +6,10 @@ import type { TokenListingByPath } from '#/token-listing.ts';
 
 export type TokenMap = Record<string, TokenNormalized>;
 
-/** A single theme composition resolved from the DTCG 2025.10 resolver. */
-export interface Theme {
+/** A single permutation of the resolver's modifier space — one entry per cartesian-product tuple. */
+export interface Permutation {
   name: string;
-  /** The resolver input permutation (e.g. `{ theme: 'Light' }` or `{ appearance: 'light', brand: 'a' }`). */
+  /** The resolver input tuple (e.g. `{ theme: 'Light' }` or `{ mode: 'Dark', brand: 'Brand A' }`). */
   input: Record<string, string>;
   /** Reserved for future use. Empty for resolver mode. */
   sources: string[];
@@ -97,6 +97,16 @@ export interface Config {
    */
   disabledAxes?: string[];
   /**
+   * Hard cap on the cartesian-product permutation count loaded eagerly.
+   * Default `1024`. When the resolver's modifier space exceeds this,
+   * `loadProject` skips enumeration and returns a project containing
+   * only the default permutation, surfaced via a `swatchbook/permutations`
+   * warn diagnostic. Keeps pathological resolvers (state-space modifiers
+   * fanned out into the cartesian product, see terrazzo#752) from OOMing
+   * the build. Set `0` to disable the guard entirely.
+   */
+  maxPermutations?: number;
+  /**
    * Map from swatchbook block chrome roles (the closed set in `CHROME_PATHS`
    * — e.g. `color.surface.default`, `color.text.default`) to token paths in
    * the consumer's project. Each entry emits a `:root` alias
@@ -163,8 +173,8 @@ export interface Diagnostic {
 }
 
 /**
- * Loaded swatchbook project. Themes are eagerly resolved at load time; use
- * `resolveTheme(project, name)` to fetch one.
+ * Loaded swatchbook project. Permutations are eagerly resolved at load
+ * time; use `resolvePermutation(project, name)` to fetch one.
  */
 export interface Project {
   config: Config;
@@ -181,15 +191,15 @@ export interface Project {
   presets: Preset[];
   /**
    * Validated chrome-alias map from `config.chrome`. Keys are swatchbook
-   * block chrome paths; values are token paths that resolve in at least one
-   * theme. Invalid entries from the raw config are dropped and reported as
-   * diagnostics. Empty if the config doesn't supply any.
+   * block chrome paths; values are token paths that resolve in at least
+   * one permutation. Invalid entries from the raw config are dropped and
+   * reported as diagnostics. Empty if the config doesn't supply any.
    */
   chrome: Record<string, string>;
-  themes: Theme[];
-  /** Eagerly-resolved tokens per theme, keyed by `theme.name`. */
-  themesResolved: Record<string, TokenMap>;
-  /** Default theme's resolved tokens — convenience for global views. */
+  permutations: Permutation[];
+  /** Eagerly-resolved tokens per permutation, keyed by `permutation.name`. */
+  permutationsResolved: Record<string, TokenMap>;
+  /** Default permutation's resolved tokens — convenience for global views. */
   graph: TokenMap;
   /**
    * Absolute paths of every file loaded while building the project —
@@ -246,11 +256,11 @@ export interface ParserInput {
 }
 
 /**
- * Serialize an axis tuple to the stable string ID used as a `Theme.name`,
- * CSS data-attribute value, and cache key. Single-axis tuples stringify to
- * the context value alone (`{ theme: 'Light' }` → `"Light"`); multi-axis
- * tuples join context values with ` · ` in insertion order
- * (`{ mode: 'Dark', brand: 'Brand A' }` → `"Dark · Brand A"`).
+ * Serialize an axis tuple to the stable string ID used as a
+ * `Permutation.name`, CSS data-attribute value, and cache key. Single-axis
+ * tuples stringify to the context value alone (`{ theme: 'Light' }` →
+ * `"Light"`); multi-axis tuples join context values with ` · ` in
+ * insertion order (`{ mode: 'Dark', brand: 'Brand A' }` → `"Dark · Brand A"`).
  */
 export function permutationID(input: Record<string, string>): string {
   const values = Object.values(input);
@@ -259,7 +269,7 @@ export function permutationID(input: Record<string, string>): string {
   return values.join(' · ');
 }
 
-export interface ResolvedTheme {
+export interface ResolvedPermutation {
   name: string;
   tokens: TokenMap;
 }

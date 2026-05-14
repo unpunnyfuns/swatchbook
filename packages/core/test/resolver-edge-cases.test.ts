@@ -49,7 +49,7 @@ it('loads a minimal valid resolver with a single set and no modifiers', async ()
     resolutionOrder: [{ $ref: '#/sets/main' }],
   });
   const project = await loadProject({ resolver: 'resolver.json', default: {} }, workspace);
-  expect(project.themes.length).toBeGreaterThan(0);
+  expect(project.permutations.length).toBeGreaterThan(0);
   expect(project.diagnostics.some((d) => d.severity === 'error')).toBe(false);
 });
 
@@ -73,7 +73,7 @@ it('loads a resolver with one modifier + two contexts (no override overlays)', a
   const axis = project.axes.find((a) => a.name === 'mode');
   expect(axis).toBeDefined();
   expect(axis?.contexts).toEqual(['Light', 'Dark']);
-  expect(project.themes.length).toBe(2);
+  expect(project.permutations.length).toBe(2);
 });
 
 it('records sourceFiles for every file pulled through $ref', async () => {

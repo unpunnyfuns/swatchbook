@@ -25,7 +25,7 @@ export interface VirtualAxisLike {
   readonly source: 'resolver' | 'layered' | 'synthetic';
 }
 
-export interface VirtualThemeLike {
+export interface VirtualPermutationLike {
   readonly name: string;
   readonly input: Record<string, string>;
 }
@@ -33,27 +33,35 @@ export interface VirtualThemeLike {
 export interface TokenDetailData {
   token: DetailToken | undefined;
   cssVar: string;
-  activeTheme: string;
+  activePermutation: string;
   activeAxes: Record<string, string>;
   axes: readonly VirtualAxisLike[];
-  themes: readonly VirtualThemeLike[];
-  themesResolved: Record<string, Record<string, DetailToken>>;
+  permutations: readonly VirtualPermutationLike[];
+  permutationsResolved: Record<string, Record<string, DetailToken>>;
   resolved: Record<string, DetailToken>;
   cssVarPrefix: string;
 }
 
 export function useTokenDetailData(path: string): TokenDetailData {
   const project = useProject();
-  const { activeTheme, activeAxes, axes, themes, themesResolved, resolved, cssVarPrefix } = project;
+  const {
+    activePermutation,
+    activeAxes,
+    axes,
+    permutations,
+    permutationsResolved,
+    resolved,
+    cssVarPrefix,
+  } = project;
   const typedResolved = resolved as Record<string, DetailToken>;
   return {
     token: typedResolved[path],
     cssVar: resolveCssVar(path, project),
-    activeTheme,
+    activePermutation,
     activeAxes,
     axes,
-    themes,
-    themesResolved: themesResolved as Record<string, Record<string, DetailToken>>,
+    permutations,
+    permutationsResolved: permutationsResolved as Record<string, Record<string, DetailToken>>,
     resolved: typedResolved,
     cssVarPrefix,
   };

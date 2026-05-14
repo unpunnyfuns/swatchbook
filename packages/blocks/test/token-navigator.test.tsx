@@ -7,8 +7,8 @@ function makeSnapshot(): ProjectSnapshot {
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
     disabledAxes: [],
     presets: [],
-    themes: [{ name: 'Light', input: { theme: 'Light' }, sources: [] }],
-    themesResolved: {
+    permutations: [{ name: 'Light', input: { theme: 'Light' }, sources: [] }],
+    permutationsResolved: {
       Light: {
         'color.bg': { $type: 'color', $value: { hex: '#fff' } },
         'color.fg': { $type: 'color', $value: { hex: '#111' } },
@@ -16,7 +16,7 @@ function makeSnapshot(): ProjectSnapshot {
         'radius.sm': { $type: 'dimension', $value: { value: 4, unit: 'px' } },
       },
     },
-    activeTheme: 'Light',
+    activePermutation: 'Light',
     activeAxes: { theme: 'Light' },
     cssVarPrefix: 'sb',
     diagnostics: [],

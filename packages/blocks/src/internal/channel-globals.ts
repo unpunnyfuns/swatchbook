@@ -17,15 +17,13 @@ import { COLOR_FORMATS, type ColorFormat } from '#/format-color.ts';
 
 export interface ChannelGlobals {
   axes: Record<string, string> | null;
-  theme: string | null;
   format: ColorFormat | null;
 }
 
 const AXES_GLOBAL_KEY = 'swatchbookAxes';
-const THEME_GLOBAL_KEY = 'swatchbookTheme';
 const COLOR_FORMAT_GLOBAL_KEY = 'swatchbookColorFormat';
 
-let snapshot: ChannelGlobals = { axes: null, theme: null, format: null };
+let snapshot: ChannelGlobals = { axes: null, format: null };
 const listeners = new Set<() => void>();
 let subscribed = false;
 
@@ -44,10 +42,6 @@ function ensureSubscribed(): void {
     const nextAxes = globals[AXES_GLOBAL_KEY];
     if (nextAxes && typeof nextAxes === 'object') {
       next = { ...next, axes: nextAxes as Record<string, string> };
-    }
-    const nextTheme = globals[THEME_GLOBAL_KEY];
-    if (typeof nextTheme === 'string') {
-      next = { ...next, theme: nextTheme };
     }
     const nextFormat = globals[COLOR_FORMAT_GLOBAL_KEY];
     if (isColorFormat(nextFormat)) {

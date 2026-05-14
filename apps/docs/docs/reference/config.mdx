@@ -152,6 +152,25 @@ defineSwatchbookConfig({
 
 Config-level only — there's no runtime toggle. Disabling an axis is the cleanest way to hide a work-in-progress modifier (or an experimental axis you don't want surfaced yet) without editing the resolver document. Unknown axis names produce `warn` diagnostics (group `swatchbook/disabled-axes`) and are ignored; the filtered list lands on `Project.disabledAxes` for downstream tooling.
 
+### `maxPermutations`
+
+Type: `number` — optional, default `1024`.
+
+Hard cap on the cartesian-product size loaded eagerly. The resolver enumerates every combination of every modifier's contexts; for projects with state-space modifiers (locale × density × motion-pref × …) that product can reach millions, and calling `resolver.listPermutations()` on it can OOM the process. When the cap is exceeded, `loadProject` loads only the default permutation, surfaces a `swatchbook/permutations` warn diagnostic, and skips the upstream enumeration call entirely. Presets are still materialized on demand so the toolbar's preset pills work.
+
+```ts
+defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  maxPermutations: 1024, // default
+});
+```
+
+Set `0` to disable the guard if you genuinely want full enumeration. For projects that trip the guard, the three scoping levers — in order of leverage — are:
+
+- **`presets`** — author the handful of tuples that matter (Default Light, A11y High, Brand A Dark). Materialized on demand under the guard so toolbar pills resolve correctly.
+- **`disabledAxes`** — pin state-space modifiers (locale, density, …) to their defaults. Shrinks the cartesian; the toolbar drops the dropdown.
+- **`maxPermutations: <bigger-number>`** — only if the full enumeration is genuinely presentational.
+
 ### `chrome`
 
 Type: `Record<string, string>` — optional.

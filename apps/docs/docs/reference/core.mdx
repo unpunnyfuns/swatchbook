@@ -41,12 +41,12 @@ const project = await loadProject(config, process.cwd());
 // project: { config, axes, presets, themes, themesResolved, graph, diagnostics }
 ```
 
-### `resolveTheme(project, name)`
+### `resolvePermutation(project, name)`
 
 Pick a single composed theme out of a project.
 
 ```ts
-const { tokens } = resolveTheme(project, 'Light · Default');
+const { tokens } = resolvePermutation(project, 'Light · Default');
 ```
 
 Throws with a helpful "known themes" message if the name is unknown.

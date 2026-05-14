@@ -2,37 +2,44 @@ import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { defineConfig as defineTerrazzoConfig, parse } from '@terrazzo/parser';
 import type { BufferedLogger } from '#/diagnostics.ts';
-import { collectGlobbedFiles } from '#/themes/util.ts';
+import {
+  cartesianSize,
+  collectGlobbedFiles,
+  DEFAULT_MAX_PERMUTATIONS,
+  permutationGuardDiagnostic,
+} from '#/permutations/util.ts';
 import {
   type Axis,
   type AxisConfig,
   type Diagnostic,
+  type Permutation,
   permutationID,
-  type Theme,
   type TokenMap,
 } from '#/types.ts';
 
 export interface LayeredLoadResult {
   axes: Axis[];
-  themes: Theme[];
+  permutations: Permutation[];
   resolved: Record<string, TokenMap>;
   sourceFiles: string[];
   diagnostics: Diagnostic[];
 }
 
 /**
- * Realize themes from a layered (resolver-less) configuration. Each axis
- * context supplies an ordered list of overlay files; for every tuple in
- * the cartesian product we parse `[...base, ...overlayFilesInAxisOrder]`
- * with alias resolution enabled. Terrazzo's parser applies last-write-wins
- * semantics on duplicate token paths, so overlay files override base
- * tokens in the order we concatenate them.
+ * Realize permutations from a layered (resolver-less) configuration.
+ * Each axis context supplies an ordered list of overlay files; for every
+ * tuple in the cartesian product we parse
+ * `[...base, ...overlayFilesInAxisOrder]` with alias resolution enabled.
+ * Terrazzo's parser applies last-write-wins semantics on duplicate token
+ * paths, so overlay files override base tokens in the order we concatenate
+ * them.
  */
-export async function loadLayeredThemes(
+export async function loadLayeredPermutations(
   axesConfig: AxisConfig[],
   tokenGlobs: string[],
   cwd: string,
   logger: BufferedLogger,
+  maxPermutations: number = DEFAULT_MAX_PERMUTATIONS,
 ): Promise<LayeredLoadResult> {
   const cwdUrl = pathToFileURL(`${cwd}/`);
   const terrazzoConfig = defineTerrazzoConfig({}, { logger, cwd: cwdUrl });
@@ -57,7 +64,16 @@ export async function loadLayeredThemes(
     return { filename: pathToFileURL(filename), src };
   };
 
-  const tuples = cartesianTuples(axesConfig);
+  // Guard against pathological cartesian products. Same shape as the
+  // resolver path — load only the default tuple when the space exceeds
+  // `maxPermutations`.
+  const diagnostics: Diagnostic[] = [];
+  const size = cartesianSize(axes);
+  const guardActive = maxPermutations > 0 && size > maxPermutations;
+  const tuples = guardActive
+    ? [Object.fromEntries(axesConfig.map((ax) => [ax.name, ax.default]))]
+    : cartesianTuples(axesConfig);
+  if (guardActive) diagnostics.push(permutationGuardDiagnostic(size, maxPermutations));
 
   const contextFilesCache = new Map<string, string[]>();
   const filesForAxisContext = (axisName: string, ctx: string, patterns: string[]): string[] => {
@@ -91,17 +107,17 @@ export async function loadLayeredThemes(
     }),
   );
 
-  const themes: Theme[] = [];
+  const permutations: Permutation[] = [];
   const resolved: Record<string, TokenMap> = {};
   const sourceSet = new Set<string>();
   for (const { input, allFiles, tokens } of perTuple) {
     const id = permutationID(input);
-    themes.push({ name: id, input: { ...input }, sources: allFiles });
+    permutations.push({ name: id, input: { ...input }, sources: allFiles });
     resolved[id] = tokens;
     for (const f of allFiles) sourceSet.add(f);
   }
 
-  return { axes, themes, resolved, sourceFiles: [...sourceSet].toSorted(), diagnostics: [] };
+  return { axes, permutations, resolved, sourceFiles: [...sourceSet].toSorted(), diagnostics };
 }
 
 function cartesianTuples(axesConfig: AxisConfig[]): Record<string, string>[] {

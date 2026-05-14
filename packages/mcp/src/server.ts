@@ -42,8 +42,8 @@ export function createServer(initial: Project): McpServer & {
     () => {
       const typeCounts: Record<string, number> = {};
       const tokensPerTheme: Record<string, number> = {};
-      for (const theme of project.themes) {
-        const tokens = project.themesResolved[theme.name] ?? {};
+      for (const theme of project.permutations) {
+        const tokens = project.permutationsResolved[theme.name] ?? {};
         tokensPerTheme[theme.name] = Object.keys(tokens).length;
         for (const token of Object.values(tokens)) {
           if (token.$type) typeCounts[token.$type] = (typeCounts[token.$type] ?? 0) + 1;
@@ -56,8 +56,8 @@ export function createServer(initial: Project): McpServer & {
       return jsonResult({
         cssVarPrefix: project.config.cssVarPrefix ?? '',
         axes: project.axes.map((a) => ({ name: a.name, contexts: a.contexts, default: a.default })),
-        themes: project.themes.map((t) => t.name),
-        defaultTheme: project.themes[0]?.name ?? null,
+        permutations: project.permutations.map((t) => t.name),
+        defaultPermutation: project.permutations[0]?.name ?? null,
         presets: project.presets.map((p) => p.name),
         tokensPerTheme,
         types: typeCounts,
@@ -96,15 +96,15 @@ export function createServer(initial: Project): McpServer & {
         theme: z
           .string()
           .optional()
-          .describe('Theme name to read values from. Defaults to the project default theme.'),
+          .describe('Permutation name to read values from. Defaults to the project default theme.'),
       },
     },
     ({ filter, type, theme }) => {
-      const themeName = theme ?? project.themes[0]?.name;
+      const themeName = theme ?? project.permutations[0]?.name;
       if (!themeName) {
-        return textResult('No themes in project.');
+        return textResult('No permutations in project.');
       }
-      const tokens = project.themesResolved[themeName] ?? {};
+      const tokens = project.permutationsResolved[themeName] ?? {};
       const rows: { path: string; type?: string; value: string }[] = [];
       for (const [path, token] of Object.entries(tokens)) {
         if (type && token.$type !== type) continue;
@@ -139,8 +139,8 @@ export function createServer(initial: Project): McpServer & {
       let aliasedBy: readonly string[] | undefined;
       let found = false;
 
-      for (const theme of project.themes) {
-        const token = project.themesResolved[theme.name]?.[path];
+      for (const theme of project.permutations) {
+        const token = project.permutationsResolved[theme.name]?.[path];
         if (!token) continue;
         found = true;
         type ??= token.$type;
@@ -173,7 +173,7 @@ export function createServer(initial: Project): McpServer & {
     'list_axes',
     {
       description:
-        'List the project axes — each axis has a name, its contexts (discrete values like `Light` / `Dark`), a default, and a source (`resolver` for DTCG-resolver-driven, `layered` for authored layered axes, `synthetic` for single-theme projects). Also returns the named themes (every axis tuple combination) and any presets defined in the project config.',
+        'List the project axes — each axis has a name, its contexts (discrete values like `Light` / `Dark`), a default, and a source (`resolver` for DTCG-resolver-driven, `layered` for authored layered axes, `synthetic` for single-theme projects). Also returns the named permutations (every axis tuple combination) and any presets defined in the project config.',
       inputSchema: {},
     },
     () =>
@@ -186,7 +186,7 @@ export function createServer(initial: Project): McpServer & {
           source: axis.source,
         })),
         disabledAxes: project.disabledAxes,
-        themes: project.themes.map((t) => ({ name: t.name, input: t.input })),
+        permutations: project.permutations.map((t) => ({ name: t.name, input: t.input })),
         presets: project.presets.map((p) => ({
           name: p.name,
           axes: p.axes,
@@ -207,8 +207,8 @@ export function createServer(initial: Project): McpServer & {
     ({ path }) => {
       const perTheme: Record<string, { aliasOf?: string; chain: readonly string[] }> = {};
       let found = false;
-      for (const theme of project.themes) {
-        const token = project.themesResolved[theme.name]?.[path];
+      for (const theme of project.permutations) {
+        const token = project.permutationsResolved[theme.name]?.[path];
         if (!token) continue;
         found = true;
         const chain: string[] = [path];
@@ -241,9 +241,9 @@ export function createServer(initial: Project): McpServer & {
     },
     ({ path, maxDepth }) => {
       const depth = maxDepth ?? 6;
-      const themeName = project.themes[0]?.name;
-      if (!themeName) return textResult('No themes in project.');
-      const tokens = project.themesResolved[themeName] ?? {};
+      const themeName = project.permutations[0]?.name;
+      if (!themeName) return textResult('No permutations in project.');
+      const tokens = project.permutationsResolved[themeName] ?? {};
       if (!tokens[path]) return textResult(`Token not found: ${path}`);
 
       interface Node {
@@ -281,13 +281,15 @@ export function createServer(initial: Project): McpServer & {
         theme: z
           .string()
           .optional()
-          .describe('Theme name to read the value from. Defaults to the project default theme.'),
+          .describe(
+            'Permutation name to read the value from. Defaults to the project default theme.',
+          ),
       },
     },
     ({ path, theme }) => {
-      const themeName = theme ?? project.themes[0]?.name;
-      if (!themeName) return textResult('No themes in project.');
-      const token = project.themesResolved[themeName]?.[path];
+      const themeName = theme ?? project.permutations[0]?.name;
+      if (!themeName) return textResult('No permutations in project.');
+      const token = project.permutationsResolved[themeName]?.[path];
       if (!token) return textResult(`Token not found: ${path}`);
       if (token.$type !== 'color') {
         return textResult(`Token ${path} is not a color (got $type=${token.$type ?? 'unknown'}).`);
@@ -312,7 +314,10 @@ export function createServer(initial: Project): McpServer & {
         background: z
           .string()
           .describe('Dot-path of the background color token, e.g. `color.surface.default`.'),
-        theme: z.string().optional().describe('Theme name. Defaults to the project default theme.'),
+        theme: z
+          .string()
+          .optional()
+          .describe('Permutation name. Defaults to the project default theme.'),
         algorithm: z
           .enum(['wcag21', 'apca'])
           .optional()
@@ -322,10 +327,10 @@ export function createServer(initial: Project): McpServer & {
       },
     },
     ({ foreground, background, theme, algorithm }) => {
-      const themeName = theme ?? project.themes[0]?.name;
-      if (!themeName) return textResult('No themes in project.');
-      const fgTok = project.themesResolved[themeName]?.[foreground];
-      const bgTok = project.themesResolved[themeName]?.[background];
+      const themeName = theme ?? project.permutations[0]?.name;
+      if (!themeName) return textResult('No permutations in project.');
+      const fgTok = project.permutationsResolved[themeName]?.[foreground];
+      const bgTok = project.permutationsResolved[themeName]?.[background];
       if (!fgTok) return textResult(`Foreground token not found: ${foreground}`);
       if (!bgTok) return textResult(`Background token not found: ${background}`);
       if (fgTok.$type !== 'color') {
@@ -363,11 +368,11 @@ export function createServer(initial: Project): McpServer & {
       },
     },
     ({ path }) => {
-      if (project.themes.length === 0) return textResult('No themes in project.');
-      const exists = project.themes.some((t) => project.themesResolved[t.name]?.[path]);
+      if (project.permutations.length === 0) return textResult('No permutations in project.');
+      const exists = project.permutations.some((t) => project.permutationsResolved[t.name]?.[path]);
       if (!exists) return textResult(`Token not found in any theme: ${path}`);
       return jsonResult(
-        analyzeAxisVariance(path, project.axes, project.themes, project.themesResolved),
+        analyzeAxisVariance(path, project.axes, project.permutations, project.permutationsResolved),
       );
     },
   );
@@ -382,14 +387,14 @@ export function createServer(initial: Project): McpServer & {
         theme: z
           .string()
           .optional()
-          .describe('Theme name to search within. Defaults to the project default.'),
+          .describe('Permutation name to search within. Defaults to the project default.'),
         limit: z.number().int().positive().optional().describe('Cap the result count. Default 50.'),
       },
     },
     ({ query, theme, limit }) => {
-      const themeName = theme ?? project.themes[0]?.name;
-      if (!themeName) return textResult('No themes in project.');
-      const tokens = project.themesResolved[themeName] ?? {};
+      const themeName = theme ?? project.permutations[0]?.name;
+      if (!themeName) return textResult('No permutations in project.');
+      const tokens = project.permutationsResolved[themeName] ?? {};
       const max = limit ?? 50;
 
       const candidates = Object.entries(tokens).map(([path, token]) => {
@@ -449,16 +454,16 @@ export function createServer(initial: Project): McpServer & {
           candidate && axis.contexts.includes(candidate) ? candidate : axis.default;
       }
       const themeName =
-        project.themes.find((t) => {
+        project.permutations.find((t) => {
           for (const axis of project.axes) {
             if ((t.input as Record<string, string>)[axis.name] !== active[axis.name]) {
               return false;
             }
           }
           return true;
-        })?.name ?? project.themes[0]?.name;
+        })?.name ?? project.permutations[0]?.name;
       if (!themeName) return textResult('No matching theme.');
-      const tokens = project.themesResolved[themeName] ?? {};
+      const tokens = project.permutationsResolved[themeName] ?? {};
       const resolved: Record<
         string,
         { value: string; type?: string; aliasOf?: string; aliasChain?: readonly string[] }
@@ -503,7 +508,7 @@ export function createServer(initial: Project): McpServer & {
           candidate && axis.contexts.includes(candidate) ? candidate : axis.default;
       }
       const themeName =
-        project.themes.find((t) => {
+        project.permutations.find((t) => {
           for (const axis of project.axes) {
             if ((t.input as Record<string, string>)[axis.name] !== activeTuple[axis.name]) {
               return false;
@@ -511,9 +516,9 @@ export function createServer(initial: Project): McpServer & {
           }
           return true;
         })?.name ??
-        project.themes[0]?.name ??
+        project.permutations[0]?.name ??
         '';
-      const token = themeName ? project.themesResolved[themeName]?.[path] : undefined;
+      const token = themeName ? project.permutationsResolved[themeName]?.[path] : undefined;
       if (!token) return textResult(`Token not found: ${path}`);
 
       const cssVar = `var(--${prefix ? `${prefix}-` : ''}${path.replaceAll('.', '-')})`;

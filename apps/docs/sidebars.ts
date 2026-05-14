@@ -14,7 +14,7 @@ const sidebars: SidebarsConfig = {
   home: ['intro', 'quickstart'],
   guides: [
     'guides/authoring-doc-stories',
-    'guides/consuming-the-active-theme',
+    'guides/consuming-the-active-permutation',
     {
       type: 'category',
       label: 'Integrations',

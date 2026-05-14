@@ -12,16 +12,16 @@ declare module 'virtual:swatchbook/tokens' {
     VirtualDiagnostic,
     VirtualListingEntry,
     VirtualPreset,
-    VirtualTheme,
+    VirtualPermutation,
     VirtualToken,
   } from '#/channel-types.ts';
 
   export const axes: readonly VirtualAxis[];
   export const disabledAxes: readonly string[];
   export const presets: readonly VirtualPreset[];
-  export const themes: readonly VirtualTheme[];
-  export const defaultTheme: string | null;
-  export const themesResolved: Record<string, Record<string, VirtualToken>>;
+  export const permutations: readonly VirtualPermutation[];
+  export const defaultPermutation: string | null;
+  export const permutationsResolved: Record<string, Record<string, VirtualToken>>;
   export const diagnostics: readonly VirtualDiagnostic[];
   export const css: string;
   export const cssVarPrefix: string;

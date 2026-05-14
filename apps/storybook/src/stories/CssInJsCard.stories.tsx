@@ -8,7 +8,7 @@ const meta = preview.meta({
   tags: ['autodocs'],
   args: {
     title: 'Release notes',
-    body: 'Theme values come from `virtual:swatchbook/theme` — every leaf is a `var(--sb-*)` reference, so the toolbar flips every style at once through CSS cascade.',
+    body: 'Permutation values come from `virtual:swatchbook/theme` — every leaf is a `var(--sb-*)` reference, so the toolbar flips every style at once through CSS cascade.',
   },
   decorators: [
     (Story: () => ReactElement) => (

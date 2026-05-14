@@ -17,7 +17,7 @@ export interface VirtualToken {
   $description?: string;
 }
 
-export interface VirtualTheme {
+export interface VirtualPermutation {
   name: string;
   input: Record<string, string>;
   sources: string[];
@@ -49,16 +49,16 @@ export interface VirtualDiagnostic {
 /**
  * The full INIT_EVENT payload. Preview emits it whole via `broadcastInit`;
  * consumers read the subset they need — manager's toolbar reads axes +
- * presets + themes + defaultTheme, panel reads additionally disabledAxes +
- * themesResolved + diagnostics + cssVarPrefix.
+ * presets + permutations + defaultPermutation, panel reads additionally disabledAxes +
+ * permutationsResolved + diagnostics + cssVarPrefix.
  */
 export interface InitPayload {
   axes: readonly VirtualAxis[];
   disabledAxes: readonly string[];
   presets: readonly VirtualPreset[];
-  themes: readonly VirtualTheme[];
-  defaultTheme: string | null;
-  themesResolved: Record<string, Record<string, VirtualToken>>;
+  permutations: readonly VirtualPermutation[];
+  defaultPermutation: string | null;
+  permutationsResolved: Record<string, Record<string, VirtualToken>>;
   diagnostics: readonly VirtualDiagnostic[];
   cssVarPrefix: string;
 }
