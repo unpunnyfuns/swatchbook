@@ -1,9 +1,20 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
 import './TypographyScale.css';
+import type { TypographyValue } from '#/internal/composite-types.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { globMatch, useProject } from '#/internal/use-project.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
+
+/**
+ * Dimension sub-values in DTCG 2025.10 use a `{ value, unit }` envelope
+ * — narrow once here so the local `asDimension` helper doesn't need
+ * to re-validate keys at every read.
+ */
+interface DimensionLike {
+  value?: unknown;
+  unit?: unknown;
+}
 
 export interface TypographyScaleProps {
   /**
@@ -35,8 +46,8 @@ function asDimension(raw: unknown): string | undefined {
   if (raw == null) return undefined;
   if (typeof raw === 'string' || typeof raw === 'number') return String(raw);
   if (typeof raw === 'object') {
-    const v = raw as Record<string, unknown>;
-    if ('value' in v && 'unit' in v) return `${String(v['value'])}${String(v['unit'])}`;
+    const v = raw as DimensionLike;
+    if (v.value !== undefined && v.unit !== undefined) return `${String(v.value)}${String(v.unit)}`;
   }
   return undefined;
 }
@@ -47,12 +58,12 @@ function asFontFamily(raw: unknown): string | undefined {
   return undefined;
 }
 
-function buildRow(path: string, composite: Record<string, unknown>): Row {
-  const fontFamily = asFontFamily(composite['fontFamily']);
-  const fontSize = asDimension(composite['fontSize']);
-  const fontWeight = composite['fontWeight'] == null ? undefined : String(composite['fontWeight']);
-  const lineHeight = composite['lineHeight'] == null ? undefined : String(composite['lineHeight']);
-  const letterSpacing = asDimension(composite['letterSpacing']);
+function buildRow(path: string, composite: TypographyValue): Row {
+  const fontFamily = asFontFamily(composite.fontFamily);
+  const fontSize = asDimension(composite.fontSize);
+  const fontWeight = composite.fontWeight == null ? undefined : String(composite.fontWeight);
+  const lineHeight = composite.lineHeight == null ? undefined : String(composite.lineHeight);
+  const letterSpacing = asDimension(composite.letterSpacing);
 
   const sampleStyle: CSSProperties = {};
   if (fontFamily) sampleStyle.fontFamily = fontFamily;
@@ -91,7 +102,7 @@ export function TypographyScale({
       if (!value || typeof value !== 'object') {
         return { path, sampleStyle: {}, specs: '' };
       }
-      return buildRow(path, value as Record<string, unknown>);
+      return buildRow(path, value as TypographyValue);
     });
   }, [resolved, filter, sortBy, sortDir]);
 

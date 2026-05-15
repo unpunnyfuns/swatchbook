@@ -1,6 +1,13 @@
 import type { ReactElement } from 'react';
 import { useColorFormat } from '#/contexts.ts';
 import { type ColorFormat, formatColor } from '#/format-color.ts';
+import type {
+  BorderValue,
+  GradientStop,
+  ShadowLayer,
+  TransitionValue,
+  TypographyValue,
+} from '#/internal/composite-types.ts';
 import { type DetailToken, useTokenDetailData } from '#/token-detail/internal.ts';
 
 export interface CompositeBreakdownProps {
@@ -44,31 +51,31 @@ export function CompositeBreakdownContent({
     subValueChain(objectAliases?.[key], resolved);
 
   if (type === 'typography') {
-    const v = rawValue as Record<string, unknown>;
+    const v = rawValue as TypographyValue;
     return renderKeyValueList([
-      ['fontFamily', formatFontFamily(v['fontFamily']), aliasFor('fontFamily')],
-      ['fontSize', formatDimensionValue(v['fontSize']), aliasFor('fontSize')],
-      ['fontWeight', formatPrimitive(v['fontWeight']), aliasFor('fontWeight')],
-      ['lineHeight', formatPrimitive(v['lineHeight']), aliasFor('lineHeight')],
-      ['letterSpacing', formatDimensionValue(v['letterSpacing']), aliasFor('letterSpacing')],
+      ['fontFamily', formatFontFamily(v.fontFamily), aliasFor('fontFamily')],
+      ['fontSize', formatDimensionValue(v.fontSize), aliasFor('fontSize')],
+      ['fontWeight', formatPrimitive(v.fontWeight), aliasFor('fontWeight')],
+      ['lineHeight', formatPrimitive(v.lineHeight), aliasFor('lineHeight')],
+      ['letterSpacing', formatDimensionValue(v.letterSpacing), aliasFor('letterSpacing')],
     ]);
   }
 
   if (type === 'border') {
-    const v = rawValue as Record<string, unknown>;
+    const v = rawValue as BorderValue;
     return renderKeyValueList([
-      ['color', formatColorSubValue(v['color'], colorFormat), aliasFor('color')],
-      ['width', formatDimensionValue(v['width']), aliasFor('width')],
-      ['style', formatPrimitive(v['style']), aliasFor('style')],
+      ['color', formatColorSubValue(v.color, colorFormat), aliasFor('color')],
+      ['width', formatDimensionValue(v.width), aliasFor('width')],
+      ['style', formatPrimitive(v.style), aliasFor('style')],
     ]);
   }
 
   if (type === 'transition') {
-    const v = rawValue as Record<string, unknown>;
+    const v = rawValue as TransitionValue;
     return renderKeyValueList([
-      ['duration', formatDimensionValue(v['duration']), aliasFor('duration')],
-      ['timingFunction', formatPrimitive(v['timingFunction']), aliasFor('timingFunction')],
-      ['delay', formatDimensionValue(v['delay']), aliasFor('delay')],
+      ['duration', formatDimensionValue(v.duration), aliasFor('duration')],
+      ['timingFunction', formatPrimitive(v.timingFunction), aliasFor('timingFunction')],
+      ['delay', formatDimensionValue(v.delay), aliasFor('delay')],
     ]);
   }
 
@@ -80,7 +87,7 @@ export function CompositeBreakdownContent({
     return (
       <div className="sb-token-detail__breakdown-section">
         {layers.map((layer, i) => {
-          const v = layer as Record<string, unknown>;
+          const v = layer as ShadowLayer;
           return (
             <div key={shadowLayerKey(v, i)} style={{ display: 'contents' }}>
               {multi && (
@@ -88,31 +95,31 @@ export function CompositeBreakdownContent({
               )}
               <KeyValueRow
                 label="color"
-                value={formatColorSubValue(v['color'], colorFormat)}
+                value={formatColorSubValue(v.color, colorFormat)}
                 alias={layerAliasFor(i, 'color')}
               />
               <KeyValueRow
                 label="offsetX"
-                value={formatDimensionValue(v['offsetX'])}
+                value={formatDimensionValue(v.offsetX)}
                 alias={layerAliasFor(i, 'offsetX')}
               />
               <KeyValueRow
                 label="offsetY"
-                value={formatDimensionValue(v['offsetY'])}
+                value={formatDimensionValue(v.offsetY)}
                 alias={layerAliasFor(i, 'offsetY')}
               />
               <KeyValueRow
                 label="blur"
-                value={formatDimensionValue(v['blur'])}
+                value={formatDimensionValue(v.blur)}
                 alias={layerAliasFor(i, 'blur')}
               />
               <KeyValueRow
                 label="spread"
-                value={formatDimensionValue(v['spread'])}
+                value={formatDimensionValue(v.spread)}
                 alias={layerAliasFor(i, 'spread')}
               />
-              {'inset' in v && (
-                <KeyValueRow label="inset" value={formatPrimitive(v['inset'])} alias={undefined} />
+              {v.inset !== undefined && (
+                <KeyValueRow label="inset" value={formatPrimitive(v.inset)} alias={undefined} />
               )}
             </div>
           );
@@ -129,13 +136,13 @@ export function CompositeBreakdownContent({
     return (
       <div className="sb-token-detail__breakdown-section">
         {stops.map((stop, i) => {
-          const v = stop as Record<string, unknown>;
-          const position = typeof v['position'] === 'number' ? v['position'] : 0;
+          const v = stop as GradientStop;
+          const position = typeof v.position === 'number' ? v.position : 0;
           return (
             <KeyValueRow
               key={gradientStopKey(v, i)}
               label={`${(position * 100).toFixed(0)}%`}
-              value={formatColorSubValue(v['color'], colorFormat)}
+              value={formatColorSubValue(v.color, colorFormat)}
               alias={stopAliasFor(i)}
             />
           );
@@ -250,18 +257,18 @@ function subValueChain(
   return tail && tail.length > 0 ? [aliasTarget, ...tail] : [aliasTarget];
 }
 
-function shadowLayerKey(layer: Record<string, unknown>, fallback: number): string {
+function shadowLayerKey(layer: ShadowLayer, fallback: number): string {
   const parts = [
-    layer['color'],
-    layer['offsetX'],
-    layer['offsetY'],
-    layer['blur'],
-    layer['spread'],
-    layer['inset'],
+    layer.color,
+    layer.offsetX,
+    layer.offsetY,
+    layer.blur,
+    layer.spread,
+    layer.inset,
   ].map((p) => (p === undefined ? '' : JSON.stringify(p)));
   return `shadow|${parts.join('|')}|${fallback}`;
 }
 
-function gradientStopKey(stop: Record<string, unknown>, fallback: number): string {
-  return `stop|${stop['position'] ?? fallback}|${JSON.stringify(stop['color'])}`;
+function gradientStopKey(stop: GradientStop, fallback: number): string {
+  return `stop|${stop.position ?? fallback}|${JSON.stringify(stop.color)}`;
 }
