@@ -1,38 +1,29 @@
+import type { Axis, Diagnostic, Permutation, Preset } from '@unpunnyfuns/swatchbook-core';
 import { createContext, useContext } from 'react';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
 import type { ColorFormat } from '#/format-color.ts';
 
 /**
- * Typed shape of the addon's `virtual:swatchbook/tokens` module, duplicated
- * as value-importable interfaces so consumers outside the addon's Vite
- * plugin (unit tests, custom React apps) can construct a snapshot by hand.
+ * Typed shape of the addon's `virtual:swatchbook/tokens` module.
  *
- * The ambient `declare module 'virtual:swatchbook/tokens'` declarations in
- * `packages/addon/src/virtual.d.ts` describe the same payload; the two
- * stay in sync by eye.
+ * The axis / permutation / diagnostic / preset entries are deliberate
+ * type-aliases of core's authoritative shapes — the virtual module
+ * publishes those shapes verbatim, so single-sourcing the types prevents
+ * silent drift the moment core grows a field the plugin doesn't
+ * serialise.
+ *
+ * Token / listing shapes stay as narrowed interfaces because blocks
+ * only read a subset of Terrazzo's full token / listing structure; the
+ * narrower shape documents what's actually relied on.
+ *
+ * The ambient `declare module 'virtual:swatchbook/tokens'` declarations
+ * in `packages/addon/src/virtual.d.ts` describe the same payload.
  */
-export interface VirtualAxisShape {
-  name: string;
-  contexts: readonly string[];
-  default: string;
-  description?: string;
-  source: 'resolver' | 'layered' | 'synthetic';
-}
+export type VirtualAxisShape = Axis;
 
-export interface VirtualPermutationShape {
-  name: string;
-  input: Record<string, string>;
-  sources: string[];
-}
+export type VirtualPermutationShape = Permutation;
 
-export interface VirtualDiagnosticShape {
-  severity: 'error' | 'warn' | 'info';
-  group: string;
-  message: string;
-  filename?: string;
-  line?: number;
-  column?: number;
-}
+export type VirtualDiagnosticShape = Diagnostic;
 
 export interface VirtualTokenShape {
   $type?: string;
@@ -64,11 +55,7 @@ export interface VirtualTokenListingShape {
   };
 }
 
-export interface VirtualPresetShape {
-  name: string;
-  axes: Partial<Record<string, string>>;
-  description?: string;
-}
+export type VirtualPresetShape = Preset;
 
 /**
  * Full project data read by blocks. Populated by the addon's preview

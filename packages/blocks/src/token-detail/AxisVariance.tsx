@@ -1,21 +1,12 @@
 import { analyzeAxisVariance } from '@unpunnyfuns/swatchbook-core/variance';
-import type {
-  Axis as CoreAxis,
-  Permutation as CorePermutation,
-  TokenMap,
-} from '@unpunnyfuns/swatchbook-core';
+import type { Axis, Permutation, TokenMap } from '@unpunnyfuns/swatchbook-core';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
 import type { ColorFormat } from '#/format-color.ts';
 import { dataAttr } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
-import {
-  type DetailToken,
-  type VirtualAxisLike,
-  type VirtualPermutationLike,
-  useTokenDetailData,
-} from '#/token-detail/internal.ts';
+import { type DetailToken, useTokenDetailData } from '#/token-detail/internal.ts';
 
 export interface AxisVarianceProps {
   /** Full dot-path of the token. */
@@ -36,11 +27,14 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
   const formatFn = (t: DetailToken | undefined): string => valueFor(t, tokenType, colorFormat);
 
   const variance = useMemo<Variance>(() => {
+    // permutationsResolved is the only field needing a structural narrow —
+    // the block's `DetailToken` is a subset of core's `TokenNormalized`,
+    // so the wrapping record types differ even though the keys match.
     const result = analyzeAxisVariance(
       path,
-      axes as unknown as readonly CoreAxis[],
-      permutations as unknown as readonly CorePermutation[],
-      permutationsResolved as unknown as Record<string, TokenMap>,
+      axes,
+      permutations,
+      permutationsResolved as Record<string, TokenMap>,
     );
     // Map core's terse kind vocabulary to the block's display-ready one.
     const kind =
@@ -141,7 +135,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
 
   const varying = variance.varyingAxes
     .map((name) => axes.find((a) => a.name === name))
-    .filter((a): a is VirtualAxisLike => Boolean(a))
+    .filter((a): a is Axis => Boolean(a))
     .toSorted((a, b) => b.contexts.length - a.contexts.length);
   const [rowAxis, colAxis, ...extra] = varying;
   if (!rowAxis || !colAxis) return <></>;
@@ -223,7 +217,7 @@ function valueFor(
 }
 
 function tupleName(
-  permutations: readonly VirtualPermutationLike[],
+  permutations: readonly Permutation[],
   tuple: Record<string, string>,
 ): string | undefined {
   const match = permutations.find((t) => {

@@ -1,6 +1,7 @@
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './FontWeightScale.css';
+import { cssVarAsNumber } from '#/internal/css-var-style.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 import { globMatch, resolveCssVar, useProject } from '#/internal/use-project.ts';
@@ -88,7 +89,7 @@ export function FontWeightScale({
           </div>
           <div
             className="sb-font-weight-scale__sample"
-            style={{ fontWeight: row.cssVar as unknown as CSSProperties['fontWeight'] }}
+            style={{ fontWeight: cssVarAsNumber(row.cssVar) }}
           >
             {sample}
           </div>
