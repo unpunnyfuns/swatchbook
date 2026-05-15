@@ -89,3 +89,75 @@ export const FocusVisibleRow = meta.story({
     ).toBeGreaterThan(0);
   },
 });
+
+/**
+ * Real-browser coverage for the DetailOverlay focus-trap shipped in
+ * the #753 a11y slice. jsdom approximates focus order but doesn't
+ * fully run the browser's tabbing model; this play test exercises
+ * the trap in Chromium via Storybook Test's Playwright provider.
+ *
+ * Verifies:
+ *   1. Opening the overlay moves focus inside the dialog.
+ *   2. Tab cycles within the dialog (never escapes to the
+ *      backgrounded table).
+ *   3. Escape dismisses; focus returns to the row that opened it.
+ */
+export const OverlayFocusTrap = meta.story({
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async ({ canvasElement }) => {
+    await assertTableRenders(canvasElement);
+
+    // Tab into the first row, activate to open the overlay.
+    const tabToRow = async (remaining: number): Promise<HTMLElement | null> => {
+      if (remaining <= 0) return null;
+      const el = document.activeElement;
+      if (el?.tagName === 'TR' && el instanceof HTMLElement && canvasElement.contains(el)) {
+        return el;
+      }
+      await userEvent.tab();
+      return tabToRow(remaining - 1);
+    };
+    const openerRow = await tabToRow(20);
+    if (!openerRow) {
+      throw new Error('expected to focus a row within 20 Tab presses');
+    }
+    await userEvent.keyboard('{Enter}');
+
+    // Dialog opens — focus should move into the panel.
+    const dialog = await waitFor(() => {
+      const node = document.querySelector('[role="dialog"]');
+      if (!(node instanceof HTMLElement)) {
+        throw new Error('overlay dialog did not mount');
+      }
+      return node;
+    });
+    expect(dialog.contains(document.activeElement), 'focus must move into the dialog on open').toBe(
+      true,
+    );
+
+    // Tab repeatedly — focus must stay inside the dialog every time
+    // (the trap should bounce wrap-around hits back to the first
+    // focusable; the background table must not receive focus). Each
+    // Tab depends on the previous one's effect, so this has to be
+    // sequential — recursive helper sidesteps the await-in-loop lint.
+    const tabAndAssert = async (count: number, attempt: number): Promise<void> => {
+      if (attempt > count) return;
+      await userEvent.tab();
+      expect(
+        dialog.contains(document.activeElement),
+        `Tab press ${attempt} escaped the dialog — focus landed at ${document.activeElement?.tagName}`,
+      ).toBe(true);
+      await tabAndAssert(count, attempt + 1);
+    };
+    await tabAndAssert(8, 1);
+
+    // Dismiss via Esc; focus should restore to the opener row.
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => {
+      expect(document.querySelector('[role="dialog"]')).toBeNull();
+    });
+    expect(document.activeElement, 'focus must restore to the row that opened the overlay').toBe(
+      openerRow,
+    );
+  },
+});
