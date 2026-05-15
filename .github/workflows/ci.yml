@@ -82,9 +82,10 @@ jobs:
         run: |
           mkdir -p "$HOME/.cache/ms-playwright"
           # Mirror every `<browser>-<rev>/` dir from /ms-playwright (image
-          # pre-install) into the default location. -L follows symlinks the
-          # image may use; -n preserves any existing destinations.
-          cp -RLn /ms-playwright/. "$HOME/.cache/ms-playwright/" || true
+          # pre-install) into the default location. `-L` follows the
+          # symlinks the image may use; `--update=none` preserves any
+          # existing destinations (portable form of the deprecated `-n`).
+          cp -RL --update=none /ms-playwright/. "$HOME/.cache/ms-playwright/" || true
           ls "$HOME/.cache/ms-playwright" | head
 
       - name: Lint / format / typecheck / test / build
