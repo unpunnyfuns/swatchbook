@@ -29,6 +29,12 @@ jobs:
       # default lookup ($HOME/.cache/ms-playwright) misses. Point it at
       # the image's install dir explicitly.
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      # Firefox refuses to launch when $HOME isn't owned by the current
+      # user, and `/github/home` hits exactly that case. Playwright's
+      # own error message names this workaround verbatim. Setting it at
+      # the job level so the bridge step's `$HOME/.cache/ms-playwright`
+      # mirror and vitest-browser-playwright's lookup agree.
+      HOME: /root
     permissions:
       contents: read
       actions: write
