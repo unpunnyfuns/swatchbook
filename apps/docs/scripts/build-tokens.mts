@@ -62,7 +62,7 @@ await writeFile(
 
 /**
  * Minimal switcher snapshot — axes, presets, default tuple, and the
- * css-var prefix. Intentionally drops `themesResolved` (huge and
+ * css-var prefix. Intentionally drops `permutationsResolved` (huge and
  * already represented in the emitted CSS) and `diagnostics` (only
  * useful at build time). Lives under src/ so it's bundled with the
  * Docusaurus build rather than fetched at runtime.

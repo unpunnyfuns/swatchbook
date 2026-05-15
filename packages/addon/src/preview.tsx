@@ -11,13 +11,13 @@ import {
   axes as virtualAxes,
   css,
   cssVarPrefix,
-  defaultTheme,
+  defaultPermutation,
   diagnostics,
   disabledAxes as virtualDisabledAxes,
   listing as virtualListing,
   presets as virtualPresets,
-  themes,
-  themesResolved,
+  permutations,
+  permutationsResolved,
 } from 'virtual:swatchbook/tokens';
 import {
   AxesContext,
@@ -26,12 +26,11 @@ import {
   ColorFormatContext,
   type ProjectSnapshot,
   SwatchbookContext,
-  ThemeContext,
+  PermutationContext,
 } from '@unpunnyfuns/swatchbook-blocks';
 import {
   AXES_GLOBAL_KEY,
   COLOR_FORMAT_GLOBAL_KEY,
-  GLOBAL_KEY,
   HMR_EVENT,
   INIT_EVENT,
   INIT_REQUEST_EVENT,
@@ -78,7 +77,7 @@ html, body {
  * same pinned context per disabled axis, so sampling any theme works.
  */
 function forEachPinnedAxis(cb: (name: string, value: string) => void): void {
-  const pinnedSample = themes[0]?.input;
+  const pinnedSample = permutations[0]?.input;
   if (!pinnedSample) return;
   for (const name of virtualDisabledAxes) {
     const value = pinnedSample[name];
@@ -87,16 +86,16 @@ function forEachPinnedAxis(cb: (name: string, value: string) => void): void {
 }
 
 /**
- * Pick the theme name for a tuple, falling back to `defaultTheme` and then
- * the first theme. Returns empty string when the project has no themes so
+ * Pick the theme name for a tuple, falling back to `defaultPermutation` and then
+ * the first theme. Returns empty string when the project has no permutations so
  * callers can omit the attr instead of writing a made-up context name.
  */
-function matchThemeName(tuple: Readonly<Record<string, string>>): string {
-  const match = themes.find((t) => {
+function matchPermutationName(tuple: Readonly<Record<string, string>>): string {
+  const match = permutations.find((t) => {
     const input = t.input as Record<string, string>;
     return Object.keys(input).every((k) => input[k] === tuple[k]);
   });
-  return match?.name ?? defaultTheme ?? themes[0]?.name ?? '';
+  return match?.name ?? defaultPermutation ?? permutations[0]?.name ?? '';
 }
 
 /**
@@ -136,9 +135,9 @@ function broadcastInit(): void {
     axes: virtualAxes,
     disabledAxes: virtualDisabledAxes,
     presets: virtualPresets,
-    themes,
-    defaultTheme,
-    themesResolved,
+    permutations,
+    defaultPermutation,
+    permutationsResolved,
     diagnostics,
     cssVarPrefix,
   });
@@ -151,9 +150,9 @@ function defaultTuple(): Record<string, string> {
   return out;
 }
 
-/** Look up a `Theme.input` by composed name. Returns `undefined` if no theme matches. */
+/** Look up a `Permutation.input` by composed name. Returns `undefined` if no theme matches. */
 function tupleForName(name: string): Record<string, string> | undefined {
-  const match = themes.find((t) => t.name === name);
+  const match = permutations.find((t) => t.name === name);
   return match?.input;
 }
 
@@ -174,12 +173,11 @@ function normalizeTuple(partial: Readonly<Record<string, string>>): Record<strin
 }
 
 /**
- * Resolve the active tuple from all four input channels, in priority order:
+ * Resolve the active tuple from all input channels, in priority order:
  *   1. `parameters.swatchbook.axes` — per-story tuple.
- *   2. `parameters.swatchbook.theme` — per-story composed name (legacy).
+ *   2. `parameters.swatchbook.permutation` — per-story composed name.
  *   3. `globals.swatchbookAxes` — toolbar-set tuple.
- *   4. `globals.swatchbookTheme` — toolbar-set composed name.
- *   5. virtual module default.
+ *   4. virtual module default.
  */
 function resolveTuple(
   globals: Record<string, unknown>,
@@ -190,19 +188,14 @@ function resolveTuple(
   if (paramAxes && typeof paramAxes === 'object') {
     return normalizeTuple(paramAxes as Record<string, string>);
   }
-  const paramTheme = param?.['theme'];
-  if (typeof paramTheme === 'string') {
-    const hit = tupleForName(paramTheme);
+  const paramPermutation = param?.['permutation'];
+  if (typeof paramPermutation === 'string') {
+    const hit = tupleForName(paramPermutation);
     if (hit) return normalizeTuple(hit);
   }
   const globalAxes = globals[AXES_GLOBAL_KEY];
   if (globalAxes && typeof globalAxes === 'object') {
     return normalizeTuple(globalAxes as Record<string, string>);
-  }
-  const globalTheme = globals[GLOBAL_KEY];
-  if (typeof globalTheme === 'string') {
-    const hit = tupleForName(globalTheme);
-    if (hit) return normalizeTuple(hit);
   }
   return defaultTuple();
 }
@@ -228,7 +221,7 @@ const themedDecorator: Decorator = (Story, context) => {
     () => resolveColorFormat(context.globals as Record<string, unknown>),
     [context.globals],
   );
-  const themeName = useMemo(() => matchThemeName(tuple), [tuple]);
+  const themeName = useMemo(() => matchPermutationName(tuple), [tuple]);
 
   useEffect(() => {
     ensureStylesheet();
@@ -254,9 +247,9 @@ const themedDecorator: Decorator = (Story, context) => {
       axes: virtualAxes,
       disabledAxes: virtualDisabledAxes,
       presets: virtualPresets,
-      themes,
-      themesResolved,
-      activeTheme: themeName,
+      permutations,
+      permutationsResolved,
+      activePermutation: themeName,
       activeAxes: tuple,
       cssVarPrefix,
       diagnostics,
@@ -268,7 +261,7 @@ const themedDecorator: Decorator = (Story, context) => {
 
   return (
     <SwatchbookContext.Provider value={snapshot}>
-      <ThemeContext.Provider value={themeName}>
+      <PermutationContext.Provider value={themeName}>
         <AxesContext.Provider value={tuple}>
           <ColorFormatContext.Provider value={colorFormat}>
             <div
@@ -282,7 +275,7 @@ const themedDecorator: Decorator = (Story, context) => {
             </div>
           </ColorFormatContext.Provider>
         </AxesContext.Provider>
-      </ThemeContext.Provider>
+      </PermutationContext.Provider>
     </SwatchbookContext.Provider>
   );
 };
@@ -294,13 +287,9 @@ const themedDecorator: Decorator = (Story, context) => {
 export const decorators: NonNullable<Preview['decorators']> = [themedDecorator];
 
 export const globalTypes: NonNullable<Preview['globalTypes']> = {
-  [GLOBAL_KEY]: {
-    name: 'Theme',
-    description: 'Active swatchbook theme (composed permutation ID).',
-  },
   [AXES_GLOBAL_KEY]: {
     name: 'Axes',
-    description: 'Per-axis context selection. Takes precedence over the composed theme name.',
+    description: 'Per-axis context selection — the active permutation tuple.',
   },
   [COLOR_FORMAT_GLOBAL_KEY]: {
     name: 'Color format',
@@ -315,7 +304,6 @@ function buildInitialAxes(): Record<string, string> {
 }
 
 export const initialGlobals: NonNullable<Preview['initialGlobals']> = {
-  [GLOBAL_KEY]: defaultTheme ?? themes[0]?.name ?? '',
   [AXES_GLOBAL_KEY]: buildInitialAxes(),
   [COLOR_FORMAT_GLOBAL_KEY]: 'hex',
 };
@@ -353,7 +341,7 @@ function installGlobalAxisApplier(): void {
   const apply = (globals: Record<string, unknown>): void => {
     ensureStylesheet();
     const tuple = resolveTuple(globals, {});
-    setRootAxes(matchThemeName(tuple), tuple);
+    setRootAxes(matchPermutationName(tuple), tuple);
   };
   const onGlobals = (payload: { globals?: Record<string, unknown> }): void => {
     if (payload.globals) apply(payload.globals);
@@ -395,9 +383,9 @@ interface HmrSnapshot {
   axes: typeof virtualAxes;
   disabledAxes: typeof virtualDisabledAxes;
   presets: typeof virtualPresets;
-  themes: typeof themes;
-  defaultTheme: typeof defaultTheme;
-  themesResolved: typeof themesResolved;
+  permutations: typeof permutations;
+  defaultPermutation: typeof defaultPermutation;
+  permutationsResolved: typeof permutationsResolved;
   diagnostics: typeof diagnostics;
   css: string;
   cssVarPrefix: string;
@@ -427,9 +415,9 @@ html, body {
       axes: payload.axes,
       disabledAxes: payload.disabledAxes,
       presets: payload.presets,
-      themes: payload.themes,
-      defaultTheme: payload.defaultTheme,
-      themesResolved: payload.themesResolved,
+      permutations: payload.permutations,
+      defaultPermutation: payload.defaultPermutation,
+      permutationsResolved: payload.permutationsResolved,
       diagnostics: payload.diagnostics,
       cssVarPrefix: payload.cssVarPrefix,
     });

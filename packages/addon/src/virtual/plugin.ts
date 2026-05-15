@@ -32,7 +32,7 @@ function resolvedId(virtualId: string): string {
 
 /**
  * Vite plugin that serves the virtual `virtual:swatchbook/tokens` module —
- * a single source of truth for themes, resolved token maps, per-theme CSS,
+ * a single source of truth for permutations, resolved token maps, per-theme CSS,
  * and diagnostics. Watches the token files + resolver for changes and
  * invalidates the module so HMR reloads the preview with fresh data.
  */
@@ -100,9 +100,9 @@ export function swatchbookTokensPlugin({
         `export const axes = ${JSON.stringify(project.axes)};`,
         `export const presets = ${JSON.stringify(project.presets)};`,
         `export const disabledAxes = ${JSON.stringify(project.disabledAxes)};`,
-        `export const themes = ${JSON.stringify(project.themes)};`,
-        `export const defaultTheme = ${JSON.stringify(project.themes[0]?.name ?? null)};`,
-        `export const themesResolved = ${JSON.stringify(project.themesResolved)};`,
+        `export const permutations = ${JSON.stringify(project.permutations)};`,
+        `export const defaultPermutation = ${JSON.stringify(project.permutations[0]?.name ?? null)};`,
+        `export const permutationsResolved = ${JSON.stringify(project.permutationsResolved)};`,
         `export const diagnostics = ${JSON.stringify(project.diagnostics)};`,
         `export const css = ${JSON.stringify(css)};`,
         `export const cssVarPrefix = ${JSON.stringify(config.cssVarPrefix ?? '')};`,
@@ -134,7 +134,7 @@ export function swatchbookTokensPlugin({
             await refresh();
             if (!project) return;
             const tokenCount = Object.keys(
-              project.themesResolved[project.themes[0]?.name ?? ''] ?? {},
+              project.permutationsResolved[project.permutations[0]?.name ?? ''] ?? {},
             ).length;
             const diagCount = project.diagnostics.length;
             server.config.logger.info(
@@ -165,9 +165,9 @@ export function swatchbookTokensPlugin({
                 axes: project.axes,
                 disabledAxes: project.disabledAxes,
                 presets: project.presets,
-                themes: project.themes,
-                defaultTheme: project.themes[0]?.name ?? null,
-                themesResolved: project.themesResolved,
+                permutations: project.permutations,
+                defaultPermutation: project.permutations[0]?.name ?? null,
+                permutationsResolved: project.permutationsResolved,
                 diagnostics: project.diagnostics,
                 css,
                 cssVarPrefix: config.cssVarPrefix ?? '',

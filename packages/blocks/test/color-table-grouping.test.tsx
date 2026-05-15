@@ -5,8 +5,8 @@ import { makeColorTableSnapshot } from './_color-table-helpers.tsx';
 
 function makeVariantSnapshot(): ProjectSnapshot {
   const base = makeColorTableSnapshot();
-  base.themesResolved['Light'] = {
-    ...base.themesResolved['Light'],
+  base.permutationsResolved['Light'] = {
+    ...base.permutationsResolved['Light'],
     'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
     'color.bg.hi-h': { $type: 'color', $value: { hex: '#222222' } },
     'color.bg.hi-d': { $type: 'color', $value: { hex: '#333333' } },
@@ -82,8 +82,8 @@ describe('ColorTable — grouping', () => {
 
   it('renders DTCG dot-segment variants (hi.disabled) the same as hyphen tails', () => {
     const snap = makeColorTableSnapshot();
-    snap.themesResolved['Light'] = {
-      ...snap.themesResolved['Light'],
+    snap.permutationsResolved['Light'] = {
+      ...snap.permutationsResolved['Light'],
       'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
       'color.bg.hi.disabled': { $type: 'color', $value: { hex: '#222222' } },
       'color.bg.hi.hover': { $type: 'color', $value: { hex: '#333333' } },

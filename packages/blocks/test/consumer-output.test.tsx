@@ -14,13 +14,13 @@ function makeSnapshot(
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
     disabledAxes: [],
     presets: [],
-    themes: [{ name: 'Light', input: { theme: 'Light' }, sources: [] }],
-    themesResolved: {
+    permutations: [{ name: 'Light', input: { theme: 'Light' }, sources: [] }],
+    permutationsResolved: {
       Light: {
         'color.accent.bg': { $type: 'color', $value: { hex: '#3b82f6' } },
       },
     },
-    activeTheme: 'Light',
+    activePermutation: 'Light',
     activeAxes: { theme: 'Light' },
     cssVarPrefix: 'sb',
     diagnostics: [],

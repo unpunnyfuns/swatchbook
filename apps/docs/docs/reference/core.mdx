@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # Core
 
-Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via Terrazzo, resolves aliases, composes themes through a resolver or layered-axes config. No React, no Storybook dependency.
+Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via Terrazzo, resolves aliases, composes per-permutation token snapshots through a resolver or layered-axes config. No React, no Storybook dependency.
 
 ## Install
 
@@ -32,28 +32,28 @@ export default defineSwatchbookConfig({
 
 ### `loadProject(config, cwd?)`
 
-Parse + resolve a project. Eagerly resolves every theme permutation, so downstream consumers can read `themesResolved[name]` directly without further I/O.
+Parse + resolve a project. Eagerly resolves every permutation, so downstream consumers can read `permutationsResolved[name]` directly without further I/O.
 
 ```ts
 import { loadProject } from '@unpunnyfuns/swatchbook-core';
 
 const project = await loadProject(config, process.cwd());
-// project: { config, axes, presets, themes, themesResolved, graph, diagnostics }
+// project: { config, axes, presets, permutations, permutationsResolved, graph, diagnostics }
 ```
 
-### `resolveTheme(project, name)`
+### `resolvePermutation(project, name)`
 
-Pick a single composed theme out of a project.
+Pick a single composed permutation out of a project.
 
 ```ts
-const { tokens } = resolveTheme(project, 'Light · Default');
+const { tokens } = resolvePermutation(project, 'Light · Default');
 ```
 
-Throws with a helpful "known themes" message if the name is unknown.
+Throws with a helpful "known permutations" message if the name is unknown.
 
 ### `permutationID(input)`
 
-Stringify a tuple to the form used as `Theme.name` and CSS data-attribute values:
+Stringify a tuple to the form used as `Permutation.name` and CSS data-attribute values:
 
 ```ts
 permutationID({ mode: 'Dark', brand: 'Brand A' }); // → "Dark · Brand A"
@@ -126,9 +126,9 @@ interface Project {
   presets: Preset[];
   /** Validated chrome-alias entries from `config.chrome`. Invalid entries are dropped and reported as diagnostics. */
   chrome: Record<string, string>;
-  themes: Theme[];
-  themesResolved: Record<string, TokenMap>;
-  graph: TokenMap; // default theme's resolved tokens
+  permutations: Permutation[];
+  permutationsResolved: Record<string, TokenMap>;
+  graph: TokenMap; // default permutation's resolved tokens
   /** Absolute paths of every file loaded while building the project (resolver + `$ref` targets, overlay files, or globbed plain-parse files). */
   sourceFiles: string[];
   /** Loader cwd — what all config-relative paths resolved against. */
@@ -172,10 +172,10 @@ interface SwatchbookIntegration {
 
 See the [Integrations guide](../guides/integrations/index.mdx) for factories that build these for Tailwind and CSS-in-JS.
 
-### `Theme`
+### `Permutation`
 
 ```ts
-interface Theme {
+interface Permutation {
   name: string;
   input: Record<string, string>; // the axis tuple
   sources: string[];
@@ -199,4 +199,4 @@ interface Diagnostic {
 
 - ✅ Use this package at build time — Node scripts, SSR, Storybook presets. It has no DOM dependency.
 - ❌ Don't import from `@terrazzo/parser` directly unless you need features core doesn't expose.
-- ❌ Don't ship `Project` objects to the browser — they carry full raw-AST references. Use `themesResolved` projections instead.
+- ❌ Don't ship `Project` objects to the browser — they carry full raw-AST references. Use `permutationsResolved` projections instead.

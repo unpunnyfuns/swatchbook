@@ -1,7 +1,7 @@
 import type { TokenNormalized } from '@terrazzo/parser';
 import { generateShorthand, makeCSSVar, transformCSSValue } from '@terrazzo/token-tools/css';
 import { CHROME_ROLES, CHROME_VAR_PREFIX, DEFAULT_CHROME_MAP } from '#/chrome.ts';
-import type { Axis, Theme, TokenMap } from '#/types.ts';
+import type { Axis, Permutation, TokenMap } from '#/types.ts';
 
 /** @internal Addon-internal CSS emitter options. Not part of the public API. */
 export interface EmitCssOptions {
@@ -43,8 +43,8 @@ export interface EmitCssOptions {
  * sources directly.
  */
 export function emitCss(
-  themes: Theme[],
-  themesResolved: Record<string, TokenMap>,
+  permutations: Permutation[],
+  permutationsResolved: Record<string, TokenMap>,
   options: EmitCssOptions = {},
 ): string {
   const prefix = options.prefix ?? '';
@@ -55,20 +55,26 @@ export function emitCss(
   const axes = options.axes ?? [];
   const multiAxis = axes.length > 1;
   const defaultTuple = buildDefaultTuple(axes);
-  const defaultTheme = axes.length > 0 ? findThemeByTuple(themes, defaultTuple) : undefined;
+  const defaultPermutation =
+    axes.length > 0 ? findPermutationByTuple(permutations, defaultTuple) : undefined;
 
   const blocks: string[] = [];
 
-  if (multiAxis && defaultTheme) {
-    const decls = declarationsFor(defaultTheme, themesResolved, varOpts, transformAlias);
+  if (multiAxis && defaultPermutation) {
+    const decls = declarationsFor(
+      defaultPermutation,
+      permutationsResolved,
+      varOpts,
+      transformAlias,
+    );
     if (decls.length > 0) blocks.push(`:root {\n${decls.join('\n')}\n}`);
   }
 
-  for (const theme of themes) {
-    if (multiAxis && theme === defaultTheme) continue;
-    const decls = declarationsFor(theme, themesResolved, varOpts, transformAlias);
+  for (const perm of permutations) {
+    if (multiAxis && perm === defaultPermutation) continue;
+    const decls = declarationsFor(perm, permutationsResolved, varOpts, transformAlias);
     if (decls.length === 0) continue;
-    blocks.push(`${selectorFor(theme, axes, prefix)} {\n${decls.join('\n')}\n}`);
+    blocks.push(`${selectorFor(perm, axes, prefix)} {\n${decls.join('\n')}\n}`);
   }
 
   const chrome = options.chrome ?? {};
@@ -91,12 +97,12 @@ export function emitCss(
 type VarOpts = Record<string, never> | { prefix: string };
 
 function declarationsFor(
-  theme: Theme,
-  themesResolved: Record<string, TokenMap>,
+  perm: Permutation,
+  permutationsResolved: Record<string, TokenMap>,
   varOpts: VarOpts,
   transformAlias: (token: TokenNormalized) => string,
 ): string[] {
-  const tokens = themesResolved[theme.name];
+  const tokens = permutationsResolved[perm.name];
   if (!tokens) return [];
   const declarations: string[] = [];
   for (const [localID, token] of Object.entries(tokens)) {
@@ -104,7 +110,7 @@ function declarationsFor(
       localID,
       token,
       tokens,
-      theme.input,
+      perm.input,
       varOpts,
       transformAlias,
     )) {
@@ -125,18 +131,18 @@ function declarationsFor(
  * bare `data-mode` / `data-theme`. Empty prefix keeps the bare form as
  * opt-out.
  */
-function selectorFor(theme: Theme, axes: Axis[], prefix: string): string {
+function selectorFor(perm: Permutation, axes: Axis[], prefix: string): string {
   const attr = attrName(prefix);
   if (axes.length <= 1) {
-    return `[${attr('theme')}="${cssEscape(theme.name)}"]`;
+    return `[${attr('theme')}="${cssEscape(perm.name)}"]`;
   }
   const parts: string[] = [];
   for (const axis of axes) {
-    const value = theme.input[axis.name];
+    const value = perm.input[axis.name];
     if (value === undefined) continue;
     parts.push(`[${attr(axis.name)}="${cssEscape(value)}"]`);
   }
-  return parts.length > 0 ? parts.join('') : `[${attr('theme')}="${cssEscape(theme.name)}"]`;
+  return parts.length > 0 ? parts.join('') : `[${attr('theme')}="${cssEscape(perm.name)}"]`;
 }
 
 /**
@@ -158,16 +164,16 @@ function buildDefaultTuple(axes: Axis[]): Record<string, string> {
   return out;
 }
 
-function findThemeByTuple(
-  themes: Theme[],
+function findPermutationByTuple(
+  permutations: Permutation[],
   tuple: Readonly<Record<string, string>>,
-): Theme | undefined {
+): Permutation | undefined {
   const keys = Object.keys(tuple);
-  return themes.find((theme) => {
+  return permutations.find((perm) => {
     for (const key of keys) {
-      if (theme.input[key] !== tuple[key]) return false;
+      if (perm.input[key] !== tuple[key]) return false;
     }
-    return Object.keys(theme.input).length === keys.length;
+    return Object.keys(perm.input).length === keys.length;
   });
 }
 

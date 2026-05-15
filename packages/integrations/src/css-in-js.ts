@@ -53,7 +53,7 @@ export interface CssInJsIntegrationOptions {
  * The theme object is stable across tuples — consumers wire it into a
  * provider *once*; runtime switching happens entirely through CSS cascade
  * when swatchbook's toolbar toggles `data-<prefix>-<axis>` on `<html>`.
- * Consumers who need resolved-value themes (MUI `createTheme`, Vuetify
+ * Consumers who need resolved-value permutations (MUI `createTheme`, Vuetify
  * factories) are not covered — that's a different emission story.
  */
 export default function cssInJsIntegration(
@@ -94,8 +94,8 @@ function renderTheme(project: Project): string {
 
 function collectPaths(project: Project): string[] {
   const all = new Set<string>();
-  for (const theme of project.themes) {
-    const tokens = project.themesResolved[theme.name] ?? {};
+  for (const theme of project.permutations) {
+    const tokens = project.permutationsResolved[theme.name] ?? {};
     for (const path of Object.keys(tokens)) all.add(path);
   }
   return [...all].toSorted();

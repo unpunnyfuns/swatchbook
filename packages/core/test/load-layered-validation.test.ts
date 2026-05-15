@@ -24,6 +24,6 @@ describe('loadProject — layered config validation', () => {
     expect(project.axes).toEqual([
       { name: 'theme', contexts: ['default'], default: 'default', source: 'synthetic' },
     ]);
-    expect(project.themes.map((t) => t.name)).toEqual(['default']);
+    expect(project.permutations.map((t) => t.name)).toEqual(['default']);
   });
 });

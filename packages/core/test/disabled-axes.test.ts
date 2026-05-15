@@ -79,9 +79,9 @@ it('carries the filtered-out names on Project.disabledAxes', () => {
   expect(project.disabledAxes).toEqual(['contrast']);
 });
 
-it('filters themes down to the ones where disabled axes equal their default', () => {
-  expect(project.themes).toHaveLength(4);
-  for (const theme of project.themes) {
+it('filters permutations down to the ones where disabled axes equal their default', () => {
+  expect(project.permutations).toHaveLength(4);
+  for (const theme of project.permutations) {
     expect(theme.input['contrast']).toBe('Normal');
   }
 });
@@ -90,9 +90,9 @@ it('emits CSS with no data-contrast selectors', () => {
   expect(css).not.toMatch(/data-contrast/);
 });
 
-it('keys themesResolved on the surviving theme names', () => {
-  const keys = Object.keys(project.themesResolved).toSorted();
-  const themeNames = project.themes.map((t) => t.name).toSorted();
+it('keys permutationsResolved on the surviving theme names', () => {
+  const keys = Object.keys(project.permutationsResolved).toSorted();
+  const themeNames = project.permutations.map((t) => t.name).toSorted();
   expect(keys).toEqual(themeNames);
 });
 

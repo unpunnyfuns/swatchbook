@@ -7,9 +7,9 @@
 export const axes = [] as const;
 export const disabledAxes = [] as const;
 export const presets = [] as const;
-export const themes = [] as const;
-export const defaultTheme = null;
-export const themesResolved = {};
+export const permutations = [] as const;
+export const defaultPermutation = null;
+export const permutationsResolved = {};
 export const diagnostics = [] as const;
 export const css = '';
 export const cssVarPrefix = '';

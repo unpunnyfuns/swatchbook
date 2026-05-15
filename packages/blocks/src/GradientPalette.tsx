@@ -71,7 +71,7 @@ export function GradientPalette({
   sortDir = 'asc',
 }: GradientPaletteProps): ReactElement {
   const project = useProject();
-  const { resolved, activeTheme, cssVarPrefix } = project;
+  const { resolved, activePermutation, cssVarPrefix } = project;
   const colorFormat = useColorFormat();
 
   const rows = useMemo<Row[]>(() => {
@@ -88,18 +88,18 @@ export function GradientPalette({
 
   const captionText =
     caption ??
-    `${rows.length} gradient${rows.length === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
+    `${rows.length} gradient${rows.length === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activePermutation}`;
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+      <div {...themeAttrs(cssVarPrefix, activePermutation)}>
         <div className="sb-block__empty">No gradient tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+    <div {...themeAttrs(cssVarPrefix, activePermutation)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} className="sb-gradient-palette__row">

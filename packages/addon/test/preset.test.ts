@@ -14,8 +14,8 @@ function fakeProject(partial: Partial<Project>): Project {
     axes: [],
     disabledAxes: [],
     presets: [],
-    themes: [],
-    themesResolved: {},
+    permutations: [],
+    permutationsResolved: {},
     graph: {},
     sourceFiles: [],
     diagnostics: [],
@@ -31,13 +31,13 @@ describe('renderTokenTypes', () => {
     expect(out).toContain('interface SwatchbookTokenMap {');
   });
 
-  it('sorts token paths alphabetically across themes', () => {
+  it('sorts token paths alphabetically across permutations', () => {
     const project = fakeProject({
-      themes: [
+      permutations: [
         { name: 'Light', input: {}, sources: [] },
         { name: 'Dark', input: {}, sources: [] },
       ],
-      themesResolved: {
+      permutationsResolved: {
         Light: {
           'color.bg': { id: 'color.bg' } as never,
           'color.fg': { id: 'color.fg' } as never,
@@ -56,29 +56,29 @@ describe('renderTokenTypes', () => {
     expect(bgIdx).toBeLessThan(fgIdx);
   });
 
-  it('builds SwatchbookThemeName as a union of theme names', () => {
+  it('builds SwatchbookPermutationName as a union of theme names', () => {
     const project = fakeProject({
-      themes: [
+      permutations: [
         { name: 'Light', input: {}, sources: [] },
         { name: 'Dark', input: {}, sources: [] },
       ],
     });
     const out = renderTokenTypes(project);
-    expect(out).toContain('export type SwatchbookThemeName = "Light" | "Dark";');
+    expect(out).toContain('export type SwatchbookPermutationName = "Light" | "Dark";');
   });
 
-  it('falls back to string when no themes exist', () => {
+  it('falls back to string when no permutations exist', () => {
     const out = renderTokenTypes(fakeProject({}));
-    expect(out).toContain('export type SwatchbookThemeName = string;');
+    expect(out).toContain('export type SwatchbookPermutationName = string;');
   });
 
-  it('dedupes token paths across themes', () => {
+  it('dedupes token paths across permutations', () => {
     const project = fakeProject({
-      themes: [
+      permutations: [
         { name: 'Light', input: {}, sources: [] },
         { name: 'Dark', input: {}, sources: [] },
       ],
-      themesResolved: {
+      permutationsResolved: {
         Light: { 'color.bg': { id: 'color.bg' } as never },
         Dark: { 'color.bg': { id: 'color.bg' } as never },
       },

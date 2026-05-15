@@ -181,7 +181,7 @@ export function TokenNavigator({
   searchable = true,
   onSelect,
 }: TokenNavigatorProps): ReactElement {
-  const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const { resolved, activePermutation, cssVarPrefix } = useProject();
 
   const typeFilter = useMemo<ReadonlySet<string> | undefined>(() => {
     if (type === undefined) return undefined;
@@ -254,7 +254,7 @@ export function TokenNavigator({
 
   if (tree.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+      <div {...themeAttrs(cssVarPrefix, activePermutation)}>
         <EmptyState>
           {root
             ? `No tokens under "${root}"${typeFilter ? ` matching ${typeLabel.slice(3)}` : ''}.`
@@ -267,7 +267,7 @@ export function TokenNavigator({
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+    <div {...themeAttrs(cssVarPrefix, activePermutation)}>
       {searchable && (
         <div className="sb-token-navigator__search">
           <input
@@ -284,7 +284,8 @@ export function TokenNavigator({
       <div className="sb-token-navigator__caption">
         {root ? `Tokens under ${root}` : 'Token graph'}
         {typeLabel}
-        {trimmedQuery !== '' ? ` · ${matchCount} matching "${trimmedQuery}"` : ''} · {activeTheme}
+        {trimmedQuery !== '' ? ` · ${matchCount} matching "${trimmedQuery}"` : ''} ·{' '}
+        {activePermutation}
       </div>
       {visibleTree.length === 0 ? (
         <div className="sb-block__empty">No tokens match "{trimmedQuery}".</div>

@@ -9,6 +9,6 @@ export {
   type VirtualAxisShape as VirtualAxis,
   type VirtualDiagnosticShape as VirtualDiagnostic,
   type VirtualPresetShape as VirtualPreset,
-  type VirtualThemeShape as VirtualTheme,
+  type VirtualPermutationShape as VirtualPermutation,
   type VirtualTokenShape as VirtualToken,
 } from '#/contexts.ts';

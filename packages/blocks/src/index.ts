@@ -23,15 +23,15 @@ export {
   AxesContext,
   ColorFormatContext,
   SwatchbookContext,
-  ThemeContext,
+  PermutationContext,
   useActiveAxes,
-  useActiveTheme,
+  useActivePermutation,
   useColorFormat,
   useOptionalSwatchbookData,
   type VirtualAxisShape,
   type VirtualDiagnosticShape,
   type VirtualPresetShape,
-  type VirtualThemeShape,
+  type VirtualPermutationShape,
   type VirtualTokenListingShape,
   type VirtualTokenShape,
 } from '#/contexts.ts';
@@ -45,7 +45,7 @@ export type {
   VirtualAxis,
   VirtualDiagnostic,
   VirtualPreset,
-  VirtualTheme,
+  VirtualPermutation,
   VirtualToken,
 } from '#/types.ts';
 export { MotionSample, type MotionSampleProps } from '#/motion-preview/MotionSample.tsx';

@@ -83,8 +83,8 @@ export const Light = meta.story({
  * Under Dark, `color.surface.default` and `color.text.default` flip —
  * the same `useToken()` calls now resolve against `neutral.900` and
  * `neutral.50` respectively. This story proves `useToken` is reactive to
- * the active theme (via `parameters.swatchbook.theme` here — same channel
- * the toolbar uses at runtime).
+ * the active permutation (via `parameters.swatchbook.axes` here — same
+ * channel the toolbar uses at runtime).
  */
 export const Dark = meta.story({
   parameters: { swatchbook: { axes: { mode: 'Dark', brand: 'Default' } } },

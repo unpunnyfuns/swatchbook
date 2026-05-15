@@ -41,11 +41,11 @@ it('runs extra Terrazzo plugins alongside plugin-css', async () => {
   expect(jsText).toContain('lineHeight');
 });
 
-it("selection 'themes' (default) fans out to every cartesian tuple", async () => {
+it("selection 'permutations' (default) fans out to every cartesian tuple", async () => {
   const files = await emitViaTerrazzo(project, { cssOptions: { filename: 'tokens.css' } });
   const text = String(files.find((f) => f.filename === 'tokens.css')!.contents);
   // Every theme.name should appear as an attribute-value fragment.
-  for (const theme of project.themes) {
+  for (const theme of project.permutations) {
     for (const [axisName, contextValue] of Object.entries(theme.input)) {
       expect(text).toContain(`data-sb-${axisName}="${contextValue}"`);
     }

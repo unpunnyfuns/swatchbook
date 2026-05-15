@@ -1,5 +1,9 @@
 import { analyzeAxisVariance } from '@unpunnyfuns/swatchbook-core/variance';
-import type { Axis as CoreAxis, Theme as CoreTheme, TokenMap } from '@unpunnyfuns/swatchbook-core';
+import type {
+  Axis as CoreAxis,
+  Permutation as CorePermutation,
+  TokenMap,
+} from '@unpunnyfuns/swatchbook-core';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
@@ -9,7 +13,7 @@ import { formatTokenValue } from '#/internal/format-token-value.ts';
 import {
   type DetailToken,
   type VirtualAxisLike,
-  type VirtualThemeLike,
+  type VirtualPermutationLike,
   useTokenDetailData,
 } from '#/token-detail/internal.ts';
 
@@ -24,7 +28,7 @@ interface Variance {
 }
 
 export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
-  const { token, cssVar, axes, themes, themesResolved, activeAxes, cssVarPrefix } =
+  const { token, cssVar, axes, permutations, permutationsResolved, activeAxes, cssVarPrefix } =
     useTokenDetailData(path);
   const colorFormat = useColorFormat();
   const tokenType = token?.$type;
@@ -35,8 +39,8 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
     const result = analyzeAxisVariance(
       path,
       axes as unknown as readonly CoreAxis[],
-      themes as unknown as readonly CoreTheme[],
-      themesResolved as unknown as Record<string, TokenMap>,
+      permutations as unknown as readonly CorePermutation[],
+      permutationsResolved as unknown as Record<string, TokenMap>,
     );
     // Map core's terse kind vocabulary to the block's display-ready one.
     const kind =
@@ -46,15 +50,17 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
           ? 'one-axis'
           : 'multi-axis';
     return { kind, varyingAxes: result.varyingAxes };
-  }, [path, axes, themes, themesResolved]);
+  }, [path, axes, permutations, permutationsResolved]);
 
-  if (themes.length === 0) {
+  if (permutations.length === 0) {
     return <></>;
   }
 
   if (variance.kind === 'constant') {
-    const anyTheme = themes[0];
-    const value = anyTheme ? formatFn(themesResolved[anyTheme.name]?.[path]) : '—';
+    const anyPermutation = permutations[0];
+    const value = anyPermutation
+      ? formatFn(permutationsResolved[anyPermutation.name]?.[path])
+      : '—';
     return (
       <>
         <div className="sb-token-detail__section-header">Values across axes</div>
@@ -71,7 +77,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                 )}
                 {value}
                 <span style={{ opacity: 0.6, marginLeft: 8 }}>
-                  same across all {themes.length} tuples
+                  same across all {permutations.length} tuples
                 </span>
               </td>
             </tr>
@@ -88,7 +94,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
     if (!axis) return <></>;
     const contextValues = axis.contexts.map((ctx) => {
       const target = { ...activeAxes, [axisName]: ctx };
-      const match = themes.find((t) => {
+      const match = permutations.find((t) => {
         const input = t.input;
         return Object.keys(input).every((k) => input[k] === target[k]);
       });
@@ -96,7 +102,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
       return {
         ctx,
         themeName: name,
-        value: name ? formatFn(themesResolved[name]?.[path]) : '—',
+        value: name ? formatFn(permutationsResolved[name]?.[path]) : '—',
       };
     });
     return (
@@ -172,8 +178,8 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                   [rowAxis.name]: row,
                   [colAxis.name]: col,
                 };
-                const name = tupleName(themes, target);
-                const value = name ? formatFn(themesResolved[name]?.[path]) : '—';
+                const name = tupleName(permutations, target);
+                const value = name ? formatFn(permutationsResolved[name]?.[path]) : '—';
                 return (
                   <td
                     key={col}
@@ -217,10 +223,10 @@ function valueFor(
 }
 
 function tupleName(
-  themes: readonly VirtualThemeLike[],
+  permutations: readonly VirtualPermutationLike[],
   tuple: Record<string, string>,
 ): string | undefined {
-  const match = themes.find((t) => {
+  const match = permutations.find((t) => {
     const input = t.input;
     const keys = Object.keys(input);
     return keys.every((k) => input[k] === tuple[k]);

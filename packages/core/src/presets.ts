@@ -48,3 +48,20 @@ export function validatePresets(raw: Preset[] | undefined, axes: Axis[]): Preset
 
   return { presets, diagnostics };
 }
+
+/**
+ * Fill a preset's sanitized partial tuple with each axis's `default`,
+ * yielding a complete tuple that names every axis. Matches what the
+ * toolbar's "apply preset" button sends out — keeps emitted output and
+ * runtime activation in lockstep.
+ */
+export function fillPresetTuple(
+  presetAxes: Partial<Record<string, string>>,
+  axes: readonly Axis[],
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const axis of axes) {
+    out[axis.name] = presetAxes[axis.name] ?? axis.default;
+  }
+  return out;
+}

@@ -18,7 +18,7 @@ it('emits two :root blocks (default tuple + chrome) plus N-1 per-tuple blocks', 
   const rootMatches = css.match(/(^|\n):root\s*\{/g) ?? [];
   expect(rootMatches).toHaveLength(2);
   const tupleBlocks = (css.match(/\n\[data-[^\]]+\][^{]*\{/g) ?? []).length;
-  expect(tupleBlocks).toBe(project.themes.length - 1);
+  expect(tupleBlocks).toBe(project.permutations.length - 1);
 });
 
 it('compound selector order matches Project.axes order', () => {

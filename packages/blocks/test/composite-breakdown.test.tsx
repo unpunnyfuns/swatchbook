@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { CompositeBreakdown, type ProjectSnapshot, SwatchbookProvider } from '#/index.ts';
 
 function makeSnapshot(): ProjectSnapshot {
-  const themesResolved = {
+  const permutationsResolved = {
     Light: {
       'color.palette.blue.500': { $type: 'color', $value: { hex: '#3b82f6' } },
       'color.border.default': {
@@ -31,9 +31,9 @@ function makeSnapshot(): ProjectSnapshot {
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
     disabledAxes: [],
     presets: [],
-    themes: [{ name: 'Light', input: { theme: 'Light' }, sources: [] }],
-    themesResolved,
-    activeTheme: 'Light',
+    permutations: [{ name: 'Light', input: { theme: 'Light' }, sources: [] }],
+    permutationsResolved,
+    activePermutation: 'Light',
     activeAxes: { theme: 'Light' },
     cssVarPrefix: 'sb',
     diagnostics: [],

@@ -77,7 +77,7 @@ For a working example, the docs site you're reading mounts `<ThemeSwitcher>` ins
 interface ThemeSwitcherProps {
   axes: readonly SwitcherAxis[];
   presets?: readonly SwitcherPreset[];
-  themes?: readonly SwitcherTheme[];
+  themes?: readonly SwitcherPermutation[];
   activeTuple: Readonly<Record<string, string>>;
   defaults: Readonly<Record<string, string>>;
   lastApplied: string | null;
@@ -118,13 +118,13 @@ interface SwitcherPreset {
   description?: string;
 }
 
-interface SwitcherTheme {
+interface SwitcherPermutation {
   name: string;
   input: Record<string, string>;
 }
 ```
 
-`SwitcherAxis` / `SwitcherPreset` / `SwitcherTheme` are structurally compatible with `Project.axes` / `Project.presets` / `Project.themes` from `@unpunnyfuns/swatchbook-core` — pass them through unchanged. The shapes are re-declared in the switcher package so it stays framework-agnostic and doesn't pull `core` as a runtime dependency.
+`SwitcherAxis` / `SwitcherPreset` / `SwitcherPermutation` are structurally compatible with `Project.axes` / `Project.presets` / `Project.permutations` from `@unpunnyfuns/swatchbook-core` — pass them through unchanged. The shapes are re-declared in the switcher package so it stays framework-agnostic and doesn't pull `core` as a runtime dependency.
 
 ## Axis-state propagation
 

@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { loadProject, resolveTheme } from '#/load.ts';
+import { loadProject, resolvePermutation } from '#/load.ts';
 import type { Config } from '#/types.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -53,7 +53,7 @@ describe('loadProject — layered axes', () => {
 
   it('enumerates the cartesian product of mode × brand', async () => {
     const project = await loadProject(layeredConfig(), fixtureCwd);
-    expect(project.themes.map((t) => t.name)).toEqual([
+    expect(project.permutations.map((t) => t.name)).toEqual([
       'Light · Default',
       'Light · Brand A',
       'Dark · Default',
@@ -63,14 +63,14 @@ describe('loadProject — layered axes', () => {
 
   it('default theme is the tuple of axis defaults', async () => {
     const project = await loadProject(layeredConfig(), fixtureCwd);
-    expect(project.themesResolved['Light · Default']).toBeDefined();
-    const def = resolveTheme(project, 'Light · Default').tokens;
+    expect(project.permutationsResolved['Light · Default']).toBeDefined();
+    const def = resolvePermutation(project, 'Light · Default').tokens;
     expect(def['color.surface']?.$value).toMatchObject({ components: [1, 1, 1] });
   });
 
   it('applies overlay layers in order — last write wins on same path', async () => {
     const project = await loadProject(layeredConfig(), fixtureCwd);
-    const dark = resolveTheme(project, 'Dark · Default').tokens;
+    const dark = resolvePermutation(project, 'Dark · Default').tokens;
     expect(dark['color.surface']?.$value).toMatchObject({ components: [0, 0, 0] });
     expect(dark['color.text']?.$value).toMatchObject({ components: [1, 1, 1] });
     expect(dark['color.accent']?.$value).toMatchObject({ components: [0.1, 0.3, 0.9] });
@@ -78,14 +78,14 @@ describe('loadProject — layered axes', () => {
 
   it('brand overlay overrides sys.accent while leaving surface alone', async () => {
     const project = await loadProject(layeredConfig(), fixtureCwd);
-    const brand = resolveTheme(project, 'Light · Brand A').tokens;
+    const brand = resolvePermutation(project, 'Light · Brand A').tokens;
     expect(brand['color.accent']?.$value).toMatchObject({ components: [0.9, 0.2, 0.2] });
     expect(brand['color.surface']?.$value).toMatchObject({ components: [1, 1, 1] });
   });
 
   it('multi-axis overlays compose (Dark + Brand A)', async () => {
     const project = await loadProject(layeredConfig(), fixtureCwd);
-    const tokens = resolveTheme(project, 'Dark · Brand A').tokens;
+    const tokens = resolvePermutation(project, 'Dark · Brand A').tokens;
     expect(tokens['color.surface']?.$value).toMatchObject({ components: [0, 0, 0] });
     expect(tokens['color.accent']?.$value).toMatchObject({ components: [0.9, 0.2, 0.2] });
   });
@@ -102,8 +102,8 @@ describe('loadProject — layered axes', () => {
       ],
     };
     const project = await loadProject(config, fixtureCwd);
-    expect(project.themes.map((t) => t.name).toSorted()).toEqual(['Brand A', 'Default']);
-    const def = resolveTheme(project, 'Default').tokens;
+    expect(project.permutations.map((t) => t.name).toSorted()).toEqual(['Brand A', 'Default']);
+    const def = resolvePermutation(project, 'Default').tokens;
     expect(def['color.accent']?.$value).toMatchObject({ components: [0.1, 0.3, 0.9] });
   });
 });

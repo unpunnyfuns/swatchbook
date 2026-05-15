@@ -1,5 +1,5 @@
-import { cssVarPrefix, defaultTheme, themesResolved } from 'virtual:swatchbook/tokens';
-import { useActiveTheme } from '@unpunnyfuns/swatchbook-blocks';
+import { cssVarPrefix, defaultPermutation, permutationsResolved } from 'virtual:swatchbook/tokens';
+import { useActivePermutation } from '@unpunnyfuns/swatchbook-blocks';
 
 /**
  * Consumers augment this interface (via the addon's generated
@@ -32,7 +32,7 @@ function makeCssVar(path: string, prefix: string): string {
 
 /**
  * Read a DTCG token for the currently active theme. Re-reads on theme
- * switch via the addon's `ThemeContext`. Returns `{ value, cssVar, type,
+ * switch via the addon's `PermutationContext`. Returns `{ value, cssVar, type,
  * description }`.
  *
  * Typed paths appear automatically once `.swatchbook/tokens.d.ts` is
@@ -43,9 +43,9 @@ function makeCssVar(path: string, prefix: string): string {
  * Storybook's preview-only hooks.
  */
 export function useToken(path: TokenPath): TokenInfo {
-  const contextTheme = useActiveTheme();
-  const themeName = contextTheme || (defaultTheme ?? '');
-  const tokens = themesResolved[themeName] ?? {};
+  const contextPermutation = useActivePermutation();
+  const permutationName = contextPermutation || (defaultPermutation ?? '');
+  const tokens = permutationsResolved[permutationName] ?? {};
   const token = tokens[path];
   const info: TokenInfo = {
     value: token?.$value,

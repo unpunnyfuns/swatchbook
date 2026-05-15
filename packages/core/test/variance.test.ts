@@ -15,8 +15,8 @@ it('classifies a token constant across every axis', () => {
   const result = analyzeAxisVariance(
     'color.palette.neutral.500',
     project.axes,
-    project.themes,
-    project.themesResolved,
+    project.permutations,
+    project.permutationsResolved,
   );
   expect(result.kind).toBe('constant');
   expect(result.varyingAxes).toEqual([]);
@@ -27,8 +27,8 @@ it('classifies a single-axis role token (surface varies with mode only)', () => 
   const result = analyzeAxisVariance(
     'color.surface.default',
     project.axes,
-    project.themes,
-    project.themesResolved,
+    project.permutations,
+    project.permutationsResolved,
   );
   expect(result.kind).toBe('single');
   expect(result.varyingAxes).toEqual(['mode']);
@@ -40,8 +40,8 @@ it('returns constant with no varying axes when the token is absent from every th
   const result = analyzeAxisVariance(
     'color.does.not.exist',
     project.axes,
-    project.themes,
-    project.themesResolved,
+    project.permutations,
+    project.permutationsResolved,
   );
   expect(result.kind).toBe('constant');
   expect(result.varyingAxes).toEqual([]);
@@ -51,8 +51,8 @@ it('per-axis contexts record the value seen at every context', () => {
   const result = analyzeAxisVariance(
     'color.surface.default',
     project.axes,
-    project.themes,
-    project.themesResolved,
+    project.permutations,
+    project.permutationsResolved,
   );
   const modeCtx = result.perAxis.mode?.contexts ?? {};
   expect(Object.keys(modeCtx).toSorted()).toEqual(['Dark', 'Light'].toSorted());

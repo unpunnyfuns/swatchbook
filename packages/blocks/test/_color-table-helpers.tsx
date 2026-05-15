@@ -5,8 +5,8 @@ export function makeColorTableSnapshot(): ProjectSnapshot {
     axes: [{ name: 'mode', contexts: ['light'], default: 'light', source: 'resolver' }],
     disabledAxes: [],
     presets: [],
-    themes: [{ name: 'Light', input: { mode: 'light' }, sources: [] }],
-    themesResolved: {
+    permutations: [{ name: 'Light', input: { mode: 'light' }, sources: [] }],
+    permutationsResolved: {
       Light: {
         'color.surface.default': {
           $type: 'color',
@@ -29,7 +29,7 @@ export function makeColorTableSnapshot(): ProjectSnapshot {
         },
       },
     },
-    activeTheme: 'Light',
+    activePermutation: 'Light',
     activeAxes: { mode: 'light' },
     cssVarPrefix: 'sb',
     diagnostics: [],

@@ -2,13 +2,15 @@ import { pathToFileURL } from 'node:url';
 import { build, defineConfig, Logger, type Plugin } from '@terrazzo/parser';
 import cssPlugin, { type CSSPluginOptions } from '@terrazzo/plugin-css';
 import { makeCSSVar } from '@terrazzo/token-tools/css';
-import type { Axis, Project, Theme } from '#/types.ts';
+import { fillPresetTuple } from '#/presets.ts';
+import type { Axis, Permutation, Project } from '#/types.ts';
 
 /**
  * Explicit permutation entry for `selection`. `input` is the tuple (any
- * subset of axis names → context values); `name` is optional display metadata
- * downstream emitters may pick up. Matches the shape of `Theme` / `Preset`
- * without forcing consumers to construct a full project type.
+ * subset of axis names → context values); `name` is optional display
+ * metadata downstream emitters may pick up. Matches the shape of
+ * `Permutation` / `Preset` without forcing consumers to construct a full
+ * project type.
  *
  * @internal Used by the addon + integrations for axis-aware emission.
  * Not part of the public API.
@@ -21,17 +23,17 @@ export interface EmitSelectionEntry {
 /** @internal Options for the addon-internal Terrazzo emission wrapper. */
 export interface EmitViaTerrazzoOptions {
   /**
-   * Which tuples to fan out across. Defaults to `'themes'` — the full
-   * cartesian product every CSS emitter wants for runtime switching. Use
-   * `'presets'` for curated named subsets (MUI createTheme, addon-themes
-   * config, Vuetify) — declare them via `config.presets`. Or pass an
-   * explicit array when you want full control.
+   * Which tuples to fan out across. Defaults to `'permutations'` — the
+   * full cartesian product every CSS emitter wants for runtime switching.
+   * Use `'presets'` for curated named subsets (MUI createTheme,
+   * addon-themes config, Vuetify) — declare them via `config.presets`. Or
+   * pass an explicit array when you want full control.
    *
    * `'presets'` with no presets declared on the project throws — that's
    * almost always a config mistake, so we surface it loudly instead of
    * silently emitting nothing.
    */
-  selection?: 'themes' | 'presets' | readonly EmitSelectionEntry[];
+  selection?: 'permutations' | 'presets' | readonly EmitSelectionEntry[];
   /**
    * Extra options for `@terrazzo/plugin-css`. `permutations` and
    * `variableName` are managed internally — passing them here is a no-op
@@ -58,8 +60,9 @@ export interface EmittedFile {
 
 /**
  * Run the Terrazzo plugin pipeline against a loaded swatchbook project.
- * Auto-derives per-tuple permutations from `project.themes` (or presets /
- * explicit list), wraps each in our compound `data-*` selector, and pins
+ * Auto-derives per-tuple permutations from `project.permutations` (or
+ * presets / explicit list), wraps each in our compound `data-*` selector,
+ * and pins
  * CSS variable naming to the project's `cssVarPrefix`. Everything else is
  * vanilla Terrazzo — additional plugins you pass receive the pre-computed
  * CSS transforms and emit on top.
@@ -90,7 +93,7 @@ export async function emitViaTerrazzo(
   const logger = new Logger({ level: 'warn' });
   const cwdURL = pathToFileURL(`${project.cwd}/`);
   const prefix = project.config.cssVarPrefix ?? '';
-  const selection = resolveSelection(project, options.selection ?? 'themes');
+  const selection = resolveSelection(project, options.selection ?? 'permutations');
 
   // Merge per-call options over the project-wide config. Per-call wins
   // because integrations (Tailwind, css-in-js) may want to override the
@@ -155,8 +158,11 @@ function resolveSelection(
   project: Project,
   selection: NonNullable<EmitViaTerrazzoOptions['selection']>,
 ): readonly EmitSelectionEntry[] {
-  if (selection === 'themes') {
-    return project.themes.map((theme: Theme) => ({ input: theme.input, name: theme.name }));
+  if (selection === 'permutations') {
+    return project.permutations.map((perm: Permutation) => ({
+      input: perm.input,
+      name: perm.name,
+    }));
   }
   if (selection === 'presets') {
     if (project.presets.length === 0) {
@@ -166,27 +172,10 @@ function resolveSelection(
       );
     }
     return project.presets.map((preset) => ({
-      input: fillPresetWithDefaults(preset.axes, project.axes),
+      input: fillPresetTuple(preset.axes, project.axes),
       name: preset.name,
     }));
   }
   // Explicit list — caller handles axis filling themselves.
   return selection;
-}
-
-/**
- * Presets may omit axes — any axis the preset doesn't name falls back to
- * that axis's own `default`. Matches the toolbar's activation semantics
- * so an emitted entry matches what the user sees when they click a preset
- * pill in Storybook.
- */
-function fillPresetWithDefaults(
-  presetAxes: Partial<Record<string, string>>,
-  axes: readonly Axis[],
-): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const axis of axes) {
-    out[axis.name] = presetAxes[axis.name] ?? axis.default;
-  }
-  return out;
 }

@@ -16,7 +16,7 @@ beforeAll(async () => {
 
 it('emits :root for the default tuple plus compound selectors for the rest', () => {
   expect(css).toContain(':root {');
-  for (const theme of project.themes) {
+  for (const theme of project.permutations) {
     const isDefault = project.axes.every((a) => theme.input[a.name] === a.default);
     if (isDefault) continue;
     expect(css).toContain(tupleSelector(theme.input));

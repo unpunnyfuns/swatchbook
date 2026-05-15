@@ -9,7 +9,7 @@ export interface DisabledAxesValidationResult {
  * Validate + sanitize the user-supplied `config.disabledAxes` list against
  * the project's axes. Unknown axis names produce `warn` diagnostics and are
  * dropped; the surviving names are what gets filtered out of
- * `Project.axes`, `Project.themes`, and CSS emission.
+ * `Project.axes`, `Project.permutations`, and CSS emission.
  *
  * Mirrors the shape of `validatePresets` so the two validation surfaces
  * feel identical to authors reading diagnostics.

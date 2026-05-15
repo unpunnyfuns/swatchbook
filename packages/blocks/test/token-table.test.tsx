@@ -14,11 +14,11 @@ function makeSnapshot(): ProjectSnapshot {
     ],
     disabledAxes: [],
     presets: [],
-    themes: [
+    permutations: [
       { name: 'Light', input: { mode: 'light' }, sources: [] },
       { name: 'Dark', input: { mode: 'dark' }, sources: [] },
     ],
-    themesResolved: {
+    permutationsResolved: {
       Light: {
         'color.text': {
           $type: 'color',
@@ -37,7 +37,7 @@ function makeSnapshot(): ProjectSnapshot {
       },
       Dark: {},
     },
-    activeTheme: 'Light',
+    activePermutation: 'Light',
     activeAxes: { mode: 'light' },
     cssVarPrefix: 'sb',
     diagnostics: [],

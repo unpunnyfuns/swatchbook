@@ -13,7 +13,7 @@ describe('Config.default tuple resolution', () => {
       },
       fixtureCwd,
     );
-    expect(project.graph).toBe(project.themesResolved['Dark · Brand A · High']);
+    expect(project.graph).toBe(project.permutationsResolved['Dark · Brand A · High']);
   });
 
   it("fills omitted axes from each axis's own default", async () => {
@@ -25,7 +25,7 @@ describe('Config.default tuple resolution', () => {
       },
       fixtureCwd,
     );
-    expect(project.graph).toBe(project.themesResolved['Dark · Default · Normal']);
+    expect(project.graph).toBe(project.permutationsResolved['Dark · Default · Normal']);
   });
 
   it('resolves to the all-axis-defaults tuple when default is absent', async () => {
@@ -33,7 +33,7 @@ describe('Config.default tuple resolution', () => {
       { tokens: ['tokens/**/*.json'], resolver: resolverPath },
       fixtureCwd,
     );
-    expect(project.graph).toBe(project.themesResolved['Light · Default · Normal']);
+    expect(project.graph).toBe(project.permutationsResolved['Light · Default · Normal']);
   });
 
   it('drops unknown axis keys with a warn diagnostic and falls back to the axis default', async () => {
@@ -49,7 +49,7 @@ describe('Config.default tuple resolution', () => {
       (d) => d.group === 'swatchbook/default' && d.message.includes('notAnAxis'),
     );
     expect(warn?.severity).toBe('warn');
-    expect(project.graph).toBe(project.themesResolved['Dark · Default · Normal']);
+    expect(project.graph).toBe(project.permutationsResolved['Dark · Default · Normal']);
   });
 
   it('drops invalid context values with a warn diagnostic and falls back to the axis default', async () => {
@@ -65,6 +65,6 @@ describe('Config.default tuple resolution', () => {
       (d) => d.group === 'swatchbook/default' && d.message.includes('NopeMode'),
     );
     expect(warn?.severity).toBe('warn');
-    expect(project.graph).toBe(project.themesResolved['Light · Default · Normal']);
+    expect(project.graph).toBe(project.permutationsResolved['Light · Default · Normal']);
   });
 });

@@ -19,7 +19,7 @@ export interface SwitcherPreset {
   description?: string;
 }
 
-export interface SwitcherTheme {
+export interface SwitcherPermutation {
   name: string;
   input: Record<string, string>;
 }

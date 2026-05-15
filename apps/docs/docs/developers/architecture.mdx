@@ -16,7 +16,7 @@ Monorepo under `@unpunnyfuns`. pnpm workspaces + Turborepo orchestration. Every 
 
 | Package | Role | Depends on |
 | --- | --- | --- |
-| `@unpunnyfuns/swatchbook-core` | Framework-free DTCG loader. Parses a resolver, normalizes axes, resolves themes, emits CSS and diagnostics. | — |
+| `@unpunnyfuns/swatchbook-core` | Framework-free DTCG loader. Parses a resolver, normalizes axes, resolves permutations, emits CSS and diagnostics. | — |
 | `@unpunnyfuns/swatchbook-addon` | Storybook 10 addon. Toolbar, preview decorator, Vite plugin that publishes a virtual module. Re-exports `-blocks` + `-switcher`. | core, blocks, switcher |
 | `@unpunnyfuns/swatchbook-blocks` | MDX doc blocks + the `SwatchbookProvider` + hooks. Pure React, framework-agnostic beyond Storybook. | — (peer: storybook) |
 | `@unpunnyfuns/swatchbook-switcher` | Framework-agnostic axis / preset popover UI. Used by the addon toolbar and the docs-site navbar. | — |
@@ -46,9 +46,9 @@ interface Project {
   disabledAxes: DisabledAxis[];// axes the consumer explicitly suppressed
   presets: Preset[];           // named quick-select axis tuples
   chrome: Record<string, string>; // block-chrome → consumer-token alias map
-  themes: Theme[];             // cartesian product of axis contexts
-  themesResolved: Record<string, TokenMap>; // theme.name → resolved tokens
-  graph: TokenMap;             // default theme's resolved tokens
+  permutations: Permutation[]; // cartesian product of axis contexts
+  permutationsResolved: Record<string, TokenMap>; // permutation.name → resolved tokens
+  graph: TokenMap;             // default permutation's resolved tokens
   sourceFiles: string[];       // every file that fed the build (for watchers)
   cwd: string;                 // loader cwd — config-relative paths resolve here
   diagnostics: Diagnostic[];   // parser / validator / resolver findings
@@ -57,7 +57,7 @@ interface Project {
 
 Properties:
 
-- **Themes are eagerly resolved.** `project.themesResolved[name]` is ready at load time — no lazy I/O.
+- **Permutations are eagerly resolved.** `project.permutationsResolved[name]` is ready at load time — no lazy I/O.
 - **`sourceFiles` is the canonical watch set.** The addon's Vite plugin and the MCP server both use it to decide what to watch for HMR / live-reload.
 - **Diagnostics flow as data, not exceptions.** Parse errors, unresolved aliases, invalid preset axis values — all land in `project.diagnostics` with a severity. The `<Diagnostics />` block renders them.
 - **One axis type.** `Axis.source` is `'resolver'` (DTCG resolver modifier), `'layered'` (authored per-axis layer globs), or `'synthetic'` (single-axis fallback for projects without a resolver or layers). Everything downstream treats them uniformly.
@@ -80,7 +80,7 @@ interface SwatchbookIntegration {
 
 The addon's Vite plugin iterates `integrations[]`, resolves each `virtualId`, serves whatever `render(project)` produces, and invalidates every integration-contributed module on HMR alongside `virtual:swatchbook/tokens`. The addon itself learns nothing about Tailwind, emotion, or anything else — integrations own their library-specific logic.
 
-The `Project` snapshot passed to `render` carries everything: axes, themes, presets, resolved maps, `cssVarPrefix`. See the [Integrations guide](../guides/integrations/index.mdx) for factory usage.
+The `Project` snapshot passed to `render` carries everything: axes, permutations, presets, resolved maps, `cssVarPrefix`. See the [Integrations guide](../guides/integrations/index.mdx) for factory usage.
 
 ## Data flow — static build path
 
@@ -101,7 +101,7 @@ tokens/resolver.json
 
 The same `Project` also feeds:
 
-- `resolveTheme(project, name)` — look up a single theme's resolved tokens
+- `resolvePermutation(project, name)` — look up a single theme's resolved tokens
 - `project.diagnostics` — the `<Diagnostics />` block reads this
 - the MCP server's tool handlers (all twelve read straight from the project)
 - TypeScript type emission (via Terrazzo's token-tools; not currently exposed as a CLI)
@@ -150,9 +150,9 @@ addons.getChannel().emit('globalsUpdated', …)
    ↓
 useChannelGlobals() store            ← packages/blocks/src/internal/channel-globals.ts
    ↓
-useProject() recomputes activeTheme  ← packages/blocks/src/internal/use-project.ts
+useProject() recomputes activePermutation  ← packages/blocks/src/internal/use-project.ts
    ↓
-blocks re-render with new active theme / resolved tokens
+blocks re-render with new active permutation / resolved tokens
 ```
 
 Two paths through `useProject`:
