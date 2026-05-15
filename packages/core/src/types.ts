@@ -12,7 +12,7 @@ export interface Permutation {
   /** The resolver input tuple (e.g. `{ theme: 'Light' }` or `{ mode: 'Dark', brand: 'Brand A' }`). */
   input: Record<string, string>;
   /** Reserved for future use. Empty for resolver mode. */
-  sources: string[];
+  sources: readonly string[];
 }
 
 /**
@@ -23,7 +23,7 @@ export interface Permutation {
  */
 export interface Axis {
   name: string;
-  contexts: string[];
+  contexts: readonly string[];
   default: string;
   description?: string;
   source: 'resolver' | 'layered' | 'synthetic';

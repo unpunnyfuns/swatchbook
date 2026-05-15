@@ -1,3 +1,4 @@
+import type { Axis, Permutation } from '@unpunnyfuns/swatchbook-core';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface DetailToken {
@@ -18,25 +19,13 @@ export interface DetailToken {
   partialAliasOf?: unknown;
 }
 
-export interface VirtualAxisLike {
-  readonly name: string;
-  readonly contexts: readonly string[];
-  readonly default: string;
-  readonly source: 'resolver' | 'layered' | 'synthetic';
-}
-
-export interface VirtualPermutationLike {
-  readonly name: string;
-  readonly input: Record<string, string>;
-}
-
 export interface TokenDetailData {
   token: DetailToken | undefined;
   cssVar: string;
   activePermutation: string;
   activeAxes: Record<string, string>;
-  axes: readonly VirtualAxisLike[];
-  permutations: readonly VirtualPermutationLike[];
+  axes: readonly Axis[];
+  permutations: readonly Permutation[];
   permutationsResolved: Record<string, Record<string, DetailToken>>;
   resolved: Record<string, DetailToken>;
   cssVarPrefix: string;

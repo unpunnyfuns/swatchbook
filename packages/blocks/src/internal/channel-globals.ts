@@ -31,17 +31,23 @@ function isColorFormat(value: unknown): value is ColorFormat {
   return typeof value === 'string' && (COLOR_FORMATS as readonly string[]).includes(value);
 }
 
+interface SwatchbookGlobalsPayload {
+  swatchbookAxes?: Record<string, string>;
+  swatchbookColorFormat?: ColorFormat;
+  [key: string]: unknown;
+}
+
 function ensureSubscribed(): void {
   if (subscribed || typeof window === 'undefined') return;
   subscribed = true;
   const channel = addons.getChannel();
-  const onGlobals = (payload: { globals?: Record<string, unknown> }): void => {
+  const onGlobals = (payload: { globals?: SwatchbookGlobalsPayload }): void => {
     const globals = payload.globals;
     if (!globals) return;
     let next = snapshot;
     const nextAxes = globals[AXES_GLOBAL_KEY];
     if (nextAxes && typeof nextAxes === 'object') {
-      next = { ...next, axes: nextAxes as Record<string, string> };
+      next = { ...next, axes: nextAxes };
     }
     const nextFormat = globals[COLOR_FORMAT_GLOBAL_KEY];
     if (isColorFormat(nextFormat)) {

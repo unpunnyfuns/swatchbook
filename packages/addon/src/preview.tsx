@@ -35,10 +35,10 @@ import {
   INIT_EVENT,
   INIT_REQUEST_EVENT,
   PREVIEW_MOUSEDOWN_EVENT,
-  PARAM_KEY,
   STYLE_ELEMENT_ID,
   TOKENS_UPDATED_EVENT,
 } from '#/constants.ts';
+import type { StoryParameters, SwatchbookGlobals } from '#/globals.ts';
 
 /** CSS var name with the active prefix applied. */
 function v(name: string): string {
@@ -180,17 +180,16 @@ function normalizeTuple(partial: Readonly<Record<string, string>>): Record<strin
  *   4. virtual module default.
  */
 function resolveTuple(
-  globals: Record<string, unknown>,
-  parameters: Record<string, Record<string, unknown>>,
+  globals: SwatchbookGlobals,
+  parameters: StoryParameters,
 ): Record<string, string> {
-  const param = parameters[PARAM_KEY];
-  const paramAxes = param?.['axes'];
-  if (paramAxes && typeof paramAxes === 'object') {
-    return normalizeTuple(paramAxes as Record<string, string>);
+  const param = parameters.swatchbook;
+  const paramAxes = param?.axes;
+  if (paramAxes) {
+    return normalizeTuple(paramAxes);
   }
-  const paramPermutation = param?.['permutation'];
-  if (typeof paramPermutation === 'string') {
-    const hit = tupleForName(paramPermutation);
+  if (param?.permutation) {
+    const hit = tupleForName(param.permutation);
     if (hit) return normalizeTuple(hit);
   }
   const globalAxes = globals[AXES_GLOBAL_KEY];
@@ -200,7 +199,7 @@ function resolveTuple(
   return defaultTuple();
 }
 
-function resolveColorFormat(globals: Record<string, unknown>): ColorFormat {
+function resolveColorFormat(globals: SwatchbookGlobals): ColorFormat {
   const raw = globals[COLOR_FORMAT_GLOBAL_KEY];
   if (typeof raw === 'string' && (COLOR_FORMATS as readonly string[]).includes(raw)) {
     return raw as ColorFormat;
@@ -209,18 +208,10 @@ function resolveColorFormat(globals: Record<string, unknown>): ColorFormat {
 }
 
 const themedDecorator: Decorator = (Story, context) => {
-  const tuple = useMemo(
-    () =>
-      resolveTuple(
-        context.globals as Record<string, unknown>,
-        context.parameters as Record<string, Record<string, unknown>>,
-      ),
-    [context.globals, context.parameters],
-  );
-  const colorFormat = useMemo(
-    () => resolveColorFormat(context.globals as Record<string, unknown>),
-    [context.globals],
-  );
+  const globals = context.globals as SwatchbookGlobals;
+  const parameters = context.parameters as StoryParameters;
+  const tuple = useMemo(() => resolveTuple(globals, parameters), [globals, parameters]);
+  const colorFormat = useMemo(() => resolveColorFormat(globals), [globals]);
   const themeName = useMemo(() => matchPermutationName(tuple), [tuple]);
 
   useEffect(() => {
@@ -338,12 +329,12 @@ function installGlobalAxisApplier(): void {
    * a late-mounting manager can ask for the payload.
    */
   channel.on(INIT_REQUEST_EVENT, broadcastInit);
-  const apply = (globals: Record<string, unknown>): void => {
+  const apply = (globals: SwatchbookGlobals): void => {
     ensureStylesheet();
     const tuple = resolveTuple(globals, {});
     setRootAxes(matchPermutationName(tuple), tuple);
   };
-  const onGlobals = (payload: { globals?: Record<string, unknown> }): void => {
+  const onGlobals = (payload: { globals?: SwatchbookGlobals }): void => {
     if (payload.globals) apply(payload.globals);
   };
   channel.on('globalsUpdated', onGlobals);

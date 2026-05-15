@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useEffect, useState } from 'react';
+import { cssVarAsNumber } from '#/internal/css-var-style.ts';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { useTokenDetailData } from '#/token-detail/internal.ts';
 
@@ -44,8 +45,8 @@ export function CompositePreviewContent({
         style={{
           fontFamily: `var(${base}-font-family)`,
           fontSize: `var(${base}-font-size)`,
-          fontWeight: `var(${base}-font-weight)` as unknown as number,
-          lineHeight: `var(${base}-line-height)` as unknown as number,
+          fontWeight: cssVarAsNumber(`var(${base}-font-weight)`),
+          lineHeight: cssVarAsNumber(`var(${base}-line-height)`),
           letterSpacing: `var(${base}-letter-spacing)`,
         }}
       >
@@ -87,7 +88,7 @@ export function CompositePreviewContent({
     return (
       <div
         className="sb-token-detail__font-weight-sample"
-        style={{ fontWeight: cssVar as unknown as number }}
+        style={{ fontWeight: cssVarAsNumber(cssVar) }}
       >
         Aa
       </div>
