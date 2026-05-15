@@ -1,5 +1,18 @@
 # @unpunnyfuns/swatchbook-mcp
 
+## 0.52.0
+
+### Patch Changes
+
+- 39dd274: Add unit coverage for the computed + emit MCP tools (`get_color_formats`, `get_color_contrast`, `get_axis_variance`, `resolve_theme`, `emit_css`, `get_consumer_output`). Fourth of the test splits under #695 — closes the `server.ts` handler coverage gap. No behavior changes.
+- d6ceac1: Add unit coverage for `load-config.ts` — bare-JSON resolver path, jiti-imported `.ts` / `.mts` / `.js` config modules, `cwdOverride` semantics, missing-file failure. Fifth of the test splits under #695. No behavior changes.
+- b72ebdf: Add unit coverage for project-metadata MCP tools (`describe_project`, `list_axes`, `list_tokens`, `get_diagnostics`) plus the in-memory test harness used to drive them through the real MCP protocol. Second of the test splits under #695. No behavior changes.
+- 20fcb3b: Add unit coverage for `contrast.ts` and `format-color.ts` (DTCG color conversion + WCAG 2.1 / APCA contrast math). First of the test splits under #695. No behavior changes.
+- c0ec405: Add unit coverage for token-introspection MCP tools (`get_token`, `get_alias_chain`, `get_aliased_by`, `search_tokens`). Third of the test splits under #695. No behavior changes.
+- Updated dependencies [9e9f635]
+- Updated dependencies [00a1bf7]
+  - @unpunnyfuns/swatchbook-core@0.52.0
+
 ## 0.51.1
 
 ### Patch Changes
