@@ -54,6 +54,7 @@ Update this section when state genuinely shifts. See GitHub milestones for per-i
 - **Code style:** functional, avoid classes/singletons. No CSS-in-JS. No inline end-of-line comments.
 - **Lint/format:** `oxlint` + `oxfmt`. Never `npx biome`.
 - **Tests:** Vitest everywhere. Storybook Test (via `@storybook/addon-vitest`) for interaction tests in `apps/storybook`.
+  - **Avoid jsdom unless it's necessary.** jsdom is honest for event handlers, `useEffect` lifecycle, and direct DOM manipulation — testing those there is fine. But jsdom doesn't implement the browser's keyboard (Tab / focus / arrow keys), pointer-down sequencing, layout, or scroll semantics; a unit test that fires synthetic events to assert on focus / pointer behaviour ends up testing the handler against the test author's model of the browser, not the browser itself. Write those as Storybook play functions instead — `apps/storybook`'s test runner uses Playwright under the hood, so the cost over jsdom in a hot loop is seconds, and the test exercises real browser semantics. The Playwright container is already pinned in CI, so play tests aren't extra infrastructure.
 - **Test structure: flat.** Each `it` reads top-to-bottom without scrolling up.
   - **No nested `describe`.** One `describe` per file at most. Split files instead of nesting.
   - **No `beforeEach`** for cosmetic shared setup. Inline `setup()` helper per test.

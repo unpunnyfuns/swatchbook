@@ -1,3 +1,12 @@
+/**
+ * jsdom is honest for event handlers, useEffect lifecycle, and direct
+ * DOM manipulation — and that's what this file tests. The Tab-key
+ * trap is verified in a real browser by the `OverlayFocusTrap` play
+ * test in `apps/storybook/src/stories/TokenTable.stories.tsx`, because
+ * jsdom doesn't implement the browser's tabbing model and any "Shift+Tab
+ * wraps focus" assertion here would be testing the handler against my
+ * own model of the browser, not the browser itself.
+ */
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
@@ -6,10 +15,6 @@ import type { ProjectSnapshot } from '#/contexts.ts';
 
 afterEach(cleanup);
 
-// Minimal snapshot — DetailOverlay renders a `<TokenDetail>` inside, which
-// needs a provider but doesn't have to find the path: an unknown path
-// renders the empty-state branch and that's fine for testing the trap
-// itself.
 function emptySnapshot(): ProjectSnapshot {
   return {
     axes: [],
@@ -34,14 +39,16 @@ function renderOverlay(onClose = vi.fn()): { onClose: ReturnType<typeof vi.fn> }
   return { onClose };
 }
 
-describe('DetailOverlay focus management', () => {
+describe('DetailOverlay focus lifecycle', () => {
   it('moves focus into the panel on mount', () => {
+    // Programmatic .focus() in a useEffect — jsdom implements this
+    // correctly, so the test exercises real React lifecycle behaviour.
     renderOverlay();
     const panel = screen.getByRole('dialog');
     expect(document.activeElement).toBe(panel);
   });
 
-  it('restores focus to the previously-active element when unmounted', () => {
+  it('restores focus to the previously-active element on unmount', () => {
     const opener = document.createElement('button');
     opener.textContent = 'opener';
     document.body.appendChild(opener);
@@ -58,44 +65,6 @@ describe('DetailOverlay focus management', () => {
     unmount();
     expect(document.activeElement).toBe(opener);
     document.body.removeChild(opener);
-  });
-
-  it('Shift+Tab from the panel wraps to the last focusable', () => {
-    renderOverlay();
-    const panel = screen.getByRole('dialog');
-    const closeBtn = screen.getByRole('button', { name: 'Close' });
-    // Panel currently focused (post-mount). Shift+Tab should jump to the
-    // last focusable inside the panel.
-    fireEvent.keyDown(panel, { key: 'Tab', shiftKey: true });
-    // Empty-state TokenDetail contributes no focusables; the only one is
-    // the close button, so it's both first and last.
-    expect(document.activeElement).toBe(closeBtn);
-  });
-
-  it('Tab from the last focusable wraps to the first', () => {
-    renderOverlay();
-    const panel = screen.getByRole('dialog');
-    const closeBtn = screen.getByRole('button', { name: 'Close' });
-    closeBtn.focus();
-    fireEvent.keyDown(panel, { key: 'Tab' });
-    // Close button is both first and last in the empty-state panel; the
-    // wrap returns focus to it.
-    expect(document.activeElement).toBe(closeBtn);
-  });
-
-  it('does not intercept Tab when focus is mid-list (delegates to browser)', () => {
-    renderOverlay();
-    const panel = screen.getByRole('dialog');
-    const event = new KeyboardEvent('keydown', {
-      key: 'Tab',
-      bubbles: true,
-      cancelable: true,
-    });
-    panel.dispatchEvent(event);
-    // With only one focusable, the only case where the trap intervenes is
-    // when active === last. Otherwise it lets the browser handle Tab.
-    // Here `active === panel` so the trap doesn't intervene.
-    expect(event.defaultPrevented).toBe(false);
   });
 });
 
