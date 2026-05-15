@@ -1,0 +1,297 @@
+---
+id: config
+title: Config reference
+sidebar_position: 0
+---
+
+# Config reference
+
+Every field on the `Config` object, with the semantics `loadProject` applies at runtime.
+
+## Two ways to supply it
+
+Inline in `.storybook/main.ts` (recommended):
+
+```ts title=".storybook/main.ts"
+import { defineMain } from '@storybook/react-vite/node';
+
+export default defineMain({
+  framework: '@storybook/react-vite',
+  addons: [
+    {
+      name: '@unpunnyfuns/swatchbook-addon',
+      options: {
+        config: {
+          resolver: 'tokens/resolver.json',
+          default: { mode: 'Dark', brand: 'Brand A' },
+          cssVarPrefix: 'ds',
+          presets: [
+            { name: 'A11y High Contrast', axes: { mode: 'Light', contrast: 'High' } },
+          ],
+        },
+      },
+    },
+  ],
+});
+```
+
+Or in its own file, referenced by path:
+
+```ts title="swatchbook.config.ts"
+import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
+
+export default defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  default: { mode: 'Dark', brand: 'Brand A' },
+  cssVarPrefix: 'ds',
+});
+```
+
+```ts title=".storybook/main.ts"
+{
+  name: '@unpunnyfuns/swatchbook-addon',
+  options: { configPath: '../swatchbook.config.ts' },
+}
+```
+
+The separate file path (`configPath`) is useful when the same config is consumed by other tooling — a CLI, a CI lint job, a custom build script. For Storybook-only projects, inline is one less file to track. `defineSwatchbookConfig` is an identity helper — it gives you typed autocomplete on the object you pass in and returns it unchanged.
+
+## Picking a theming input
+
+Exactly three shapes are legal:
+
+- **Resolver** — `resolver: 'path/to/resolver.json'`. The DTCG-spec-native path; the file declares sets, modifiers, and resolutionOrder, and the modifiers become your axes. Recommended.
+- **Layered** — `axes: [...]` + `tokens: [...]`. For projects without a resolver document. You declare axes inline; each context names overlay files that layer onto the base `tokens`.
+- **Plain parse** — `tokens: [...]` alone. Single synthetic `theme` axis; every token loaded as one tuple. Useful for smoke-testing a token set before adopting a resolver.
+
+Setting `resolver` and `axes` at the same time is an error. Setting none of the three (no `resolver`, no `axes`, no `tokens`) throws at load time.
+
+## Fields
+
+### `tokens?: string[]`
+
+Glob patterns (relative to the config's cwd) for base DTCG token files.
+
+- **Resolver projects (`resolver` set)** — optional. The resolver's own `$ref` targets fully determine which files get loaded, and the addon's Vite plugin derives HMR watch paths from the resolved source list. Supplying `tokens` alongside `resolver` is still valid and unions the watch paths — useful when you want HMR to pick up files the resolver doesn't reference directly.
+- **Layered projects (`axes` set)** — required. The layered loader parses `[...base, ...overlayFilesInAxisOrder]` per tuple; without `tokens` there's nothing to layer onto.
+- **Plain-parse (no resolver, no axes)** — required. Every file matched by the globs gets parsed into the single synthetic theme.
+
+### `resolver?: string`
+
+Path to a [DTCG 2025.10 resolver](https://www.designtokens.org/TR/2025.10/resolver/) document. Mutually exclusive with `axes`.
+
+Terrazzo normalizes the document, then Swatchbook enumerates permutations via `resolver.listPermutations()` and realizes each with `resolver.apply()`. One `Axis` surfaces per modifier; the resolver file itself and every `$ref` target it pulls in land on `Project.sourceFiles`.
+
+### `axes?: AxisConfig[]`
+
+Authored layered axes, for projects without a resolver. Mutually exclusive with `resolver`. Each `AxisConfig` has:
+
+```ts
+interface AxisConfig {
+  name: string;
+  description?: string;
+  contexts: Record<string, string[]>;
+  default: string;
+}
+```
+
+`contexts` is a map from context name to an ordered list of overlay files (paths or globs, relative to the config's cwd). An empty array is legal — it means "no override," which is the baseline for an axis that introduces nothing by default (`Default: []`).
+
+Themes are every combination of contexts across all axes. Last write wins on duplicate token paths across base + overlays; overlay files listed later in `axes` win over earlier ones.
+
+### `default?: Partial<Record<string, string>>`
+
+Initial active tuple, keyed by axis name. Partial is fine — any axis you omit falls back to that axis's own `default` at load time. Unknown axis keys and invalid context values produce `warn` diagnostics (group `swatchbook/default`) and are sanitized out.
+
+```ts
+// Every axis specified:
+default: { mode: 'Dark', brand: 'Brand A' }
+
+// Partial — omitted axes use their own defaults:
+default: { brand: 'Brand A' }
+
+// Omit entirely — starts in the all-axis-defaults tuple:
+// default: undefined
+```
+
+### `cssVarPrefix?: string`
+
+Prefix prepended to every emitted CSS variable. `color.accent.bg` becomes `var(--<prefix>-color-accent-bg)`; an empty string disables the prefix. Typical values are short and project-specific (`ds`, `sb`, `ui`).
+
+### `outDir?: string`
+
+Project-local directory for codegen artifacts (default `.swatchbook`). The addon preset writes `tokens.d.ts` here — add `"include": [".swatchbook/**/*.d.ts"]` to your tsconfig so `useToken()` autocompletes.
+
+### `presets?: Preset[]`
+
+Named tuple combinations rendered as quick-select pills next to the toolbar's axis dropdowns. Each `Preset` has:
+
+```ts
+interface Preset {
+  name: string;
+  axes: Partial<Record<string, string>>;
+  description?: string;
+}
+```
+
+Partial tuples are legal — omitted axes resolve to the axis's `default` when the preset is applied. `loadProject` validates presets: unknown axis keys and invalid context values surface as `warn` diagnostics (group `swatchbook/presets`) and are sanitized out, but the preset itself stays in `Project.presets` (an empty preset is still a valid tuple — it resolves to all defaults).
+
+### `disabledAxes`
+
+Type: `string[]` — optional.
+
+Axis names to suppress from this Storybook session. Each listed axis is **pinned to its `default` context**: the toolbar dropdown disappears, the axis drops out of `Project.axes`, non-default tuples fold away, and CSS emission stops including the axis in compound selectors. The Design Tokens panel still shows a small pinned indicator so authors don't forget the modifier is being suppressed.
+
+```ts
+defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  disabledAxes: ['contrast'],
+  cssVarPrefix: 'ds',
+});
+```
+
+Config-level only — there's no runtime toggle. Disabling an axis is the cleanest way to hide a work-in-progress modifier (or an experimental axis you don't want surfaced yet) without editing the resolver document. Unknown axis names produce `warn` diagnostics (group `swatchbook/disabled-axes`) and are ignored; the filtered list lands on `Project.disabledAxes` for downstream tooling.
+
+### `maxPermutations`
+
+Type: `number` — optional, default `1024`.
+
+Hard cap on the cartesian-product size loaded eagerly. The resolver enumerates every combination of every modifier's contexts; for projects with state-space modifiers (locale × density × motion-pref × …) that product can reach millions, and calling `resolver.listPermutations()` on it can OOM the process. When the cap is exceeded, `loadProject` loads only the default permutation, surfaces a `swatchbook/permutations` warn diagnostic, and skips the upstream enumeration call entirely. Presets are still materialized on demand so the toolbar's preset pills work.
+
+```ts
+defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  maxPermutations: 1024, // default
+});
+```
+
+Set `0` to disable the guard if you genuinely want full enumeration. For projects that trip the guard, the three scoping levers — in order of leverage — are:
+
+- **`presets`** — author the handful of tuples that matter (Default Light, A11y High, Brand A Dark). Materialized on demand under the guard so toolbar pills resolve correctly.
+- **`disabledAxes`** — pin state-space modifiers (locale, density, …) to their defaults. Shrinks the cartesian; the toolbar drops the dropdown.
+- **`maxPermutations: <bigger-number>`** — only if the full enumeration is genuinely presentational.
+
+### `chrome`
+
+Type: `Record<string, string>` — optional.
+
+Override one or more of swatchbook's ten block-chrome roles. Block components (`<TokenTable>`, `<ColorPalette>`, etc.) read a fixed `--swatchbook-*` CSS variable namespace for their surfaces, text, and accents — independent of `cssVarPrefix`, so your token namespace never collides with chrome reads. Every role is always declared: by default, to the hard-coded literals in `DEFAULT_CHROME_MAP` (which use `light-dark()` so chrome auto-flips with the active `color-scheme` — Storybook's light/dark preference, the OS, whatever). Any role you set in `chrome` replaces that literal with a `var(--<prefix>-<your-token>)` reference so chrome reflows with your own theme switches instead.
+
+The ten roles (closed set — also exported as `CHROME_ROLES` and the `ChromeRole` type from `@unpunnyfuns/swatchbook-core`):
+
+| Role              | Reads as                               |
+| ----------------- | -------------------------------------- |
+| `surfaceDefault`  | `--swatchbook-surface-default`         |
+| `surfaceMuted`    | `--swatchbook-surface-muted`           |
+| `surfaceRaised`   | `--swatchbook-surface-raised`          |
+| `textDefault`     | `--swatchbook-text-default`            |
+| `textMuted`       | `--swatchbook-text-muted`              |
+| `borderDefault`   | `--swatchbook-border-default`          |
+| `accentBg`        | `--swatchbook-accent-bg`               |
+| `accentFg`        | `--swatchbook-accent-fg`               |
+| `bodyFontFamily`  | `--swatchbook-body-font-family`        |
+| `bodyFontSize`    | `--swatchbook-body-font-size`          |
+
+Each entry emits a `:root` alias that redirects the chrome read to your target token's already-emitted CSS variable:
+
+```ts
+defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  cssVarPrefix: 'ds',
+  chrome: {
+    surfaceDefault: 'color.brand.bg.primary',
+    textDefault:    'color.brand.fg.primary',
+    accentBg:       'color.brand.accent.primary',
+    // …
+  },
+});
+```
+
+Produces a single `:root` chrome block with all ten roles declared — overrides become `var(...)` references that inherit per-theme values automatically, the rest stay on `DEFAULT_CHROME_MAP`'s hard-coded literals:
+
+```css
+:root {
+  color-scheme: light dark;
+  --swatchbook-surface-default: var(--ds-color-brand-bg-primary);
+  --swatchbook-surface-muted:   light-dark(#f4f4f5, #1e293b);
+  --swatchbook-surface-raised:  light-dark(#ffffff, #111827);
+  --swatchbook-text-default:    var(--ds-color-brand-fg-primary);
+  --swatchbook-text-muted:      light-dark(#4b5563, #94a3b8);
+  --swatchbook-border-default:  light-dark(#e5e7eb, #334155);
+  --swatchbook-accent-bg:       var(--ds-color-brand-accent-primary);
+  --swatchbook-accent-fg:       light-dark(#ffffff, #0b1220);
+  --swatchbook-body-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --swatchbook-body-font-size:  14px;
+}
+```
+
+**Composite sub-field targets are accepted.** `typography.body` is a composite token that emits one sub-variable per field; the chrome map can target those directly (`bodyFontSize: 'typography.body.font-size'`) even though the sub-field isn't a standalone token ID.
+
+Unknown role keys (outside the ten above) and target paths that don't resolve to any token or composite sub-field in any theme produce `warn` diagnostics (group `swatchbook/chrome`) and are dropped — the corresponding chrome slot falls back to its hard-coded literal default. The validated entries land on `Project.chrome` for downstream tooling.
+
+### `cssOptions`
+
+Type: `Omit<CSSPluginOptions, 'variableName' | 'permutations' | 'filename' | 'skipBuild'>` — optional.
+
+Options forwarded to the `@terrazzo/plugin-css` instance swatchbook runs internally — for the stylesheet it emits for the Storybook preview and for the Token Listing's `names.css` derivation. Use this when your production Terrazzo build passes non-default options to `plugin-css` (`legacyHex`, a custom `transform`, `include` / `exclude` globs, etc.) and you want the docs-side output to match.
+
+Four fields are managed internally and stripped from the allowed type:
+
+- `variableName` — swatchbook routes naming through `@terrazzo/token-tools/css.makeCSSVar` with your `cssVarPrefix`; overriding this would desync the listing's `names.css` from the emitted stylesheet.
+- `permutations` — synthesized one-per-theme so CSS emission is axis-aware; overriding breaks the preview's toolbar cascade.
+- `filename` — the internal stylesheet is captured in memory, never written to disk.
+- `skipBuild` — setting `true` would null out the listing's `previewValue` derivation, breaking every block that displays a value.
+
+Everything else passes through. Deprecated knobs (`baseSelector`, `baseScheme`, `modeSelectors`) still pass the type check but do nothing under swatchbook's permutation-based emission; setting any of them produces a `swatchbook/css-options` warn diagnostic with a pointer to what to use instead.
+
+```ts
+defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  cssVarPrefix: 'ds',
+  cssOptions: { legacyHex: true, include: ['color.*', 'space.*'] },
+});
+```
+
+See [Aligning with your token build](../guides/sharing-terrazzo-options.mdx) for the end-to-end shared-options pattern.
+
+### `listingOptions`
+
+Type: `Omit<TokenListingPluginOptions, 'filename'>` — optional.
+
+Options forwarded to `@terrazzo/plugin-token-listing`. The listing is how swatchbook surfaces authoritative per-token metadata (plugin-css-computed CSS variable names, preview values, alias chains, source file + line references) into `Project.listing` and the block-side `ProjectSnapshot.listing`. Use `listingOptions.platforms` to register additional platforms beyond the built-in `css` entry:
+
+```ts
+import swiftPlugin from '@terrazzo/plugin-swift';
+
+defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  cssVarPrefix: 'ds',
+  listingOptions: {
+    platforms: {
+      css:   { name: '@terrazzo/plugin-css' },
+      swift: { name: '@terrazzo/plugin-swift', description: 'UIColor' },
+    },
+  },
+  terrazzoPlugins: [swiftPlugin({ /* swift plugin options */ })],
+});
+```
+
+Each `platforms` entry names a Terrazzo plugin whose identifier-naming logic derives the token's identifier on that platform. The plugin has to be loaded in the build for the reference to resolve — see `terrazzoPlugins` below.
+
+`filename` is managed internally (the listing is captured in memory, not written to disk) and is stripped from the option type.
+
+### `terrazzoPlugins`
+
+Type: `readonly Plugin[]` — optional.
+
+Additional Terrazzo plugins loaded alongside swatchbook's internal `plugin-css` + `plugin-token-listing`. Required when `listingOptions.platforms` references anything beyond the built-in `css` — the referenced plugin has to actually run in the same build for the listing to resolve its naming. Plugins whose output swatchbook doesn't consume are harmless — they run, their output files land in the in-memory output set, nothing else happens.
+
+Common use: load `@terrazzo/plugin-swift` / `-android` / `-js` / `-sass` alongside so their naming logic populates `listing[path].names.<platform>` for block consumption.
+
+See [Sharing Terrazzo options](../guides/sharing-terrazzo-options.mdx) for the pattern of sharing one options file between `terrazzo.config.ts` and `swatchbook.config.ts`.
+
+## See also
+
+- [Axes reference](./axes.mdx) — the runtime model for selection.
+- [Reference: core](./core.mdx) — the loader APIs this config drives.
+- [Sharing Terrazzo options](../guides/sharing-terrazzo-options.mdx) — keep the swatchbook build aligned with a production Terrazzo CLI.
