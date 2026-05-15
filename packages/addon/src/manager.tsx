@@ -233,6 +233,13 @@ function AxesToolbar(): ReactElement {
       title,
       active: open,
       onClick: () => setOpen((prev) => !prev),
+      // Screen-reader disclosure semantics for the popover trigger. We
+      // don't set `aria-controls` because the popover is portaled by
+      // Storybook's `WithTooltipPure` with a dynamically-generated id we
+      // don't have a stable handle on; `aria-haspopup` + `aria-expanded`
+      // is the practical subset of the disclosure pattern.
+      'aria-haspopup': 'dialog' as const,
+      'aria-expanded': open,
     },
     h(SwatchbookIcon),
   );
