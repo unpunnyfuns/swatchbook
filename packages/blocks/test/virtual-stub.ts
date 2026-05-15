@@ -13,3 +13,4 @@ export const permutationsResolved = {};
 export const diagnostics = [] as const;
 export const css = '';
 export const cssVarPrefix = '';
+export const listing = {} as const;

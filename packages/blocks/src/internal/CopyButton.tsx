@@ -39,11 +39,13 @@ export function CopyButton({
   }, []);
 
   const handleClick = useCallback((): void => {
-    try {
-      void navigator.clipboard?.writeText(value);
-    } catch {
-      return;
-    }
+    // `writeText` is async and rejects on unfocused documents,
+    // insecure origins, missing permissions, etc. Swallow the
+    // rejection — the "Copied!" affordance is a nicety, not a
+    // correctness requirement; an unhandled rejection in prod would
+    // surface in DevTools and (under vitest browser-mode) fail the
+    // suite from an unrelated test.
+    navigator.clipboard?.writeText(value).catch(() => {});
     setCopied(true);
     if (timerRef.current !== null) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => setCopied(false), 1500);

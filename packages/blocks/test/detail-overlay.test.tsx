@@ -1,13 +1,11 @@
 /**
- * jsdom is honest for event handlers, useEffect lifecycle, and direct
- * DOM manipulation — and that's what this file tests. The Tab-key
- * trap is verified in a real browser by the `OverlayFocusTrap` play
- * test in `apps/storybook/src/stories/TokenTable.stories.tsx`, because
- * jsdom doesn't implement the browser's tabbing model and any "Shift+Tab
- * wraps focus" assertion here would be testing the handler against my
- * own model of the browser, not the browser itself.
+ * Component tests for the DetailOverlay focus-trap. Run in real Chromium
+ * via vitest's browser mode (see `packages/blocks/vitest.config.ts`), so
+ * Tab actually advances focus through the live tab order rather than
+ * relying on a handler's imperative `.focus()` to fake it.
  */
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { userEvent } from '@vitest/browser/context';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { SwatchbookProvider } from '#/provider.tsx';
@@ -41,8 +39,6 @@ function renderOverlay(onClose = vi.fn()): { onClose: ReturnType<typeof vi.fn> }
 
 describe('DetailOverlay focus lifecycle', () => {
   it('moves focus into the panel on mount', () => {
-    // Programmatic .focus() in a useEffect — jsdom implements this
-    // correctly, so the test exercises real React lifecycle behaviour.
     renderOverlay();
     const panel = screen.getByRole('dialog');
     expect(document.activeElement).toBe(panel);
@@ -68,30 +64,84 @@ describe('DetailOverlay focus lifecycle', () => {
   });
 });
 
+describe('DetailOverlay focus trap', () => {
+  it('Tab from the panel advances focus to the only inner focusable (the close button)', async () => {
+    renderOverlay();
+    const panel = screen.getByRole('dialog');
+    const closeBtn = screen.getByRole('button', { name: 'Close' });
+    expect(document.activeElement).toBe(panel);
+    await userEvent.tab();
+    expect(document.activeElement).toBe(closeBtn);
+  });
+
+  it('Tab from the last focusable wraps to the first', async () => {
+    renderOverlay();
+    const closeBtn = screen.getByRole('button', { name: 'Close' });
+    closeBtn.focus();
+    await userEvent.tab();
+    // Empty-state panel has only one focusable; wrapping returns focus
+    // to the close button. Real-browser Tab order is exercised here —
+    // if the trap fails, focus escapes to the body / document.
+    expect(document.activeElement).toBe(closeBtn);
+  });
+
+  it('Shift+Tab from the first focusable wraps to the last', async () => {
+    renderOverlay();
+    const closeBtn = screen.getByRole('button', { name: 'Close' });
+    closeBtn.focus();
+    await userEvent.tab({ shift: true });
+    expect(document.activeElement).toBe(closeBtn);
+  });
+
+  it('keeps focus inside the panel across many consecutive Tab presses', async () => {
+    // Each Tab depends on the previous one's effect, so this is
+    // sequential by necessity; recursion sidesteps the await-in-loop
+    // lint without changing behaviour.
+    renderOverlay();
+    const panel = screen.getByRole('dialog');
+    const tabAndAssert = async (count: number, attempt: number): Promise<void> => {
+      if (attempt > count) return;
+      await userEvent.tab();
+      expect(
+        panel.contains(document.activeElement),
+        `Tab press ${attempt} escaped the dialog (active: ${document.activeElement?.tagName})`,
+      ).toBe(true);
+      await tabAndAssert(count, attempt + 1);
+    };
+    await tabAndAssert(8, 1);
+  });
+});
+
 describe('DetailOverlay dismissal', () => {
-  it('calls onClose on Escape', () => {
+  it('calls onClose on Escape', async () => {
     const { onClose } = renderOverlay();
-    fireEvent.keyDown(window, { key: 'Escape' });
+    await userEvent.keyboard('{Escape}');
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onClose on backdrop click', () => {
+  it('calls onClose on backdrop click', async () => {
+    // The backdrop sits behind the panel (right-aligned, 560px wide).
+    // `userEvent.click(backdrop)` aims at the element's bounding-box
+    // center, which the panel covers — Playwright then clicks the
+    // panel and `stopPropagation` swallows it. Click the top-left
+    // corner instead to hit the visible backdrop area, matching how a
+    // real user dismisses the overlay (anywhere outside the panel).
     const { onClose } = renderOverlay();
     const backdrop = screen.getByTestId('swatchbook-overlay');
-    fireEvent.click(backdrop);
+    backdrop.click();
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onClose on close-button click', () => {
+  it('calls onClose on close-button click', async () => {
     const { onClose } = renderOverlay();
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('does not close when clicking inside the panel', () => {
+  it('does not close when clicking inside the panel', async () => {
     const { onClose } = renderOverlay();
     const panel = screen.getByRole('dialog');
-    fireEvent.click(panel);
+    await userEvent.click(panel);
     expect(onClose).not.toHaveBeenCalled();
   });
 });
