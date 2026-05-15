@@ -5,6 +5,8 @@ import { loadWithPrefix } from './_helpers.ts';
 
 let project: Project;
 
+// beforeAll: loadProject against the full fixture (~1s) is shared by
+// every assertion; per-test reload would dominate runtime.
 beforeAll(async () => {
   project = await loadWithPrefix(undefined);
 });

@@ -6,6 +6,9 @@ import { loadProject } from '#/load';
 
 let workspace: string;
 
+// beforeEach: each test mints a tmpdir and writes its own fixture
+// files into it, so the workspace must reset per-test (otherwise
+// stale resolver / token files from earlier tests would leak in).
 beforeEach(() => {
   workspace = mkdtempSync(join(tmpdir(), 'swatchbook-resolver-'));
 });
