@@ -24,7 +24,12 @@ export default defineConfig({
     browser: {
       enabled: true,
       provider: playwright(),
-      instances: [{ browser: 'chromium' }],
+      // Run the full block suite across all three Playwright engines.
+      // Token-renderer components ship into consumer apps that run on
+      // every modern engine, so focus / keyboard / CSS layout regressions
+      // specific to Gecko or WebKit are worth catching before a release.
+      // Each instance is independent; vitest runs them concurrently.
+      instances: [{ browser: 'chromium' }, { browser: 'firefox' }, { browser: 'webkit' }],
       headless: true,
     },
   },
