@@ -1,0 +1,181 @@
+---
+id: overview
+title: Overview blocks
+sidebar_position: 2
+---
+
+# Overview blocks
+
+Survey many tokens at once. The first two work across every `$type` in the graph; the rest scope to one DTCG type and render a type-specific visual.
+
+Most blocks in this group take:
+
+- `filter?: string` — path glob (see the [globMatch rules](#) on each block's implementation).
+- `sortBy?: 'path' | 'value' | 'none'` — default `'path'` (exceptions noted per block).
+- `sortDir?: 'asc' | 'desc'` — default `'asc'`.
+- `caption?: string` — override the default summary caption.
+
+## Across types
+
+### TokenNavigator
+
+```tsx
+<TokenNavigator root="color" />
+```
+
+Expandable tree of the token graph. Each interior group shows its child count; each leaf shows its `$type` pill plus an inline preview (color swatch, dimension bar, shadow / border / motion sample, or a formatted value). A fuzzy-search input at the top filters leaves by path — case-insensitive, out-of-order terms, single-character typo tolerance. Matching leaves survive, groups on the way to them auto-expand. Clicking a leaf opens a slide-over with the full `<TokenDetail>`; pass `onSelect` to own the click follow-up instead.
+
+Props:
+
+- `root?: string` — mount at this subtree (e.g. `"color"`, `"typography"`). Omit to show everything.
+- `type?: string | readonly string[]` — restrict to one DTCG `$type` (`type="color"`) or a small-multiples set (`type={['duration', 'cubicBezier', 'transition']}`). Composes with `root` — both constraints must hold.
+- `initiallyExpanded?: number` — depth open on first render. `0` all collapsed, `1` top-level groups open (default), `2` one deeper, etc.
+- `searchable?: boolean` — render a runtime search input above the tree. Defaults to `true`. Pass `false` to hide the input (the `root` / `type` props still apply at authoring time).
+- `onSelect?(path: string): void` — receives a leaf's full dot-path on click; suppresses the built-in overlay.
+
+### TokenTable
+
+```tsx
+<TokenTable type="color" />
+```
+
+Compact two-column table: **Path** and **Value** (with inline type pill + color swatch). A fuzzy-search input at the top narrows rows by path, type, or value — case-insensitive, out-of-order terms, single-character typo tolerance. Each value cell has a hover-revealed copy-to-clipboard button. Clicking a row opens the same slide-over `<TokenDetail>` the tree uses; pass `onSelect` to own the follow-up. Columns follow content with per-column `min-width` floors, so the table breathes in narrow containers.
+
+Props:
+
+- `filter?: string` — path glob.
+- `type?: string` — DTCG `$type` filter (`"color"`, `"dimension"`, …).
+- `caption?: string` — override the caption.
+- `sortBy?: 'path' | 'value' | 'none'` — default `'path'`.
+- `sortDir?: 'asc' | 'desc'` — default `'asc'`.
+- `searchable?: boolean` — render a runtime search input above the table. Defaults to `true`.
+- `onSelect?(path: string): void` — suppress the built-in drawer.
+
+## Per-type
+
+Every block in this group scopes to one DTCG `$type`, filters / sorts, and renders a type-specific visual. All accept `filter?: string`, `sortBy?`, `sortDir?`, and `caption?: string`.
+
+### ColorPalette
+
+```tsx
+<ColorPalette filter="color.palette.*" />
+```
+
+Swatch grid grouped by dot-path prefix. `groupBy` is auto-derived from the filter's fixed-prefix depth but can be overridden. Default sort is `'path'`; `'value'` orders colors perceptually via oklch **L → C → H** so ramps read light → dark and warm → cool.
+
+### ColorTable
+
+```tsx
+<ColorTable filter="color.*" />
+```
+
+Tabular, color-only companion to `TokenTable`. One row per `$type: color` token with swatch, name, value (in the active color format from the toolbar toggle), CSS var, and alias-target columns. Each value cell has a hover-revealed copy-to-clipboard button. Fuzzy search across path + value.
+
+Clicking a row expands it inline — the detail panel surfaces `$description`, the token's alias chain, and (for grouped variants) a sub-table comparing every variant's HEX / HSL / OKLCH at once. That side-by-side comparison is the one place per-format density earns its weight; the collapsed row only shows the format the user already picked.
+
+**Variant grouping** — pass a `variants` map to collapse sibling tokens that share a base path into a single row with a pill selector. Clicking a pill swaps the displayed values to that variant:
+
+```tsx
+<ColorTable
+  filter="color.bg.*"
+  variants={{ hover: 'hover', disabled: 'disabled' }}
+/>
+```
+
+Given tokens like `color.bg.hi` / `color.bg.hi.hover` / `color.bg.hi.disabled`, the table emits one row for `color.bg.hi` with three pills (`base`, `hover`, `disabled`). The same map also handles Backmarket-style hyphen tails — `color.bg.hi-h` with `variants={{ hover: 'h' }}` groups identically. Suffix matching is longest-wins and requires a real segment boundary, so `variants={{ zero: '0' }}` will not spuriously hit `neutral-900`.
+
+Props:
+
+- `filter?: string` — path glob. Defaults to every `$type: color` token.
+- `caption?: string` — override the caption.
+- `sortBy?: 'path' | 'value' | 'none'` — default `'path'`. `'value'` orders perceptually (oklch L → C → H).
+- `sortDir?: 'asc' | 'desc'` — default `'asc'`.
+- `searchable?: boolean` — render a fuzzy-search input above the table. Defaults to `true`.
+- `onSelect?(path: string): void` — replaces the expand-in-place default with a consumer-driven callback, invoked with the currently-selected variant's path.
+- `variants?: Record<string, string>` — label-to-suffix map for grouping. Accepts both DTCG dot-segment (`hi.disabled`) and Backmarket hyphen-tail (`hi-d`) conventions. Single-member groups render as plain rows; empty / omitted map disables grouping entirely.
+
+### TypographyScale
+
+```tsx
+<TypographyScale />
+```
+
+One sample line per `typography` composite, rendered with the token's own `fontFamily` / `fontSize` / `fontWeight` / `lineHeight` / `letterSpacing`. `sample?: string` overrides the text.
+
+### DimensionScale
+
+```tsx
+<DimensionScale kind="length" />
+```
+
+Width-driven bar (default), radius-sample square, or size-sample square per `dimension` token. Defaults to `sortBy: 'value'` — ordered numerically by the rendered pixel size.
+
+- `kind?: 'length' | 'radius' | 'size'` — visualization mode (default `'length'`).
+
+### FontFamilySample
+
+```tsx
+<FontFamilySample />
+```
+
+Pangram rendered per `fontFamily` primitive. `sample?: string` overrides the text.
+
+### FontWeightScale
+
+```tsx
+<FontWeightScale />
+```
+
+Same sample text rendered at each `fontWeight` primitive. Defaults to `sortBy: 'value'` — ordered 100 → 900.
+
+### OpacityScale
+
+```tsx
+<OpacityScale filter="number.opacity.*" />
+```
+
+One card per opacity token: the sample colour rendered at that opacity over a checkerboard backdrop, so the transparency reads visually. Only `$type: 'number'` (or `'opacity'`) tokens whose `$value` is a finite number in `[0, 1]` are picked up — non-opacity `number` siblings (`line-height`, `z-index`) fall out naturally.
+
+- `filter?: string` — path glob; defaults to `'**.opacity.*'` so common layouts (`number.opacity.*`, `opacity.*`) work without configuration.
+- `type?: 'number' | 'opacity'` — default `'number'`.
+- `sampleColor?: string` — the colour the sample layer uses. Default `'color.accent.bg'`.
+
+### BorderPreview
+
+```tsx
+<BorderPreview />
+```
+
+One framed `<BorderSample>` per `border` composite token.
+
+### ShadowPreview
+
+```tsx
+<ShadowPreview />
+```
+
+One `<ShadowSample>` surface per `shadow` composite token.
+
+### MotionPreview
+
+```tsx
+<MotionPreview />
+```
+
+One animated `<MotionSample>` per `transition` / `duration` / `cubicBezier` token. Respects `prefers-reduced-motion`.
+
+### StrokeStyleSample
+
+```tsx
+<StrokeStyleSample />
+```
+
+Border rendered per `strokeStyle` primitive. Supports string forms (`solid`, `dashed`, `dotted`, `double`) natively; object forms (`dashArray` / `lineCap`) fall back to a textual summary.
+
+### GradientPalette
+
+```tsx
+<GradientPalette />
+```
+
+Wide sample per `gradient` token (linear, left → right by default) with a stop list. DTCG gradients are stop arrays — the gradient *function* is a rendering choice the consumer makes.
