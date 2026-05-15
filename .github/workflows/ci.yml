@@ -104,6 +104,7 @@ jobs:
 
       - name: Diagnose WebKit launch (temporary)
         shell: bash
+        working-directory: packages/blocks
         run: |
           set +e
           DEBUG=pw:browser* node -e "
@@ -121,10 +122,10 @@ jobs:
                 console.log('cleanup OK');
               } catch (e) {
                 console.error('WEBKIT FAILED:', e && e.stack || e);
-                process.exit(0); // never fail the build on this diagnostic
               }
+              process.exit(0); // never fail the build on this diagnostic
             })();
-          " 2>&1 | sed -n '1,200p'
+          " 2>&1 | sed -n '1,300p'
           echo "(diagnostic exit; build continues regardless)"
 
       - name: Lint / format / typecheck / test / build
