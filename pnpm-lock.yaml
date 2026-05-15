@@ -372,6 +372,9 @@ importers:
       '@types/node':
         specifier: ^25.6.0
         version: 25.6.0
+      '@unpunnyfuns/swatchbook-tokens':
+        specifier: workspace:*
+        version: link:../tokens
       tsdown:
         specifier: ^0.21.9
         version: 0.21.9(@tsdown/css@0.21.9)(typescript@6.0.3)
