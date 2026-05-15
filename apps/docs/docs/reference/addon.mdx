@@ -114,13 +114,36 @@ The preview decorator mounts a `SwatchbookProvider` (from blocks) that populates
 import {
   ADDON_ID,
   AXES_GLOBAL_KEY,
-  GLOBAL_KEY,
   PARAM_KEY,
   VIRTUAL_MODULE_ID,
 } from '@unpunnyfuns/swatchbook-addon';
 ```
 
 Useful when wiring the addon into custom tooling or writing interaction tests that read the globals directly.
+
+## `AddonOptions`
+
+Typed shape of the `options` object passed to the Storybook `addons` entry — what the preset reads at preview start.
+
+```ts
+import type { AddonOptions } from '@unpunnyfuns/swatchbook-addon';
+
+interface AddonOptions {
+  /** Inline swatchbook config. Mutually exclusive with `configPath`. */
+  config?: Config;
+  /** Path to a config module, relative to the Storybook `configDir`. */
+  configPath?: string;
+  /**
+   * Display-side integrations plugged into the addon's Vite plugin.
+   * Each typically contributes a virtual module the preview imports
+   * (e.g. `virtual:swatchbook/tailwind.css`). The addon itself is
+   * tool-agnostic; integrations ship as separate packages.
+   */
+  integrations?: SwatchbookIntegration[];
+}
+```
+
+`Config` and `SwatchbookIntegration` come from [`@unpunnyfuns/swatchbook-core`](./core.mdx). See the [Registration](#registration) section above for a worked example, and the [Integrations guide](../guides/integrations/index.mdx) for `integrations` factories.
 
 ## Do / don't
 
