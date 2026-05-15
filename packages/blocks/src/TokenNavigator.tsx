@@ -1,6 +1,6 @@
 import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import type { KeyboardEvent, ReactElement } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './TokenNavigator.css';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
@@ -150,6 +150,33 @@ function collectLeafPaths(nodes: TreeNode[], out: string[]): void {
 }
 
 /**
+ * Flatten the currently-visible treeitems into the order screen-reader
+ * users + arrow-key users navigate them: depth-first, only descending
+ * into expanded groups. Each entry carries enough metadata for the
+ * keyboard handler to compute parent / first-child / next / prev.
+ */
+interface FlatTreeItem {
+  path: string;
+  kind: 'group' | 'leaf';
+  /** Dot-path of the parent group, or `null` for top-level entries. */
+  parentPath: string | null;
+}
+
+function flattenVisible(
+  nodes: TreeNode[],
+  expanded: Set<string>,
+  parentPath: string | null,
+  out: FlatTreeItem[],
+): void {
+  for (const node of nodes) {
+    out.push({ path: node.path, kind: node.kind, parentPath });
+    if (node.kind === 'group' && expanded.has(node.path)) {
+      flattenVisible(node.children, expanded, node.path, out);
+    }
+  }
+}
+
+/**
  * Return a pruned copy of the tree keeping only leaves whose path is in
  * `matches`, plus the groups on the way to them. Every surviving group's
  * path is added to `expandOut` so callers can force those groups open.
@@ -240,6 +267,166 @@ export function TokenNavigator({
     [onSelect],
   );
 
+  // WAI-ARIA tree pattern's roving tabindex — exactly one treeitem at a
+  // time has tabIndex={0}; the rest are -1. Tab into / out of the tree
+  // hits that one item; arrow keys move focus between items inside.
+  const [focusedPath, setFocusedPath] = useState<string | null>(null);
+  const treeItemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
+  const registerTreeItem = useCallback(
+    (path: string) =>
+      (el: HTMLLIElement | null): void => {
+        if (el) treeItemRefs.current.set(path, el);
+        else treeItemRefs.current.delete(path);
+      },
+    [],
+  );
+
+  const flatVisible = useMemo<FlatTreeItem[]>(() => {
+    const out: FlatTreeItem[] = [];
+    flattenVisible(visibleTree, effectiveExpanded, null, out);
+    return out;
+  }, [visibleTree, effectiveExpanded]);
+
+  // Reset / repair focused path whenever the visible set changes. Keep
+  // the existing focus if it's still visible; otherwise fall back to
+  // the first item.
+  useEffect(() => {
+    if (flatVisible.length === 0) {
+      setFocusedPath(null);
+      return;
+    }
+    setFocusedPath((prev) => {
+      if (prev && flatVisible.some((entry) => entry.path === prev)) return prev;
+      return flatVisible[0]?.path ?? null;
+    });
+  }, [flatVisible]);
+
+  const focusByPath = useCallback((path: string): void => {
+    const node = treeItemRefs.current.get(path);
+    if (node) {
+      node.focus();
+      setFocusedPath(path);
+    } else {
+      // Ref will register on the next render; flag the path so the
+      // focus-repair effect can move focus once the node mounts.
+      setFocusedPath(path);
+    }
+  }, []);
+
+  // After expanding a group via Right-arrow, the new children mount on
+  // the following render. If a path was queued via setFocusedPath but
+  // the corresponding ref didn't exist at the time, repair focus now
+  // that the children are live.
+  useEffect(() => {
+    if (focusedPath === null) return;
+    const node = treeItemRefs.current.get(focusedPath);
+    if (node && document.activeElement !== node) {
+      // Only steal focus if it currently sits on a different treeitem
+      // inside our tree — don't yank it away from the search input or
+      // anything outside.
+      const active = document.activeElement;
+      const insideTree = active instanceof HTMLElement && active.closest('[role="tree"]');
+      if (insideTree) node.focus();
+    }
+  }, [focusedPath]);
+
+  const handleTreeKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLUListElement>): void => {
+      // Derive the active treeitem from `document.activeElement` rather
+      // than the `focusedPath` state. State updates from `onFocus` may
+      // not have flushed by the time a subsequent keydown fires (e.g.
+      // tests that programmatically `.focus()` then immediately dispatch
+      // keys), and the handler must always operate on the row the user
+      // is currently on.
+      if (flatVisible.length === 0) return;
+      const active = document.activeElement;
+      if (!(active instanceof HTMLLIElement)) return;
+      const activePath = active.getAttribute('data-path');
+      if (activePath === null) return;
+      const currentIndex = flatVisible.findIndex((entry) => entry.path === activePath);
+      if (currentIndex < 0) return;
+      const current = flatVisible[currentIndex];
+      if (!current) return;
+
+      switch (e.key) {
+        case 'ArrowDown': {
+          const next = flatVisible[currentIndex + 1];
+          if (next) {
+            e.preventDefault();
+            focusByPath(next.path);
+          }
+          return;
+        }
+        case 'ArrowUp': {
+          const prev = flatVisible[currentIndex - 1];
+          if (prev) {
+            e.preventDefault();
+            focusByPath(prev.path);
+          }
+          return;
+        }
+        case 'Home': {
+          const first = flatVisible[0];
+          if (first) {
+            e.preventDefault();
+            focusByPath(first.path);
+          }
+          return;
+        }
+        case 'End': {
+          const last = flatVisible[flatVisible.length - 1];
+          if (last) {
+            e.preventDefault();
+            focusByPath(last.path);
+          }
+          return;
+        }
+        case 'ArrowRight': {
+          if (current.kind === 'group') {
+            if (!effectiveExpanded.has(current.path)) {
+              e.preventDefault();
+              toggle(current.path);
+              // Focus stays on the group — user can press Right again
+              // to step into the first child on the next render.
+              return;
+            }
+            // Already expanded: step into first child (which is the
+            // next entry in the flattened list).
+            const firstChild = flatVisible[currentIndex + 1];
+            if (firstChild && firstChild.parentPath === current.path) {
+              e.preventDefault();
+              focusByPath(firstChild.path);
+            }
+          }
+          return;
+        }
+        case 'ArrowLeft': {
+          if (current.kind === 'group' && effectiveExpanded.has(current.path)) {
+            e.preventDefault();
+            toggle(current.path);
+            return;
+          }
+          // Collapsed group or leaf: step to parent.
+          if (current.parentPath !== null) {
+            e.preventDefault();
+            focusByPath(current.parentPath);
+          }
+          return;
+        }
+        case 'Enter':
+        case ' ': {
+          e.preventDefault();
+          if (current.kind === 'group') toggle(current.path);
+          else handleLeafClick(current.path);
+          return;
+        }
+        default:
+          return;
+      }
+    },
+    [flatVisible, effectiveExpanded, toggle, focusByPath, handleLeafClick],
+  );
+
   const typeLabel = typeFilter ? ` · ${[...typeFilter].map((t) => `$type=${t}`).join(', ')}` : '';
   const trimmedQuery = query.trim();
   // Must run every render — React's rules of hooks forbid the earlier empty-state
@@ -290,13 +477,21 @@ export function TokenNavigator({
       {visibleTree.length === 0 ? (
         <div className="sb-block__empty">No tokens match "{trimmedQuery}".</div>
       ) : (
-        <ul className="sb-token-navigator__tree" role="tree">
+        <ul
+          className="sb-token-navigator__tree"
+          role="tree"
+          aria-label="Token graph"
+          onKeyDown={handleTreeKeyDown}
+        >
           {visibleTree.map((node) => (
             <TreeNodeRow
               key={node.path || node.segment}
               node={node}
               expanded={effectiveExpanded}
+              focusedPath={focusedPath}
+              registerTreeItem={registerTreeItem}
               onToggle={toggle}
+              onFocusPath={setFocusedPath}
               onLeafClick={handleLeafClick}
             />
           ))}
@@ -317,31 +512,51 @@ export function TokenNavigator({
 interface TreeNodeRowProps {
   node: TreeNode;
   expanded: Set<string>;
+  focusedPath: string | null;
+  registerTreeItem(path: string): (el: HTMLLIElement | null) => void;
   onToggle(path: string): void;
+  onFocusPath(path: string): void;
   onLeafClick(path: string): void;
 }
 
-function TreeNodeRow({ node, expanded, onToggle, onLeafClick }: TreeNodeRowProps): ReactElement {
+function TreeNodeRow({
+  node,
+  expanded,
+  focusedPath,
+  registerTreeItem,
+  onToggle,
+  onFocusPath,
+  onLeafClick,
+}: TreeNodeRowProps): ReactElement {
   if (node.kind === 'leaf') {
-    return <LeafRow node={node} onLeafClick={onLeafClick} />;
+    return (
+      <LeafRow
+        node={node}
+        focusedPath={focusedPath}
+        registerTreeItem={registerTreeItem}
+        onFocusPath={onFocusPath}
+        onLeafClick={onLeafClick}
+      />
+    );
   }
   const isOpen = expanded.has(node.path);
-  const onKey = (e: KeyboardEvent<HTMLDivElement>): void => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onToggle(node.path);
-    }
-  };
+  const isFocused = focusedPath === node.path;
   return (
-    <li role="treeitem" aria-expanded={isOpen}>
+    <li
+      ref={registerTreeItem(node.path)}
+      role="treeitem"
+      aria-expanded={isOpen}
+      tabIndex={isFocused ? 0 : -1}
+      onFocus={() => onFocusPath(node.path)}
+      data-path={node.path}
+      data-testid="token-navigator-group"
+    >
       <div
-        role="button"
-        tabIndex={0}
         className="sb-token-navigator__group-row"
-        onClick={() => onToggle(node.path)}
-        onKeyDown={onKey}
-        data-path={node.path}
-        data-testid="token-navigator-group"
+        onClick={() => {
+          onFocusPath(node.path);
+          onToggle(node.path);
+        }}
       >
         <span className="sb-token-navigator__caret" aria-hidden>
           {isOpen ? '▾' : '▸'}
@@ -356,7 +571,10 @@ function TreeNodeRow({ node, expanded, onToggle, onLeafClick }: TreeNodeRowProps
               key={c.path || c.segment}
               node={c}
               expanded={expanded}
+              focusedPath={focusedPath}
+              registerTreeItem={registerTreeItem}
               onToggle={onToggle}
+              onFocusPath={onFocusPath}
               onLeafClick={onLeafClick}
             />
           ))}
@@ -368,27 +586,36 @@ function TreeNodeRow({ node, expanded, onToggle, onLeafClick }: TreeNodeRowProps
 
 interface LeafRowProps {
   node: LeafNode;
+  focusedPath: string | null;
+  registerTreeItem(path: string): (el: HTMLLIElement | null) => void;
+  onFocusPath(path: string): void;
   onLeafClick(path: string): void;
 }
 
-function LeafRow({ node, onLeafClick }: LeafRowProps): ReactElement {
-  const onKey = (e: KeyboardEvent<HTMLDivElement>): void => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onLeafClick(node.path);
-    }
-  };
+function LeafRow({
+  node,
+  focusedPath,
+  registerTreeItem,
+  onFocusPath,
+  onLeafClick,
+}: LeafRowProps): ReactElement {
   const type = node.token.$type ?? '';
+  const isFocused = focusedPath === node.path;
   return (
-    <li role="treeitem">
+    <li
+      ref={registerTreeItem(node.path)}
+      role="treeitem"
+      tabIndex={isFocused ? 0 : -1}
+      onFocus={() => onFocusPath(node.path)}
+      data-path={node.path}
+      data-testid="token-navigator-leaf"
+    >
       <div
-        role="button"
-        tabIndex={0}
         className="sb-token-navigator__leaf-row"
-        onClick={() => onLeafClick(node.path)}
-        onKeyDown={onKey}
-        data-path={node.path}
-        data-testid="token-navigator-leaf"
+        onClick={() => {
+          onFocusPath(node.path);
+          onLeafClick(node.path);
+        }}
       >
         <span className="sb-token-navigator__caret" aria-hidden>
           •
