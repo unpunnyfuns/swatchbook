@@ -8,6 +8,8 @@ import { fixtureCwd, loadWithPrefix } from './_helpers.ts';
 
 let project: Project;
 
+// beforeAll: loadProject against the full fixture (~1s) feeds every
+// emitViaTerrazzo assertion below; per-test reload would dominate.
 beforeAll(async () => {
   project = await loadWithPrefix('sb');
 });

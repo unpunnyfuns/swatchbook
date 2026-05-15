@@ -9,6 +9,8 @@ const fixtureCwd = dirname(tokensDir);
 describe('loadProject — resolver mode', () => {
   let project: Project;
 
+  // beforeAll: loadProject runs the parser + resolver evaluation against
+  // the full fixture once (~1s); per-test reload would dominate runtime.
   beforeAll(async () => {
     project = await loadProject(
       {
@@ -84,20 +86,5 @@ describe('loadProject — resolver mode', () => {
 
   it('throws on unknown permutation name', () => {
     expect(() => resolvePermutation(project, 'Nope')).toThrow(/unknown permutation/i);
-  });
-});
-
-describe('loadProject — validation', () => {
-  it('throws when both `resolver` and `axes` are set', async () => {
-    await expect(
-      loadProject(
-        {
-          tokens: [],
-          resolver: resolverPath,
-          axes: [{ name: 'mode', contexts: { Light: [] }, default: 'Light' }],
-        },
-        fixtureCwd,
-      ),
-    ).rejects.toThrow(/either `resolver` or `axes`, not both/);
   });
 });

@@ -75,14 +75,14 @@ export interface ChromeValidationResult {
  */
 export function validateChrome(
   raw: Record<string, string> | undefined,
-  themesResolved: Record<string, TokenMap>,
+  permutationsResolved: Record<string, TokenMap>,
 ): ChromeValidationResult {
   const diagnostics: Diagnostic[] = [];
   if (!raw) return { entries: {}, diagnostics };
 
   const known = new Set<string>(CHROME_ROLES);
   const tokenIDs = new Set<string>();
-  for (const tokens of Object.values(themesResolved)) {
+  for (const tokens of Object.values(permutationsResolved)) {
     for (const id of Object.keys(tokens)) tokenIDs.add(id);
   }
 

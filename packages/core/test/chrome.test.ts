@@ -68,6 +68,8 @@ it('CHROME_ROLES and DEFAULT_CHROME_MAP cover the same ten roles', () => {
 
 let project: Project;
 
+// beforeAll: loadProject against the full fixture (~1s) is shared by
+// every assertion below; per-test reload would dominate runtime.
 beforeAll(async () => {
   project = await loadProject(
     {

@@ -23,7 +23,7 @@ const config = defineSwatchbookConfig({
 });
 
 const project = await loadProject(config, process.cwd());
-// project.themesResolved[themeName] — ready to read, no further I/O.
+// project.permutationsResolved[permutationName] — ready to read, no further I/O.
 ```
 
 The [config reference](https://unpunnyfuns.github.io/swatchbook/reference/config) covers every field; the [core reference](https://unpunnyfuns.github.io/swatchbook/reference/core) covers the `Project` shape and exported helpers (`resolvePermutation`, `permutationID`, typed `Axis` / `Permutation` / `Diagnostic`).
@@ -32,7 +32,7 @@ The [config reference](https://unpunnyfuns.github.io/swatchbook/reference/config
 
 - ✅ Build-time use — Node, scripts, SSR, Storybook presets.
 - ✅ Pair with [Terrazzo](https://terrazzo.app/)'s CLI for production artifact emission (CSS / JS / Tailwind / Swift / Sass / …).
-- ❌ Don't ship the `Project` object to the browser — it carries full raw-AST references. Use `themesResolved` projections instead.
+- ❌ Don't ship the `Project` object to the browser — it carries full raw-AST references. Use `permutationsResolved` projections instead.
 - ❌ Don't reach into `@terrazzo/parser` directly. Stay on the core surface so upgrades don't churn your code.
 
 ## Credits
