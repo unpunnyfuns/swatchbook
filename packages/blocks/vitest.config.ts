@@ -24,20 +24,15 @@ export default defineConfig({
     browser: {
       enabled: true,
       provider: playwright(),
-      // Cross-engine matrix — Blink + Gecko + WebKit. WebKit needs
-      // the CI container's `--ipc=host` so its multi-process helpers
-      // get a real shared-memory region; without that it crashes on
-      // `newPage` with "Target page, context or browser has been
-      // closed". See `.github/workflows/ci.yml` for the container
-      // options.
-      instances: [{ browser: 'chromium' }, { browser: 'firefox' }, { browser: 'webkit' }],
+      // Cross-engine matrix — Blink + Gecko. WebKit deferred (see #754):
+      // the binary launches cleanly in this container (CI diagnostic in
+      // PR #762 run 25944927450 confirmed bare `webkit.launch().newPage()`
+      // works), but `@vitest/browser-playwright` 4.1.4's per-file harness
+      // setup hits "Target page, context or browser has been closed"
+      // regardless of `--ipc=host` or `isolate: false`. Library-side
+      // integration issue rather than anything we own.
+      instances: [{ browser: 'chromium' }, { browser: 'firefox' }],
       headless: true,
-      // `isolate: false` reuses one browser/context across test files.
-      // CI diagnostic (PR #762 run 25944927450) proved WebKit itself
-      // launches + newPage + cleanup correctly, but vitest-browser-
-      // playwright's per-file isolation cycle trips it. Reusing context
-      // sidesteps the churn. Chromium + Firefox tolerate either mode.
-      isolate: false,
     },
   },
 });
