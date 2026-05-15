@@ -60,6 +60,74 @@ permutationID({ mode: 'Dark', brand: 'Brand A' }); // → "Dark · Brand A"
 permutationID({ theme: 'Light' }); // → "Light"
 ```
 
+### `analyzeAxisVariance(path, axes, permutations, permutationsResolved)`
+
+Classify how a token's resolved value changes across each axis. Used by the `AxisVariance` block and the MCP server's `get_axis_variance` tool to drive consumer-facing previews.
+
+```ts
+import { analyzeAxisVariance } from '@unpunnyfuns/swatchbook-core';
+
+const result = analyzeAxisVariance(
+  'color.accent.bg',
+  project.axes,
+  project.permutations,
+  project.permutationsResolved,
+);
+// result.kind: 'constant' | 'single' | 'multi'
+// result.varyingAxes: axes whose contexts change this token
+// result.perAxis: per-axis contexts → stringified resolved values
+```
+
+Returns an [`AxisVarianceResult`](#axisvarianceresult). Available as a subpath import too: `import { analyzeAxisVariance } from '@unpunnyfuns/swatchbook-core/variance'` — useful for tree-shaking when only variance analysis is needed.
+
+### `projectCss(project)`
+
+Emit the project's resolved CSS as a string — the same output the addon publishes into `virtual:swatchbook/tokens` at preview time. Each permutation gets its own `[data-sb-<axis>="<context>"]` selector block; the default permutation's tokens are also written to `:root`.
+
+```ts
+import { loadProject, projectCss } from '@unpunnyfuns/swatchbook-core';
+
+const project = await loadProject(config, process.cwd());
+const css = projectCss(project);
+// :root { --sb-color-accent-bg: …; … }
+// [data-sb-mode="Dark"] { --sb-color-accent-bg: …; }
+```
+
+For consumers building docs sites, the docs apps under `apps/docs/` use this same call to feed Docusaurus's Infima theme. For production builds, prefer Terrazzo's CLI — `projectCss` exists primarily for tooling that wants the same emission the addon does.
+
+## Constants
+
+### `CHROME_ROLES`
+
+Frozen list of the ten role names that block chrome reads from. Independent of `config.cssVarPrefix` — these always live under the `--swatchbook-*` namespace so blocks remain stylable regardless of consumer prefix.
+
+```ts
+import { CHROME_ROLES } from '@unpunnyfuns/swatchbook-core';
+
+CHROME_ROLES;
+// → ['borderDefault', 'surfaceDefault', 'surfaceMuted', 'surfaceRaised',
+//    'textDefault', 'textMuted', 'accentBg', 'accentFg',
+//    'bodyFontFamily', 'bodyFontSize']
+```
+
+### `DEFAULT_CHROME_MAP`
+
+Built-in chrome values used when `config.chrome` is empty or partial. Color roles use `light-dark()` so zero-config chrome auto-flips with the active `color-scheme` (which Storybook's preview iframe, MDX docs pages, and the OS preference all participate in).
+
+```ts
+import { DEFAULT_CHROME_MAP, type ChromeRole } from '@unpunnyfuns/swatchbook-core';
+
+DEFAULT_CHROME_MAP.surfaceDefault;   // 'light-dark(#ffffff, #0f172a)'
+DEFAULT_CHROME_MAP.accentBg;         // 'light-dark(#1d4ed8, #3b82f6)'
+```
+
+### `ChromeRole`
+
+```ts
+type ChromeRole = (typeof CHROME_ROLES)[number];
+// 'borderDefault' | 'surfaceDefault' | 'surfaceMuted' | …
+```
+
 ## Types
 
 ### `Config`
@@ -186,7 +254,7 @@ interface Permutation {
 
 ```ts
 interface Diagnostic {
-  severity: 'error' | 'warn' | 'info';
+  severity: DiagnosticSeverity;
   group: string;
   message: string;
   filename?: string;
@@ -194,6 +262,77 @@ interface Diagnostic {
   column?: number;
 }
 ```
+
+### `DiagnosticSeverity`
+
+```ts
+type DiagnosticSeverity = 'error' | 'warn' | 'info';
+```
+
+### `AxisVarianceResult`
+
+Returned by [`analyzeAxisVariance`](#analyzeaxisvariancepath-axes-permutations-permutationsresolved). `kind` classifies the overall variance shape; `perAxis` records the resolved value seen in each context with other axes held at their defaults.
+
+```ts
+interface AxisVarianceResult {
+  path: string;
+  kind: VarianceKind;
+  /** Axes whose contexts change this token's resolved value. */
+  varyingAxes: string[];
+  /** Axes whose contexts do not change the resolved value. */
+  constantAcrossAxes: string[];
+  perAxis: Record<
+    string,
+    {
+      varying: boolean;
+      contexts: Record<string, string>;
+    }
+  >;
+}
+```
+
+### `VarianceKind`
+
+```ts
+type VarianceKind = 'constant' | 'single' | 'multi';
+```
+
+### `ResolvedPermutation`
+
+Pair of `(name, tokens)` returned by [`resolvePermutation`](#resolvepermutationproject-name).
+
+```ts
+interface ResolvedPermutation {
+  name: string;
+  tokens: TokenMap;
+}
+```
+
+### `TokenMap`
+
+```ts
+type TokenMap = Record<string, TokenNormalized>;
+```
+
+`TokenNormalized` is Terrazzo's per-token shape — see [`@terrazzo/parser`](https://terrazzo.app/) for its fields. Keyed by DTCG flat path (`"color.accent.bg"`).
+
+### `ListedToken`
+
+The per-token shape from `@terrazzo/plugin-token-listing`, re-exported for typing convenience. Each entry carries the authoritative plugin-css-emitted CSS variable names, a CSS-ready `previewValue`, the pre-resolution `originalValue`, and a `source.loc` pointer to the authoring file + line. Composed map: [`TokenListingByPath`](#tokenlistingbypath).
+
+### `ParserInput`
+
+Retained Terrazzo parse output threaded through the project for downstream plugin emission. Consumers should treat this as opaque; reach for it only when wiring custom Terrazzo plugins.
+
+```ts
+interface ParserInput {
+  tokens: Record<string, TokenNormalized>;
+  sources: InputSourceWithDocument[];
+  resolver: Resolver;
+}
+```
+
+`InputSourceWithDocument` and `Resolver` come from `@terrazzo/parser`.
 
 ## Do / don't
 
