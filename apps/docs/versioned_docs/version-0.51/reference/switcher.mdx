@@ -1,0 +1,148 @@
+---
+id: switcher
+title: Switcher
+sidebar_position: 3
+---
+
+# Switcher
+
+Published as `@unpunnyfuns/swatchbook-switcher`. Framework-agnostic React component that draws the theme-switcher menu — preset pills, one row per axis, an optional footer for host-specific controls. The Storybook addon's toolbar mounts it inside a popover; the docs site's navbar mounts the same component. Reach for this package directly when you want the switcher on a non-Storybook surface.
+
+Most consumers pick it up transitively via `@unpunnyfuns/swatchbook-addon` — `import { ThemeSwitcher } from '@unpunnyfuns/swatchbook-addon'` works without adding a sibling dependency. Install directly when you're outside Storybook (Docusaurus, Next.js, a vanilla React app).
+
+## Install
+
+```bash
+npm install @unpunnyfuns/swatchbook-switcher
+```
+
+Peer requirements: React 18+. The package ships its own stylesheet at `dist/style.css`; import it once at your app's entry, or pull it in via the `./style.css` subpath if your bundler honors `package.json#exports`:
+
+```ts
+import '@unpunnyfuns/swatchbook-switcher/style.css';
+```
+
+The component is a *menu*, not a *button*. It draws no trigger of its own — you decide when it's visible (popover, drawer, inline) and how the active tuple gets applied.
+
+## Mount example
+
+Minimal React usage. Pull `axes` / `presets` / `themes` / `defaults` from `@unpunnyfuns/swatchbook-core`'s `loadProject` output (or any other source that produces matching shapes); track the active tuple yourself.
+
+```tsx title="src/components/MySwitcher.tsx"
+import { ThemeSwitcher, type SwitcherPreset } from '@unpunnyfuns/swatchbook-switcher';
+import '@unpunnyfuns/swatchbook-switcher/style.css';
+import { useState, useCallback } from 'react';
+
+export function MySwitcher({ axes, presets, themes, defaults }) {
+  const [activeTuple, setActiveTuple] = useState(defaults);
+  const [lastApplied, setLastApplied] = useState<string | null>(null);
+
+  const onAxisChange = useCallback((axis: string, next: string) => {
+    setActiveTuple((prev) => ({ ...prev, [axis]: next }));
+    document.documentElement.setAttribute(`data-sb-${axis}`, next);
+    setLastApplied(null);
+  }, []);
+
+  const onPresetApply = useCallback((preset: SwitcherPreset) => {
+    const tuple = { ...defaults, ...preset.axes };
+    setActiveTuple(tuple);
+    for (const [axis, value] of Object.entries(tuple)) {
+      document.documentElement.setAttribute(`data-sb-${axis}`, value);
+    }
+    setLastApplied(preset.name);
+  }, [defaults]);
+
+  return (
+    <ThemeSwitcher
+      axes={axes}
+      presets={presets}
+      themes={themes}
+      activeTuple={activeTuple}
+      defaults={defaults}
+      lastApplied={lastApplied}
+      onAxisChange={onAxisChange}
+      onPresetApply={onPresetApply}
+    />
+  );
+}
+```
+
+The pattern is identical across hosts — only the surrounding chrome changes (Docusaurus navbar plugin, a Next.js layout component, an emotion-themed React app). The component never reaches into the DOM itself, so wherever the `data-<prefix>-<axis>` attributes need to land is up to the caller.
+
+For a working example, the docs site you're reading mounts `<ThemeSwitcher>` inside the navbar — see [`apps/docs/src/components/SwatchbookSwitcherButton.tsx`](https://github.com/unpunnyfuns/swatchbook/blob/main/apps/docs/src/components/SwatchbookSwitcherButton.tsx) for the full popover-trigger setup, including `aria-haspopup` / `aria-expanded` wiring on the trigger button.
+
+## Props
+
+```ts
+interface ThemeSwitcherProps {
+  axes: readonly SwitcherAxis[];
+  presets?: readonly SwitcherPreset[];
+  themes?: readonly SwitcherPermutation[];
+  activeTuple: Readonly<Record<string, string>>;
+  defaults: Readonly<Record<string, string>>;
+  lastApplied: string | null;
+  onAxisChange(axisName: string, next: string): void;
+  onPresetApply(preset: SwitcherPreset): void;
+  onKeyDown?(event: KeyboardEvent<HTMLDivElement>): void;
+  footer?: ReactElement | null;
+}
+```
+
+| Prop | Required | Purpose |
+| --- | --- | --- |
+| `axes` | yes | Axes the project ships. The component renders one row per entry. Omit this to draw a presets-only menu. |
+| `presets` | no | Saved tuple snapshots rendered above the axes. Empty / omitted = no presets section. |
+| `themes` | no | The full resolved theme list. Used only to determine whether the active tuple has drifted from the most recent applied preset (the "modified" dot on the preset pill). |
+| `activeTuple` | yes | Active axis selections, keyed by axis name. Drives which pill in each axis row is `--active`. |
+| `defaults` | yes | Fallback values used to fill in axes a preset doesn't explicitly set. |
+| `lastApplied` | yes | Name of the most recently applied preset, or `null`. Drives the "modified since applied" dot. |
+| `onAxisChange` | yes | Receives `(axisName, next)` when the user clicks an axis pill. Caller decides what "applied" means — set `data-*` attributes, route, write to global state. |
+| `onPresetApply` | yes | Receives the full preset object when a preset pill is clicked. Caller fills in omitted axes from `defaults` and applies the resulting tuple. |
+| `onKeyDown` | no | Optional key handler — typically used by hosts to close their popover on `Escape`. |
+| `footer` | no | Host-specific node rendered after the axes (e.g. the Storybook addon's color-format picker). The switcher itself ships no color-format UI. |
+
+## Input shapes
+
+```ts
+interface SwitcherAxis {
+  name: string;
+  contexts: readonly string[];
+  default: string;
+  description?: string;
+  source?: 'resolver' | 'layered' | 'synthetic';
+}
+
+interface SwitcherPreset {
+  name: string;
+  axes: Partial<Record<string, string>>;
+  description?: string;
+}
+
+interface SwitcherPermutation {
+  name: string;
+  input: Record<string, string>;
+}
+```
+
+`SwitcherAxis` / `SwitcherPreset` / `SwitcherPermutation` are structurally compatible with `Project.axes` / `Project.presets` / `Project.permutations` from `@unpunnyfuns/swatchbook-core` — pass them through unchanged. The shapes are re-declared in the switcher package so it stays framework-agnostic and doesn't pull `core` as a runtime dependency.
+
+## Axis-state propagation
+
+The component is *pure*: it reads its inputs, draws the menu, and calls back when the user clicks. It does not:
+
+- Read or write to `localStorage` / `sessionStorage`.
+- Touch the DOM outside its own subtree.
+- Subscribe to the routing or framework state.
+
+That makes it portable but also means the host owns the policy for what "applying a preset" or "switching an axis" actually does. The two common shapes:
+
+- **Attribute on `<html>`** — set `data-<prefix>-<axis>` on `document.documentElement` per change. Pairs with `cssVarPrefix` from `loadProject` so emitted CSS targets the same selectors. The Storybook addon and the docs-site switcher both use this.
+- **Class on `<body>`** — toggle `theme-<value>` on `document.body.classList`. Useful if the project's stylesheet uses class-based scoping instead of attribute selectors.
+
+Persisting across reloads is also up to the host. The Storybook addon piggybacks on Storybook's globals API; the docs-site switcher syncs with Docusaurus's `useColorMode` for `mode` and persists the rest via `localStorage`.
+
+## Styling hooks
+
+The component renders within a fixed `.sb-switcher` container. Class names follow BEM-style namespacing (`.sb-switcher__pill`, `.sb-switcher__section-label`, `.sb-switcher__divider`, …). Visual polish — surface, border, focus ring — comes from the bundled `style.css`.
+
+For deeper restyling, target the class names from your own stylesheet after the bundled one has loaded. The chrome variables (`--swatchbook-*`) the blocks use are not consumed here; the switcher's surface is intentionally self-contained.

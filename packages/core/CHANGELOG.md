@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.51.0
+
+### Minor Changes
+
+- b087e60: `config.resolver` now accepts bare package specifiers (e.g. `@my/tokens/resolver.json`). Resolution prefers `cwd`-relative paths when the file is on disk — preserving every existing config form — and falls back to `node_modules` resolution from `cwd` otherwise, so token packages can ship a resolver that consumers reference directly without copying it into their tree.
+
 ## 0.50.0
 
 ### Minor Changes
