@@ -24,14 +24,13 @@ export default defineConfig({
     browser: {
       enabled: true,
       provider: playwright(),
-      // Cross-engine matrix — Blink (chromium) + Gecko (firefox). WebKit
-      // is deliberately omitted: it crashes on `newPage` in the pinned
-      // Playwright container, likely a missing system dep or an
-      // interaction with the `HOME=/root` workaround we need for
-      // Firefox. Local dev still gets WebKit if it's installed, but CI
-      // shouldn't fail on container quirks unrelated to the code under
-      // test. Tracked in a follow-up issue.
-      instances: [{ browser: 'chromium' }, { browser: 'firefox' }],
+      // Cross-engine matrix — Blink + Gecko + WebKit. WebKit needs
+      // the CI container's `--ipc=host` so its multi-process helpers
+      // get a real shared-memory region; without that it crashes on
+      // `newPage` with "Target page, context or browser has been
+      // closed". See `.github/workflows/ci.yml` for the container
+      // options.
+      instances: [{ browser: 'chromium' }, { browser: 'firefox' }, { browser: 'webkit' }],
       headless: true,
     },
   },

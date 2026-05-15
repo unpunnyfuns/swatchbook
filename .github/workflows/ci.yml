@@ -23,6 +23,14 @@ jobs:
     # tag, then update this line + the CLAUDE.md bullet.
     container:
       image: ghcr.io/${{ github.repository }}/playwright:v1.59.1-noble
+      # `--ipc=host` per Playwright's container guidance
+      # (https://playwright.dev/docs/docker). WebKit's multi-process
+      # architecture needs a larger shared-memory region than GH
+      # Actions' default 64 MB; without it the helper processes die
+      # immediately and `browserContext.newPage` rejects with "Target
+      # page, context or browser has been closed". Chromium tolerates
+      # the default; WebKit doesn't.
+      options: --ipc=host
     env:
       # The image pre-installs chromium to /ms-playwright, but GH Actions
       # overrides $HOME to /github/home inside containers so Playwright's
