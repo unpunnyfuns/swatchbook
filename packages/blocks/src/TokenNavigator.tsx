@@ -548,18 +548,24 @@ function TreeNodeRow({
       aria-expanded={isOpen}
       tabIndex={isFocused ? 0 : -1}
       onFocus={() => onFocusPath(node.path)}
-      // Click handler on the `<li>` itself — not the inner row div — so
-      // synthetic clicks targeting the treeitem element (Storybook play
-      // tests, `userEvent.click(li)`) still toggle. The inner div is
-      // layout-only; clicks on its descendants bubble up here.
-      onClick={() => {
-        onFocusPath(node.path);
-        onToggle(node.path);
-      }}
       data-path={node.path}
       data-testid="token-navigator-group"
     >
-      <div className="sb-token-navigator__group-row">
+      {/*
+        Click handler on the inner row div, not the <li>. Nested
+        treeitems are DOM descendants of their parent <li>, so a
+        click on a child row would bubble through each ancestor
+        <li>'s onClick. The row div is a SIBLING of the nested
+        <ul>, so child rows never bubble through it.
+      */}
+      <div
+        className="sb-token-navigator__group-row"
+        data-testid="token-navigator-group-row"
+        onClick={() => {
+          onFocusPath(node.path);
+          onToggle(node.path);
+        }}
+      >
         <span className="sb-token-navigator__caret" aria-hidden>
           {isOpen ? '▾' : '▸'}
         </span>
@@ -609,16 +615,19 @@ function LeafRow({
       role="treeitem"
       tabIndex={isFocused ? 0 : -1}
       onFocus={() => onFocusPath(node.path)}
-      // Click on the `<li>` itself for the same reason as group rows —
-      // see TreeNodeRow.
-      onClick={() => {
-        onFocusPath(node.path);
-        onLeafClick(node.path);
-      }}
       data-path={node.path}
       data-testid="token-navigator-leaf"
     >
-      <div className="sb-token-navigator__leaf-row">
+      {/* Click handler on the inner row div for the same reason as
+          group rows — see TreeNodeRow. */}
+      <div
+        className="sb-token-navigator__leaf-row"
+        data-testid="token-navigator-leaf-row"
+        onClick={() => {
+          onFocusPath(node.path);
+          onLeafClick(node.path);
+        }}
+      >
         <span className="sb-token-navigator__caret" aria-hidden>
           •
         </span>

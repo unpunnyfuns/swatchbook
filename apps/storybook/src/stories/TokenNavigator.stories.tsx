@@ -84,15 +84,26 @@ export const ExpandAndOpenDetail = meta.story({
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
+    // The treeitem <li> owns focus + keyboard nav (roving tabindex);
+    // the inner row div owns click. Clicks must target the row div —
+    // synthetic clicks dispatched at the <li> directly bubble up but
+    // never propagate down to its child row.
+    const groupRowFor = (path: string): HTMLElement | null => {
+      const group = canvasElement.querySelector<HTMLElement>(
+        `[data-testid="token-navigator-group"][data-path="${path}"]`,
+      );
+      return group?.querySelector<HTMLElement>('[data-testid="token-navigator-group-row"]') ?? null;
+    };
+
     // 1. Expand the "color" top-level group.
     await waitFor(() => {
-      const group = canvasElement.querySelector<HTMLElement>('[data-path="color"]');
-      if (!group) throw new Error('color group not in DOM yet');
+      const row = groupRowFor('color');
+      if (!row) throw new Error('color group not in DOM yet');
     });
-    const colorGroup = canvasElement.querySelector<HTMLElement>('[data-path="color"]');
-    expect(colorGroup).not.toBeNull();
-    if (!colorGroup) return;
-    await userEvent.click(colorGroup);
+    const colorRow = groupRowFor('color');
+    expect(colorRow).not.toBeNull();
+    if (!colorRow) return;
+    await userEvent.click(colorRow);
 
     // 2. Recursively drill into the first unexpanded color.* group until a
     // leaf appears. The reference fixture nests color tokens several levels
@@ -104,12 +115,23 @@ export const ExpandAndOpenDetail = meta.story({
         ...canvasElement.querySelectorAll<HTMLElement>(
           '[data-testid="token-navigator-group"][data-path^="color."]',
         ),
-      ].find(
-        (el) =>
-          el.getAttribute('aria-expanded') !== 'true' && el.textContent?.trim().startsWith('▸'),
-      );
+      ].find((el) => el.getAttribute('aria-expanded') !== 'true');
       if (!collapsed) return;
-      await userEvent.click(collapsed);
+      const targetPath = collapsed.getAttribute('data-path');
+      const row = collapsed.querySelector<HTMLElement>('[data-testid="token-navigator-group-row"]');
+      if (!row) throw new Error(`no row for ${targetPath}`);
+      await userEvent.click(row);
+      // Wait for the click's state update to land in the DOM before the
+      // next iteration queries — otherwise we can pick the same group
+      // again on the next pass and toggle it shut.
+      await waitFor(() => {
+        const after = canvasElement.querySelector<HTMLElement>(
+          `[data-testid="token-navigator-group"][data-path="${targetPath}"]`,
+        );
+        if (after?.getAttribute('aria-expanded') !== 'true') {
+          throw new Error('expansion did not land');
+        }
+      });
       await drill(depth - 1);
     };
     await drill(8);
@@ -121,7 +143,10 @@ export const ExpandAndOpenDetail = meta.story({
     const leaf = canvasElement.querySelector<HTMLElement>('[data-testid="token-navigator-leaf"]');
     expect(leaf).not.toBeNull();
     if (!leaf) return;
-    await userEvent.click(leaf);
+    const leafRow = leaf.querySelector<HTMLElement>('[data-testid="token-navigator-leaf-row"]');
+    expect(leafRow).not.toBeNull();
+    if (!leafRow) return;
+    await userEvent.click(leafRow);
 
     // 3. Overlay opens.
     const overlay = await canvas.findByTestId('token-navigator-overlay');
@@ -153,7 +178,10 @@ export const OnSelectFires = meta.story({
     if (!leaf) return;
     const leafPath = leaf.getAttribute('data-path');
     expect(leafPath).toBeTruthy();
-    await userEvent.click(leaf);
+    const leafRow = leaf.querySelector<HTMLElement>('[data-testid="token-navigator-leaf-row"]');
+    expect(leafRow).not.toBeNull();
+    if (!leafRow) return;
+    await userEvent.click(leafRow);
 
     const record = canvasElement.querySelector<HTMLElement>('[data-testid="custom-select-record"]');
     expect(record?.textContent).toContain(leafPath ?? '');
@@ -177,31 +205,27 @@ export const FocusVisibleRow = meta.story({
       const group = canvasElement.querySelector('[data-testid="token-navigator-group"]');
       if (!group) throw new Error('navigator did not render any group rows');
     });
-    const isFocusedTreeitem = (): boolean => {
-      const el = document.activeElement;
-      return (
-        el instanceof HTMLElement &&
-        canvasElement.contains(el) &&
-        (el.classList.contains('sb-token-navigator__group-row') ||
-          el.classList.contains('sb-token-navigator__leaf-row'))
-      );
-    };
-    const tabUntilTreeitem = async (remaining: number): Promise<void> => {
-      if (isFocusedTreeitem() || remaining <= 0) return;
-      await userEvent.tab();
-      await tabUntilTreeitem(remaining - 1);
-    };
-    await tabUntilTreeitem(30);
+    // Seed focus on the search input (always tabbable, always present),
+    // then Tab once. The next stop is the single treeitem holding the
+    // roving tabindex=0. Going via Tab — rather than `.focus()` —
+    // matters: `:focus-visible` is keyboard-only by design, so a
+    // programmatic focus may not paint the outline in Blink.
+    const search = canvasElement.querySelector<HTMLInputElement>(
+      '[data-testid="token-navigator-search"]',
+    );
+    expect(search, 'search input must render so Tab traversal has a known anchor').not.toBeNull();
+    if (!search) return;
+    search.focus();
+    await userEvent.tab();
+
     const focused = document.activeElement;
     if (
       !(focused instanceof HTMLElement) ||
-      !(
-        focused.classList.contains('sb-token-navigator__group-row') ||
-        focused.classList.contains('sb-token-navigator__leaf-row')
-      )
+      focused.tagName !== 'LI' ||
+      focused.getAttribute('role') !== 'treeitem'
     ) {
       throw new Error(
-        `expected a navigator row to receive keyboard focus; got ${focused?.tagName}`,
+        `expected first Tab after search input to focus the roving treeitem <li>; got ${focused?.tagName}`,
       );
     }
     const computed = getComputedStyle(focused);

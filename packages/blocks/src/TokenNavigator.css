@@ -51,8 +51,14 @@
   font-size: 12px;
 }
 
-.sb-token-navigator__group-row:focus-visible,
-.sb-token-navigator__leaf-row:focus-visible {
+/*
+ * Focus ring targets the <li role="treeitem"> directly — that's the
+ * focusable element under the WAI-ARIA tree pattern, not the inner
+ * row div. `:focus-visible` keeps the ring keyboard-only so mouse
+ * clicks don't paint a permanent border.
+ */
+.sb-token-navigator__tree li[role='treeitem']:focus-visible,
+.sb-token-navigator__nested li[role='treeitem']:focus-visible {
   outline: 2px solid var(--swatchbook-accent-bg, #1d4ed8);
   outline-offset: 1px;
 }
