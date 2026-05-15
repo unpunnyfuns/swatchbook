@@ -1,4 +1,5 @@
 import Color from 'colorjs.io';
+import type { ColorValue } from '#/internal/composite-types.ts';
 
 /**
  * Color display formats understood by {@link formatColor}.
@@ -73,20 +74,20 @@ export function formatColor(
 
 function coerce(value: unknown): NormalizedColor | null {
   if (!value || typeof value !== 'object') return null;
-  const v = value as Record<string, unknown>;
-  const colorSpace = typeof v['colorSpace'] === 'string' ? (v['colorSpace'] as string) : undefined;
-  const components = Array.isArray(v['components'])
-    ? (v['components'] as (number | null)[])
-    : Array.isArray(v['channels'])
-      ? (v['channels'] as (number | null)[])
+  const v = value as ColorValue;
+  const colorSpace = typeof v.colorSpace === 'string' ? v.colorSpace : undefined;
+  const components = Array.isArray(v.components)
+    ? (v.components as (number | null)[])
+    : Array.isArray(v.channels)
+      ? (v.channels as (number | null)[])
       : undefined;
   if (!colorSpace || !components) {
-    if (typeof v['hex'] === 'string') {
-      return { colorSpace: 'srgb', components: hexToComponents(v['hex'] as string) };
+    if (typeof v.hex === 'string') {
+      return { colorSpace: 'srgb', components: hexToComponents(v.hex) };
     }
     return null;
   }
-  const alpha = typeof v['alpha'] === 'number' ? (v['alpha'] as number) : undefined;
+  const alpha = typeof v.alpha === 'number' ? v.alpha : undefined;
   const hex = typeof v['hex'] === 'string' ? (v['hex'] as string) : undefined;
   return {
     colorSpace,

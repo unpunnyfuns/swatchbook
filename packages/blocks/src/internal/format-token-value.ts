@@ -1,5 +1,10 @@
 import type { VirtualTokenListingShape } from '#/contexts.ts';
 import { type ColorFormat, formatColor } from '#/format-color.ts';
+import type {
+  BorderValue,
+  DashedStrokeStyleValue,
+  ShadowLayer,
+} from '#/internal/composite-types.ts';
 
 /**
  * Single-line display string for any DTCG token `$value`. Prefers
@@ -86,7 +91,7 @@ function formatCubicBezier(v: unknown): string {
 function formatStrokeStyle(v: unknown): string {
   if (typeof v === 'string') return v;
   if (v && typeof v === 'object') {
-    const s = v as { dashArray?: unknown; lineCap?: unknown };
+    const s = v as DashedStrokeStyleValue;
     const parts: string[] = ['dashed'];
     if (Array.isArray(s.dashArray)) {
       parts.push(s.dashArray.map((n) => formatDimension(n)).join(' '));
@@ -101,15 +106,15 @@ function formatShadow(v: unknown, colorFormat: ColorFormat): string {
   const layers = Array.isArray(v) ? v : [v];
   const parts = layers.map((layer) => {
     if (!layer || typeof layer !== 'object') return formatUnknown(layer);
-    const s = layer as Record<string, unknown>;
+    const s = layer as ShadowLayer;
     const pieces = [
-      formatDimension(s['offsetX']),
-      formatDimension(s['offsetY']),
-      formatDimension(s['blur']),
-      formatDimension(s['spread']),
-      formatColor(s['color'], colorFormat).value,
+      formatDimension(s.offsetX),
+      formatDimension(s.offsetY),
+      formatDimension(s.blur),
+      formatDimension(s.spread),
+      formatColor(s.color, colorFormat).value,
     ].filter((p) => p !== '');
-    if (s['inset']) pieces.push('inset');
+    if (s.inset) pieces.push('inset');
     return pieces.join(' ');
   });
   return parts.join(', ');
@@ -117,10 +122,10 @@ function formatShadow(v: unknown, colorFormat: ColorFormat): string {
 
 function formatBorder(v: unknown, colorFormat: ColorFormat): string {
   if (!v || typeof v !== 'object') return formatUnknown(v);
-  const b = v as Record<string, unknown>;
-  const width = formatDimension(b['width']);
-  const style = formatPrimitive(b['style']);
-  const color = formatColor(b['color'], colorFormat).value;
+  const b = v as BorderValue;
+  const width = formatDimension(b.width);
+  const style = formatPrimitive(b.style);
+  const color = formatColor(b.color, colorFormat).value;
   return [width, style, color].filter((p) => p !== '').join(' ');
 }
 
