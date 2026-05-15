@@ -1,5 +1,7 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.51.1
+
 ## 0.51.0
 
 ### Minor Changes
