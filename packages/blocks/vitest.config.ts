@@ -32,6 +32,12 @@ export default defineConfig({
       // options.
       instances: [{ browser: 'chromium' }, { browser: 'firefox' }, { browser: 'webkit' }],
       headless: true,
+      // `isolate: false` reuses one browser/context across test files.
+      // CI diagnostic (PR #762 run 25944927450) proved WebKit itself
+      // launches + newPage + cleanup correctly, but vitest-browser-
+      // playwright's per-file isolation cycle trips it. Reusing context
+      // sidesteps the churn. Chromium + Firefox tolerate either mode.
+      isolate: false,
     },
   },
 });

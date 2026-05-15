@@ -43,9 +43,11 @@ export default defineConfig({
           browser: {
             enabled: true,
             provider: playwright(),
-            // Same three-engine matrix as blocks — see that config.
+            // Same three-engine matrix as blocks — see that config for
+            // the WebKit + `isolate: false` rationale.
             instances: [{ browser: 'chromium' }, { browser: 'firefox' }, { browser: 'webkit' }],
             headless: true,
+            isolate: false,
           },
         },
       },
