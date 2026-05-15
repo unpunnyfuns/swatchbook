@@ -24,13 +24,13 @@ export default defineConfig({
     browser: {
       enabled: true,
       provider: playwright(),
-      // Cross-engine matrix — Blink (chromium) + Gecko (firefox). WebKit
-      // is deliberately omitted: it crashes on `newPage` in the pinned
-      // Playwright container, likely a missing system dep or an
-      // interaction with the `HOME=/root` workaround we need for
-      // Firefox. Local dev still gets WebKit if it's installed, but CI
-      // shouldn't fail on container quirks unrelated to the code under
-      // test. Tracked in a follow-up issue.
+      // Cross-engine matrix — Blink + Gecko. WebKit deferred (see #754):
+      // the binary launches cleanly in this container (CI diagnostic in
+      // PR #762 run 25944927450 confirmed bare `webkit.launch().newPage()`
+      // works), but `@vitest/browser-playwright` 4.1.4's per-file harness
+      // setup hits "Target page, context or browser has been closed"
+      // regardless of `--ipc=host` or `isolate: false`. Library-side
+      // integration issue rather than anything we own.
       instances: [{ browser: 'chromium' }, { browser: 'firefox' }],
       headless: true,
     },

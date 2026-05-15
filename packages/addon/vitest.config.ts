@@ -43,8 +43,8 @@ export default defineConfig({
           browser: {
             enabled: true,
             provider: playwright(),
-            // Same matrix as blocks (chromium + firefox; webkit
-            // omitted for container reasons — see that config).
+            // Same two-engine matrix as blocks (WebKit deferred — see
+            // that config for the rationale).
             instances: [{ browser: 'chromium' }, { browser: 'firefox' }],
             headless: true,
           },
