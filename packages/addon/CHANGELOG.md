@@ -1,5 +1,14 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.51.1
+
+### Patch Changes
+
+- 9da2687: Ship root-level `manager.js`, `preset.js`, `preview.js` shims alongside the existing `package.json#exports` subpath entries. Tools that resolve addon entrypoints by joining filenames onto the package directory — bypassing `exports` — now find the entry files without ceremony. Storybook 10.x, which resolves via `exports`, is unaffected.
+  - @unpunnyfuns/swatchbook-core@0.51.1
+  - @unpunnyfuns/swatchbook-blocks@0.51.1
+  - @unpunnyfuns/swatchbook-switcher@0.51.1
+
 ## 0.51.0
 
 ### Patch Changes
