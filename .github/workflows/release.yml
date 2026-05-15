@@ -74,6 +74,73 @@ jobs:
           # short-lived publish token at publish time.
           NPM_CONFIG_PROVENANCE: true
 
+      # Post-publish verification — catches silent partial publishes.
+      #
+      # Failure mode this guards against: `changeset publish` reports
+      # success even if a member of the fixed group never made it to npm
+      # (e.g. its `dist/` was never built because the release script's
+      # turbo filter omitted it, as happened for `integrations` pre-0.50).
+      # The action's `published` output is true if ANY package shipped,
+      # so this is the only place that asserts the fixed group is whole.
+      #
+      # For each fixed-group package, ask npm whether
+      # `<pkg>@<version>` resolves. Any miss fails the workflow with a
+      # punch-list of which packages are unpublished, so the release can
+      # be re-run (idempotent) or the missing package bootstrapped.
+      - name: Verify fixed-group publish completeness
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          NPM_REGISTRY: https://registry.npmjs.org
+        run: |
+          set -e
+          version=$(jq -r .version packages/core/package.json)
+          if [ -z "$version" ] || [ "$version" = "null" ]; then
+            echo "Could not read packages/core/package.json#version — aborting verification."
+            exit 1
+          fi
+
+          echo "Verifying fixed group at v$version on npm…"
+
+          missing=()
+          # npm propagates new versions through its CDN within a few seconds
+          # but not always instantly; give each lookup a couple of retries
+          # before declaring it missing.
+          for pkg in \
+            @unpunnyfuns/swatchbook-core \
+            @unpunnyfuns/swatchbook-addon \
+            @unpunnyfuns/swatchbook-blocks \
+            @unpunnyfuns/swatchbook-switcher \
+            @unpunnyfuns/swatchbook-integrations \
+            @unpunnyfuns/swatchbook-mcp; do
+            ok=""
+            for attempt in 1 2 3 4 5; do
+              published=$(npm view "$pkg@$version" version --registry "$NPM_REGISTRY" 2>/dev/null || true)
+              if [ "$published" = "$version" ]; then
+                ok="yes"
+                echo "  ✓ $pkg@$version"
+                break
+              fi
+              sleep 5
+            done
+            if [ -z "$ok" ]; then
+              echo "  ✗ $pkg@$version not found on npm"
+              missing+=("$pkg")
+            fi
+          done
+
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo ""
+            echo "Fixed-group publish is incomplete — missing on npm:"
+            for pkg in "${missing[@]}"; do
+              echo "  - $pkg@$version"
+            done
+            echo ""
+            echo "Re-running the release workflow will re-attempt publish for any package not yet on npm (idempotent for already-shipped versions)."
+            exit 1
+          fi
+
+          echo "All six fixed-group packages confirmed at v$version."
+
       # The action opens the Version Packages PR with a static title
       # ("chore(release): version packages") and a body that leads with a
       # "This PR was opened by the Changesets release GitHub action…"

@@ -22,7 +22,7 @@
     "mcp:inspect": "turbo run inspect --filter=@unpunnyfuns/swatchbook-mcp",
     "changeset": "changeset",
     "version": "changeset version && node scripts/snapshot-docs-version.mjs",
-    "release": "turbo run build --filter=@unpunnyfuns/swatchbook-core --filter=@unpunnyfuns/swatchbook-addon --filter=@unpunnyfuns/swatchbook-blocks && changeset publish"
+    "release": "turbo run build --filter=@unpunnyfuns/swatchbook-core --filter=@unpunnyfuns/swatchbook-addon --filter=@unpunnyfuns/swatchbook-blocks --filter=@unpunnyfuns/swatchbook-switcher --filter=@unpunnyfuns/swatchbook-integrations --filter=@unpunnyfuns/swatchbook-mcp && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
