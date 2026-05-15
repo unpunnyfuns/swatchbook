@@ -96,6 +96,37 @@ it('records sourceFiles for every file pulled through $ref', async () => {
   expect(resolverPath).toBeDefined();
 });
 
+it('resolves a `config.resolver` bare package specifier through the consumer cwd node_modules', async () => {
+  // Stage a fake token package at node_modules/@swatchbook-test/tokens/.
+  // No `exports` field: Node falls back to legacy subpath resolution so
+  // `@swatchbook-test/tokens/resolver.json` maps to the file on disk.
+  writeJSON('node_modules/@swatchbook-test/tokens/package.json', {
+    name: '@swatchbook-test/tokens',
+    version: '0.0.0',
+  });
+  writeJSON('node_modules/@swatchbook-test/tokens/tokens.json', {
+    color: { red: { $type: 'color', $value: { colorSpace: 'srgb', components: [1, 0, 0] } } },
+  });
+  writeJSON('node_modules/@swatchbook-test/tokens/resolver.json', {
+    $schema: 'https://www.designtokens.org/TR/2025.10/resolver/',
+    version: '2025.10',
+    sets: { main: { sources: [{ $ref: './tokens.json' }] } },
+    resolutionOrder: [{ $ref: '#/sets/main' }],
+  });
+  const project = await loadProject(
+    { resolver: '@swatchbook-test/tokens/resolver.json', default: {} },
+    workspace,
+  );
+  expect(project.permutations.length).toBeGreaterThan(0);
+  expect(project.diagnostics.some((d) => d.severity === 'error')).toBe(false);
+});
+
+it('surfaces a clear error when a bare-specifier resolver is not installed', async () => {
+  await expect(
+    loadProject({ resolver: '@nope/not-installed/resolver.json', default: {} }, workspace),
+  ).rejects.toThrow(/not-installed|Cannot find/);
+});
+
 it('surfaces a warn diagnostic when a modifier has no default and no contexts', async () => {
   writeJSON('tokens.json', {
     color: { red: { $type: 'color', $value: { colorSpace: 'srgb', components: [1, 0, 0] } } },
