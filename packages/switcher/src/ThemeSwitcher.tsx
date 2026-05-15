@@ -51,8 +51,14 @@ export function ThemeSwitcher({
   footer,
 }: ThemeSwitcherProps): ReactElement {
   return (
+    // `role="group"` + `aria-label` — the switcher is a settings panel
+    // (presets, per-axis selectors, color-format pills), not a command
+    // menu. WAI-ARIA `menu` would require `menuitem`-rolled children plus
+    // a roving tabindex; the actual content is a panel of independent
+    // controls each of which already exposes its own role + state.
     <div
-      role="menu"
+      role="group"
+      aria-label="Swatchbook controls"
       tabIndex={-1}
       className="sb-switcher"
       onKeyDown={onKeyDown}
