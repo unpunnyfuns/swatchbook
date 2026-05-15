@@ -102,6 +102,31 @@ jobs:
           cp -RL --update=none /ms-playwright/. "$HOME/.cache/ms-playwright/" || true
           ls "$HOME/.cache/ms-playwright" | head
 
+      - name: Diagnose WebKit launch (temporary)
+        shell: bash
+        run: |
+          set +e
+          DEBUG=pw:browser* node -e "
+            const { webkit } = require('playwright');
+            (async () => {
+              try {
+                const browser = await webkit.launch({ headless: true });
+                console.log('webkit launched OK');
+                const ctx = await browser.newContext();
+                const page = await ctx.newPage();
+                console.log('newPage OK');
+                await page.close();
+                await ctx.close();
+                await browser.close();
+                console.log('cleanup OK');
+              } catch (e) {
+                console.error('WEBKIT FAILED:', e && e.stack || e);
+                process.exit(0); // never fail the build on this diagnostic
+              }
+            })();
+          " 2>&1 | sed -n '1,200p'
+          echo "(diagnostic exit; build continues regardless)"
+
       - name: Lint / format / typecheck / test / build
         id: checks
         # Container image's default shell is `sh` (dash), which has no
