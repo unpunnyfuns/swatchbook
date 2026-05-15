@@ -1,4 +1,6 @@
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { isAbsolute, resolve as resolvePath } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { defineConfig as defineTerrazzoConfig, loadResolver, parse } from '@terrazzo/parser';
@@ -26,6 +28,40 @@ export interface ResolverLoadResult {
   /** Retained Terrazzo parse output for downstream plugin emission. */
   parserInput?: ParserInput;
   diagnostics: Diagnostic[];
+}
+
+/**
+ * Resolve a `config.resolver` value to an absolute file path.
+ *
+ * Resolution order:
+ *
+ * 1. Absolute paths pass through unchanged.
+ * 2. Explicit relative paths (`./resolver.json`, `../config/resolver.json`)
+ *    resolve against `cwd`.
+ * 3. Anything else first tries `cwd`-relative on disk — preserves the
+ *    legacy "`resolver.json` in the project root" form — and falls back
+ *    to `node_modules` resolution when that file isn't present. Token
+ *    packages can ship a resolver that consumers reference directly
+ *    (`@scope/pkg/resolver.json`) without copying it into their tree.
+ *
+ * The `createRequire` anchor doesn't need to exist on disk — it only
+ * fixes the starting point for the `node_modules` walk.
+ */
+function resolveResolverInput(resolverPath: string, cwd: string): string {
+  if (isAbsolute(resolverPath)) return resolverPath;
+  if (resolverPath.startsWith('.')) return resolvePath(cwd, resolverPath);
+
+  const cwdRelative = resolvePath(cwd, resolverPath);
+  if (existsSync(cwdRelative)) return cwdRelative;
+
+  const require = createRequire(resolvePath(cwd, '__swatchbook_resolver__'));
+  try {
+    return require.resolve(resolverPath);
+  } catch {
+    throw new Error(
+      `swatchbook: could not resolve config.resolver "${resolverPath}". Tried "${cwdRelative}" on disk and node_modules under "${cwd}".`,
+    );
+  }
 }
 
 /**
@@ -62,7 +98,7 @@ export async function loadResolverPermutations(
   let loaded: Awaited<ReturnType<typeof loadResolver>> | undefined;
   let resolverAbsolute: string | undefined;
   if (resolverPath) {
-    resolverAbsolute = isAbsolute(resolverPath) ? resolverPath : resolvePath(cwd, resolverPath);
+    resolverAbsolute = resolveResolverInput(resolverPath, cwd);
     // `loadResolver` expects the resolver file alone as input and fetches
     // referenced token files via `req`. Passing tokens up front triggers
     // "Resolver must be the only input" errors.
