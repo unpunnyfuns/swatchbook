@@ -54,7 +54,10 @@
     "#/*": "./src/*"
   },
   "files": [
-    "dist"
+    "dist",
+    "manager.js",
+    "preset.js",
+    "preview.js"
   ],
   "sideEffects": [
     "./dist/preview.mjs"
