@@ -61,6 +61,52 @@ export const DimensionsOnly = meta.story({
  * users get an "I am here" indicator. Chromatic skips this one — the
  * focus state is asserted via computed style, not pixels.
  */
+/**
+ * Search-input interaction — type a substring and the visible row set
+ * narrows to matching paths. Closes the "TokenTable — only render
+ * smoke, no search/sort play" gap from #704. The component-level
+ * coverage in `packages/blocks/test/token-table.test.tsx` already
+ * tests the underlying logic; this play function verifies the same
+ * contract end-to-end through the actual Storybook preview pipeline
+ * (decorator → snapshot → block render → user input).
+ */
+export const SearchFilters = meta.story({
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async ({ canvasElement }) => {
+    await assertTableRenders(canvasElement);
+    const search = canvasElement.querySelector<HTMLInputElement>(
+      '[data-testid="token-table-search"]',
+    );
+    if (!search) throw new Error('search input missing');
+
+    const visibleRowCount = (): number =>
+      canvasElement.querySelectorAll<HTMLElement>('[data-testid="token-table-row"]').length;
+    const before = visibleRowCount();
+    expect(before, 'table should have multiple rows before filtering').toBeGreaterThan(2);
+
+    await userEvent.type(search, 'surface');
+    await waitFor(() => {
+      const visible = canvasElement.querySelectorAll<HTMLElement>(
+        '[data-testid="token-table-row"]',
+      );
+      expect(visible.length, 'search should narrow row count').toBeLessThan(before);
+      expect(visible.length, 'at least one row matches "surface"').toBeGreaterThan(0);
+      for (const row of visible) {
+        expect(row.getAttribute('data-path') ?? '').toContain('surface');
+      }
+    });
+
+    // Clear and verify it un-narrows. `userEvent.clear` would be cleaner
+    // but isn't on every userEvent flavor; triple-click + delete is the
+    // portable form.
+    await userEvent.tripleClick(search);
+    await userEvent.keyboard('{Delete}');
+    await waitFor(() => {
+      expect(visibleRowCount()).toBe(before);
+    });
+  },
+});
+
 export const FocusVisibleRow = meta.story({
   parameters: { chromatic: { disableSnapshot: true } },
   play: async ({ canvasElement }) => {
