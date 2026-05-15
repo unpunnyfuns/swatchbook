@@ -29,6 +29,12 @@ jobs:
       # default lookup ($HOME/.cache/ms-playwright) misses. Point it at
       # the image's install dir explicitly.
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      # Firefox refuses to launch when $HOME isn't owned by the current
+      # user, and `/github/home` hits exactly that case. Playwright's
+      # own error message names this workaround verbatim. Setting it at
+      # the job level so the bridge step's `$HOME/.cache/ms-playwright`
+      # mirror and vitest-browser-playwright's lookup agree.
+      HOME: /root
     permissions:
       contents: read
       actions: write
@@ -64,6 +70,29 @@ jobs:
             turbo-${{ matrix.node }}-
 
       - run: pnpm install --frozen-lockfile
+
+      # `@vitest/browser-playwright` queries the default Playwright cache
+      # (`$HOME/.cache/ms-playwright`) at launch and does not honor the
+      # image's `PLAYWRIGHT_BROWSERS_PATH=/ms-playwright`, so the pre-installed
+      # binaries at `/ms-playwright` go unused for our vitest-browser-mode
+      # component tests in `packages/{blocks,addon}`. `@storybook/addon-vitest`
+      # in `apps/storybook` resolves its own path and is unaffected.
+      #
+      # Hard-link the image's chromium-headless-shell directory into the
+      # default path so vitest finds it without a fresh download. Cheap (a
+      # few directory entries) and version-stable: bumping the playwright
+      # image and the `playwright` devDep in lockstep keeps the binary
+      # version matched to what vitest-browser-playwright expects.
+      - name: Bridge image's Playwright binaries to vitest-browser default path
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.cache/ms-playwright"
+          # Mirror every `<browser>-<rev>/` dir from /ms-playwright (image
+          # pre-install) into the default location. `-L` follows the
+          # symlinks the image may use; `--update=none` preserves any
+          # existing destinations (portable form of the deprecated `-n`).
+          cp -RL --update=none /ms-playwright/. "$HOME/.cache/ms-playwright/" || true
+          ls "$HOME/.cache/ms-playwright" | head
 
       - name: Lint / format / typecheck / test / build
         id: checks

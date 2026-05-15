@@ -53,7 +53,8 @@ Update this section when state genuinely shifts. See GitHub milestones for per-i
 - **Package manager:** pnpm@10.33.0 (workspaces); Turborepo orchestration. `uuid` pinned to `^14` via root pnpm overrides (transitively from `webpack-dev-server → sockjs`; clears GHSA-w5hq-g745-h8pq).
 - **Code style:** functional, avoid classes/singletons. No CSS-in-JS. No inline end-of-line comments.
 - **Lint/format:** `oxlint` + `oxfmt`. Never `npx biome`.
-- **Tests:** Vitest everywhere. Storybook Test (via `@storybook/addon-vitest`) for interaction tests in `apps/storybook`.
+- **Tests:** Vitest everywhere. Storybook Test (via `@storybook/addon-vitest`) for story-level interaction tests in `apps/storybook`.
+  - **No jsdom.** Component-level tests in `packages/{blocks,addon}/test/` run in real Chromium via vitest's browser mode (`@vitest/browser-playwright` provider). Same `describe / it / expect` shape as any vitest file; same `@testing-library/react` API; the difference is `userEvent.tab()` actually advances the live tab order instead of relying on a handler's imperative `.focus()` to fake it. jsdom's keyboard / focus / pointer / layout / scroll simulation is partial enough that tests written against it end up testing the test author's model of the browser, not the browser itself — banned outright. Use `@vitest/browser/context`'s `userEvent` over `@testing-library/user-event` for browser-mode tests.
 - **Test structure: flat.** Each `it` reads top-to-bottom without scrolling up.
   - **No nested `describe`.** One `describe` per file at most. Split files instead of nesting.
   - **No `beforeEach`** for cosmetic shared setup. Inline `setup()` helper per test.

@@ -30,3 +30,5 @@ apps/docs/src/tokens.snapshot.json
 *.log
 npm-debug.log*
 pnpm-debug.log*
+.vitest-attachments/
+__screenshots__/
