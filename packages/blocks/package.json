@@ -1,6 +1,6 @@
 {
   "name": "@unpunnyfuns/swatchbook-blocks",
-  "version": "0.51.1",
+  "version": "0.52.0",
   "description": "Storybook MDX doc blocks for DTCG design tokens — TokenTable, ColorPalette, TypographyScale, TokenDetail.",
   "license": "MIT",
   "author": "unpunnyfuns <unpunnyfuns@gmail.com>",

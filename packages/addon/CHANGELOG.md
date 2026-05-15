@@ -1,5 +1,55 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.52.0
+
+### Patch Changes
+
+- 27b3f69: A11y polish (first slice of #707):
+
+  - **`@unpunnyfuns/swatchbook-addon` toolbar trigger** — adds `aria-haspopup="dialog"` + `aria-expanded` to the popover button so screen readers announce the disclosure state. (`aria-controls` is omitted because Storybook's `WithTooltipPure` portals the popover with a dynamically-generated id we can't anchor to.)
+  - **`@unpunnyfuns/swatchbook-switcher` root** — switches `role="menu"` → `role="group"` with `aria-label="Swatchbook controls"`. The switcher is a settings panel (presets, axis selectors, color-format pills), not a command menu — ARIA `menu` would require `menuitem`-rolled children plus a roving tabindex, and the actual content is a panel of independent controls each of which exposes its own role + state.
+
+  No visual changes. Pure assistive-tech announcement improvements.
+
+- ac436d1: Add unit coverage for `useToken`, `dataAttr`, and `ColorFormatSelector`. Brings the addon's direct test surface from 16 → 30 tests; sets up the jsdom + Testing Library scaffold (vitest config + virtual-module stub) the package didn't have before. `preview.tsx` and `manager.tsx` stay covered by Storybook play-functions — their integration shape (DOM mount, ambient module imports, Storybook channel comms) makes meaningful unit tests cost more than they return. No behavior changes.
+- 9e9f635: Align the public export surface with the reference docs ahead of v1.0.
+
+  **Retracted from `@unpunnyfuns/swatchbook-core`** (no first-party consumers, removed from the package's public surface):
+
+  - `emitTypes`, `emitCss`, `EmitCssOptions`
+  - `emitViaTerrazzo`, `EmitViaTerrazzoOptions`, `EmitSelectionEntry`, `EmittedFile`
+  - `dataAttr`
+
+  `projectCss` stays public — it has real first-party consumers and is now documented in the [core reference](https://unpunnyfuns.github.io/swatchbook/reference/core). For production-platform emission, use Terrazzo's CLI directly.
+
+  **Newly documented surface** (no API change, just docs that catch up to reality):
+
+  - core: `projectCss`, `analyzeAxisVariance`, `CHROME_ROLES`, `DEFAULT_CHROME_MAP`, `ChromeRole`, `AxisVarianceResult`, `VarianceKind`, `ResolvedPermutation`, `TokenMap`, `ListedToken`, `DiagnosticSeverity`, `ParserInput`
+  - addon: `AddonOptions` typed shape; phantom `GLOBAL_KEY` removed from the exported-constants example
+
+- 00a1bf7: Consolidate parallel type definitions: `@unpunnyfuns/swatchbook-blocks`'s `VirtualAxisShape` / `VirtualPermutationShape` / `VirtualDiagnosticShape` / `VirtualPresetShape` are now type-aliases of core's authoritative `Axis` / `Permutation` / `Diagnostic` / `Preset`. Internal `VirtualAxisLike` / `VirtualPermutationLike` helpers in blocks removed; core's types are used directly.
+
+  Two array fields on core's types tighten to `readonly` so the existing immutable usage flows through cleanly:
+
+  - `Axis.contexts: readonly string[]` (was `string[]`)
+  - `Permutation.sources: readonly string[]` (was `string[]`)
+
+  No first-party site mutates either array; consumers who treated them as immutable already match the tightened contract.
+
+  Side cleanups while we were in here:
+
+  - New `cssVarAsNumber` helper in blocks centralises the `var(--…)` → `CSSProperties.fontWeight` / `lineHeight` pattern. The four scattered `as unknown as number` casts are gone.
+  - New `SwatchbookGlobals` / `StoryParameters` types in addon narrow the Storybook globals + parameters bags around the keys the addon actually owns. Eliminates seven `Record<string, unknown>` casts in `preview.tsx`.
+
+  Composite-token shape narrowing (DTCG `$type` discriminated unions over shadow / border / gradient / typography) deferred to a follow-up — touches a different surface and is its own surgery.
+
+- Updated dependencies [27b3f69]
+- Updated dependencies [9e9f635]
+- Updated dependencies [00a1bf7]
+  - @unpunnyfuns/swatchbook-switcher@0.52.0
+  - @unpunnyfuns/swatchbook-core@0.52.0
+  - @unpunnyfuns/swatchbook-blocks@0.52.0
+
 ## 0.51.1
 
 ### Patch Changes
