@@ -5,7 +5,7 @@ import type {
   SwatchbookIntegration,
   TokenListingByPath,
 } from '@unpunnyfuns/swatchbook-core';
-import { loadProject, projectCss } from '@unpunnyfuns/swatchbook-core';
+import { emitAxisProjectedCss, loadProject, projectCss } from '@unpunnyfuns/swatchbook-core';
 import { type FSWatcher, watch as fsWatch } from 'node:fs';
 import { basename, dirname, isAbsolute, resolve as resolvePath } from 'node:path';
 import picomatch from 'picomatch';
@@ -23,6 +23,13 @@ export interface SwatchbookPluginOptions {
   cwd: string;
   /** Display-side integrations — each may contribute a virtual module the preview imports. */
   integrations?: readonly SwatchbookIntegration[];
+  /**
+   * Which CSS emitter to use for the virtual module's `css` export.
+   * `'cartesian'` (default) calls `projectCss`; `'projected'` calls
+   * `emitAxisProjectedCss`. See `AddonOptions.emitMode` for the
+   * trade-offs.
+   */
+  emitMode?: 'cartesian' | 'projected';
 }
 
 /** `\0<virtualId>` — Vite convention for resolved virtual module IDs. */
@@ -40,13 +47,14 @@ export function swatchbookTokensPlugin({
   config,
   cwd,
   integrations = [],
+  emitMode = 'cartesian',
 }: SwatchbookPluginOptions): Plugin {
   let project: Project | undefined;
   let css = '';
 
   async function refresh(): Promise<void> {
     project = await loadProject(config, cwd);
-    css = projectCss(project);
+    css = composeProjectCss(project, emitMode);
   }
 
   /** Map of resolvedId → integration, indexed once. */
@@ -251,6 +259,27 @@ export function collectWatchPaths(
 function resolveFromCwd(p: string, cwd: string): string {
   if (isAbsolute(p)) return p;
   return resolvePath(cwd, p);
+}
+
+/**
+ * Dispatch between the two emitters based on `emitMode`. Extracted from
+ * the plugin's closure so unit tests can verify the dispatch without
+ * booting Vite — pass a project, get back the matching CSS string.
+ *
+ * @internal Exported for tests; not part of the public API.
+ */
+export function composeProjectCss(
+  project: Project,
+  emitMode: 'cartesian' | 'projected' = 'cartesian',
+): string {
+  if (emitMode === 'projected') {
+    return emitAxisProjectedCss(project.permutations, project.permutationsResolved, {
+      prefix: project.config.cssVarPrefix ?? '',
+      axes: project.axes,
+      chrome: project.chrome,
+    });
+  }
+  return projectCss(project);
 }
 
 type SlimListedToken = Pick<

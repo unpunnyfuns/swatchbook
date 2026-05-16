@@ -1,12 +1,15 @@
-// Pragmatic exception: `collectWatchPaths` is not part of the public API,
-// but its real "surface" is Vite HMR file-watching behavior — which is
-// impractical to test end-to-end (tmp fs, watcher events, dev server).
-// Testing the pure function directly catches the common regressions
-// (brace expansion, absolute paths, sourceFiles fallback) at a fraction
-// of the cost.
+// Pragmatic exception: `collectWatchPaths` and `composeProjectCss` are
+// not part of the public API, but their real "surface" is plugin
+// behavior — Vite HMR file-watching + virtual-module CSS emission —
+// which is impractical to test end-to-end (tmp fs, watcher events,
+// dev server). Testing the pure functions directly catches the common
+// regressions at a fraction of the cost.
+import { dirname } from 'node:path';
+import { loadProject } from '@unpunnyfuns/swatchbook-core';
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
-import { describe, expect, it } from 'vitest';
-import { collectWatchPaths } from '#/virtual/plugin.ts';
+import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { collectWatchPaths, composeProjectCss } from '#/virtual/plugin.ts';
 
 const CWD = '/project';
 
@@ -68,5 +71,51 @@ describe('collectWatchPaths', () => {
     const config: Config = { tokens: ['/abs/tokens/**/*.json'] };
     const paths = collectWatchPaths(config, undefined, CWD);
     expect(paths).toEqual(['/abs/tokens']);
+  });
+});
+
+describe('composeProjectCss', () => {
+  // beforeAll: loadProject takes ~1s; every test reads from the same project.
+  let fixtureProject: Project;
+  beforeAll(async () => {
+    fixtureProject = await loadProject(
+      {
+        tokens: ['tokens/**/*.json'],
+        resolver: resolverPath,
+        default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+        cssVarPrefix: 'sb',
+      },
+      dirname(tokensDir),
+    );
+  }, 30_000);
+
+  it('defaults to cartesian — compound selectors present for the fixture', () => {
+    const css = composeProjectCss(fixtureProject);
+    // Cartesian emission produces compound selectors when the project
+    // has multiple axes (mode × brand × contrast in the fixture).
+    expect(css).toMatch(/\[data-sb-[^\]]+\]\[data-sb-/);
+  });
+
+  it("'projected' emits single-attribute selectors only — no compound selectors anywhere", () => {
+    const css = composeProjectCss(fixtureProject, 'projected');
+    expect(css).not.toMatch(/\[data-sb-[^\]]+\]\[data-sb-/);
+    // And the projection-specific single-attribute selector IS present.
+    expect(css).toMatch(/\[data-sb-mode="Dark"\]/);
+  });
+
+  it("'projected' produces a stylesheet noticeably smaller than 'cartesian' for the fixture", () => {
+    const cartesian = composeProjectCss(fixtureProject, 'cartesian');
+    const projected = composeProjectCss(fixtureProject, 'projected');
+    // Same size relationship the core unit test pins — projection is
+    // under 1/3 the cartesian length for the reference fixture.
+    expect(projected.length).toBeLessThan(cartesian.length / 3);
+  });
+
+  it('both modes emit the chrome alias block at the tail', () => {
+    for (const mode of ['cartesian', 'projected'] as const) {
+      const css = composeProjectCss(fixtureProject, mode);
+      expect(css).toContain('--swatchbook-surface-default:');
+      expect(css).toContain('color-scheme: light dark;');
+    }
   });
 });

@@ -18,4 +18,21 @@ export interface AddonOptions {
    * tool-agnostic; integrations ship as separate packages.
    */
   integrations?: SwatchbookIntegration[];
+  /**
+   * Which CSS emitter populates the `css` export of
+   * `virtual:swatchbook/tokens`:
+   *
+   * - `'cartesian'` (default) — one block per cartesian tuple, scoped
+   *   by compound `[data-<axis>="<ctx>"][data-…]` selectors. Correct
+   *   for projects with joint-variant tokens (values that depend on
+   *   the combination of two axes, not each independently).
+   * - `'projected'` — one `:root` baseline plus one
+   *   `[data-<axis>="<ctx>"]` block per non-default cell, deltas only.
+   *   Composes via CSS cascade at runtime. Output size scales with
+   *   `Σ(axes × non-default contexts × varying tokens)` instead of
+   *   the cartesian product. Requires orthogonal axes — see
+   *   `emitAxisProjectedCss`'s doc-comment for the joint-variance
+   *   limitation.
+   */
+  emitMode?: 'cartesian' | 'projected';
 }
