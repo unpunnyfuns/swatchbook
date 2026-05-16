@@ -1,23 +1,26 @@
 /**
- * Axis-projection emitter (`emitAxisProjectedCss`) — a size-optimization
- * alternative to the cartesian `emitCss` / `projectCss` path, valid
- * only for resolver projects whose modifiers are orthogonal. Tests pin:
+ * Smart axis-projection emitter (`emitAxisProjectedCss`) — routes each
+ * token through `analyzeProjectVariance` and emits via projection
+ * (single-attribute selectors) for orthogonal tokens or compound
+ * selectors for joint-variant tokens. Spec-faithful for any
+ * DTCG-compliant resolver.
+ *
+ * Tests pin:
  *
  *   - the structural shape (one `:root` baseline + one single-attribute
- *     cell selector per non-default `(axis, context)`),
- *   - the delta optimization (cells only emit declarations that differ
- *     from the baseline value at the same var name),
- *   - the size win vs. cartesian emission for the same project, and
- *   - the joint-variance lossiness — when a fixture authors non-orthogonal
- *     modifiers (which the DTCG resolver spec explicitly permits, per
- *     the Primer "Pirate" light-only example in the rationale doc), this
- *     emitter silently produces the projection-implied value rather than
- *     the spec-correct joint resolution. Cartesian (`emitCss`) is the
- *     spec-faithful default; this emitter is opt-in for orthogonal cases.
- *     The joint-variance test below pins the lossy behavior so future
- *     changes don't quietly "fix" it without an explicit decision —
- *     the planned smart emitter (analysis + per-token routing) is the
- *     intended fix path.
+ *     cell selector per non-default `(axis, context)` that has touching
+ *     tokens; plus compound `[data-A][data-B]` blocks for joint cases),
+ *   - the per-axis cells contain only tokens that axis actually touches
+ *     (variance-driven filter — palette primitives never appear in any
+ *     cell),
+ *   - joint-variant tokens get compound selectors with the
+ *     cartesian-correct value (the fixture's `color.accent.fg` Dark+High
+ *     interaction is the canonical case),
+ *   - smart dedup: cells re-emit values when ANY axis touches the var,
+ *     so cascade resolves orthogonal-after-probe tokens correctly
+ *     (Brand A's `accent.fg = white` IS now emitted because Dark
+ *     touches the var, even though it matches baseline),
+ *   - the chrome alias block is emitted unchanged at the tail.
  */
 import { beforeAll, expect, it } from 'vitest';
 import { emitAxisProjectedCss } from '#/css-axis-projected';
@@ -32,35 +35,14 @@ beforeAll(async () => {
   project = await loadWithPrefix('sb');
 }, 30_000);
 
-it('emits one :root baseline block plus N cell blocks (Σ axes × non-default contexts), plus the trailing chrome block', () => {
-  const css = emitAxisProjectedCss(project.permutations, project.permutationsResolved, {
-    axes: project.axes,
-    prefix: project.config.cssVarPrefix ?? '',
-    chrome: project.chrome,
-  });
+it('emits one :root baseline block plus N per-axis cell blocks plus the trailing chrome block, with optional compound joint blocks in between', () => {
+  const css = emitAxisProjectedCss(project);
   // Two `:root {` openings — baseline + chrome trailer.
   const rootMatches = css.match(/(^|\n):root\s*\{/g) ?? [];
   expect(rootMatches).toHaveLength(2);
   // The fixture has three axes with one non-default context each
-  // (Dark, Brand A, High) → three cell blocks.
-  const expectedCells = project.axes.reduce((n, a) => n + (a.contexts.length - 1), 0);
-  const cellMatches = css.match(/\n\[data-sb-[^\]]+\]\s*\{/g) ?? [];
-  expect(cellMatches).toHaveLength(expectedCells);
-});
-
-it('uses single-attribute selectors only — no compound [data-…][data-…] selectors anywhere', () => {
-  const css = emitAxisProjectedCss(project.permutations, project.permutationsResolved, {
-    axes: project.axes,
-    prefix: project.config.cssVarPrefix ?? '',
-  });
-  expect(css).not.toMatch(/\[data-[^\]]+\]\[data-/);
-});
-
-it('emits per-axis cell selectors that match each non-default context', () => {
-  const css = emitAxisProjectedCss(project.permutations, project.permutationsResolved, {
-    axes: project.axes,
-    prefix: project.config.cssVarPrefix ?? '',
-  });
+  // (Dark, Brand A, High). Each axis cell block exists if any token
+  // touches that axis — for our fixture all three axes touch something.
   for (const axis of project.axes) {
     for (const ctx of axis.contexts) {
       if (ctx === axis.default) continue;
@@ -69,53 +51,67 @@ it('emits per-axis cell selectors that match each non-default context', () => {
   }
 });
 
-it("cell blocks carry only deltas — tokens unchanged from baseline don't appear in the cell", () => {
-  const css = emitAxisProjectedCss(project.permutations, project.permutationsResolved, {
-    axes: project.axes,
-    prefix: project.config.cssVarPrefix ?? '',
-  });
-  // The baseline declares the full token graph. Each cell should be a
-  // small fraction of that — mode-invariant primitives (palette, size,
-  // typography) belong in :root and stay out of the Dark cell.
-  const baseline = extractBlock(css, ':root');
-  const darkCell = extractBlock(css, '[data-sb-mode="Dark"]');
-  expect(baseline).toBeTruthy();
-  expect(darkCell).toBeTruthy();
-  const baselineVarCount = (baseline.match(/--sb-/g) ?? []).length;
-  const darkCellVarCount = (darkCell.match(/--sb-/g) ?? []).length;
-  expect(darkCellVarCount).toBeLessThan(baselineVarCount / 2);
+it('emits compound [data-A][data-B] blocks for joint-variant tokens (joint blocks contain the cartesian-correct value, not the projection-composed value)', () => {
+  const css = emitAxisProjectedCss(project);
+  // The fixture has joint variance on `color.accent.fg` between mode and
+  // contrast (Dark mode's `accessible.accent.fg = neutral.900` is aliased
+  // through by contrast=High; the joint Dark+High tuple resolves to dark
+  // text rather than the white that projection-composition of Light's
+  // accessible.accent would produce).
+  const compoundSelectors = css.match(/\[data-sb-[^\]]+\]\[data-sb-[^\]]+\]/g) ?? [];
+  expect(compoundSelectors.length).toBeGreaterThan(0);
+
+  // At least one compound block touches color.accent.fg.
+  const compoundBlocks = css.split('\n\n').filter((b) => /\[data-sb-[^\]]+\]\[data-sb-/.test(b));
+  const fgInAnyCompound = compoundBlocks.some((b) => /--sb-color-accent-fg:/.test(b));
+  expect(fgInAnyCompound).toBe(true);
 });
 
-it("mode-invariant tokens (size scale primitives) don't appear in the mode cell", () => {
-  const css = emitAxisProjectedCss(project.permutations, project.permutationsResolved, {
-    axes: project.axes,
-    prefix: project.config.cssVarPrefix ?? '',
-  });
+it('per-axis cell blocks include every touching token, even when that token matches baseline (smart dedup — needed so cascade lands on the right cell under joint composition)', () => {
+  const css = emitAxisProjectedCss(project);
+  // `color.accent.fg` is touched by brand (Brand A overrides it). Under
+  // smart dedup, Brand A's cell emits accent.fg = white even though
+  // it matches baseline white — so that under `<html data-sb-mode="Dark"
+  // data-sb-brand="Brand A">`, Brand A's white wins over Dark's
+  // overridden dark via source-order cascade.
+  const brandACell = extractBlock(css, '[data-sb-brand="Brand A"]');
+  expect(brandACell).toBeTruthy();
+  expect(brandACell).toMatch(/--sb-color-accent-fg:/);
+});
+
+it('baseline-only tokens (palette primitives) appear ONLY in :root, never in any cell', () => {
+  const css = emitAxisProjectedCss(project);
+  const baseline = extractBlock(css, ':root');
+  expect(baseline).toMatch(/--sb-color-palette-blue-500:/);
+  // No cell or compound block should redeclare a palette primitive.
+  const allCells = css.split('\n\n').filter((b) => b.startsWith('[data-sb-'));
+  for (const block of allCells) {
+    expect(block).not.toMatch(/--sb-color-palette-blue-500:/);
+  }
+});
+
+it("mode-invariant tokens (e.g. size primitives, font families) still don't appear in the mode cell — single-axis routing", () => {
+  const css = emitAxisProjectedCss(project);
   const darkCell = extractBlock(css, '[data-sb-mode="Dark"]');
   expect(darkCell).not.toMatch(/--sb-size-400:/);
   expect(darkCell).not.toMatch(/--sb-font-family-sans:/);
 });
 
-it('produces a stylesheet meaningfully smaller than the cartesian emission for the same project', () => {
-  const projected = emitAxisProjectedCss(project.permutations, project.permutationsResolved, {
-    axes: project.axes,
-    prefix: project.config.cssVarPrefix ?? '',
-    chrome: project.chrome,
-  });
+it('produces a stylesheet meaningfully smaller than cartesian emission for the fixture (size win preserved even with joint compound blocks)', () => {
+  const projected = emitAxisProjectedCss(project);
   const cartesian = projectCss(project);
-  // 8 cartesian tuples × full-token redeclaration vs baseline + 3 deltas
-  // → projected must be substantially smaller. Tightened past the
-  // half-size threshold to a third — large headroom for fixture growth
-  // while still catching regressions.
-  expect(projected.length).toBeLessThan(cartesian.length / 3);
+  // 8 cartesian tuples × full-token redeclaration vs baseline + ≤3
+  // per-axis cells + a handful of joint compound blocks for the few
+  // joint-variant tokens → projected must still be substantially
+  // smaller. Half-cartesian is the regression bound (used to be 1/3
+  // when projection was lossy and dropped declarations; smart emit
+  // adds back some bytes for re-emits + compound blocks but stays
+  // well under 1/2).
+  expect(projected.length).toBeLessThan(cartesian.length / 2);
 });
 
 it('terminates with a trailing newline + emits chrome aliases identically to emitCss', () => {
-  const css = emitAxisProjectedCss(project.permutations, project.permutationsResolved, {
-    axes: project.axes,
-    prefix: project.config.cssVarPrefix ?? '',
-    chrome: project.chrome,
-  });
+  const css = emitAxisProjectedCss(project);
   expect(css.endsWith('\n')).toBe(true);
   // The chrome aliases block is appended at the tail — same shape as
   // emitCss writes — so blocks that read `--swatchbook-*` resolve the
@@ -124,30 +120,19 @@ it('terminates with a trailing newline + emits chrome aliases identically to emi
   expect(css).toContain('--swatchbook-surface-default:');
 });
 
-it("joint-variance lossiness: a cell's declaration drops out when its value equals baseline, even if another cell overrides the same token — under runtime cascade, the other cell's value wins at the joint tuple instead of this cell's intent. Documents projection's lossiness for spec-compliant non-orthogonal fixtures (consumers wanting joint-variance correctness should use cartesian `emitCss`, or wait for the planned smart emitter).", () => {
-  const css = emitAxisProjectedCss(project.permutations, project.permutationsResolved, {
-    axes: project.axes,
-    prefix: project.config.cssVarPrefix ?? '',
+it('respects options.prefix when overriding the project default', () => {
+  const css = emitAxisProjectedCss(project, { prefix: 'ds' });
+  // Var prefix flips from `--sb-*` to `--ds-*` and so do the data attrs.
+  expect(css).toContain('--ds-color-');
+  expect(css).toContain('[data-ds-mode="Dark"]');
+  expect(css).not.toContain('--sb-color-');
+});
+
+it('respects options.chrome override (passes through to chrome alias block)', () => {
+  const css = emitAxisProjectedCss(project, {
+    chrome: { surfaceDefault: 'color.palette.blue.500' },
   });
-  // Pick a token whose Brand A cell happens to equal baseline. The
-  // fixture's `color.accent.fg` is `neutral.0` (white) in both
-  // baseline (Light + Default) and the Brand A cell, but Dark mode
-  // overrides it to a dark value. Under projection, the Brand A cell
-  // does NOT re-emit `color.accent.fg` (delta-vs-baseline is zero),
-  // so at runtime `<html data-sb-mode="Dark" data-sb-brand="Brand A">`
-  // resolves `accent.fg` to Dark's dark value — even though the
-  // cartesian-emitted joint tuple (per `resolutionOrder` last-wins)
-  // would have produced white. This is what the DTCG spec calls
-  // out: non-orthogonal modifiers are allowed (Primer's "Pirate"
-  // light-only theme is the rationale doc's canonical example), and
-  // tools that take liberties with the emit strategy can lose joint
-  // resolution. Cartesian `emitCss` is the spec-faithful default.
-  const brandACell = extractBlock(css, '[data-sb-brand="Brand A"]');
-  const darkCell = extractBlock(css, '[data-sb-mode="Dark"]');
-  expect(brandACell).toBeTruthy();
-  expect(darkCell).toBeTruthy();
-  // Brand A cell does NOT mention accent-fg (it equals baseline).
-  expect(brandACell).not.toMatch(/--sb-color-accent-fg:/);
-  // Dark cell DOES override accent-fg.
-  expect(darkCell).toMatch(/--sb-color-accent-fg:/);
+  expect(css).toContain(
+    '--swatchbook-surface-default: var(--sb-color-palette-blue-500);',
+  );
 });
