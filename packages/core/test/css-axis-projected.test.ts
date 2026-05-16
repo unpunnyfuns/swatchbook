@@ -1,19 +1,23 @@
 /**
- * Axis-projection emitter (`emitAxisProjectedCss`) — an opt-in alternative
- * to the cartesian `emitCss`/`projectCss` path. Tests pin:
+ * Axis-projection emitter (`emitAxisProjectedCss`) — a size-optimization
+ * alternative to the cartesian `emitCss` / `projectCss` path, valid
+ * only for resolver projects whose modifiers are orthogonal. Tests pin:
  *
  *   - the structural shape (one `:root` baseline + one single-attribute
  *     cell selector per non-default `(axis, context)`),
  *   - the delta optimization (cells only emit declarations that differ
  *     from the baseline value at the same var name),
  *   - the size win vs. cartesian emission for the same project, and
- *   - the documented joint-variance limitation — cells from independent
- *     axes compose via CSS cascade, so a token whose value at one cell
- *     happens to match baseline silently drops out, which can let the
- *     other axis's cell win at runtime under the joint tuple. This
- *     behavior is the orthogonality contract, not a bug; the test pins
- *     it so future changes don't quietly "fix" it without an explicit
- *     decision.
+ *   - the joint-variance lossiness — when a fixture authors non-orthogonal
+ *     modifiers (which the DTCG resolver spec explicitly permits, per
+ *     the Primer "Pirate" light-only example in the rationale doc), this
+ *     emitter silently produces the projection-implied value rather than
+ *     the spec-correct joint resolution. Cartesian (`emitCss`) is the
+ *     spec-faithful default; this emitter is opt-in for orthogonal cases.
+ *     The joint-variance test below pins the lossy behavior so future
+ *     changes don't quietly "fix" it without an explicit decision —
+ *     the planned smart emitter (analysis + per-token routing) is the
+ *     intended fix path.
  */
 import { beforeAll, expect, it } from 'vitest';
 import { emitAxisProjectedCss } from '#/css-axis-projected';
@@ -120,7 +124,7 @@ it('terminates with a trailing newline + emits chrome aliases identically to emi
   expect(css).toContain('--swatchbook-surface-default:');
 });
 
-it('joint-variance constraint: when an axis cell has the same value as baseline for a token, the declaration drops out — even if another axis cell sets that same token differently. This is the documented orthogonality contract.', () => {
+it("joint-variance lossiness: a cell's declaration drops out when its value equals baseline, even if another cell overrides the same token — under runtime cascade, the other cell's value wins at the joint tuple instead of this cell's intent. Documents projection's lossiness for spec-compliant non-orthogonal fixtures (consumers wanting joint-variance correctness should use cartesian `emitCss`, or wait for the planned smart emitter).", () => {
   const css = emitAxisProjectedCss(project.permutations, project.permutationsResolved, {
     axes: project.axes,
     prefix: project.config.cssVarPrefix ?? '',
@@ -132,7 +136,12 @@ it('joint-variance constraint: when an axis cell has the same value as baseline 
   // does NOT re-emit `color.accent.fg` (delta-vs-baseline is zero),
   // so at runtime `<html data-sb-mode="Dark" data-sb-brand="Brand A">`
   // resolves `accent.fg` to Dark's dark value — even though the
-  // cartesian-emitted joint tuple would have produced white.
+  // cartesian-emitted joint tuple (per `resolutionOrder` last-wins)
+  // would have produced white. This is what the DTCG spec calls
+  // out: non-orthogonal modifiers are allowed (Primer's "Pirate"
+  // light-only theme is the rationale doc's canonical example), and
+  // tools that take liberties with the emit strategy can lose joint
+  // resolution. Cartesian `emitCss` is the spec-faithful default.
   const brandACell = extractBlock(css, '[data-sb-brand="Brand A"]');
   const darkCell = extractBlock(css, '[data-sb-mode="Dark"]');
   expect(brandACell).toBeTruthy();
