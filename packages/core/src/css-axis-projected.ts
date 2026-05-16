@@ -25,34 +25,55 @@ export interface EmitAxisProjectedCssOptions {
 }
 
 /**
- * Emit a single concatenated stylesheet under the **axis-projection**
- * model: one `:root` block for the default tuple plus one
- * `[data-<prefix>-<axis>="<context>"] { … }` block per
- * `(axis, non-default context)` cell, containing only the declarations
- * whose values differ from baseline at that cell.
+ * Emit a single concatenated stylesheet as a **size optimization** for
+ * resolver projects whose modifiers are orthogonal: one `:root` block
+ * for the default tuple plus one `[data-<prefix>-<axis>="<context>"] { … }`
+ * block per `(axis, non-default context)` cell, containing only the
+ * declarations whose values differ from baseline at that cell.
  *
  * Output size scales with `Σ(axes × non-default contexts × varying
- * tokens)` instead of the cartesian product — bounded and small for
- * orthogonal axis projects.
+ * tokens)` instead of the cartesian product. Cells from different axes
+ * compose at runtime via the browser's CSS cascade.
  *
- * ## Orthogonality constraint
+ * ## When this is spec-faithful
  *
- * Axes must be orthogonal. A token whose value depends on the
- * *combination* of two axes (e.g. an alias whose resolution differs
+ * `emitCss` (the cartesian emitter) is what faithfully serializes the
+ * resolved tokens for any DTCG-compliant resolver — including ones with
+ * non-orthogonal modifiers. The DTCG Resolver Module 2025.10 (Final
+ * Community Group Report) explicitly permits non-orthogonal modifiers
+ * and resolves their conflicts via the `resolutionOrder` array
+ * (last write wins). GitHub Primer's "Pirate" theme, available only in
+ * light mode, is the rationale doc's canonical example — the spec
+ * endorses authoring of that shape.
+ *
+ * This emitter, by contrast, is a **lossy size optimization** that
+ * works correctly **only when modifiers are orthogonal** — i.e., when
+ * the resolved value of any token at any tuple is fully determined by
+ * stacking each axis's singleton effect, independent of the others.
+ * Joint-variant tokens (values that genuinely depend on the
+ * *combination* of two axes — e.g. an alias whose resolution differs
  * per `(brand, mode)` pair beyond what either singleton override
- * would produce) will render the projection-implied value at runtime,
- * not the true joint resolution. Document this as a usage constraint;
- * consumers that need joint precision should keep using `emitCss`.
+ * produces) will render the projection-implied value at runtime, not
+ * the spec-correct joint resolution.
+ *
+ * **Use this emitter when** you've confirmed your modifiers are
+ * orthogonal and want the size reduction. **Use `emitCss` when** any
+ * modifier joint-varies tokens, or when in doubt — cartesian is the
+ * spec-faithful default.
+ *
+ * A planned smart emitter folds projection + cartesian-fallback into
+ * one path (orthogonal tokens projected, joint-variant tokens emitted
+ * via compound selectors); once that ships this function may become
+ * its internal primitive rather than a standalone consumer surface.
  *
  * For single-axis projects (a synthetic `theme` axis, or a resolver
  * with one modifier), the cell selector uses the axis's actual name
  * — e.g. `[data-mode="Dark"]` — rather than the `theme` alias that
  * `emitCss` uses. Both forms are scope-equivalent on `<html>`.
  *
- * @internal Consumers should not depend on this function. The addon
- * may opt-in via a feature flag in a separate change; external
- * consumers driving their own build pipeline should use Terrazzo's
- * CLI against the DTCG sources directly.
+ * @internal Consumers should not depend on this function directly.
+ * External consumers driving their own build pipeline should use
+ * Terrazzo's CLI against the DTCG sources directly.
  */
 export function emitAxisProjectedCss(
   permutations: Permutation[],
