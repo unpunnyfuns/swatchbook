@@ -1,5 +1,23 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.53.0
+
+### Minor Changes
+
+- 3be6285: `TokenNavigator` now implements the full WAI-ARIA tree-view keyboard pattern. The `<li role="treeitem">` is the focusable element (roving tabindex — exactly one item carries `tabIndex=0`, the rest are `-1`); arrow keys traverse the visible tree (`Down`/`Up` walk the flattened list; `Right` expands a collapsed group or steps to the first child; `Left` collapses an expanded group or steps to the parent); `Home`/`End` jump to the first / last visible treeitem; `Enter`/`Space` activates a leaf or toggles a group. Previously focus lived on a nested `<div role="button">` and only Enter / Space worked.
+
+  Behavior visible to consumers:
+
+  - Tab into the tree lands on a single treeitem instead of cycling through every row.
+  - Keyboard-only users can now traverse and operate the tree without reaching for a pointer device.
+  - The DOM the consumer queries via `getAllByRole('treeitem')` is unchanged; existing component tests pass as-is.
+
+### Patch Changes
+
+- 6d0919f: Replace the `Record<string, unknown>` casts used to read DTCG composite `$value` shapes (`typography`, `border`, `transition`, `shadow`, `gradient`, `color`, `strokeStyle`) with named per-`$type` interfaces in a new `internal/composite-types.ts`. Sub-values stay `unknown` because each may be a primitive, an alias-resolved string, or a nested composite — the win is that typos in key reads (`fontFamlly`, `offstX`) now surface as compile errors instead of silent `undefined`s. 13 scattered casts collapse into 4 named imports. Internal refactor only; no behaviour change.
+- 33de453: `DetailOverlay` now implements the WAI-ARIA dialog pattern's focus management. Opening the overlay moves focus into the panel; Tab is trapped so it cycles through the panel's interactive descendants only; closing restores focus to whatever opened the overlay (typically the table row or tree item the user clicked). Previously focus could wander into the backgrounded page on Tab, and after dismissal the user landed at the top of the document.
+  - @unpunnyfuns/swatchbook-core@0.53.0
+
 ## 0.52.0
 
 ### Patch Changes

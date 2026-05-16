@@ -1,0 +1,65 @@
+{
+  "home": [
+    "intro",
+    "quickstart"
+  ],
+  "guides": [
+    "guides/authoring-doc-stories",
+    "guides/consuming-the-active-permutation",
+    {
+      "type": "category",
+      "label": "Integrations",
+      "link": {
+        "type": "doc",
+        "id": "guides/integrations/integrations"
+      },
+      "collapsed": false,
+      "items": [
+        "guides/integrations/tailwind",
+        "guides/integrations/css-in-js"
+      ]
+    },
+    "guides/sharing-terrazzo-options"
+  ],
+  "reference": [
+    {
+      "type": "category",
+      "label": "Packages",
+      "collapsed": false,
+      "items": [
+        "reference/addon",
+        "reference/core",
+        "reference/config",
+        "reference/switcher",
+        "reference/mcp"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Blocks",
+      "collapsed": false,
+      "items": [
+        "reference/blocks/blocks",
+        "reference/blocks/overview",
+        "reference/blocks/inspector",
+        "reference/blocks/samples",
+        "reference/blocks/utility",
+        "reference/blocks/hooks"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Model",
+      "collapsed": false,
+      "items": [
+        "reference/axes",
+        "reference/token-pipeline"
+      ]
+    }
+  ],
+  "developers": [
+    "developers/developers",
+    "developers/architecture",
+    "developers/sharp-corners"
+  ]
+}
