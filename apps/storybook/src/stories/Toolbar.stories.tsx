@@ -74,7 +74,6 @@ function ToolbarHarness(): ReactElement {
       <ThemeSwitcher
         axes={FIXTURE_AXES}
         presets={FIXTURE_PRESETS}
-        permutations={[]}
         activeTuple={activeTuple}
         defaults={FIXTURE_DEFAULTS}
         lastApplied={lastApplied}
