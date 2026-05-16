@@ -1,15 +1,13 @@
 import cx from 'clsx';
 import React, { type KeyboardEvent, type ReactElement } from 'react';
 import './ThemeSwitcher.css';
-import type { SwitcherAxis, SwitcherPreset, SwitcherPermutation } from '#/types.ts';
+import type { SwitcherAxis, SwitcherPreset } from '#/types.ts';
 
 export interface ThemeSwitcherProps {
   /** Project axes the UI renders one section per. */
   axes: readonly SwitcherAxis[];
   /** Saved preset snapshots rendered above the axes, if any. */
   presets?: readonly SwitcherPreset[];
-  /** Full permutation list — only consulted for the "modified since preset applied" dot. */
-  permutations?: readonly SwitcherPermutation[];
   /** Active axis tuple, keyed by axis name. */
   activeTuple: Readonly<Record<string, string>>;
   /** Default tuple used to fill in omitted preset axes. */
@@ -41,7 +39,6 @@ export interface ThemeSwitcherProps {
 export function ThemeSwitcher({
   axes,
   presets = [],
-  permutations = [],
   activeTuple,
   defaults,
   lastApplied,
@@ -69,7 +66,6 @@ export function ThemeSwitcher({
           <PresetsSection
             presets={presets}
             axes={axes}
-            permutations={permutations}
             defaults={defaults}
             activeTuple={activeTuple}
             lastApplied={lastApplied}
@@ -128,7 +124,6 @@ function OptionPill({ label, active, title, onClick, trailing }: OptionPillProps
 interface PresetsSectionProps {
   presets: readonly SwitcherPreset[];
   axes: readonly SwitcherAxis[];
-  permutations: readonly SwitcherPermutation[];
   defaults: Readonly<Record<string, string>>;
   activeTuple: Readonly<Record<string, string>>;
   lastApplied: string | null;

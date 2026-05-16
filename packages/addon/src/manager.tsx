@@ -6,7 +6,6 @@ import { addons, types, useGlobals, useStorybookApi } from 'storybook/manager-ap
 import {
   type InitPayload,
   type VirtualAxis as AxisEntry,
-  type VirtualPermutation as PermutationEntry,
   type VirtualPreset as PresetEntry,
 } from '#/channel-types.ts';
 import {
@@ -35,7 +34,6 @@ const h = React.createElement;
 
 const EMPTY_AXES: readonly AxisEntry[] = [];
 const EMPTY_PRESETS: readonly PresetEntry[] = [];
-const EMPTY_PERMUTATIONS: readonly PermutationEntry[] = [];
 
 /**
  * Root toolbar glyph — a split-circle ("yinyang") mark: a faint filled
@@ -106,7 +104,6 @@ function AxesToolbar(): ReactElement {
 
   const axes = payload?.axes ?? EMPTY_AXES;
   const presets = payload?.presets ?? EMPTY_PRESETS;
-  const permutations = payload?.permutations ?? EMPTY_PERMUTATIONS;
   const defaults = useMemo(() => defaultTupleFor(axes), [axes]);
   const [lastApplied, setLastApplied] = useState<string | null>(null);
   const globalTuple = globals[AXES_GLOBAL_KEY] as Record<string, string> | undefined;
@@ -247,7 +244,6 @@ function AxesToolbar(): ReactElement {
   const tooltipBody = h(ThemeSwitcher, {
     axes,
     presets,
-    permutations,
     activeTuple,
     defaults,
     lastApplied,

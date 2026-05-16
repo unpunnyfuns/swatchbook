@@ -18,8 +18,3 @@ export interface SwitcherPreset {
   axes: Partial<Record<string, string>>;
   description?: string;
 }
-
-export interface SwitcherPermutation {
-  name: string;
-  input: Record<string, string>;
-}
