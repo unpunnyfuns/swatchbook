@@ -1,0 +1,153 @@
+---
+id: addon
+title: Addon
+sidebar_position: 2
+---
+
+# Addon
+
+Published as `@unpunnyfuns/swatchbook-addon`. Storybook addon. Loads your config at build time via `@unpunnyfuns/swatchbook-core`, exposes the resolved graph as a virtual module, registers a preview decorator + manager toolbar, and ships a `useToken` hook. Block-side hooks (`useSwatchbookData`, `useActivePermutation`, `useActiveAxes`, `useColorFormat`) live in `@unpunnyfuns/swatchbook-blocks`.
+
+## Install
+
+```bash
+npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
+```
+
+This gives you the toolbar, preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `Diagnostics`, `SwatchbookProvider`, block-side hooks) live in `@unpunnyfuns/swatchbook-blocks` — install it alongside if you want them. See the [authoring guide](../guides/authoring-doc-stories.mdx) for MDX composition patterns.
+
+Peer requirements: Storybook 10.3+ on the Vite builder, React 18+.
+
+## Registration
+
+Register the addon in `main.ts#addons` with your config (inline `config` preferred; `configPath` also works — see the [config reference](./config.mdx)):
+
+```ts title=".storybook/main.ts"
+import { defineMain } from '@storybook/react-vite/node';
+
+export default defineMain({
+  framework: '@storybook/react-vite',
+  addons: [
+    {
+      name: '@unpunnyfuns/swatchbook-addon',
+      options: {
+        config: {
+          resolver: 'tokens/resolver.json',
+          cssVarPrefix: 'ds',
+        },
+      },
+    },
+  ],
+});
+```
+
+Then opt the preview into the addon's annotations (CSF Next factory) in `preview.ts`:
+
+```ts title=".storybook/preview.ts"
+import { definePreview } from '@storybook/react-vite';
+import swatchbookAddon from '@unpunnyfuns/swatchbook-addon';
+
+export default definePreview({
+  addons: [swatchbookAddon()],
+});
+```
+
+## What it registers
+
+- **Preview decorator** — reads the active axis tuple, writes `data-<prefix>-<axis>="<context>"` attributes (plus `data-<prefix>-theme="<composed id>"`) on `<html>` + story wrapper, mounts the per-theme CSS, emits `INIT_EVENT` to the manager. The prefix follows `cssVarPrefix` (default `swatch`).
+- **Toolbar tool** — a single Swatchbook `IconButton`. Clicking opens a popover containing preset pills, one dropdown per axis, and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`). Escape and outside-click close it.
+
+For a browsable tree + diagnostics surface, compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` on an MDX page — see the [authoring guide](../guides/authoring-doc-stories.mdx)'s dashboard example.
+
+## Globals
+
+| Key | Type | Purpose |
+| --- | --- | --- |
+| `swatchbookAxes` | `Record<string, string>` | Active tuple. Preferred input. |
+| `swatchbookTheme` | `string` | Composed permutation ID. Back-compat companion. |
+| `swatchbookColorFormat` | `'hex' \| 'rgb' \| 'hsl' \| 'oklch' \| 'raw'` | Display-only color format consumed by the blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`). Does **not** affect emitted CSS. Default `hex`. |
+
+The toolbar writes `swatchbookAxes` and `swatchbookTheme` in lockstep so legacy consumers keep working. `swatchbookColorFormat` is toggled from the color-format picker in the popover; `hex` falls back to space-separated `rgb()` (flagged with a ⚠ warning marker) for colors outside sRGB gamut.
+
+## Per-story overrides
+
+```ts
+export const DarkBrandA = meta.story({
+  parameters: {
+    swatchbook: {
+      axes: { mode: 'Dark', brand: 'Brand A' },
+    },
+  },
+});
+```
+
+`axes` is a tuple; omitted keys fall back to axis defaults. The legacy `theme: 'Composed Name'` form still works for single-axis projects.
+
+## Hooks
+
+The addon exposes exactly one hook, under `@unpunnyfuns/swatchbook-addon/hooks`.
+
+### `useToken(path)`
+
+Typed lookup. Returns `{ value, cssVar, type, description }` for the given path; reactive to axis changes.
+
+```tsx
+import { useToken } from '@unpunnyfuns/swatchbook-addon/hooks';
+
+function Brand() {
+  const accent = useToken('color.accent.bg');
+  return <span style={{ background: accent.cssVar }}>{accent.description}</span>;
+}
+```
+
+Paths autocomplete from the generated `.swatchbook/tokens.d.ts`. Add `"include": [".swatchbook/**/*.d.ts"]` to your consumer tsconfig.
+
+### Block-side hooks live in `@unpunnyfuns/swatchbook-blocks`
+
+`useSwatchbookData`, `useActivePermutation`, `useActiveAxes`, `useColorFormat`, and the contexts that back them (`SwatchbookContext`, `PermutationContext`, `AxesContext`, `ColorFormatContext`) are exported from `@unpunnyfuns/swatchbook-blocks` — see the [blocks reference](./blocks/index.mdx). They are **not** re-exported from the addon; import them from blocks.
+
+The preview decorator mounts a `SwatchbookProvider` (from blocks) that populates every context, so the hooks resolve wherever the addon is registered.
+
+## Exported constants
+
+```ts
+import {
+  ADDON_ID,
+  AXES_GLOBAL_KEY,
+  PARAM_KEY,
+  VIRTUAL_MODULE_ID,
+} from '@unpunnyfuns/swatchbook-addon';
+```
+
+Useful when wiring the addon into custom tooling or writing interaction tests that read the globals directly.
+
+## `AddonOptions`
+
+Typed shape of the `options` object passed to the Storybook `addons` entry — what the preset reads at preview start.
+
+```ts
+import type { AddonOptions } from '@unpunnyfuns/swatchbook-addon';
+
+interface AddonOptions {
+  /** Inline swatchbook config. Mutually exclusive with `configPath`. */
+  config?: Config;
+  /** Path to a config module, relative to the Storybook `configDir`. */
+  configPath?: string;
+  /**
+   * Display-side integrations plugged into the addon's Vite plugin.
+   * Each typically contributes a virtual module the preview imports
+   * (e.g. `virtual:swatchbook/tailwind.css`). The addon itself is
+   * tool-agnostic; integrations ship as separate packages.
+   */
+  integrations?: SwatchbookIntegration[];
+}
+```
+
+`Config` and `SwatchbookIntegration` come from [`@unpunnyfuns/swatchbook-core`](./core.mdx). See the [Registration](#registration) section above for a worked example, and the [Integrations guide](../guides/integrations/index.mdx) for `integrations` factories.
+
+## Do / don't
+
+- ✅ Use `useToken` for typed lookups when you need the resolved value at runtime (aria labels, conditional rendering).
+- ✅ Prefer `var(--…)` in CSS; `useToken().cssVar` gives you the right string programmatically.
+- ❌ Don't import from `virtual:swatchbook/tokens` directly in consumer code. Go through `useToken` / the panel / the doc blocks so the API stays stable.
+- ❌ Don't combine `parameters.swatchbook.theme` *and* the toolbar for the same story — the parameter wins and the toolbar change won't stick.
