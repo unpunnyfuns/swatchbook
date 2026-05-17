@@ -1,7 +1,7 @@
 import { dirname } from 'node:path';
 import { beforeAll, expect, it } from 'vitest';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
-import { projectCss } from '#/emit';
+import { emitAxisProjectedCss } from '#/css-axis-projected';
 import { loadProject } from '#/load';
 import { validateDisabledAxes } from '#/disabled-axes';
 import type { Axis, Project } from '#/types';
@@ -68,7 +68,7 @@ beforeAll(async () => {
     },
     fixtureCwd,
   );
-  css = projectCss(project);
+  css = emitAxisProjectedCss(project);
 }, 30_000);
 
 it('filters disabled axes out of Project.axes', () => {

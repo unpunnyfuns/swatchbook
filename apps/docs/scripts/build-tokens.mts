@@ -15,7 +15,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadProject, projectCss } from '@unpunnyfuns/swatchbook-core';
+import { emitAxisProjectedCss, loadProject } from '@unpunnyfuns/swatchbook-core';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const docsRoot = resolve(here, '..');
@@ -35,7 +35,7 @@ for (const diagnostic of project.diagnostics) {
   console.warn(`${tag} ${diagnostic.group}: ${diagnostic.message}`);
 }
 
-const rawCss = projectCss(project);
+const rawCss = emitAxisProjectedCss(project);
 
 /**
  * Rewrite swatchbook's emitter selectors so `mode` tracks Docusaurus's

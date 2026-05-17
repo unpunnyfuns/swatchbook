@@ -2,7 +2,7 @@ import { beforeAll, expect, it } from 'vitest';
 import { dirname } from 'node:path';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { CHROME_ROLES, DEFAULT_CHROME_MAP, validateChrome } from '#/chrome';
-import { projectCss } from '#/emit';
+import { emitAxisProjectedCss } from '#/css-axis-projected';
 import { loadProject } from '#/load';
 import type { Project, TokenMap } from '#/types';
 
@@ -96,8 +96,8 @@ it('loadProject surfaces a chrome diagnostic for dropped user entries', () => {
   expect(chromeDiags[0]?.message).toMatch(/unknown role "bogusRole"/);
 });
 
-it('projectCss emits every chrome role — user entry as var, others as literal defaults', () => {
-  const css = projectCss(project);
+it('emitAxisProjectedCss emits every chrome role — user entry as var, others as literal defaults', () => {
+  const css = emitAxisProjectedCss(project);
   const rootBlocks = css.split('\n\n').filter((b) => b.startsWith(':root {'));
   const chromeBlock = rootBlocks.find((b) => b.includes('--swatchbook-surface-default:'));
   expect(chromeBlock).toBeDefined();
@@ -111,7 +111,7 @@ it('projectCss emits every chrome role — user entry as var, others as literal 
   );
 });
 
-it('projectCss emits all ten roles even when chrome config is absent', async () => {
+it('emitAxisProjectedCss emits all ten roles even when chrome config is absent', async () => {
   const p = await loadProject(
     {
       tokens: ['tokens/**/*.json'],
@@ -121,7 +121,7 @@ it('projectCss emits all ten roles even when chrome config is absent', async () 
     },
     fixtureCwd,
   );
-  const css = projectCss(p);
+  const css = emitAxisProjectedCss(p);
   for (const role of CHROME_ROLES) {
     const varName = `--swatchbook-${role
       .replace(/([A-Z])/g, '-$1')
@@ -131,8 +131,8 @@ it('projectCss emits all ten roles even when chrome config is absent', async () 
   }
 });
 
-it('projectCss never prefixes chrome source vars with the project prefix', () => {
-  const css = projectCss(project);
+it('emitAxisProjectedCss never prefixes chrome source vars with the project prefix', () => {
+  const css = emitAxisProjectedCss(project);
   expect(css).not.toMatch(/--sb-swatchbook-/);
   expect(css).not.toMatch(/--sb-surface-default:\s*var\(/);
 });
