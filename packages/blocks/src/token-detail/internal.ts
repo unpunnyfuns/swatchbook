@@ -31,6 +31,13 @@ export interface TokenDetailData {
   resolved: Record<string, DetailToken>;
   cssVarPrefix: string;
   varianceByPath: VirtualVarianceByPathShape;
+  /**
+   * Pure-function accessor that composes the resolved tokens for any
+   * tuple of axis selections — used by the `AxisVariance` grid to
+   * read per-cell values without indexing `permutationsResolved` by
+   * a derived tuple name.
+   */
+  resolveAt: (tuple: Record<string, string>) => Record<string, DetailToken>;
 }
 
 export function useTokenDetailData(path: string): TokenDetailData {
@@ -44,6 +51,7 @@ export function useTokenDetailData(path: string): TokenDetailData {
     resolved,
     cssVarPrefix,
     varianceByPath,
+    resolveAt,
   } = project;
   const typedResolved = resolved as Record<string, DetailToken>;
   return {
@@ -57,5 +65,6 @@ export function useTokenDetailData(path: string): TokenDetailData {
     resolved: typedResolved,
     cssVarPrefix,
     varianceByPath,
+    resolveAt: resolveAt as (tuple: Record<string, string>) => Record<string, DetailToken>,
   };
 }

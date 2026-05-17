@@ -38,6 +38,10 @@
     "./fuzzy": {
       "types": "./dist/fuzzy.d.mts",
       "import": "./dist/fuzzy.mjs"
+    },
+    "./resolve-at": {
+      "types": "./dist/resolve-at.d.mts",
+      "import": "./dist/resolve-at.mjs"
     }
   },
   "imports": {
@@ -48,7 +52,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsdown src/index.ts src/variance.ts src/fuzzy.ts --format esm --dts --clean --sourcemap",
+    "build": "tsdown src/index.ts src/variance.ts src/fuzzy.ts src/resolve-at.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
