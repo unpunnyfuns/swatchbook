@@ -3,7 +3,7 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
 import type { ColorFormat } from '#/format-color.ts';
-import { dataAttr } from '#/internal/data-attr.ts';
+import { dataAttr } from '@unpunnyfuns/swatchbook-core/data-attr';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { type DetailToken, useTokenDetailData } from '#/token-detail/internal.ts';
 

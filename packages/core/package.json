@@ -38,6 +38,10 @@
     "./resolve-at": {
       "types": "./dist/resolve-at.d.mts",
       "import": "./dist/resolve-at.mjs"
+    },
+    "./data-attr": {
+      "types": "./dist/data-attr.d.mts",
+      "import": "./dist/data-attr.mjs"
     }
   },
   "imports": {
@@ -48,7 +52,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsdown src/index.ts src/fuzzy.ts src/resolve-at.ts --format esm --dts --clean --sourcemap",
+    "build": "tsdown src/index.ts src/fuzzy.ts src/resolve-at.ts src/data-attr.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
