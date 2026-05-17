@@ -79,12 +79,19 @@ export type JointOverrides = ReadonlyMap<string, JointOverride>;
  */
 export type ResolveAt = (tuple: Record<string, string>) => TokenMap;
 
-/** A single permutation of the resolver's modifier space — one entry per cartesian-product tuple. */
+/**
+ * @internal Loader-internal materialization of a singleton tuple
+ * (default tuple + per-axis non-default cells + presets). No longer
+ * surfaced on `Project`; kept here as the shape `normalize` /
+ * `loadResolverPermutations` / `loadLayeredPermutations` produce
+ * internally, consumed by the cells builder via a resolver callback
+ * and by emit-via-terrazzo's tuple selection.
+ */
 export interface Permutation {
   name: string;
   /** The resolver input tuple (e.g. `{ theme: 'Light' }` or `{ mode: 'Dark', brand: 'Brand A' }`). */
   input: Record<string, string>;
-  /** Reserved for future use. Empty for resolver mode. */
+  /** Source files this tuple was parsed from (layered loader populates; resolver mode leaves empty). */
   sources: readonly string[];
 }
 
@@ -236,8 +243,11 @@ export interface Diagnostic {
 }
 
 /**
- * Loaded swatchbook project. Permutations are eagerly resolved at load
- * time; use `resolvePermutation(project, name)` to fetch one.
+ * Loaded swatchbook project. Token data lives on `cells` (per-axis
+ * resolved `TokenMap`s, bounded by `Σ(axes × contexts)`) and
+ * `jointOverrides` (the partial-tuple divergences cells composition
+ * cannot reproduce). Read any tuple via `project.resolveAt(tuple)`;
+ * read the default-tuple snapshot via `project.defaultTokens`.
  */
 export interface Project {
   config: Config;
@@ -249,9 +259,9 @@ export interface Project {
    * read this to indicate that a modifier exists in the resolver but is
    * pinned to its default for this session.
    */
-  disabledAxes: string[];
+  disabledAxes: readonly string[];
   /** Validated + sanitized presets from `config.presets`. Empty if unset. */
-  presets: Preset[];
+  presets: readonly Preset[];
   /**
    * Validated chrome-alias map from `config.chrome`. Keys are swatchbook
    * block chrome paths; values are token paths that resolve in at least
@@ -259,11 +269,8 @@ export interface Project {
    * reported as diagnostics. Empty if the config doesn't supply any.
    */
   chrome: Record<string, string>;
-  permutations: Permutation[];
-  /** Eagerly-resolved tokens per permutation, keyed by `permutation.name`. */
-  permutationsResolved: Record<string, TokenMap>;
-  /** Default permutation's resolved tokens — convenience for global views. */
-  graph: TokenMap;
+  /** Resolved tokens at the project's default tuple. Convenience for global views. */
+  defaultTokens: TokenMap;
   /**
    * Per-axis resolved `TokenMap`s — `cells[axisName][contextName]` is
    * the resolved tokens for `{ ...defaultTuple, [axisName]: contextName }`.
@@ -356,8 +363,8 @@ export interface ParserInput {
 }
 
 /**
- * Serialize an axis tuple to the stable string ID used as a
- * `Permutation.name`, CSS data-attribute value, and cache key. Single-axis
+ * @internal Serialize an axis tuple to the stable string ID used as
+ * an internal cache key and the wire-format theme name. Single-axis
  * tuples stringify to the context value alone (`{ theme: 'Light' }` →
  * `"Light"`); multi-axis tuples join context values with ` · ` in
  * insertion order (`{ mode: 'Dark', brand: 'Brand A' }` → `"Dark · Brand A"`).

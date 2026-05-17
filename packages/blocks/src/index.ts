@@ -31,7 +31,6 @@ export {
   type VirtualAxisShape,
   type VirtualDiagnosticShape,
   type VirtualPresetShape,
-  type VirtualPermutationShape,
   type VirtualTokenListingShape,
   type VirtualTokenShape,
 } from '#/contexts.ts';
@@ -45,7 +44,6 @@ export type {
   VirtualAxis,
   VirtualDiagnostic,
   VirtualPreset,
-  VirtualPermutation,
   VirtualToken,
 } from '#/types.ts';
 export { MotionSample, type MotionSampleProps } from '#/motion-preview/MotionSample.tsx';

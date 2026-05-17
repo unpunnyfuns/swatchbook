@@ -79,24 +79,21 @@ it('carries the filtered-out names on Project.disabledAxes', () => {
   expect(project.disabledAxes).toEqual(['contrast']);
 });
 
-it('filters permutations down to the ones where disabled axes equal their default', () => {
-  // Singleton enumeration: 1 default tuple + 1 per non-default cell on
-  // each surviving axis (mode=Dark, brand=Brand A) = 3 permutations.
-  // All carry contrast=Normal (the pinned default).
-  expect(project.permutations.length).toBeGreaterThan(0);
-  for (const theme of project.permutations) {
-    expect(theme.input['contrast']).toBe('Normal');
-  }
+it('drops the disabled axis from the project axes list and defaultTuple', () => {
+  // Singleton enumeration over surviving axes: 1 default tuple + 1 per
+  // non-default cell on each surviving axis (mode=Dark, brand=Brand A) = 3.
+  expect(project.axes.map((a) => a.name)).not.toContain('contrast');
+  expect(project.defaultTuple).not.toHaveProperty('contrast');
 });
 
 it('emits CSS with no data-contrast selectors', () => {
   expect(css).not.toMatch(/data-contrast/);
 });
 
-it('keys permutationsResolved on the surviving theme names', () => {
-  const keys = Object.keys(project.permutationsResolved).toSorted();
-  const themeNames = project.permutations.map((t) => t.name).toSorted();
-  expect(keys).toEqual(themeNames);
+it('keeps cells keyed against the surviving axes only', () => {
+  const cellAxes = Object.keys(project.cells).toSorted();
+  const projectAxes = project.axes.map((a) => a.name).toSorted();
+  expect(cellAxes).toEqual(projectAxes);
 });
 
 it('surfaces a warn diagnostic when disabledAxes references an unknown axis', async () => {

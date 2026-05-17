@@ -83,11 +83,13 @@ describe('analyzeProjectVariance — reference fixture', () => {
     }
   });
 
-  it('returns a VarianceInfo for every token path present in any permutation', () => {
+  it('returns a VarianceInfo for every token path present in any cell', () => {
     // Sanity: the result map covers every token path the loader produced.
-    const allPaths = new Set<string>();
-    for (const tokens of Object.values(referenceProject.permutationsResolved)) {
-      for (const path of Object.keys(tokens)) allPaths.add(path);
+    const allPaths = new Set<string>(Object.keys(referenceProject.defaultTokens));
+    for (const axisCells of Object.values(referenceProject.cells)) {
+      for (const cell of Object.values(axisCells)) {
+        for (const path of Object.keys(cell)) allPaths.add(path);
+      }
     }
     for (const path of allPaths) {
       expect(variance.has(path), `missing variance info for ${path}`).toBe(true);

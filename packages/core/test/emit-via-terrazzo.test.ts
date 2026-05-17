@@ -41,13 +41,15 @@ it('runs extra Terrazzo plugins alongside plugin-css', async () => {
   expect(jsText).toContain('lineHeight');
 });
 
-it("selection 'permutations' (default) fans out to every cartesian tuple", async () => {
+it("selection 'permutations' (default) fans out to the singleton tuples + presets", async () => {
   const files = await emitViaTerrazzo(project, { cssOptions: { filename: 'tokens.css' } });
   const text = String(files.find((f) => f.filename === 'tokens.css')!.contents);
-  // Every theme.name should appear as an attribute-value fragment.
-  for (const theme of project.permutations) {
-    for (const [axisName, contextValue] of Object.entries(theme.input)) {
-      expect(text).toContain(`data-sb-${axisName}="${contextValue}"`);
+  // Every per-axis non-default context should appear as an attribute-value
+  // fragment in some block; the default tuple lands in `:root`.
+  for (const axis of project.axes) {
+    for (const ctx of axis.contexts) {
+      if (ctx === axis.default) continue;
+      expect(text).toContain(`data-sb-${axis.name}="${ctx}"`);
     }
   }
 });

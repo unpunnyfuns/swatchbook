@@ -52,7 +52,7 @@ it('loads a minimal valid resolver with a single set and no modifiers', async ()
     resolutionOrder: [{ $ref: '#/sets/main' }],
   });
   const project = await loadProject({ resolver: 'resolver.json', default: {} }, workspace);
-  expect(project.permutations.length).toBeGreaterThan(0);
+  expect(Object.keys(project.defaultTokens).length).toBeGreaterThan(0);
   expect(project.diagnostics.some((d) => d.severity === 'error')).toBe(false);
 });
 
@@ -76,7 +76,8 @@ it('loads a resolver with one modifier + two contexts (no override overlays)', a
   const axis = project.axes.find((a) => a.name === 'mode');
   expect(axis).toBeDefined();
   expect(axis?.contexts).toEqual(['Light', 'Dark']);
-  expect(project.permutations.length).toBe(2);
+  // Singletons: default tuple + 1 per non-default context = 2 cells on `mode`.
+  expect(Object.keys(project.cells['mode'] ?? {}).toSorted()).toEqual(['Dark', 'Light']);
 });
 
 it('records sourceFiles for every file pulled through $ref', async () => {
@@ -117,7 +118,7 @@ it('resolves a `config.resolver` bare package specifier through the consumer cwd
     { resolver: '@swatchbook-test/tokens/resolver.json', default: {} },
     workspace,
   );
-  expect(project.permutations.length).toBeGreaterThan(0);
+  expect(Object.keys(project.defaultTokens).length).toBeGreaterThan(0);
   expect(project.diagnostics.some((d) => d.severity === 'error')).toBe(false);
 });
 

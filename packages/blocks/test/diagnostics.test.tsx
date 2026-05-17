@@ -1,21 +1,21 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Diagnostics, type ProjectSnapshot, SwatchbookProvider } from '#/index.ts';
-import { withCellsShape } from './_snapshot-utils.ts';
 
 function makeSnapshot(diagnostics: ProjectSnapshot['diagnostics'] = []): ProjectSnapshot {
-  return withCellsShape({
+  return {
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
     disabledAxes: [],
     presets: [],
-    permutations: [{ name: 'Light', input: { theme: 'Light' }, sources: [] }],
-    permutationsResolved: { Light: {} },
+    cells: { theme: { Light: {} } },
+    jointOverrides: [],
+    defaultTuple: { theme: 'Light' },
     activePermutation: 'Light',
     activeAxes: { theme: 'Light' },
     cssVarPrefix: 'sb',
     diagnostics,
     css: '',
-  });
+  };
 }
 
 describe('Diagnostics', () => {

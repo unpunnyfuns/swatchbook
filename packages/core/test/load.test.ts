@@ -26,15 +26,15 @@ describe('loadProject — resolver mode', () => {
     // Bounded by `Σ(axes × contexts)`, independent of the cartesian
     // product. For the reference fixture (3 axes × 2 contexts each):
     // 1 default + 3 axes × 1 non-default ctx = 4 singletons.
-    expect(project.permutations.map((t) => t.name).toSorted()).toEqual(
-      [
-        'Light · Default · Normal',
-        'Dark · Default · Normal',
-        'Light · Brand A · Normal',
-        'Light · Default · High',
-      ].toSorted(),
-    );
-    expect(Object.keys(project.graph).length).toBeGreaterThan(100);
+    const expected = 1 + project.axes.reduce((acc, a) => acc + (a.contexts.length - 1), 0);
+    expect(expected).toBe(4);
+    // Cells carry the per-axis baseline + delta entries.
+    for (const axis of project.axes) {
+      for (const ctx of axis.contexts) {
+        expect(project.cells[axis.name]?.[ctx]).toBeDefined();
+      }
+    }
+    expect(Object.keys(project.defaultTokens).length).toBeGreaterThan(100);
   });
 
   it('surfaces resolver modifiers as independent axes', () => {

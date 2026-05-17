@@ -1,28 +1,30 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { type ProjectSnapshot, SwatchbookProvider, TokenNavigator } from '#/index.ts';
-import { withCellsShape } from './_snapshot-utils.ts';
 
 function makeSnapshot(): ProjectSnapshot {
-  return withCellsShape({
+  return {
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
     disabledAxes: [],
     presets: [],
-    permutations: [{ name: 'Light', input: { theme: 'Light' }, sources: [] }],
-    permutationsResolved: {
-      Light: {
-        'color.bg': { $type: 'color', $value: { hex: '#fff' } },
-        'color.fg': { $type: 'color', $value: { hex: '#111' } },
-        'color.palette.blue.500': { $type: 'color', $value: { hex: '#3b82f6' } },
-        'radius.sm': { $type: 'dimension', $value: { value: 4, unit: 'px' } },
+    cells: {
+      theme: {
+        Light: {
+          'color.bg': { $type: 'color', $value: { hex: '#fff' } },
+          'color.fg': { $type: 'color', $value: { hex: '#111' } },
+          'color.palette.blue.500': { $type: 'color', $value: { hex: '#3b82f6' } },
+          'radius.sm': { $type: 'dimension', $value: { value: 4, unit: 'px' } },
+        },
       },
     },
+    jointOverrides: [],
+    defaultTuple: { theme: 'Light' },
     activePermutation: 'Light',
     activeAxes: { theme: 'Light' },
     cssVarPrefix: 'sb',
     diagnostics: [],
     css: '',
-  });
+  };
 }
 
 describe('TokenNavigator', () => {

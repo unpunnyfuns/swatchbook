@@ -21,14 +21,16 @@ import {
 } from '#/types.ts';
 
 /**
- * Load a swatchbook project from a config. Permutations are eagerly
- * resolved, so downstream consumers can call
- * `resolvePermutation(project, name)` or read
- * `project.permutationsResolved[name]` directly without further I/O.
+ * Load a swatchbook project from a config. Read tokens at any axis
+ * tuple via `project.resolveAt(tuple)`; read the default-tuple
+ * snapshot directly via `project.defaultTokens`. The bounded
+ * primitives (`cells`, `jointOverrides`, `varianceByPath`) are
+ * pre-computed at load time so downstream consumers don't pay
+ * resolver costs.
  *
- * The `cwd` defaults to `process.cwd()`. All relative paths in `config`
- * (token globs, `resolver`, layered axis overlay globs) resolve against
- * this directory.
+ * The `cwd` defaults to `process.cwd()`. All relative paths in
+ * `config` (token globs, `resolver`, layered axis overlay globs)
+ * resolve against this directory.
  */
 /** Default `cssVarPrefix` applied when the config omits one. Namespaces
  * emitted vars (`--swatch-…`) and data attributes (`data-swatch-…`) so
@@ -65,16 +67,12 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     config.default,
     filteredAxes,
   );
-  // `project.graph` is the resolved TokenMap at the user-specified
-  // default tuple. Singleton enumeration always materializes the
-  // axes-defaults tuple; if `config.default` points somewhere else,
-  // resolve it on the side without grafting into
-  // `permutationsResolved` (which must stay keyed against the
-  // singleton enumeration to preserve the
-  // `keys == permutations.map(name)` invariant downstream consumers
-  // rely on).
+  // `project.defaultTokens` is the resolved TokenMap at the
+  // user-specified default tuple. Singleton enumeration always
+  // materializes the axes-defaults tuple; if `config.default` points
+  // somewhere else, resolve it on the side.
   const computedDefault = permutationID(defaultTuple);
-  const graph: TokenMap =
+  const defaultTokens: TokenMap =
     filteredResolved[computedDefault] ??
     (normalized.parserInput?.resolver
       ? normalized.parserInput.resolver.apply(defaultTuple)
@@ -164,7 +162,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
   // bounded surface, no cartesian dependency.
   const baselineForVariance = filteredAxes[0]
     ? (cells[filteredAxes[0].name]?.[filteredAxes[0].default] ?? {})
-    : graph;
+    : defaultTokens;
   const varianceByPath = buildVarianceByPath(
     filteredAxes,
     cells,
@@ -188,9 +186,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     disabledAxes,
     presets,
     chrome,
-    permutations: filteredPermutations,
-    permutationsResolved: filteredResolved,
-    graph,
+    defaultTokens,
     cells,
     jointOverrides,
     defaultTuple: projectDefaultTuple,

@@ -21,7 +21,7 @@ it('treats a .json path as a bare DTCG resolver, deriving cwd from its directory
   const { project, cwd, config } = await loadFromConfig(resolverPath);
   expect(config).toEqual({ resolver: resolverPath });
   expect(cwd).toBe(resolve(resolverPath, '..'));
-  expect(project.permutations.length).toBeGreaterThan(0);
+  expect(project.axes.length).toBeGreaterThan(0);
 });
 
 it('honors `cwdOverride` for bare JSON resolvers', async () => {
@@ -31,7 +31,7 @@ it('honors `cwdOverride` for bare JSON resolvers', async () => {
     expect(cwd).toBe(elsewhere);
     // The resolver itself is absolute, so loading still succeeds even though
     // cwd is unrelated — the override only affects relative-token resolution.
-    expect(project.permutations.length).toBeGreaterThan(0);
+    expect(project.axes.length).toBeGreaterThan(0);
   } finally {
     rmSync(elsewhere, { recursive: true, force: true });
   }

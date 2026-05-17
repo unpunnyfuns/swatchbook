@@ -5,6 +5,22 @@ import { loadFixtureProject, type McpTestHarness, startTestServer } from './_hel
 let project: Project;
 let mcp: McpTestHarness;
 
+/**
+ * Singleton enumeration count — same set the MCP server's
+ * `tupleByName` map carries (default + per-axis non-default cells +
+ * presets). Mirrors the formula in `packages/mcp/src/bin.ts`'s
+ * reload log so tests assert against the same shape.
+ */
+function singletonCount(p: Project): number {
+  return (
+    1 + p.axes.reduce((acc, a) => acc + Math.max(0, a.contexts.length - 1), 0) + p.presets.length
+  );
+}
+
+function defaultThemeName(p: Project): string {
+  return p.axes.map((a) => p.defaultTuple[a.name] ?? a.default).join(' · ');
+}
+
 // beforeAll is a perf escape hatch (per CLAUDE.md): the fixture + server
 // boot is ~1s, far too slow per-test. Tests here are read-only.
 beforeAll(async () => {
@@ -37,7 +53,7 @@ it('get_token: returns the alias chain and resolved value per permutation', asyn
   expect(result.type).toBe('color');
   // cssVar uses the project prefix and dot→dash substitution.
   expect(result.cssVar).toBe(`var(--sb-${ALIAS_TOKEN.replaceAll('.', '-')})`);
-  expect(Object.keys(result.perTheme).length).toBe(project.permutations.length);
+  expect(Object.keys(result.perTheme).length).toBe(singletonCount(project));
   // Every permutation entry carries a value; aliased ones name their target.
   for (const entry of Object.values(result.perTheme)) {
     expect(entry.value).toBeTruthy();
@@ -71,7 +87,7 @@ interface GetAliasChainResult {
 it('get_alias_chain: returns the forward chain per permutation for an alias token', async () => {
   const result = await mcp.callJson<GetAliasChainResult>('get_alias_chain', { path: ALIAS_TOKEN });
   expect(result.path).toBe(ALIAS_TOKEN);
-  expect(Object.keys(result.perTheme).length).toBe(project.permutations.length);
+  expect(Object.keys(result.perTheme).length).toBe(singletonCount(project));
   for (const entry of Object.values(result.perTheme)) {
     expect(entry.chain[0]).toBe(ALIAS_TOKEN);
     // Aliased tokens have at least one further hop; primitive variants would
@@ -156,7 +172,7 @@ interface SearchTokensResult {
 
 it('search_tokens: returns ranked fuzzy hits scoped to the default permutation', async () => {
   const result = await mcp.callJson<SearchTokensResult>('search_tokens', { query: 'surface' });
-  expect(result.theme).toBe(project.permutations[0]?.name);
+  expect(result.theme).toBe(defaultThemeName(project));
   expect(result.count).toBeGreaterThan(0);
   expect(result.count).toBe(result.hits.length);
   expect(result.truncated).toBe(false);

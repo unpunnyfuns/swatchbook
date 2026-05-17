@@ -142,7 +142,12 @@ async function main(): Promise<void> {
     async function reload(): Promise<void> {
       const { project: next } = await loadFromConfig(configAbsolute, args.cwd);
       server.setProject(next);
-      const themeCount = next.permutations.length;
+      // Same set the resolver loader's singleton enumeration produces:
+      // default tuple + per-axis non-default cells + presets.
+      const themeCount =
+        1 +
+        next.axes.reduce((acc, a) => acc + Math.max(0, a.contexts.length - 1), 0) +
+        next.presets.length;
       const tokenCount = next.varianceByPath.size;
       console.error(
         `swatchbook-mcp: project reloaded — ${tokenCount} tokens across ${themeCount} theme${themeCount === 1 ? '' : 's'}.`,

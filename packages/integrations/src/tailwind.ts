@@ -138,7 +138,7 @@ function deriveRoles(project: Project): RoleMap {
     font: [],
   };
 
-  for (const [path, token] of Object.entries(project.graph)) {
+  for (const [path, token] of Object.entries(project.defaultTokens)) {
     const classification = classify(path, token.$type);
     if (!classification) continue;
     const { scale, role } = classification;

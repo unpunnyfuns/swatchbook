@@ -39,9 +39,7 @@ it('get_color_formats: returns hex / rgb / hsl / oklch / raw entries for a color
 
 it('get_color_formats: returns text fallback for a non-color $type', async () => {
   // Pick a size token from the fixture.
-  const sizeEntry = Object.entries(
-    project.permutationsResolved[project.permutations[0]!.name]!,
-  ).find(([, t]) => t.$type === 'dimension');
+  const sizeEntry = Object.entries(project.defaultTokens).find(([, t]) => t.$type === 'dimension');
   expect(sizeEntry).toBeDefined();
   const [sizePath] = sizeEntry!;
   const text = await mcp.callText('get_color_formats', { path: sizePath });
@@ -86,9 +84,7 @@ it('get_color_contrast: honors the algorithm flag (APCA returns signed Lc + bron
 });
 
 it('get_color_contrast: returns text fallback when either token is not a color', async () => {
-  const sizeEntry = Object.entries(
-    project.permutationsResolved[project.permutations[0]!.name]!,
-  ).find(([, t]) => t.$type === 'dimension');
+  const sizeEntry = Object.entries(project.defaultTokens).find(([, t]) => t.$type === 'dimension');
   const [sizePath] = sizeEntry!;
   const text = await mcp.callText('get_color_contrast', {
     foreground: sizePath,
