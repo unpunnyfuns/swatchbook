@@ -285,13 +285,7 @@ const themedDecorator: Decorator = (Story, context) => {
       jointOverrides: virtualJointOverrides,
       varianceByPath: virtualVarianceByPath,
       defaultTuple: virtualDefaultTuple,
-      // Cast: `buildResolveAt` returns `TokenMap` (Terrazzo's
-      // `TokenNormalized`), while the block-side snapshot type uses
-      // its own narrower `VirtualTokenShape`. The shapes are
-      // structurally a subset; the cast covers the
-      // `exactOptionalPropertyTypes` mismatch between
-      // `string | undefined` and `string`.
-      resolveAt: previewResolveAt as unknown as NonNullable<ProjectSnapshot['resolveAt']>,
+      resolveAt: previewResolveAt,
     }),
     [themeName, tuple],
   );
