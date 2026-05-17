@@ -2,7 +2,7 @@ import { buildCells } from '#/cells.ts';
 import { validateChrome } from '#/chrome.ts';
 import { BufferedLogger, toDiagnostics } from '#/diagnostics.ts';
 import { validateDisabledAxes } from '#/disabled-axes.ts';
-import { buildJointOverrides } from '#/joint-overrides.ts';
+import { probeJointOverrides } from '#/joint-overrides.ts';
 import { fillPresetTuple, validatePresets } from '#/presets.ts';
 import { validateCssOptions } from '#/terrazzo-options.ts';
 import { resolveDefaultTuple } from '#/permutations/default.ts';
@@ -141,28 +141,31 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     projectDefaultTuple,
   );
 
-  // Exhaustive cartesian-divergence probe — for every non-baseline
-  // permutation, compose via cells alone and record any divergent
-  // tokens as a joint override keyed by the permutation's non-default
-  // partial tuple. Guarantees `resolveAt` is exactly equivalent to
-  // `permutationsResolved` for every cartesian tuple. The follow-up
-  // that drops the cartesian map replaces this with an analytical
-  // probe over the resolver directly.
-  const jointOverrides = buildJointOverrides(
+  // Pair-only joint-divergence probe via `resolver.apply` — bounded
+  // by `Σ pairs (contexts_a - 1) × (contexts_b - 1)` calls,
+  // independent of the cartesian product size. Returns two derived
+  // signals: `overrides` for resolveAt correctness, `jointTouching`
+  // for variance display (axes that genuinely contribute to a joint
+  // divergence on a path, separated from cell-composition artifacts).
+  const { overrides: jointOverrides, jointTouching } = probeJointOverrides(
     filteredAxes,
-    filteredPermutations,
-    filteredResolved,
     cells,
     projectDefaultTuple,
+    normalized.parserInput?.resolver,
   );
   const resolveAt = buildResolveAt(filteredAxes, cells, jointOverrides, projectDefaultTuple);
 
-  // Pre-compute per-path variance so consumers can O(1) look up which
-  // axes affect a token. Same algorithm `analyzeAxisVariance` exposes
-  // today — bucketing the cartesian map. A later PR switches the
-  // implementation behind this accessor to an analytical probe over
-  // cells once the cartesian materialization goes away.
-  const varianceByPath = buildVarianceByPath(filteredAxes, filteredPermutations, filteredResolved);
+  // Pre-compute per-path variance from cells + jointOverrides — the
+  // bounded surface, no cartesian dependency.
+  const baselineForVariance = filteredAxes[0]
+    ? (cells[filteredAxes[0].name]?.[filteredAxes[0].default] ?? {})
+    : graph;
+  const varianceByPath = buildVarianceByPath(
+    filteredAxes,
+    cells,
+    jointTouching,
+    baselineForVariance,
+  );
 
   return {
     config: configWithDefaults,
