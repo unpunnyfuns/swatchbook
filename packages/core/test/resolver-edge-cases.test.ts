@@ -128,7 +128,7 @@ it('surfaces a clear error when a bare-specifier resolver is not installed', asy
   ).rejects.toThrow(/not-installed|Cannot find/);
 });
 
-it('surfaces a warn diagnostic when a modifier has no default and no contexts', async () => {
+it('rejects or warns when a modifier has no default and no contexts', async () => {
   writeJSON('tokens.json', {
     color: { red: { $type: 'color', $value: { colorSpace: 'srgb', components: [1, 0, 0] } } },
   });
@@ -141,18 +141,31 @@ it('surfaces a warn diagnostic when a modifier has no default and no contexts', 
     },
     resolutionOrder: [{ $ref: '#/sets/main' }],
   });
-  let project;
+  // Two paths are acceptable behavior — assert exactly one happened:
+  //   1. Terrazzo's loadResolver rejects the broken modifier upstream;
+  //      loadProject throws with a recognizable parse-error message.
+  //   2. Terrazzo admits the modifier; we emit a `swatchbook/resolver`
+  //      warn naming the broken modifier.
+  // The previous form silently `return`ed in both edge cases, leaving
+  // the test asserting nothing.
+  let project: Awaited<ReturnType<typeof loadProject>> | undefined;
+  let threw: unknown;
   try {
     project = await loadProject({ resolver: 'resolver.json', default: {} }, workspace);
-  } catch {
-    // Terrazzo may reject the resolver outright; the diagnostic only fires
-    // when Terrazzo admits the modifier to the parsed shape. Skip assertion
-    // if parsing failed upstream.
+  } catch (err) {
+    threw = err;
+  }
+  if (threw !== undefined) {
+    expect(threw).toBeInstanceOf(Error);
+    // Whatever Terrazzo says, it should be a non-empty message (not a
+    // mysterious "undefined" error).
+    expect((threw as Error).message.length).toBeGreaterThan(0);
     return;
   }
+  if (!project) throw new Error('expected loadProject to return or throw');
   const diag = project.diagnostics.find(
     (d) => d.group === 'swatchbook/resolver' && d.message.includes('broken'),
   );
-  if (!diag) return;
-  expect(diag.severity).toBe('warn');
+  expect(diag, 'expected a swatchbook/resolver warn when Terrazzo admits the broken modifier').toBeDefined();
+  expect(diag?.severity).toBe('warn');
 });
