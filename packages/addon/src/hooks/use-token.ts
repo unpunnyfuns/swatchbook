@@ -6,6 +6,7 @@ import {
   jointOverrides as virtualJointOverrides,
 } from 'virtual:swatchbook/tokens';
 import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
+import { makeCssVar } from '@unpunnyfuns/swatchbook-core/css-var';
 import type {
   Axis as CoreAxis,
   Cells as CoreCells,
@@ -49,11 +50,6 @@ export interface TokenInfo {
   type?: string;
   /** Optional DTCG `$description`. */
   description?: string;
-}
-
-function makeCssVar(path: string, prefix: string): string {
-  const tail = path.replaceAll('.', '-');
-  return prefix ? `var(--${prefix}-${tail})` : `var(--${tail})`;
 }
 
 /**

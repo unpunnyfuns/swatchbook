@@ -1,6 +1,6 @@
 import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
+import { makeCssVar } from '@unpunnyfuns/swatchbook-core/css-var';
 import type { Axis, Cells, JointOverrides, TokenMap } from '@unpunnyfuns/swatchbook-core';
-import { makeCSSVar } from '@terrazzo/token-tools/css';
 import { useEffect, useMemo } from 'react';
 import type { VirtualTokenListingShape, VirtualVarianceByPathShape } from '#/contexts.ts';
 import { useActiveAxes, useActivePermutation, useOptionalSwatchbookData } from '#/contexts.ts';
@@ -276,16 +276,6 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
       resolveAt,
     ],
   );
-}
-
-/**
- * Thin wrapper around Terrazzo's `makeCSSVar` so the block-display surface
- * and `packages/core/src/css.ts`'s emitter share one implementation. Any
- * future naming-policy shift in Terrazzo (casing, unicode, prefix handling)
- * reaches both surfaces at once instead of needing a parallel update here.
- */
-export function makeCssVar(path: string, prefix: string): string {
-  return prefix ? makeCSSVar(path, { prefix, wrapVar: true }) : makeCSSVar(path, { wrapVar: true });
 }
 
 /**
