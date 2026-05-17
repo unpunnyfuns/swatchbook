@@ -3,7 +3,7 @@
  * payload is produced by the addon's Vite plugin (`swatchbookTokensPlugin`)
  * and JSON-serialized, so this declaration describes the plain-data shape
  * consumers read back — a narrow subset of Terrazzo's `TokenNormalized`
- * plus core's `Permutation` and `Diagnostic`.
+ * plus core's `Axis` / `Diagnostic` / `Preset` shapes.
  */
 declare module 'virtual:swatchbook/tokens' {
   interface VirtualAxis {
@@ -12,12 +12,6 @@ declare module 'virtual:swatchbook/tokens' {
     default: string;
     description?: string;
     source: 'resolver' | 'layered' | 'synthetic';
-  }
-
-  interface VirtualPermutation {
-    name: string;
-    input: Record<string, string>;
-    sources: string[];
   }
 
   interface VirtualDiagnostic {

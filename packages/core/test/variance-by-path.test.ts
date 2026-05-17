@@ -15,10 +15,14 @@ beforeAll(async () => {
   project = await loadWithPrefix(undefined);
 }, 30_000);
 
-it('covers every path that appears in any permutation', () => {
-  const allPaths = new Set<string>();
-  for (const tokens of Object.values(project.permutationsResolved)) {
-    for (const path of Object.keys(tokens)) allPaths.add(path);
+it('covers every path that appears in any cell', () => {
+  // Union of every path across baseline + delta cells — same set the
+  // loader walks when building varianceByPath.
+  const allPaths = new Set<string>(Object.keys(project.defaultTokens));
+  for (const axisCells of Object.values(project.cells)) {
+    for (const cell of Object.values(axisCells)) {
+      for (const path of Object.keys(cell)) allPaths.add(path);
+    }
   }
   for (const path of allPaths) {
     expect(project.varianceByPath.has(path), `missing variance for ${path}`).toBe(true);

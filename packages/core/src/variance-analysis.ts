@@ -14,8 +14,8 @@ import { permutationID, type Project, type TokenMap } from '#/types.ts';
  * The algorithm runs in three phases:
  *
  * 1. **Per-axis cell read** — pull each non-default `(axis, context)`
- *    cell's resolved `TokenMap` from `project.permutationsResolved`.
- *    Free; the loader already paid this cost.
+ *    cell's resolved `TokenMap` from `project.cells`. Free; the loader
+ *    already paid this cost.
  * 2. **Touching set** — for each token, determine which axes can change
  *    its value at any tuple. Compares each singleton cell against the
  *    default cell; an axis whose non-default contexts produce a
@@ -86,22 +86,20 @@ export interface JointCase {
   ctxB: string;
   /**
    * Stringified `$value` from `resolver.apply` at the joint tuple — the
-   * spec-correct value that compound-selector emit must reproduce. The
-   * emitter looks up the full `TokenNormalized` from
-   * `project.permutationsResolved[permutationName]` to access transform
-   * data; this key is purely for comparison + diagnostics.
+   * spec-correct value that compound-selector emit must reproduce.
+   * Purely for comparison + diagnostics; the smart emitter reads the
+   * actual `TokenNormalized` from `project.jointOverrides`.
    */
   cartesianValueKey: string;
-  /** Permutation name in `project.permutationsResolved` where the joint TokenMap lives. */
+  /** Synthesized name for the joint tuple — `axisValues.join(' · ')`. */
   permutationName: string;
 }
 
 /**
  * Classify every token in a project. Returns a Map keyed by token path
- * (the same paths that appear in `project.permutationsResolved[*]`).
- * Tokens that don't appear in any permutation are not in the map; the
- * emitter can iterate the map and project.graph in tandem if it needs a
- * stable union.
+ * (the same paths that appear in any cell). Tokens that don't appear
+ * in any permutation are not in the map; the emitter can iterate the
+ * map and `project.defaultTokens` in tandem if it needs a stable union.
  */
 export function analyzeProjectVariance(project: Project): Map<string, VarianceInfo> {
   const result = new Map<string, VarianceInfo>();
@@ -109,21 +107,19 @@ export function analyzeProjectVariance(project: Project): Map<string, VarianceIn
 
   if (axes.length === 0) {
     // No axes → every token is baseline-only. Skip the cell + probe work.
-    for (const path of Object.keys(project.graph)) {
+    for (const path of Object.keys(project.defaultTokens)) {
       result.set(path, { kind: 'baseline-only' });
     }
     return result;
   }
 
-  // Phase 1 — locate the baseline tuple + per-axis non-default cells.
-  // Reads directly from `project.cells` rather than reconstructing
-  // from `permutationsResolved`. `Project.cells` is the bounded
-  // per-axis surface; cartesian materialization is on its way out.
+  // Phase 1 — locate the baseline tuple + per-axis non-default cells
+  // from `project.cells` directly.
   const defaultTuple = project.defaultTuple;
   const firstAxis = axes[0];
   const baseline: TokenMap = firstAxis
-    ? (project.cells[firstAxis.name]?.[firstAxis.default] ?? project.graph)
-    : project.graph;
+    ? (project.cells[firstAxis.name]?.[firstAxis.default] ?? project.defaultTokens)
+    : project.defaultTokens;
 
   const cells: Record<string, Record<string, TokenMap>> = {};
   for (const axis of axes) {

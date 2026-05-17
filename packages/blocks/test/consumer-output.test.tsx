@@ -6,28 +6,30 @@ import {
   SwatchbookProvider,
   type VirtualTokenListingShape,
 } from '#/index.ts';
-import { withCellsShape } from './_snapshot-utils.ts';
 
 function makeSnapshot(
   listing?: Readonly<Record<string, VirtualTokenListingShape>>,
 ): ProjectSnapshot {
-  return withCellsShape({
+  return {
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
     disabledAxes: [],
     presets: [],
-    permutations: [{ name: 'Light', input: { theme: 'Light' }, sources: [] }],
-    permutationsResolved: {
-      Light: {
-        'color.accent.bg': { $type: 'color', $value: { hex: '#3b82f6' } },
+    cells: {
+      theme: {
+        Light: {
+          'color.accent.bg': { $type: 'color', $value: { hex: '#3b82f6' } },
+        },
       },
     },
+    jointOverrides: [],
+    defaultTuple: { theme: 'Light' },
     activePermutation: 'Light',
     activeAxes: { theme: 'Light' },
     cssVarPrefix: 'sb',
     diagnostics: [],
     css: '',
     ...(listing !== undefined && { listing }),
-  });
+  };
 }
 
 describe('ConsumerOutput', () => {

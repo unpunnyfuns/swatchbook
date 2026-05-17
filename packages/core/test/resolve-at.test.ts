@@ -1,11 +1,11 @@
-// `Project.resolveAt(tuple)` is the load-time-built lazy accessor that
-// replaces direct `permutationsResolved[name]` reads. These tests pin
-// equivalence — for every tuple in the fixture's cartesian map,
-// `resolveAt` produces the same TokenMap structure (same set of paths,
-// same `$value` per path) as direct cartesian lookup. The smart-dedup
-// + joint-override composition handles the joint-variance fixture
-// (`color.accent.fg` under mode=Dark + brand=Brand A) without ever
-// invoking the resolver again.
+// `Project.resolveAt(tuple)` is the load-time-built lazy accessor over
+// `cells + jointOverrides`. These tests pin equivalence against the
+// resolver's own output — for every tuple in the fixture's cartesian
+// space, `resolveAt` produces the same TokenMap structure (same set of
+// paths, same `$value` per path) as the upstream `resolver.apply(tuple)`.
+// The joint-override composition handles the joint-variance fixture
+// (`color.accent.fg` under mode=Dark + brand=Brand A) without invoking
+// the resolver again at runtime.
 import { beforeAll, expect, it } from 'vitest';
 import type { Project } from '#/types';
 import { loadWithPrefix } from './_helpers';
@@ -20,17 +20,34 @@ function valueKey(value: unknown): string {
   return JSON.stringify(value);
 }
 
-it('matches the cartesian-resolved TokenMap for every fixture tuple, value-by-value', () => {
-  for (const perm of project.permutations) {
-    const expected = project.permutationsResolved[perm.name] ?? {};
-    const actual = project.resolveAt(perm.input);
+function* cartesianTuples(
+  axes: readonly { name: string; contexts: readonly string[] }[],
+): Generator<Record<string, string>> {
+  if (axes.length === 0) {
+    yield {};
+    return;
+  }
+  const [first, ...rest] = axes;
+  for (const ctx of first!.contexts) {
+    for (const sub of cartesianTuples(rest)) {
+      yield { [first!.name]: ctx, ...sub };
+    }
+  }
+}
+
+it('matches resolver.apply for every cartesian tuple, value-by-value', () => {
+  const resolver = project.parserInput?.resolver;
+  expect(resolver, 'reference fixture must be resolver-backed').toBeDefined();
+  for (const tuple of cartesianTuples(project.axes)) {
+    const expected = resolver!.apply(tuple);
+    const actual = project.resolveAt(tuple);
     const expectedPaths = Object.keys(expected).toSorted();
     const actualPaths = Object.keys(actual).toSorted();
     expect(actualPaths).toEqual(expectedPaths);
     for (const path of expectedPaths) {
       const expectedVal = valueKey(expected[path]?.$value);
       const actualVal = valueKey(actual[path]?.$value);
-      expect(actualVal, `tuple=${perm.name} path=${path}`).toBe(expectedVal);
+      expect(actualVal, `tuple=${JSON.stringify(tuple)} path=${path}`).toBe(expectedVal);
     }
   }
 });

@@ -3,7 +3,7 @@ import { build, defineConfig, Logger, type Plugin } from '@terrazzo/parser';
 import cssPlugin, { type CSSPluginOptions } from '@terrazzo/plugin-css';
 import { makeCSSVar } from '@terrazzo/token-tools/css';
 import { fillPresetTuple } from '#/presets.ts';
-import type { Axis, Permutation, Project } from '#/types.ts';
+import { permutationID, type Axis, type Project } from '#/types.ts';
 
 /**
  * Explicit permutation entry for `selection`. `input` is the tuple (any
@@ -159,10 +159,29 @@ function resolveSelection(
   selection: NonNullable<EmitViaTerrazzoOptions['selection']>,
 ): readonly EmitSelectionEntry[] {
   if (selection === 'permutations') {
-    return project.permutations.map((perm: Permutation) => ({
-      input: perm.input,
-      name: perm.name,
-    }));
+    // Default tuple + per-axis non-default cells + presets — same
+    // set the resolver loader's singleton enumeration produces,
+    // derived from `axes` + `presets` + `defaultTuple` so this
+    // emitter survives the removal of `Project.permutations`.
+    const entries: EmitSelectionEntry[] = [];
+    const seen = new Set<string>();
+    const push = (input: Record<string, string>): void => {
+      const name = permutationID(input);
+      if (seen.has(name)) return;
+      seen.add(name);
+      entries.push({ input, name });
+    };
+    push({ ...project.defaultTuple });
+    for (const axis of project.axes) {
+      for (const ctx of axis.contexts) {
+        if (ctx === axis.default) continue;
+        push({ ...project.defaultTuple, [axis.name]: ctx });
+      }
+    }
+    for (const preset of project.presets) {
+      push(fillPresetTuple(preset.axes, project.axes));
+    }
+    return entries;
   }
   if (selection === 'presets') {
     if (project.presets.length === 0) {

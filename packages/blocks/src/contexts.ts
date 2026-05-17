@@ -1,10 +1,4 @@
-import type {
-  Axis,
-  AxisVarianceResult,
-  Diagnostic,
-  Permutation,
-  Preset,
-} from '@unpunnyfuns/swatchbook-core';
+import type { Axis, AxisVarianceResult, Diagnostic, Preset } from '@unpunnyfuns/swatchbook-core';
 import { createContext, useContext } from 'react';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
 import type { ColorFormat } from '#/format-color.ts';
@@ -27,8 +21,6 @@ import type { ColorFormat } from '#/format-color.ts';
  */
 export type VirtualAxisShape = Axis;
 
-export type VirtualPermutationShape = Permutation;
-
 export type VirtualDiagnosticShape = Diagnostic;
 
 export interface VirtualTokenShape {
@@ -38,6 +30,15 @@ export interface VirtualTokenShape {
   aliasOf?: string;
   aliasChain?: readonly string[];
   aliasedBy?: readonly string[];
+  /**
+   * Per-sub-field alias map for composite tokens whose value blends
+   * primitives with aliased fragments — Terrazzo populates this when
+   * one or more component fields of a composite ($type: 'border',
+   * 'shadow', 'typography', 'gradient', 'transition') resolve through
+   * an alias. The `CompositeBreakdown` block reads it to render the
+   * source path beside each component value.
+   */
+  partialAliasOf?: Record<string, string | undefined>;
 }
 
 /**
@@ -90,17 +91,6 @@ export interface ProjectSnapshot {
   /** Axis names suppressed via `config.disabledAxes` — pinned to their defaults, hidden from the toolbar. */
   disabledAxes: readonly string[];
   presets: readonly VirtualPresetShape[];
-  /**
-   * @deprecated Wire-shipped permutations were removed in PR 6a.
-   * Hand-built snapshots (tests, MDX consumers) may still populate
-   * this for backward compatibility with the legacy fallback path
-   * in `useProject`. Production preview snapshots omit it.
-   */
-  permutations?: readonly VirtualPermutationShape[];
-  /**
-   * @deprecated See `permutations`. Wire format dropped in PR 6a.
-   */
-  permutationsResolved?: Record<string, Record<string, VirtualTokenShape>>;
   activePermutation: string;
   activeAxes: Readonly<Record<string, string>>;
   cssVarPrefix: string;
@@ -118,26 +108,23 @@ export interface ProjectSnapshot {
    * Per-axis cell maps — `cells[axis][context]` is the resolved token
    * data for `{ ...defaults, [axis]: context }`. Bounded by
    * `Σ(axes × contexts)` regardless of cartesian product size.
-   * Optional during the chain rollout — empty fallback when the
-   * snapshot pre-dates the wire format change.
+   * Non-default cells store only the tokens whose value differs from
+   * the default-cell baseline (delta cells).
    */
-  cells?: Record<string, Record<string, Record<string, VirtualTokenShape>>>;
+  cells: Record<string, Record<string, Record<string, VirtualTokenShape>>>;
   /**
    * `Project.jointOverrides` flattened to entries for wire transport.
    * Same ascending-arity iteration order the Map carries on the
-   * server side.
+   * server side. Empty array when no joint divergences exist.
    */
-  jointOverrides?: readonly (readonly [string, VirtualJointOverrideShape])[];
+  jointOverrides: readonly (readonly [string, VirtualJointOverrideShape])[];
   /**
    * Cached per-path variance results. Blocks read this for O(1) axis
    * variance lookup instead of recomputing on each render.
    */
   varianceByPath?: VirtualVarianceByPathShape;
-  /**
-   * The default tuple — `{ axis: axis.default }` for every axis.
-   * Replaces the legacy "look at `permutations[0].input`" pattern.
-   */
-  defaultTuple?: Record<string, string>;
+  /** The default tuple — `{ axis: axis.default }` for every axis. */
+  defaultTuple: Record<string, string>;
   /**
    * Pre-built `resolveAt(tuple)` accessor. The addon's preview
    * decorator instantiates this once per iframe lifetime — the

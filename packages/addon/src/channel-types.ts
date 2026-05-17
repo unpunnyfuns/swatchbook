@@ -17,12 +17,6 @@ export interface VirtualToken {
   $description?: string;
 }
 
-export interface VirtualPermutation {
-  name: string;
-  input: Record<string, string>;
-  sources: string[];
-}
-
 export interface VirtualAxis {
   name: string;
   contexts: readonly string[];
@@ -47,10 +41,10 @@ export interface VirtualDiagnostic {
 }
 
 /**
- * The full INIT_EVENT payload. Preview emits it whole via `broadcastInit`;
- * consumers read the subset they need — manager's toolbar reads axes +
- * presets + permutations + defaultPermutation, panel reads additionally disabledAxes +
- * permutationsResolved + diagnostics + cssVarPrefix.
+ * The full INIT_EVENT payload. Preview emits it whole via
+ * `broadcastInit`; consumers read the subset they need — manager's
+ * toolbar reads axes + presets + defaultTuple, panel reads
+ * additionally disabledAxes + diagnostics + cssVarPrefix.
  */
 export interface InitPayload {
   axes: readonly VirtualAxis[];

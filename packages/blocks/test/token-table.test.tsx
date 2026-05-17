@@ -1,10 +1,9 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { type ProjectSnapshot, SwatchbookProvider, TokenTable } from '#/index.ts';
-import { withCellsShape } from './_snapshot-utils.ts';
 
 function makeSnapshot(): ProjectSnapshot {
-  return withCellsShape({
+  return {
     axes: [
       {
         name: 'mode',
@@ -15,35 +14,35 @@ function makeSnapshot(): ProjectSnapshot {
     ],
     disabledAxes: [],
     presets: [],
-    permutations: [
-      { name: 'Light', input: { mode: 'light' }, sources: [] },
-      { name: 'Dark', input: { mode: 'dark' }, sources: [] },
-    ],
-    permutationsResolved: {
-      Light: {
-        'color.text': {
-          $type: 'color',
-          $value: { hex: '#111111' },
-          $description: 'Primary text.',
+    cells: {
+      mode: {
+        light: {
+          'color.text': {
+            $type: 'color',
+            $value: { hex: '#111111' },
+            $description: 'Primary text.',
+          },
+          'color.surface': {
+            $type: 'color',
+            $value: { hex: '#ffffff' },
+            $description: 'Default surface.',
+          },
+          'space.md': {
+            $type: 'dimension',
+            $value: { value: 16, unit: 'px' },
+          },
         },
-        'color.surface': {
-          $type: 'color',
-          $value: { hex: '#ffffff' },
-          $description: 'Default surface.',
-        },
-        'space.md': {
-          $type: 'dimension',
-          $value: { value: 16, unit: 'px' },
-        },
+        dark: {},
       },
-      Dark: {},
     },
+    jointOverrides: [],
+    defaultTuple: { mode: 'light' },
     activePermutation: 'Light',
     activeAxes: { mode: 'light' },
     cssVarPrefix: 'sb',
     diagnostics: [],
     css: '',
-  });
+  };
 }
 
 describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => {

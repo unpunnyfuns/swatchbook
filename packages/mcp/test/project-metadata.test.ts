@@ -83,7 +83,12 @@ interface ListTokensResult {
 
 it('list_tokens: returns every token sorted by path when filter and type are omitted', async () => {
   const result = await mcp.callJson<ListTokensResult>('list_tokens');
-  expect(result.theme).toBe(project.permutations[0]?.name);
+  // Default theme name = axis defaults joined by ` · ` (the form
+  // `permutationID` produces server-side).
+  const defaultThemeName = project.axes
+    .map((a) => project.defaultTuple[a.name] ?? a.default)
+    .join(' · ');
+  expect(result.theme).toBe(defaultThemeName);
   expect(result.count).toBeGreaterThan(0);
   expect(result.count).toBe(result.tokens.length);
   // Sorted ascending by path with numeric awareness.
@@ -107,14 +112,13 @@ it('list_tokens: scopes results to a DTCG `$type`', async () => {
 });
 
 it('list_tokens: reads from a non-default permutation when `theme` is supplied', async () => {
-  const darkPermutation = project.permutations.find((p) => p.name.includes('Dark'));
-  if (!darkPermutation) {
-    throw new Error('expected fixture to include a Dark permutation');
-  }
-  const result = await mcp.callJson<ListTokensResult>('list_tokens', {
-    theme: darkPermutation.name,
-  });
-  expect(result.theme).toBe(darkPermutation.name);
+  // Synthesize a Dark-mode singleton name the same way the server does.
+  const modeAxis = project.axes.find((a) => a.name === 'mode');
+  if (!modeAxis) throw new Error('expected fixture to include a mode axis');
+  const darkTuple: Record<string, string> = { ...project.defaultTuple, mode: 'Dark' };
+  const darkName = project.axes.map((a) => darkTuple[a.name] ?? a.default).join(' · ');
+  const result = await mcp.callJson<ListTokensResult>('list_tokens', { theme: darkName });
+  expect(result.theme).toBe(darkName);
   expect(result.count).toBeGreaterThan(0);
 });
 

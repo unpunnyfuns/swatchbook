@@ -2,20 +2,15 @@ import { act, cleanup, fireEvent, render, screen, within } from '@testing-librar
 import { afterEach, describe, expect, it } from 'vitest';
 import { ColorTable, type ProjectSnapshot, SwatchbookProvider } from '#/index.ts';
 import { makeColorTableSnapshot } from './_color-table-helpers.tsx';
-import { withCellsShape } from './_snapshot-utils.ts';
 
 function makeVariantSnapshot(): ProjectSnapshot {
   const base = makeColorTableSnapshot();
-  base.permutationsResolved['Light'] = {
-    ...base.permutationsResolved['Light'],
+  Object.assign(base.cells['mode']!['light']!, {
     'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
     'color.bg.hi-h': { $type: 'color', $value: { hex: '#222222' } },
     'color.bg.hi-d': { $type: 'color', $value: { hex: '#333333' } },
-  };
-  // Rebuild cells against the mutated permutationsResolved — the
-  // initial `withCellsShape` call inside `makeColorTableSnapshot`
-  // captured the pre-mutation shape.
-  return withCellsShape(base);
+  });
+  return base;
 }
 
 describe('ColorTable — grouping', () => {
@@ -86,14 +81,13 @@ describe('ColorTable — grouping', () => {
 
   it('renders DTCG dot-segment variants (hi.disabled) the same as hyphen tails', () => {
     const snap = makeColorTableSnapshot();
-    snap.permutationsResolved['Light'] = {
-      ...snap.permutationsResolved['Light'],
+    Object.assign(snap.cells['mode']!['light']!, {
       'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
       'color.bg.hi.disabled': { $type: 'color', $value: { hex: '#222222' } },
       'color.bg.hi.hover': { $type: 'color', $value: { hex: '#333333' } },
-    };
+    });
     render(
-      <SwatchbookProvider value={withCellsShape(snap)}>
+      <SwatchbookProvider value={snap}>
         <ColorTable filter="color.bg.*" variants={{ hover: 'hover', disabled: 'disabled' }} />
       </SwatchbookProvider>,
     );

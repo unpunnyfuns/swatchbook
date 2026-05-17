@@ -2,7 +2,6 @@ import { act, cleanup, fireEvent, render, screen, within } from '@testing-librar
 import { afterEach, describe, expect, it } from 'vitest';
 import { ColorTable, SwatchbookProvider } from '#/index.ts';
 import { makeColorTableSnapshot } from './_color-table-helpers.tsx';
-import { withCellsShape } from './_snapshot-utils.ts';
 
 describe('ColorTable — expansion', () => {
   afterEach(() => {
@@ -46,14 +45,13 @@ describe('ColorTable — expansion', () => {
 
   it('multi-variant expansion lists all variants in a sub-table', () => {
     const snap = makeColorTableSnapshot();
-    snap.permutationsResolved['Light'] = {
-      ...snap.permutationsResolved['Light'],
+    Object.assign(snap.cells['mode']!['light']!, {
       'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
       'color.bg.hi-h': { $type: 'color', $value: { hex: '#222222' } },
       'color.bg.hi-d': { $type: 'color', $value: { hex: '#333333' } },
-    };
+    });
     render(
-      <SwatchbookProvider value={withCellsShape(snap)}>
+      <SwatchbookProvider value={snap}>
         <ColorTable filter="color.bg.*" variants={{ hover: 'h', disabled: 'd' }} />
       </SwatchbookProvider>,
     );
@@ -85,13 +83,12 @@ describe('ColorTable — expansion', () => {
 
   it('clicking a pill does not toggle the row expansion', () => {
     const snap = makeColorTableSnapshot();
-    snap.permutationsResolved['Light'] = {
-      ...snap.permutationsResolved['Light'],
+    Object.assign(snap.cells['mode']!['light']!, {
       'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
       'color.bg.hi-h': { $type: 'color', $value: { hex: '#222222' } },
-    };
+    });
     render(
-      <SwatchbookProvider value={withCellsShape(snap)}>
+      <SwatchbookProvider value={snap}>
         <ColorTable filter="color.bg.*" variants={{ hover: 'h' }} />
       </SwatchbookProvider>,
     );
