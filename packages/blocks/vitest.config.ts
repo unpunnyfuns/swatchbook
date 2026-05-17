@@ -4,21 +4,24 @@ import { playwright } from '@vitest/browser-playwright';
 import { defineConfig } from 'vitest/config';
 
 /**
- * Two projects, split by file extension:
+ * Two projects, discriminated by an explicit `.browser.` infix in the
+ * filename (matching the convention in `packages/addon/vitest.config.ts`):
  *
- * - **node** — pure-function tests (`*.test.ts`): `format-color`,
- *   `format-token-value`, `sort-tokens`. No DOM, no React rendering;
- *   running these under the browser harness would add ~5× wall-clock
- *   per file for no semantic gain.
- * - **browser** — component tests (`*.test.tsx`): everything that calls
- *   `render(<X />)`. Runs in real Chromium + Firefox via vitest-browser.
+ * - **node** — every `*.test.{ts,tsx}` file WITHOUT the `.browser.`
+ *   infix. Runs in Node, no DOM, no browser harness. Today this is the
+ *   three pure-function suites (`format-color`, `format-token-value`,
+ *   `sort-tokens`); ~40× faster than the browser provider (157 ms vs
+ *   ~6 s).
+ * - **browser** — every `*.browser.test.{ts,tsx}` file. Runs in real
+ *   Chromium + Firefox via vitest-browser; this is where component
+ *   tests calling `render(<X />)` live.
  *
- * The `.ts` vs `.tsx` discriminator is load-bearing: every `.test.tsx`
- * file in this package renders a React component (asserted via grep);
- * every `.test.ts` file is pure-function. Don't add a `.test.ts` that
- * needs a DOM — promote to `.tsx` if it does. jsdom is intentionally
- * absent from both projects (project convention; partial browser
- * simulation hides real regressions).
+ * The infix is the contract — `.ts` vs `.tsx` is just compilation
+ * shape, not a runner signal. A `.test.ts` that reaches for `document`
+ * or `window` belongs in the browser project; rename it to
+ * `.browser.test.{ts,tsx}` to move it across. jsdom is intentionally
+ * absent from both projects — project convention, partial browser
+ * simulation hides real regressions.
  */
 export default defineConfig({
   plugins: [react()],
@@ -36,14 +39,15 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'node',
-          include: ['test/**/*.test.ts'],
+          include: ['test/**/*.test.{ts,tsx}'],
+          exclude: ['test/**/*.browser.test.{ts,tsx}'],
         },
       },
       {
         extends: true,
         test: {
           name: 'browser',
-          include: ['test/**/*.test.tsx'],
+          include: ['test/**/*.browser.test.{ts,tsx}'],
           browser: {
             enabled: true,
             provider: playwright(),
