@@ -604,10 +604,9 @@ function buildTupleByName(project: Project): Map<string, Record<string, string>>
 }
 
 /**
- * Same form `permutationID` produces server-side — axis values joined
- * by ` · ` in axis order. Inlined here so MCP doesn't depend on the
- * `permutationID` export staying in core's public API through the
- * cartesian-drop chain.
+ * Synthesize the tuple's stable name — axis values joined by ` · ` in
+ * axis order. Inlined here rather than imported so MCP doesn't depend
+ * on `permutationID` staying in core's public API.
  */
 function tupleToName(
   axes: readonly { name: string; default: string }[],

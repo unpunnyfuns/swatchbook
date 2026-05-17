@@ -33,25 +33,20 @@ export interface ProjectData {
   listing: Readonly<Record<string, VirtualTokenListingShape>>;
   /**
    * Cached per-path `AxisVarianceResult` — blocks use this for O(1)
-   * variance lookup instead of re-running the bucket analysis. Empty
-   * for snapshots that pre-date the wire format change.
+   * variance lookup instead of re-running the analysis on every
+   * render.
    */
   varianceByPath: VirtualVarianceByPathShape;
   /**
    * Compose the resolved `TokenMap` for any tuple of axis selections.
    * Built browser-side from `cells + jointOverrides` shipped over the
-   * wire — no resolver needed. Replaces direct
-   * `permutationsResolved[name]` reads for tuple-keyed lookups
-   * (`AxisVariance` grid cells, future per-tuple block displays).
+   * wire — no resolver needed.
    */
   resolveAt: (tuple: Record<string, string>) => ResolvedTokens;
   /**
-   * Look up the permutation name for a full tuple — `O(1)` against a
-   * `Map<canonicalKey, name>` built once per snapshot. Returns
-   * `undefined` when no permutation matches. Consumers that previously
-   * did `permutations.find(...)` per grid cell should use this
-   * instead to avoid quadratic-in-cell work as permutation counts
-   * grow.
+   * Synthesize a display name for a full tuple — `axisValues.join(' · ')`,
+   * matching the form `permutationID` produces server-side. Used by
+   * the AxisVariance grid for `data-<prefix>-theme` attribution.
    */
   permutationNameForTuple: (tuple: Record<string, string>) => string | undefined;
 }

@@ -236,9 +236,6 @@ function resolveColorFormat(globals: SwatchbookGlobals): ColorFormat {
  * never needs to rebuild; downstream `ProjectSnapshot` consumers can
  * key memos on the snapshot wrapper without worrying about
  * `resolveAt` churning when Storybook recreates `context.globals`.
- *
- * Replaces the per-render `useMemo(makeResolveAt(...))` dance the
- * blocks side used to do in `useProject`.
  */
 const previewResolveAt = buildResolveAt(
   virtualAxes as readonly CoreAxis[],

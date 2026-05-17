@@ -104,11 +104,9 @@ export function renderTokenTypes(project: Project): string {
 }
 
 /**
- * Same set the resolver loader's singleton enumeration produces:
- * default tuple + one per non-default cell on each axis + each
- * preset. Built from `project.axes` + `project.presets` + `project.defaultTuple`
- * so it survives the cartesian-drop chain's removal of
- * `project.permutations`.
+ * Default tuple + one per non-default cell on each axis + each
+ * preset — same set the resolver loader's singleton enumeration
+ * produces.
  */
 function enumerateThemeNames(project: Project): string[] {
   if (project.axes.length === 0) return [];
