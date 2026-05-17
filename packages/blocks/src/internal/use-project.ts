@@ -1,5 +1,13 @@
+import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
+import type {
+  Axis,
+  Cells,
+  JointOverride,
+  JointOverrides,
+  TokenMap,
+} from '@unpunnyfuns/swatchbook-core';
 import { makeCSSVar } from '@terrazzo/token-tools/css';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { VirtualTokenListingShape, VirtualVarianceByPathShape } from '#/contexts.ts';
 import { useActiveAxes, useActivePermutation, useOptionalSwatchbookData } from '#/contexts.ts';
 import { type ColorFormat, formatColor, type FormatColorResult } from '#/format-color.ts';
@@ -37,6 +45,14 @@ export interface ProjectData {
    * for snapshots that pre-date the wire format change.
    */
   varianceByPath: VirtualVarianceByPathShape;
+  /**
+   * Compose the resolved `TokenMap` for any tuple of axis selections.
+   * Built browser-side from `cells + jointOverrides` shipped over the
+   * wire — no resolver needed. Replaces direct
+   * `permutationsResolved[name]` reads for tuple-keyed lookups
+   * (`AxisVariance` grid cells, future per-tuple block displays).
+   */
+  resolveAt: (tuple: Record<string, string>) => ResolvedTokens;
 }
 
 const STYLE_ELEMENT_ID = 'swatchbook-tokens';
@@ -74,18 +90,47 @@ function nameForTuple(
   return match?.name;
 }
 
-function snapshotToData(snapshot: ProjectSnapshot): ProjectData {
-  return {
-    activePermutation: snapshot.activePermutation,
-    activeAxes: { ...snapshot.activeAxes },
-    axes: snapshot.axes,
-    permutations: snapshot.permutations,
-    permutationsResolved: snapshot.permutationsResolved,
-    resolved: snapshot.permutationsResolved[snapshot.activePermutation] ?? {},
-    diagnostics: snapshot.diagnostics,
-    cssVarPrefix: snapshot.cssVarPrefix,
-    listing: snapshot.listing ?? {},
-    varianceByPath: snapshot.varianceByPath ?? {},
+/**
+ * Reconstruct a `resolveAt` accessor from snapshot data. The wire
+ * format ships `cells` as plain JSON and `jointOverrides` as an
+ * array of `[key, entry]` pairs (Map doesn't survive JSON.stringify);
+ * this hydrates them and wraps `buildResolveAt` from core. Stable
+ * identity across calls with the same snapshot — `useMemo` keyed on
+ * the snapshot fields produces a referentially stable function.
+ */
+function makeResolveAt(snapshot: {
+  axes: readonly VirtualAxis[];
+  cells?: ProjectSnapshot['cells'];
+  jointOverrides?: ProjectSnapshot['jointOverrides'];
+  defaultTuple?: ProjectSnapshot['defaultTuple'];
+}): (tuple: Record<string, string>) => ResolvedTokens {
+  const cells = (snapshot.cells ?? {}) as Cells;
+  const jointOverrides: JointOverrides = new Map<string, JointOverride>(
+    (snapshot.jointOverrides ?? []) as readonly (readonly [string, JointOverride])[],
+  );
+  const defaults = snapshot.defaultTuple ?? defaultTuple(snapshot.axes);
+  const resolver = buildResolveAt(
+    snapshot.axes as readonly Axis[],
+    cells,
+    jointOverrides,
+    defaults,
+  );
+  return (tuple) => resolver(tuple) as TokenMap as ResolvedTokens;
+}
+
+/**
+ * Build the `resolveAt` accessor for a snapshot, falling back to
+ * indexing `permutationsResolved` by tuple name when the snapshot
+ * pre-dates the wire format change and doesn't carry `cells`.
+ */
+function snapshotResolveAt(
+  snapshot: ProjectSnapshot,
+): (tuple: Record<string, string>) => ResolvedTokens {
+  const hasCells = Object.keys(snapshot.cells ?? {}).length > 0;
+  if (hasCells) return makeResolveAt(snapshot);
+  return (tuple) => {
+    const name = nameForTuple(snapshot.permutations, tuple) ?? snapshot.activePermutation;
+    return snapshot.permutationsResolved[name] ?? {};
   };
 }
 
@@ -103,8 +148,66 @@ function snapshotToData(snapshot: ProjectSnapshot): ProjectData {
  */
 export function useProject(): ProjectData {
   const snapshot = useOptionalSwatchbookData();
+  // Memoize against the stable underlying fields, NOT the snapshot
+  // wrapper. Storybook rebuilds `context.globals` identity on every
+  // render → the preview's `tuple` useMemo invalidates → the
+  // provider's snapshot useMemo rebuilds. Keying off `snapshot`
+  // would mean `makeResolveAt` runs on every render, producing a
+  // fresh closure with a fresh internal memo, so `resolved` would
+  // have a new identity each render. Downstream block
+  // `useMemo([resolved, …])` calls would recompute forever; the
+  // `TokenNavigator`'s focus-repair `useEffect` (deps include the
+  // recomputed `flatVisible`) would `setState` in an infinite loop.
+  // The underlying `cells` / `jointOverrides` / `permutations`
+  // references are stable module-level exports, so depending on
+  // them directly keeps `resolveAt` (and the resolved map it
+  // returns) referentially stable across renders.
+  const axes = snapshot?.axes;
+  const cells = snapshot?.cells;
+  const jointOverrides = snapshot?.jointOverrides;
+  const dataDefaultTuple = snapshot?.defaultTuple;
+  const permutations = snapshot?.permutations;
+  const permutationsResolved = snapshot?.permutationsResolved;
+  const activePermutation = snapshot?.activePermutation;
+  const resolveAt = useMemo(() => {
+    if (!snapshot) return null;
+    return snapshotResolveAt(snapshot);
+    // The deps below are deliberately the stable inner fields rather
+    // than `snapshot` itself; see the long block comment above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    axes,
+    cells,
+    jointOverrides,
+    dataDefaultTuple,
+    permutations,
+    permutationsResolved,
+    activePermutation,
+  ]);
   const fallback = useVirtualModuleFallback(snapshot === null);
-  return snapshot !== null ? snapshotToData(snapshot) : fallback;
+  if (snapshot !== null && resolveAt !== null) {
+    return snapshotToData(snapshot, resolveAt);
+  }
+  return fallback;
+}
+
+function snapshotToData(
+  snapshot: ProjectSnapshot,
+  resolveAt: (tuple: Record<string, string>) => ResolvedTokens,
+): ProjectData {
+  return {
+    activePermutation: snapshot.activePermutation,
+    activeAxes: { ...snapshot.activeAxes },
+    axes: snapshot.axes,
+    permutations: snapshot.permutations,
+    permutationsResolved: snapshot.permutationsResolved,
+    resolved: resolveAt(snapshot.activeAxes),
+    diagnostics: snapshot.diagnostics,
+    cssVarPrefix: snapshot.cssVarPrefix,
+    listing: snapshot.listing ?? {},
+    varianceByPath: snapshot.varianceByPath ?? {},
+    resolveAt,
+  };
 }
 
 function useVirtualModuleFallback(enabled: boolean): ProjectData {
@@ -138,17 +241,35 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
     tokens.permutations[0]?.name ||
     '';
 
+  // `buildResolveAt` returns a closure that memoizes on the canonical
+  // tuple key, so wrapping the call in another `useMemo` would be
+  // redundant — the inner memo handles the per-tuple cache. We only
+  // need `useMemo` for the outer `resolveAt` itself so React's
+  // reference equality stays stable between renders.
+  const resolveAt = useMemo(
+    () =>
+      makeResolveAt({
+        axes: tokens.axes,
+        cells: tokens.cells,
+        jointOverrides: tokens.jointOverrides,
+        defaultTuple: tokens.defaultTuple,
+      }),
+    [tokens.axes, tokens.cells, tokens.jointOverrides, tokens.defaultTuple],
+  );
+  const resolved = resolveAt(activeAxes);
+
   return {
     activePermutation,
     activeAxes,
     axes: tokens.axes,
     permutations: tokens.permutations,
     permutationsResolved: tokens.permutationsResolved,
-    resolved: tokens.permutationsResolved[activePermutation] ?? {},
+    resolved,
     diagnostics: tokens.diagnostics,
     cssVarPrefix: tokens.cssVarPrefix,
     listing: tokens.listing,
     varianceByPath: tokens.varianceByPath,
+    resolveAt,
   };
 }
 

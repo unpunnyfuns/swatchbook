@@ -18,16 +18,8 @@ interface Variance {
 }
 
 export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
-  const {
-    token,
-    cssVar,
-    axes,
-    permutations,
-    permutationsResolved,
-    activeAxes,
-    cssVarPrefix,
-    varianceByPath,
-  } = useTokenDetailData(path);
+  const { token, cssVar, axes, permutations, activeAxes, cssVarPrefix, varianceByPath, resolveAt } =
+    useTokenDetailData(path);
   const colorFormat = useColorFormat();
   const tokenType = token?.$type;
   const isColor = tokenType === 'color';
@@ -56,10 +48,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
   }
 
   if (variance.kind === 'constant') {
-    const anyPermutation = permutations[0];
-    const value = anyPermutation
-      ? formatFn(permutationsResolved[anyPermutation.name]?.[path])
-      : '—';
+    const value = formatFn(resolveAt(activeAxes)[path] as DetailToken | undefined);
     return (
       <>
         <div className="sb-token-detail__section-header">Values across axes</div>
@@ -93,15 +82,11 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
     if (!axis) return <></>;
     const contextValues = axis.contexts.map((ctx) => {
       const target = { ...activeAxes, [axisName]: ctx };
-      const match = permutations.find((t) => {
-        const input = t.input;
-        return Object.keys(input).every((k) => input[k] === target[k]);
-      });
-      const name = match?.name ?? '';
+      const themeName = tupleName(permutations, target) ?? '';
       return {
         ctx,
-        themeName: name,
-        value: name ? formatFn(permutationsResolved[name]?.[path]) : '—',
+        themeName,
+        value: formatFn(resolveAt(target)[path] as DetailToken | undefined),
       };
     });
     return (
@@ -178,7 +163,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                   [colAxis.name]: col,
                 };
                 const name = tupleName(permutations, target);
-                const value = name ? formatFn(permutationsResolved[name]?.[path]) : '—';
+                const value = formatFn(resolveAt(target)[path] as DetailToken | undefined);
                 return (
                   <td
                     key={col}
