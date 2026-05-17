@@ -91,7 +91,7 @@ A resolver may declare more modifiers than a given Storybook wants to surface. L
 
 `loadProject` enumerates `1 + Σ(axes × (contexts - 1))` singleton tuples per project — the default tuple plus one per non-default cell on each axis. Bounded by axis cardinality, independent of the cartesian product, so a resolver with 20 axes × 5 contexts loads ~80 tuples regardless of whether the underlying cartesian is hundreds or 15 million. The toolbar surfaces every axis, the smart CSS emitter writes per-axis cell blocks plus compound blocks only for tokens with genuine joint divergence, and runtime CSS composition lands the right value at any multi-axis selector.
 
-That makes the historical `maxPermutations` guard unnecessary — the loader can't blow up on a large cartesian because it doesn't materialize the cartesian in the first place. Two scoping levers remain, both presentational:
+The loader can't blow up on a large cartesian because it doesn't materialize the cartesian in the first place. Two scoping levers remain, both presentational:
 
 - **`presets`** — author named tuples for the handful of permutations that matter (`Default Light`, `Brand A Dark`, `A11y High Contrast`). Toolbar surfaces them as quick-select pills; emit pipelines can fan out on `'presets'` instead of every axis-attribute combination. The right answer when only a handful of tuples are presentational.
 - **`disabledAxes`** — pin state-space modifiers (locale, density, motion-pref, …) to their defaults. They vanish from the toolbar, drop from the project's axis list, and don't contribute to emitted CSS. The right answer when an axis exists in the resolver but doesn't represent presentational variation.
