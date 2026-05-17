@@ -55,13 +55,33 @@ declare module 'virtual:swatchbook/tokens' {
     tokens: Record<string, VirtualToken>;
   }
 
-  interface VirtualAxisVarianceEntry {
-    path: string;
-    kind: 'constant' | 'single' | 'multi';
-    varyingAxes: string[];
-    constantAcrossAxes: string[];
-    perAxis: Record<string, { varying: boolean; contexts: Record<string, string> }>;
-  }
+  type VirtualAxisVariancePerAxis = Record<
+    string,
+    { varying: boolean; contexts: Record<string, string> }
+  >;
+  type VirtualAxisVarianceEntry =
+    | {
+        path: string;
+        kind: 'constant';
+        varyingAxes: readonly [];
+        constantAcrossAxes: readonly string[];
+        perAxis: VirtualAxisVariancePerAxis;
+      }
+    | {
+        path: string;
+        kind: 'single';
+        axis: string;
+        varyingAxes: readonly [string];
+        constantAcrossAxes: readonly string[];
+        perAxis: VirtualAxisVariancePerAxis;
+      }
+    | {
+        path: string;
+        kind: 'multi';
+        varyingAxes: readonly [string, string, ...string[]];
+        constantAcrossAxes: readonly string[];
+        perAxis: VirtualAxisVariancePerAxis;
+      };
 
   export const axes: readonly VirtualAxis[];
   export const presets: readonly VirtualPreset[];

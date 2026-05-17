@@ -20,26 +20,50 @@ export type TokenMap = Record<string, TokenNormalized>;
  */
 export type VarianceKind = 'constant' | 'single' | 'multi';
 
-export interface AxisVarianceResult {
-  path: string;
-  kind: VarianceKind;
-  /** Axes whose contexts change this token's resolved value. */
-  varyingAxes: string[];
-  /** Axes whose contexts do not change the resolved value. */
-  constantAcrossAxes: string[];
-  /**
-   * Per-axis breakdown. For each axis, whether it affects this token,
-   * and the stringified value seen in each of its contexts (holding
-   * other axes at their defaults).
-   */
-  perAxis: Record<
-    string,
-    {
-      varying: boolean;
-      contexts: Record<string, string>;
+/**
+ * Per-axis breakdown carried on every variance result — whether each
+ * axis affects this token, and the stringified value seen in each of
+ * its contexts (holding other axes at their defaults).
+ */
+export type AxisVariancePerAxis = Record<
+  string,
+  {
+    varying: boolean;
+    contexts: Record<string, string>;
+  }
+>;
+
+/**
+ * Discriminated on `kind` so a `switch (result.kind)` narrows
+ * `varyingAxes`'s cardinality and exposes the `axis: string` shortcut
+ * on the single-axis variant. The wire shape is unchanged (the same
+ * JSON the flat interface serialized to), so MCP consumers and
+ * snapshot wire payloads keep working without translation.
+ */
+export type AxisVarianceResult =
+  | {
+      path: string;
+      kind: 'constant';
+      varyingAxes: readonly [];
+      constantAcrossAxes: readonly string[];
+      perAxis: AxisVariancePerAxis;
     }
-  >;
-}
+  | {
+      path: string;
+      kind: 'single';
+      /** Convenience accessor — the sole varying axis, also at `varyingAxes[0]`. */
+      axis: string;
+      varyingAxes: readonly [string];
+      constantAcrossAxes: readonly string[];
+      perAxis: AxisVariancePerAxis;
+    }
+  | {
+      path: string;
+      kind: 'multi';
+      varyingAxes: readonly [string, string, ...string[]];
+      constantAcrossAxes: readonly string[];
+      perAxis: AxisVariancePerAxis;
+    };
 
 /**
  * Per-axis cell maps. `cells[axisName][contextName]` is the resolved

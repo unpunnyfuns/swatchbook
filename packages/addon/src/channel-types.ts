@@ -100,15 +100,38 @@ export interface VirtualJointOverride {
 export type VirtualJointOverrides = readonly (readonly [string, VirtualJointOverride])[];
 
 /**
- * Wire shape of one cached `AxisVarianceResult` entry. Mirrors the
- * core type but uses the local `VirtualToken`-style references.
+ * Wire shape of one cached `AxisVarianceResult` entry — discriminated
+ * on `kind` so consumers narrow `varyingAxes`'s cardinality and (for
+ * the single-axis variant) reach `axis: string` directly. Mirrors
+ * core's discriminated union; JSON-shape-identical so the wire
+ * payload doesn't carry a translation step.
  */
-export interface VirtualVarianceEntry {
-  path: string;
-  kind: 'constant' | 'single' | 'multi';
-  varyingAxes: string[];
-  constantAcrossAxes: string[];
-  perAxis: Record<string, { varying: boolean; contexts: Record<string, string> }>;
-}
+export type VirtualVariancePerAxis = Record<
+  string,
+  { varying: boolean; contexts: Record<string, string> }
+>;
+export type VirtualVarianceEntry =
+  | {
+      path: string;
+      kind: 'constant';
+      varyingAxes: readonly [];
+      constantAcrossAxes: readonly string[];
+      perAxis: VirtualVariancePerAxis;
+    }
+  | {
+      path: string;
+      kind: 'single';
+      axis: string;
+      varyingAxes: readonly [string];
+      constantAcrossAxes: readonly string[];
+      perAxis: VirtualVariancePerAxis;
+    }
+  | {
+      path: string;
+      kind: 'multi';
+      varyingAxes: readonly [string, string, ...string[]];
+      constantAcrossAxes: readonly string[];
+      perAxis: VirtualVariancePerAxis;
+    };
 
 export type VirtualVarianceByPath = Record<string, VirtualVarianceEntry>;

@@ -1,4 +1,4 @@
-import type { Axis, AxisVarianceResult, Cells, TokenMap, VarianceKind } from '#/types.ts';
+import type { Axis, AxisVariancePerAxis, AxisVarianceResult, Cells, TokenMap } from '#/types.ts';
 
 /**
  * Pre-compute per-path variance at load time so consumers don't have
@@ -42,7 +42,7 @@ export function buildVarianceByPath(
   const out = new Map<string, AxisVarianceResult>();
   for (const path of allPaths) {
     const baselineKey = valueKey(baseline[path]);
-    const perAxis: AxisVarianceResult['perAxis'] = {};
+    const perAxis: AxisVariancePerAxis = {};
     const varyingAxes: string[] = [];
     const constantAcrossAxes: string[] = [];
     const jointTouchSet = jointTouching.get(path) ?? new Set<string>();
@@ -60,11 +60,39 @@ export function buildVarianceByPath(
       (varying ? varyingAxes : constantAcrossAxes).push(axis.name);
     }
 
-    const kind: VarianceKind =
-      varyingAxes.length === 0 ? 'constant' : varyingAxes.length === 1 ? 'single' : 'multi';
-    out.set(path, { path, kind, varyingAxes, constantAcrossAxes, perAxis });
+    out.set(path, buildResult(path, varyingAxes, constantAcrossAxes, perAxis));
   }
   return out;
+}
+
+function buildResult(
+  path: string,
+  varyingAxes: string[],
+  constantAcrossAxes: string[],
+  perAxis: AxisVariancePerAxis,
+): AxisVarianceResult {
+  if (varyingAxes.length === 0) {
+    return { path, kind: 'constant', varyingAxes: [], constantAcrossAxes, perAxis };
+  }
+  if (varyingAxes.length === 1) {
+    const [axis] = varyingAxes as [string];
+    return {
+      path,
+      kind: 'single',
+      axis,
+      varyingAxes: [axis],
+      constantAcrossAxes,
+      perAxis,
+    };
+  }
+  const [first, second, ...rest] = varyingAxes as [string, string, ...string[]];
+  return {
+    path,
+    kind: 'multi',
+    varyingAxes: [first, second, ...rest],
+    constantAcrossAxes,
+    perAxis,
+  };
 }
 
 function valueKey(token: TokenMap[string] | undefined): string {
