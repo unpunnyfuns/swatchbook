@@ -9,6 +9,7 @@ export { type ListedToken, type TokenListingByPath } from '#/token-listing.ts';
 export type {
   Axis,
   AxisConfig,
+  AxisVariancePerAxis,
   AxisVarianceResult,
   Cells,
   Config,

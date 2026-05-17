@@ -12,10 +12,10 @@ export interface AxisVarianceProps {
   path: string;
 }
 
-interface Variance {
-  kind: 'constant' | 'one-axis' | 'multi-axis';
-  varyingAxes: readonly string[];
-}
+type Variance =
+  | { kind: 'constant' }
+  | { kind: 'one-axis'; axis: string; varyingAxes: readonly [string] }
+  | { kind: 'multi-axis'; varyingAxes: readonly [string, string, ...string[]] };
 
 export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
   const {
@@ -39,16 +39,15 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
     // map over the wire — O(1) lookup per render instead of an O(paths
     // × permutations) re-derivation here.
     const result = varianceByPath[path];
-    if (!result) {
-      return { kind: 'constant', varyingAxes: [] };
+    if (!result) return { kind: 'constant' };
+    switch (result.kind) {
+      case 'constant':
+        return { kind: 'constant' };
+      case 'single':
+        return { kind: 'one-axis', axis: result.axis, varyingAxes: result.varyingAxes };
+      case 'multi':
+        return { kind: 'multi-axis', varyingAxes: result.varyingAxes };
     }
-    const kind =
-      result.kind === 'constant'
-        ? 'constant'
-        : result.kind === 'single'
-          ? 'one-axis'
-          : 'multi-axis';
-    return { kind, varyingAxes: result.varyingAxes };
   }, [path, varianceByPath]);
 
   if (axes.length === 0) {
@@ -82,8 +81,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
   }
 
   if (variance.kind === 'one-axis') {
-    const axisName = variance.varyingAxes[0];
-    if (!axisName) return <></>;
+    const axisName = variance.axis;
     const axis = axes.find((a) => a.name === axisName);
     if (!axis) return <></>;
     const contextValues = axis.contexts.map((ctx) => {
