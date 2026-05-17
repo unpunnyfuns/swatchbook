@@ -9,15 +9,19 @@ import { dataAttr } from '#/data-attr.ts';
 import 'virtual:swatchbook/integration-side-effects';
 import {
   axes as virtualAxes,
+  cells as virtualCells,
   css,
   cssVarPrefix,
   defaultPermutation,
+  defaultTuple as virtualDefaultTuple,
   diagnostics,
   disabledAxes as virtualDisabledAxes,
+  jointOverrides as virtualJointOverrides,
   listing as virtualListing,
   presets as virtualPresets,
   permutations,
   permutationsResolved,
+  varianceByPath as virtualVarianceByPath,
 } from 'virtual:swatchbook/tokens';
 import {
   AxesContext,
@@ -140,6 +144,10 @@ function broadcastInit(): void {
     permutationsResolved,
     diagnostics,
     cssVarPrefix,
+    cells: virtualCells,
+    jointOverrides: virtualJointOverrides,
+    varianceByPath: virtualVarianceByPath,
+    defaultTuple: virtualDefaultTuple,
   });
 }
 
@@ -246,6 +254,10 @@ const themedDecorator: Decorator = (Story, context) => {
       diagnostics,
       css,
       listing: virtualListing,
+      cells: virtualCells,
+      jointOverrides: virtualJointOverrides,
+      varianceByPath: virtualVarianceByPath,
+      defaultTuple: virtualDefaultTuple,
     }),
     [themeName, tuple],
   );
@@ -381,6 +393,10 @@ interface HmrSnapshot {
   css: string;
   cssVarPrefix: string;
   listing: typeof virtualListing;
+  cells: typeof virtualCells;
+  jointOverrides: typeof virtualJointOverrides;
+  varianceByPath: typeof virtualVarianceByPath;
+  defaultTuple: typeof virtualDefaultTuple;
 }
 if (import.meta.hot) {
   import.meta.hot.on(HMR_EVENT, (payload: HmrSnapshot) => {
@@ -411,6 +427,10 @@ html, body {
       permutationsResolved: payload.permutationsResolved,
       diagnostics: payload.diagnostics,
       cssVarPrefix: payload.cssVarPrefix,
+      cells: payload.cells,
+      jointOverrides: payload.jointOverrides,
+      varianceByPath: payload.varianceByPath,
+      defaultTuple: payload.defaultTuple,
     });
     channel.emit(TOKENS_UPDATED_EVENT, payload);
   });

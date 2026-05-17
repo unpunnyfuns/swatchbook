@@ -56,6 +56,19 @@ declare module 'virtual:swatchbook/tokens' {
     };
   }
 
+  interface VirtualJointOverrideEntry {
+    axes: Record<string, string>;
+    tokens: Record<string, VirtualToken>;
+  }
+
+  interface VirtualAxisVarianceEntry {
+    path: string;
+    kind: 'constant' | 'single' | 'multi';
+    varyingAxes: string[];
+    constantAcrossAxes: string[];
+    perAxis: Record<string, { varying: boolean; contexts: Record<string, string> }>;
+  }
+
   export const axes: readonly VirtualAxis[];
   export const presets: readonly VirtualPreset[];
   export const permutations: readonly VirtualPermutation[];
@@ -65,6 +78,10 @@ declare module 'virtual:swatchbook/tokens' {
   export const css: string;
   export const cssVarPrefix: string;
   export const listing: Readonly<Record<string, VirtualListingEntry>>;
+  export const cells: Record<string, Record<string, Record<string, VirtualToken>>>;
+  export const jointOverrides: readonly (readonly [string, VirtualJointOverrideEntry])[];
+  export const varianceByPath: Record<string, VirtualAxisVarianceEntry>;
+  export const defaultTuple: Record<string, string>;
 }
 
 declare module '*.css';
