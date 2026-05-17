@@ -97,12 +97,9 @@ it("mode-invariant tokens (e.g. size primitives, font families) still don't appe
   expect(darkCell).not.toMatch(/--sb-font-family-sans:/);
 });
 
-it('terminates with a trailing newline + emits chrome aliases identically to emitCss', () => {
+it('terminates with a trailing newline + emits a chrome alias block at the tail', () => {
   const css = emitAxisProjectedCss(project);
   expect(css.endsWith('\n')).toBe(true);
-  // The chrome aliases block is appended at the tail — same shape as
-  // emitCss writes — so blocks that read `--swatchbook-*` resolve the
-  // same way regardless of which emitter ran.
   expect(css).toContain('color-scheme: light dark;');
   expect(css).toContain('--swatchbook-surface-default:');
 });

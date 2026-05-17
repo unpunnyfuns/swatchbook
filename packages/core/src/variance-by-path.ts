@@ -1,5 +1,4 @@
-import { type AxisVarianceResult, type VarianceKind } from '#/variance.ts';
-import type { Axis, Cells, TokenMap } from '#/types.ts';
+import type { Axis, AxisVarianceResult, Cells, TokenMap, VarianceKind } from '#/types.ts';
 
 /**
  * Pre-compute per-path variance at load time so consumers don't have

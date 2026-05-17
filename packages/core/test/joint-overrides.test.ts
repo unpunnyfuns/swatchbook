@@ -1,8 +1,8 @@
-// `buildJointOverrides` extracts only the divergent partial-tuple
-// entries from `analyzeProjectVariance`'s output — those are the
-// values `composeAt` cannot reconstruct from cells alone. The reference
-// fixture has joint variance on the accessible-accent chain; this test
-// pins that we identify those entries without overcollecting.
+// `Project.jointOverrides` stores only the divergent partial-tuple
+// entries — the values `composeAt` cannot reconstruct from cells
+// alone. The reference fixture has joint variance on the
+// accessible-accent chain; this test pins that we identify those
+// entries without overcollecting.
 import { beforeAll, expect, it } from 'vitest';
 import type { Project } from '#/types';
 import { loadWithPrefix } from './_helpers';

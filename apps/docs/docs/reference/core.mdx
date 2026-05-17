@@ -60,25 +60,18 @@ permutationID({ mode: 'Dark', brand: 'Brand A' }); // → "Dark · Brand A"
 permutationID({ theme: 'Light' }); // → "Light"
 ```
 
-### `analyzeAxisVariance(path, axes, permutations, permutationsResolved)`
+### `project.varianceByPath`
 
-Classify how a token's resolved value changes across each axis. Used by the `AxisVariance` block and the MCP server's `get_axis_variance` tool to drive consumer-facing previews.
+Cached per-token variance classification, built at load time and stored on `Project.varianceByPath: ReadonlyMap<string, AxisVarianceResult>`. The `AxisVariance` block, the MCP `get_axis_variance` tool, and the smart CSS emitter all read this map for O(1) lookup instead of re-running the analysis per call.
 
 ```ts
-import { analyzeAxisVariance } from '@unpunnyfuns/swatchbook-core';
-
-const result = analyzeAxisVariance(
-  'color.accent.bg',
-  project.axes,
-  project.permutations,
-  project.permutationsResolved,
-);
-// result.kind: 'constant' | 'single' | 'multi'
-// result.varyingAxes: axes whose contexts change this token
-// result.perAxis: per-axis contexts → stringified resolved values
+const info = project.varianceByPath.get('color.accent.bg');
+// info?.kind: 'constant' | 'single' | 'multi'
+// info?.varyingAxes: axes whose contexts change this token
+// info?.perAxis: per-axis contexts → stringified resolved values
 ```
 
-Returns an [`AxisVarianceResult`](#axisvarianceresult). Available as a subpath import too: `import { analyzeAxisVariance } from '@unpunnyfuns/swatchbook-core/variance'` — useful for tree-shaking when only variance analysis is needed.
+See [`AxisVarianceResult`](#axisvarianceresult) for the entry shape.
 
 ### `projectCss(project)`
 
@@ -271,7 +264,7 @@ type DiagnosticSeverity = 'error' | 'warn' | 'info';
 
 ### `AxisVarianceResult`
 
-Returned by [`analyzeAxisVariance`](#analyzeaxisvariancepath-axes-permutations-permutationsresolved). `kind` classifies the overall variance shape; `perAxis` records the resolved value seen in each context with other axes held at their defaults.
+Each entry of [`project.varianceByPath`](#projectvariancebypath). `kind` classifies the overall variance shape; `perAxis` records the resolved value seen in each context with other axes held at their defaults.
 
 ```ts
 interface AxisVarianceResult {

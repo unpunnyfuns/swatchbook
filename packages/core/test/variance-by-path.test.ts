@@ -1,14 +1,10 @@
 // `Project.varianceByPath` caches per-path variance analysis so
 // consumers can O(1) look up which axes affect a token. These tests
 // pin the shape (every resolved path is covered) and the per-kind
-// classification for representative tokens. The exact parity with
-// the legacy cartesian-bucket `analyzeAxisVariance` is gone — the
-// pair-only resolver probe in `probeJointOverrides` catches the
-// common cases (singleton variance + pair-level joint touching)
-// but conservatively misses some joint variance that's only visible
-// across three or more axes' combinations. Documented limitation;
-// the smart emitter continues to emit compound blocks for any
-// genuinely divergent tuple, so output correctness is preserved.
+// classification for representative tokens. The resolver probe in
+// `probeJointOverrides` is bounded by axis cardinality; the smart
+// emitter continues to emit compound blocks for any genuinely
+// divergent tuple, so output correctness is preserved.
 import { beforeAll, expect, it } from 'vitest';
 import type { Project } from '#/types.ts';
 import { loadWithPrefix } from './_helpers.ts';

@@ -5,12 +5,12 @@ export { loadProject } from '#/load.ts';
 export { emitAxisProjectedCss } from '#/css-axis-projected.ts';
 export { jointOverrideKey } from '#/joint-overrides.ts';
 export { permutationID } from '#/types.ts';
-export { analyzeAxisVariance, type AxisVarianceResult, type VarianceKind } from '#/variance.ts';
 export { type ListedToken, type TokenListingByPath } from '#/token-listing.ts';
 
 export type {
   Axis,
   AxisConfig,
+  AxisVarianceResult,
   Cells,
   Config,
   Diagnostic,
@@ -24,4 +24,5 @@ export type {
   ResolveAt,
   SwatchbookIntegration,
   TokenMap,
+  VarianceKind,
 } from '#/types.ts';
