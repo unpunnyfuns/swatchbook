@@ -1,6 +1,5 @@
 import type { TokenNormalized } from '@terrazzo/parser';
 import type { Axis, Project, TokenMap } from '#/types.ts';
-import { analyzeAxisVariance } from '#/variance.ts';
 
 /**
  * Per-token variance classification across a loaded project's axes.
@@ -156,10 +155,14 @@ export function analyzeProjectVariance(project: Project): Map<string, VarianceIn
     }
   }
 
+  // Use the project's cached per-path variance instead of re-running
+  // the bucket analysis. The cache is populated at load time using the
+  // same algorithm `analyzeAxisVariance` exposes; reading it lets the
+  // smart emitter avoid quadratic-in-path bucket work per build.
   const touchingByPath = new Map<string, Set<string>>();
   for (const path of allPaths) {
-    const varianceResult = analyzeAxisVariance(path, axes, permutations, permutationsResolved);
-    touchingByPath.set(path, new Set(varianceResult.varyingAxes));
+    const cached = project.varianceByPath.get(path);
+    touchingByPath.set(path, new Set(cached?.varyingAxes ?? []));
   }
 
   // Partition + Phase 3 (joint probe for multi-touch only). Phase 3 needs

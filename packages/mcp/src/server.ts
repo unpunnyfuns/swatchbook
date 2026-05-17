@@ -1,5 +1,5 @@
 import type { Project } from '@unpunnyfuns/swatchbook-core';
-import { analyzeAxisVariance, projectCss } from '@unpunnyfuns/swatchbook-core';
+import { projectCss } from '@unpunnyfuns/swatchbook-core';
 import { fuzzyFilter, fuzzyMatches } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
@@ -371,9 +371,9 @@ export function createServer(initial: Project): McpServer & {
       if (project.permutations.length === 0) return textResult('No permutations in project.');
       const exists = project.permutations.some((t) => project.permutationsResolved[t.name]?.[path]);
       if (!exists) return textResult(`Token not found in any theme: ${path}`);
-      return jsonResult(
-        analyzeAxisVariance(path, project.axes, project.permutations, project.permutationsResolved),
-      );
+      const cached = project.varianceByPath.get(path);
+      if (!cached) return textResult(`Token not found in any theme: ${path}`);
+      return jsonResult(cached);
     },
   );
 

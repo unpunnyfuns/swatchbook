@@ -9,6 +9,7 @@ import { resolveDefaultTuple } from '#/permutations/default.ts';
 import { normalizePermutations } from '#/permutations/normalize.ts';
 import { buildResolveAt } from '#/resolve-at.ts';
 import { computeTokenListing } from '#/token-listing.ts';
+import { buildVarianceByPath } from '#/variance-by-path.ts';
 import {
   permutationID,
   type Axis,
@@ -156,6 +157,13 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
   );
   const resolveAt = buildResolveAt(filteredAxes, cells, jointOverrides, projectDefaultTuple);
 
+  // Pre-compute per-path variance so consumers can O(1) look up which
+  // axes affect a token. Same algorithm `analyzeAxisVariance` exposes
+  // today — bucketing the cartesian map. A later PR switches the
+  // implementation behind this accessor to an analytical probe over
+  // cells once the cartesian materialization goes away.
+  const varianceByPath = buildVarianceByPath(filteredAxes, filteredPermutations, filteredResolved);
+
   return {
     config: configWithDefaults,
     axes: filteredAxes,
@@ -169,6 +177,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     jointOverrides,
     defaultTuple: projectDefaultTuple,
     resolveAt,
+    varianceByPath,
     sourceFiles: normalized.sourceFiles,
     cwd,
     ...(normalized.parserInput !== undefined && { parserInput: normalized.parserInput }),
