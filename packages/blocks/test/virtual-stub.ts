@@ -14,3 +14,7 @@ export const diagnostics = [] as const;
 export const css = '';
 export const cssVarPrefix = '';
 export const listing = {} as const;
+export const cells = {} as const;
+export const jointOverrides = [] as const;
+export const varianceByPath = {} as const;
+export const defaultTuple = {} as const;

@@ -50,3 +50,12 @@ export const diagnostics = [] as const;
 export const css = '';
 export const cssVarPrefix = 'sb';
 export const listing = {};
+export const cells: Record<string, Record<string, Record<string, unknown>>> = {
+  mode: {
+    Light: permutationsResolved.Light ?? {},
+    Dark: permutationsResolved.Dark ?? {},
+  },
+};
+export const jointOverrides: readonly (readonly [string, unknown])[] = [];
+export const varianceByPath: Record<string, unknown> = {};
+export const defaultTuple: Record<string, string> = { mode: 'Light' };

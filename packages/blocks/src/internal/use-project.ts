@@ -1,6 +1,6 @@
 import { makeCSSVar } from '@terrazzo/token-tools/css';
 import { useEffect } from 'react';
-import type { VirtualTokenListingShape } from '#/contexts.ts';
+import type { VirtualTokenListingShape, VirtualVarianceByPathShape } from '#/contexts.ts';
 import { useActiveAxes, useActivePermutation, useOptionalSwatchbookData } from '#/contexts.ts';
 import { type ColorFormat, formatColor, type FormatColorResult } from '#/format-color.ts';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
@@ -31,6 +31,12 @@ export interface ProjectData {
    * preview strings from `listing[path].previewValue`.
    */
   listing: Readonly<Record<string, VirtualTokenListingShape>>;
+  /**
+   * Cached per-path `AxisVarianceResult` — blocks use this for O(1)
+   * variance lookup instead of re-running the bucket analysis. Empty
+   * for snapshots that pre-date the wire format change.
+   */
+  varianceByPath: VirtualVarianceByPathShape;
 }
 
 const STYLE_ELEMENT_ID = 'swatchbook-tokens';
@@ -79,6 +85,7 @@ function snapshotToData(snapshot: ProjectSnapshot): ProjectData {
     diagnostics: snapshot.diagnostics,
     cssVarPrefix: snapshot.cssVarPrefix,
     listing: snapshot.listing ?? {},
+    varianceByPath: snapshot.varianceByPath ?? {},
   };
 }
 
@@ -141,6 +148,7 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
     diagnostics: tokens.diagnostics,
     cssVarPrefix: tokens.cssVarPrefix,
     listing: tokens.listing,
+    varianceByPath: tokens.varianceByPath,
   };
 }
 

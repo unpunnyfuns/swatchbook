@@ -1,5 +1,4 @@
-import { analyzeAxisVariance } from '@unpunnyfuns/swatchbook-core/variance';
-import type { Axis, Permutation, TokenMap } from '@unpunnyfuns/swatchbook-core';
+import type { Axis, Permutation } from '@unpunnyfuns/swatchbook-core';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
@@ -19,24 +18,30 @@ interface Variance {
 }
 
 export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
-  const { token, cssVar, axes, permutations, permutationsResolved, activeAxes, cssVarPrefix } =
-    useTokenDetailData(path);
+  const {
+    token,
+    cssVar,
+    axes,
+    permutations,
+    permutationsResolved,
+    activeAxes,
+    cssVarPrefix,
+    varianceByPath,
+  } = useTokenDetailData(path);
   const colorFormat = useColorFormat();
   const tokenType = token?.$type;
   const isColor = tokenType === 'color';
   const formatFn = (t: DetailToken | undefined): string => valueFor(t, tokenType, colorFormat);
 
   const variance = useMemo<Variance>(() => {
-    // permutationsResolved is the only field needing a structural narrow —
-    // the block's `DetailToken` is a subset of core's `TokenNormalized`,
-    // so the wrapping record types differ even though the keys match.
-    const result = analyzeAxisVariance(
-      path,
-      axes,
-      permutations,
-      permutationsResolved as Record<string, TokenMap>,
-    );
-    // Map core's terse kind vocabulary to the block's display-ready one.
+    // Read the pre-computed per-path variance from the snapshot. The
+    // server side runs the bucket analysis once at load and ships the
+    // map over the wire — O(1) lookup per render instead of an O(paths
+    // × permutations) re-derivation here.
+    const result = varianceByPath[path];
+    if (!result) {
+      return { kind: 'constant', varyingAxes: [] };
+    }
     const kind =
       result.kind === 'constant'
         ? 'constant'
@@ -44,7 +49,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
           ? 'one-axis'
           : 'multi-axis';
     return { kind, varyingAxes: result.varyingAxes };
-  }, [path, axes, permutations, permutationsResolved]);
+  }, [path, varianceByPath]);
 
   if (permutations.length === 0) {
     return <></>;

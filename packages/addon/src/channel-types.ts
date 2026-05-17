@@ -61,6 +61,14 @@ export interface InitPayload {
   permutationsResolved: Record<string, Record<string, VirtualToken>>;
   diagnostics: readonly VirtualDiagnostic[];
   cssVarPrefix: string;
+  /** {@link VirtualCells} — additive companion to `permutationsResolved`. */
+  cells: VirtualCells;
+  /** {@link VirtualJointOverrides} — Map serialized as `[key, entry]` pairs. */
+  jointOverrides: VirtualJointOverrides;
+  /** {@link VirtualVarianceByPath} — cached `analyzeAxisVariance` per path. */
+  varianceByPath: VirtualVarianceByPath;
+  /** The project's default tuple — `{ axis: axis.default }` for each axis. */
+  defaultTuple: Record<string, string>;
 }
 
 export interface VirtualListingEntry {
@@ -74,3 +82,42 @@ export interface VirtualListingEntry {
     };
   };
 }
+
+/**
+ * Wire shape of `Project.cells` — one entry per `(axis, context)`,
+ * each carrying the resolved TokenMap. Plain object serialization;
+ * size is bounded by `Σ(axes × contexts) × tokens`, independent of
+ * the cartesian product.
+ */
+export type VirtualCells = Record<string, Record<string, Record<string, VirtualToken>>>;
+
+/**
+ * Wire shape of one `Project.jointOverrides` entry — a partial-tuple
+ * override patching specific token values that cell composition alone
+ * can't reproduce.
+ */
+export interface VirtualJointOverride {
+  axes: Record<string, string>;
+  tokens: Record<string, VirtualToken>;
+}
+
+/**
+ * Wire-friendly form of `Project.jointOverrides` — a Map serialized
+ * as an array of `[key, entry]` pairs so JSON round-trips don't drop
+ * the iteration order or the entry structure.
+ */
+export type VirtualJointOverrides = readonly (readonly [string, VirtualJointOverride])[];
+
+/**
+ * Wire shape of one cached `AxisVarianceResult` entry. Mirrors the
+ * core type but uses the local `VirtualToken`-style references.
+ */
+export interface VirtualVarianceEntry {
+  path: string;
+  kind: 'constant' | 'single' | 'multi';
+  varyingAxes: string[];
+  constantAcrossAxes: string[];
+  perAxis: Record<string, { varying: boolean; contexts: Record<string, string> }>;
+}
+
+export type VirtualVarianceByPath = Record<string, VirtualVarianceEntry>;

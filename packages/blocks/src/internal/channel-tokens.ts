@@ -2,16 +2,24 @@ import { useSyncExternalStore } from 'react';
 import { addons } from 'storybook/preview-api';
 import {
   axes as initialAxes,
+  cells as initialCells,
   css as initialCss,
   cssVarPrefix as initialCssVarPrefix,
   defaultPermutation as initialDefaultPermutation,
+  defaultTuple as initialDefaultTuple,
   diagnostics as initialDiagnostics,
+  jointOverrides as initialJointOverrides,
   listing as initialListing,
   permutations as initialPermutations,
   permutationsResolved as initialPermutationsResolved,
   presets as initialPresets,
+  varianceByPath as initialVarianceByPath,
 } from 'virtual:swatchbook/tokens';
-import type { VirtualTokenListingShape } from '#/contexts.ts';
+import type {
+  VirtualJointOverrideShape,
+  VirtualTokenListingShape,
+  VirtualVarianceByPathShape,
+} from '#/contexts.ts';
 import type { VirtualAxis, VirtualDiagnostic, VirtualPermutation, VirtualToken } from '#/types.ts';
 
 /**
@@ -47,6 +55,10 @@ export interface TokenSnapshot {
   readonly css: string;
   readonly cssVarPrefix: string;
   readonly listing: Readonly<Record<string, VirtualTokenListingShape>>;
+  readonly cells: Record<string, Record<string, Record<string, VirtualToken>>>;
+  readonly jointOverrides: readonly (readonly [string, VirtualJointOverrideShape])[];
+  readonly varianceByPath: VirtualVarianceByPathShape;
+  readonly defaultTuple: Record<string, string>;
   /** Monotonic counter, bumped on each update. Useful as a React key. */
   readonly version: number;
 }
@@ -61,6 +73,10 @@ let snapshot: TokenSnapshot = {
   css: initialCss,
   cssVarPrefix: initialCssVarPrefix,
   listing: initialListing ?? {},
+  cells: initialCells ?? {},
+  jointOverrides: initialJointOverrides ?? [],
+  varianceByPath: initialVarianceByPath ?? {},
+  defaultTuple: initialDefaultTuple ?? {},
   version: 0,
 };
 
@@ -82,6 +98,10 @@ function ensureSubscribed(): void {
       css: payload.css ?? snapshot.css,
       cssVarPrefix: payload.cssVarPrefix ?? snapshot.cssVarPrefix,
       listing: payload.listing ?? snapshot.listing,
+      cells: payload.cells ?? snapshot.cells,
+      jointOverrides: payload.jointOverrides ?? snapshot.jointOverrides,
+      varianceByPath: payload.varianceByPath ?? snapshot.varianceByPath,
+      defaultTuple: payload.defaultTuple ?? snapshot.defaultTuple,
       version: snapshot.version + 1,
     };
     for (const cb of listeners) cb();

@@ -103,6 +103,11 @@ export function swatchbookTokensPlugin({
       if (id !== RESOLVED_VIRTUAL_MODULE_ID) return null;
       if (!project) return 'export default null;';
       // Emit a typed ESM module. Values are JSON-stringified for stability.
+      // `jointOverrides` ships as an array of `[key, entry]` pairs because
+      // `Map` doesn't survive `JSON.stringify`; the block side reconstructs
+      // the Map (or just reads the array, depending on the consumer).
+      const jointOverridesArr = [...project.jointOverrides.entries()];
+      const varianceByPathObj = Object.fromEntries(project.varianceByPath.entries());
       return [
         `/* swatchbook virtual module — generated */`,
         `export const axes = ${JSON.stringify(project.axes)};`,
@@ -115,6 +120,10 @@ export function swatchbookTokensPlugin({
         `export const css = ${JSON.stringify(css)};`,
         `export const cssVarPrefix = ${JSON.stringify(config.cssVarPrefix ?? '')};`,
         `export const listing = ${JSON.stringify(slimListing(project.listing))};`,
+        `export const cells = ${JSON.stringify(project.cells)};`,
+        `export const jointOverrides = ${JSON.stringify(jointOverridesArr)};`,
+        `export const varianceByPath = ${JSON.stringify(varianceByPathObj)};`,
+        `export const defaultTuple = ${JSON.stringify(project.defaultTuple)};`,
       ].join('\n');
     },
 
@@ -180,6 +189,10 @@ export function swatchbookTokensPlugin({
                 css,
                 cssVarPrefix: config.cssVarPrefix ?? '',
                 listing: slimListing(project.listing),
+                cells: project.cells,
+                jointOverrides: [...project.jointOverrides.entries()],
+                varianceByPath: Object.fromEntries(project.varianceByPath.entries()),
+                defaultTuple: project.defaultTuple,
               },
             });
           })();

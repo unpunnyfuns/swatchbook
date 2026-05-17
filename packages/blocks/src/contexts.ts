@@ -1,4 +1,10 @@
-import type { Axis, Diagnostic, Permutation, Preset } from '@unpunnyfuns/swatchbook-core';
+import type {
+  Axis,
+  AxisVarianceResult,
+  Diagnostic,
+  Permutation,
+  Preset,
+} from '@unpunnyfuns/swatchbook-core';
 import { createContext, useContext } from 'react';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
 import type { ColorFormat } from '#/format-color.ts';
@@ -58,6 +64,23 @@ export interface VirtualTokenListingShape {
 export type VirtualPresetShape = Preset;
 
 /**
+ * Wire shape of one `Project.jointOverrides` entry — same as core's
+ * `JointOverride` but with the block's `VirtualTokenShape` for the
+ * token values that ship over the wire.
+ */
+export interface VirtualJointOverrideShape {
+  axes: Record<string, string>;
+  tokens: Record<string, VirtualTokenShape>;
+}
+
+/**
+ * Map from path → cached `AxisVarianceResult`. Snapshot carries this
+ * so the `AxisVariance` block can O(1) look up which axes affect a
+ * token instead of re-running `analyzeAxisVariance` on every render.
+ */
+export type VirtualVarianceByPathShape = Record<string, AxisVarianceResult>;
+
+/**
  * Full project data read by blocks. Populated by the addon's preview
  * decorator (from the virtual module) or constructed by hand in
  * non-Storybook consumers.
@@ -82,6 +105,30 @@ export interface ProjectSnapshot {
    * absent.
    */
   listing?: Readonly<Record<string, VirtualTokenListingShape>>;
+  /**
+   * Per-axis cell maps — `cells[axis][context]` is the resolved token
+   * data for `{ ...defaults, [axis]: context }`. Bounded by
+   * `Σ(axes × contexts)` regardless of cartesian product size.
+   * Optional during the chain rollout — empty fallback when the
+   * snapshot pre-dates the wire format change.
+   */
+  cells?: Record<string, Record<string, Record<string, VirtualTokenShape>>>;
+  /**
+   * `Project.jointOverrides` flattened to entries for wire transport.
+   * Same ascending-arity iteration order the Map carries on the
+   * server side.
+   */
+  jointOverrides?: readonly (readonly [string, VirtualJointOverrideShape])[];
+  /**
+   * Cached per-path variance results. Blocks read this for O(1) axis
+   * variance lookup instead of recomputing on each render.
+   */
+  varianceByPath?: VirtualVarianceByPathShape;
+  /**
+   * The default tuple — `{ axis: axis.default }` for every axis.
+   * Replaces the legacy "look at `permutations[0].input`" pattern.
+   */
+  defaultTuple?: Record<string, string>;
 }
 
 /**

@@ -1,4 +1,5 @@
 import type { Axis, Permutation } from '@unpunnyfuns/swatchbook-core';
+import type { VirtualVarianceByPathShape } from '#/contexts.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface DetailToken {
@@ -29,6 +30,7 @@ export interface TokenDetailData {
   permutationsResolved: Record<string, Record<string, DetailToken>>;
   resolved: Record<string, DetailToken>;
   cssVarPrefix: string;
+  varianceByPath: VirtualVarianceByPathShape;
 }
 
 export function useTokenDetailData(path: string): TokenDetailData {
@@ -41,6 +43,7 @@ export function useTokenDetailData(path: string): TokenDetailData {
     permutationsResolved,
     resolved,
     cssVarPrefix,
+    varianceByPath,
   } = project;
   const typedResolved = resolved as Record<string, DetailToken>;
   return {
@@ -53,5 +56,6 @@ export function useTokenDetailData(path: string): TokenDetailData {
     permutationsResolved: permutationsResolved as Record<string, Record<string, DetailToken>>,
     resolved: typedResolved,
     cssVarPrefix,
+    varianceByPath,
   };
 }
