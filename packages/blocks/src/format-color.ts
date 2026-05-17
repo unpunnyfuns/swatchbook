@@ -88,7 +88,8 @@ function coerce(value: unknown): NormalizedColor | null {
     return null;
   }
   const alpha = typeof v.alpha === 'number' ? v.alpha : undefined;
-  const hex = typeof v['hex'] === 'string' ? (v['hex'] as string) : undefined;
+  const hexVal = v['hex'];
+  const hex = typeof hexVal === 'string' ? hexVal : undefined;
   return {
     colorSpace,
     components,

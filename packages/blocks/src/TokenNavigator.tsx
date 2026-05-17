@@ -86,7 +86,8 @@ function buildTree(
 
     let node: GroupNode = rootNode;
     for (let i = 0; i < segments.length - 1; i += 1) {
-      const seg = segments[i] as string;
+      const seg = segments[i];
+      if (seg === undefined) continue;
       const prefix = [...rootSegments, ...segments.slice(0, i + 1)].join('.');
       let child = node.children.find(
         (c): c is GroupNode => c.kind === 'group' && c.segment === seg,

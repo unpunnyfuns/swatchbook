@@ -106,9 +106,18 @@ function AxesToolbar(): ReactElement {
   const presets = payload?.presets ?? EMPTY_PRESETS;
   const defaults = useMemo(() => defaultTupleFor(axes), [axes]);
   const [lastApplied, setLastApplied] = useState<string | null>(null);
-  const globalTuple = globals[AXES_GLOBAL_KEY] as Record<string, string> | undefined;
-  const activeColorFormat = ((globals[COLOR_FORMAT_GLOBAL_KEY] as string | undefined) ??
-    'hex') as ColorFormat;
+  const rawTuple = globals[AXES_GLOBAL_KEY];
+  const globalTuple =
+    rawTuple && typeof rawTuple === 'object' ? (rawTuple as Record<string, string>) : undefined;
+  const rawColorFormat = globals[COLOR_FORMAT_GLOBAL_KEY];
+  const activeColorFormat: ColorFormat =
+    rawColorFormat === 'hex' ||
+    rawColorFormat === 'rgb' ||
+    rawColorFormat === 'hsl' ||
+    rawColorFormat === 'oklch' ||
+    rawColorFormat === 'raw'
+      ? rawColorFormat
+      : 'hex';
 
   const activeTuple = useMemo<Record<string, string>>(() => {
     const out: Record<string, string> = { ...defaults };

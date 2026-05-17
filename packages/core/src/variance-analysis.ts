@@ -198,7 +198,8 @@ export function analyzeProjectVariance(project: Project): Map<string, VarianceIn
     }
     if (touching.size === 1) {
       const [axis] = touching;
-      result.set(path, { kind: 'single-axis', axis: axis as string });
+      if (axis === undefined) continue;
+      result.set(path, { kind: 'single-axis', axis });
       continue;
     }
     const jointCases = jointCasesByPath.get(path) ?? [];

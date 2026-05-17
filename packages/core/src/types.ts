@@ -375,8 +375,9 @@ export interface ParserInput {
  */
 export function permutationID(input: Record<string, string>): string {
   const values = Object.values(input);
-  if (values.length === 0) return '';
-  if (values.length === 1) return values[0] as string;
+  const [first, ...rest] = values;
+  if (first === undefined) return '';
+  if (rest.length === 0) return first;
   return values.join(' · ');
 }
 
