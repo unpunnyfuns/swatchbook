@@ -1,3 +1,13 @@
+/**
+ * Browser-safe `resolveAt` builder. Exported through the
+ * `@unpunnyfuns/swatchbook-core/resolve-at` subpath so the preview
+ * + blocks can import it without pulling in the Terrazzo parser
+ * (which the main `@unpunnyfuns/swatchbook-core` barrel transitively
+ * depends on and which is Node-only). The subpath split is
+ * load-bearing for the addon's preview bundle and any browser
+ * consumer that needs to compose tokens at any tuple without
+ * shipping `@terrazzo/parser` to the client.
+ */
 import type { Axis, Cells, JointOverrides, ResolveAt, TokenMap } from '#/types.ts';
 
 /**

@@ -1,3 +1,10 @@
+/**
+ * Browser-safe fuzzy search helper. Exported through the
+ * `@unpunnyfuns/swatchbook-core/fuzzy` subpath so the MCP server
+ * + future browser consumers can use it without pulling in the
+ * Terrazzo parser. Single transitive dep (`@leeoniya/ufuzzy`),
+ * zero Node API usage.
+ */
 import uFuzzy from '@leeoniya/ufuzzy';
 
 export interface FuzzyOptions {
