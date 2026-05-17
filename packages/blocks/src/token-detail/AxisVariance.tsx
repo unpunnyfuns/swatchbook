@@ -1,4 +1,4 @@
-import type { Axis, Permutation } from '@unpunnyfuns/swatchbook-core';
+import type { Axis } from '@unpunnyfuns/swatchbook-core';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
@@ -18,8 +18,17 @@ interface Variance {
 }
 
 export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
-  const { token, cssVar, axes, permutations, activeAxes, cssVarPrefix, varianceByPath, resolveAt } =
-    useTokenDetailData(path);
+  const {
+    token,
+    cssVar,
+    axes,
+    permutations,
+    activeAxes,
+    cssVarPrefix,
+    varianceByPath,
+    resolveAt,
+    permutationNameForTuple,
+  } = useTokenDetailData(path);
   const colorFormat = useColorFormat();
   const tokenType = token?.$type;
   const isColor = tokenType === 'color';
@@ -82,7 +91,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
     if (!axis) return <></>;
     const contextValues = axis.contexts.map((ctx) => {
       const target = { ...activeAxes, [axisName]: ctx };
-      const themeName = tupleName(permutations, target) ?? '';
+      const themeName = permutationNameForTuple(target) ?? '';
       return {
         ctx,
         themeName,
@@ -162,7 +171,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                   [rowAxis.name]: row,
                   [colAxis.name]: col,
                 };
-                const name = tupleName(permutations, target);
+                const name = permutationNameForTuple(target);
                 const value = formatFn(resolveAt(target)[path] as DetailToken | undefined);
                 return (
                   <td
@@ -204,16 +213,4 @@ function valueFor(
 ): string {
   if (!token) return '—';
   return formatTokenValue(token.$value, $type, format);
-}
-
-function tupleName(
-  permutations: readonly Permutation[],
-  tuple: Record<string, string>,
-): string | undefined {
-  const match = permutations.find((t) => {
-    const input = t.input;
-    const keys = Object.keys(input);
-    return keys.every((k) => input[k] === tuple[k]);
-  });
-  return match?.name;
 }

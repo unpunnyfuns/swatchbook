@@ -53,6 +53,15 @@ export interface ProjectData {
    * (`AxisVariance` grid cells, future per-tuple block displays).
    */
   resolveAt: (tuple: Record<string, string>) => ResolvedTokens;
+  /**
+   * Look up the permutation name for a full tuple — `O(1)` against a
+   * `Map<canonicalKey, name>` built once per snapshot. Returns
+   * `undefined` when no permutation matches. Consumers that previously
+   * did `permutations.find(...)` per grid cell should use this
+   * instead to avoid quadratic-in-cell work as permutation counts
+   * grow.
+   */
+  permutationNameForTuple: (tuple: Record<string, string>) => string | undefined;
 }
 
 const STYLE_ELEMENT_ID = 'swatchbook-tokens';
@@ -71,6 +80,34 @@ function ensureStylesheet(css: string): void {
 function defaultTuple(axes: readonly VirtualAxis[]): Record<string, string> {
   const out: Record<string, string> = {};
   for (const axis of axes) out[axis.name] = axis.default;
+  return out;
+}
+
+/**
+ * Stable string key for a tuple — axes sorted by name + `:` separator.
+ * Matches the key form `buildResolveAt` uses in core so both surfaces
+ * agree on what counts as "the same tuple."
+ */
+function canonicalTupleKey(tuple: Readonly<Record<string, string>>): string {
+  return Object.keys(tuple)
+    .toSorted()
+    .map((k) => `${k}:${tuple[k]}`)
+    .join('|');
+}
+
+/**
+ * Build a `Map<canonicalKey, permutationName>` once per permutations
+ * list so per-tuple lookups go through O(1) `Map.get` instead of an
+ * `Array.prototype.find` scan per call. Bounded by the permutations
+ * count regardless of how many lookups consumers do.
+ */
+function buildPermutationNameByTuple(
+  permutations: readonly VirtualPermutation[],
+): ReadonlyMap<string, string> {
+  const out = new Map<string, string>();
+  for (const perm of permutations) {
+    out.set(canonicalTupleKey(perm.input as Record<string, string>), perm.name);
+  }
   return out;
 }
 
@@ -184,9 +221,13 @@ export function useProject(): ProjectData {
     permutationsResolved,
     activePermutation,
   ]);
+  const permutationNameByTuple = useMemo(
+    () => buildPermutationNameByTuple(permutations ?? []),
+    [permutations],
+  );
   const fallback = useVirtualModuleFallback(snapshot === null);
   if (snapshot !== null && resolveAt !== null) {
-    return snapshotToData(snapshot, resolveAt);
+    return snapshotToData(snapshot, resolveAt, permutationNameByTuple);
   }
   return fallback;
 }
@@ -194,6 +235,7 @@ export function useProject(): ProjectData {
 function snapshotToData(
   snapshot: ProjectSnapshot,
   resolveAt: (tuple: Record<string, string>) => ResolvedTokens,
+  permutationNameByTuple: ReadonlyMap<string, string>,
 ): ProjectData {
   return {
     activePermutation: snapshot.activePermutation,
@@ -211,6 +253,7 @@ function snapshotToData(
     listing: snapshot.listing ?? {},
     varianceByPath: snapshot.varianceByPath ?? {},
     resolveAt,
+    permutationNameForTuple: (tuple) => permutationNameByTuple.get(canonicalTupleKey(tuple)),
   };
 }
 
@@ -261,6 +304,10 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
     [tokens.axes, tokens.cells, tokens.jointOverrides, tokens.defaultTuple],
   );
   const resolved = resolveAt(activeAxes);
+  const permutationNameByTuple = useMemo(
+    () => buildPermutationNameByTuple(tokens.permutations),
+    [tokens.permutations],
+  );
 
   return {
     activePermutation,
@@ -274,6 +321,7 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
     listing: tokens.listing,
     varianceByPath: tokens.varianceByPath,
     resolveAt,
+    permutationNameForTuple: (tuple) => permutationNameByTuple.get(canonicalTupleKey(tuple)),
   };
 }
 
