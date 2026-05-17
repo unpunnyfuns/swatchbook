@@ -1,10 +1,13 @@
+import { buildCells } from '#/cells.ts';
 import { validateChrome } from '#/chrome.ts';
 import { BufferedLogger, toDiagnostics } from '#/diagnostics.ts';
 import { validateDisabledAxes } from '#/disabled-axes.ts';
+import { buildJointOverrides } from '#/joint-overrides.ts';
 import { fillPresetTuple, validatePresets } from '#/presets.ts';
 import { validateCssOptions } from '#/terrazzo-options.ts';
 import { resolveDefaultTuple } from '#/permutations/default.ts';
 import { normalizePermutations } from '#/permutations/normalize.ts';
+import { buildResolveAt } from '#/resolve-at.ts';
 import { computeTokenListing } from '#/token-listing.ts';
 import {
   permutationID,
@@ -121,6 +124,38 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
         )
       : { listing: {}, diagnostics: [] };
 
+  // Build the cells / jointOverrides / resolveAt surface alongside the
+  // existing cartesian shape. Additive only — downstream consumers can
+  // migrate to the new fields without breaking until a follow-up PR
+  // drops the cartesian materialization. `defaultTuple` here is the
+  // post-disabledAxes-filter version, matching what `cells` is keyed
+  // against.
+  const projectDefaultTuple: Record<string, string> = {};
+  for (const axis of filteredAxes) projectDefaultTuple[axis.name] = axis.default;
+
+  const cells = buildCells(
+    filteredAxes,
+    filteredPermutations,
+    filteredResolved,
+    projectDefaultTuple,
+  );
+
+  // Exhaustive cartesian-divergence probe — for every non-baseline
+  // permutation, compose via cells alone and record any divergent
+  // tokens as a joint override keyed by the permutation's non-default
+  // partial tuple. Guarantees `resolveAt` is exactly equivalent to
+  // `permutationsResolved` for every cartesian tuple. The follow-up
+  // that drops the cartesian map replaces this with an analytical
+  // probe over the resolver directly.
+  const jointOverrides = buildJointOverrides(
+    filteredAxes,
+    filteredPermutations,
+    filteredResolved,
+    cells,
+    projectDefaultTuple,
+  );
+  const resolveAt = buildResolveAt(filteredAxes, cells, jointOverrides, projectDefaultTuple);
+
   return {
     config: configWithDefaults,
     axes: filteredAxes,
@@ -130,6 +165,10 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     permutations: filteredPermutations,
     permutationsResolved: filteredResolved,
     graph,
+    cells,
+    jointOverrides,
+    defaultTuple: projectDefaultTuple,
+    resolveAt,
     sourceFiles: normalized.sourceFiles,
     cwd,
     ...(normalized.parserInput !== undefined && { parserInput: normalized.parserInput }),
