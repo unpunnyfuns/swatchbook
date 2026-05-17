@@ -43,12 +43,15 @@ Everything flows through one shape: `Project` in `packages/core/src/types.ts`.
 interface Project {
   config: Config;              // the resolved user config
   axes: Axis[];                // axes driving composition (mode, brand, contrast…)
-  disabledAxes: DisabledAxis[];// axes the consumer explicitly suppressed
-  presets: Preset[];           // named quick-select axis tuples
+  disabledAxes: readonly string[]; // axes the consumer explicitly suppressed
+  presets: readonly Preset[];  // named quick-select axis tuples
   chrome: Record<string, string>; // block-chrome → consumer-token alias map
-  permutations: Permutation[]; // cartesian product of axis contexts
-  permutationsResolved: Record<string, TokenMap>; // permutation.name → resolved tokens
-  graph: TokenMap;             // default permutation's resolved tokens
+  defaultTokens: TokenMap;     // resolved tokens at the default tuple
+  cells: Cells;                // per-axis (context → TokenMap) cells, bounded by Σ(axes × contexts)
+  jointOverrides: JointOverrides; // partial-tuple divergences cells composition can't reproduce
+  defaultTuple: Record<string, string>; // axis defaults
+  resolveAt: (tuple: Record<string, string>) => TokenMap; // compose any tuple
+  varianceByPath: ReadonlyMap<string, AxisVarianceResult>; // O(1) per-token variance lookup
   sourceFiles: string[];       // every file that fed the build (for watchers)
   cwd: string;                 // loader cwd — config-relative paths resolve here
   diagnostics: Diagnostic[];   // parser / validator / resolver findings
@@ -57,7 +60,7 @@ interface Project {
 
 Properties:
 
-- **Permutations are eagerly resolved.** `project.permutationsResolved[name]` is ready at load time — no lazy I/O.
+- **Tokens are bounded by axis cardinality, not cartesian size.** `cells` carries `Σ(axes × contexts)` resolved TokenMaps; `jointOverrides` carries only the partial-tuple divergences cells composition can't reproduce. `resolveAt(tuple)` composes any tuple on demand — no resolver calls at read time.
 - **`sourceFiles` is the canonical watch set.** The addon's Vite plugin and the MCP server both use it to decide what to watch for HMR / live-reload.
 - **Diagnostics flow as data, not exceptions.** Parse errors, unresolved aliases, invalid preset axis values — all land in `project.diagnostics` with a severity. The `<Diagnostics />` block renders them.
 - **One axis type.** `Axis.source` is `'resolver'` (DTCG resolver modifier), `'layered'` (authored per-axis layer globs), or `'synthetic'` (single-axis fallback for projects without a resolver or layers). Everything downstream treats them uniformly.
@@ -80,7 +83,7 @@ interface SwatchbookIntegration {
 
 The addon's Vite plugin iterates `integrations[]`, resolves each `virtualId`, serves whatever `render(project)` produces, and invalidates every integration-contributed module on HMR alongside `virtual:swatchbook/tokens`. The addon itself learns nothing about Tailwind, emotion, or anything else — integrations own their library-specific logic.
 
-The `Project` snapshot passed to `render` carries everything: axes, permutations, presets, resolved maps, `cssVarPrefix`. See the [Integrations guide](../guides/integrations/index.mdx) for factory usage.
+The `Project` snapshot passed to `render` carries everything: axes, cells, joint overrides, presets, `defaultTokens`, `resolveAt`, `cssVarPrefix`. See the [Integrations guide](../guides/integrations/index.mdx) for factory usage.
 
 ## Data flow — static build path
 
@@ -93,15 +96,18 @@ tokens/resolver.json
        ↓
      Project                       ← the one shape
        ↓
-   projectCss(project)             ← packages/core/src/css.ts
+   emitAxisProjectedCss(project)   ← packages/core/src/css-axis-projected.ts
        ↓
  :root { --prefix-color-…: … }
  [data-prefix-mode="Dark"] { … }
+ [data-prefix-mode="Dark"][data-prefix-brand="Brand A"] { … }
 ```
 
 The same `Project` also feeds:
 
-- `resolvePermutation(project, name)` — look up a single theme's resolved tokens
+- `project.resolveAt(tuple)` — compose the resolved TokenMap for any axis tuple
+- `project.defaultTokens` — the default-tuple snapshot for global views
+- `project.varianceByPath` — O(1) per-token variance classification
 - `project.diagnostics` — the `<Diagnostics />` block reads this
 - the MCP server's tool handlers (all twelve read straight from the project)
 - TypeScript type emission (via Terrazzo's token-tools; not currently exposed as a CLI)

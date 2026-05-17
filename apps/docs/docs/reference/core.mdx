@@ -32,32 +32,33 @@ export default defineSwatchbookConfig({
 
 ### `loadProject(config, cwd?)`
 
-Parse + resolve a project. Eagerly resolves every permutation, so downstream consumers can read `permutationsResolved[name]` directly without further I/O.
+Parse + resolve a project. Returns a `Project` carrying per-axis cells, joint overrides, and a `resolveAt(tuple)` accessor — no resolver calls happen at consumer-read time.
 
 ```ts
 import { loadProject } from '@unpunnyfuns/swatchbook-core';
 
 const project = await loadProject(config, process.cwd());
-// project: { config, axes, presets, permutations, permutationsResolved, graph, diagnostics }
+// project: { config, axes, presets, cells, jointOverrides, defaultTuple,
+//            defaultTokens, resolveAt, varianceByPath, diagnostics, … }
 ```
 
-### `resolvePermutation(project, name)`
+### `project.resolveAt(tuple)`
 
-Pick a single composed permutation out of a project.
+Compose the resolved `TokenMap` for any axis tuple. Pure function over `cells + jointOverrides + axes + defaultTuple`; accepts partial tuples (omitted axes fall back to their defaults). Memoized on the tuple key.
 
 ```ts
-const { tokens } = resolvePermutation(project, 'Light · Default');
+const dark = project.resolveAt({ mode: 'Dark' });
+const darkBrand = project.resolveAt({ mode: 'Dark', brand: 'Brand A' });
 ```
 
-Throws with a helpful "known permutations" message if the name is unknown.
+### `project.defaultTokens`
 
-### `permutationID(input)`
-
-Stringify a tuple to the form used as `Permutation.name` and CSS data-attribute values:
+The resolved `TokenMap` at the project's default tuple. Convenience for global views.
 
 ```ts
-permutationID({ mode: 'Dark', brand: 'Brand A' }); // → "Dark · Brand A"
-permutationID({ theme: 'Light' }); // → "Light"
+for (const [path, token] of Object.entries(project.defaultTokens)) {
+  // …
+}
 ```
 
 ### `project.varianceByPath`
@@ -73,20 +74,20 @@ const info = project.varianceByPath.get('color.accent.bg');
 
 See [`AxisVarianceResult`](#axisvarianceresult) for the entry shape.
 
-### `projectCss(project)`
+### `emitAxisProjectedCss(project, options?)`
 
-Emit the project's resolved CSS as a string — the same output the addon publishes into `virtual:swatchbook/tokens` at preview time. Each permutation gets its own `[data-sb-<axis>="<context>"]` selector block; the default permutation's tokens are also written to `:root`.
+Emit the project's resolved CSS as a string — the same output the addon publishes into `virtual:swatchbook/tokens` at preview time. Each per-axis non-default cell gets its own `[data-<prefix>-<axis>="<context>"]` selector block; the default cell's tokens are written to `:root`; joint-divergent tokens get compound `[data-axis-A][data-axis-B]` blocks. Size bounded by `Σ(axes × contexts)` regardless of cartesian product size.
 
 ```ts
-import { loadProject, projectCss } from '@unpunnyfuns/swatchbook-core';
+import { loadProject, emitAxisProjectedCss } from '@unpunnyfuns/swatchbook-core';
 
 const project = await loadProject(config, process.cwd());
-const css = projectCss(project);
+const css = emitAxisProjectedCss(project);
 // :root { --sb-color-accent-bg: …; … }
 // [data-sb-mode="Dark"] { --sb-color-accent-bg: …; }
 ```
 
-For consumers building docs sites, the docs apps under `apps/docs/` use this same call to feed Docusaurus's Infima theme. For production builds, prefer Terrazzo's CLI — `projectCss` exists primarily for tooling that wants the same emission the addon does.
+For production builds, prefer Terrazzo's CLI — `emitAxisProjectedCss` exists primarily for tooling that wants the same emission the addon does.
 
 ## Constants
 
@@ -187,9 +188,18 @@ interface Project {
   presets: Preset[];
   /** Validated chrome-alias entries from `config.chrome`. Invalid entries are dropped and reported as diagnostics. */
   chrome: Record<string, string>;
-  permutations: Permutation[];
-  permutationsResolved: Record<string, TokenMap>;
-  graph: TokenMap; // default permutation's resolved tokens
+  /** Resolved TokenMap at the default tuple. Convenience for global views. */
+  defaultTokens: TokenMap;
+  /** Per-axis cell maps: `cells[axisName][contextName]` is the resolved TokenMap for `{ ...defaults, [axisName]: contextName }`. */
+  cells: Cells;
+  /** Joint-variant partial-tuple overrides — values that diverge from cells composition. */
+  jointOverrides: JointOverrides;
+  /** Axis defaults — `{ axisName: axis.default }` for every axis. */
+  defaultTuple: Record<string, string>;
+  /** Compose the resolved TokenMap for any tuple of axis selections. */
+  resolveAt: (tuple: Record<string, string>) => TokenMap;
+  /** Pre-computed per-path variance classification (O(1) lookup). */
+  varianceByPath: ReadonlyMap<string, AxisVarianceResult>;
   /** Absolute paths of every file loaded while building the project (resolver + `$ref` targets, overlay files, or globbed plain-parse files). */
   sourceFiles: string[];
   /** Loader cwd — what all config-relative paths resolved against. */
@@ -331,4 +341,4 @@ interface ParserInput {
 
 - ✅ Use this package at build time — Node scripts, SSR, Storybook presets. It has no DOM dependency.
 - ❌ Don't import from `@terrazzo/parser` directly unless you need features core doesn't expose.
-- ❌ Don't ship `Project` objects to the browser — they carry full raw-AST references. Use `permutationsResolved` projections instead.
+- ❌ Don't ship `Project` objects to the browser — they carry full raw-AST references on `parserInput`. Ship the cells / `defaultTokens` projections instead (the addon's virtual module does exactly this).
