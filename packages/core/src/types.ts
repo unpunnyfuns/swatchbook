@@ -6,6 +6,44 @@ import type { TokenListingByPath } from '#/token-listing.ts';
 
 export type TokenMap = Record<string, TokenNormalized>;
 
+/**
+ * Per-axis cell maps. `cells[axisName][contextName]` is the resolved
+ * `TokenMap` for `{ ...defaults, [axisName]: contextName }` — the
+ * single-attribute slice of the resolver's modifier space. Size is
+ * bounded by `Σ(axes × contexts)`, independent of the cartesian
+ * product. Forms the primary input to `composeAt` / `resolveAt`.
+ */
+export type Cells = Record<string, Record<string, TokenMap>>;
+
+/**
+ * One divergent partial tuple identified by `analyzeProjectVariance`.
+ * A combination of axis selections at which the resolver's resolved
+ * value diverges from cascade composition over `cells` — kept around
+ * so `composeAt` can patch the divergence back in.
+ */
+export interface JointOverride {
+  /** axisName → contextName for the divergent combination (at any arity ≥ 2). */
+  axes: Record<string, string>;
+  /** Only the tokens whose resolved value at this tuple diverges from cascade composition. */
+  tokens: TokenMap;
+}
+
+/**
+ * All joint-variant overrides for a project, keyed by canonical
+ * stringification of `JointOverride.axes`. Iteration order is
+ * ascending arity so higher-order divergences win over lower-order
+ * ones when applied in sequence.
+ */
+export type JointOverrides = ReadonlyMap<string, JointOverride>;
+
+/**
+ * Compute the resolved `TokenMap` for any tuple of axis selections
+ * without touching the resolver. Pure function over `cells +
+ * jointOverrides + axes + defaultTuple`; accepts partial tuples
+ * (missing axes fall back to their defaults).
+ */
+export type ResolveAt = (tuple: Record<string, string>) => TokenMap;
+
 /** A single permutation of the resolver's modifier space — one entry per cartesian-product tuple. */
 export interface Permutation {
   name: string;
@@ -201,6 +239,35 @@ export interface Project {
   permutationsResolved: Record<string, TokenMap>;
   /** Default permutation's resolved tokens — convenience for global views. */
   graph: TokenMap;
+  /**
+   * Per-axis resolved `TokenMap`s — `cells[axisName][contextName]` is
+   * the resolved tokens for `{ ...defaultTuple, [axisName]: contextName }`.
+   * Bounded by `Σ(axes × contexts)`, independent of the cartesian
+   * product. The primary input to {@link resolveAt}.
+   */
+  cells: Cells;
+  /**
+   * Joint-variant partial-tuple overrides — token values that diverge
+   * from cascade composition over `cells` and need to be patched in
+   * by {@link resolveAt}. Currently extracted from the pair-only joint
+   * cases identified by `analyzeProjectVariance`; extends to N-order
+   * in a follow-up.
+   */
+  jointOverrides: JointOverrides;
+  /**
+   * The default tuple — `{ axisName: axis.default }` for every axis,
+   * after `disabledAxes` filtering and any `config.default` overrides
+   * applied. Replaces the legacy "look at `permutations[0].input`"
+   * pattern for downstream consumers.
+   */
+  defaultTuple: Record<string, string>;
+  /**
+   * Compose the resolved `TokenMap` for any tuple of axis selections.
+   * Pure function over `cells + jointOverrides + axes + defaultTuple`,
+   * memoized on the tuple key. Partial tuples are allowed — missing
+   * axes fall back to their defaults.
+   */
+  resolveAt: ResolveAt;
   /**
    * Absolute paths of every file loaded while building the project —
    * the resolver file (if any), every `$ref` target it pulled in, every
