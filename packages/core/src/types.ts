@@ -136,20 +136,6 @@ export interface Config {
    */
   disabledAxes?: string[];
   /**
-   * Hard cap on the cartesian-product permutation count loaded
-   * eagerly by the **layered** loader (`config.axes`). Default
-   * `1024`. When exceeded, `loadLayeredPermutations` falls back to
-   * the default tuple only and surfaces a
-   * `swatchbook/permutations` warn diagnostic.
-   *
-   * The resolver path is **unaffected** — its enumeration is
-   * intrinsically bounded by `Σ(axes × contexts)` regardless of
-   * the cartesian size. The option may be removed in a future
-   * release once layered loading also moves off cartesian
-   * enumeration.
-   */
-  maxPermutations?: number;
-  /**
    * Map from swatchbook block chrome roles (the closed set in `CHROME_PATHS`
    * — e.g. `color.surface.default`, `color.text.default`) to token paths in
    * the consumer's project. Each entry emits a `:root` alias

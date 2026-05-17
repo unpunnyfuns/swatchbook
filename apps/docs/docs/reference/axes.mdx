@@ -89,17 +89,14 @@ A resolver may declare more modifiers than a given Storybook wants to surface. L
 
 ## Scoping large modifier spaces
 
-A resolver enumerates the cartesian product of every modifier's contexts. For projects that use modifiers as **presentational space** (mode × brand × contrast — what's worth rendering side by side), the product stays small. For projects that use modifiers as **state space** (locale × density × motion-pref × keyboard-layout × …), it can reach millions. Swatchbook isn't designed to render a state-space product — the toolbar would have to surface every combination, and the consumer-side CSS would emit one selector block per tuple.
+`loadProject` enumerates `1 + Σ(axes × (contexts - 1))` singleton tuples per project — the default tuple plus one per non-default cell on each axis. Bounded by axis cardinality, independent of the cartesian product, so a resolver with 20 axes × 5 contexts loads ~80 tuples regardless of whether the underlying cartesian is hundreds or 15 million. The toolbar surfaces every axis, the smart CSS emitter writes per-axis cell blocks plus compound blocks only for tokens with genuine joint divergence, and runtime CSS composition lands the right value at any multi-axis selector.
 
-Three levers, increasing scope:
+That makes the historical `maxPermutations` guard unnecessary — the loader can't blow up on a large cartesian because it doesn't materialize the cartesian in the first place. Two scoping levers remain, both presentational:
 
-- **`presets`** — author named tuples for the handful of permutations that matter (`Default Light`, `Brand A Dark`, `A11y High Contrast`). Toolbar surfaces them as quick-select pills, emit pipelines can fan out on `'presets'` instead of the full cartesian. The right answer when most permutations aren't worth rendering.
-- **`disabledAxes`** — pin state-space modifiers to their defaults; they vanish from the toolbar, the cartesian shrinks, the consumer's CSS stays small. The right answer when an axis exists in the resolver but doesn't represent presentational variation.
-- **`maxPermutations`** — hard cap on the loaded cartesian (default `1024`). When tripped, `loadProject` loads only the default tuple + any declared presets, and surfaces a `swatchbook/permutations` warn diagnostic. Defensive; the actionable response is one of the first two.
-
-See [`maxPermutations`](./config.mdx#maxpermutations) for the guard details.
+- **`presets`** — author named tuples for the handful of permutations that matter (`Default Light`, `Brand A Dark`, `A11y High Contrast`). Toolbar surfaces them as quick-select pills; emit pipelines can fan out on `'presets'` instead of every axis-attribute combination. The right answer when only a handful of tuples are presentational.
+- **`disabledAxes`** — pin state-space modifiers (locale, density, motion-pref, …) to their defaults. They vanish from the toolbar, drop from the project's axis list, and don't contribute to emitted CSS. The right answer when an axis exists in the resolver but doesn't represent presentational variation.
 
 ## See also
 
-- [Config reference](./config.mdx) — the `resolver` / `axes` / `default` / `disabledAxes` / `presets` / `maxPermutations` fields.
+- [Config reference](./config.mdx) — the `resolver` / `axes` / `default` / `disabledAxes` / `presets` fields.
 - [Consuming the active permutation](../guides/consuming-the-active-permutation.mdx) — how stories pick up axis flips.
