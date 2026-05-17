@@ -324,11 +324,17 @@ export interface Project {
    */
   cwd: string;
   /**
-   * Raw Terrazzo parse output retained so downstream emitters can drive
-   * Terrazzo's plugin pipeline (`emitViaTerrazzo(project, [...plugins])`)
-   * without re-parsing from disk. Present for resolver-backed projects;
-   * currently `undefined` for layered + plain-parse paths — those would
-   * need a synthesized resolver before `build()` accepts them.
+   * @internal Raw Terrazzo parse output retained so downstream
+   * emitters can drive Terrazzo's plugin pipeline
+   * (`emitViaTerrazzo(project, [...plugins])`) without re-parsing
+   * from disk. Present for resolver-backed projects; currently
+   * `undefined` for layered + plain-parse paths — those would need
+   * a synthesized resolver before `build()` accepts them.
+   *
+   * Consumers should pass the `Project` itself to
+   * `emitViaTerrazzo` rather than reaching for this field directly —
+   * the `ParserInput` shape is not part of the public type surface
+   * and may move under a different name in future releases.
    */
   parserInput?: ParserInput;
   /**

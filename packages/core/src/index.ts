@@ -16,7 +16,6 @@ export type {
   DiagnosticSeverity,
   JointOverride,
   JointOverrides,
-  ParserInput,
   Preset,
   Project,
   ResolveAt,
