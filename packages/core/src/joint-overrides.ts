@@ -47,8 +47,8 @@ export interface JointProbeResult {
  * Pair-only at this stage. Triple-and-higher joint variance is a
  * documented limitation; the algorithm extends naturally to arity N.
  *
- * Resolver-less projects (layered / plain-parse) return empty maps
- * — no resolver to probe with.
+ * Resolver-less projects (layered / plain-parse) return empty
+ * collections — no resolver to probe with.
  */
 export function probeJointOverrides(
   axes: readonly Axis[],
@@ -57,9 +57,12 @@ export function probeJointOverrides(
   resolver: Resolver | undefined,
 ): JointProbeResult {
   if (!resolver || axes.length < 2) {
-    return { overrides: new Map(), jointTouching: new Map() };
+    return { overrides: [], jointTouching: new Map() };
   }
 
+  // Internal Map keyed on canonicalKey for dedupe across arity passes.
+  // Materialized to the public array shape on return so the wire
+  // boundary doesn't have to marshal a Map.
   const overrides = new Map<string, JointOverride>();
   const jointTouching = new Map<string, Set<string>>();
   // Baseline carries the values for paths that delta cells omit;
@@ -83,7 +86,7 @@ export function probeJointOverrides(
   // divergences get recorded only when they're not already implied
   // by a lower-arity override.
   for (let arity = 2; arity <= axes.length; arity++) {
-    const composer = buildResolveAt(axes, cells, overrides, defaultTuple);
+    const composer = buildResolveAt(axes, cells, [...overrides.entries()], defaultTuple);
 
     for (const axisCombo of axisCombinations(axes, arity)) {
       for (const partialTuple of contextProducts(axisCombo)) {
@@ -140,7 +143,7 @@ export function probeJointOverrides(
     }
   }
 
-  return { overrides, jointTouching };
+  return { overrides: [...overrides.entries()], jointTouching };
 }
 
 function* axisCombinations(axes: readonly Axis[], k: number): Generator<readonly Axis[]> {

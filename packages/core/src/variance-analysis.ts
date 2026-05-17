@@ -162,7 +162,7 @@ export function analyzeProjectVariance(project: Project): Map<string, VarianceIn
   // information; reading from them avoids a duplicate probe pass on
   // every emit.
   const jointCasesByPath = new Map<string, JointCase[]>();
-  for (const override of project.jointOverrides.values()) {
+  for (const [, override] of project.jointOverrides) {
     const axisEntries = Object.entries(override.axes);
     if (axisEntries.length < 2) continue;
     // Flatten N-arity overrides into all pair sub-combinations so the

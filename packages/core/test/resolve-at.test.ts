@@ -86,6 +86,6 @@ it('materializes a bounded set of joint override entries (one per divergent part
   // Bounded by `Σ_n C(axes, n) × Π_i (contexts_i - 1)` across all
   // arities that probed up a divergence — much smaller than the
   // cartesian product for typical fixtures.
-  expect(project.jointOverrides.size).toBeGreaterThan(0);
-  expect(project.jointOverrides.size).toBeLessThan(50);
+  expect(project.jointOverrides.length).toBeGreaterThan(0);
+  expect(project.jointOverrides.length).toBeLessThan(50);
 });

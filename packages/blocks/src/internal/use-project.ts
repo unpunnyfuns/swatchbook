@@ -1,11 +1,5 @@
 import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
-import type {
-  Axis,
-  Cells,
-  JointOverride,
-  JointOverrides,
-  TokenMap,
-} from '@unpunnyfuns/swatchbook-core';
+import type { Axis, Cells, JointOverrides, TokenMap } from '@unpunnyfuns/swatchbook-core';
 import { makeCSSVar } from '@terrazzo/token-tools/css';
 import { useEffect, useMemo } from 'react';
 import type { VirtualTokenListingShape, VirtualVarianceByPathShape } from '#/contexts.ts';
@@ -84,12 +78,11 @@ function tupleToName(
 }
 
 /**
- * Reconstruct a `resolveAt` accessor from snapshot data. The wire
- * format ships `cells` as plain JSON and `jointOverrides` as an
- * array of `[key, entry]` pairs (Map doesn't survive JSON.stringify);
- * this hydrates them and wraps `buildResolveAt` from core. Stable
- * identity across calls with the same snapshot — `useMemo` keyed on
- * the snapshot fields produces a referentially stable function.
+ * Reconstruct a `resolveAt` accessor from snapshot data. Both `cells`
+ * and `jointOverrides` ship as plain JSON in the same shape core uses
+ * internally — no Map reconstruction at the boundary. Stable identity
+ * across calls with the same snapshot — `useMemo` keyed on the
+ * snapshot fields produces a referentially stable function.
  */
 function makeResolveAt(snapshot: {
   axes: readonly VirtualAxis[];
@@ -98,9 +91,7 @@ function makeResolveAt(snapshot: {
   defaultTuple?: ProjectSnapshot['defaultTuple'];
 }): (tuple: Record<string, string>) => ResolvedTokens {
   const cells = (snapshot.cells ?? {}) as Cells;
-  const jointOverrides: JointOverrides = new Map<string, JointOverride>(
-    (snapshot.jointOverrides ?? []) as readonly (readonly [string, JointOverride])[],
-  );
+  const jointOverrides = (snapshot.jointOverrides ?? []) as JointOverrides;
   const defaults = snapshot.defaultTuple ?? defaultTuple(snapshot.axes);
   const resolver = buildResolveAt(
     snapshot.axes as readonly Axis[],

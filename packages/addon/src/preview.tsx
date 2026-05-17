@@ -3,7 +3,6 @@ import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
 import type {
   Axis as CoreAxis,
   Cells as CoreCells,
-  JointOverride,
   JointOverrides,
 } from '@unpunnyfuns/swatchbook-core';
 import type { Decorator, Preview } from '@storybook/react-vite';
@@ -240,7 +239,7 @@ function resolveColorFormat(globals: SwatchbookGlobals): ColorFormat {
 const previewResolveAt = buildResolveAt(
   virtualAxes as readonly CoreAxis[],
   virtualCells as CoreCells,
-  new Map(virtualJointOverrides as readonly (readonly [string, JointOverride])[]) as JointOverrides,
+  virtualJointOverrides as JointOverrides,
   virtualDefaultTuple,
 );
 
