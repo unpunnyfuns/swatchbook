@@ -37,3 +37,38 @@ it("iteration order is ascending arity (so composition can apply lower-order ove
     prevArity = arity;
   }
 });
+
+it('exercises the arity-3 branch — the fixture produces at least one triple-axis override entry', () => {
+  // probeJointOverrides walks arity 2..N. The arity-3+ branch
+  // marks every participating axis touching conservatively (vs
+  // arity-2's per-axis leave-one-out check) and dedupes via
+  // canonicalKey across arity passes. The fixture's
+  // {brand:'Brand A', contrast:High, mode:Dark} entry exists because
+  // pair-composition can't reproduce the triple-joint accessible-accent
+  // values; pin that the branch is reachable so future fixture changes
+  // don't silently drop the only real-data coverage of the arity-3 loop.
+  const triples = [...project.jointOverrides.values()].filter(
+    (o) => Object.keys(o.axes).length === 3,
+  );
+  expect(triples.length).toBeGreaterThan(0);
+  for (const triple of triples) {
+    expect(Object.keys(triple.tokens).length).toBeGreaterThan(0);
+  }
+});
+
+it('marks an axis as joint-touching even when its singleton cell matches baseline (variance surfaces via the joint probe, not the per-axis cell)', () => {
+  // `color.accent.fg`: brand at default mode produces white, matching
+  // baseline white — brand's singleton cell records no divergence. Yet
+  // brand still appears in varianceByPath.varyingAxes because the joint
+  // probe at {mode:Dark, brand:'Brand A'} marks brand touching
+  // (Brand A's resolver overrides accent.fg=white where Dark's cell
+  // alone gives dark). Pins that the two signals — singleton + joint —
+  // both flow into varyingAxes.
+  const variance = project.varianceByPath.get('color.accent.fg');
+  expect(variance?.kind).toBe('multi');
+  expect(variance?.varyingAxes).toContain('brand');
+  // Brand's per-axis singleton contexts match (no singleton effect).
+  const brandContexts = variance?.perAxis['brand']?.contexts ?? {};
+  const brandValues = new Set(Object.values(brandContexts));
+  expect(brandValues.size).toBe(1);
+});
