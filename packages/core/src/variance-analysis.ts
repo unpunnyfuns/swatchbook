@@ -116,24 +116,22 @@ export function analyzeProjectVariance(project: Project): Map<string, VarianceIn
   }
 
   // Phase 1 — locate the baseline tuple + per-axis non-default cells.
-  const defaultTuple: Record<string, string> = {};
-  for (const axis of axes) defaultTuple[axis.name] = axis.default;
-  const baselinePerm = findPermByTuple(permutations, defaultTuple);
-  const baseline: TokenMap = baselinePerm
-    ? (permutationsResolved[baselinePerm.name] ?? {})
+  // Reads directly from `project.cells` rather than reconstructing
+  // from `permutationsResolved`. `Project.cells` is the bounded
+  // per-axis surface; cartesian materialization is on its way out.
+  const defaultTuple = project.defaultTuple;
+  const firstAxis = axes[0];
+  const baseline: TokenMap = firstAxis
+    ? (project.cells[firstAxis.name]?.[firstAxis.default] ?? project.graph)
     : project.graph;
 
-  // cells[axis.name][ctx] = TokenMap for { ...defaults, [axis.name]: ctx }.
-  // Missing cells (resolver pruned a tuple, disabledAxes filtered it) are
-  // treated as "no overlay" — the token's value at that cell equals baseline.
   const cells: Record<string, Record<string, TokenMap>> = {};
   for (const axis of axes) {
     const axisCells: Record<string, TokenMap> = {};
     for (const ctx of axis.contexts) {
       if (ctx === axis.default) continue;
-      const cellTuple = { ...defaultTuple, [axis.name]: ctx };
-      const cellPerm = findPermByTuple(permutations, cellTuple);
-      if (cellPerm) axisCells[ctx] = permutationsResolved[cellPerm.name] ?? {};
+      const cell = project.cells[axis.name]?.[ctx];
+      if (cell) axisCells[ctx] = cell;
     }
     cells[axis.name] = axisCells;
   }
