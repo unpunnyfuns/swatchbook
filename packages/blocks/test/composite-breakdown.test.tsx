@@ -58,10 +58,9 @@ describe('CompositeBreakdown', () => {
     const aliasAnnotations = screen.getAllByTestId('breakdown-alias');
     expect(aliasAnnotations.length).toBe(1);
 
-    const chain = aliasAnnotations[0];
-    expect(chain).toBeDefined();
-    expect(within(chain as HTMLElement).getByText('color.border.default')).toBeDefined();
-    expect(within(chain as HTMLElement).getByText('color.palette.blue.500')).toBeDefined();
+    const chain = aliasAnnotations[0] as HTMLElement;
+    within(chain).getByText('color.border.default');
+    within(chain).getByText('color.palette.blue.500');
   });
 
   it('omits the alias annotation on sub-values that are literal (not aliases)', () => {

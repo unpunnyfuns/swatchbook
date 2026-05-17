@@ -55,8 +55,8 @@ describe('TokenNavigator', () => {
     );
     expect(screen.queryByText('radius')).toBeNull();
     // Leaves `bg` and `fg` visible under the scoped root.
-    expect(screen.getByText('bg')).toBeDefined();
-    expect(screen.getByText('fg')).toBeDefined();
+    screen.getByText('bg');
+    screen.getByText('fg');
   });
 
   it('shows an empty-state message when the root matches no tokens', () => {
@@ -65,7 +65,7 @@ describe('TokenNavigator', () => {
         <TokenNavigator root="does-not-exist" />
       </SwatchbookProvider>,
     );
-    expect(screen.getByText(/No tokens under "does-not-exist"/)).toBeDefined();
+    screen.getByText(/No tokens under "does-not-exist"/);
   });
 
   it('filters by DTCG $type with a single string', () => {
@@ -103,7 +103,7 @@ describe('TokenNavigator', () => {
         <TokenNavigator root="color" type="dimension" />
       </SwatchbookProvider>,
     );
-    expect(screen.getByText(/No tokens under "color"/)).toBeDefined();
+    screen.getByText(/No tokens under "color"/);
   });
 
   it('shows a type-aware empty-state when no tokens match', () => {
@@ -112,7 +112,7 @@ describe('TokenNavigator', () => {
         <TokenNavigator type="fontWeight" />
       </SwatchbookProvider>,
     );
-    expect(screen.getByText(/No tokens matching \$type=fontWeight/)).toBeDefined();
+    screen.getByText(/No tokens matching \$type=fontWeight/);
   });
 
   it('renders a search input by default that prunes the tree to matching leaves', () => {
@@ -123,8 +123,6 @@ describe('TokenNavigator', () => {
     );
 
     const input = screen.getByTestId('token-navigator-search') as HTMLInputElement;
-    expect(input).toBeDefined();
-
     fireEvent.change(input, { target: { value: 'bg' } });
 
     // `color.bg` is the single leaf matching 'bg'; `radius` and `color.fg` /
@@ -165,7 +163,7 @@ describe('TokenNavigator', () => {
     const input = screen.getByTestId('token-navigator-search') as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'xyz-no-match' } });
 
-    expect(screen.getByText(/No tokens match "xyz-no-match"/)).toBeDefined();
+    screen.getByText(/No tokens match "xyz-no-match"/);
     expect(screen.queryByRole('tree')).toBeNull();
   });
 
