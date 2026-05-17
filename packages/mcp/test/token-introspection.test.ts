@@ -47,14 +47,14 @@ interface GetTokenResult {
   perTheme: Record<string, { value: string; aliasOf?: string; aliasChain?: readonly string[] }>;
 }
 
-it('get_token: returns the alias chain and resolved value per permutation', async () => {
+it('get_token: returns the alias chain and resolved value per theme', async () => {
   const result = await mcp.callJson<GetTokenResult>('get_token', { path: ALIAS_TOKEN });
   expect(result.path).toBe(ALIAS_TOKEN);
   expect(result.type).toBe('color');
   // cssVar uses the project prefix and dot→dash substitution.
   expect(result.cssVar).toBe(`var(--sb-${ALIAS_TOKEN.replaceAll('.', '-')})`);
   expect(Object.keys(result.perTheme).length).toBe(singletonCount(project));
-  // Every permutation entry carries a value; aliased ones name their target.
+  // Every theme entry carries a value; aliased ones name their target.
   for (const entry of Object.values(result.perTheme)) {
     expect(entry.value).toBeTruthy();
     if (entry.aliasOf) {
@@ -84,7 +84,7 @@ interface GetAliasChainResult {
   perTheme: Record<string, { aliasOf?: string; chain: readonly string[] }>;
 }
 
-it('get_alias_chain: returns the forward chain per permutation for an alias token', async () => {
+it('get_alias_chain: returns the forward chain per theme for an alias token', async () => {
   const result = await mcp.callJson<GetAliasChainResult>('get_alias_chain', { path: ALIAS_TOKEN });
   expect(result.path).toBe(ALIAS_TOKEN);
   expect(Object.keys(result.perTheme).length).toBe(singletonCount(project));
@@ -170,7 +170,7 @@ interface SearchTokensResult {
   }[];
 }
 
-it('search_tokens: returns ranked fuzzy hits scoped to the default permutation', async () => {
+it('search_tokens: returns ranked fuzzy hits scoped to the default theme', async () => {
   const result = await mcp.callJson<SearchTokensResult>('search_tokens', { query: 'surface' });
   expect(result.theme).toBe(defaultThemeName(project));
   expect(result.count).toBeGreaterThan(0);

@@ -45,7 +45,7 @@ Usage:
   swatchbook-mcp --config <path> --no-watch   Disable live-reload on token / config edits.
 
 Tools exposed:
-  describe_project    Orientation — counts, axes, permutations, presets, diagnostics.
+  describe_project    Orientation — counts, axes, themes, presets, diagnostics.
   list_tokens         List tokens by path glob / \`$type\`.
   search_tokens       Fuzzy search across paths, descriptions, values.
   resolve_theme       Full resolved token map for an axis tuple.
@@ -56,7 +56,7 @@ Tools exposed:
   get_color_formats   hex / rgb / hsl / oklch / raw for a color token.
   get_color_contrast  Pair-wise contrast (WCAG 2.1 ratio or APCA Lc) + pass flags.
   get_axis_variance   Classify token variance (constant / single / multi) per axis.
-  list_axes           Axes + contexts + permutations + presets.
+  list_axes           Axes + contexts + themes + presets.
   get_diagnostics     Project diagnostics (optional severity filter).
   emit_css            Full project stylesheet.`);
       process.exit(0);

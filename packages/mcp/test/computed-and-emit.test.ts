@@ -182,7 +182,7 @@ it('resolve_theme: scopes the returned map via filter and $type', async () => {
 it('emit_css: returns a stylesheet with :root + per-tuple selectors', async () => {
   const css = await mcp.callText('emit_css');
   expect(css).toContain(':root');
-  // The non-default permutations get attribute selectors with the data-sb-* prefix.
+  // The non-default themes get attribute selectors with the data-sb-* prefix.
   expect(css).toMatch(/data-sb-mode/);
   // CSS vars use the project prefix.
   expect(css).toMatch(/--sb-color-/);

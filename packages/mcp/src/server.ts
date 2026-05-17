@@ -23,9 +23,7 @@ export function createServer(initial: Project): McpServer & {
   // parameter use this to map it to a tuple in O(1) before calling
   // `project.resolveAt(tuple)`. The set carries the default tuple +
   // every singleton (one per non-default cell on each axis) + every
-  // preset — enumerated from `axes` + `presets` + `defaultTuple`
-  // independently of the soon-to-be-removed `Project.permutations`
-  // field.
+  // preset — enumerated from `axes` + `presets` + `defaultTuple`.
   let tupleByName = buildTupleByName(initial);
   let defaultThemeName = tupleToName(initial.axes, initial.defaultTuple);
   const server = new McpServer(
@@ -57,9 +55,8 @@ export function createServer(initial: Project): McpServer & {
 
   /**
    * Iterate every `(themeName, tuple)` pair the project surfaces —
-   * default + singletons + presets — without going through
-   * `project.permutations`. Order is insertion order of `tupleByName`
-   * (default first, then singletons per axis, then presets).
+   * default + singletons + presets. Order is insertion order of
+   * `tupleByName` (default first, then singletons per axis, then presets).
    */
   const eachTheme = function* (): Generator<{ name: string; tuple: Record<string, string> }> {
     for (const [name, tuple] of tupleByName) yield { name, tuple };
@@ -89,8 +86,8 @@ export function createServer(initial: Project): McpServer & {
       return jsonResult({
         cssVarPrefix: project.config.cssVarPrefix ?? '',
         axes: project.axes.map((a) => ({ name: a.name, contexts: a.contexts, default: a.default })),
-        permutations: [...tupleByName.keys()],
-        defaultPermutation: defaultThemeName,
+        themes: [...tupleByName.keys()],
+        defaultTheme: defaultThemeName,
         presets: project.presets.map((p) => p.name),
         tokensPerTheme,
         types: typeCounts,
@@ -129,7 +126,7 @@ export function createServer(initial: Project): McpServer & {
         theme: z
           .string()
           .optional()
-          .describe('Permutation name to read values from. Defaults to the project default theme.'),
+          .describe('Theme name to read values from. Defaults to the project default theme.'),
       },
     },
     ({ filter, type, theme }) => {
@@ -203,7 +200,7 @@ export function createServer(initial: Project): McpServer & {
     'list_axes',
     {
       description:
-        'List the project axes — each axis has a name, its contexts (discrete values like `Light` / `Dark`), a default, and a source (`resolver` for DTCG-resolver-driven, `layered` for authored layered axes, `synthetic` for single-theme projects). Also returns the named permutations (every axis tuple combination) and any presets defined in the project config.',
+        'List the project axes — each axis has a name, its contexts (discrete values like `Light` / `Dark`), a default, and a source (`resolver` for DTCG-resolver-driven, `layered` for authored layered axes, `synthetic` for single-theme projects). Also returns the named themes (one per default tuple + per-axis non-default singleton + preset) and any presets defined in the project config.',
       inputSchema: {},
     },
     () =>
@@ -216,7 +213,7 @@ export function createServer(initial: Project): McpServer & {
           source: axis.source,
         })),
         disabledAxes: project.disabledAxes,
-        permutations: [...eachTheme()].map(({ name, tuple }) => ({ name, input: tuple })),
+        themes: [...eachTheme()].map(({ name, tuple }) => ({ name, input: tuple })),
         presets: project.presets.map((p) => ({
           name: p.name,
           axes: p.axes,
@@ -309,9 +306,7 @@ export function createServer(initial: Project): McpServer & {
         theme: z
           .string()
           .optional()
-          .describe(
-            'Permutation name to read the value from. Defaults to the project default theme.',
-          ),
+          .describe('Theme name to read the value from. Defaults to the project default theme.'),
       },
     },
     ({ path, theme }) => {
@@ -341,10 +336,7 @@ export function createServer(initial: Project): McpServer & {
         background: z
           .string()
           .describe('Dot-path of the background color token, e.g. `color.surface.default`.'),
-        theme: z
-          .string()
-          .optional()
-          .describe('Permutation name. Defaults to the project default theme.'),
+        theme: z.string().optional().describe('Theme name. Defaults to the project default theme.'),
         algorithm: z
           .enum(['wcag21', 'apca'])
           .optional()
@@ -411,7 +403,7 @@ export function createServer(initial: Project): McpServer & {
         theme: z
           .string()
           .optional()
-          .describe('Permutation name to search within. Defaults to the project default.'),
+          .describe('Theme name to search within. Defaults to the project default.'),
         limit: z.number().int().positive().optional().describe('Cap the result count. Default 50.'),
       },
     },
