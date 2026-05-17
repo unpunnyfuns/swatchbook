@@ -197,7 +197,11 @@ function snapshotToData(
 ): ProjectData {
   return {
     activePermutation: snapshot.activePermutation,
-    activeAxes: { ...snapshot.activeAxes },
+    // Pass `snapshot.activeAxes` through directly rather than spreading
+    // into a fresh object — the snapshot already exposes it as a
+    // read-only record, and a new identity per render would invite
+    // the same memo-stability bug `resolveAt` had.
+    activeAxes: snapshot.activeAxes as Record<string, string>,
     axes: snapshot.axes,
     permutations: snapshot.permutations,
     permutationsResolved: snapshot.permutationsResolved,
