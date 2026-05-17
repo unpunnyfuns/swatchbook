@@ -14,7 +14,6 @@ import {
   permutationID,
   type Axis,
   type Config,
-  type Diagnostic,
   type Permutation,
   type Project,
   type TokenMap,
@@ -97,20 +96,6 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
   }
 
   const { diagnostics: cssOptionsDiagnostics } = validateCssOptions(config.cssOptions);
-
-  // A misconfigured `disabledAxes` (e.g. pinning an axis whose default
-  // context has no permutation rows) can filter every permutation out.
-  // We still return an empty project so the addon can render diagnostics
-  // instead of crashing, but the cause is easy to miss — the panel just
-  // shows an empty tree. Flag it here so users have something actionable.
-  const projectDiagnostics: Diagnostic[] = [];
-  if (disabledAxes.length > 0 && filteredPermutations.length === 0) {
-    projectDiagnostics.push({
-      severity: 'warn',
-      group: 'swatchbook/project',
-      message: `\`disabledAxes\` ${JSON.stringify(disabledAxes)} filtered out every permutation — nothing left to render. Check that the pinned axes' default contexts are represented in the resolver's permutations.`,
-    });
-  }
 
   const { listing, diagnostics: listingDiagnostics } =
     normalized.parserInput !== undefined
@@ -205,7 +190,6 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
       ...chromeDiagnostics,
       ...cssOptionsDiagnostics,
       ...listingDiagnostics,
-      ...projectDiagnostics,
     ],
   };
 }
