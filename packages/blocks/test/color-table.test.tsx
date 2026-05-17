@@ -1,5 +1,6 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
+import { userEvent } from '@vitest/browser/context';
 import { ColorTable, SwatchbookProvider } from '#/index.ts';
 import { makeColorTableSnapshot } from './_color-table-helpers.tsx';
 
@@ -51,7 +52,7 @@ describe('ColorTable — base rendering', () => {
     expect(alias?.textContent?.trim()).toBe('—');
   });
 
-  it('fuzzy search narrows rows with out-of-order terms', () => {
+  it('fuzzy search narrows rows with out-of-order terms', async () => {
     render(
       <SwatchbookProvider value={makeColorTableSnapshot()}>
         <ColorTable />
@@ -59,7 +60,7 @@ describe('ColorTable — base rendering', () => {
     );
 
     const input = screen.getByTestId('color-table-search') as HTMLInputElement;
-    fireEvent.change(input, { target: { value: 'default text' } });
+    await userEvent.fill(input, 'default text');
 
     const rows = screen.getAllByTestId('color-table-row');
     expect(rows.length).toBe(1);

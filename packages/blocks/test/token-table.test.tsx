@@ -1,5 +1,6 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
+import { userEvent } from '@vitest/browser/context';
 import { type ProjectSnapshot, SwatchbookProvider, TokenTable } from '#/index.ts';
 
 function makeSnapshot(): ProjectSnapshot {
@@ -114,7 +115,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     expect(within(table).queryByText('space.md')).toBeNull();
   });
 
-  it('renders a search input by default that filters rows by substring', () => {
+  it('renders a search input by default that filters rows by substring', async () => {
     const snapshot = makeSnapshot();
     const { container } = render(
       <SwatchbookProvider value={snapshot}>
@@ -127,7 +128,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     expect(before).toBeGreaterThan(2);
 
     // Typing narrows rows to those whose path contains the needle.
-    fireEvent.change(input, { target: { value: 'surface' } });
+    await userEvent.fill(input, 'surface');
 
     const after = within(screen.getByRole('table')).getAllByRole('row');
     // Header row + at least one matching row; no non-matching rows.
@@ -139,7 +140,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     expect(container.textContent).toContain('matching "surface"');
   });
 
-  it('shows a "no matches" row when the search query matches nothing', () => {
+  it('shows a "no matches" row when the search query matches nothing', async () => {
     const snapshot = makeSnapshot();
     render(
       <SwatchbookProvider value={snapshot}>
@@ -148,7 +149,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     );
 
     const input = screen.getByTestId('token-table-search') as HTMLInputElement;
-    fireEvent.change(input, { target: { value: 'xyz-no-match' } });
+    await userEvent.fill(input, 'xyz-no-match');
 
     screen.getByText(/No tokens match "xyz-no-match"/);
   });

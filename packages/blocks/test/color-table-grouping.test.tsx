@@ -1,5 +1,6 @@
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
+import { userEvent } from '@vitest/browser/context';
 import { ColorTable, type ProjectSnapshot, SwatchbookProvider } from '#/index.ts';
 import { makeColorTableSnapshot } from './_color-table-helpers.tsx';
 
@@ -52,7 +53,7 @@ describe('ColorTable — grouping', () => {
     within(hiRow).getByText('#111111');
   });
 
-  it('clicking a pill swaps the active variant and the displayed values', () => {
+  it('clicking a pill swaps the active variant and the displayed values', async () => {
     render(
       <SwatchbookProvider value={makeVariantSnapshot()}>
         <ColorTable filter="color.bg.*" variants={{ hover: 'h', disabled: 'd' }} />
@@ -67,9 +68,7 @@ describe('ColorTable — grouping', () => {
       .getAllByTestId('color-table-variant')
       .find((p) => p.textContent === 'disabled');
     if (!disabledPill) throw new Error('disabled pill not found');
-    act(() => {
-      fireEvent.click(disabledPill);
-    });
+    await userEvent.click(disabledPill);
 
     const hiRow = screen
       .getAllByTestId('color-table-row')

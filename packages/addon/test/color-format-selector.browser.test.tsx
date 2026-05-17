@@ -1,5 +1,6 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { userEvent } from '@vitest/browser/context';
 import { ColorFormatSelector } from '#/ColorFormatSelector.tsx';
 
 afterEach(cleanup);
@@ -20,10 +21,10 @@ describe('ColorFormatSelector', () => {
     expect(inactive.className).not.toContain('sb-switcher__pill--active');
   });
 
-  it("invokes `onSelect` with the pill's format id on click", () => {
+  it("invokes `onSelect` with the pill's format id on click", async () => {
     const onSelect = vi.fn();
     render(<ColorFormatSelector active="hex" onSelect={onSelect} />);
-    fireEvent.click(screen.getByRole('button', { name: 'RGB' }));
+    await userEvent.click(screen.getByRole('button', { name: 'RGB' }));
     expect(onSelect).toHaveBeenCalledWith('rgb');
   });
 

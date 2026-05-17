@@ -1,5 +1,6 @@
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
+import { userEvent } from '@vitest/browser/context';
 import { ColorTable, SwatchbookProvider } from '#/index.ts';
 import { makeColorTableSnapshot } from './_color-table-helpers.tsx';
 
@@ -8,7 +9,18 @@ describe('ColorTable — expansion', () => {
     cleanup();
   });
 
-  it('row click toggles inline expansion (no drawer)', () => {
+  // Helper: focus the row and activate via keyboard. Rows have
+  // tabIndex={0} and an Enter/Space handler; this exercises the same
+  // path a keyboard user takes (real-browser `userEvent.click(<tr>)`
+  // bbox-centroid hits a `<td>` child unreliably under Playwright's
+  // actionability checks, so keyboard activation is the more stable
+  // way to drive the row's handler).
+  async function activateRow(row: HTMLElement): Promise<void> {
+    row.focus();
+    await userEvent.keyboard('{Enter}');
+  }
+
+  it('row click toggles inline expansion (no drawer)', async () => {
     render(
       <SwatchbookProvider value={makeColorTableSnapshot()}>
         <ColorTable filter="color.text.default" />
@@ -17,33 +29,27 @@ describe('ColorTable — expansion', () => {
     expect(screen.queryByTestId('color-table-detail')).toBeNull();
 
     const row = screen.getByTestId('color-table-row');
-    act(() => {
-      fireEvent.click(row);
-    });
+    await activateRow(row);
     screen.getByTestId('color-table-detail');
     expect(row.getAttribute('aria-label')).toBe('Collapse color.text.default');
 
-    act(() => {
-      fireEvent.click(row);
-    });
+    await activateRow(row);
     expect(screen.queryByTestId('color-table-detail')).toBeNull();
   });
 
-  it('expansion surfaces $description and alias chain from the active variant', () => {
+  it('expansion surfaces $description and alias chain from the active variant', async () => {
     render(
       <SwatchbookProvider value={makeColorTableSnapshot()}>
         <ColorTable filter="color.text.default" />
       </SwatchbookProvider>,
     );
-    act(() => {
-      fireEvent.click(screen.getByTestId('color-table-row'));
-    });
+    await activateRow(screen.getByTestId('color-table-row'));
     const detail = screen.getByTestId('color-table-detail');
     within(detail).getByText('Primary text on default surfaces.');
     expect(detail.textContent).toContain('color.palette.neutral.900');
   });
 
-  it('multi-variant expansion lists all variants in a sub-table', () => {
+  it('multi-variant expansion lists all variants in a sub-table', async () => {
     const snap = makeColorTableSnapshot();
     Object.assign(snap.cells['mode']!['light']!, {
       'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
@@ -59,9 +65,7 @@ describe('ColorTable — expansion', () => {
       .getAllByTestId('color-table-row')
       .find((r) => r.getAttribute('data-base') === 'color.bg.hi');
     if (!row) throw new Error('group row not found');
-    act(() => {
-      fireEvent.click(row);
-    });
+    await activateRow(row);
     const detail = screen.getByTestId('color-table-detail');
     expect(detail.textContent).toContain('#111111');
     expect(detail.textContent).toContain('#222222');
