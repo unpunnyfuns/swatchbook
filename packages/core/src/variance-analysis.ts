@@ -1,5 +1,5 @@
-import type { TokenNormalized } from '@terrazzo/parser';
 import { permutationID, type Project, type TokenMap } from '#/types.ts';
+import { valueKey } from '#/value-key.ts';
 
 /**
  * Per-token variance classification across a loaded project's axes.
@@ -211,14 +211,4 @@ export function analyzeProjectVariance(project: Project): Map<string, VarianceIn
   }
 
   return result;
-}
-
-/**
- * Stable key for value comparison — `JSON.stringify($value)`.
- * Composite tokens (shadow, typography, …) compare on every sub-field;
- * missing tokens compare equal to the empty string.
- */
-function valueKey(token: TokenNormalized | undefined): string {
-  if (!token) return '';
-  return JSON.stringify(token.$value);
 }

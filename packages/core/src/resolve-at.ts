@@ -8,6 +8,7 @@
  * consumer that needs to compose tokens at any tuple without
  * shipping `@terrazzo/parser` to the client.
  */
+import { canonicalKey } from '#/tuple-key.ts';
 import type { Axis, Cells, JointOverrides, ResolveAt, TokenMap } from '#/types.ts';
 
 /**
@@ -84,11 +85,4 @@ function isSubset(
     if (full[key] !== sub[key]) return false;
   }
   return true;
-}
-
-function canonicalKey(tuple: Readonly<Record<string, string>>): string {
-  return Object.keys(tuple)
-    .toSorted()
-    .map((k) => `${k}:${tuple[k]}`)
-    .join('|');
 }

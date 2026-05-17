@@ -1,4 +1,5 @@
 import type { Axis, AxisVariancePerAxis, AxisVarianceResult, Cells, TokenMap } from '#/types.ts';
+import { valueKey } from '#/value-key.ts';
 
 /**
  * Pre-compute per-path variance at load time so consumers don't have
@@ -93,9 +94,4 @@ function buildResult(
     constantAcrossAxes,
     perAxis,
   };
-}
-
-function valueKey(token: TokenMap[string] | undefined): string {
-  if (!token) return '';
-  return JSON.stringify(token.$value);
 }
