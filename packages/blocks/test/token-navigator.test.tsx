@@ -1,5 +1,6 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
+import { userEvent } from '@vitest/browser/context';
 import { type ProjectSnapshot, SwatchbookProvider, TokenNavigator } from '#/index.ts';
 
 function makeSnapshot(): ProjectSnapshot {
@@ -115,7 +116,7 @@ describe('TokenNavigator', () => {
     screen.getByText(/No tokens matching \$type=fontWeight/);
   });
 
-  it('renders a search input by default that prunes the tree to matching leaves', () => {
+  it('renders a search input by default that prunes the tree to matching leaves', async () => {
     const { container } = render(
       <SwatchbookProvider value={makeSnapshot()}>
         <TokenNavigator />
@@ -123,7 +124,7 @@ describe('TokenNavigator', () => {
     );
 
     const input = screen.getByTestId('token-navigator-search') as HTMLInputElement;
-    fireEvent.change(input, { target: { value: 'bg' } });
+    await userEvent.fill(input, 'bg');
 
     // `color.bg` is the single leaf matching 'bg'; `radius` and `color.fg` /
     // `color.palette.blue.500` prune out.
@@ -134,7 +135,7 @@ describe('TokenNavigator', () => {
     expect(container.textContent).toContain('matching "bg"');
   });
 
-  it('auto-expands groups on the path to a matching leaf', () => {
+  it('auto-expands groups on the path to a matching leaf', async () => {
     render(
       <SwatchbookProvider value={makeSnapshot()}>
         <TokenNavigator initiallyExpanded={0} />
@@ -142,7 +143,7 @@ describe('TokenNavigator', () => {
     );
 
     const input = screen.getByTestId('token-navigator-search') as HTMLInputElement;
-    fireEvent.change(input, { target: { value: 'blue' } });
+    await userEvent.fill(input, 'blue');
 
     // `color.palette.blue.500` is nested under `color > palette > blue`.
     // Even though `initiallyExpanded={0}` leaves everything collapsed, the
@@ -153,7 +154,7 @@ describe('TokenNavigator', () => {
     expect(leafPaths).toContain('color.palette.blue.500');
   });
 
-  it('shows an empty message when the search matches nothing', () => {
+  it('shows an empty message when the search matches nothing', async () => {
     render(
       <SwatchbookProvider value={makeSnapshot()}>
         <TokenNavigator />
@@ -161,7 +162,7 @@ describe('TokenNavigator', () => {
     );
 
     const input = screen.getByTestId('token-navigator-search') as HTMLInputElement;
-    fireEvent.change(input, { target: { value: 'xyz-no-match' } });
+    await userEvent.fill(input, 'xyz-no-match');
 
     screen.getByText(/No tokens match "xyz-no-match"/);
     expect(screen.queryByRole('tree')).toBeNull();
