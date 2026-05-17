@@ -1,6 +1,8 @@
 import type { Resolver } from '@terrazzo/parser';
 import { buildResolveAt } from '#/resolve-at.ts';
+import { canonicalKey } from '#/tuple-key.ts';
 import type { Axis, Cells, JointOverride, JointOverrides, TokenMap } from '#/types.ts';
+import { valueKey } from '#/value-key.ts';
 
 /**
  * Two-pass joint-probe output:
@@ -176,18 +178,4 @@ function* contextProducts(axisCombo: readonly Axis[]): Generator<Record<string, 
  */
 export function jointOverrideKey(axes: Readonly<Record<string, string>>): string {
   return canonicalKey(axes);
-}
-
-function canonicalKey(axes: Readonly<Record<string, string>>): string {
-  return Object.keys(axes)
-    .toSorted()
-    .map((k) => `${k}:${axes[k]}`)
-    .join('|');
-}
-
-function valueKey(token: unknown): string {
-  if (token && typeof token === 'object' && '$value' in token) {
-    return JSON.stringify((token as { $value: unknown }).$value);
-  }
-  return '';
 }

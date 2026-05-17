@@ -2,6 +2,7 @@ import { pathToFileURL } from 'node:url';
 import { build, defineConfig, Logger, type Plugin } from '@terrazzo/parser';
 import cssPlugin, { type CSSPluginOptions } from '@terrazzo/plugin-css';
 import { makeCSSVar } from '@terrazzo/token-tools/css';
+import { cssEscape } from '#/css-escape.ts';
 import { fillPresetTuple } from '#/presets.ts';
 import { permutationID, type Axis, type Project } from '#/types.ts';
 
@@ -141,17 +142,13 @@ function compoundSelector(
   for (const axis of axes) {
     const value = input[axis.name];
     if (value === undefined) continue;
-    parts.push(`[${attrName(prefix, axis.name)}="${cssEscapeAttr(value)}"]`);
+    parts.push(`[${attrName(prefix, axis.name)}="${cssEscape(value)}"]`);
   }
   return parts.length > 0 ? parts.join('') : ':root';
 }
 
 function attrName(prefix: string, key: string): string {
   return prefix ? `data-${prefix}-${key}` : `data-${key}`;
-}
-
-function cssEscapeAttr(value: string): string {
-  return value.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
 }
 
 function resolveSelection(

@@ -1,6 +1,7 @@
 import type { TokenNormalized } from '@terrazzo/parser';
 import { generateShorthand, makeCSSVar, transformCSSValue } from '@terrazzo/token-tools/css';
 import { CHROME_ROLES, CHROME_VAR_PREFIX, DEFAULT_CHROME_MAP } from '#/chrome.ts';
+import { cssEscape } from '#/css-escape.ts';
 import type { Project, TokenMap } from '#/types.ts';
 import { analyzeProjectVariance, type VarianceInfo } from '#/variance-analysis.ts';
 
@@ -298,8 +299,4 @@ function* collectTokenDeclarations(
   }
   const shorthand = generateShorthand({ token, localID });
   if (shorthand) yield { varName, value: shorthand };
-}
-
-function cssEscape(name: string): string {
-  return name.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
 }
