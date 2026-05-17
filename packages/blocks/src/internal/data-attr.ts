@@ -1,12 +1,4 @@
-/**
- * Produce a prefixed `data-*` attribute name when `prefix` is set, bare
- * `data-<key>` otherwise. Mirrors `dataAttr` in `@unpunnyfuns/swatchbook-core`
- * so block wrappers and emitted-CSS selectors stay in lockstep without
- * blocks taking a runtime dep on core.
- */
-export function dataAttr(prefix: string, key: string): string {
-  return prefix ? `data-${prefix}-${key}` : `data-${key}`;
-}
+import { dataAttr } from '@unpunnyfuns/swatchbook-core/data-attr';
 
 /**
  * Marker attribute set on every block wrapper. Retained as a stable hook

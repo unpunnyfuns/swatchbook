@@ -2,13 +2,9 @@ import type { TokenNormalized } from '@terrazzo/parser';
 import { generateShorthand, makeCSSVar, transformCSSValue } from '@terrazzo/token-tools/css';
 import { CHROME_ROLES, CHROME_VAR_PREFIX, DEFAULT_CHROME_MAP } from '#/chrome.ts';
 import { cssEscape } from '#/css-escape.ts';
+import { dataAttr } from '#/data-attr.ts';
 import type { Project, TokenMap } from '#/types.ts';
 import { analyzeProjectVariance, type VarianceInfo } from '#/variance-analysis.ts';
-
-/** Build the `data-<prefix>-<key>` attribute name (or `data-<key>` when prefix is empty). */
-function dataAttr(prefix: string, key: string): string {
-  return prefix ? `data-${prefix}-${key}` : `data-${key}`;
-}
 
 /** @internal Addon-internal smart-emitter options. Not part of the public API. */
 export interface EmitAxisProjectedCssOptions {
