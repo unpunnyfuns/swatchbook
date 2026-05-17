@@ -1,6 +1,6 @@
 import { resolverPath } from '@unpunnyfuns/swatchbook-tokens';
 import { describe, expect, it } from 'vitest';
-import { loadProject } from '#/load';
+import { loadProject } from '#/load.ts';
 import { fixtureCwd, loadWithPrefix } from './_helpers';
 
 describe('Token Listing integration', () => {

@@ -7,7 +7,7 @@
 // (`color.accent.fg` under mode=Dark + brand=Brand A) without invoking
 // the resolver again at runtime.
 import { beforeAll, expect, it } from 'vitest';
-import type { Project } from '#/types';
+import type { Project } from '#/types.ts';
 import { loadWithPrefix } from './_helpers';
 
 let project: Project;

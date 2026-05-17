@@ -1,10 +1,10 @@
 import { dirname } from 'node:path';
 import { beforeAll, expect, it } from 'vitest';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
-import { emitAxisProjectedCss } from '#/css-axis-projected';
-import { loadProject } from '#/load';
-import { validateDisabledAxes } from '#/disabled-axes';
-import type { Axis, Project } from '#/types';
+import { emitAxisProjectedCss } from '#/css-axis-projected.ts';
+import { loadProject } from '#/load.ts';
+import { validateDisabledAxes } from '#/disabled-axes.ts';
+import type { Axis, Project } from '#/types.ts';
 
 const fixtureCwd = dirname(tokensDir);
 

@@ -1,10 +1,10 @@
 import { beforeAll, expect, it } from 'vitest';
 import { dirname } from 'node:path';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
-import { CHROME_ROLES, DEFAULT_CHROME_MAP, validateChrome } from '#/chrome';
-import { emitAxisProjectedCss } from '#/css-axis-projected';
-import { loadProject } from '#/load';
-import type { Project } from '#/types';
+import { CHROME_ROLES, DEFAULT_CHROME_MAP, validateChrome } from '#/chrome.ts';
+import { emitAxisProjectedCss } from '#/css-axis-projected.ts';
+import { loadProject } from '#/load.ts';
+import type { Project } from '#/types.ts';
 
 const fixtureCwd = dirname(tokensDir);
 

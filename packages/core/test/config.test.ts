@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defineSwatchbookConfig } from '#/config';
+import { defineSwatchbookConfig } from '#/config.ts';
 
 describe('defineSwatchbookConfig', () => {
   it('returns the config unchanged (identity helper)', () => {

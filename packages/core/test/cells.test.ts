@@ -6,7 +6,7 @@
 // later axis's cell can't accidentally overwrite an earlier axis's
 // overlay on a token it doesn't touch.
 import { beforeAll, expect, it } from 'vitest';
-import type { Project } from '#/types';
+import type { Project } from '#/types.ts';
 import { loadWithPrefix } from './_helpers';
 
 let project: Project;

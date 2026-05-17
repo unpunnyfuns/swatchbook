@@ -23,8 +23,8 @@
  *   - the chrome alias block is emitted unchanged at the tail.
  */
 import { beforeAll, expect, it } from 'vitest';
-import { emitAxisProjectedCss } from '#/css-axis-projected';
-import type { Project } from '#/types';
+import { emitAxisProjectedCss } from '#/css-axis-projected.ts';
+import type { Project } from '#/types.ts';
 import { extractBlock, loadWithPrefix } from './_helpers';
 
 let project: Project;

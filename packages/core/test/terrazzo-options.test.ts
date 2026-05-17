@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { validateCssOptions } from '#/terrazzo-options';
+import { validateCssOptions } from '#/terrazzo-options.ts';
 
 it('validateCssOptions returns no diagnostics for an empty object', () => {
   const { diagnostics } = validateCssOptions({});

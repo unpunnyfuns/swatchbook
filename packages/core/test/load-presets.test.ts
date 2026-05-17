@@ -1,8 +1,8 @@
 import { dirname } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
-import { loadProject } from '#/load';
-import type { Project } from '#/types';
+import { loadProject } from '#/load.ts';
+import type { Project } from '#/types.ts';
 
 const fixtureCwd = dirname(tokensDir);
 

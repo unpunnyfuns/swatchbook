@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { validatePresets } from '#/presets';
-import type { Axis, Preset } from '#/types';
+import { validatePresets } from '#/presets.ts';
+import type { Axis, Preset } from '#/types.ts';
 
 const axes: Axis[] = [
   {
