@@ -1,16 +1,22 @@
 import type { Axis, Cells, Permutation, TokenMap } from '#/types.ts';
 
 /**
- * Derive `Project.cells` from the existing cartesian-shaped permutation
- * data. One entry per `(axis, context)` — pulled from the singleton
- * permutation whose tuple is `{ ...defaultTuple, [axisName]: contextName }`.
+ * Derive `Project.cells` from the singleton permutation map. Each
+ * non-default `(axis, context)` cell is stored as a **delta** —
+ * only tokens whose `$value` differs from the default-cell baseline.
+ * The default cell stays as a full TokenMap and serves as the
+ * baseline reference for `resolveAt`.
  *
- * This is the additive form: shipped on `Project` alongside the
- * existing `permutationsResolved` so downstream consumers can adopt
- * the cells shape without changing the load path. A follow-up PR
- * switches `loadResolverPermutations` to populate `cells` directly via
- * `resolver.apply` per `(axis, context)`, at which point the cartesian
- * map goes away and this derivation does too.
+ * Delta cells make `composeAt` correct under sparse composition:
+ * `Object.assign(result, cell)` for a later axis can't accidentally
+ * overwrite an earlier axis's overlay on a token the later axis
+ * doesn't actually touch, because the later axis's delta cell
+ * doesn't contain that token. The previous full-TokenMap form
+ * relied on "smart-dedup re-emit" in CSS cascade order to recover
+ * the right value at multi-axis tuples; with delta cells the
+ * composition is straightforwardly correct, and joint overrides
+ * handle the few cases where the cartesian truth genuinely
+ * diverges from delta composition (recorded by `probeJointOverrides`).
  */
 export function buildCells(
   axes: readonly Axis[],
@@ -19,6 +25,10 @@ export function buildCells(
   defaultTuple: Readonly<Record<string, string>>,
 ): Cells {
   const cells: Cells = {};
+  // Locate the default (baseline) TokenMap from the default permutation.
+  const defaultPerm = findPermByTuple(permutations, defaultTuple);
+  const baseline = defaultPerm ? permutationsResolved[defaultPerm.name] : undefined;
+
   for (const axis of axes) {
     const axisCells: Record<string, TokenMap> = {};
     for (const ctx of axis.contexts) {
@@ -26,7 +36,20 @@ export function buildCells(
       const perm = findPermByTuple(permutations, cellTuple);
       if (!perm) continue;
       const resolved = permutationsResolved[perm.name];
-      if (resolved) axisCells[ctx] = resolved;
+      if (!resolved) continue;
+      if (ctx === axis.default || !baseline) {
+        // Default cell — keep the full TokenMap; serves as baseline.
+        axisCells[ctx] = resolved;
+      } else {
+        // Non-default cell — store only tokens that differ from baseline.
+        const delta: TokenMap = {};
+        for (const path of Object.keys(resolved)) {
+          const cellValue = resolved[path];
+          if (!cellValue) continue;
+          if (!sameValue(cellValue, baseline[path])) delta[path] = cellValue;
+        }
+        axisCells[ctx] = delta;
+      }
     }
     cells[axis.name] = axisCells;
   }
@@ -44,4 +67,15 @@ function findPermByTuple(
     }
     return Object.keys(perm.input).length === keys.length;
   });
+}
+
+function sameValue(a: unknown, b: unknown): boolean {
+  return JSON.stringify(getValue(a)) === JSON.stringify(getValue(b));
+}
+
+function getValue(t: unknown): unknown {
+  if (t && typeof t === 'object' && '$value' in t) {
+    return (t as { $value: unknown }).$value;
+  }
+  return undefined;
 }

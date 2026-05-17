@@ -37,11 +37,5 @@ export async function normalizePermutations(
     return loadLayeredPermutations(config.axes, config.tokens, cwd, logger, config.maxPermutations);
   }
 
-  return loadResolverPermutations(
-    config.resolver,
-    config.tokens,
-    cwd,
-    logger,
-    config.maxPermutations,
-  );
+  return loadResolverPermutations(config.resolver, config.tokens, cwd, logger);
 }

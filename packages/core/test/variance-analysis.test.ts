@@ -70,15 +70,16 @@ describe('analyzeProjectVariance — reference fixture', () => {
     // At least one joint case must be recorded.
     expect(info.jointCases.length).toBeGreaterThan(0);
     // Joint cases name an axis pair + non-default contexts + a stringified
-    // cartesian value + a permutation name for downstream emit lookup.
+    // cartesian value + a permutation name. After the singleton-only
+    // loader switch, the joint tuple is no longer materialized in
+    // `permutationsResolved` — the name is informational, and the
+    // cartesian-correct value lives in `project.jointOverrides`.
     for (const c of info.jointCases) {
       expect(c.axisA).toBeTruthy();
       expect(c.axisB).toBeTruthy();
       expect(c.axisA).not.toBe(c.axisB);
       expect(c.cartesianValueKey).toBeTruthy();
       expect(c.permutationName).toBeTruthy();
-      // The recorded permutation must exist in the project's resolved map.
-      expect(referenceProject.permutationsResolved[c.permutationName]).toBeDefined();
     }
   });
 

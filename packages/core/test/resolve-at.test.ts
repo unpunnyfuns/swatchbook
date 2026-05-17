@@ -46,23 +46,29 @@ it('repeated calls with the same tuple return the same instance (memoization)', 
   expect(project.resolveAt(tuple)).toBe(project.resolveAt(tuple));
 });
 
-it("reproduces the fixture's joint-variance value (Dark + Brand A) via joint overrides — `accent.fg` is dark, not white", () => {
-  // The joint-variance case the smart emitter chain pinned:
-  // baseline accent.fg = white; under mode=Dark alone, `accessible.accent.fg`
-  // overrides to a dark value; under brand=Brand A alone, accent.fg is white;
-  // jointly, the cartesian resolves to the dark Brand A value, not white.
-  const jointTuple = { ...project.defaultTuple, mode: 'Dark', brand: 'Brand A' };
-  const expected = project.permutationsResolved['Dark · Brand A · Normal'];
-  expect(expected, 'fixture missing the expected joint permutation').toBeDefined();
-  const actual = project.resolveAt(jointTuple);
-  const expectedVal = valueKey(expected?.['color.accent.fg']?.$value);
+it("reproduces the fixture's joint-variance value at (Dark, Brand A) via joint overrides", () => {
+  // accent.fg at {Dark, Brand A}: mode=Dark's `accessible.accent.fg`
+  // overlay gives dark; Brand A alone gives white (matches baseline);
+  // jointly the cartesian truth differs from the projection composition,
+  // so `probeJointOverrides` records an override that `resolveAt`
+  // applies to land on the correct value.
+  const parserInput = project.parserInput;
+  expect(parserInput?.resolver, 'reference fixture must be resolver-backed').toBeDefined();
+  const cartesianTokens = parserInput?.resolver?.apply({
+    ...project.defaultTuple,
+    mode: 'Dark',
+    brand: 'Brand A',
+  });
+  const expectedVal = valueKey(cartesianTokens?.['color.accent.fg']?.$value);
+  const actual = project.resolveAt({ ...project.defaultTuple, mode: 'Dark', brand: 'Brand A' });
   const actualVal = valueKey(actual['color.accent.fg']?.$value);
   expect(actualVal).toBe(expectedVal);
 });
 
-it("doesn't materialize a joint override entry for tuples that compose correctly from cells alone", () => {
-  // Sanity check: cells alone handle orthogonal-after-probe and
-  // single-axis tokens, so the joint-override count is small relative
-  // to the fixture's cartesian size.
-  expect(project.jointOverrides.size).toBeLessThan(project.permutations.length);
+it('materializes a bounded set of joint override entries (one per divergent partial tuple)', () => {
+  // Bounded by `Σ_n C(axes, n) × Π_i (contexts_i - 1)` across all
+  // arities that probed up a divergence — much smaller than the
+  // cartesian product for typical fixtures.
+  expect(project.jointOverrides.size).toBeGreaterThan(0);
+  expect(project.jointOverrides.size).toBeLessThan(50);
 });

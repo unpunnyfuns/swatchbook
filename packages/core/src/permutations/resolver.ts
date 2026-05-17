@@ -13,12 +13,7 @@ import {
   type TokenMap,
 } from '#/types.ts';
 import type { BufferedLogger } from '#/diagnostics.ts';
-import {
-  cartesianSize,
-  collectGlobbedFiles,
-  DEFAULT_MAX_PERMUTATIONS,
-  permutationGuardDiagnostic,
-} from '#/permutations/util.ts';
+import { collectGlobbedFiles } from '#/permutations/util.ts';
 
 export interface ResolverLoadResult {
   axes: Axis[];
@@ -81,7 +76,6 @@ export async function loadResolverPermutations(
   tokenGlobs: string[] | undefined,
   cwd: string,
   logger: BufferedLogger,
-  maxPermutations: number = DEFAULT_MAX_PERMUTATIONS,
 ): Promise<ResolverLoadResult> {
   const cwdUrl = pathToFileURL(`${cwd}/`);
   const terrazzoConfig = defineTerrazzoConfig({}, { logger, cwd: cwdUrl });
@@ -179,27 +173,29 @@ export async function loadResolverPermutations(
   const permutations: Permutation[] = [];
   const resolved: Record<string, TokenMap> = {};
 
-  // Guard against pathological resolvers (terrazzo#752): when the
-  // cartesian product would explode, skip `listPermutations` entirely
-  // and load only the default tuple. The resolver itself stays
-  // available on `parserInput.resolver` for on-demand `apply()` later.
-  const size = cartesianSize(axes);
-  const guardActive = maxPermutations > 0 && size > maxPermutations;
+  // Materialize `Σ(axes × contexts)` singleton permutations: the
+  // default tuple + one per `(axis, non-default-context)` cell.
+  // Bounded by axis cardinality — independent of the cartesian
+  // product, so even pathological resolvers (terrazzo#752's ~15M
+  // tuples) load in milliseconds. Joint divergences are picked up
+  // downstream via targeted `resolver.apply` probes in
+  // `probeJointOverrides`. The resolver itself stays on
+  // `parserInput.resolver` for any consumer that needs an
+  // on-demand `apply` at a non-singleton tuple.
+  const defaultInput: Record<string, string> = {};
+  for (const axis of axes) defaultInput[axis.name] = axis.default;
+  const defaultId = permutationID(defaultInput);
+  permutations.push({ name: defaultId, input: defaultInput, sources: [] });
+  resolved[defaultId] = resolver.apply(defaultInput);
 
-  if (guardActive) {
-    diagnostics.push(permutationGuardDiagnostic(size, maxPermutations));
-    const defaultInput: Record<string, string> = {};
-    for (const axis of axes) defaultInput[axis.name] = axis.default;
-    const id = permutationID(defaultInput);
-    const tokens = resolver.apply(defaultInput);
-    permutations.push({ name: id, input: defaultInput, sources: [] });
-    resolved[id] = tokens;
-  } else {
-    for (const input of resolver.listPermutations()) {
-      const id = permutationID(input);
-      const tokens = resolver.apply(input);
-      permutations.push({ name: id, input: { ...input }, sources: [] });
-      resolved[id] = tokens;
+  for (const axis of axes) {
+    for (const ctx of axis.contexts) {
+      if (ctx === axis.default) continue;
+      const cellInput = { ...defaultInput, [axis.name]: ctx };
+      const id = permutationID(cellInput);
+      if (resolved[id] !== undefined) continue;
+      permutations.push({ name: id, input: cellInput, sources: [] });
+      resolved[id] = resolver.apply(cellInput);
     }
   }
 
