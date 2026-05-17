@@ -1,9 +1,10 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { type ProjectSnapshot, SwatchbookProvider, TokenTable } from '#/index.ts';
+import { withCellsShape } from './_snapshot-utils.ts';
 
 function makeSnapshot(): ProjectSnapshot {
-  return {
+  return withCellsShape({
     axes: [
       {
         name: 'mode',
@@ -42,7 +43,7 @@ function makeSnapshot(): ProjectSnapshot {
     cssVarPrefix: 'sb',
     diagnostics: [],
     css: '',
-  };
+  });
 }
 
 describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => {

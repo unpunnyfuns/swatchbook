@@ -9,11 +9,12 @@ import { userEvent } from '@vitest/browser/context';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { type ProjectSnapshot, SwatchbookProvider, TokenNavigator } from '#/index.ts';
+import { withCellsShape } from './_snapshot-utils.ts';
 
 afterEach(cleanup);
 
 function snapshot(): ProjectSnapshot {
-  return {
+  return withCellsShape({
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
     disabledAxes: [],
     presets: [],
@@ -31,7 +32,7 @@ function snapshot(): ProjectSnapshot {
     cssVarPrefix: 'sb',
     diagnostics: [],
     css: '',
-  };
+  });
 }
 
 function renderNav(props: { initiallyExpanded?: number; onSelect?: (p: string) => void } = {}) {

@@ -1,9 +1,10 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Diagnostics, type ProjectSnapshot, SwatchbookProvider } from '#/index.ts';
+import { withCellsShape } from './_snapshot-utils.ts';
 
 function makeSnapshot(diagnostics: ProjectSnapshot['diagnostics'] = []): ProjectSnapshot {
-  return {
+  return withCellsShape({
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
     disabledAxes: [],
     presets: [],
@@ -14,7 +15,7 @@ function makeSnapshot(diagnostics: ProjectSnapshot['diagnostics'] = []): Project
     cssVarPrefix: 'sb',
     diagnostics,
     css: '',
-  };
+  });
 }
 
 describe('Diagnostics', () => {
