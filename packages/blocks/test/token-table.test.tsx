@@ -63,9 +63,9 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     const rows = within(table).getAllByRole('row');
     expect(rows.length).toBe(4);
 
-    expect(within(table).getByText('color.text')).toBeDefined();
-    expect(within(table).getByText('color.surface')).toBeDefined();
-    expect(within(table).getByText('space.md')).toBeDefined();
+    within(table).getByText('color.text');
+    within(table).getByText('color.surface');
+    within(table).getByText('space.md');
   });
 
   it('clicking a row opens the TokenDetail overlay by default', async () => {
@@ -81,8 +81,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     if (!target) throw new Error('row not found');
     target.click();
 
-    const overlay = await findByTestId('token-table-overlay');
-    expect(overlay).toBeDefined();
+    await findByTestId('token-table-overlay');
   });
 
   it('onSelect suppresses the overlay and hands the path to the consumer', () => {
@@ -124,8 +123,6 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     );
 
     const input = screen.getByTestId('token-table-search') as HTMLInputElement;
-    expect(input).toBeDefined();
-
     const before = within(screen.getByRole('table')).getAllByRole('row').length;
     expect(before).toBeGreaterThan(2);
 
@@ -153,7 +150,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     const input = screen.getByTestId('token-table-search') as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'xyz-no-match' } });
 
-    expect(screen.getByText(/No tokens match "xyz-no-match"/)).toBeDefined();
+    screen.getByText(/No tokens match "xyz-no-match"/);
   });
 
   it('hides the search input when searchable={false}', () => {
@@ -177,7 +174,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     );
 
     expect(screen.queryByRole('table')).toBeNull();
-    expect(screen.getByText('No tokens match this filter.')).toBeDefined();
+    screen.getByText('No tokens match this filter.');
   });
 
   it('does not carry any chrome-aliasing inline style on the wrapper', () => {

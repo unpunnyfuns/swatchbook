@@ -52,9 +52,9 @@ describe('ColorPalette', () => {
     // `color.*` has fixed length 1. Auto groupBy clamps so every swatch
     // keeps a leaf label — depth-2 tokens get `color.<leaf>` groups,
     // depth-4 palette tokens collapse under the shared `color.palette` group.
-    expect(screen.getByText('color.bg')).toBeDefined();
-    expect(screen.getByText('color.fg')).toBeDefined();
-    expect(screen.getByText('color.palette')).toBeDefined();
+    screen.getByText('color.bg');
+    screen.getByText('color.fg');
+    screen.getByText('color.palette');
   });
 
   it('clamps auto-groupBy so each swatch keeps a leaf label', () => {
@@ -66,8 +66,8 @@ describe('ColorPalette', () => {
         <ColorPalette filter="color.palette.blue.*" />
       </SwatchbookProvider>,
     );
-    expect(screen.getByText('color.palette.blue')).toBeDefined();
-    expect(screen.getByText('500')).toBeDefined();
+    screen.getByText('color.palette.blue');
+    screen.getByText('500');
   });
 
   it('shows the empty state when the filter matches no color tokens', () => {
@@ -76,6 +76,6 @@ describe('ColorPalette', () => {
         <ColorPalette filter="typography.*" />
       </SwatchbookProvider>,
     );
-    expect(screen.getByText('No color tokens match this filter.')).toBeDefined();
+    screen.getByText('No color tokens match this filter.');
   });
 });

@@ -49,7 +49,7 @@ describe('ColorTable — grouping', () => {
       .find((r) => r.getAttribute('data-base') === 'color.bg.hi');
     if (!hiRow) throw new Error('group row not found');
     expect(hiRow.getAttribute('data-path')).toBe('color.bg.hi');
-    expect(within(hiRow).getByText('#111111')).toBeDefined();
+    within(hiRow).getByText('#111111');
   });
 
   it('clicking a pill swaps the active variant and the displayed values', () => {
@@ -76,7 +76,7 @@ describe('ColorTable — grouping', () => {
       .find((r) => r.getAttribute('data-base') === 'color.bg.hi');
     if (!hiRow) throw new Error('group row after click not found');
     expect(hiRow.getAttribute('data-path')).toBe('color.bg.hi-d');
-    expect(within(hiRow).getByText('#333333')).toBeDefined();
+    within(hiRow).getByText('#333333');
   });
 
   it('renders DTCG dot-segment variants (hi.disabled) the same as hyphen tails', () => {

@@ -32,9 +32,9 @@ describe('ColorTable — base rendering', () => {
     );
 
     const row = screen.getByTestId('color-table-row');
-    expect(within(row).getByText('#111111')).toBeDefined();
-    expect(within(row).getByText(/var\(--sb-color-text-default\)/)).toBeDefined();
-    expect(within(row).getByText('color.palette.neutral.900')).toBeDefined();
+    within(row).getByText('#111111');
+    within(row).getByText(/var\(--sb-color-text-default\)/);
+    within(row).getByText('color.palette.neutral.900');
     // Per-format HSL / OKLCH copy buttons shouldn't exist on the collapsed row.
     expect(within(row).queryByLabelText(/Copy HSL/)).toBeNull();
     expect(within(row).queryByLabelText(/Copy OKLCH/)).toBeNull();
@@ -73,7 +73,7 @@ describe('ColorTable — base rendering', () => {
       </SwatchbookProvider>,
     );
     expect(screen.queryByRole('table')).toBeNull();
-    expect(screen.getByText('No color tokens match this filter.')).toBeDefined();
+    screen.getByText('No color tokens match this filter.');
   });
 
   it('renders no variant pills when the variants prop is omitted', () => {

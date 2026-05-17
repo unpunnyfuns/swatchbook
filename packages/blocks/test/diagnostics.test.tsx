@@ -29,7 +29,7 @@ describe('Diagnostics', () => {
         <Diagnostics />
       </SwatchbookProvider>,
     );
-    expect(screen.getByText(/✔ OK · no diagnostics/)).toBeDefined();
+    screen.getByText(/✔ OK · no diagnostics/);
   });
 
   it('auto-expands when there are errors and lists each row', () => {
@@ -51,15 +51,15 @@ describe('Diagnostics', () => {
     );
 
     // Summary shows the aggregated count.
-    expect(screen.getByText(/✖ 1 error · ⚠ 1 warning/)).toBeDefined();
+    screen.getByText(/✖ 1 error · ⚠ 1 warning/);
 
     // <details> auto-opens when errors exist — rows visible.
     const details = screen.getByText(/✖ 1 error · ⚠ 1 warning/).closest('details');
     expect(details?.hasAttribute('open')).toBe(true);
 
-    expect(screen.getByText('Missing $value on color.bg')).toBeDefined();
-    expect(screen.getByText('modifier unusable')).toBeDefined();
-    expect(screen.getByText(/parser · \/proj\/tokens.json · :4/)).toBeDefined();
+    screen.getByText('Missing $value on color.bg');
+    screen.getByText('modifier unusable');
+    screen.getByText(/parser · \/proj\/tokens.json · :4/);
   });
 
   it('stays collapsed when only info-level diagnostics are present', () => {
@@ -80,6 +80,6 @@ describe('Diagnostics', () => {
         <Diagnostics caption="Project health" />
       </SwatchbookProvider>,
     );
-    expect(screen.getByText('Project health')).toBeDefined();
+    screen.getByText('Project health');
   });
 });

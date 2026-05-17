@@ -20,7 +20,7 @@ describe('ColorTable — expansion', () => {
     act(() => {
       fireEvent.click(row);
     });
-    expect(screen.getByTestId('color-table-detail')).toBeDefined();
+    screen.getByTestId('color-table-detail');
     expect(row.getAttribute('aria-label')).toBe('Collapse color.text.default');
 
     act(() => {
@@ -39,7 +39,7 @@ describe('ColorTable — expansion', () => {
       fireEvent.click(screen.getByTestId('color-table-row'));
     });
     const detail = screen.getByTestId('color-table-detail');
-    expect(within(detail).getByText('Primary text on default surfaces.')).toBeDefined();
+    within(detail).getByText('Primary text on default surfaces.');
     expect(detail.textContent).toContain('color.palette.neutral.900');
   });
 
