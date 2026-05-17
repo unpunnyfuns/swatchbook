@@ -45,7 +45,7 @@ it('returns empty maps when axes.length < 2 (no joint combinations to probe)', (
     { mode: 'Light' },
     resolver,
   );
-  expect(overrides.size).toBe(0);
+  expect(overrides.length).toBe(0);
   expect(jointTouching.size).toBe(0);
 });
 
@@ -61,7 +61,7 @@ it('returns empty maps when resolver is undefined (layered / plain-parse project
     { mode: 'Light', brand: 'Default' },
     undefined,
   );
-  expect(overrides.size).toBe(0);
+  expect(overrides.length).toBe(0);
   expect(jointTouching.size).toBe(0);
 });
 
@@ -89,8 +89,8 @@ it('records an arity-2 override when cells composition cannot reproduce the cart
     { mode: 'Light', brand: 'Default' },
     resolver,
   );
-  expect(overrides.size).toBe(1);
-  const entry = [...overrides.values()][0];
+  expect(overrides.length).toBe(1);
+  const entry = overrides[0]?.[1];
   expect(entry?.axes).toEqual({ mode: 'Dark', brand: 'A' });
   expect(entry?.tokens['color.fg']?.$value).toBe('red');
   // Both axes contribute (cartesian red differs from cellA black AND from cellB baseline white).
@@ -163,9 +163,9 @@ it('marks every participating axis touching when an arity-3+ divergence is found
     { mode: 'Light', brand: 'Default', contrast: 'Normal' },
     resolver,
   );
-  const tripleEntries = [...overrides.values()].filter(
-    (o) => Object.keys(o.axes).length === 3,
-  );
+  const tripleEntries = overrides
+    .map(([, o]) => o)
+    .filter((o) => Object.keys(o.axes).length === 3);
   expect(tripleEntries).toHaveLength(1);
   expect(tripleEntries[0]?.tokens['color.fg']?.$value).toBe('red');
   // Arity-3 conservative marking: every participating axis flagged.
@@ -199,6 +199,6 @@ it('dedupes overrides on canonical key — the same partial tuple under differen
   );
   // Exactly one arity-2 entry; canonicalKey is `brand:A|mode:Dark`
   // (axis names lexicographically sorted), not `mode:Dark|brand:A`.
-  expect(overrides.size).toBe(1);
-  expect([...overrides.keys()]).toEqual(['brand:A|mode:Dark']);
+  expect(overrides.length).toBe(1);
+  expect(overrides.map(([k]) => k)).toEqual(['brand:A|mode:Dark']);
 });

@@ -88,12 +88,19 @@ export interface JointOverride {
 }
 
 /**
- * All joint-variant overrides for a project, keyed by canonical
- * stringification of `JointOverride.axes`. Iteration order is
- * ascending arity so higher-order divergences win over lower-order
- * ones when applied in sequence.
+ * All joint-variant overrides for a project — an array of
+ * `[canonicalKey, override]` pairs (canonical stringification of
+ * `override.axes`). Iteration order is ascending arity so higher-order
+ * divergences win over lower-order ones when applied in sequence.
+ *
+ * Shape mirrors the wire format the addon's virtual module ships to the
+ * preview — no Map↔array marshaling at the boundary. No consumer needs
+ * keyed lookup; all reads are `for (const [, override] of ...)`
+ * iteration. Internal dedupe during construction (`probeJointOverrides`)
+ * uses a temporary Map keyed on canonical tuple, materialized to this
+ * array shape on return.
  */
-export type JointOverrides = ReadonlyMap<string, JointOverride>;
+export type JointOverrides = ReadonlyArray<readonly [string, JointOverride]>;
 
 /**
  * Compute the resolved `TokenMap` for any tuple of axis selections

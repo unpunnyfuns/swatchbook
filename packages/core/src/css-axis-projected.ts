@@ -211,7 +211,7 @@ function collectJointBlocks(
   transformAlias: (token: TokenNormalized) => string,
 ): string[] {
   const blocks: string[] = [];
-  for (const override of project.jointOverrides.values()) {
+  for (const [, override] of project.jointOverrides) {
     const fullTuple = { ...project.defaultTuple, ...override.axes };
     const fullTokens = project.resolveAt(fullTuple);
     const axisEntries = Object.entries(override.axes);

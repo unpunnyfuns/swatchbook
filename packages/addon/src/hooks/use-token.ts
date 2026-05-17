@@ -9,7 +9,6 @@ import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
 import type {
   Axis as CoreAxis,
   Cells as CoreCells,
-  JointOverride,
   JointOverrides,
 } from '@unpunnyfuns/swatchbook-core';
 import { useActiveAxes, useOptionalSwatchbookData } from '@unpunnyfuns/swatchbook-blocks';
@@ -24,7 +23,7 @@ import { useActiveAxes, useOptionalSwatchbookData } from '@unpunnyfuns/swatchboo
 const fallbackResolveAt = buildResolveAt(
   virtualAxes as readonly CoreAxis[],
   virtualCells as CoreCells,
-  new Map(virtualJointOverrides as readonly (readonly [string, JointOverride])[]) as JointOverrides,
+  virtualJointOverrides as JointOverrides,
   virtualDefaultTuple,
 );
 

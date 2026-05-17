@@ -65,9 +65,9 @@ export function buildResolveAt(
       const cell = cells[axis.name]?.[ctx];
       if (cell) Object.assign(result, cell);
     }
-    // Step 3: joint overrides. Map iteration is insertion order =
-    // ascending arity, so larger overrides naturally win.
-    for (const override of jointOverrides.values()) {
+    // Step 3: joint overrides. Array iteration order is ascending
+    // arity by construction, so larger overrides naturally win.
+    for (const [, override] of jointOverrides) {
       if (!isSubset(override.axes, full)) continue;
       Object.assign(result, override.tokens);
     }

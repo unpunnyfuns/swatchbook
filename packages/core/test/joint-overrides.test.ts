@@ -14,24 +14,24 @@ beforeAll(async () => {
 }, 30_000);
 
 it('produces at least one entry for the reference fixture (which has a known joint-variance case on color.accent.fg)', () => {
-  expect(project.jointOverrides.size).toBeGreaterThan(0);
+  expect(project.jointOverrides.length).toBeGreaterThan(0);
 });
 
 it("every entry covers a partial tuple of size ≥ 2 (joint by definition; singleton variance is single-axis, captured in cells)", () => {
-  for (const override of project.jointOverrides.values()) {
+  for (const [, override] of project.jointOverrides) {
     expect(Object.keys(override.axes).length).toBeGreaterThanOrEqual(2);
   }
 });
 
 it('every entry holds at least one token whose value at the partial tuple diverges from cascade composition', () => {
-  for (const override of project.jointOverrides.values()) {
+  for (const [, override] of project.jointOverrides) {
     expect(Object.keys(override.tokens).length).toBeGreaterThan(0);
   }
 });
 
 it("iteration order is ascending arity (so composition can apply lower-order overrides before higher-order ones)", () => {
   let prevArity = 0;
-  for (const override of project.jointOverrides.values()) {
+  for (const [, override] of project.jointOverrides) {
     const arity = Object.keys(override.axes).length;
     expect(arity).toBeGreaterThanOrEqual(prevArity);
     prevArity = arity;
@@ -47,9 +47,9 @@ it('exercises the arity-3 branch — the fixture produces at least one triple-ax
   // pair-composition can't reproduce the triple-joint accessible-accent
   // values; pin that the branch is reachable so future fixture changes
   // don't silently drop the only real-data coverage of the arity-3 loop.
-  const triples = [...project.jointOverrides.values()].filter(
-    (o) => Object.keys(o.axes).length === 3,
-  );
+  const triples = project.jointOverrides
+    .map(([, override]) => override)
+    .filter((o) => Object.keys(o.axes).length === 3);
   expect(triples.length).toBeGreaterThan(0);
   for (const triple of triples) {
     expect(Object.keys(triple.tokens).length).toBeGreaterThan(0);

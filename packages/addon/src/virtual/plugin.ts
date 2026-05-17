@@ -108,10 +108,8 @@ export function swatchbookTokensPlugin({
       if (id !== RESOLVED_VIRTUAL_MODULE_ID) return null;
       if (!project) return 'export default null;';
       // Emit a typed ESM module. Values are JSON-stringified for stability.
-      // `jointOverrides` ships as an array of `[key, entry]` pairs because
-      // `Map` doesn't survive `JSON.stringify`; the block side reconstructs
-      // the Map (or just reads the array, depending on the consumer).
-      const jointOverridesArr = [...project.jointOverrides.entries()];
+      // `jointOverrides` is already an array of `[key, entry]` pairs on
+      // the server side — same shape consumers read on the wire.
       const varianceByPathObj = Object.fromEntries(project.varianceByPath.entries());
       return [
         `/* swatchbook virtual module — generated */`,
@@ -123,7 +121,7 @@ export function swatchbookTokensPlugin({
         `export const cssVarPrefix = ${JSON.stringify(config.cssVarPrefix ?? '')};`,
         `export const listing = ${JSON.stringify(slimListing(project.listing))};`,
         `export const cells = ${JSON.stringify(project.cells)};`,
-        `export const jointOverrides = ${JSON.stringify(jointOverridesArr)};`,
+        `export const jointOverrides = ${JSON.stringify(project.jointOverrides)};`,
         `export const varianceByPath = ${JSON.stringify(varianceByPathObj)};`,
         `export const defaultTuple = ${JSON.stringify(project.defaultTuple)};`,
       ].join('\n');
@@ -187,7 +185,7 @@ export function swatchbookTokensPlugin({
                 cssVarPrefix: config.cssVarPrefix ?? '',
                 listing: slimListing(project.listing),
                 cells: project.cells,
-                jointOverrides: [...project.jointOverrides.entries()],
+                jointOverrides: project.jointOverrides,
                 varianceByPath: Object.fromEntries(project.varianceByPath.entries()),
                 defaultTuple: project.defaultTuple,
               },
