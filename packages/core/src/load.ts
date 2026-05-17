@@ -98,11 +98,6 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     }
   }
 
-  const { entries: chrome, diagnostics: chromeDiagnostics } = validateChrome(
-    config.chrome,
-    filteredResolved,
-  );
-
   const { diagnostics: cssOptionsDiagnostics } = validateCssOptions(config.cssOptions);
 
   // A misconfigured `disabledAxes` (e.g. pinning an axis whose default
@@ -133,21 +128,23 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
         )
       : { listing: {}, diagnostics: [] };
 
-  // Build the cells / jointOverrides / resolveAt surface alongside the
-  // existing cartesian shape. Additive only — downstream consumers can
-  // migrate to the new fields without breaking until a follow-up PR
-  // drops the cartesian materialization. `defaultTuple` here is the
-  // post-disabledAxes-filter version, matching what `cells` is keyed
-  // against.
+  // `defaultTuple` here is the post-disabledAxes-filter version,
+  // matching what `cells` is keyed against.
   const projectDefaultTuple: Record<string, string> = {};
   for (const axis of filteredAxes) projectDefaultTuple[axis.name] = axis.default;
 
-  const cells = buildCells(
-    filteredAxes,
-    filteredPermutations,
-    filteredResolved,
-    projectDefaultTuple,
-  );
+  // `buildCells` calls `resolveTuple` once per `(axis, context)`
+  // singleton. Resolver-backed projects route through `resolver.apply`
+  // directly (no scan of the singleton-enumeration shape); layered /
+  // plain-parse projects look up the loader's per-tuple parse output
+  // by `permutationID(tuple)`. Either way the data source is
+  // upstream of `Project.permutations` / `permutationsResolved`.
+  const resolveTuple = normalized.parserInput?.resolver
+    ? (tuple: Readonly<Record<string, string>>): TokenMap =>
+        normalized.parserInput!.resolver!.apply(tuple as Record<string, string>)
+    : (tuple: Readonly<Record<string, string>>): TokenMap =>
+        filteredResolved[permutationID(tuple)] ?? {};
+  const cells = buildCells(filteredAxes, resolveTuple, projectDefaultTuple);
 
   // Pair-only joint-divergence probe via `resolver.apply` — bounded
   // by `Σ pairs (contexts_a - 1) × (contexts_b - 1)` calls,
@@ -173,6 +170,16 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     cells,
     jointTouching,
     baselineForVariance,
+  );
+
+  // `validateChrome` checks targets against the project's path
+  // universe. `varianceByPath.keys()` is the union of every path
+  // that appears in any theme by construction — same set the prior
+  // `permutationsResolved`-scan produced, computed once at load time.
+  const tokenIDs = new Set<string>(varianceByPath.keys());
+  const { entries: chrome, diagnostics: chromeDiagnostics } = validateChrome(
+    config.chrome,
+    tokenIDs,
   );
 
   return {

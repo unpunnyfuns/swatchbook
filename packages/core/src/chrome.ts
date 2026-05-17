@@ -1,4 +1,4 @@
-import type { Diagnostic, TokenMap } from '#/types.ts';
+import type { Diagnostic } from '#/types.ts';
 
 /**
  * Closed set of roles that swatchbook's block chrome reads. Each role emits
@@ -67,24 +67,24 @@ export interface ChromeValidationResult {
 }
 
 /**
- * Validate `config.chrome` against the project's resolved tokens. Unknown
- * roles (outside `CHROME_ROLES`) and target paths that don't resolve in any
- * theme produce `warn` diagnostics and are dropped. Surviving entries land
- * on `Project.chrome` and override the hard-coded `DEFAULT_CHROME_MAP`
- * literals during CSS emission.
+ * Validate `config.chrome` against the project's known token paths.
+ * Unknown roles (outside `CHROME_ROLES`) and target paths that don't
+ * appear in any theme produce `warn` diagnostics and are dropped.
+ * Surviving entries land on `Project.chrome` and override the
+ * hard-coded `DEFAULT_CHROME_MAP` literals during CSS emission.
+ *
+ * Caller pre-computes `tokenIDs` (typically the union of every path
+ * in `Project.cells` or `Project.varianceByPath.keys()`) so this
+ * function doesn't reach into `permutationsResolved`.
  */
 export function validateChrome(
   raw: Record<string, string> | undefined,
-  permutationsResolved: Record<string, TokenMap>,
+  tokenIDs: ReadonlySet<string>,
 ): ChromeValidationResult {
   const diagnostics: Diagnostic[] = [];
   if (!raw) return { entries: {}, diagnostics };
 
   const known = new Set<string>(CHROME_ROLES);
-  const tokenIDs = new Set<string>();
-  for (const tokens of Object.values(permutationsResolved)) {
-    for (const id of Object.keys(tokens)) tokenIDs.add(id);
-  }
 
   const entries: Record<string, string> = {};
   for (const [role, target] of Object.entries(raw)) {
@@ -116,7 +116,7 @@ export function validateChrome(
  * `typography.body`). Composite tokens emit one CSS var per sub-field,
  * so either form is a valid alias target.
  */
-function targetResolves(target: string, tokenIDs: Set<string>): boolean {
+function targetResolves(target: string, tokenIDs: ReadonlySet<string>): boolean {
   if (tokenIDs.has(target)) return true;
   const lastDot = target.lastIndexOf('.');
   if (lastDot < 0) return false;
