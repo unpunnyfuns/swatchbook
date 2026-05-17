@@ -25,6 +25,52 @@ type Entry = readonly [string, VirtualToken];
  * `sortBy: 'none'` — preserve input order (still respects `sortDir: 'desc'`
  *   as a reverse).
  */
+/**
+ * Pre-computed per-token sort key — one of three shapes depending on
+ * `$type`. The comparator looks the key up by token-reference once
+ * per pair instead of recomputing on every comparison (Schwartzian
+ * transform).
+ *
+ * For N tokens, sort does O(N log N) comparisons; per-call cost for
+ * colors was an Oklch conversion (a `new Color()` + `to('oklch')`)
+ * which dominates wall time on real fixtures. Pre-computing brings
+ * that down to O(N) keys + O(N log N) cheap lookups.
+ */
+type SortKey =
+  | { kind: 'numeric'; value: number; valid: boolean }
+  | { kind: 'color'; key: { l: number; c: number; h: number } | null }
+  | { kind: 'string'; value: string }
+  | { kind: 'none' };
+
+const NUMERIC_TYPES = new Set([
+  'dimension',
+  'duration',
+  'fontWeight',
+  'opacity',
+  'number',
+  'lineHeight',
+]);
+
+const STRING_TYPES = new Set(['fontFamily', 'strokeStyle']);
+
+function computeSortKey(token: VirtualToken): SortKey {
+  const type = token.$type;
+  if (!type) return { kind: 'none' };
+  if (NUMERIC_TYPES.has(type)) {
+    const value = toMagnitude(token.$value);
+    return { kind: 'numeric', value, valid: Number.isFinite(value) };
+  }
+  if (type === 'color') {
+    return { kind: 'color', key: colorKey(token.$value) };
+  }
+  if (STRING_TYPES.has(type)) {
+    return { kind: 'string', value: toDisplayable(token.$value) };
+  }
+  // Composite types ($type: 'typography', 'shadow', 'border', …) have
+  // no useful one-dimensional ordering — fall back to no-op.
+  return { kind: 'none' };
+}
+
 export function sortTokens(entries: readonly Entry[], options: SortOptions = {}): Entry[] {
   const by = options.by ?? 'path';
   const dir = options.dir ?? 'asc';
@@ -40,58 +86,56 @@ export function sortTokens(entries: readonly Entry[], options: SortOptions = {})
     );
   }
 
-  // by === 'value'
+  // by === 'value' — pre-compute per-token sort keys once.
+  const keys = new Map<VirtualToken, SortKey>();
+  for (const [, token] of entries) {
+    keys.set(token, computeSortKey(token));
+  }
+
   return [...entries].toSorted(([aPath, aTok], [bPath, bTok]) => {
-    const cmp = compareValue(aTok, bTok);
+    const cmp = compareValue(aTok, bTok, keys);
     if (cmp !== 0) return sign * cmp;
     // Stable tiebreak on path so the order is deterministic when values equal.
     return sign * aPath.localeCompare(bPath, undefined, { numeric: true });
   });
 }
 
-function compareValue(a: VirtualToken, b: VirtualToken): number {
-  const type = a.$type;
+function compareValue(
+  a: VirtualToken,
+  b: VirtualToken,
+  keys: ReadonlyMap<VirtualToken, SortKey>,
+): number {
   // When the two tokens differ in $type, fall back to type-alpha so at
   // least the mixed list clusters by type.
-  if (type !== b.$type) return String(type ?? '').localeCompare(String(b.$type ?? ''));
-  if (!type) return 0;
+  if (a.$type !== b.$type) return String(a.$type ?? '').localeCompare(String(b.$type ?? ''));
 
-  if (
-    type === 'dimension' ||
-    type === 'duration' ||
-    type === 'fontWeight' ||
-    type === 'opacity' ||
-    type === 'number' ||
-    type === 'lineHeight'
-  ) {
-    const av = toMagnitude(a.$value);
-    const bv = toMagnitude(b.$value);
-    if (Number.isFinite(av) && Number.isFinite(bv)) return av - bv;
-    if (Number.isFinite(av)) return -1;
-    if (Number.isFinite(bv)) return 1;
+  const ak = keys.get(a);
+  const bk = keys.get(b);
+  if (!ak || !bk) return 0;
+  if (ak.kind !== bk.kind) return 0; // matches a.$type === b.$type check above
+
+  if (ak.kind === 'numeric' && bk.kind === 'numeric') {
+    if (ak.valid && bk.valid) return ak.value - bk.value;
+    if (ak.valid) return -1;
+    if (bk.valid) return 1;
     return 0;
   }
 
-  if (type === 'color') {
-    const ak = colorKey(a.$value);
-    const bk = colorKey(b.$value);
-    if (!ak && !bk) return 0;
-    if (!ak) return 1;
-    if (!bk) return -1;
-    // L → C → H.
-    if (ak.l !== bk.l) return ak.l - bk.l;
-    if (ak.c !== bk.c) return ak.c - bk.c;
-    return ak.h - bk.h;
+  if (ak.kind === 'color' && bk.kind === 'color') {
+    const a3 = ak.key;
+    const b3 = bk.key;
+    if (!a3 && !b3) return 0;
+    if (!a3) return 1;
+    if (!b3) return -1;
+    if (a3.l !== b3.l) return a3.l - b3.l;
+    if (a3.c !== b3.c) return a3.c - b3.c;
+    return a3.h - b3.h;
   }
 
-  if (type === 'fontFamily' || type === 'strokeStyle') {
-    const as = toDisplayable(a.$value);
-    const bs = toDisplayable(b.$value);
-    return as.localeCompare(bs, undefined, { numeric: true });
+  if (ak.kind === 'string' && bk.kind === 'string') {
+    return ak.value.localeCompare(bk.value, undefined, { numeric: true });
   }
 
-  // Composite types — no one-dimensional ordering. Callers should have
-  // fallen through to 'path' for these; if they didn't, leave untouched.
   return 0;
 }
 
