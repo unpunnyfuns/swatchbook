@@ -48,11 +48,18 @@ export function fuzzyFilter<T>(
   const [idxs, _info, order] = matcher.search(haystack, needle, outOfOrder ? 8 : 0);
   if (idxs === null) return [];
 
-  const ranked = order ? order.map((oi) => idxs[oi] as number) : idxs;
+  const ranked = order
+    ? order.flatMap((oi): number[] => {
+        const v = idxs[oi];
+        return v === undefined ? [] : [v];
+      })
+    : idxs;
   const out: T[] = [];
   const cap = options.limit ?? ranked.length;
   for (let i = 0; i < ranked.length && out.length < cap; i += 1) {
-    const item = items[ranked[i] as number];
+    const rankIndex = ranked[i];
+    if (rankIndex === undefined) continue;
+    const item = items[rankIndex];
     if (item !== undefined) out.push(item);
   }
   return out;

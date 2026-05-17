@@ -109,8 +109,9 @@ export function probeJointOverrides(
           // surfacing variance to consumers rather than hiding it.
           if (arity === 2) {
             const [axisA, axisB] = axisCombo as [Axis, Axis];
-            const ctxA = partialTuple[axisA.name] as string;
-            const ctxB = partialTuple[axisB.name] as string;
+            const ctxA = partialTuple[axisA.name];
+            const ctxB = partialTuple[axisB.name];
+            if (ctxA === undefined || ctxB === undefined) continue;
             const cellA = cells[axisA.name]?.[ctxA] ?? {};
             const cellB = cells[axisB.name]?.[ctxB] ?? {};
             // Fall back to baseline for delta cells that omit this

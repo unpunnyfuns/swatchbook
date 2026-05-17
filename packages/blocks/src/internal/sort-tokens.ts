@@ -161,6 +161,15 @@ function toMagnitude(v: unknown): number {
   return Number.NaN;
 }
 
+/**
+ * Coerce a possibly-null/undefined number to 0 — `coords` returns
+ * `(number | null)[]` and `noUncheckedIndexedAccess` adds `undefined`
+ * on top. `typeof` narrows the union for the comparator below.
+ */
+function safeNumber(v: number | null | undefined): number {
+  return typeof v === 'number' && Number.isFinite(v) ? v : 0;
+}
+
 function colorKey(v: unknown): { l: number; c: number; h: number } | null {
   if (!v || typeof v !== 'object') return null;
   try {
@@ -186,12 +195,7 @@ function colorKey(v: unknown): { l: number; c: number; h: number } | null {
     // the union ends up broader than Color.js's typed surface.
     const color = new Color(source as string);
     const [l, chroma, h] = color.to('oklch').coords;
-    // Guard against NaN hue on achromatic colors so the sort stays stable.
-    return {
-      l: Number.isFinite(l) ? (l as number) : 0,
-      c: Number.isFinite(chroma) ? (chroma as number) : 0,
-      h: Number.isFinite(h) ? (h as number) : 0,
-    };
+    return { l: safeNumber(l), c: safeNumber(chroma), h: safeNumber(h) };
   } catch {
     return null;
   }
