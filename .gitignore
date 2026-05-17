@@ -19,6 +19,11 @@ apps/docs/src/tokens.snapshot.json
 .swatchbook
 *.tsbuildinfo
 
+# Per-developer Claude Code skill installs (.agents/skills/*; skills-lock.json
+# tracks which skills the local user has enabled). Not project source.
+.agents
+skills-lock.json
+
 # Editors
 .vscode
 .idea
