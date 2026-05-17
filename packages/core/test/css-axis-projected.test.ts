@@ -120,3 +120,14 @@ it('respects options.chrome override (passes through to chrome alias block)', ()
     '--swatchbook-surface-default: var(--sb-color-palette-blue-500);',
   );
 });
+
+// Golden snapshot. Substring matchers above cover individual shape
+// invariants (which selectors exist, which vars appear); the snapshot
+// pins everything substring matchers don't — declaration order within
+// each block, selector specificity, exact spacing around the joint
+// compound selectors. Regenerate with `vitest -u` after a deliberate
+// emit change.
+it('matches the checked-in golden CSS for the reference fixture', async () => {
+  const css = emitAxisProjectedCss(project);
+  await expect(css).toMatchFileSnapshot('__snapshots__/css-axis-projected.css');
+});
