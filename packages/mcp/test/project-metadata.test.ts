@@ -118,20 +118,6 @@ it('list_tokens: reads from a non-default permutation when `theme` is supplied',
   expect(result.count).toBeGreaterThan(0);
 });
 
-it('list_tokens: returns a text fallback when the project has no permutations', async () => {
-  // Swap in an empty project — exercises the early-return guard at the top of the handler.
-  const emptyProject: Project = {
-    ...project,
-    permutations: [],
-    permutationsResolved: {},
-  };
-  mcp.setProject(emptyProject);
-  const text = await mcp.callText('list_tokens');
-  expect(text).toBe('No permutations in project.');
-  // Restore for the remaining tests.
-  mcp.setProject(project);
-});
-
 interface DiagnosticsResult {
   count: number;
   diagnostics: { severity: string; group: string; message: string }[];

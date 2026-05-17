@@ -143,9 +143,7 @@ async function main(): Promise<void> {
       const { project: next } = await loadFromConfig(configAbsolute, args.cwd);
       server.setProject(next);
       const themeCount = next.permutations.length;
-      const tokenCount = Object.keys(
-        next.permutationsResolved[next.permutations[0]?.name ?? ''] ?? {},
-      ).length;
+      const tokenCount = next.varianceByPath.size;
       console.error(
         `swatchbook-mcp: project reloaded — ${tokenCount} tokens across ${themeCount} theme${themeCount === 1 ? '' : 's'}.`,
       );
