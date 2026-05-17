@@ -25,16 +25,20 @@ export async function viteFinal(
 ): Promise<InlineConfig> {
   const { config, cwd } = await resolveConfig(options);
 
-  // Codegen runs once at Vite startup. The virtual module plugin still
-  // owns the live reload path via its HMR watcher; this file just gives
-  // TS autocomplete for `useToken('…')` in consumer stories.
-  await writeTokenCodegen(config, cwd, options);
+  // One `loadProject` call shared between codegen (needs the resolved
+  // shape to render typed token paths) and the Vite plugin (uses it
+  // for its first virtual-module render). Without sharing, the addon
+  // calls `loadProject` twice at Storybook startup — once here for
+  // codegen, once again inside the plugin's `buildStart`.
+  const project = await loadProject(config, cwd);
+  await writeTokenCodegen(project, options);
 
   const plugins = Array.isArray(viteConfig.plugins) ? [...viteConfig.plugins] : [];
   plugins.push(
     swatchbookTokensPlugin({
       config,
       cwd,
+      initialProject: project,
       ...(options.integrations !== undefined && { integrations: options.integrations }),
     }),
   );
@@ -69,14 +73,9 @@ async function resolveConfig(options: PresetOptions): Promise<{ config: Config; 
   return { config: loaded, cwd };
 }
 
-async function writeTokenCodegen(
-  config: Config,
-  cwd: string,
-  options: PresetOptions,
-): Promise<void> {
-  const project = await loadProject(config, cwd);
+async function writeTokenCodegen(project: Project, options: PresetOptions): Promise<void> {
   const projectRoot = resolve(options.configDir, '..');
-  const outDir = resolve(projectRoot, config.outDir ?? '.swatchbook');
+  const outDir = resolve(projectRoot, project.config.outDir ?? '.swatchbook');
   await mkdir(outDir, { recursive: true });
   const content = renderTokenTypes(project);
   await writeFile(resolve(outDir, 'tokens.d.ts'), content);

@@ -23,6 +23,14 @@ export interface SwatchbookPluginOptions {
   cwd: string;
   /** Display-side integrations — each may contribute a virtual module the preview imports. */
   integrations?: readonly SwatchbookIntegration[];
+  /**
+   * Pre-loaded project to use for the first `buildStart` instead of
+   * calling `loadProject` again. Lets `preset.viteFinal` share its
+   * single `loadProject` call (originally needed for codegen) with the
+   * plugin, eliminating a redundant parse pass at Storybook startup.
+   * HMR-triggered reloads still call `loadProject` directly.
+   */
+  initialProject?: Project;
 }
 
 /** `\0<virtualId>` — Vite convention for resolved virtual module IDs. */
@@ -40,9 +48,10 @@ export function swatchbookTokensPlugin({
   config,
   cwd,
   integrations = [],
+  initialProject,
 }: SwatchbookPluginOptions): Plugin {
-  let project: Project | undefined;
-  let css = '';
+  let project: Project | undefined = initialProject;
+  let css = project ? emitAxisProjectedCss(project) : '';
 
   async function refresh(): Promise<void> {
     project = await loadProject(config, cwd);
@@ -65,6 +74,10 @@ export function swatchbookTokensPlugin({
     enforce: 'pre',
 
     async buildStart() {
+      // Skip the redundant load when preset.viteFinal already supplied
+      // a freshly-loaded project via `initialProject`. The first HMR
+      // reload (or a manual `refresh()`) calls `loadProject` as usual.
+      if (project) return;
       await refresh();
     },
 
