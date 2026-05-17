@@ -157,15 +157,20 @@ export function useProject(): ProjectData {
   // `useMemo([resolved, …])` calls would recompute forever; the
   // `TokenNavigator`'s focus-repair `useEffect` (deps include the
   // recomputed `flatVisible`) would `setState` in an infinite loop.
-  // The underlying `cells` / `jointOverrides` / `permutations`
-  // references are stable module-level exports, so depending on
-  // them directly keeps `resolveAt` (and the resolved map it
+  // The underlying `cells` / `jointOverrides` / `defaultTuple` /
+  // `axes` references are stable module-level exports, so depending
+  // on them directly keeps `resolveAt` (and the resolved map it
   // returns) referentially stable across renders.
   const axes = snapshot?.axes;
   const cells = snapshot?.cells;
   const jointOverrides = snapshot?.jointOverrides;
   const dataDefaultTuple = snapshot?.defaultTuple;
+  const activeAxes = snapshot?.activeAxes;
   const activePermutation = snapshot?.activePermutation;
+  const diagnostics = snapshot?.diagnostics;
+  const cssVarPrefix = snapshot?.cssVarPrefix;
+  const listing = snapshot?.listing;
+  const varianceByPath = snapshot?.varianceByPath;
   const resolveAt = useMemo(() => {
     if (!snapshot) return null;
     return snapshotResolveAt(snapshot);
@@ -173,33 +178,42 @@ export function useProject(): ProjectData {
     // than `snapshot` itself; see the long block comment above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [axes, cells, jointOverrides, dataDefaultTuple, activePermutation]);
-  const fallback = useVirtualModuleFallback(snapshot === null);
-  if (snapshot !== null && resolveAt !== null) {
-    return snapshotToData(snapshot, resolveAt);
-  }
-  return fallback;
-}
-
-function snapshotToData(
-  snapshot: ProjectSnapshot,
-  resolveAt: (tuple: Record<string, string>) => ResolvedTokens,
-): ProjectData {
-  return {
-    activePermutation: snapshot.activePermutation,
-    // Pass `snapshot.activeAxes` through directly rather than spreading
-    // into a fresh object — the snapshot already exposes it as a
-    // read-only record, and a new identity per render would invite
-    // the same memo-stability bug `resolveAt` had.
-    activeAxes: snapshot.activeAxes as Record<string, string>,
-    axes: snapshot.axes,
-    resolved: resolveAt(snapshot.activeAxes),
-    diagnostics: snapshot.diagnostics,
-    cssVarPrefix: snapshot.cssVarPrefix,
-    listing: snapshot.listing ?? {},
-    varianceByPath: snapshot.varianceByPath ?? {},
+  // Memoize the returned ProjectData against the same stable inner
+  // fields — without this, blocks `useMemo([project, …])` calls
+  // invalidate every render (the function returns a fresh object
+  // identity), defeating the per-block memoization that
+  // `TokenNavigator` / `TokenTable` / `ColorPalette` rely on.
+  const providerData = useMemo<ProjectData | null>(() => {
+    if (!snapshot || !resolveAt || !axes || !activeAxes) return null;
+    return {
+      activePermutation: activePermutation ?? '',
+      activeAxes: activeAxes as Record<string, string>,
+      axes,
+      resolved: resolveAt(activeAxes as Record<string, string>),
+      diagnostics: diagnostics ?? [],
+      cssVarPrefix: cssVarPrefix ?? '',
+      listing: listing ?? {},
+      varianceByPath: varianceByPath ?? {},
+      resolveAt,
+      permutationNameForTuple: (tuple) => tupleToName(axes, tuple),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    snapshot,
     resolveAt,
-    permutationNameForTuple: (tuple) => tupleToName(snapshot.axes, tuple),
-  };
+    axes,
+    cells,
+    jointOverrides,
+    dataDefaultTuple,
+    activePermutation,
+    activeAxes,
+    diagnostics,
+    cssVarPrefix,
+    listing,
+    varianceByPath,
+  ]);
+  const fallback = useVirtualModuleFallback(snapshot === null);
+  return providerData ?? fallback;
 }
 
 function useVirtualModuleFallback(enabled: boolean): ProjectData {
@@ -220,10 +234,16 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
     ensureStylesheet(tokens.css);
   }, [enabled, tokens.css]);
 
-  const hasContextAxes = Object.keys(contextAxes).length > 0;
-  const activeAxes: Record<string, string> = hasContextAxes
-    ? { ...contextAxes }
-    : (channelGlobals.axes ?? defaultTuple(tokens.axes));
+  // Memoize against the stable identities — `contextAxes` is a
+  // useContext value that's stable across renders unless the
+  // provider mutates; `channelGlobals.axes` updates on channel
+  // events; `tokens.axes` is a stable virtual-module export.
+  // Without this memo `activeAxes` would have fresh identity per
+  // render and defeat downstream `useMemo([project, …])` calls.
+  const activeAxes = useMemo<Record<string, string>>(() => {
+    const hasContextAxes = Object.keys(contextAxes).length > 0;
+    return hasContextAxes ? { ...contextAxes } : (channelGlobals.axes ?? defaultTuple(tokens.axes));
+  }, [contextAxes, channelGlobals.axes, tokens.axes]);
 
   const activePermutation = contextPermutation || tupleToName(tokens.axes, activeAxes);
 
@@ -242,20 +262,34 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
       }),
     [tokens.axes, tokens.cells, tokens.jointOverrides, tokens.defaultTuple],
   );
-  const resolved = resolveAt(activeAxes);
 
-  return {
-    activePermutation,
-    activeAxes,
-    axes: tokens.axes,
-    resolved,
-    diagnostics: tokens.diagnostics,
-    cssVarPrefix: tokens.cssVarPrefix,
-    listing: tokens.listing,
-    varianceByPath: tokens.varianceByPath,
-    resolveAt,
-    permutationNameForTuple: (tuple) => tupleToName(tokens.axes, tuple),
-  };
+  // Memoize the returned ProjectData against the stable inner fields
+  // for the same reason the provider path does — fresh object identity
+  // per render would defeat `useMemo([project, …])` in every block.
+  return useMemo<ProjectData>(
+    () => ({
+      activePermutation,
+      activeAxes,
+      axes: tokens.axes,
+      resolved: resolveAt(activeAxes),
+      diagnostics: tokens.diagnostics,
+      cssVarPrefix: tokens.cssVarPrefix,
+      listing: tokens.listing,
+      varianceByPath: tokens.varianceByPath,
+      resolveAt,
+      permutationNameForTuple: (tuple) => tupleToName(tokens.axes, tuple),
+    }),
+    [
+      activePermutation,
+      activeAxes,
+      tokens.axes,
+      tokens.diagnostics,
+      tokens.cssVarPrefix,
+      tokens.listing,
+      tokens.varianceByPath,
+      resolveAt,
+    ],
+  );
 }
 
 /**
