@@ -3,5 +3,17 @@
     "$type": "color",
     "surface": { "$value": "{color.black}" },
     "text":    { "$value": "{color.white}" }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "md": {
+      "$value": {
+        "color":   "{color.white}",
+        "offsetX": { "value": 0, "unit": "px" },
+        "offsetY": "{dimension.xs}",
+        "blur":    "{dimension.sm}",
+        "spread":  { "value": 0, "unit": "px" }
+      }
+    }
   }
 }

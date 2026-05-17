@@ -13,5 +13,27 @@
     "red": {
       "$value": { "colorSpace": "srgb", "components": [0.9, 0.2, 0.2] }
     }
+  },
+  "dimension": {
+    "$type": "dimension",
+    "xs": { "$value": { "value": 4, "unit": "px" } },
+    "sm": { "$value": { "value": 8, "unit": "px" } }
+  },
+  "duration": {
+    "$type": "duration",
+    "fast": { "$value": { "value": 150, "unit": "ms" } }
+  },
+  "cubicBezier": {
+    "$type": "cubicBezier",
+    "ease-out": { "$value": [0, 0, 0.2, 1] }
+  },
+  "fontFamily": {
+    "$type": "fontFamily",
+    "sans": { "$value": ["Inter", "system-ui", "sans-serif"] }
+  },
+  "fontWeight": {
+    "$type": "fontWeight",
+    "regular": { "$value": 400 },
+    "bold": { "$value": 700 }
   }
 }

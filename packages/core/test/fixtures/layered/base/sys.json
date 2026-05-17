@@ -3,6 +3,51 @@
     "$type": "color",
     "surface": { "$value": "{color.white}" },
     "text":    { "$value": "{color.black}" },
-    "accent":  { "$value": "{color.blue}" }
+    "accent":  { "$value": "{color.blue}" },
+    "fg":      { "$value": "{color.text}" }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "md": {
+      "$value": {
+        "color":   "{color.black}",
+        "offsetX": { "value": 0, "unit": "px" },
+        "offsetY": "{dimension.xs}",
+        "blur":    "{dimension.sm}",
+        "spread":  { "value": 0, "unit": "px" }
+      }
+    }
+  },
+  "border": {
+    "$type": "border",
+    "default": {
+      "$value": {
+        "color": "{color.accent}",
+        "width": "{dimension.xs}",
+        "style": "solid"
+      }
+    }
+  },
+  "transition": {
+    "$type": "transition",
+    "enter": {
+      "$value": {
+        "duration":       "{duration.fast}",
+        "delay":          { "value": 0, "unit": "ms" },
+        "timingFunction": "{cubicBezier.ease-out}"
+      }
+    }
+  },
+  "typography": {
+    "$type": "typography",
+    "heading": {
+      "$value": {
+        "fontFamily":    "{fontFamily.sans}",
+        "fontSize":      { "value": 24, "unit": "px" },
+        "fontWeight":    "{fontWeight.bold}",
+        "lineHeight":    1.2,
+        "letterSpacing": { "value": 0, "unit": "px" }
+      }
+    }
   }
 }
