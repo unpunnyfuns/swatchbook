@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, expect, it } from 'vitest';
-import { loadProject } from '#/load';
+import { loadProject } from '#/load.ts';
 
 let workspace: string;
 

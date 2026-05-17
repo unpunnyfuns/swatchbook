@@ -4,7 +4,7 @@
 // accessible-accent chain; this test pins that we identify those
 // entries without overcollecting.
 import { beforeAll, expect, it } from 'vitest';
-import type { Project } from '#/types';
+import type { Project } from '#/types.ts';
 import { loadWithPrefix } from './_helpers';
 
 let project: Project;
