@@ -34,7 +34,7 @@ export async function normalizePermutations(
         'swatchbook: config with `axes` must also supply `tokens` (the base token files the overlays layer onto).',
       );
     }
-    return loadLayeredPermutations(config.axes, config.tokens, cwd, logger, config.maxPermutations);
+    return loadLayeredPermutations(config.axes, config.tokens, cwd, logger);
   }
 
   return loadResolverPermutations(config.resolver, config.tokens, cwd, logger);

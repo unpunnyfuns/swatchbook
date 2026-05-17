@@ -82,11 +82,12 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
 
   const { presets, diagnostics: presetDiagnostics } = validatePresets(config.presets, filteredAxes);
 
-  // Materialize any preset tuples the loader didn't enumerate. Happens
-  // under the `maxPermutations` guard: only the default permutation was
-  // loaded, but the consumer's presets need their tokens too so the
-  // toolbar's preset pills resolve correctly. Resolver-backed projects
-  // only — layered presets without a resolver can't apply() on demand.
+  // Materialize any preset tuples the singleton enumeration didn't
+  // cover. Singletons only vary one axis at a time, so any preset
+  // pointing at a multi-non-default tuple needs an extra
+  // `resolver.apply` call to ship the toolbar pill's resolved data.
+  // Resolver-backed projects only — layered presets without a
+  // resolver can't apply() on demand.
   if (normalized.parserInput?.resolver && presets.length > 0) {
     for (const preset of presets) {
       const tuple = fillPresetTuple(preset.axes, filteredAxes);
