@@ -56,12 +56,9 @@ export interface InitPayload {
   axes: readonly VirtualAxis[];
   disabledAxes: readonly string[];
   presets: readonly VirtualPreset[];
-  permutations: readonly VirtualPermutation[];
-  defaultPermutation: string | null;
-  permutationsResolved: Record<string, Record<string, VirtualToken>>;
   diagnostics: readonly VirtualDiagnostic[];
   cssVarPrefix: string;
-  /** {@link VirtualCells} — additive companion to `permutationsResolved`. */
+  /** {@link VirtualCells} — per-axis resolved TokenMaps, bounded by Σ(axes × contexts). */
   cells: VirtualCells;
   /** {@link VirtualJointOverrides} — Map serialized as `[key, entry]` pairs. */
   jointOverrides: VirtualJointOverrides;

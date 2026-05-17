@@ -90,8 +90,17 @@ export interface ProjectSnapshot {
   /** Axis names suppressed via `config.disabledAxes` — pinned to their defaults, hidden from the toolbar. */
   disabledAxes: readonly string[];
   presets: readonly VirtualPresetShape[];
-  permutations: readonly VirtualPermutationShape[];
-  permutationsResolved: Record<string, Record<string, VirtualTokenShape>>;
+  /**
+   * @deprecated Wire-shipped permutations were removed in PR 6a.
+   * Hand-built snapshots (tests, MDX consumers) may still populate
+   * this for backward compatibility with the legacy fallback path
+   * in `useProject`. Production preview snapshots omit it.
+   */
+  permutations?: readonly VirtualPermutationShape[];
+  /**
+   * @deprecated See `permutations`. Wire format dropped in PR 6a.
+   */
+  permutationsResolved?: Record<string, Record<string, VirtualTokenShape>>;
   activePermutation: string;
   activeAxes: Readonly<Record<string, string>>;
   cssVarPrefix: string;
@@ -129,6 +138,17 @@ export interface ProjectSnapshot {
    * Replaces the legacy "look at `permutations[0].input`" pattern.
    */
   defaultTuple?: Record<string, string>;
+  /**
+   * Pre-built `resolveAt(tuple)` accessor. The addon's preview
+   * decorator instantiates this once per iframe lifetime — the
+   * underlying virtual-module exports (cells, jointOverrides, axes,
+   * defaultTuple) are stable, so a single resolver instance with
+   * internal per-tuple memoization is correct and avoids the
+   * per-render rebuild dance the blocks side used to do. Hand-built
+   * snapshots (tests, MDX) can omit this; blocks fall back to
+   * building locally from `cells` / `permutationsResolved`.
+   */
+  resolveAt?: (tuple: Record<string, string>) => Record<string, VirtualTokenShape>;
 }
 
 /**

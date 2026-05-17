@@ -1,19 +1,29 @@
 import { type ReactNode } from 'react';
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { PermutationContext } from '@unpunnyfuns/swatchbook-blocks';
+import { AxesContext, PermutationContext } from '@unpunnyfuns/swatchbook-blocks';
 import { useToken } from '#/hooks/use-token.ts';
 
-function withPermutation(name: string) {
+/**
+ * The hook resolves through `useActiveAxes` (the post-cells contract);
+ * tests previously only set `PermutationContext`, which the legacy
+ * `useToken` translated to a permutation-name lookup. We set both so
+ * the test fixtures work under either contract.
+ */
+function withPermutation(name: string, axes: Record<string, string>) {
   return function Wrapper({ children }: { children: ReactNode }) {
-    return <PermutationContext.Provider value={name}>{children}</PermutationContext.Provider>;
+    return (
+      <PermutationContext.Provider value={name}>
+        <AxesContext.Provider value={axes}>{children}</AxesContext.Provider>
+      </PermutationContext.Provider>
+    );
   };
 }
 
 describe('useToken', () => {
   it('returns the resolved value + `var(--…)` reference for the active permutation', () => {
     const { result } = renderHook(() => useToken('color.accent.bg'), {
-      wrapper: withPermutation('Light'),
+      wrapper: withPermutation('Light', { mode: 'Light' }),
     });
     expect(result.current.value).toEqual({ colorSpace: 'srgb', components: [0, 0.4, 1] });
     expect(result.current.cssVar).toBe('var(--sb-color-accent-bg)');
@@ -23,10 +33,10 @@ describe('useToken', () => {
 
   it('returns a different resolved value when the active permutation changes', () => {
     const { result: light } = renderHook(() => useToken('color.accent.bg'), {
-      wrapper: withPermutation('Light'),
+      wrapper: withPermutation('Light', { mode: 'Light' }),
     });
     const { result: dark } = renderHook(() => useToken('color.accent.bg'), {
-      wrapper: withPermutation('Dark'),
+      wrapper: withPermutation('Dark', { mode: 'Dark' }),
     });
     expect(light.current.value).not.toEqual(dark.current.value);
     // cssVar is permutation-independent: blocks read CSS vars per
@@ -43,7 +53,7 @@ describe('useToken', () => {
 
   it('returns undefined value + cssVar reference when the path is unknown', () => {
     const { result } = renderHook(() => useToken('not.a.token'), {
-      wrapper: withPermutation('Light'),
+      wrapper: withPermutation('Light', { mode: 'Light' }),
     });
     expect(result.current.value).toBeUndefined();
     expect(result.current.cssVar).toBe('var(--sb-not-a-token)');
@@ -53,7 +63,7 @@ describe('useToken', () => {
 
   it('returns a non-color token with the right $type', () => {
     const { result } = renderHook(() => useToken('space.md'), {
-      wrapper: withPermutation('Light'),
+      wrapper: withPermutation('Light', { mode: 'Light' }),
     });
     expect(result.current.value).toBe('16px');
     expect(result.current.type).toBe('dimension');
@@ -62,7 +72,7 @@ describe('useToken', () => {
 
   it('omits the `description` field when the token has no $description', () => {
     const { result } = renderHook(() => useToken('space.md'), {
-      wrapper: withPermutation('Light'),
+      wrapper: withPermutation('Light', { mode: 'Light' }),
     });
     expect(result.current.description).toBeUndefined();
   });

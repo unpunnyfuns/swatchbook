@@ -22,7 +22,6 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
     token,
     cssVar,
     axes,
-    permutations,
     activeAxes,
     cssVarPrefix,
     varianceByPath,
@@ -52,7 +51,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
     return { kind, varyingAxes: result.varyingAxes };
   }, [path, varianceByPath]);
 
-  if (permutations.length === 0) {
+  if (axes.length === 0) {
     return <></>;
   }
 
@@ -73,9 +72,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                   />
                 )}
                 {value}
-                <span style={{ opacity: 0.6, marginLeft: 8 }}>
-                  same across all {permutations.length} tuples
-                </span>
+                <span style={{ opacity: 0.6, marginLeft: 8 }}>same across every axis</span>
               </td>
             </tr>
           </tbody>

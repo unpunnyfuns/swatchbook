@@ -85,11 +85,22 @@ async function writeTokenCodegen(
 
 /** @internal Exported for tests; not part of the public API. */
 export function renderTokenTypes(project: Project): string {
+  // `varianceByPath` covers every path that appears in any
+  // permutation's resolved map (by construction in
+  // `buildVarianceByPath`), so it's the right source for the token
+  // path union — independent of the cartesian materialization the
+  // chain is in the process of dropping. Hand-built test fixtures
+  // that don't populate `varianceByPath` fall through to the
+  // legacy per-permutation scan.
   const paths = new Set<string>();
-  for (const theme of project.permutations) {
-    const tokens = project.permutationsResolved[theme.name];
-    if (!tokens) continue;
-    for (const path of Object.keys(tokens)) paths.add(path);
+  if (project.varianceByPath && project.varianceByPath.size > 0) {
+    for (const p of project.varianceByPath.keys()) paths.add(p);
+  } else {
+    for (const theme of project.permutations) {
+      const tokens = project.permutationsResolved[theme.name];
+      if (!tokens) continue;
+      for (const path of Object.keys(tokens)) paths.add(path);
+    }
   }
   const sorted = [...paths].toSorted();
   const tokenEntries = sorted.map((p) => `    ${JSON.stringify(p)}: string;`);

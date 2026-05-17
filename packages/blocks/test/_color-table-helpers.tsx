@@ -1,6 +1,17 @@
-import type { ProjectSnapshot } from '#/index.ts';
+import type { ProjectSnapshot, VirtualTokenShape } from '#/index.ts';
 
-export function makeColorTableSnapshot(): ProjectSnapshot {
+/**
+ * Test snapshot using the legacy `permutationsResolved` shape — the
+ * `snapshotResolveAt` fallback path in `use-project` covers this for
+ * hand-built snapshots. `permutationsResolved` is typed as the wider
+ * `Record<…>` rather than inferred from the literal so tests can
+ * extend the map with extra paths after construction.
+ */
+export interface ColorTableSnapshot extends ProjectSnapshot {
+  permutationsResolved: Record<string, Record<string, VirtualTokenShape>>;
+}
+
+export function makeColorTableSnapshot(): ColorTableSnapshot {
   return {
     axes: [{ name: 'mode', contexts: ['light'], default: 'light', source: 'resolver' }],
     disabledAxes: [],

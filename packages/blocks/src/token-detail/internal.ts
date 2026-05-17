@@ -1,4 +1,4 @@
-import type { Axis, Permutation } from '@unpunnyfuns/swatchbook-core';
+import type { Axis } from '@unpunnyfuns/swatchbook-core';
 import type { VirtualVarianceByPathShape } from '#/contexts.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 
@@ -26,8 +26,6 @@ export interface TokenDetailData {
   activePermutation: string;
   activeAxes: Record<string, string>;
   axes: readonly Axis[];
-  permutations: readonly Permutation[];
-  permutationsResolved: Record<string, Record<string, DetailToken>>;
   resolved: Record<string, DetailToken>;
   cssVarPrefix: string;
   varianceByPath: VirtualVarianceByPathShape;
@@ -53,8 +51,6 @@ export function useTokenDetailData(path: string): TokenDetailData {
     activePermutation,
     activeAxes,
     axes,
-    permutations,
-    permutationsResolved,
     resolved,
     cssVarPrefix,
     varianceByPath,
@@ -68,8 +64,6 @@ export function useTokenDetailData(path: string): TokenDetailData {
     activePermutation,
     activeAxes,
     axes,
-    permutations,
-    permutationsResolved: permutationsResolved as Record<string, Record<string, DetailToken>>,
     resolved: typedResolved,
     cssVarPrefix,
     varianceByPath,

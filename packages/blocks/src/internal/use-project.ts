@@ -27,9 +27,7 @@ export interface ProjectData {
   activePermutation: string;
   activeAxes: Record<string, string>;
   axes: readonly VirtualAxis[];
-  permutations: readonly VirtualPermutation[];
   resolved: ResolvedTokens;
-  permutationsResolved: Record<string, ResolvedTokens>;
   diagnostics: readonly VirtualDiagnostic[];
   cssVarPrefix: string;
   /**
@@ -111,6 +109,8 @@ function buildPermutationNameByTuple(
   return out;
 }
 
+const noPermutationName = (): string | undefined => undefined;
+
 function tuplesEqual(a: Record<string, string>, b: Record<string, string>): boolean {
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
   for (const k of keys) {
@@ -156,18 +156,28 @@ function makeResolveAt(snapshot: {
 }
 
 /**
- * Build the `resolveAt` accessor for a snapshot, falling back to
- * indexing `permutationsResolved` by tuple name when the snapshot
- * pre-dates the wire format change and doesn't carry `cells`.
+ * Build the `resolveAt` accessor for a snapshot. Prefers the
+ * snapshot's own `resolveAt` (the addon's preview decorator
+ * pre-builds one at module load — see `previewResolveAt` in
+ * `packages/addon/src/preview.tsx`), falling back to constructing
+ * one from `cells` + `jointOverrides` when present (covers
+ * hand-built test snapshots and the no-provider path) and finally to
+ * the legacy per-permutation lookup for snapshots that only carry
+ * `permutationsResolved` + `permutations` (MDX consumers that
+ * pre-date the wire format change).
  */
 function snapshotResolveAt(
   snapshot: ProjectSnapshot,
 ): (tuple: Record<string, string>) => ResolvedTokens {
+  if (snapshot.resolveAt)
+    return snapshot.resolveAt as (tuple: Record<string, string>) => ResolvedTokens;
   const hasCells = Object.keys(snapshot.cells ?? {}).length > 0;
   if (hasCells) return makeResolveAt(snapshot);
   return (tuple) => {
-    const name = nameForTuple(snapshot.permutations, tuple) ?? snapshot.activePermutation;
-    return snapshot.permutationsResolved[name] ?? {};
+    const perms = snapshot.permutations ?? [];
+    const resolved = snapshot.permutationsResolved ?? {};
+    const name = nameForTuple(perms, tuple) ?? snapshot.activePermutation;
+    return resolved[name] ?? {};
   };
 }
 
@@ -203,8 +213,6 @@ export function useProject(): ProjectData {
   const cells = snapshot?.cells;
   const jointOverrides = snapshot?.jointOverrides;
   const dataDefaultTuple = snapshot?.defaultTuple;
-  const permutations = snapshot?.permutations;
-  const permutationsResolved = snapshot?.permutationsResolved;
   const activePermutation = snapshot?.activePermutation;
   const resolveAt = useMemo(() => {
     if (!snapshot) return null;
@@ -212,18 +220,10 @@ export function useProject(): ProjectData {
     // The deps below are deliberately the stable inner fields rather
     // than `snapshot` itself; see the long block comment above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    axes,
-    cells,
-    jointOverrides,
-    dataDefaultTuple,
-    permutations,
-    permutationsResolved,
-    activePermutation,
-  ]);
+  }, [axes, cells, jointOverrides, dataDefaultTuple, activePermutation]);
   const permutationNameByTuple = useMemo(
-    () => buildPermutationNameByTuple(permutations ?? []),
-    [permutations],
+    () => buildPermutationNameByTuple(snapshot?.permutations ?? []),
+    [snapshot?.permutations],
   );
   const fallback = useVirtualModuleFallback(snapshot === null);
   if (snapshot !== null && resolveAt !== null) {
@@ -245,8 +245,6 @@ function snapshotToData(
     // the same memo-stability bug `resolveAt` had.
     activeAxes: snapshot.activeAxes as Record<string, string>,
     axes: snapshot.axes,
-    permutations: snapshot.permutations,
-    permutationsResolved: snapshot.permutationsResolved,
     resolved: resolveAt(snapshot.activeAxes),
     diagnostics: snapshot.diagnostics,
     cssVarPrefix: snapshot.cssVarPrefix,
@@ -280,13 +278,13 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
     ? { ...contextAxes }
     : (channelGlobals.axes ?? defaultTuple(tokens.axes));
 
-  const derivedName = nameForTuple(tokens.permutations, activeAxes);
+  // No more `permutations` / `permutationsResolved` on the wire —
+  // synthesize an active-permutation name from the tuple instead
+  // (same form `permutationID` produced server-side: axis values
+  // joined by ` · `). Used only for the legacy
+  // `data-<prefix>-theme` attribute on swatches.
   const activePermutation =
-    contextPermutation ||
-    derivedName ||
-    tokens.defaultPermutation ||
-    tokens.permutations[0]?.name ||
-    '';
+    contextPermutation || tokens.axes.map((a) => activeAxes[a.name] ?? a.default).join(' · ') || '';
 
   // `buildResolveAt` returns a closure that memoizes on the canonical
   // tuple key, so wrapping the call in another `useMemo` would be
@@ -304,24 +302,22 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
     [tokens.axes, tokens.cells, tokens.jointOverrides, tokens.defaultTuple],
   );
   const resolved = resolveAt(activeAxes);
-  const permutationNameByTuple = useMemo(
-    () => buildPermutationNameByTuple(tokens.permutations),
-    [tokens.permutations],
-  );
+  // No permutations list to index against — consumers
+  // (`AxisVariance`'s grid) treat `undefined` as "no theme name"
+  // and fall through to rendering without the data-theme attribute.
+  const permutationNameForTuple = noPermutationName;
 
   return {
     activePermutation,
     activeAxes,
     axes: tokens.axes,
-    permutations: tokens.permutations,
-    permutationsResolved: tokens.permutationsResolved,
     resolved,
     diagnostics: tokens.diagnostics,
     cssVarPrefix: tokens.cssVarPrefix,
     listing: tokens.listing,
     varianceByPath: tokens.varianceByPath,
     resolveAt,
-    permutationNameForTuple: (tuple) => permutationNameByTuple.get(canonicalTupleKey(tuple)),
+    permutationNameForTuple,
   };
 }
 
