@@ -1,10 +1,15 @@
 // `Project.varianceByPath` caches per-path variance analysis so
-// consumers can O(1) look up which axes affect a token instead of
-// running `analyzeAxisVariance` per call. These tests pin parity with
-// the on-demand call (same `AxisVarianceResult` shape and contents)
-// and cover that every path in the resolved data is represented.
+// consumers can O(1) look up which axes affect a token. These tests
+// pin the shape (every resolved path is covered) and the per-kind
+// classification for representative tokens. The exact parity with
+// the legacy cartesian-bucket `analyzeAxisVariance` is gone — the
+// pair-only resolver probe in `probeJointOverrides` catches the
+// common cases (singleton variance + pair-level joint touching)
+// but conservatively misses some joint variance that's only visible
+// across three or more axes' combinations. Documented limitation;
+// the smart emitter continues to emit compound blocks for any
+// genuinely divergent tuple, so output correctness is preserved.
 import { beforeAll, expect, it } from 'vitest';
-import { analyzeAxisVariance } from '#/variance.ts';
 import type { Project } from '#/types.ts';
 import { loadWithPrefix } from './_helpers.ts';
 
@@ -24,23 +29,20 @@ it('covers every path that appears in any permutation', () => {
   }
 });
 
-it("each cached entry equals the on-demand `analyzeAxisVariance` call for the same path", () => {
-  // Spot-check three representative tokens: a constant (palette
-  // primitive), a single-axis token (surface), a multi-axis token
-  // (accent.fg has joint variance). Full parity is over hundreds of
-  // paths; these three exercise the three `VarianceKind` branches.
-  for (const path of [
-    'color.palette.neutral.500',
-    'color.surface.default',
-    'color.accent.fg',
-  ]) {
-    const cached = project.varianceByPath.get(path);
-    const live = analyzeAxisVariance(
-      path,
-      project.axes,
-      project.permutations,
-      project.permutationsResolved,
-    );
-    expect(cached).toEqual(live);
-  }
+it('classifies representative tokens by VarianceKind', () => {
+  // A palette primitive: constant across every axis.
+  const palette = project.varianceByPath.get('color.palette.neutral.500');
+  expect(palette?.kind).toBe('constant');
+
+  // A single-axis token: surface varies only with mode.
+  const surface = project.varianceByPath.get('color.surface.default');
+  expect(surface?.kind).toBe('single');
+  expect(surface?.varyingAxes).toEqual(['mode']);
+
+  // A multi-axis token: accent.fg varies with mode + (jointly) brand
+  // via the pair-level joint touching probe.
+  const accent = project.varianceByPath.get('color.accent.fg');
+  expect(accent?.kind).toBe('multi');
+  expect(accent?.varyingAxes).toContain('mode');
+  expect(accent?.varyingAxes).toContain('brand');
 });

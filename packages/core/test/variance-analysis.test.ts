@@ -54,18 +54,19 @@ describe('analyzeProjectVariance — reference fixture', () => {
     expect(info.axis).toBe('mode');
   });
 
-  it("classifies `color.accent.fg` as joint-variant — Dark mode + contrast=High joint diverges from projection composition", () => {
+  it("classifies `color.accent.fg` as joint-variant — Dark mode + brand=Brand A diverges from projection composition", () => {
     const info = variance.get('color.accent.fg');
     expect(info).toBeDefined();
     if (info?.kind !== 'joint-variant') {
       throw new Error(`expected joint-variant, got ${info?.kind}`);
     }
-    // `touching` should include at least mode + contrast (the two axes
-    // that interact through `accessible.accent` aliasing). Brand may
-    // also be in touching depending on whether projection composition
-    // happens to match cartesian for the (mode, brand) joint.
+    // `touching` includes mode (singleton variance) and brand (joint
+    // variance with mode at {Dark, Brand A}). Contrast may also touch
+    // — depends on whether the high-contrast accessibility chain
+    // shows up at pair-level probes, which the post-PR-6b-iv probe
+    // catches conservatively.
     expect(info.touching.has('mode')).toBe(true);
-    expect(info.touching.has('contrast')).toBe(true);
+    expect(info.touching.has('brand')).toBe(true);
     // At least one joint case must be recorded.
     expect(info.jointCases.length).toBeGreaterThan(0);
     // Joint cases name an axis pair + non-default contexts + a stringified

@@ -1,80 +1,176 @@
+import type { Resolver } from '@terrazzo/parser';
 import { buildResolveAt } from '#/resolve-at.ts';
-import type { Axis, Cells, JointOverride, JointOverrides, Permutation, TokenMap } from '#/types.ts';
+import type { Axis, Cells, JointOverride, JointOverrides, TokenMap } from '#/types.ts';
 
 /**
- * Extract joint-override entries by exhaustive cartesian-divergence
- * probe — for every non-baseline permutation in
- * `permutationsResolved`, compose via cells alone (no overrides yet),
- * compare against the cartesian-resolved TokenMap, and record the
- * divergent tokens as a joint override keyed by the permutation's
- * non-default partial tuple.
+ * Two-pass joint-probe output:
  *
- * This is the PR-1 derivation. It guarantees `composeAt` is exactly
- * equivalent to `permutationsResolved` for every cartesian tuple,
- * including all-orders joint variance for free — no Phase 3 pair-only
- * probe gap. The follow-up that drops the cartesian materialization
- * replaces this with an analytical probe over the resolver directly.
+ *   - **`overrides`** — partial-tuple → divergent-tokens map. Fed
+ *     into `resolveAt` so cell composition at the divergent tuples
+ *     reproduces the cartesian-correct value.
+ *   - **`jointTouching`** — path → set of axes that genuinely
+ *     contribute to a joint divergence on that path (cartesian
+ *     truth at the joint tuple differs from what the OTHER axis's
+ *     cell alone would produce). Drives the "varying axis" set
+ *     downstream consumers (variance display, smart emitter cell
+ *     filtering) need, separated from the cell-composition-artifact
+ *     overrides.
+ */
+export interface JointProbeResult {
+  overrides: JointOverrides;
+  jointTouching: ReadonlyMap<string, ReadonlySet<string>>;
+}
+
+/**
+ * Probe every pair of `(axis, non-default-context)` combinations via
+ * `resolver.apply` and derive two distinct signals from each probe:
  *
- * Override keys are sorted by arity on insertion so map iteration in
- * `composeAt` applies lower-order overrides before higher-order ones.
+ *   1. `overrides` — records the cartesian-correct values for tokens
+ *      whose joint value differs from cells composition. Drives
+ *      `resolveAt`.
+ *   2. `jointTouching` — marks axis A as touching path P when the
+ *      joint value at `{A: ctxA, B: ctxB}` differs from
+ *      `cells[B][ctxB][P]` (i.e. A's contribution beyond B alone is
+ *      non-trivial). Symmetric for B. Drives variance display.
+ *
+ * The two signals diverge for tokens that pass through cell
+ * composition unchanged but are still axis-dependent — e.g. the
+ * reference fixture's `accent.fg` at `{Dark, BrandA}`: cells
+ * composition gives the correct white because Brand A's cell
+ * overwrites Dark's dark, so no override is recorded; but brand
+ * does genuinely affect accent.fg jointly with mode (Dark+Default →
+ * dark, Dark+BrandA → white), so the touching signal flags brand
+ * even though no override is needed.
+ *
+ * Pair-only at this stage. Triple-and-higher joint variance is a
+ * documented limitation; the algorithm extends naturally to arity N.
+ *
+ * Resolver-less projects (layered / plain-parse) return empty maps
+ * — no resolver to probe with.
+ */
+export function probeJointOverrides(
+  axes: readonly Axis[],
+  cells: Cells,
+  defaultTuple: Readonly<Record<string, string>>,
+  resolver: Resolver | undefined,
+): JointProbeResult {
+  if (!resolver || axes.length < 2) {
+    return { overrides: new Map(), jointTouching: new Map() };
+  }
+
+  const overrides = new Map<string, JointOverride>();
+  const jointTouching = new Map<string, Set<string>>();
+
+  const markJointTouching = (path: string, axisName: string): void => {
+    let set = jointTouching.get(path);
+    if (!set) {
+      set = new Set<string>();
+      jointTouching.set(path, set);
+    }
+    set.add(axisName);
+  };
+
+  // Iterate arity 2..axes.length. At each arity, build a composer
+  // over `cells + accumulated overrides` so arity-N probes see the
+  // (N-1)-level corrections already recorded — higher-arity
+  // divergences get recorded only when they're not already implied
+  // by a lower-arity override.
+  for (let arity = 2; arity <= axes.length; arity++) {
+    const composer = buildResolveAt(axes, cells, overrides, defaultTuple);
+
+    for (const axisCombo of axisCombinations(axes, arity)) {
+      for (const partialTuple of contextProducts(axisCombo)) {
+        const fullTuple = { ...defaultTuple, ...partialTuple };
+        const cartesian = resolver.apply(fullTuple);
+        const composed = composer(fullTuple);
+        const divergent: TokenMap = {};
+
+        for (const path of Object.keys(cartesian)) {
+          const cVal = cartesian[path];
+          if (!cVal) continue;
+          const cKey = valueKey(cVal);
+
+          // Override: needed when cells + lower-arity-overrides
+          // composition gives a different value.
+          if (cKey !== valueKey(composed[path])) divergent[path] = cVal;
+
+          // Touching: at arity 2, an axis genuinely contributes
+          // when the joint value differs from "the other axis's
+          // cell alone." At higher arities we mark every
+          // participating axis on any divergent path
+          // conservatively — establishing genuine contribution per
+          // axis at arity N would require N leave-one-out probes
+          // per path; the conservative marking errs on the side of
+          // surfacing variance to consumers rather than hiding it.
+          if (arity === 2) {
+            const [axisA, axisB] = axisCombo as [Axis, Axis];
+            const ctxA = partialTuple[axisA.name] as string;
+            const ctxB = partialTuple[axisB.name] as string;
+            const cellA = cells[axisA.name]?.[ctxA] ?? {};
+            const cellB = cells[axisB.name]?.[ctxB] ?? {};
+            if (cKey !== valueKey(cellB[path])) markJointTouching(path, axisA.name);
+            if (cKey !== valueKey(cellA[path])) markJointTouching(path, axisB.name);
+          } else if (cKey !== valueKey(composed[path])) {
+            // Arity ≥ 3 with a divergence at this tuple: every
+            // participating axis is conservatively marked.
+            for (const axis of axisCombo) markJointTouching(path, axis.name);
+          }
+        }
+
+        if (Object.keys(divergent).length > 0) {
+          overrides.set(canonicalKey(partialTuple), {
+            axes: partialTuple,
+            tokens: divergent,
+          });
+        }
+      }
+    }
+  }
+
+  return { overrides, jointTouching };
+}
+
+function* axisCombinations(axes: readonly Axis[], k: number): Generator<readonly Axis[]> {
+  if (k === 0) {
+    yield [];
+    return;
+  }
+  if (k > axes.length) return;
+  for (let i = 0; i <= axes.length - k; i++) {
+    const head = axes[i] as Axis;
+    for (const tail of axisCombinations(axes.slice(i + 1), k - 1)) {
+      yield [head, ...tail];
+    }
+  }
+}
+
+function* contextProducts(axisCombo: readonly Axis[]): Generator<Record<string, string>> {
+  if (axisCombo.length === 0) {
+    yield {};
+    return;
+  }
+  const [first, ...rest] = axisCombo;
+  if (!first) return;
+  for (const ctx of first.contexts) {
+    if (ctx === first.default) continue;
+    for (const subTuple of contextProducts(rest)) {
+      yield { [first.name]: ctx, ...subTuple };
+    }
+  }
+}
+
+/**
+ * @deprecated Use {@link probeJointOverrides} which also returns the
+ * `jointTouching` signal needed for variance display. This shim is
+ * kept for callers that only care about `overrides`.
  */
 export function buildJointOverrides(
   axes: readonly Axis[],
-  permutations: readonly Permutation[],
-  permutationsResolved: Readonly<Record<string, TokenMap>>,
   cells: Cells,
   defaultTuple: Readonly<Record<string, string>>,
+  resolver: Resolver | undefined,
 ): JointOverrides {
-  // Probe in ascending arity. At each arity, compose against all
-  // lower-arity overrides already recorded; the arity-N override
-  // corrects any cases where the arity-(N-1) overrides set the wrong
-  // value at an N-axis tuple. This is what makes the "higher arity
-  // wins" property hold without losing the lower-arity benefits.
-  const accumulated = new Map<string, JointOverride>();
-
-  // Group permutations by partial-tuple arity (count of non-default axes).
-  const byArity = new Map<number, Permutation[]>();
-  let maxArity = 0;
-  for (const perm of permutations) {
-    let arity = 0;
-    for (const axis of axes) {
-      if (perm.input[axis.name] !== undefined && perm.input[axis.name] !== axis.default) {
-        arity += 1;
-      }
-    }
-    if (arity === 0) continue;
-    if (!byArity.has(arity)) byArity.set(arity, []);
-    byArity.get(arity)!.push(perm);
-    if (arity > maxArity) maxArity = arity;
-  }
-
-  for (let arity = 1; arity <= maxArity; arity++) {
-    const perms = byArity.get(arity) ?? [];
-    const composer = buildResolveAt(axes, cells, accumulated, defaultTuple);
-    for (const perm of perms) {
-      const cartesian = permutationsResolved[perm.name];
-      if (!cartesian) continue;
-      const partialAxes: Record<string, string> = {};
-      for (const axis of axes) {
-        const v = perm.input[axis.name];
-        if (v !== undefined && v !== axis.default) partialAxes[axis.name] = v;
-      }
-      const composed = composer(perm.input);
-      const divergent: TokenMap = {};
-      for (const path of Object.keys(cartesian)) {
-        const cVal = cartesian[path];
-        if (!cVal) continue;
-        if (!sameValue(cVal, composed[path])) divergent[path] = cVal;
-      }
-      if (Object.keys(divergent).length === 0) continue;
-      accumulated.set(canonicalKey(partialAxes), {
-        axes: partialAxes,
-        tokens: divergent,
-      });
-    }
-  }
-
-  return accumulated;
+  return probeJointOverrides(axes, cells, defaultTuple, resolver).overrides;
 }
 
 /**
@@ -92,15 +188,9 @@ function canonicalKey(axes: Readonly<Record<string, string>>): string {
     .join('|');
 }
 
-function sameValue(a: unknown, b: unknown): boolean {
-  // Stable structural comparison on `$value` — same key
-  // `analyzeAxisVariance` uses for variance bucketing.
-  return JSON.stringify(getValue(a)) === JSON.stringify(getValue(b));
-}
-
-function getValue(t: unknown): unknown {
-  if (t && typeof t === 'object' && '$value' in t) {
-    return (t as { $value: unknown }).$value;
+function valueKey(token: unknown): string {
+  if (token && typeof token === 'object' && '$value' in token) {
+    return JSON.stringify((token as { $value: unknown }).$value);
   }
-  return undefined;
+  return '';
 }
