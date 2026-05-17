@@ -3,7 +3,7 @@ import { generateShorthand, makeCSSVar, transformCSSValue } from '@terrazzo/toke
 import { CHROME_ROLES, CHROME_VAR_PREFIX, DEFAULT_CHROME_MAP } from '#/chrome.ts';
 import { dataAttr } from '#/css.ts';
 import type { Project, TokenMap } from '#/types.ts';
-import { analyzeProjectVariance, type JointCase, type VarianceInfo } from '#/variance-analysis.ts';
+import { analyzeProjectVariance, type VarianceInfo } from '#/variance-analysis.ts';
 
 /** @internal Addon-internal smart-emitter options. Not part of the public API. */
 export interface EmitAxisProjectedCssOptions {
@@ -80,7 +80,7 @@ export function emitAxisProjectedCss(
   const transformAlias = (token: TokenNormalized): string =>
     makeCSSVar(token.id, { ...varOpts, wrapVar: true });
 
-  const { axes, permutationsResolved } = project;
+  const { axes } = project;
   const variance = options.variance ?? analyzeProjectVariance(project);
 
   const defaultTuple = project.defaultTuple;
@@ -123,19 +123,13 @@ export function emitAxisProjectedCss(
     }
   }
 
-  // 3. Compound joint cells — one block per unique `(axisA, ctxA, axisB,
-  //    ctxB)` combination across all joint-variant tokens. The block
-  //    carries the spec-correct cartesian values for each token that
-  //    diverges from projection composition at that joint tuple.
-  //    Compound selector specificity beats the singleton cells, so the
-  //    joint cell wins where it applies.
-  for (const block of collectJointBlocks(
-    variance,
-    permutationsResolved,
-    prefix,
-    varOpts,
-    transformAlias,
-  )) {
+  // 3. Compound joint cells — one block per `Project.jointOverrides`
+  //    entry. Each override carries the cartesian-correct values for
+  //    the divergent tokens at that partial tuple; the block selector
+  //    is built from the override's axes (N-arity supported — pairs,
+  //    triples, etc.). Compound-selector specificity beats the
+  //    singleton cells, so the joint cell wins where it applies.
+  for (const block of collectJointBlocks(project, prefix, varOpts, transformAlias)) {
     blocks.push(block);
   }
 
@@ -178,55 +172,44 @@ function axisTouchesToken(axisName: string, info: VarianceInfo | undefined): boo
 }
 
 /**
- * Group every joint-variant token's `jointCases` by their compound
- * selector key (`axisA|ctxA|axisB|ctxB`), then emit one block per
- * unique key containing the cartesian-correct values for each token's
- * joint case. Each token's joint value is pulled from the corresponding
- * permutation's resolved TokenMap (the `permutationName` recorded
- * during analysis), so it goes through the same Terrazzo-side resolution
- * as cartesian emit would.
+ * Iterate `Project.jointOverrides` and emit one compound-selector
+ * block per entry. Each override entry carries the spec-correct
+ * cartesian values for its divergent tokens at the entry's partial
+ * tuple, so the block content comes from the override's `tokens` map
+ * directly — no \`permutationsResolved[jointCase.permutationName]\`
+ * roundtrip.
+ *
+ * Selector arity matches the override's `axes` arity — pairs produce
+ * `[data-A="a"][data-B="b"]`, triples produce a 3-attribute compound
+ * selector, etc. Compound-selector specificity beats the singleton
+ * cells emitted in Phase 2.
+ *
+ * Composite tokens with alias references resolve against
+ * `project.resolveAt(fullTuple)` — the full TokenMap at the joint
+ * tuple, so cross-token aliases find their targets.
  */
 function collectJointBlocks(
-  variance: Map<string, VarianceInfo>,
-  permutationsResolved: Record<string, TokenMap>,
+  project: Project,
   prefix: string,
   varOpts: VarOpts,
   transformAlias: (token: TokenNormalized) => string,
 ): string[] {
-  const grouped = new Map<string, { path: string; jointCase: JointCase }[]>();
-  for (const [path, info] of variance) {
-    if (info.kind !== 'joint-variant') continue;
-    for (const jointCase of info.jointCases) {
-      const key = `${jointCase.axisA}|${jointCase.ctxA}|${jointCase.axisB}|${jointCase.ctxB}`;
-      const bucket = grouped.get(key) ?? [];
-      bucket.push({ path, jointCase });
-      grouped.set(key, bucket);
-    }
-  }
-
   const blocks: string[] = [];
-  for (const [key, entries] of grouped) {
-    const parts = key.split('|');
-    const axisA = parts[0] as string;
-    const ctxA = parts[1] as string;
-    const axisB = parts[2] as string;
-    const ctxB = parts[3] as string;
-    const selector = `[${dataAttr(prefix, axisA)}="${cssEscape(ctxA)}"][${dataAttr(prefix, axisB)}="${cssEscape(ctxB)}"]`;
+  for (const override of project.jointOverrides.values()) {
+    const fullTuple = { ...project.defaultTuple, ...override.axes };
+    const fullTokens = project.resolveAt(fullTuple);
+    const axisEntries = Object.entries(override.axes);
+    const selector = axisEntries
+      .map(([axisName, ctx]) => `[${dataAttr(prefix, axisName)}="${cssEscape(ctx)}"]`)
+      .join('');
 
     const lines: string[] = [];
-    for (const { path, jointCase } of entries) {
-      const cellTokens = permutationsResolved[jointCase.permutationName];
-      if (!cellTokens) continue;
-      const token = cellTokens[path];
-      if (!token) continue;
+    for (const [path, token] of Object.entries(override.tokens)) {
       for (const decl of collectTokenDeclarations(
         path,
         token,
-        cellTokens,
-        // Use the joint permutation's input as the resolution context —
-        // composite token sub-fields and alias references are resolved
-        // against the joint tuple, matching what cartesian emit would do.
-        jointInputFromCase(jointCase),
+        fullTokens,
+        fullTuple,
         varOpts,
         transformAlias,
       )) {
@@ -237,16 +220,6 @@ function collectJointBlocks(
   }
 
   return blocks;
-}
-
-/**
- * Reconstruct a partial `permutation.input` from a JointCase. Used as
- * the `permutation` context for `transformCSSValue` — composite tokens
- * and aliases resolve against the joint tuple. Other axes default
- * naturally during transform; the joint axes are the load-bearing ones.
- */
-function jointInputFromCase(jointCase: JointCase): Record<string, string> {
-  return { [jointCase.axisA]: jointCase.ctxA, [jointCase.axisB]: jointCase.ctxB };
 }
 
 /**

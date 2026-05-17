@@ -1,5 +1,5 @@
 import type { TokenNormalized } from '@terrazzo/parser';
-import type { Axis, Project, TokenMap } from '#/types.ts';
+import { permutationID, type Project, type TokenMap } from '#/types.ts';
 
 /**
  * Per-token variance classification across a loaded project's axes.
@@ -105,7 +105,7 @@ export interface JointCase {
  */
 export function analyzeProjectVariance(project: Project): Map<string, VarianceInfo> {
   const result = new Map<string, VarianceInfo>();
-  const { axes, permutations, permutationsResolved, parserInput } = project;
+  const { axes } = project;
 
   if (axes.length === 0) {
     // No axes → every token is baseline-only. Skip the cell + probe work.
@@ -163,11 +163,40 @@ export function analyzeProjectVariance(project: Project): Map<string, VarianceIn
     touchingByPath.set(path, new Set(cached?.varyingAxes ?? []));
   }
 
-  // Partition + Phase 3 (joint probe for multi-touch only). Phase 3 needs
-  // resolver.apply, which only resolver-backed projects have; for layered
-  // / plain-parse we conservatively mark multi-touch as joint-variant
-  // (empty jointCases — emitter falls back to cartesian-style emit).
-  const resolver = parserInput?.resolver;
+  // Phase 3 — derive joint-variant kind from `project.jointOverrides`
+  // instead of running an ad-hoc resolver probe. The overrides were
+  // computed once at load time and carry the same divergence
+  // information; reading from them avoids a duplicate probe pass on
+  // every emit.
+  const jointCasesByPath = new Map<string, JointCase[]>();
+  for (const override of project.jointOverrides.values()) {
+    const axisEntries = Object.entries(override.axes);
+    if (axisEntries.length < 2) continue;
+    // Flatten N-arity overrides into all pair sub-combinations so the
+    // pair-shaped `JointCase` surface keeps working for consumers
+    // that depend on it (analyzeProjectVariance tests + any external
+    // tooling). The smart emitter itself iterates `jointOverrides`
+    // at full arity for compound-block emission.
+    for (let i = 0; i < axisEntries.length; i++) {
+      for (let j = i + 1; j < axisEntries.length; j++) {
+        const [axisA, ctxA] = axisEntries[i] as [string, string];
+        const [axisB, ctxB] = axisEntries[j] as [string, string];
+        for (const [path, token] of Object.entries(override.tokens)) {
+          const list = jointCasesByPath.get(path) ?? [];
+          const fullTuple = { ...defaultTuple, ...override.axes };
+          list.push({
+            axisA,
+            ctxA,
+            axisB,
+            ctxB,
+            cartesianValueKey: valueKey(token),
+            permutationName: permutationID(fullTuple),
+          });
+          jointCasesByPath.set(path, list);
+        }
+      }
+    }
+  }
 
   for (const [path, touching] of touchingByPath) {
     if (touching.size === 0) {
@@ -179,25 +208,7 @@ export function analyzeProjectVariance(project: Project): Map<string, VarianceIn
       result.set(path, { kind: 'single-axis', axis: axis as string });
       continue;
     }
-
-    if (!resolver) {
-      // Conservative: treat as joint-variant. Empty jointCases — the emitter
-      // signals "I can't determine joint correctness, emit cartesian-style."
-      result.set(path, { kind: 'joint-variant', touching, jointCases: [] });
-      continue;
-    }
-
-    const jointCases = probeJointPairs(
-      path,
-      touching,
-      axes,
-      defaultTuple,
-      cells,
-      baseline,
-      resolver,
-      permutations,
-      permutationsResolved,
-    );
+    const jointCases = jointCasesByPath.get(path) ?? [];
     if (jointCases.length === 0) {
       result.set(path, { kind: 'orthogonal-after-probe', touching });
     } else {
@@ -206,98 +217,6 @@ export function analyzeProjectVariance(project: Project): Map<string, VarianceIn
   }
 
   return result;
-}
-
-/**
- * For a multi-touch token, probe every pair of touching axes at every
- * non-default combination. Compare the cartesian-resolved value against
- * what projection composition would produce; record the divergences.
- *
- * Composition assumes the "smart dedup" rule: a cell re-emits its value
- * for any token touched by ANY cell (not just when this cell differs
- * from baseline). Under that rule, projection composition at a joint
- * `(A, B)` tuple equals the value of whichever of `cells[A][ctx_a]` /
- * `cells[B][ctx_b]` is emitted later in source order — by axis iteration
- * order. We match that by checking the B-cell value (B iterated after A).
- */
-function probeJointPairs(
-  path: string,
-  touching: ReadonlySet<string>,
-  axes: readonly Axis[],
-  defaultTuple: Record<string, string>,
-  cells: Record<string, Record<string, TokenMap>>,
-  baseline: TokenMap,
-  resolver: NonNullable<Project['parserInput']>['resolver'],
-  permutations: Project['permutations'],
-  permutationsResolved: Project['permutationsResolved'],
-): JointCase[] {
-  const cases: JointCase[] = [];
-  // Stable axis-pair iteration in project axis order — gives deterministic
-  // output and matches the cascade order the emitter will use.
-  const touchingAxes = axes.filter((a) => touching.has(a.name));
-
-  for (let i = 0; i < touchingAxes.length; i++) {
-    for (let j = i + 1; j < touchingAxes.length; j++) {
-      const axisA = touchingAxes[i] as Axis;
-      const axisB = touchingAxes[j] as Axis;
-      const cellsA = cells[axisA.name] ?? {};
-      const cellsB = cells[axisB.name] ?? {};
-
-      for (const ctxA of Object.keys(cellsA)) {
-        for (const ctxB of Object.keys(cellsB)) {
-          // Cartesian truth via resolver.apply.
-          const jointTuple = { ...defaultTuple, [axisA.name]: ctxA, [axisB.name]: ctxB };
-          const cartesianTokens = resolver.apply(jointTuple);
-          const cartesianValueKey = valueKey(cartesianTokens[path]);
-
-          // Projection composition under smart dedup: B is later in source
-          // order than A, so B's cell value wins when both touch the token.
-          // Falls back to A if only A's cell holds a value, else baseline.
-          const projectionValueKey =
-            valueKey(cellsB[ctxB]?.[path]) ||
-            valueKey(cellsA[ctxA]?.[path]) ||
-            valueKey(baseline[path]);
-
-          if (cartesianValueKey === projectionValueKey) continue;
-
-          // Divergence — record the joint case. Look up the permutation
-          // name so downstream emit can find the full TokenNormalized.
-          const jointPerm = findPermByTuple(permutations, jointTuple);
-          if (!jointPerm) continue;
-          if (permutationsResolved[jointPerm.name] === undefined) continue;
-          cases.push({
-            axisA: axisA.name,
-            ctxA,
-            axisB: axisB.name,
-            ctxB,
-            cartesianValueKey,
-            permutationName: jointPerm.name,
-          });
-        }
-      }
-    }
-  }
-
-  return cases;
-}
-
-/**
- * Locate the permutation whose `input` exactly matches the given tuple.
- * Returns `undefined` when no permutation matches — happens when
- * `disabledAxes` filtered the tuple out, or when the resolver's
- * cartesian was pruned. Callers handle this as "no overlay applies."
- */
-function findPermByTuple(
-  permutations: Project['permutations'],
-  tuple: Readonly<Record<string, string>>,
-): Project['permutations'][number] | undefined {
-  const keys = Object.keys(tuple);
-  return permutations.find((perm) => {
-    for (const key of keys) {
-      if (perm.input[key] !== tuple[key]) return false;
-    }
-    return Object.keys(perm.input).length === keys.length;
-  });
 }
 
 /**
