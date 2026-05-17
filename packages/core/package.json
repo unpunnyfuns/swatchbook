@@ -38,6 +38,10 @@
     "./resolve-at": {
       "types": "./dist/resolve-at.d.mts",
       "import": "./dist/resolve-at.mjs"
+    },
+    "./css-var": {
+      "types": "./dist/css-var.d.mts",
+      "import": "./dist/css-var.mjs"
     }
   },
   "imports": {
@@ -48,7 +52,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsdown src/index.ts src/fuzzy.ts src/resolve-at.ts --format esm --dts --clean --sourcemap",
+    "build": "tsdown src/index.ts src/fuzzy.ts src/resolve-at.ts src/css-var.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
