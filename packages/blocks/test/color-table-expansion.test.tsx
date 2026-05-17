@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen, within } from '@testing-librar
 import { afterEach, describe, expect, it } from 'vitest';
 import { ColorTable, SwatchbookProvider } from '#/index.ts';
 import { makeColorTableSnapshot } from './_color-table-helpers.tsx';
+import { withCellsShape } from './_snapshot-utils.ts';
 
 describe('ColorTable — expansion', () => {
   afterEach(() => {
@@ -52,7 +53,7 @@ describe('ColorTable — expansion', () => {
       'color.bg.hi-d': { $type: 'color', $value: { hex: '#333333' } },
     };
     render(
-      <SwatchbookProvider value={snap}>
+      <SwatchbookProvider value={withCellsShape(snap)}>
         <ColorTable filter="color.bg.*" variants={{ hover: 'h', disabled: 'd' }} />
       </SwatchbookProvider>,
     );
@@ -90,7 +91,7 @@ describe('ColorTable — expansion', () => {
       'color.bg.hi-h': { $type: 'color', $value: { hex: '#222222' } },
     };
     render(
-      <SwatchbookProvider value={snap}>
+      <SwatchbookProvider value={withCellsShape(snap)}>
         <ColorTable filter="color.bg.*" variants={{ hover: 'h' }} />
       </SwatchbookProvider>,
     );

@@ -1,18 +1,18 @@
 import type { ProjectSnapshot, VirtualTokenShape } from '#/index.ts';
+import { withCellsShape } from './_snapshot-utils.ts';
 
 /**
- * Test snapshot using the legacy `permutationsResolved` shape — the
- * `snapshotResolveAt` fallback path in `use-project` covers this for
- * hand-built snapshots. `permutationsResolved` is typed as the wider
- * `Record<…>` rather than inferred from the literal so tests can
- * extend the map with extra paths after construction.
+ * Test snapshot carrying the legacy `permutationsResolved` map alongside
+ * the cells shape so existing assertions can keep extending it with
+ * extra paths after construction. `permutationsResolved` is typed as
+ * the wider `Record<…>` rather than inferred from the literal.
  */
 export interface ColorTableSnapshot extends ProjectSnapshot {
   permutationsResolved: Record<string, Record<string, VirtualTokenShape>>;
 }
 
 export function makeColorTableSnapshot(): ColorTableSnapshot {
-  return {
+  return withCellsShape({
     axes: [{ name: 'mode', contexts: ['light'], default: 'light', source: 'resolver' }],
     disabledAxes: [],
     presets: [],
@@ -45,5 +45,5 @@ export function makeColorTableSnapshot(): ColorTableSnapshot {
     cssVarPrefix: 'sb',
     diagnostics: [],
     css: '',
-  };
+  });
 }

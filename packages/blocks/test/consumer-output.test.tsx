@@ -6,11 +6,12 @@ import {
   SwatchbookProvider,
   type VirtualTokenListingShape,
 } from '#/index.ts';
+import { withCellsShape } from './_snapshot-utils.ts';
 
 function makeSnapshot(
   listing?: Readonly<Record<string, VirtualTokenListingShape>>,
 ): ProjectSnapshot {
-  return {
+  return withCellsShape({
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
     disabledAxes: [],
     presets: [],
@@ -26,7 +27,7 @@ function makeSnapshot(
     diagnostics: [],
     css: '',
     ...(listing !== undefined && { listing }),
-  };
+  });
 }
 
 describe('ConsumerOutput', () => {

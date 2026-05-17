@@ -120,24 +120,17 @@ function makeResolveAt(snapshot: {
  * Build the `resolveAt` accessor for a snapshot. Prefers the
  * snapshot's own `resolveAt` (the addon's preview decorator
  * pre-builds one at module load — see `previewResolveAt` in
- * `packages/addon/src/preview.tsx`), then `cells` + `jointOverrides`
- * via `makeResolveAt`, finally a hand-built-snapshot fallback that
- * resolves only the active-permutation TokenMap (sufficient for the
- * `resolveAt(activeAxes)` path blocks take; multi-tuple lookups
- * — `AxisVariance` grid cells — require `cells`). The fallback's
- * `permutationsResolved` read goes away in PR 3 of #815 when the
- * field exits `Project` entirely.
+ * `packages/addon/src/preview.tsx`), otherwise composes one from
+ * `cells` + `jointOverrides` via `makeResolveAt`. Hand-built
+ * snapshots should provide both via the test `withCellsShape`
+ * helper or by populating the fields directly.
  */
 function snapshotResolveAt(
   snapshot: ProjectSnapshot,
 ): (tuple: Record<string, string>) => ResolvedTokens {
   if (snapshot.resolveAt)
     return snapshot.resolveAt as (tuple: Record<string, string>) => ResolvedTokens;
-  const hasCells = Object.keys(snapshot.cells ?? {}).length > 0;
-  if (hasCells) return makeResolveAt(snapshot);
-  const resolved = (snapshot.permutationsResolved ?? {}) as Record<string, ResolvedTokens>;
-  const active = resolved[snapshot.activePermutation] ?? {};
-  return () => active;
+  return makeResolveAt(snapshot);
 }
 
 /**

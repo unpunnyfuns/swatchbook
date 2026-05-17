@@ -10,11 +10,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { SwatchbookProvider } from '#/provider.tsx';
 import type { ProjectSnapshot } from '#/contexts.ts';
+import { withCellsShape } from './_snapshot-utils.ts';
 
 afterEach(cleanup);
 
 function emptySnapshot(): ProjectSnapshot {
-  return {
+  return withCellsShape({
     axes: [],
     disabledAxes: [],
     presets: [],
@@ -25,7 +26,7 @@ function emptySnapshot(): ProjectSnapshot {
     cssVarPrefix: '',
     diagnostics: [],
     css: '',
-  };
+  });
 }
 
 function renderOverlay(onClose = vi.fn()): { onClose: ReturnType<typeof vi.fn> } {
