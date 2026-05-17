@@ -4,17 +4,14 @@ import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { CHROME_ROLES, DEFAULT_CHROME_MAP, validateChrome } from '#/chrome';
 import { emitAxisProjectedCss } from '#/css-axis-projected';
 import { loadProject } from '#/load';
-import type { Project, TokenMap } from '#/types';
+import type { Project } from '#/types';
 
 const fixtureCwd = dirname(tokensDir);
 
-const tokensFixture: TokenMap = {
-  'color.palette.blue.500': {} as TokenMap[string],
-  'color.palette.neutral.0': {} as TokenMap[string],
-};
+const tokenIDs = new Set<string>(['color.palette.blue.500', 'color.palette.neutral.0']);
 
 it('validateChrome returns empty when input is undefined', () => {
-  const { entries, diagnostics } = validateChrome(undefined, { Light: tokensFixture });
+  const { entries, diagnostics } = validateChrome(undefined, tokenIDs);
   expect(entries).toEqual({});
   expect(diagnostics).toEqual([]);
 });
@@ -22,7 +19,7 @@ it('validateChrome returns empty when input is undefined', () => {
 it('validateChrome keeps entries whose role is known and target resolves', () => {
   const { entries, diagnostics } = validateChrome(
     { surfaceDefault: 'color.palette.blue.500' },
-    { Light: tokensFixture },
+    tokenIDs,
   );
   expect(entries).toEqual({ surfaceDefault: 'color.palette.blue.500' });
   expect(diagnostics).toEqual([]);
@@ -31,7 +28,7 @@ it('validateChrome keeps entries whose role is known and target resolves', () =>
 it('validateChrome drops unknown roles with a warn diagnostic', () => {
   const { entries, diagnostics } = validateChrome(
     { bogusRole: 'color.palette.blue.500' },
-    { Light: tokensFixture },
+    tokenIDs,
   );
   expect(entries).toEqual({});
   expect(diagnostics).toHaveLength(1);
@@ -41,20 +38,16 @@ it('validateChrome drops unknown roles with a warn diagnostic', () => {
 });
 
 it('validateChrome accepts composite sub-field targets (parent token exists)', () => {
-  const composite: TokenMap = { 'typography.body': {} as TokenMap[string] };
   const { entries, diagnostics } = validateChrome(
     { bodyFontFamily: 'typography.body.font-family' },
-    { Light: composite },
+    new Set(['typography.body']),
   );
   expect(entries).toEqual({ bodyFontFamily: 'typography.body.font-family' });
   expect(diagnostics).toEqual([]);
 });
 
 it('validateChrome drops entries whose target resolves in no theme', () => {
-  const { entries, diagnostics } = validateChrome(
-    { surfaceDefault: 'color.nowhere' },
-    { Light: tokensFixture },
-  );
+  const { entries, diagnostics } = validateChrome({ surfaceDefault: 'color.nowhere' }, tokenIDs);
   expect(entries).toEqual({});
   expect(diagnostics).toHaveLength(1);
   expect(diagnostics[0]?.severity).toBe('warn');
