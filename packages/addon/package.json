@@ -101,6 +101,7 @@
     "@types/node": "^25.6.0",
     "@types/picomatch": "^4.0.3",
     "@types/react": "^19.2.14",
+    "@unpunnyfuns/swatchbook-tokens": "workspace:*",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/browser": "^4.1.4",
     "@vitest/browser-playwright": "^4.1.4",

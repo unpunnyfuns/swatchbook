@@ -18,4 +18,30 @@ export interface AddonOptions {
    * tool-agnostic; integrations ship as separate packages.
    */
   integrations?: SwatchbookIntegration[];
+  /**
+   * Which CSS emitter populates the `css` export of
+   * `virtual:swatchbook/tokens`. Defaults to `'projected'`.
+   *
+   * - `'projected'` (default) — smart axis-projected emit
+   *   (`emitAxisProjectedCss`). One `:root` baseline block, one
+   *   `[data-<axis>="<ctx>"]` block per non-default cell (deltas only
+   *   for tokens that axis touches), and compound `[data-A][data-B]`
+   *   blocks for joint-variant tokens that need cartesian-correct
+   *   values at specific joint tuples. Output size scales with
+   *   `Σ(axes × non-default contexts × touching tokens) + joint
+   *   compound blocks` — dramatically smaller than cartesian for
+   *   typical fixtures. Spec-faithful for any DTCG-compliant
+   *   resolver: orthogonal tokens project, joint-variant tokens fall
+   *   back to compound selectors automatically.
+   * - `'cartesian'` — explicit fan-out (`projectCss`). One block per
+   *   cartesian tuple, scoped by compound
+   *   `[data-<axis>="<ctx>"][data-…]` selectors. Output scales with
+   *   the cartesian product. Pick this when you want explicit
+   *   per-tuple blocks for debugging, regression-comparison against
+   *   the projected output, or because your tooling reads them
+   *   directly. Not an escape hatch for large cardinality — at the
+   *   scales where the projection analysis is expensive, the
+   *   cartesian output is just as unmanageable.
+   */
+  emitMode?: 'cartesian' | 'projected';
 }

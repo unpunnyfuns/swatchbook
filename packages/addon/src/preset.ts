@@ -36,6 +36,7 @@ export async function viteFinal(
       config,
       cwd,
       ...(options.integrations !== undefined && { integrations: options.integrations }),
+      ...(options.emitMode !== undefined && { emitMode: options.emitMode }),
     }),
   );
 
