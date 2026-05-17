@@ -1,7 +1,7 @@
 import { dirname } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
-import { loadProject, resolvePermutation } from '#/load';
+import { loadProject } from '#/load';
 import type { Project } from '#/types';
 
 const fixtureCwd = dirname(tokensDir);
@@ -22,17 +22,18 @@ describe('loadProject — resolver mode', () => {
     );
   }, 30_000);
 
-  it('enumerates the cartesian product of mode × brand × contrast', () => {
-    expect(project.permutations.map((t) => t.name)).toEqual([
-      'Light · Default · Normal',
-      'Dark · Default · Normal',
-      'Light · Brand A · Normal',
-      'Dark · Brand A · Normal',
-      'Light · Default · High',
-      'Dark · Default · High',
-      'Light · Brand A · High',
-      'Dark · Brand A · High',
-    ]);
+  it('enumerates singletons only — default tuple + one per `(axis, non-default-context)`', () => {
+    // Bounded by `Σ(axes × contexts)`, independent of the cartesian
+    // product. For the reference fixture (3 axes × 2 contexts each):
+    // 1 default + 3 axes × 1 non-default ctx = 4 singletons.
+    expect(project.permutations.map((t) => t.name).toSorted()).toEqual(
+      [
+        'Light · Default · Normal',
+        'Dark · Default · Normal',
+        'Light · Brand A · Normal',
+        'Light · Default · High',
+      ].toSorted(),
+    );
     expect(Object.keys(project.graph).length).toBeGreaterThan(100);
   });
 
@@ -64,27 +65,22 @@ describe('loadProject — resolver mode', () => {
     ]);
   });
 
-  it('cartesian product of axis contexts matches the theme count', () => {
-    const cartesian = project.axes.reduce((n, axis) => n * axis.contexts.length, 1);
-    expect(project.permutations.length).toBe(cartesian);
-  });
-
-  it('resolves alias chains (sys → ref)', () => {
-    const light = resolvePermutation(project, 'Light · Default · Normal').tokens;
+  it('resolveAt composes any tuple from cells + jointOverrides — no listPermutations needed', () => {
+    const light = project.resolveAt({ mode: 'Light', brand: 'Default', contrast: 'Normal' });
     const accentBg = light['color.accent.bg'];
     expect(accentBg).toBeDefined();
     expect(accentBg?.$type).toBe('color');
   });
 
   it('produces different surface values for Light vs Dark at the same brand', () => {
-    const light = resolvePermutation(project, 'Light · Default · Normal').tokens['color.surface.default'];
-    const dark = resolvePermutation(project, 'Dark · Default · Normal').tokens['color.surface.default'];
+    const light = project.resolveAt({ mode: 'Light', brand: 'Default', contrast: 'Normal' })[
+      'color.surface.default'
+    ];
+    const dark = project.resolveAt({ mode: 'Dark', brand: 'Default', contrast: 'Normal' })[
+      'color.surface.default'
+    ];
     expect(light).toBeDefined();
     expect(dark).toBeDefined();
     expect(JSON.stringify(light?.$value)).not.toEqual(JSON.stringify(dark?.$value));
-  });
-
-  it('throws on unknown permutation name', () => {
-    expect(() => resolvePermutation(project, 'Nope')).toThrow(/unknown permutation/i);
   });
 });

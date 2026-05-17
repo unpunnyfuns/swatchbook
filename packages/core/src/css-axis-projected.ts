@@ -93,7 +93,14 @@ export function emitAxisProjectedCss(
   //    Baseline-only tokens never appear elsewhere; all other variance
   //    kinds also need a baseline value to start the cascade from.
   if (baselineTokens) {
-    const lines = collectLines(baselineTokens, () => true, defaultTuple, varOpts, transformAlias);
+    const lines = collectLines(
+      baselineTokens,
+      baselineTokens,
+      () => true,
+      defaultTuple,
+      varOpts,
+      transformAlias,
+    );
     if (lines.length > 0) blocks.push(`:root {\n${lines.join('\n')}\n}`);
   }
 
@@ -109,9 +116,14 @@ export function emitAxisProjectedCss(
       const cellTokens = project.cells[axis.name]?.[ctx];
       if (!cellTokens) continue;
       const cellTuple = { ...defaultTuple, [axis.name]: ctx };
+      // The cell carries only delta tokens; alias resolution needs
+      // the full composed TokenMap at the cell's tuple to find
+      // non-delta targets.
+      const cellTokensForAliases = project.resolveAt(cellTuple);
 
       const lines = collectLines(
         cellTokens,
+        cellTokensForAliases,
         (path) => axisTouchesToken(axis.name, variance.get(path)),
         cellTuple,
         varOpts,
@@ -228,9 +240,15 @@ function collectJointBlocks(
  * indent for embedding in a block). Composite tokens contribute one
  * line per sub-field plus an optional shorthand line; primitives
  * contribute one line.
+ *
+ * `tokensForAliasResolution` is the broader resolution context —
+ * with delta cells, `tokens` itself only carries the delta paths,
+ * so composite token sub-aliases need the full composed TokenMap
+ * to resolve references to non-delta tokens.
  */
 function collectLines(
   tokens: TokenMap,
+  tokensForAliasResolution: TokenMap,
   accept: (path: string) => boolean,
   permutation: Record<string, string>,
   varOpts: VarOpts,
@@ -242,7 +260,7 @@ function collectLines(
     for (const decl of collectTokenDeclarations(
       path,
       token,
-      tokens,
+      tokensForAliasResolution,
       permutation,
       varOpts,
       transformAlias,

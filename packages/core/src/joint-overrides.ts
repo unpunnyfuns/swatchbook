@@ -60,6 +60,11 @@ export function probeJointOverrides(
 
   const overrides = new Map<string, JointOverride>();
   const jointTouching = new Map<string, Set<string>>();
+  // Baseline carries the values for paths that delta cells omit;
+  // touching detection compares against this to avoid flagging
+  // baseline-equal cells as "diverging from cartesian."
+  const firstAxis = axes[0];
+  const baseline: TokenMap = (firstAxis && cells[firstAxis.name]?.[firstAxis.default]) ?? {};
 
   const markJointTouching = (path: string, axisName: string): void => {
     let set = jointTouching.get(path);
@@ -108,8 +113,13 @@ export function probeJointOverrides(
             const ctxB = partialTuple[axisB.name] as string;
             const cellA = cells[axisA.name]?.[ctxA] ?? {};
             const cellB = cells[axisB.name]?.[ctxB] ?? {};
-            if (cKey !== valueKey(cellB[path])) markJointTouching(path, axisA.name);
-            if (cKey !== valueKey(cellA[path])) markJointTouching(path, axisB.name);
+            // Fall back to baseline for delta cells that omit this
+            // path — "axis didn't touch it" should not look like
+            // divergence from cartesian.
+            const cellBVal = valueKey(cellB[path] ?? baseline[path]);
+            const cellAVal = valueKey(cellA[path] ?? baseline[path]);
+            if (cKey !== cellBVal) markJointTouching(path, axisA.name);
+            if (cKey !== cellAVal) markJointTouching(path, axisB.name);
           } else if (cKey !== valueKey(composed[path])) {
             // Arity ≥ 3 with a divergence at this tuple: every
             // participating axis is conservatively marked.

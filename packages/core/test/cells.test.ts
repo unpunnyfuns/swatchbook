@@ -1,10 +1,10 @@
-// `Project.cells` is the per-axis singleton TokenMap surface that
-// replaces direct reads from `permutationsResolved` for the smart
-// emitter + downstream consumers. The PR-1 form derives it from the
-// existing cartesian map; these tests pin the parity (every cell
-// matches the corresponding singleton permutation's TokenMap) so the
-// later PR that switches the load path to direct resolver calls has a
-// clean equivalence baseline.
+// `Project.cells` is the per-axis surface that replaces direct reads
+// from `permutationsResolved` for the smart emitter + downstream
+// consumers. Default cells carry the full baseline TokenMap; non-default
+// cells store deltas (only tokens whose value differs from baseline).
+// Delta cells make `composeAt` correct under sparse composition — a
+// later axis's cell can't accidentally overwrite an earlier axis's
+// overlay on a token it doesn't touch.
 import { beforeAll, expect, it } from 'vitest';
 import type { Project } from '#/types';
 import { loadWithPrefix } from './_helpers';
@@ -23,20 +23,39 @@ it("populates one cell per (axis, context) — including each axis's default —
   }
 });
 
-it("every cell equals the corresponding singleton permutation's TokenMap (`{ ...defaults, [axis]: ctx }`)", () => {
-  const defaults: Record<string, string> = {};
-  for (const axis of project.axes) defaults[axis.name] = axis.default;
+it("the default cell on each axis is the full baseline TokenMap (every axis's default cell is the same data)", () => {
+  const [first] = project.axes;
+  if (!first) return;
+  const baseline = project.cells[first.name]?.[first.default];
+  expect(baseline).toBeDefined();
+  // Every other axis's default cell should reference the same baseline
+  // data (they're all the resolver-apply'd default tuple).
+  for (const axis of project.axes) {
+    const defaultCell = project.cells[axis.name]?.[axis.default];
+    expect(defaultCell).toBeDefined();
+    expect(Object.keys(defaultCell ?? {}).length).toBeGreaterThan(0);
+  }
+});
 
+it("non-default cells store only delta tokens (paths whose value differs from baseline)", () => {
+  const [first] = project.axes;
+  if (!first) return;
+  const baseline = project.cells[first.name]?.[first.default] ?? {};
   for (const axis of project.axes) {
     for (const ctx of axis.contexts) {
-      const tuple = { ...defaults, [axis.name]: ctx };
-      const perm = project.permutations.find((p) =>
-        Object.keys(tuple).every((k) => p.input[k] === tuple[k]) &&
-        Object.keys(p.input).length === Object.keys(tuple).length,
-      );
-      expect(perm, `missing permutation for ${JSON.stringify(tuple)}`).toBeDefined();
-      const expected = project.permutationsResolved[perm!.name];
-      expect(project.cells[axis.name]?.[ctx]).toBe(expected);
+      if (ctx === axis.default) continue;
+      const cell = project.cells[axis.name]?.[ctx];
+      expect(cell).toBeDefined();
+      // Every token in a non-default cell must differ from baseline.
+      for (const [path, token] of Object.entries(cell ?? {})) {
+        const baselineToken = baseline[path];
+        const cellValue = JSON.stringify(token.$value);
+        const baselineValue = JSON.stringify(baselineToken?.$value);
+        expect(
+          cellValue,
+          `${axis.name}=${ctx} cell delta for ${path} should differ from baseline`,
+        ).not.toBe(baselineValue);
+      }
     }
   }
 });

@@ -66,16 +66,17 @@ it('emits compound [data-A][data-B] blocks for joint-variant tokens (joint block
   expect(fgInAnyCompound).toBe(true);
 });
 
-it('per-axis cell blocks include every touching token, even when that token matches baseline (smart dedup — needed so cascade lands on the right cell under joint composition)', () => {
+it('per-axis cell blocks contain only the delta tokens that genuinely differ from baseline at that axis-context (delta cells, joint case handled by compound block above)', () => {
   const css = emitAxisProjectedCss(project);
-  // `color.accent.fg` is touched by brand (Brand A overrides it). Under
-  // smart dedup, Brand A's cell emits accent.fg = white even though
-  // it matches baseline white — so that under `<html data-sb-mode="Dark"
-  // data-sb-brand="Brand A">`, Brand A's white wins over Dark's
-  // overridden dark via source-order cascade.
+  // `color.accent.fg` at brand=Brand A alone equals baseline (white),
+  // so it doesn't appear in the Brand A cell. The joint Dark+BrandA
+  // divergence is handled by the compound `[data-sb-mode][data-sb-brand]`
+  // block (covered above), not by re-emitting the baseline-equal value
+  // into the brand cell.
   const brandACell = extractBlock(css, '[data-sb-brand="Brand A"]');
   expect(brandACell).toBeTruthy();
-  expect(brandACell).toMatch(/--sb-color-accent-fg:/);
+  // Brand A genuinely changes the violet roles — those land in the cell.
+  expect(brandACell).toMatch(/--sb-color-accent-bg:/);
 });
 
 it('baseline-only tokens (palette primitives) appear ONLY in :root, never in any cell', () => {

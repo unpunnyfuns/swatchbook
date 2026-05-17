@@ -136,13 +136,17 @@ export interface Config {
    */
   disabledAxes?: string[];
   /**
-   * Hard cap on the cartesian-product permutation count loaded eagerly.
-   * Default `1024`. When the resolver's modifier space exceeds this,
-   * `loadProject` skips enumeration and returns a project containing
-   * only the default permutation, surfaced via a `swatchbook/permutations`
-   * warn diagnostic. Keeps pathological resolvers (state-space modifiers
-   * fanned out into the cartesian product, see terrazzo#752) from OOMing
-   * the build. Set `0` to disable the guard entirely.
+   * Hard cap on the cartesian-product permutation count loaded
+   * eagerly by the **layered** loader (`config.axes`). Default
+   * `1024`. When exceeded, `loadLayeredPermutations` falls back to
+   * the default tuple only and surfaces a
+   * `swatchbook/permutations` warn diagnostic.
+   *
+   * The resolver path is **unaffected** — its enumeration is
+   * intrinsically bounded by `Σ(axes × contexts)` regardless of
+   * the cartesian size. The option may be removed in a future
+   * release once layered loading also moves off cartesian
+   * enumeration.
    */
   maxPermutations?: number;
   /**
@@ -343,11 +347,6 @@ export function permutationID(input: Record<string, string>): string {
   if (values.length === 0) return '';
   if (values.length === 1) return values[0] as string;
   return values.join(' · ');
-}
-
-export interface ResolvedPermutation {
-  name: string;
-  tokens: TokenMap;
 }
 
 /**

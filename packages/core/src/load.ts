@@ -17,7 +17,6 @@ import {
   type Diagnostic,
   type Permutation,
   type Project,
-  type ResolvedPermutation,
   type TokenMap,
 } from '#/types.ts';
 
@@ -66,12 +65,20 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     config.default,
     filteredAxes,
   );
+  // `project.graph` is the resolved TokenMap at the user-specified
+  // default tuple. Singleton enumeration always materializes the
+  // axes-defaults tuple; if `config.default` points somewhere else,
+  // resolve it on the side without grafting into
+  // `permutationsResolved` (which must stay keyed against the
+  // singleton enumeration to preserve the
+  // `keys == permutations.map(name)` invariant downstream consumers
+  // rely on).
   const computedDefault = permutationID(defaultTuple);
-  const defaultPermutationName = filteredResolved[computedDefault]
-    ? computedDefault
-    : (filteredPermutations[0]?.name ?? '');
-
-  const graph = filteredResolved[defaultPermutationName] ?? {};
+  const graph: TokenMap =
+    filteredResolved[computedDefault] ??
+    (normalized.parserInput?.resolver
+      ? normalized.parserInput.resolver.apply(defaultTuple)
+      : (filteredResolved[filteredPermutations[0]?.name ?? ''] ?? {}));
 
   const { presets, diagnostics: presetDiagnostics } = validatePresets(config.presets, filteredAxes);
 
@@ -231,14 +238,4 @@ function applyDisabledAxes(
     if (surviving.has(name)) filteredResolved[name] = tokens;
   }
   return { axes: filteredAxes, permutations: filteredPermutations, resolved: filteredResolved };
-}
-
-/** Fetch the resolved tokens for a named permutation. Throws if the name is unknown. */
-export function resolvePermutation(project: Project, name: string): ResolvedPermutation {
-  const tokens = project.permutationsResolved[name];
-  if (!tokens) {
-    const known = project.permutations.map((p) => p.name).join(', ');
-    throw new Error(`swatchbook: unknown permutation "${name}". Known: ${known || '(none)'}`);
-  }
-  return { name, tokens };
 }

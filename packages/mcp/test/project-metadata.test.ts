@@ -60,12 +60,14 @@ interface ListAxesResult {
   presets: { name: string; axes: Record<string, string>; description?: string }[];
 }
 
-it('list_axes: returns axes with `source: resolver` for resolver-driven projects, plus the full permutation product', async () => {
+it('list_axes: returns axes with `source: resolver` for resolver-driven projects, plus the materialized singleton permutations', async () => {
   const result = await mcp.callJson<ListAxesResult>('list_axes');
   expect(result.axes.every((a) => a.source === 'resolver')).toBe(true);
   expect(result.disabledAxes).toEqual([]);
-  // Permutation count = product of axis context counts.
-  const expected = result.axes.reduce((acc, a) => acc * a.contexts.length, 1);
+  // Singleton enumeration: 1 default tuple + 1 per non-default cell on
+  // each axis = 1 + Σ(contexts - 1). Bounded by Σ(axes × contexts),
+  // not by the cartesian product.
+  const expected = 1 + result.axes.reduce((acc, a) => acc + (a.contexts.length - 1), 0);
   expect(result.permutations.length).toBe(expected);
   // Every permutation should have an entry per axis.
   for (const tuple of result.permutations) {
