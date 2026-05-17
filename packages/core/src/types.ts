@@ -3,6 +3,7 @@ import type { Plugin, Resolver, TokenNormalized } from '@terrazzo/parser';
 import type { CSSPluginOptions } from '@terrazzo/plugin-css';
 import type { TokenListingPluginOptions } from '@terrazzo/plugin-token-listing';
 import type { TokenListingByPath } from '#/token-listing.ts';
+import type { AxisVarianceResult } from '#/variance.ts';
 
 export type TokenMap = Record<string, TokenNormalized>;
 
@@ -268,6 +269,14 @@ export interface Project {
    * axes fall back to their defaults.
    */
   resolveAt: ResolveAt;
+  /**
+   * Per-token cached `AxisVarianceResult` — pre-computed at load time
+   * so consumers (block axis-variance display, MCP `get_axis_variance`,
+   * smart-emitter Phase 2) can O(1) look up which axes affect a token
+   * instead of re-running the bucket analysis on every read. The map
+   * spans every path that appears in any permutation's resolved map.
+   */
+  varianceByPath: ReadonlyMap<string, AxisVarianceResult>;
   /**
    * Absolute paths of every file loaded while building the project —
    * the resolver file (if any), every `$ref` target it pulled in, every
