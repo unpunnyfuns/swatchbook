@@ -1,4 +1,4 @@
-import type { Project } from '@unpunnyfuns/swatchbook-core';
+import type { Project, TokenMap } from '@unpunnyfuns/swatchbook-core';
 import { projectCss } from '@unpunnyfuns/swatchbook-core';
 import { fuzzyFilter, fuzzyMatches } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -18,6 +18,13 @@ export function createServer(initial: Project): McpServer & {
   setProject: (next: Project) => void;
 } {
   let project = initial;
+  // Reverse lookup `permutationName → axisTuple`, refreshed on each
+  // `setProject` swap. Tool handlers that accept a `theme` name
+  // parameter use this to map it to a tuple in O(1) before calling
+  // `project.resolveAt(tuple)` — replaces the direct
+  // `project.permutationsResolved[name]` indexing the tools used
+  // before the cells migration.
+  let tupleByName = buildTupleByName(initial);
   const server = new McpServer(
     {
       name: '@unpunnyfuns/swatchbook-mcp',
@@ -30,6 +37,18 @@ export function createServer(initial: Project): McpServer & {
   ) as McpServer & { setProject: (next: Project) => void };
   server.setProject = (next: Project) => {
     project = next;
+    tupleByName = buildTupleByName(next);
+  };
+
+  /**
+   * Resolve tokens for a `theme` name parameter. Falls back to the
+   * project's default tuple when the name doesn't match any known
+   * permutation (also covers the no-theme-provided path).
+   */
+  const tokensForTheme = (themeName: string | undefined): TokenMap => {
+    const tuple =
+      (themeName !== undefined ? tupleByName.get(themeName) : undefined) ?? project.defaultTuple;
+    return project.resolveAt(tuple);
   };
 
   server.registerTool(
@@ -43,7 +62,7 @@ export function createServer(initial: Project): McpServer & {
       const typeCounts: Record<string, number> = {};
       const tokensPerTheme: Record<string, number> = {};
       for (const theme of project.permutations) {
-        const tokens = project.permutationsResolved[theme.name] ?? {};
+        const tokens = project.resolveAt(theme.input as Record<string, string>);
         tokensPerTheme[theme.name] = Object.keys(tokens).length;
         for (const token of Object.values(tokens)) {
           if (token.$type) typeCounts[token.$type] = (typeCounts[token.$type] ?? 0) + 1;
@@ -104,7 +123,7 @@ export function createServer(initial: Project): McpServer & {
       if (!themeName) {
         return textResult('No permutations in project.');
       }
-      const tokens = project.permutationsResolved[themeName] ?? {};
+      const tokens = tokensForTheme(themeName);
       const rows: { path: string; type?: string; value: string }[] = [];
       for (const [path, token] of Object.entries(tokens)) {
         if (type && token.$type !== type) continue;
@@ -140,7 +159,7 @@ export function createServer(initial: Project): McpServer & {
       let found = false;
 
       for (const theme of project.permutations) {
-        const token = project.permutationsResolved[theme.name]?.[path];
+        const token = project.resolveAt(theme.input as Record<string, string>)[path];
         if (!token) continue;
         found = true;
         type ??= token.$type;
@@ -208,7 +227,7 @@ export function createServer(initial: Project): McpServer & {
       const perTheme: Record<string, { aliasOf?: string; chain: readonly string[] }> = {};
       let found = false;
       for (const theme of project.permutations) {
-        const token = project.permutationsResolved[theme.name]?.[path];
+        const token = project.resolveAt(theme.input as Record<string, string>)[path];
         if (!token) continue;
         found = true;
         const chain: string[] = [path];
@@ -243,7 +262,7 @@ export function createServer(initial: Project): McpServer & {
       const depth = maxDepth ?? 6;
       const themeName = project.permutations[0]?.name;
       if (!themeName) return textResult('No permutations in project.');
-      const tokens = project.permutationsResolved[themeName] ?? {};
+      const tokens = tokensForTheme(themeName);
       if (!tokens[path]) return textResult(`Token not found: ${path}`);
 
       interface Node {
@@ -289,7 +308,7 @@ export function createServer(initial: Project): McpServer & {
     ({ path, theme }) => {
       const themeName = theme ?? project.permutations[0]?.name;
       if (!themeName) return textResult('No permutations in project.');
-      const token = project.permutationsResolved[themeName]?.[path];
+      const token = tokensForTheme(themeName)[path];
       if (!token) return textResult(`Token not found: ${path}`);
       if (token.$type !== 'color') {
         return textResult(`Token ${path} is not a color (got $type=${token.$type ?? 'unknown'}).`);
@@ -329,8 +348,9 @@ export function createServer(initial: Project): McpServer & {
     ({ foreground, background, theme, algorithm }) => {
       const themeName = theme ?? project.permutations[0]?.name;
       if (!themeName) return textResult('No permutations in project.');
-      const fgTok = project.permutationsResolved[themeName]?.[foreground];
-      const bgTok = project.permutationsResolved[themeName]?.[background];
+      const tokens = tokensForTheme(themeName);
+      const fgTok = tokens[foreground];
+      const bgTok = tokens[background];
       if (!fgTok) return textResult(`Foreground token not found: ${foreground}`);
       if (!bgTok) return textResult(`Background token not found: ${background}`);
       if (fgTok.$type !== 'color') {
@@ -369,8 +389,9 @@ export function createServer(initial: Project): McpServer & {
     },
     ({ path }) => {
       if (project.permutations.length === 0) return textResult('No permutations in project.');
-      const exists = project.permutations.some((t) => project.permutationsResolved[t.name]?.[path]);
-      if (!exists) return textResult(`Token not found in any theme: ${path}`);
+      // `varianceByPath` covers every path that appears in any
+      // permutation's resolved map; presence here is the same
+      // existence signal the prior `permutations.some` scan provided.
       const cached = project.varianceByPath.get(path);
       if (!cached) return textResult(`Token not found in any theme: ${path}`);
       return jsonResult(cached);
@@ -394,7 +415,7 @@ export function createServer(initial: Project): McpServer & {
     ({ query, theme, limit }) => {
       const themeName = theme ?? project.permutations[0]?.name;
       if (!themeName) return textResult('No permutations in project.');
-      const tokens = project.permutationsResolved[themeName] ?? {};
+      const tokens = tokensForTheme(themeName);
       const max = limit ?? 50;
 
       const candidates = Object.entries(tokens).map(([path, token]) => {
@@ -463,7 +484,7 @@ export function createServer(initial: Project): McpServer & {
           return true;
         })?.name ?? project.permutations[0]?.name;
       if (!themeName) return textResult('No matching theme.');
-      const tokens = project.permutationsResolved[themeName] ?? {};
+      const tokens = project.resolveAt(active);
       const resolved: Record<
         string,
         { value: string; type?: string; aliasOf?: string; aliasChain?: readonly string[] }
@@ -518,7 +539,7 @@ export function createServer(initial: Project): McpServer & {
         })?.name ??
         project.permutations[0]?.name ??
         '';
-      const token = themeName ? project.permutationsResolved[themeName]?.[path] : undefined;
+      const token = project.resolveAt(activeTuple)[path];
       if (!token) return textResult(`Token not found: ${path}`);
 
       const cssVar = `var(--${prefix ? `${prefix}-` : ''}${path.replaceAll('.', '-')})`;
@@ -569,6 +590,19 @@ export function createServer(initial: Project): McpServer & {
   );
 
   return server;
+}
+
+/**
+ * Build a `Map<permutationName, axisTuple>` so the per-theme tool
+ * handlers can avoid an `Array.find` scan per request. Bounded by the
+ * permutation count.
+ */
+function buildTupleByName(project: Project): Map<string, Record<string, string>> {
+  const out = new Map<string, Record<string, string>>();
+  for (const perm of project.permutations) {
+    out.set(perm.name, perm.input as Record<string, string>);
+  }
+  return out;
 }
 
 function stringifyValue(value: unknown): string {

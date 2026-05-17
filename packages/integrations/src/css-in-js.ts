@@ -95,7 +95,7 @@ function renderTheme(project: Project): string {
 function collectPaths(project: Project): string[] {
   const all = new Set<string>();
   for (const theme of project.permutations) {
-    const tokens = project.permutationsResolved[theme.name] ?? {};
+    const tokens = project.resolveAt(theme.input as Record<string, string>);
     for (const path of Object.keys(tokens)) all.add(path);
   }
   return [...all].toSorted();
