@@ -380,8 +380,23 @@ function installGlobalAxisApplier(): void {
     const tuple = resolveTuple(globals, {});
     setRootAxes(matchPermutationName(tuple), tuple);
   };
+  // Storybook fires `globalsUpdated`, `setGlobals`, and `updateGlobals`
+  // for the same logical change (preview init + every toolbar tick).
+  // Subscribing to all three is intentional — `setGlobals` carries the
+  // initial URL-persisted globals; `updateGlobals` is the toolbar
+  // signal; `globalsUpdated` is the cross-frame echo. Apply the same
+  // handler to all three but dedupe via a stringified-tuple guard so
+  // downstream `setRootAxes` + `useSyncExternalStore` consumers
+  // re-render at most once per real change instead of three times per
+  // tick.
+  let lastApplied = '';
   const onGlobals = (payload: { globals?: SwatchbookGlobals }): void => {
-    if (payload.globals) apply(payload.globals);
+    if (!payload.globals) return;
+    const tuple = resolveTuple(payload.globals, {});
+    const fingerprint = matchPermutationName(tuple);
+    if (fingerprint === lastApplied) return;
+    lastApplied = fingerprint;
+    apply(payload.globals);
   };
   channel.on('globalsUpdated', onGlobals);
   channel.on('setGlobals', onGlobals);

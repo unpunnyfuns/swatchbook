@@ -41,31 +41,30 @@ function ensureSubscribed(): void {
   if (subscribed || typeof window === 'undefined') return;
   subscribed = true;
   const channel = addons.getChannel();
+  // Storybook fires `globalsUpdated`, `setGlobals`, and `updateGlobals`
+  // for the same logical change (preview init + every toolbar tick).
+  // Subscribing to all three is intentional — `setGlobals` carries the
+  // initial URL-persisted globals; `updateGlobals` is the toolbar
+  // signal; `globalsUpdated` is the cross-frame echo. The handler runs
+  // for each but content-deduplicates: we only update the shared
+  // snapshot when axes or format actually shifted (the previous
+  // identity-based spread guard fired three times per tick because each
+  // spread produced a new object identity even with unchanged content).
+  let lastFingerprint = '';
   const onGlobals = (payload: { globals?: SwatchbookGlobalsPayload }): void => {
     const globals = payload.globals;
     if (!globals) return;
-    let next = snapshot;
-    const nextAxes = globals[AXES_GLOBAL_KEY];
-    if (nextAxes && typeof nextAxes === 'object') {
-      next = { ...next, axes: nextAxes };
-    }
-    const nextFormat = globals[COLOR_FORMAT_GLOBAL_KEY];
-    if (isColorFormat(nextFormat)) {
-      next = { ...next, format: nextFormat };
-    }
-    if (next !== snapshot) {
-      snapshot = next;
-      for (const cb of listeners) cb();
-    }
+    const incomingAxes = globals[AXES_GLOBAL_KEY];
+    const incomingFormat = globals[COLOR_FORMAT_GLOBAL_KEY];
+    const nextAxes =
+      incomingAxes && typeof incomingAxes === 'object' ? incomingAxes : snapshot.axes;
+    const nextFormat = isColorFormat(incomingFormat) ? incomingFormat : snapshot.format;
+    const fingerprint = `${nextFormat ?? ''}|${nextAxes ? JSON.stringify(nextAxes) : ''}`;
+    if (fingerprint === lastFingerprint) return;
+    lastFingerprint = fingerprint;
+    snapshot = { axes: nextAxes, format: nextFormat };
+    for (const cb of listeners) cb();
   };
-  /**
-   * `setGlobals` fires once on preview init carrying the URL-persisted user
-   * globals (Storybook stores toolbar selections in `?globals=…`). Without
-   * this listener, deeplinking to an MDX page with a non-default axis tuple
-   * or color format renders defaults for one frame before the first
-   * `updateGlobals` arrives. `emitGlobals()` reads from `userGlobals.get()`
-   * (current state), so the payload is never stale — safe to handle.
-   */
   channel.on('globalsUpdated', onGlobals);
   channel.on('updateGlobals', onGlobals);
   channel.on('setGlobals', onGlobals);
