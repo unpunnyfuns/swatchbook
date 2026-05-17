@@ -2,7 +2,7 @@ import type { TokenNormalized } from '@terrazzo/parser';
 import { generateShorthand, makeCSSVar, transformCSSValue } from '@terrazzo/token-tools/css';
 import { CHROME_ROLES, CHROME_VAR_PREFIX, DEFAULT_CHROME_MAP } from '#/chrome.ts';
 import { dataAttr } from '#/css.ts';
-import type { Axis, Permutation, Project, TokenMap } from '#/types.ts';
+import type { Project, TokenMap } from '#/types.ts';
 import { analyzeProjectVariance, type JointCase, type VarianceInfo } from '#/variance-analysis.ts';
 
 /** @internal Addon-internal smart-emitter options. Not part of the public API. */
@@ -80,30 +80,21 @@ export function emitAxisProjectedCss(
   const transformAlias = (token: TokenNormalized): string =>
     makeCSSVar(token.id, { ...varOpts, wrapVar: true });
 
-  const { axes, permutations, permutationsResolved } = project;
+  const { axes, permutationsResolved } = project;
   const variance = options.variance ?? analyzeProjectVariance(project);
 
-  const defaultTuple = buildDefaultTuple(axes);
-  const baselinePerm =
-    axes.length > 0 ? findPermutationByTuple(permutations, defaultTuple) : permutations[0];
+  const defaultTuple = project.defaultTuple;
+  const firstAxis = axes[0];
+  const baselineTokens = firstAxis ? project.cells[firstAxis.name]?.[firstAxis.default] : undefined;
 
   const blocks: string[] = [];
 
   // 1. Baseline `:root` — every token's baseline value lives here.
   //    Baseline-only tokens never appear elsewhere; all other variance
   //    kinds also need a baseline value to start the cascade from.
-  if (baselinePerm) {
-    const baselineTokens = permutationsResolved[baselinePerm.name];
-    if (baselineTokens) {
-      const lines = collectLines(
-        baselineTokens,
-        () => true,
-        baselinePerm.input,
-        varOpts,
-        transformAlias,
-      );
-      if (lines.length > 0) blocks.push(`:root {\n${lines.join('\n')}\n}`);
-    }
+  if (baselineTokens) {
+    const lines = collectLines(baselineTokens, () => true, defaultTuple, varOpts, transformAlias);
+    if (lines.length > 0) blocks.push(`:root {\n${lines.join('\n')}\n}`);
   }
 
   // 2. Per-axis singleton cells — emit every token this axis touches.
@@ -115,16 +106,14 @@ export function emitAxisProjectedCss(
   for (const axis of axes) {
     for (const ctx of axis.contexts) {
       if (ctx === axis.default) continue;
-      const cellTuple = { ...defaultTuple, [axis.name]: ctx };
-      const cellPerm = findPermutationByTuple(permutations, cellTuple);
-      if (!cellPerm) continue;
-      const cellTokens = permutationsResolved[cellPerm.name];
+      const cellTokens = project.cells[axis.name]?.[ctx];
       if (!cellTokens) continue;
+      const cellTuple = { ...defaultTuple, [axis.name]: ctx };
 
       const lines = collectLines(
         cellTokens,
         (path) => axisTouchesToken(axis.name, variance.get(path)),
-        cellPerm.input,
+        cellTuple,
         varOpts,
         transformAlias,
       );
@@ -317,25 +306,6 @@ function* collectTokenDeclarations(
   }
   const shorthand = generateShorthand({ token, localID });
   if (shorthand) yield { varName, value: shorthand };
-}
-
-function buildDefaultTuple(axes: readonly Axis[]): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const axis of axes) out[axis.name] = axis.default;
-  return out;
-}
-
-function findPermutationByTuple(
-  permutations: readonly Permutation[],
-  tuple: Readonly<Record<string, string>>,
-): Permutation | undefined {
-  const keys = Object.keys(tuple);
-  return permutations.find((perm) => {
-    for (const key of keys) {
-      if (perm.input[key] !== tuple[key]) return false;
-    }
-    return Object.keys(perm.input).length === keys.length;
-  });
 }
 
 function cssEscape(name: string): string {
