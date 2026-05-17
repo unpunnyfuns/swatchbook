@@ -24,7 +24,6 @@
  */
 import { beforeAll, expect, it } from 'vitest';
 import { emitAxisProjectedCss } from '#/css-axis-projected';
-import { projectCss } from '#/emit';
 import type { Project } from '#/types';
 import { extractBlock, loadWithPrefix } from './_helpers';
 
@@ -95,19 +94,6 @@ it("mode-invariant tokens (e.g. size primitives, font families) still don't appe
   const darkCell = extractBlock(css, '[data-sb-mode="Dark"]');
   expect(darkCell).not.toMatch(/--sb-size-400:/);
   expect(darkCell).not.toMatch(/--sb-font-family-sans:/);
-});
-
-it('produces a stylesheet meaningfully smaller than cartesian emission for the fixture (size win preserved even with joint compound blocks)', () => {
-  const projected = emitAxisProjectedCss(project);
-  const cartesian = projectCss(project);
-  // 8 cartesian tuples × full-token redeclaration vs baseline + ≤3
-  // per-axis cells + a handful of joint compound blocks for the few
-  // joint-variant tokens → projected must still be substantially
-  // smaller. Half-cartesian is the regression bound (used to be 1/3
-  // when projection was lossy and dropped declarations; smart emit
-  // adds back some bytes for re-emits + compound blocks but stays
-  // well under 1/2).
-  expect(projected.length).toBeLessThan(cartesian.length / 2);
 });
 
 it('terminates with a trailing newline + emits chrome aliases identically to emitCss', () => {

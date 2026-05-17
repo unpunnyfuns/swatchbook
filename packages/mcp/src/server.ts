@@ -1,5 +1,5 @@
 import type { Project, TokenMap } from '@unpunnyfuns/swatchbook-core';
-import { projectCss } from '@unpunnyfuns/swatchbook-core';
+import { emitAxisProjectedCss } from '@unpunnyfuns/swatchbook-core';
 import { fuzzyFilter, fuzzyMatches } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
@@ -92,10 +92,10 @@ export function createServer(initial: Project): McpServer & {
     'emit_css',
     {
       description:
-        'Return the full project CSS — a `:root` block with the default tuple plus one compound-selector block per non-default axis combination. Same output the addon injects into Storybook and the docs-site chrome pipeline writes to disk. Useful when an agent needs to inline the stylesheet into a generated artifact.',
+        'Return the full project CSS — a `:root` baseline + per-axis singleton cells (`[data-<prefix>-<axis>="<context>"]`) + compound joint-override blocks for tokens whose value at a multi-axis combination diverges from cascade composition + a trailing chrome alias block. Same output the addon injects into Storybook and the docs-site chrome pipeline writes to disk. Useful when an agent needs to inline the stylesheet into a generated artifact.',
       inputSchema: {},
     },
-    () => textResult(projectCss(project)),
+    () => textResult(emitAxisProjectedCss(project)),
   );
 
   server.registerTool(
