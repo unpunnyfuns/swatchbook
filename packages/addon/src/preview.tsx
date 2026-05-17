@@ -1,4 +1,11 @@
 /// <reference types="vite/client" />
+import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
+import type {
+  Axis as CoreAxis,
+  Cells as CoreCells,
+  JointOverride,
+  JointOverrides,
+} from '@unpunnyfuns/swatchbook-core';
 import type { Decorator, Preview } from '@storybook/react-vite';
 import { useEffect, useMemo } from 'react';
 import { addons } from 'storybook/preview-api';
@@ -12,15 +19,12 @@ import {
   cells as virtualCells,
   css,
   cssVarPrefix,
-  defaultPermutation,
   defaultTuple as virtualDefaultTuple,
   diagnostics,
   disabledAxes as virtualDisabledAxes,
   jointOverrides as virtualJointOverrides,
   listing as virtualListing,
   presets as virtualPresets,
-  permutations,
-  permutationsResolved,
   varianceByPath as virtualVarianceByPath,
 } from 'virtual:swatchbook/tokens';
 import {
@@ -74,32 +78,30 @@ html, body {
 }
 
 /**
- * Apply `cb(axisName, value)` for every pinned (disabled) axis whose value
- * is present on any surviving theme's `input`. Disabled axes don't appear
- * in `virtualAxes`, but CSS may still reference their pinned value on
- * compound selectors — every theme that survived filtering carries the
- * same pinned context per disabled axis, so sampling any theme works.
+ * Apply `cb(axisName, value)` for every pinned (disabled) axis whose
+ * default-tuple value is set. `virtualDefaultTuple` carries the
+ * post-filter axis defaults; disabled axes don't appear in
+ * `virtualAxes` but their pinned context value still lives here, so
+ * sampling it gives the same result the old "first permutation's
+ * input" lookup did.
  */
 function forEachPinnedAxis(cb: (name: string, value: string) => void): void {
-  const pinnedSample = permutations[0]?.input;
-  if (!pinnedSample) return;
   for (const name of virtualDisabledAxes) {
-    const value = pinnedSample[name];
+    const value = virtualDefaultTuple[name];
     if (value !== undefined) cb(name, value);
   }
 }
 
 /**
- * Pick the theme name for a tuple, falling back to `defaultPermutation` and then
- * the first theme. Returns empty string when the project has no permutations so
- * callers can omit the attr instead of writing a made-up context name.
+ * Compose a stable theme name from a tuple — the same `Light · Brand A
+ * · Normal` form `permutationID` produced server-side. Used for the
+ * `data-<prefix>-theme` attribute and the `swatchbook/theme` channel
+ * signal. Returns empty string when there are no axes (no name to
+ * write).
  */
 function matchPermutationName(tuple: Readonly<Record<string, string>>): string {
-  const match = permutations.find((t) => {
-    const input = t.input as Record<string, string>;
-    return Object.keys(input).every((k) => input[k] === tuple[k]);
-  });
-  return match?.name ?? defaultPermutation ?? permutations[0]?.name ?? '';
+  if (virtualAxes.length === 0) return '';
+  return virtualAxes.map((axis) => tuple[axis.name] ?? axis.default).join(' · ');
 }
 
 /**
@@ -139,9 +141,6 @@ function broadcastInit(): void {
     axes: virtualAxes,
     disabledAxes: virtualDisabledAxes,
     presets: virtualPresets,
-    permutations,
-    defaultPermutation,
-    permutationsResolved,
     diagnostics,
     cssVarPrefix,
     cells: virtualCells,
@@ -158,10 +157,25 @@ function defaultTuple(): Record<string, string> {
   return out;
 }
 
-/** Look up a `Permutation.input` by composed name. Returns `undefined` if no theme matches. */
+/**
+ * Reverse-engineer a tuple from a `Light · Brand A · Normal`-shape
+ * theme name. Splits on ` · ` and zips with `virtualAxes` in declared
+ * order — matches `matchPermutationName`'s production direction so a
+ * round-trip is lossless. Returns `undefined` when the segment count
+ * doesn't match the axis count.
+ */
 function tupleForName(name: string): Record<string, string> | undefined {
-  const match = permutations.find((t) => t.name === name);
-  return match?.input;
+  if (!name) return undefined;
+  const parts = name.split(' · ');
+  if (parts.length !== virtualAxes.length) return undefined;
+  const out: Record<string, string> = {};
+  for (let i = 0; i < virtualAxes.length; i++) {
+    const axis = virtualAxes[i] as (typeof virtualAxes)[number];
+    const value = parts[i];
+    if (value === undefined) return undefined;
+    out[axis.name] = value;
+  }
+  return out;
 }
 
 /**
@@ -215,6 +229,24 @@ function resolveColorFormat(globals: SwatchbookGlobals): ColorFormat {
   return 'hex';
 }
 
+/**
+ * Single shared `resolveAt` instance for the lifetime of the preview
+ * iframe. The inputs (`virtualAxes`, `virtualCells`, …) are all
+ * module-level virtual-module exports with stable identity, so this
+ * never needs to rebuild; downstream `ProjectSnapshot` consumers can
+ * key memos on the snapshot wrapper without worrying about
+ * `resolveAt` churning when Storybook recreates `context.globals`.
+ *
+ * Replaces the per-render `useMemo(makeResolveAt(...))` dance the
+ * blocks side used to do in `useProject`.
+ */
+const previewResolveAt = buildResolveAt(
+  virtualAxes as readonly CoreAxis[],
+  virtualCells as CoreCells,
+  new Map(virtualJointOverrides as readonly (readonly [string, JointOverride])[]) as JointOverrides,
+  virtualDefaultTuple,
+);
+
 const themedDecorator: Decorator = (Story, context) => {
   const globals = context.globals as SwatchbookGlobals;
   const parameters = context.parameters as StoryParameters;
@@ -246,8 +278,6 @@ const themedDecorator: Decorator = (Story, context) => {
       axes: virtualAxes,
       disabledAxes: virtualDisabledAxes,
       presets: virtualPresets,
-      permutations,
-      permutationsResolved,
       activePermutation: themeName,
       activeAxes: tuple,
       cssVarPrefix,
@@ -258,6 +288,13 @@ const themedDecorator: Decorator = (Story, context) => {
       jointOverrides: virtualJointOverrides,
       varianceByPath: virtualVarianceByPath,
       defaultTuple: virtualDefaultTuple,
+      // Cast: `buildResolveAt` returns `TokenMap` (Terrazzo's
+      // `TokenNormalized`), while the block-side snapshot type uses
+      // its own narrower `VirtualTokenShape`. The shapes are
+      // structurally a subset; the cast covers the
+      // `exactOptionalPropertyTypes` mismatch between
+      // `string | undefined` and `string`.
+      resolveAt: previewResolveAt as unknown as NonNullable<ProjectSnapshot['resolveAt']>,
     }),
     [themeName, tuple],
   );
@@ -386,9 +423,6 @@ interface HmrSnapshot {
   axes: typeof virtualAxes;
   disabledAxes: typeof virtualDisabledAxes;
   presets: typeof virtualPresets;
-  permutations: typeof permutations;
-  defaultPermutation: typeof defaultPermutation;
-  permutationsResolved: typeof permutationsResolved;
   diagnostics: typeof diagnostics;
   css: string;
   cssVarPrefix: string;
@@ -422,9 +456,6 @@ html, body {
       axes: payload.axes,
       disabledAxes: payload.disabledAxes,
       presets: payload.presets,
-      permutations: payload.permutations,
-      defaultPermutation: payload.defaultPermutation,
-      permutationsResolved: payload.permutationsResolved,
       diagnostics: payload.diagnostics,
       cssVarPrefix: payload.cssVarPrefix,
       cells: payload.cells,

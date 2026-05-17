@@ -555,7 +555,7 @@ export const TokenDetailConstantAcrossAxes = meta.story({
     );
     expect(header, 'must render "Values across axes" section header').toBeTruthy();
     const cell = await waitForContent(canvasElement, '[data-testid="token-detail-constant"]');
-    expect(cell.textContent ?? '').toMatch(/same across all/);
+    expect(cell.textContent ?? '').toMatch(/same across every axis/);
   },
 });
 

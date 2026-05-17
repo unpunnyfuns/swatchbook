@@ -5,13 +5,10 @@ import {
   cells as initialCells,
   css as initialCss,
   cssVarPrefix as initialCssVarPrefix,
-  defaultPermutation as initialDefaultPermutation,
   defaultTuple as initialDefaultTuple,
   diagnostics as initialDiagnostics,
   jointOverrides as initialJointOverrides,
   listing as initialListing,
-  permutations as initialPermutations,
-  permutationsResolved as initialPermutationsResolved,
   presets as initialPresets,
   varianceByPath as initialVarianceByPath,
 } from 'virtual:swatchbook/tokens';
@@ -20,7 +17,7 @@ import type {
   VirtualTokenListingShape,
   VirtualVarianceByPathShape,
 } from '#/contexts.ts';
-import type { VirtualAxis, VirtualDiagnostic, VirtualPermutation, VirtualToken } from '#/types.ts';
+import type { VirtualAxis, VirtualDiagnostic, VirtualToken } from '#/types.ts';
 
 /**
  * Live token snapshot backed by the addon's preview dev-time HMR event.
@@ -48,9 +45,6 @@ export interface TokenSnapshot {
     axes: Partial<Record<string, string>>;
     description?: string;
   }[];
-  readonly permutations: readonly VirtualPermutation[];
-  readonly defaultPermutation: string | null;
-  readonly permutationsResolved: Record<string, Record<string, VirtualToken>>;
   readonly diagnostics: readonly VirtualDiagnostic[];
   readonly css: string;
   readonly cssVarPrefix: string;
@@ -66,9 +60,6 @@ export interface TokenSnapshot {
 let snapshot: TokenSnapshot = {
   axes: initialAxes,
   presets: initialPresets,
-  permutations: initialPermutations,
-  defaultPermutation: initialDefaultPermutation,
-  permutationsResolved: initialPermutationsResolved,
   diagnostics: initialDiagnostics,
   css: initialCss,
   cssVarPrefix: initialCssVarPrefix,
@@ -91,9 +82,6 @@ function ensureSubscribed(): void {
     snapshot = {
       axes: payload.axes ?? snapshot.axes,
       presets: payload.presets ?? snapshot.presets,
-      permutations: payload.permutations ?? snapshot.permutations,
-      defaultPermutation: payload.defaultPermutation ?? snapshot.defaultPermutation,
-      permutationsResolved: payload.permutationsResolved ?? snapshot.permutationsResolved,
       diagnostics: payload.diagnostics ?? snapshot.diagnostics,
       css: payload.css ?? snapshot.css,
       cssVarPrefix: payload.cssVarPrefix ?? snapshot.cssVarPrefix,

@@ -14,17 +14,12 @@ declare module 'virtual:swatchbook/tokens' {
     VirtualJointOverrides,
     VirtualListingEntry,
     VirtualPreset,
-    VirtualPermutation,
-    VirtualToken,
     VirtualVarianceByPath,
   } from '#/channel-types.ts';
 
   export const axes: readonly VirtualAxis[];
   export const disabledAxes: readonly string[];
   export const presets: readonly VirtualPreset[];
-  export const permutations: readonly VirtualPermutation[];
-  export const defaultPermutation: string | null;
-  export const permutationsResolved: Record<string, Record<string, VirtualToken>>;
   export const diagnostics: readonly VirtualDiagnostic[];
   export const css: string;
   export const cssVarPrefix: string;

@@ -113,9 +113,6 @@ export function swatchbookTokensPlugin({
         `export const axes = ${JSON.stringify(project.axes)};`,
         `export const presets = ${JSON.stringify(project.presets)};`,
         `export const disabledAxes = ${JSON.stringify(project.disabledAxes)};`,
-        `export const permutations = ${JSON.stringify(project.permutations)};`,
-        `export const defaultPermutation = ${JSON.stringify(project.permutations[0]?.name ?? null)};`,
-        `export const permutationsResolved = ${JSON.stringify(project.permutationsResolved)};`,
         `export const diagnostics = ${JSON.stringify(project.diagnostics)};`,
         `export const css = ${JSON.stringify(css)};`,
         `export const cssVarPrefix = ${JSON.stringify(config.cssVarPrefix ?? '')};`,
@@ -150,9 +147,7 @@ export function swatchbookTokensPlugin({
           void (async () => {
             await refresh();
             if (!project) return;
-            const tokenCount = Object.keys(
-              project.permutationsResolved[project.permutations[0]?.name ?? ''] ?? {},
-            ).length;
+            const tokenCount = project.varianceByPath.size;
             const diagCount = project.diagnostics.length;
             server.config.logger.info(
               `\x1b[36m[swatchbook]\x1b[0m tokens reloaded — ${tokenCount} tokens, ${diagCount} diagnostic${diagCount === 1 ? '' : 's'}`,
@@ -182,9 +177,6 @@ export function swatchbookTokensPlugin({
                 axes: project.axes,
                 disabledAxes: project.disabledAxes,
                 presets: project.presets,
-                permutations: project.permutations,
-                defaultPermutation: project.permutations[0]?.name ?? null,
-                permutationsResolved: project.permutationsResolved,
                 diagnostics: project.diagnostics,
                 css,
                 cssVarPrefix: config.cssVarPrefix ?? '',
