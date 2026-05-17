@@ -1,9 +1,13 @@
 import type { TokenNormalized } from '@terrazzo/parser';
 import { generateShorthand, makeCSSVar, transformCSSValue } from '@terrazzo/token-tools/css';
 import { CHROME_ROLES, CHROME_VAR_PREFIX, DEFAULT_CHROME_MAP } from '#/chrome.ts';
-import { dataAttr } from '#/css.ts';
 import type { Project, TokenMap } from '#/types.ts';
 import { analyzeProjectVariance, type VarianceInfo } from '#/variance-analysis.ts';
+
+/** Build the `data-<prefix>-<key>` attribute name (or `data-<key>` when prefix is empty). */
+function dataAttr(prefix: string, key: string): string {
+  return prefix ? `data-${prefix}-${key}` : `data-${key}`;
+}
 
 /** @internal Addon-internal smart-emitter options. Not part of the public API. */
 export interface EmitAxisProjectedCssOptions {
@@ -64,8 +68,7 @@ export interface EmitAxisProjectedCssOptions {
  *
  * For single-axis projects (a synthetic `theme` axis, or a resolver
  * with one modifier), the cell selector uses the axis's actual name
- * — e.g. `[data-mode="Dark"]` — rather than the `theme` alias that
- * `emitCss` uses. Both forms are scope-equivalent on `<html>`.
+ * — e.g. `[data-mode="Dark"]`.
  *
  * @internal Consumers should not depend on this function directly.
  * External consumers driving their own build pipeline should use
@@ -145,7 +148,7 @@ export function emitAxisProjectedCss(
     blocks.push(block);
   }
 
-  // 4. Chrome aliases — trailing `:root` block, identical to `emitCss`.
+  // 4. Chrome aliases — trailing `:root` block.
   const chrome = options.chrome ?? project.chrome;
   const chromeLines: string[] = ['  color-scheme: light dark;'];
   for (const role of CHROME_ROLES) {
@@ -274,9 +277,7 @@ function collectLines(
 /**
  * Expand a single token into its emitted `{ varName, value }` records.
  * Primitive tokens yield one record; composite tokens yield one per
- * sub-field plus an optional shorthand. Mirrors `emitCss`'s expansion
- * — kept here so the two emitters produce byte-identical declarations
- * for the tokens they each emit.
+ * sub-field plus an optional shorthand.
  */
 function* collectTokenDeclarations(
   localID: string,

@@ -170,20 +170,6 @@ function* contextProducts(axisCombo: readonly Axis[]): Generator<Record<string, 
 }
 
 /**
- * @deprecated Use {@link probeJointOverrides} which also returns the
- * `jointTouching` signal needed for variance display. This shim is
- * kept for callers that only care about `overrides`.
- */
-export function buildJointOverrides(
-  axes: readonly Axis[],
-  cells: Cells,
-  defaultTuple: Readonly<Record<string, string>>,
-  resolver: Resolver | undefined,
-): JointOverrides {
-  return probeJointOverrides(axes, cells, defaultTuple, resolver).overrides;
-}
-
-/**
  * Canonical key for a partial tuple — axes sorted by name so
  * `{A:a,B:b}` and `{B:b,A:a}` produce the same lookup key.
  */

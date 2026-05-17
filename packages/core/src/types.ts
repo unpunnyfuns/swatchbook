@@ -3,9 +3,43 @@ import type { Plugin, Resolver, TokenNormalized } from '@terrazzo/parser';
 import type { CSSPluginOptions } from '@terrazzo/plugin-css';
 import type { TokenListingPluginOptions } from '@terrazzo/plugin-token-listing';
 import type { TokenListingByPath } from '#/token-listing.ts';
-import type { AxisVarianceResult } from '#/variance.ts';
 
 export type TokenMap = Record<string, TokenNormalized>;
+
+/**
+ * How a token's resolved value depends on the project's axes.
+ *
+ * - `constant` — same value across every tuple (or token missing entirely).
+ * - `single` — varies with exactly one axis.
+ * - `multi` — varies across two or more axes.
+ *
+ * Produced by `buildVarianceByPath` at load time and stored on
+ * `Project.varianceByPath` for O(1) lookup; the smart CSS emitter,
+ * the MCP `get_axis_variance` tool, and the `AxisVariance` doc block
+ * all read this rather than re-running the analysis per call.
+ */
+export type VarianceKind = 'constant' | 'single' | 'multi';
+
+export interface AxisVarianceResult {
+  path: string;
+  kind: VarianceKind;
+  /** Axes whose contexts change this token's resolved value. */
+  varyingAxes: string[];
+  /** Axes whose contexts do not change the resolved value. */
+  constantAcrossAxes: string[];
+  /**
+   * Per-axis breakdown. For each axis, whether it affects this token,
+   * and the stringified value seen in each of its contexts (holding
+   * other axes at their defaults).
+   */
+  perAxis: Record<
+    string,
+    {
+      varying: boolean;
+      contexts: Record<string, string>;
+    }
+  >;
+}
 
 /**
  * Per-axis cell maps. `cells[axisName][contextName]` is the resolved

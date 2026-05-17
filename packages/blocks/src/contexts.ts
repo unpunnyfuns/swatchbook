@@ -76,7 +76,7 @@ export interface VirtualJointOverrideShape {
 /**
  * Map from path → cached `AxisVarianceResult`. Snapshot carries this
  * so the `AxisVariance` block can O(1) look up which axes affect a
- * token instead of re-running `analyzeAxisVariance` on every render.
+ * token instead of re-running variance analysis on every render.
  */
 export type VirtualVarianceByPathShape = Record<string, AxisVarianceResult>;
 

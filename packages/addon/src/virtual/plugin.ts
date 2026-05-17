@@ -258,11 +258,6 @@ function resolveFromCwd(p: string, cwd: string): string {
   return resolvePath(cwd, p);
 }
 
-/** @internal Tests use this so they don't have to spin up Vite. */
-export function composeProjectCss(project: Project): string {
-  return emitAxisProjectedCss(project);
-}
-
 type SlimListedToken = Pick<
   ListedToken['$extensions']['app.terrazzo.listing'],
   'names' | 'previewValue' | 'source'

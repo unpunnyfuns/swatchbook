@@ -62,7 +62,7 @@ export interface InitPayload {
   cells: VirtualCells;
   /** {@link VirtualJointOverrides} — Map serialized as `[key, entry]` pairs. */
   jointOverrides: VirtualJointOverrides;
-  /** {@link VirtualVarianceByPath} — cached `analyzeAxisVariance` per path. */
+  /** {@link VirtualVarianceByPath} — cached `AxisVarianceResult` per path. */
   varianceByPath: VirtualVarianceByPath;
   /** The project's default tuple — `{ axis: axis.default }` for each axis. */
   defaultTuple: Record<string, string>;

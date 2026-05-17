@@ -17,10 +17,10 @@ import { permutationID, type Project, type TokenMap } from '#/types.ts';
  *    cell's resolved `TokenMap` from `project.permutationsResolved`.
  *    Free; the loader already paid this cost.
  * 2. **Touching set** — for each token, determine which axes can change
- *    its value at any tuple. Uses the same logic `analyzeAxisVariance`
- *    applies: bucket permutations by tuple-minus-this-axis; if any
- *    bucket holds two contexts whose token values differ, the axis
- *    touches this token. The naive "compare singleton cell to baseline"
+ *    its value at any tuple. Compares each singleton cell against the
+ *    default cell; an axis whose non-default contexts produce a
+ *    different value than the baseline touches the token. The naive
+ *    "compare singleton cell to baseline"
  *    check would miss axes whose effect ONLY shows under specific
  *    joint combinations (e.g. brand's effect on `accent.fg` is hidden
  *    when mode is Light because Brand A's white matches baseline white;
@@ -137,14 +137,13 @@ export function analyzeProjectVariance(project: Project): Map<string, VarianceIn
   }
 
   // Phase 2 — touching set per token. Build the union of every token path
-  // mentioned by baseline or any cell, then for each token use
-  // `analyzeAxisVariance` (variance.ts) to find every axis whose contexts
-  // produce different values when other axes are held constant. This
-  // catches joint-only touching: an axis whose effect is hidden when
-  // others sit at defaults but becomes load-bearing under specific
-  // combinations (Brand A's `accent.fg = white` matches baseline white,
-  // so its singleton cell looks like a no-op — but in combination with
-  // Dark mode where the baseline value is overridden, Brand A's white
+  // mentioned by baseline or any cell, then for each token find every axis
+  // whose contexts produce different values when other axes are held
+  // constant. This catches joint-only touching: an axis whose effect is
+  // hidden when others sit at defaults but becomes load-bearing under
+  // specific combinations (Brand A's `accent.fg = white` matches baseline
+  // white, so its singleton cell looks like a no-op — but in combination
+  // with Dark mode where the baseline value is overridden, Brand A's white
   // is genuinely an override).
   const allPaths = new Set<string>(Object.keys(baseline));
   for (const axisCells of Object.values(cells)) {
@@ -154,9 +153,7 @@ export function analyzeProjectVariance(project: Project): Map<string, VarianceIn
   }
 
   // Use the project's cached per-path variance instead of re-running
-  // the bucket analysis. The cache is populated at load time using the
-  // same algorithm `analyzeAxisVariance` exposes; reading it lets the
-  // smart emitter avoid quadratic-in-path bucket work per build.
+  // the bucket analysis at every read.
   const touchingByPath = new Map<string, Set<string>>();
   for (const path of allPaths) {
     const cached = project.varianceByPath.get(path);
@@ -220,10 +217,9 @@ export function analyzeProjectVariance(project: Project): Map<string, VarianceIn
 }
 
 /**
- * Stable key for value comparison — `JSON.stringify($value)`. Mirrors
- * `analyzeAxisVariance`'s comparator so composite tokens (shadow,
- * typography, …) compare on every sub-field and missing tokens compare
- * equal to the empty string.
+ * Stable key for value comparison — `JSON.stringify($value)`.
+ * Composite tokens (shadow, typography, …) compare on every sub-field;
+ * missing tokens compare equal to the empty string.
  */
 function valueKey(token: TokenNormalized | undefined): string {
   if (!token) return '';
