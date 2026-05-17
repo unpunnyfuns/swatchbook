@@ -36,10 +36,12 @@ export interface AddonOptions {
    * - `'cartesian'` — explicit fan-out (`projectCss`). One block per
    *   cartesian tuple, scoped by compound
    *   `[data-<axis>="<ctx>"][data-…]` selectors. Output scales with
-   *   the cartesian product. Use only when the projection analysis
-   *   pass is too costly for your fixture (pathological cardinality
-   *   on the order of `terrazzo#752`'s 15M tuples), or when you have
-   *   a specific reason to want explicit per-tuple blocks.
+   *   the cartesian product. Pick this when you want explicit
+   *   per-tuple blocks for debugging, regression-comparison against
+   *   the projected output, or because your tooling reads them
+   *   directly. Not an escape hatch for large cardinality — at the
+   *   scales where the projection analysis is expensive, the
+   *   cartesian output is just as unmanageable.
    */
   emitMode?: 'cartesian' | 'projected';
 }
