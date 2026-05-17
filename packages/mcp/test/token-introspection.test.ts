@@ -141,17 +141,6 @@ it('get_aliased_by: returns text "not found" for unknown paths', async () => {
   expect(text).toBe('Token not found: gone.gone');
 });
 
-it('get_aliased_by: returns text fallback when the project has no permutations', async () => {
-  const empty: Project = { ...project, permutations: [], permutationsResolved: {} };
-  mcp.setProject(empty);
-  try {
-    const text = await mcp.callText('get_aliased_by', { path: PRIMITIVE_TOKEN });
-    expect(text).toBe('No permutations in project.');
-  } finally {
-    mcp.setProject(project);
-  }
-});
-
 interface SearchTokensResult {
   query: string;
   theme: string;
@@ -187,16 +176,5 @@ it('search_tokens: marks `truncated: true` when the result count equals `limit`'
   expect(result.hits.length).toBeLessThanOrEqual(3);
   if (result.hits.length === 3) {
     expect(result.truncated).toBe(true);
-  }
-});
-
-it('search_tokens: returns text fallback when the project has no permutations', async () => {
-  const empty: Project = { ...project, permutations: [], permutationsResolved: {} };
-  mcp.setProject(empty);
-  try {
-    const text = await mcp.callText('search_tokens', { query: 'whatever' });
-    expect(text).toBe('No permutations in project.');
-  } finally {
-    mcp.setProject(project);
   }
 });

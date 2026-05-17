@@ -4,7 +4,7 @@
 // pure function is materially cheaper than a full codegen-write-read-parse
 // round-trip while asserting the same observable output. If the signature
 // ever changes, this test should move to a snapshot of the written file.
-import type { Project } from '@unpunnyfuns/swatchbook-core';
+import type { Project, VarianceInfo } from '@unpunnyfuns/swatchbook-core';
 import { describe, expect, it } from 'vitest';
 import { renderTokenTypes } from '#/preset.ts';
 
@@ -16,11 +16,25 @@ function fakeProject(partial: Partial<Project>): Project {
     presets: [],
     permutations: [],
     permutationsResolved: {},
+    cells: {},
+    jointOverrides: new Map(),
+    defaultTuple: {},
+    resolveAt: () => ({}),
+    varianceByPath: new Map(),
     graph: {},
     sourceFiles: [],
+    listing: {},
     diagnostics: [],
     ...partial,
   } as Project;
+}
+
+function variance(paths: readonly string[]): ReadonlyMap<string, VarianceInfo> {
+  const out = new Map<string, VarianceInfo>();
+  for (const p of paths) {
+    out.set(p, { kind: 'baseline-only' } as VarianceInfo);
+  }
+  return out;
 }
 
 describe('renderTokenTypes', () => {
@@ -31,22 +45,9 @@ describe('renderTokenTypes', () => {
     expect(out).toContain('interface SwatchbookTokenMap {');
   });
 
-  it('sorts token paths alphabetically across permutations', () => {
+  it('sorts token paths alphabetically', () => {
     const project = fakeProject({
-      permutations: [
-        { name: 'Light', input: {}, sources: [] },
-        { name: 'Dark', input: {}, sources: [] },
-      ],
-      permutationsResolved: {
-        Light: {
-          'color.bg': { id: 'color.bg' } as never,
-          'color.fg': { id: 'color.fg' } as never,
-        },
-        Dark: {
-          'color.accent': { id: 'color.accent' } as never,
-          'color.bg': { id: 'color.bg' } as never,
-        },
-      },
+      varianceByPath: variance(['color.bg', 'color.fg', 'color.accent']),
     });
     const out = renderTokenTypes(project);
     const bgIdx = out.indexOf('"color.bg"');
@@ -56,32 +57,48 @@ describe('renderTokenTypes', () => {
     expect(bgIdx).toBeLessThan(fgIdx);
   });
 
-  it('builds SwatchbookPermutationName as a union of theme names', () => {
+  it('builds SwatchbookPermutationName as a union of singleton theme names from axes + defaultTuple', () => {
     const project = fakeProject({
-      permutations: [
-        { name: 'Light', input: {}, sources: [] },
-        { name: 'Dark', input: {}, sources: [] },
+      axes: [
+        {
+          name: 'mode',
+          contexts: ['Light', 'Dark'],
+          default: 'Light',
+          source: 'resolver',
+        },
       ],
+      defaultTuple: { mode: 'Light' },
     });
     const out = renderTokenTypes(project);
     expect(out).toContain('export type SwatchbookPermutationName = "Light" | "Dark";');
   });
 
-  it('falls back to string when no permutations exist', () => {
+  it('falls back to string when no axes are present', () => {
     const out = renderTokenTypes(fakeProject({}));
     expect(out).toContain('export type SwatchbookPermutationName = string;');
   });
 
-  it('dedupes token paths across permutations', () => {
+  it('includes preset tuples in the theme name union', () => {
     const project = fakeProject({
-      permutations: [
-        { name: 'Light', input: {}, sources: [] },
-        { name: 'Dark', input: {}, sources: [] },
+      axes: [
+        { name: 'mode', contexts: ['Light', 'Dark'], default: 'Light', source: 'resolver' },
+        {
+          name: 'brand',
+          contexts: ['Default', 'BrandA'],
+          default: 'Default',
+          source: 'resolver',
+        },
       ],
-      permutationsResolved: {
-        Light: { 'color.bg': { id: 'color.bg' } as never },
-        Dark: { 'color.bg': { id: 'color.bg' } as never },
-      },
+      defaultTuple: { mode: 'Light', brand: 'Default' },
+      presets: [{ name: 'Dark BrandA', axes: { mode: 'Dark', brand: 'BrandA' } }],
+    });
+    const out = renderTokenTypes(project);
+    expect(out).toContain('"Dark · BrandA"');
+  });
+
+  it('emits each path once even when surfaced multiple times in varianceByPath', () => {
+    const project = fakeProject({
+      varianceByPath: variance(['color.bg', 'color.bg']),
     });
     const out = renderTokenTypes(project);
     const hits = (out.match(/"color\.bg": string;/g) ?? []).length;

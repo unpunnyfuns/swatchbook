@@ -18,13 +18,16 @@ export function createServer(initial: Project): McpServer & {
   setProject: (next: Project) => void;
 } {
   let project = initial;
-  // Reverse lookup `permutationName → axisTuple`, refreshed on each
+  // Reverse lookup `themeName → axisTuple`, refreshed on each
   // `setProject` swap. Tool handlers that accept a `theme` name
   // parameter use this to map it to a tuple in O(1) before calling
-  // `project.resolveAt(tuple)` — replaces the direct
-  // `project.permutationsResolved[name]` indexing the tools used
-  // before the cells migration.
+  // `project.resolveAt(tuple)`. The set carries the default tuple +
+  // every singleton (one per non-default cell on each axis) + every
+  // preset — enumerated from `axes` + `presets` + `defaultTuple`
+  // independently of the soon-to-be-removed `Project.permutations`
+  // field.
   let tupleByName = buildTupleByName(initial);
+  let defaultThemeName = tupleToName(initial.axes, initial.defaultTuple);
   const server = new McpServer(
     {
       name: '@unpunnyfuns/swatchbook-mcp',
@@ -38,17 +41,28 @@ export function createServer(initial: Project): McpServer & {
   server.setProject = (next: Project) => {
     project = next;
     tupleByName = buildTupleByName(next);
+    defaultThemeName = tupleToName(next.axes, next.defaultTuple);
   };
 
   /**
    * Resolve tokens for a `theme` name parameter. Falls back to the
    * project's default tuple when the name doesn't match any known
-   * permutation (also covers the no-theme-provided path).
+   * theme (also covers the no-theme-provided path).
    */
   const tokensForTheme = (themeName: string | undefined): TokenMap => {
     const tuple =
       (themeName !== undefined ? tupleByName.get(themeName) : undefined) ?? project.defaultTuple;
     return project.resolveAt(tuple);
+  };
+
+  /**
+   * Iterate every `(themeName, tuple)` pair the project surfaces —
+   * default + singletons + presets — without going through
+   * `project.permutations`. Order is insertion order of `tupleByName`
+   * (default first, then singletons per axis, then presets).
+   */
+  const eachTheme = function* (): Generator<{ name: string; tuple: Record<string, string> }> {
+    for (const [name, tuple] of tupleByName) yield { name, tuple };
   };
 
   server.registerTool(
@@ -61,9 +75,9 @@ export function createServer(initial: Project): McpServer & {
     () => {
       const typeCounts: Record<string, number> = {};
       const tokensPerTheme: Record<string, number> = {};
-      for (const theme of project.permutations) {
-        const tokens = project.resolveAt(theme.input as Record<string, string>);
-        tokensPerTheme[theme.name] = Object.keys(tokens).length;
+      for (const { name, tuple } of eachTheme()) {
+        const tokens = project.resolveAt(tuple);
+        tokensPerTheme[name] = Object.keys(tokens).length;
         for (const token of Object.values(tokens)) {
           if (token.$type) typeCounts[token.$type] = (typeCounts[token.$type] ?? 0) + 1;
         }
@@ -75,8 +89,8 @@ export function createServer(initial: Project): McpServer & {
       return jsonResult({
         cssVarPrefix: project.config.cssVarPrefix ?? '',
         axes: project.axes.map((a) => ({ name: a.name, contexts: a.contexts, default: a.default })),
-        permutations: project.permutations.map((t) => t.name),
-        defaultPermutation: project.permutations[0]?.name ?? null,
+        permutations: [...tupleByName.keys()],
+        defaultPermutation: defaultThemeName,
         presets: project.presets.map((p) => p.name),
         tokensPerTheme,
         types: typeCounts,
@@ -119,10 +133,7 @@ export function createServer(initial: Project): McpServer & {
       },
     },
     ({ filter, type, theme }) => {
-      const themeName = theme ?? project.permutations[0]?.name;
-      if (!themeName) {
-        return textResult('No permutations in project.');
-      }
+      const themeName = theme ?? defaultThemeName;
       const tokens = tokensForTheme(themeName);
       const rows: { path: string; type?: string; value: string }[] = [];
       for (const [path, token] of Object.entries(tokens)) {
@@ -158,14 +169,14 @@ export function createServer(initial: Project): McpServer & {
       let aliasedBy: readonly string[] | undefined;
       let found = false;
 
-      for (const theme of project.permutations) {
-        const token = project.resolveAt(theme.input as Record<string, string>)[path];
+      for (const { name, tuple } of eachTheme()) {
+        const token = project.resolveAt(tuple)[path];
         if (!token) continue;
         found = true;
         type ??= token.$type;
         description ??= token.$description;
         aliasedBy ??= token.aliasedBy;
-        perTheme[theme.name] = {
+        perTheme[name] = {
           value: stringifyValue(token.$value),
           ...(token.aliasOf !== undefined && { aliasOf: token.aliasOf }),
           ...(token.aliasChain !== undefined && { aliasChain: token.aliasChain }),
@@ -205,7 +216,7 @@ export function createServer(initial: Project): McpServer & {
           source: axis.source,
         })),
         disabledAxes: project.disabledAxes,
-        permutations: project.permutations.map((t) => ({ name: t.name, input: t.input })),
+        permutations: [...eachTheme()].map(({ name, tuple }) => ({ name, input: tuple })),
         presets: project.presets.map((p) => ({
           name: p.name,
           axes: p.axes,
@@ -226,14 +237,14 @@ export function createServer(initial: Project): McpServer & {
     ({ path }) => {
       const perTheme: Record<string, { aliasOf?: string; chain: readonly string[] }> = {};
       let found = false;
-      for (const theme of project.permutations) {
-        const token = project.resolveAt(theme.input as Record<string, string>)[path];
+      for (const { name, tuple } of eachTheme()) {
+        const token = project.resolveAt(tuple)[path];
         if (!token) continue;
         found = true;
         const chain: string[] = [path];
         if (token.aliasChain && token.aliasChain.length > 0) chain.push(...token.aliasChain);
         else if (token.aliasOf) chain.push(token.aliasOf);
-        perTheme[theme.name] = {
+        perTheme[name] = {
           ...(token.aliasOf !== undefined && { aliasOf: token.aliasOf }),
           chain,
         };
@@ -260,9 +271,7 @@ export function createServer(initial: Project): McpServer & {
     },
     ({ path, maxDepth }) => {
       const depth = maxDepth ?? 6;
-      const themeName = project.permutations[0]?.name;
-      if (!themeName) return textResult('No permutations in project.');
-      const tokens = tokensForTheme(themeName);
+      const tokens = tokensForTheme(defaultThemeName);
       if (!tokens[path]) return textResult(`Token not found: ${path}`);
 
       interface Node {
@@ -306,8 +315,7 @@ export function createServer(initial: Project): McpServer & {
       },
     },
     ({ path, theme }) => {
-      const themeName = theme ?? project.permutations[0]?.name;
-      if (!themeName) return textResult('No permutations in project.');
+      const themeName = theme ?? defaultThemeName;
       const token = tokensForTheme(themeName)[path];
       if (!token) return textResult(`Token not found: ${path}`);
       if (token.$type !== 'color') {
@@ -346,8 +354,7 @@ export function createServer(initial: Project): McpServer & {
       },
     },
     ({ foreground, background, theme, algorithm }) => {
-      const themeName = theme ?? project.permutations[0]?.name;
-      if (!themeName) return textResult('No permutations in project.');
+      const themeName = theme ?? defaultThemeName;
       const tokens = tokensForTheme(themeName);
       const fgTok = tokens[foreground];
       const bgTok = tokens[background];
@@ -388,10 +395,6 @@ export function createServer(initial: Project): McpServer & {
       },
     },
     ({ path }) => {
-      if (project.permutations.length === 0) return textResult('No permutations in project.');
-      // `varianceByPath` covers every path that appears in any
-      // permutation's resolved map; presence here is the same
-      // existence signal the prior `permutations.some` scan provided.
       const cached = project.varianceByPath.get(path);
       if (!cached) return textResult(`Token not found in any theme: ${path}`);
       return jsonResult(cached);
@@ -413,8 +416,7 @@ export function createServer(initial: Project): McpServer & {
       },
     },
     ({ query, theme, limit }) => {
-      const themeName = theme ?? project.permutations[0]?.name;
-      if (!themeName) return textResult('No permutations in project.');
+      const themeName = theme ?? defaultThemeName;
       const tokens = tokensForTheme(themeName);
       const max = limit ?? 50;
 
@@ -474,16 +476,7 @@ export function createServer(initial: Project): McpServer & {
         active[axis.name] =
           candidate && axis.contexts.includes(candidate) ? candidate : axis.default;
       }
-      const themeName =
-        project.permutations.find((t) => {
-          for (const axis of project.axes) {
-            if ((t.input as Record<string, string>)[axis.name] !== active[axis.name]) {
-              return false;
-            }
-          }
-          return true;
-        })?.name ?? project.permutations[0]?.name;
-      if (!themeName) return textResult('No matching theme.');
+      const themeName = tupleToName(project.axes, active);
       const tokens = project.resolveAt(active);
       const resolved: Record<
         string,
@@ -528,17 +521,7 @@ export function createServer(initial: Project): McpServer & {
         activeTuple[axis.name] =
           candidate && axis.contexts.includes(candidate) ? candidate : axis.default;
       }
-      const themeName =
-        project.permutations.find((t) => {
-          for (const axis of project.axes) {
-            if ((t.input as Record<string, string>)[axis.name] !== activeTuple[axis.name]) {
-              return false;
-            }
-          }
-          return true;
-        })?.name ??
-        project.permutations[0]?.name ??
-        '';
+      const themeName = tupleToName(project.axes, activeTuple);
       const token = project.resolveAt(activeTuple)[path];
       if (!token) return textResult(`Token not found: ${path}`);
 
@@ -593,16 +576,44 @@ export function createServer(initial: Project): McpServer & {
 }
 
 /**
- * Build a `Map<permutationName, axisTuple>` so the per-theme tool
- * handlers can avoid an `Array.find` scan per request. Bounded by the
- * permutation count.
+ * Build a `Map<themeName, axisTuple>` covering the same set the
+ * resolver loader's singleton enumeration produces: default tuple +
+ * one per non-default cell on each axis + each preset. Bounded by
+ * `1 + Σ(axes × (contexts - 1)) + presets.length` — linear in axis
+ * cardinality, independent of the cartesian product.
  */
 function buildTupleByName(project: Project): Map<string, Record<string, string>> {
   const out = new Map<string, Record<string, string>>();
-  for (const perm of project.permutations) {
-    out.set(perm.name, perm.input as Record<string, string>);
+  const defaultName = tupleToName(project.axes, project.defaultTuple);
+  out.set(defaultName, { ...project.defaultTuple });
+  for (const axis of project.axes) {
+    for (const ctx of axis.contexts) {
+      if (ctx === axis.default) continue;
+      const tuple = { ...project.defaultTuple, [axis.name]: ctx };
+      out.set(tupleToName(project.axes, tuple), tuple);
+    }
+  }
+  for (const preset of project.presets) {
+    const tuple: Record<string, string> = { ...project.defaultTuple };
+    for (const [axis, ctx] of Object.entries(preset.axes)) {
+      if (ctx !== undefined) tuple[axis] = ctx;
+    }
+    out.set(tupleToName(project.axes, tuple), tuple);
   }
   return out;
+}
+
+/**
+ * Same form `permutationID` produces server-side — axis values joined
+ * by ` · ` in axis order. Inlined here so MCP doesn't depend on the
+ * `permutationID` export staying in core's public API through the
+ * cartesian-drop chain.
+ */
+function tupleToName(
+  axes: readonly { name: string; default: string }[],
+  tuple: Readonly<Record<string, string>>,
+): string {
+  return axes.map((a) => tuple[a.name] ?? a.default).join(' · ');
 }
 
 function stringifyValue(value: unknown): string {
