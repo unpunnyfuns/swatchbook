@@ -281,16 +281,14 @@ export interface Project {
   /**
    * Joint-variant partial-tuple overrides — token values that diverge
    * from cascade composition over `cells` and need to be patched in
-   * by {@link resolveAt}. Currently extracted from the pair-only joint
-   * cases identified by `analyzeProjectVariance`; extends to N-order
-   * in a follow-up.
+   * by {@link resolveAt}. Probed via `analyzeProjectVariance` at all
+   * arities ≥ 2 against the cartesian truth.
    */
   jointOverrides: JointOverrides;
   /**
    * The default tuple — `{ axisName: axis.default }` for every axis,
-   * after `disabledAxes` filtering and any `config.default` overrides
-   * applied. Replaces the legacy "look at `permutations[0].input`"
-   * pattern for downstream consumers.
+   * after `disabledAxes` filtering. The baseline that `cells` /
+   * `resolveAt` compose against.
    */
   defaultTuple: Record<string, string>;
   /**
