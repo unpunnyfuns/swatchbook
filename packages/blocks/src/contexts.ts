@@ -24,21 +24,25 @@ export type VirtualAxisShape = Axis;
 export type VirtualDiagnosticShape = Diagnostic;
 
 export interface VirtualTokenShape {
-  $type?: string;
+  $type?: string | undefined;
   $value?: unknown;
-  $description?: string;
-  aliasOf?: string;
-  aliasChain?: readonly string[];
-  aliasedBy?: readonly string[];
+  $description?: string | undefined;
+  aliasOf?: string | undefined;
+  aliasChain?: readonly string[] | undefined;
+  aliasedBy?: readonly string[] | undefined;
   /**
    * Per-sub-field alias map for composite tokens whose value blends
    * primitives with aliased fragments — Terrazzo populates this when
    * one or more component fields of a composite ($type: 'border',
    * 'shadow', 'typography', 'gradient', 'transition') resolve through
    * an alias. The `CompositeBreakdown` block reads it to render the
-   * source path beside each component value.
+   * source path beside each component value. Typed as `unknown` because
+   * the shape varies per composite type (color carries a
+   * `{components: (string | undefined)[]}` sub-shape; typography/border
+   * carry a flat `Record<string, string | undefined>`); the block
+   * narrows it at the consumer.
    */
-  partialAliasOf?: Record<string, string | undefined>;
+  partialAliasOf?: unknown;
 }
 
 /**

@@ -107,7 +107,7 @@ function asEasing(
 }
 
 export function resolveMotionSpec(
-  token: { $type?: string; $value?: unknown } | undefined,
+  token: { $type?: string | undefined; $value?: unknown } | undefined,
   themeTokens: Record<string, { $value?: unknown }>,
 ): Spec | null {
   if (!token) return null;
