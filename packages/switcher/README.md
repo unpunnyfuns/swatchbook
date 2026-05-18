@@ -21,7 +21,6 @@ import '@unpunnyfuns/swatchbook-switcher/style.css';
 <ThemeSwitcher
   axes={axes}
   presets={presets}
-  permutations={permutations}
   activeTuple={{ mode: 'Dark' }}
   defaults={{ mode: 'Light', brand: 'Default', contrast: 'Normal' }}
   lastApplied={null}
@@ -40,7 +39,7 @@ The component is pure — it doesn't read or write to storage, and it doesn't ba
 
 Color-format selection isn't part of the switcher — hosts that need it slot a `<ColorFormatSelector>` (or any other custom node) into the optional `footer` prop.
 
-`SwitcherAxis` / `SwitcherPreset` / `SwitcherPermutation` are the accepted shapes and are cross-compatible with `Project.axes` / `.presets` / `.permutations` from `@unpunnyfuns/swatchbook-core` — pass them through directly.
+`SwitcherAxis` / `SwitcherPreset` are the accepted shapes and are cross-compatible with `Project.axes` / `Project.presets` from `@unpunnyfuns/swatchbook-core` — pass them through directly.
 
 ## Credits
 

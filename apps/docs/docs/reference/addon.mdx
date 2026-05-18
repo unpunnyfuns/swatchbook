@@ -64,7 +64,7 @@ For a browsable tree + diagnostics surface, compose `<Diagnostics />` + `<TokenN
 | Key | Type | Purpose |
 | --- | --- | --- |
 | `swatchbookAxes` | `Record<string, string>` | Active tuple. Preferred input. |
-| `swatchbookTheme` | `string` | Composed permutation ID. Back-compat companion. |
+| `swatchbookTheme` | `string` | Composed theme ID. Back-compat companion. |
 | `swatchbookColorFormat` | `'hex' \| 'rgb' \| 'hsl' \| 'oklch' \| 'raw'` | Display-only color format consumed by the blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`). Does **not** affect emitted CSS. Default `hex`. |
 
 The toolbar writes `swatchbookAxes` and `swatchbookTheme` in lockstep so legacy consumers keep working. `swatchbookColorFormat` is toggled from the color-format picker in the popover; `hex` falls back to space-separated `rgb()` (flagged with a ⚠ warning marker) for colors outside sRGB gamut.

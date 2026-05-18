@@ -135,7 +135,7 @@ The shared-options module above closes each of these gaps in one place.
 Five fields are stripped at the type level. They're load-bearing for how swatchbook emits CSS and publishes the listing; letting consumers override them breaks the preview model.
 
 - **`cssOptions.variableName`** — swatchbook routes naming through `@terrazzo/token-tools`' `makeCSSVar` with your `cssVarPrefix`, so every variable carries the prefix and kebab-cases consistently with what the listing records under `names.css`. A custom policy would make the listing's `names.css` disagree with the emitted stylesheet, which is worse than the default.
-- **`cssOptions.permutations`** — swatchbook synthesizes one permutation per resolver theme (or per layered tuple) so the emitted stylesheet declares each permutation under a compound `data-<prefix>-<axis>` selector. Overriding this defeats axis-aware rendering.
+- **`cssOptions.permutations`** — swatchbook synthesizes one entry per resolver theme (or per layered tuple) so the emitted stylesheet declares each theme under a compound `data-<prefix>-<axis>` selector. Overriding this defeats axis-aware rendering.
 - **`cssOptions.filename`** — the internal stylesheet is captured in memory, never written to disk.
 - **`cssOptions.skipBuild`** — setting `true` nulls out the listing's `previewValue` derivation, breaking every block that displays a value.
 - **`listingOptions.filename`** — the listing is captured in memory; the `outputFile` handler finds the entry by filename, and swatchbook owns that handshake.
@@ -144,13 +144,13 @@ Everything else passes through untouched.
 
 ### Soft-inert knobs (type-accepted, runtime-ignored)
 
-Three older `plugin-css` options predate permutations and pre-`permutations`-era builds still expose them:
+Three `plugin-css` options pass the type check but swatchbook ignores them — `permutations`-based emission supersedes them:
 
 - `baseSelector`
 - `baseScheme`
 - `modeSelectors`
 
-Setting any of these doesn't hit a type error because they're still part of `CSSPluginOptions`, but swatchbook always drives emission through permutations, so they do nothing in the preview. Load emits a `swatchbook/css-options` warn diagnostic listing the offending keys — visible in the preview's diagnostic overlay and on `Project.diagnostics` for programmatic consumers — so the "my setting isn't taking effect" failure mode turns into an explicit signal.
+Setting any of these doesn't hit a type error because they're still part of `CSSPluginOptions`, but swatchbook always drives emission through the `permutations` API, so they do nothing in the preview. Load emits a `swatchbook/css-options` warn diagnostic listing the offending keys — visible in the preview's diagnostic overlay and on `Project.diagnostics` for programmatic consumers — so the "my setting isn't taking effect" failure mode turns into an explicit signal.
 
 ## Per-platform identifier display
 
@@ -242,7 +242,7 @@ If you're weighing whether to add Terrazzo to an SD-only pipeline, the pragmatic
 ## Common pitfalls
 
 - **`cssVarPrefix` drift** — swatchbook's `cssVarPrefix` is independent of the prefix plugin-css would pick if you set `variableName` yourself. Since swatchbook owns `variableName`, setting `cssVarPrefix: 'sb'` is the only lever you need for prefix control on the swatchbook side. Production's prefix lives in its own plugin-css call (or in a `variableName` policy you ship). Both sides should pick the same prefix — the guide's "one shared module" pattern doesn't cover prefix because swatchbook takes it from a top-level field; double-check that `cssVarPrefix: 'ds'` in swatchbook matches whatever `--ds-*` your production stylesheet emits.
-- **Resolver vs `tokens` divergence** — if your production build reads a flat `tokens.json` but swatchbook reads a DTCG resolver, the two pipelines see different permutation sets. The listing will only reflect swatchbook's resolver view. Keep both on the same shape; if production needs flat output, emit it with Terrazzo's `plugin-js` or similar from the resolver's own permutations.
+- **Resolver vs `tokens` divergence** — if your production build reads a flat `tokens.json` but swatchbook reads a DTCG resolver, the two pipelines see different theme sets. The listing will only reflect swatchbook's resolver view. Keep both on the same shape; if production needs flat output, emit it with Terrazzo's `plugin-js` or similar driven from the resolver's themes.
 - **Plugin loaded but not listed** — a plugin in `terrazzoPlugins` without a matching entry in `listingOptions.platforms` runs but doesn't contribute to `names.*`. Conversely, a platform entry in `listingOptions.platforms` whose plugin isn't in `terrazzoPlugins` will fail at listing time. Both sides or neither.
 - **Plugins that write to disk** — swatchbook captures `outputFile` calls in memory. A plugin that writes via `fs` directly (bypassing the Terrazzo build API) will try to write files relative to the Storybook preview's cwd during HMR. Prefer plugins that use the supported `outputFile` hook.
 - **`@terrazzo/cli` vs `@terrazzo/parser`'s `defineConfig`** — `@terrazzo/cli` is what a `tz build` consumer already has installed; `@terrazzo/parser` exports a lower-level `defineConfig` that takes a `cwd` option. Prefer the cli export in user-facing config files.
