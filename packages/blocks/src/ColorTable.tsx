@@ -293,6 +293,7 @@ function GroupRow({
               ? `Collapse ${group.base}`
               : `Expand ${group.base}`
         }
+        {...(onSelect ? { 'aria-haspopup': 'dialog' as const } : {})}
         data-testid="color-table-row"
         data-path={active.path}
         data-base={group.base}
