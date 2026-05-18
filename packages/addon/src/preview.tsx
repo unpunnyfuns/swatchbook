@@ -6,7 +6,8 @@ import type {
   JointOverrides,
 } from '@unpunnyfuns/swatchbook-core';
 import type { Decorator, Preview } from '@storybook/react-vite';
-import { useEffect, useMemo } from 'react';
+import type { CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { addons } from 'storybook/preview-api';
 import { dataAttr } from '@unpunnyfuns/swatchbook-core/data-attr';
 import { ensureStyleElement } from '@unpunnyfuns/swatchbook-core/style-element';
@@ -47,6 +48,24 @@ import {
   TOKENS_UPDATED_EVENT,
 } from '#/constants.ts';
 import type { StoryParameters, SwatchbookGlobals } from '#/globals.ts';
+
+/**
+ * Standard visually-hidden style for the theme-flip live region.
+ * Keeps the announcement element discoverable by SR but out of visual
+ * + pointer flow. The clip-path / `position: absolute` combination is
+ * the canonical sr-only pattern.
+ */
+const SR_ONLY_STYLE: CSSProperties = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: 'hidden',
+  clip: 'rect(0, 0, 0, 0)',
+  whiteSpace: 'nowrap',
+  border: 0,
+};
 
 /**
  * The `html, body { ... }` rules that paint the iframe's own chrome
@@ -293,6 +312,23 @@ const themedDecorator: Decorator = (Story, context) => {
     setRootAxes(tuple);
   }, [tuple]);
 
+  // Page-level live region announces theme/axis flips to SR users.
+  // Initial mount stays silent (no spurious announcement on every story
+  // load); subsequent `themeName` changes schedule a debounced update so
+  // rapid axis flips (or per-story tuple overrides while paging through
+  // a Storybook docs index) collapse into one announcement.
+  const [announcement, setAnnouncement] = useState('');
+  const initialThemeRef = useRef(themeName);
+  useEffect(() => {
+    if (themeName === initialThemeRef.current) return;
+    const timer = setTimeout(() => {
+      setAnnouncement(themeName ? `Theme: ${themeName}` : '');
+    }, 250);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [themeName]);
+
   const wrapperAttrs: Record<string, string> = {};
   for (const axis of virtualAxes) {
     const value = tuple[axis.name];
@@ -335,6 +371,9 @@ const themedDecorator: Decorator = (Story, context) => {
               }}
             >
               <Story />
+            </div>
+            <div role="status" aria-live="polite" style={SR_ONLY_STYLE}>
+              {announcement}
             </div>
           </ColorFormatContext.Provider>
         </AxesContext.Provider>
