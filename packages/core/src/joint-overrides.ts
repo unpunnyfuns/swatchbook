@@ -1,9 +1,22 @@
 import type { Resolver } from '@terrazzo/parser';
+import type { AliasGraph } from '#/alias-graph.ts';
+import { isAxisComboConnected } from '#/alias-graph.ts';
 import { buildResolveAt } from '#/resolve-at.ts';
 import { canonicalKey } from '#/tuple-key.ts';
 import type { TupleKey } from '#/tuple-key.ts';
 import type { Axis, Cells, JointOverride, JointOverrides, TokenMap } from '#/types.ts';
 import { valueKey } from '#/value-key.ts';
+
+/**
+ * Optional inputs to `probeJointOverrides`. `aliasGraph` lets callers
+ * thread a precomputed graph in so the probe can skip axis
+ * combinations the graph reports as orthogonal. `loadProject`
+ * pre-builds one from the resolver source + baseline tokens;
+ * standalone callers can opt in.
+ */
+export interface ProbeOptions {
+  aliasGraph?: AliasGraph;
+}
 
 /**
  * Two-pass joint-probe output:
@@ -56,10 +69,12 @@ export function probeJointOverrides(
   cells: Cells,
   defaultTuple: Readonly<Record<string, string>>,
   resolver: Resolver | undefined,
+  options: ProbeOptions = {},
 ): JointProbeResult {
   if (!resolver || axes.length < 2) {
     return { overrides: [], jointTouching: new Map() };
   }
+  const { aliasGraph } = options;
 
   // Internal Map keyed on canonicalKey for dedupe across arity passes.
   // Materialized to the public array shape on return so the wire
@@ -90,6 +105,10 @@ export function probeJointOverrides(
     const composer = buildResolveAt(axes, cells, [...overrides.entries()], defaultTuple);
 
     for (const axisCombo of axisCombinations(axes, arity)) {
+      // Graph cull: every axis must have an in-combo connection, or
+      // the combo is provably orthogonal and can't contribute a
+      // joint divergence. Skipped when no graph was supplied.
+      if (aliasGraph && !isAxisComboConnected(aliasGraph, axisCombo)) continue;
       for (const partialTuple of contextProducts(axisCombo)) {
         const fullTuple = { ...defaultTuple, ...partialTuple };
         const cartesian = resolver.apply(fullTuple);

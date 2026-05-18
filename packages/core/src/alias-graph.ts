@@ -41,7 +41,10 @@ export interface BuildAliasGraphInput {
    * `loadResolver` — `contexts` maps context name → array of inlined
    * Group nodes whose leaves carry `$value`.
    */
-  resolverModifiers: Record<string, { contexts?: Record<string, unknown[]>; default?: string }>;
+  resolverModifiers: Record<
+    string,
+    { contexts?: Record<string, unknown[]> | undefined; default?: string | undefined }
+  >;
   /**
    * The default-tuple-resolved `TokenMap`. Used to follow each path's
    * `aliasChain` (transitively populated by Terrazzo) and recursive

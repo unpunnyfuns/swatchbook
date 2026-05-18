@@ -1,3 +1,4 @@
+import { buildAliasGraph } from '#/alias-graph.ts';
 import { buildCells } from '#/cells.ts';
 import { validateChrome } from '#/chrome.ts';
 import { BufferedLogger, toDiagnostics } from '#/diagnostics.ts';
@@ -123,17 +124,26 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
         filteredResolved[permutationID(tuple)] ?? {};
   const cells = buildCells(filteredAxes, resolveTuple, projectDefaultTuple);
 
-  // Pair-only joint-divergence probe via `resolver.apply` — bounded
-  // by `Σ pairs (contexts_a - 1) × (contexts_b - 1)` calls,
-  // independent of the cartesian product size. Returns two derived
-  // signals: `overrides` for resolveAt correctness, `jointTouching`
-  // for variance display (axes that genuinely contribute to a joint
-  // divergence on a path, separated from cell-composition artifacts).
+  // Pair-and-up joint-divergence probe via `resolver.apply` —
+  // bounded by `Σ combos × Π non-default contexts` calls,
+  // independent of the cartesian product size. Pre-build an alias
+  // graph from the resolver source + baseline tokens so the probe
+  // skips orthogonal axis combinations (axis combos whose reach
+  // sets don't overlap can't produce a joint divergence).
+  const aliasGraph =
+    normalized.parserInput?.resolver !== undefined
+      ? buildAliasGraph({
+          axes: filteredAxes,
+          resolverModifiers: normalized.parserInput.resolver.source.modifiers ?? {},
+          baseline: defaultTokens,
+        })
+      : undefined;
   const { overrides: jointOverrides, jointTouching } = probeJointOverrides(
     filteredAxes,
     cells,
     projectDefaultTuple,
     normalized.parserInput?.resolver,
+    aliasGraph ? { aliasGraph } : {},
   );
   const resolveAt = buildResolveAt(filteredAxes, cells, jointOverrides, projectDefaultTuple);
 
