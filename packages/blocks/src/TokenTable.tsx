@@ -1,7 +1,7 @@
 import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import cx from 'clsx';
 import type { ReactElement } from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useDeferredValue, useMemo, useState } from 'react';
 import './TokenTable.css';
 import { useColorFormat } from '#/contexts.ts';
 import { CopyButton } from '#/internal/CopyButton.tsx';
@@ -66,6 +66,7 @@ export function TokenTable({
   const colorFormat = useColorFormat();
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const deferredQuery = useDeferredValue(query);
 
   const rows = useMemo(() => {
     const projectFields = { listing, cssVarPrefix };
@@ -92,9 +93,9 @@ export function TokenTable({
   }, [resolved, listing, cssVarPrefix, filter, type, colorFormat, sortBy, sortDir]);
 
   const visibleRows = useMemo(() => {
-    if (!searchable || query.trim() === '') return rows;
-    return fuzzyFilter(rows, query, (row) => `${row.path} ${row.type} ${row.value}`);
-  }, [rows, query, searchable]);
+    if (!searchable || deferredQuery.trim() === '') return rows;
+    return fuzzyFilter(rows, deferredQuery, (row) => `${row.path} ${row.type} ${row.value}`);
+  }, [rows, deferredQuery, searchable]);
 
   const handleRowClick = useCallback(
     (path: string) => {
