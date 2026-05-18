@@ -1,5 +1,29 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.59.0
+
+### Patch Changes
+
+- eadf2fd: Add a page-level `role="status" aria-live="polite"` region to the addon's preview decorator so screen readers announce theme/axis-flip changes. When a user flips the toolbar or applies a preset, the region's text content becomes `Theme: <composed tuple name>` after a 250ms debounce — rapid axis flips collapse into one announcement instead of bursting through.
+
+  The element renders inside the existing `themedDecorator` wrapper (sibling of the per-story `<Story />` container) with the standard visually-hidden style so it's discoverable by SR but stays out of visual + pointer flow. Initial story mount stays silent (no spurious announcement on page load); only subsequent `themeName` changes fire.
+
+- c270b8c: Brand `TupleKey` for canonical-tuple-key strings.
+
+  `canonicalKey` and `jointOverrideKey` now return a `TupleKey = string & { readonly __brand: 'TupleKey' }` instead of bare `string`. `Project.jointOverrides` and the in-memory memo Map inside `buildResolveAt` use it too, as does the wire-shape `jointOverrides` entry the addon ships through `virtual:swatchbook/tokens` for the blocks preview.
+
+  The brand catches places that pass an arbitrary string (token paths, axis names, theme display names) into a context expecting a canonical tuple key — these used to all compile as plain `string`. Structurally still `string`, so JSON round-trips and `Map` lookups behave identically; the brand is purely compile-time.
+
+  Scope is intentionally narrow per [issue #941](https://github.com/unpunnyfuns/swatchbook/issues/941)'s "alternative narrower scope" — axis and context names stay bare `string` to avoid casting every fixture literal.
+
+  `TupleKey` is exported from `@unpunnyfuns/swatchbook-core`.
+
+- Updated dependencies [c270b8c]
+- Updated dependencies [3e9e310]
+  - @unpunnyfuns/swatchbook-core@0.59.0
+  - @unpunnyfuns/swatchbook-blocks@0.59.0
+  - @unpunnyfuns/swatchbook-switcher@0.59.0
+
 ## 0.58.1
 
 ### Patch Changes

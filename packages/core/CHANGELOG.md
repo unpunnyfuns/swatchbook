@@ -1,5 +1,25 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.59.0
+
+### Minor Changes
+
+- c270b8c: Brand `TupleKey` for canonical-tuple-key strings.
+
+  `canonicalKey` and `jointOverrideKey` now return a `TupleKey = string & { readonly __brand: 'TupleKey' }` instead of bare `string`. `Project.jointOverrides` and the in-memory memo Map inside `buildResolveAt` use it too, as does the wire-shape `jointOverrides` entry the addon ships through `virtual:swatchbook/tokens` for the blocks preview.
+
+  The brand catches places that pass an arbitrary string (token paths, axis names, theme display names) into a context expecting a canonical tuple key — these used to all compile as plain `string`. Structurally still `string`, so JSON round-trips and `Map` lookups behave identically; the brand is purely compile-time.
+
+  Scope is intentionally narrow per [issue #941](https://github.com/unpunnyfuns/swatchbook/issues/941)'s "alternative narrower scope" — axis and context names stay bare `string` to avoid casting every fixture literal.
+
+  `TupleKey` is exported from `@unpunnyfuns/swatchbook-core`.
+
+### Patch Changes
+
+- 3e9e310: Fix `analyzeProjectVariance` docstring: layered / plain-parse multi-touch tokens classify as `orthogonal-after-probe`, not `joint-variant` with empty `jointCases` as the docstring previously claimed.
+
+  The implementation was correct; the comment had drifted. Cascade composition over per-axis cells IS the spec for layered modifiers (the loader builds the cells by cascade in the first place), so there's no hidden joint resolution for `analyzeProjectVariance` to surface — `orthogonal-after-probe` is the right classification. No behavioural change.
+
 ## 0.58.1
 
 ## 0.58.0

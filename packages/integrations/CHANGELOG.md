@@ -1,5 +1,13 @@
 # @unpunnyfuns/swatchbook-integrations
 
+## 0.59.0
+
+### Patch Changes
+
+- Updated dependencies [c270b8c]
+- Updated dependencies [3e9e310]
+  - @unpunnyfuns/swatchbook-core@0.59.0
+
 ## 0.58.1
 
 ### Patch Changes
