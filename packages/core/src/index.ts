@@ -24,6 +24,7 @@ export type {
   ResolveAt,
   ResolverConfig,
   SwatchbookIntegration,
+  SwatchbookToken,
   TokenMap,
   VarianceKind,
 } from '#/types.ts';

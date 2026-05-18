@@ -1,6 +1,6 @@
 import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
 import { makeCssVar } from '@unpunnyfuns/swatchbook-core/css-var';
-import type { Axis, Cells, JointOverrides, TokenMap } from '@unpunnyfuns/swatchbook-core';
+import type { Axis, Cells, JointOverrides } from '@unpunnyfuns/swatchbook-core';
 import { useEffect, useMemo } from 'react';
 import type { VirtualTokenListingShape, VirtualVarianceByPathShape } from '#/contexts.ts';
 import { useActiveAxes, useActivePermutation, useOptionalSwatchbookData } from '#/contexts.ts';
@@ -99,7 +99,7 @@ function makeResolveAt(snapshot: {
     jointOverrides,
     defaults,
   );
-  return (tuple) => resolver(tuple) as TokenMap as ResolvedTokens;
+  return (tuple) => resolver(tuple);
 }
 
 /**

@@ -6,6 +6,21 @@ import { dataAttr } from '#/data-attr.ts';
 import type { Project, TokenMap } from '#/types.ts';
 import { analyzeProjectVariance, type VarianceInfo } from '#/variance-analysis.ts';
 
+/**
+ * Internal alias: the raw Terrazzo-shape map this emitter passes into
+ * `transformCSSValue` / `generateShorthand`. The public `TokenMap` is a
+ * structural subset (`SwatchbookToken`) of `TokenNormalized` — every
+ * value in any `TokenMap` here actually carries the full Terrazzo
+ * fields, because it came from `resolver.apply()` and was stored
+ * verbatim into cells / jointOverrides. The cast at the boundary
+ * (`asRawTokens`) is safe by construction.
+ */
+type RawTokenMap = Record<string, TokenNormalized>;
+
+function asRawTokens(map: TokenMap): RawTokenMap {
+  return map as RawTokenMap;
+}
+
 /** @internal Addon-internal smart-emitter options. Not part of the public API. */
 export interface EmitAxisProjectedCssOptions {
   /** Override the prefix from project config (default: `project.config.cssVarPrefix ?? ''`). */
@@ -93,9 +108,10 @@ export function emitAxisProjectedCss(
   //    Baseline-only tokens never appear elsewhere; all other variance
   //    kinds also need a baseline value to start the cascade from.
   if (baselineTokens) {
+    const baselineRaw = asRawTokens(baselineTokens);
     const lines = collectLines(
-      baselineTokens,
-      baselineTokens,
+      baselineRaw,
+      baselineRaw,
       () => true,
       defaultTuple,
       varOpts,
@@ -122,8 +138,8 @@ export function emitAxisProjectedCss(
       const cellTokensForAliases = project.resolveAt(cellTuple);
 
       const lines = collectLines(
-        cellTokens,
-        cellTokensForAliases,
+        asRawTokens(cellTokens),
+        asRawTokens(cellTokensForAliases),
         (path) => axisTouchesToken(axis.name, variance.get(path)),
         cellTuple,
         varOpts,
@@ -209,14 +225,14 @@ function collectJointBlocks(
   const blocks: string[] = [];
   for (const [, override] of project.jointOverrides) {
     const fullTuple = { ...project.defaultTuple, ...override.axes };
-    const fullTokens = project.resolveAt(fullTuple);
+    const fullTokens = asRawTokens(project.resolveAt(fullTuple));
     const axisEntries = Object.entries(override.axes);
     const selector = axisEntries
       .map(([axisName, ctx]) => `[${dataAttr(prefix, axisName)}="${cssEscape(ctx)}"]`)
       .join('');
 
     const lines: string[] = [];
-    for (const [path, token] of Object.entries(override.tokens)) {
+    for (const [path, token] of Object.entries(asRawTokens(override.tokens))) {
       for (const decl of collectTokenDeclarations(
         path,
         token,
@@ -247,8 +263,8 @@ function collectJointBlocks(
  * to resolve references to non-delta tokens.
  */
 function collectLines(
-  tokens: TokenMap,
-  tokensForAliasResolution: TokenMap,
+  tokens: RawTokenMap,
+  tokensForAliasResolution: RawTokenMap,
   accept: (path: string) => boolean,
   permutation: Record<string, string>,
   varOpts: VarOpts,
@@ -279,7 +295,7 @@ function collectLines(
 function* collectTokenDeclarations(
   localID: string,
   token: TokenNormalized,
-  tokensSet: TokenMap,
+  tokensSet: RawTokenMap,
   permutation: Record<string, string>,
   varOpts: VarOpts,
   transformAlias: (token: TokenNormalized) => string,
