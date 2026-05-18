@@ -144,7 +144,7 @@ export const SwitchAxis = meta.story({
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     expect(probeAttr(canvasElement, 'data-mode')).toBe('Light');
-    await userEvent.click(canvas.getByRole('button', { name: 'Dark' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Dark (mode)' }));
     expect(probeAttr(canvasElement, 'data-mode')).toBe('Dark');
     expect(probeAttr(canvasElement, 'data-brand')).toBe('Default');
     expect(probeAttr(canvasElement, 'data-last-applied')).toBe('');
@@ -196,7 +196,7 @@ export const AxisChangeClearsPreset = meta.story({
     await userEvent.click(canvas.getByRole('button', { name: 'Marketing Dark' }));
     expect(probeAttr(canvasElement, 'data-last-applied')).toBe('Marketing Dark');
     // Drift away from the preset by picking a different brand.
-    await userEvent.click(canvas.getByRole('button', { name: 'Default' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Default (brand)' }));
     expect(probeAttr(canvasElement, 'data-last-applied')).toBe('');
     expect(probeAttr(canvasElement, 'data-brand')).toBe('Default');
     // Mode still reflects the preset's earlier application.
