@@ -14,7 +14,14 @@ Lower-level than the per-type overview blocks — these render the visual for **
 <MotionSample path="transition.enter" />
 ```
 
-Animated ball + track for one `transition` / `duration` / `cubicBezier`. `speed?: 0.25 | 0.5 | 1 | 2` (default `1`); `runKey?: number` forces a restart when it changes.
+Animated ball + track for one `transition` / `duration` / `cubicBezier`. `speed?: MotionSpeed` (default `1`); `runKey?: number` forces a restart when it changes.
+
+```ts
+import type { MotionSpeed } from '@unpunnyfuns/swatchbook-blocks';
+type MotionSpeed = 0.25 | 0.5 | 1 | 2;
+```
+
+The four allowed playback rates the speed pills surface above the sample track. Re-exported for hosts that want to drive the speed externally.
 
 ## ShadowSample
 

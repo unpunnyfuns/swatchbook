@@ -40,9 +40,12 @@ Leaf utilities consumers need without the loader's Node deps live on dedicated s
 
 - `@unpunnyfuns/swatchbook-core/resolve-at` — `buildResolveAt(axes, cells, jointOverrides, defaultTuple)`
 - `@unpunnyfuns/swatchbook-core/snapshot-for-wire` — `snapshotForWire(project, css)` + `SnapshotForWire` type
+- `@unpunnyfuns/swatchbook-core/themes` — `enumerateThemes({axes, presets, defaultTuple})` + `tupleToName(axes, tuple)` + `ThemeEntry` type
+- `@unpunnyfuns/swatchbook-core/match-path` — `matchPath(path, filter)` glob-style matcher (`*` / `**`)
 - `@unpunnyfuns/swatchbook-core/fuzzy` — uFuzzy-backed token search
 - `@unpunnyfuns/swatchbook-core/css-var` — `makeCssVar(path, prefix)`
 - `@unpunnyfuns/swatchbook-core/data-attr` — `dataAttr(prefix, key)`
+- `@unpunnyfuns/swatchbook-core/style-element` — `ensureStyleElement(id, text)` + `SWATCHBOOK_STYLE_ELEMENT_ID`
 
 ## Boundaries
 

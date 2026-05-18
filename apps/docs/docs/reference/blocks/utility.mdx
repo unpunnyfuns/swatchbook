@@ -67,3 +67,43 @@ if (errors.length > 0) {
   process.exit(1);
 }
 ```
+
+## Color formatting
+
+The color-rendering blocks (`<ColorPalette>`, `<ColorTable>`, `<TokenDetail>`, sub-color fields in `<ShadowPreview>` / `<BorderPreview>` / `<GradientPalette>`) all route through one helper. The helper plus its types are exported from `@unpunnyfuns/swatchbook-blocks` for custom blocks that need to stringify a color the same way.
+
+```ts
+import {
+  formatColor,
+  COLOR_FORMATS,
+  type ColorFormat,
+  type FormatColorResult,
+  type NormalizedColor,
+} from '@unpunnyfuns/swatchbook-blocks';
+
+type ColorFormat = 'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw';
+
+const COLOR_FORMATS: readonly ColorFormat[];
+
+function formatColor(
+  value: unknown,
+  format: ColorFormat,
+  fallback?: string,
+): FormatColorResult;
+
+interface FormatColorResult {
+  /** Display string — e.g. "rgb(59 132 246)" or "#3b82f6". */
+  value: string;
+  /** True when the requested format can't losslessly represent the color. */
+  outOfGamut: boolean;
+}
+```
+
+- `hex` falls back to space-separated `rgb()` for out-of-gamut colors and marks them `outOfGamut: true`; blocks render a ⚠ glyph beside the value.
+- `oklch` is wide-gamut and never marks `outOfGamut`.
+- `raw` returns a compact JSON of the normalized Terrazzo shape — useful for DTCG authors who want to see exactly what the parser stored.
+- `fallback` defaults to `'—'`; pass a custom string when integrating with surfaces that need a different placeholder.
+
+`COLOR_FORMATS` is the runtime list used to validate stored user choices — reach for it when you need to enumerate the formats (toolbar pills, validation) without duplicating the union.
+
+`NormalizedColor` is the shape `formatColor` accepts — a structural copy of Terrazzo's `ColorValueNormalized` (`colorSpace`, `components` / `channels`, `alpha`, optional `hex`). Use it when typing custom block code that produces or consumes the same payload.

@@ -118,6 +118,20 @@ interface SwitcherPreset {
 
 `SwitcherAxis` and `SwitcherPreset` are structurally compatible with `Project.axes` / `Project.presets` from `@unpunnyfuns/swatchbook-core` — pass them through unchanged. The shapes are re-declared in the switcher package so it stays framework-agnostic and doesn't pull `core` as a runtime dependency.
 
+## `presetTuple(preset, axes, defaults)`
+
+```ts
+function presetTuple(
+  preset: SwitcherPreset,
+  axes: readonly SwitcherAxis[],
+  defaults: Readonly<Record<string, string>>,
+): Record<string, string>;
+```
+
+Compose a preset's sanitized partial tuple with the axis defaults — the omitted axes fall back to their defaults, and any context the preset names that isn't listed on its axis is silently dropped. Mirrors the preview decorator's own fallback logic so what a host sends out matches what the preview honors.
+
+The Storybook addon's manager toolbar imports this directly to avoid carrying a byte-identical local copy; other hosts that apply presets through their own pathway are welcome to.
+
 ## Axis-state propagation
 
 The component is *pure*: it reads its inputs, draws the menu, and calls back when the user clicks. It does not:

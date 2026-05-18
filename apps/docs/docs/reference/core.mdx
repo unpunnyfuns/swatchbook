@@ -92,6 +92,14 @@ const css = emitAxisProjectedCss(project);
 
 For production builds, prefer Terrazzo's CLI — `emitAxisProjectedCss` exists primarily for tooling that wants the same emission the addon does.
 
+### `jointOverrideKey(axes)`
+
+```ts
+function jointOverrideKey(axes: Readonly<Record<string, string>>): string;
+```
+
+Canonical stringification of a joint-override's `axes` tuple — `{ mode: 'Dark', brand: 'Brand A' }` becomes `"brand:Brand A|mode:Dark"` (alphabetical-by-axis, pipe-joined `axis:context` pairs). The same key shape `Project.jointOverrides` uses internally; reach for it when you need to look up or compare joint-override entries from outside the loader.
+
 ## Browser-safe subpaths
 
 Leaf utilities consumers need without the loader's Node deps live on dedicated subpaths. Each is tree-shake-clean, no `@terrazzo/parser`, no `node:*` imports — safe to import from preview-side bundles, the Storybook manager, or any browser consumer.
@@ -100,9 +108,12 @@ Leaf utilities consumers need without the loader's Node deps live on dedicated s
 | --- | --- | --- |
 | `/resolve-at` | `buildResolveAt(axes, cells, jointOverrides, defaultTuple)` | Compose tokens for any tuple without the loader. |
 | `/snapshot-for-wire` | `snapshotForWire(project, css)` + `SnapshotForWire` type | JSON-friendly subset of `Project` for cross-boundary transport. |
+| `/themes` | `enumerateThemes({axes, presets, defaultTuple})` + `tupleToName(axes, tuple)` + `ThemeEntry` / `ThemeEnumAxis` / `ThemeEnumPreset` types | Enumerate axis singletons + presets as a unified theme list; compose stable theme IDs from tuples. |
+| `/match-path` | `matchPath(path, filter)` | Glob-style path matcher (`*` single-segment, `**` multi-segment, bare prefix treated as descendants); shared by blocks' filter prop and the MCP `list_tokens` tool. |
 | `/fuzzy` | `fuzzyFilter` + `fuzzyMatches` | uFuzzy-backed token search; powers the MCP `search_tokens` tool. |
 | `/css-var` | `makeCssVar(path, prefix)` | Compose `var(--prefix-path)` strings — same shape Terrazzo's plugin-css emits. |
 | `/data-attr` | `dataAttr(prefix, key)` | Compose `data-prefix-key` attribute names — namespaced to `cssVarPrefix`. |
+| `/style-element` | `ensureStyleElement(elementId, text)` + `SWATCHBOOK_STYLE_ELEMENT_ID` | Idempotent `<style>` injector — shared between the addon's preview decorator and the blocks-side stylesheet path. |
 
 ```ts
 import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
@@ -370,13 +381,30 @@ type AxisVariancePerAxis = Record<
 type VarianceKind = 'constant' | 'single' | 'multi';
 ```
 
+### `SwatchbookToken`
+
+```ts
+interface SwatchbookToken {
+  $type?: string | undefined;
+  $value?: unknown;
+  $description?: string | undefined;
+  aliasOf?: string | undefined;
+  aliasChain?: readonly string[] | undefined;
+  aliasedBy?: readonly string[] | undefined;
+  /** Per-sub-field alias map for composite tokens; shape varies per `$type`. */
+  partialAliasOf?: unknown;
+}
+```
+
+The seven fields downstream consumers actually read off a resolved token. Structurally compatible with Terrazzo's `TokenNormalized`, so resolver output flows in without casts; carrying the narrower interface means a Terrazzo-side field rename or restructure doesn't ripple onto the swatchbook public surface.
+
 ### `TokenMap`
 
 ```ts
-type TokenMap = Record<string, TokenNormalized>;
+type TokenMap = Record<string, SwatchbookToken>;
 ```
 
-`TokenNormalized` is Terrazzo's per-token shape — see [`@terrazzo/parser`](https://terrazzo.app/) for its fields. Keyed by DTCG flat path (`"color.accent.bg"`).
+Resolved-token map keyed by DTCG flat path (`"color.accent.bg"`). The shape `project.defaultTokens`, `project.resolveAt(tuple)`, and every `cells[axis][context]` cell carry.
 
 ### `ListedToken`
 
