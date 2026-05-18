@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { matchPath } from '#/match.ts';
+import { matchPath } from '#/match-path.ts';
 
 describe('matchPath', () => {
   it('returns true for every path when the filter is omitted or "**"', () => {

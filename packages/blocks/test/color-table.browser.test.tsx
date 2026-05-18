@@ -44,7 +44,7 @@ describe('ColorTable — base rendering', () => {
   it('renders an em-dash in the alias column for non-aliased tokens', () => {
     render(
       <SwatchbookProvider value={makeColorTableSnapshot()}>
-        <ColorTable filter="color.surface.*" />
+        <ColorTable filter="color.surface.**" />
       </SwatchbookProvider>,
     );
     const row = screen.getByTestId('color-table-row');
@@ -70,7 +70,7 @@ describe('ColorTable — base rendering', () => {
   it('renders the empty state when the filter matches no colors', () => {
     render(
       <SwatchbookProvider value={makeColorTableSnapshot()}>
-        <ColorTable filter="typography.*" />
+        <ColorTable filter="typography.**" />
       </SwatchbookProvider>,
     );
     expect(screen.queryByRole('table')).toBeNull();
@@ -90,7 +90,7 @@ describe('ColorTable — base rendering', () => {
     const picks: string[] = [];
     render(
       <SwatchbookProvider value={makeColorTableSnapshot()}>
-        <ColorTable onSelect={(p) => picks.push(p)} filter="color.surface.*" />
+        <ColorTable onSelect={(p) => picks.push(p)} filter="color.surface.**" />
       </SwatchbookProvider>,
     );
     const copy = screen.getAllByLabelText(/Copy value/)[0];

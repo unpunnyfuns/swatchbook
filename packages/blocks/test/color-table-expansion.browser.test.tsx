@@ -58,7 +58,7 @@ describe('ColorTable — expansion', () => {
     });
     render(
       <SwatchbookProvider value={snap}>
-        <ColorTable filter="color.bg.*" variants={{ hover: 'h', disabled: 'd' }} />
+        <ColorTable filter="color.bg.**" variants={{ hover: 'h', disabled: 'd' }} />
       </SwatchbookProvider>,
     );
     const row = screen
@@ -93,7 +93,7 @@ describe('ColorTable — expansion', () => {
     });
     render(
       <SwatchbookProvider value={snap}>
-        <ColorTable filter="color.bg.*" variants={{ hover: 'h' }} />
+        <ColorTable filter="color.bg.**" variants={{ hover: 'h' }} />
       </SwatchbookProvider>,
     );
     const row = screen

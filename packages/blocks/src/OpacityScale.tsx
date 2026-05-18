@@ -3,7 +3,8 @@ import { useMemo } from 'react';
 import './OpacityScale.css';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
-import { globMatch, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface OpacityScaleProps {
   /**
@@ -76,7 +77,7 @@ export function OpacityScale({
       if (token.$type !== type) return false;
       const v = toOpacity(token.$value);
       if (!Number.isFinite(v) || v < 0 || v > 1) return false;
-      return globMatch(path, filter);
+      return matchPath(path, filter);
     });
     return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => {
       const opacity = toOpacity(token.$value);

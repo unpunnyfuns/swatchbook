@@ -50,7 +50,7 @@ async function waitForContent(root: ParentNode, selector: string): Promise<Eleme
  * swatch card whose background resolves to a non-transparent CSS value.
  */
 export const ColorPaletteRenders = meta.story({
-  render: () => <ColorPalette filter="color.surface.*" groupBy={2} />,
+  render: () => <ColorPalette filter="color.surface.**" groupBy={2} />,
   play: async ({ canvasElement }) => {
     const section = await waitForContent(canvasElement, 'section');
     const swatch = section.querySelector<HTMLElement>('[aria-hidden="true"]');
@@ -66,7 +66,7 @@ export const ColorPaletteRenders = meta.story({
  * `TokenTable` must render the expected headers and at least one data row.
  */
 export const TokenTableRenders = meta.story({
-  render: () => <TokenTable filter="color.*" type="color" />,
+  render: () => <TokenTable filter="color.**" type="color" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'tbody tr');
     const headerTexts = [...canvasElement.querySelectorAll('thead th')].map((th) =>
@@ -84,7 +84,7 @@ export const TokenTableRenders = meta.story({
  * tokens with a non-zero value — space.md is 12px).
  */
 export const DimensionScaleRenders = meta.story({
-  render: () => <DimensionScale filter="space.*" />,
+  render: () => <DimensionScale filter="space.**" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'div[aria-hidden="true"]');
     const bars = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -102,7 +102,7 @@ export const DimensionScaleRenders = meta.story({
  * computed style for at least one shadow token.
  */
 export const ShadowPreviewRenders = meta.story({
-  render: () => <ShadowPreview filter="shadow.*" />,
+  render: () => <ShadowPreview filter="shadow.**" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'div[aria-hidden="true"]');
     const samples = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -123,7 +123,7 @@ export const ShadowPreviewRenders = meta.story({
  * that includes `gradient` (the computed shorthand).
  */
 export const GradientPaletteRenders = meta.story({
-  render: () => <GradientPalette filter="gradient.*" />,
+  render: () => <GradientPalette filter="gradient.**" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'div[aria-hidden="true"]');
     const samples = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -143,7 +143,7 @@ export const GradientPaletteRenders = meta.story({
  * `none` for at least one border token.
  */
 export const BorderPreviewRenders = meta.story({
-  render: () => <BorderPreview filter="border.*" />,
+  render: () => <BorderPreview filter="border.**" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'div[aria-hidden="true"]');
     const samples = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -164,7 +164,7 @@ export const BorderPreviewRenders = meta.story({
  * is on — we don't assert behavior there, just that the block renders).
  */
 export const MotionPreviewRenders = meta.story({
-  render: () => <MotionPreview filter="transition.*" />,
+  render: () => <MotionPreview filter="transition.**" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'div[aria-hidden="true"]');
     const balls = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -350,7 +350,7 @@ export const TokenDetailShadowComposite = meta.story({
  * fallback, which is acceptable.
  */
 export const StrokeStyleSampleRenders = meta.story({
-  render: () => <StrokeStyleSample filter="stroke.style.*" />,
+  render: () => <StrokeStyleSample filter="stroke.style.**" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'section, div');
     const lines = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -372,7 +372,7 @@ export const StrokeStyleSampleRenders = meta.story({
  * sample's computed `font-family` must resolve to a non-empty stack.
  */
 export const FontFamilySampleRenders = meta.story({
-  render: () => <FontFamilySample filter="font.family.*" />,
+  render: () => <FontFamilySample filter="font.family.**" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'section, div');
     const paths = [...canvasElement.querySelectorAll('span')].filter((el) =>
@@ -395,7 +395,7 @@ export const FontFamilySampleRenders = meta.story({
  * computed `font-weight` reflecting each token's value.
  */
 export const FontWeightScaleRenders = meta.story({
-  render: () => <FontWeightScale filter="font.weight.*" />,
+  render: () => <FontWeightScale filter="font.weight.**" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'section, div');
     const samples = [...canvasElement.querySelectorAll<HTMLElement>('div')].filter(

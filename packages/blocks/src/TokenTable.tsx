@@ -9,7 +9,8 @@ import { themeAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
-import { globMatch, resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface TokenTableProps {
   /**
@@ -67,7 +68,7 @@ export function TokenTable({
 
   const rows = useMemo(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
-      if (!globMatch(path, filter)) return false;
+      if (!matchPath(path, filter)) return false;
       if (type && token.$type !== type) return false;
       return true;
     });

@@ -46,7 +46,7 @@ describe('ColorPalette', () => {
   it('narrows to the filter subtree and derives groupBy from it', () => {
     render(
       <SwatchbookProvider value={makeSnapshot()}>
-        <ColorPalette filter="color.*" />
+        <ColorPalette filter="color.**" />
       </SwatchbookProvider>,
     );
     // `color.*` has fixed length 1. Auto groupBy clamps so every swatch
@@ -63,7 +63,7 @@ describe('ColorPalette', () => {
     // their shade as the leaf.
     render(
       <SwatchbookProvider value={makeSnapshot()}>
-        <ColorPalette filter="color.palette.blue.*" />
+        <ColorPalette filter="color.palette.blue.**" />
       </SwatchbookProvider>,
     );
     screen.getByText('color.palette.blue');
@@ -73,7 +73,7 @@ describe('ColorPalette', () => {
   it('shows the empty state when the filter matches no color tokens', () => {
     render(
       <SwatchbookProvider value={makeSnapshot()}>
-        <ColorPalette filter="typography.*" />
+        <ColorPalette filter="typography.**" />
       </SwatchbookProvider>,
     );
     screen.getByText('No color tokens match this filter.');

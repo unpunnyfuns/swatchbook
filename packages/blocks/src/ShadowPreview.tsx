@@ -6,7 +6,8 @@ import { useColorFormat } from '#/contexts.ts';
 import { type ColorFormat, formatColor } from '#/format-color.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
-import { globMatch, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
 
 export interface ShadowPreviewProps {
@@ -86,7 +87,7 @@ export function ShadowPreview({
   const rows = useMemo<Row[]>(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
       if (token.$type !== 'shadow') return false;
-      return globMatch(path, filter);
+      return matchPath(path, filter);
     });
     return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
       path,

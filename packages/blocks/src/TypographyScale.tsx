@@ -3,7 +3,8 @@ import { useMemo } from 'react';
 import './TypographyScale.css';
 import type { TypographyValue } from '#/internal/composite-types.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
-import { globMatch, useProject } from '#/internal/use-project.ts';
+import { useProject } from '#/internal/use-project.ts';
+import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 
 /**
@@ -95,7 +96,7 @@ export function TypographyScale({
   const rows = useMemo<Row[]>(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
       if (token.$type !== 'typography') return false;
-      return globMatch(path, filter);
+      return matchPath(path, filter);
     });
     return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => {
       const value = token.$value;

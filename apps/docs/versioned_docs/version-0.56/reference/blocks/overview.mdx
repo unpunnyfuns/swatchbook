@@ -58,7 +58,7 @@ Every block in this group scopes to one DTCG `$type`, filters / sorts, and rende
 ### ColorPalette
 
 ```tsx
-<ColorPalette filter="color.palette.*" />
+<ColorPalette filter="color.palette.**" />
 ```
 
 Swatch grid grouped by dot-path prefix. `groupBy` is auto-derived from the filter's fixed-prefix depth but can be overridden. Default sort is `'path'`; `'value'` orders colors perceptually via oklch **L → C → H** so ramps read light → dark and warm → cool.
@@ -66,7 +66,7 @@ Swatch grid grouped by dot-path prefix. `groupBy` is auto-derived from the filte
 ### ColorTable
 
 ```tsx
-<ColorTable filter="color.*" />
+<ColorTable filter="color.**" />
 ```
 
 Tabular, color-only companion to `TokenTable`. One row per `$type: color` token with swatch, name, value (in the active color format from the toolbar toggle), CSS var, and alias-target columns. Each value cell has a hover-revealed copy-to-clipboard button. Fuzzy search across path + value.
@@ -77,7 +77,7 @@ Clicking a row expands it inline — the detail panel surfaces `$description`, t
 
 ```tsx
 <ColorTable
-  filter="color.bg.*"
+  filter="color.bg.**"
   variants={{ hover: 'hover', disabled: 'disabled' }}
 />
 ```
@@ -131,7 +131,7 @@ Same sample text rendered at each `fontWeight` primitive. Defaults to `sortBy: '
 ### OpacityScale
 
 ```tsx
-<OpacityScale filter="number.opacity.*" />
+<OpacityScale filter="number.opacity.**" />
 ```
 
 One card per opacity token: the sample colour rendered at that opacity over a checkerboard backdrop, so the transparency reads visually. Only `$type: 'number'` (or `'opacity'`) tokens whose `$value` is a finite number in `[0, 1]` are picked up — non-opacity `number` siblings (`line-height`, `z-index`) fall out naturally.
