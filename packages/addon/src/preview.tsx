@@ -9,6 +9,7 @@ import type { Decorator, Preview } from '@storybook/react-vite';
 import { useEffect, useMemo } from 'react';
 import { addons } from 'storybook/preview-api';
 import { dataAttr } from '@unpunnyfuns/swatchbook-core/data-attr';
+import { tupleToName } from '@unpunnyfuns/swatchbook-core/themes';
 // Side-effect import for integrations that opted into `autoInject`
 // (e.g. Tailwind's `@theme` block). When no integration opts in, the
 // virtual module body is empty — still a valid no-op.
@@ -92,15 +93,14 @@ function forEachPinnedAxis(cb: (name: string, value: string) => void): void {
 }
 
 /**
- * Compose a stable theme name from a tuple — the same `Light · Brand A
- * · Normal` form `permutationID` produced server-side. Used for the
- * `data-<prefix>-theme` attribute and the `swatchbook/theme` channel
- * signal. Returns empty string when there are no axes (no name to
- * write).
+ * Compose a stable theme name from a tuple — `axisValues.join(' · ')`
+ * in axis order. Used for the `data-<prefix>-theme` attribute and the
+ * `swatchbook/theme` channel signal. Returns empty string when there
+ * are no axes (no name to write).
  */
 function matchPermutationName(tuple: Readonly<Record<string, string>>): string {
   if (virtualAxes.length === 0) return '';
-  return virtualAxes.map((axis) => tuple[axis.name] ?? axis.default).join(' · ');
+  return tupleToName(virtualAxes, tuple);
 }
 
 /**

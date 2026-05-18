@@ -1,5 +1,6 @@
 import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
 import { makeCssVar } from '@unpunnyfuns/swatchbook-core/css-var';
+import { tupleToName } from '@unpunnyfuns/swatchbook-core/themes';
 import type { Axis, Cells, JointOverrides, TokenMap } from '@unpunnyfuns/swatchbook-core';
 import { useEffect, useMemo } from 'react';
 import type { VirtualTokenListingShape, VirtualVarianceByPathShape } from '#/contexts.ts';
@@ -62,19 +63,6 @@ function defaultTuple(axes: readonly VirtualAxis[]): Record<string, string> {
   const out: Record<string, string> = {};
   for (const axis of axes) out[axis.name] = axis.default;
   return out;
-}
-
-/**
- * Synthesize a permutation name from a tuple — same form
- * `permutationID` produces server-side (axis values joined by ` · `).
- * Used by the AxisVariance grid for `data-<prefix>-theme` attribution
- * and similar display-only callers.
- */
-function tupleToName(
-  axes: readonly VirtualAxis[],
-  tuple: Readonly<Record<string, string>>,
-): string {
-  return axes.map((a) => tuple[a.name] ?? a.default).join(' · ');
 }
 
 /**

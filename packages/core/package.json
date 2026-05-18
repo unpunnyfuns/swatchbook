@@ -50,6 +50,10 @@
     "./snapshot-for-wire": {
       "types": "./dist/snapshot-for-wire.d.mts",
       "import": "./dist/snapshot-for-wire.mjs"
+    },
+    "./themes": {
+      "types": "./dist/themes.d.mts",
+      "import": "./dist/themes.mjs"
     }
   },
   "imports": {
@@ -60,7 +64,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsdown src/index.ts src/fuzzy.ts src/resolve-at.ts src/css-var.ts src/data-attr.ts src/snapshot-for-wire.ts --format esm --dts --clean --sourcemap",
+    "build": "tsdown src/index.ts src/fuzzy.ts src/resolve-at.ts src/css-var.ts src/data-attr.ts src/snapshot-for-wire.ts src/themes.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
