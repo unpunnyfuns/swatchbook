@@ -1,6 +1,7 @@
 import cx from 'clsx';
 import React, { type KeyboardEvent, type ReactElement } from 'react';
 import './ThemeSwitcher.css';
+import { presetTuple } from '#/preset-tuple.ts';
 import type { SwitcherAxis, SwitcherPreset } from '#/types.ts';
 
 export interface ThemeSwitcherProps {
@@ -200,28 +201,6 @@ function AxisSection({ axis, active, onSelect }: AxisSectionProps): ReactElement
 function displayLabelFor(axis: SwitcherAxis): string {
   if (axis.source === 'synthetic' && axis.name === 'theme') return 'Permutation';
   return axis.name;
-}
-
-/**
- * Compose a preset's sanitized partial tuple with the axis defaults, so
- * applying a preset that only names some axes leaves the omitted ones at
- * their defaults (not blank). Mirrors the addon preview decorator's own
- * fallback logic so what the switcher sends out matches what the host
- * honors.
- */
-function presetTuple(
-  preset: SwitcherPreset,
-  axes: readonly SwitcherAxis[],
-  defaults: Readonly<Record<string, string>>,
-): Record<string, string> {
-  const out: Record<string, string> = { ...defaults };
-  for (const axis of axes) {
-    const candidate = preset.axes[axis.name];
-    if (candidate !== undefined && axis.contexts.includes(candidate)) {
-      out[axis.name] = candidate;
-    }
-  }
-  return out;
 }
 
 function tuplesEqual(

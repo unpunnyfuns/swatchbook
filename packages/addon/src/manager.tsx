@@ -1,4 +1,5 @@
-import { ThemeSwitcher } from '@unpunnyfuns/swatchbook-switcher';
+import { presetTuple, ThemeSwitcher } from '@unpunnyfuns/swatchbook-switcher';
+import { COLOR_FORMATS } from '@unpunnyfuns/swatchbook-blocks';
 import { type ColorFormat, ColorFormatSelector } from '#/ColorFormatSelector.tsx';
 import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { IconButton, WithTooltipPure } from 'storybook/internal/components';
@@ -58,27 +59,6 @@ function defaultTupleFor(axes: readonly AxisEntry[]): Record<string, string> {
   return out;
 }
 
-/**
- * Compose a preset's sanitized partial tuple with the axis defaults, so
- * applying a preset that only names some axes leaves the omitted ones at
- * their defaults (not blank). Mirrors the preview decorator's own fallback
- * logic so what the toolbar sends out is what the decorator honors.
- */
-function presetTuple(
-  preset: PresetEntry,
-  axes: readonly AxisEntry[],
-  defaults: Readonly<Record<string, string>>,
-): Record<string, string> {
-  const out: Record<string, string> = { ...defaults };
-  for (const axis of axes) {
-    const candidate = preset.axes[axis.name];
-    if (candidate !== undefined && axis.contexts.includes(candidate)) {
-      out[axis.name] = candidate;
-    }
-  }
-  return out;
-}
-
 function AxesToolbar(): ReactElement {
   const [globals, updateGlobals] = useGlobals();
   const api = useStorybookApi();
@@ -111,12 +91,9 @@ function AxesToolbar(): ReactElement {
     rawTuple && typeof rawTuple === 'object' ? (rawTuple as Record<string, string>) : undefined;
   const rawColorFormat = globals[COLOR_FORMAT_GLOBAL_KEY];
   const activeColorFormat: ColorFormat =
-    rawColorFormat === 'hex' ||
-    rawColorFormat === 'rgb' ||
-    rawColorFormat === 'hsl' ||
-    rawColorFormat === 'oklch' ||
-    rawColorFormat === 'raw'
-      ? rawColorFormat
+    typeof rawColorFormat === 'string' &&
+    (COLOR_FORMATS as readonly string[]).includes(rawColorFormat)
+      ? (rawColorFormat as ColorFormat)
       : 'hex';
 
   const activeTuple = useMemo<Record<string, string>>(() => {

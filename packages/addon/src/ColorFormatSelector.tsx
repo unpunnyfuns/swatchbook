@@ -1,4 +1,7 @@
+import { type ColorFormat } from '@unpunnyfuns/swatchbook-blocks';
 import React, { type ReactElement } from 'react';
+
+export type { ColorFormat };
 
 /**
  * Storybook-addon-specific pill row for picking how color sub-values
@@ -15,8 +18,6 @@ import React, { type ReactElement } from 'react';
  * Uses `React.createElement` (via `h`) to survive embedding in Storybook's
  * manager bundle, which doesn't expose `react/jsx-runtime`.
  */
-
-export type ColorFormat = 'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw';
 
 const COLOR_FORMAT_OPTIONS: readonly { id: ColorFormat; label: string }[] = [
   { id: 'hex', label: 'Hex' },
