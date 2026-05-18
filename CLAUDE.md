@@ -10,7 +10,7 @@ When a proposal frames swatchbook as owning transform logic, custom naming schem
 
 ## Current state
 
-`v0.20.1 shipped`. Six published packages in a fixed-version Changesets group — `core`, `addon`, `blocks`, `switcher`, `integrations`, `mcp` — plus private workspaces (`tokens`, `apps/docs`, `apps/storybook`). Documentation site at https://unpunnyfuns.github.io/swatchbook/ with Docusaurus 3.10 + Faster (Rspack); single versioned snapshot per minor under `apps/docs/versioned_docs/`. Pre-1.0; routine breaking changes take a **minor** bump.
+`v0.20.1 shipped`. Six published packages in a fixed-version Changesets group — `core`, `addon`, `blocks`, `switcher`, `integrations`, `mcp` — plus private workspaces (`tokens`, `apps/docs`, `apps/storybook`). Documentation site at https://unpunnyfuns.github.io/swatchbook/ with Docusaurus 3.10 + Faster (Rspack); pre-1.0 the site keeps **one stable snapshot under `apps/docs/versioned_docs/version-<minor>/` plus current `docs/` at `/next/`** — every release wipes the previous snapshot rather than archiving it, because per-minor breaking changes make older snapshots actively misleading. Pre-1.0; routine breaking changes take a **minor** bump.
 
 Architectural pillars settled this era:
 
@@ -102,7 +102,7 @@ claude
 - **Pre-1.0 semver:** routine breaking changes take a `minor` bump. No `!` in PR titles. Each major is a deliberate stability commitment, not "this PR happens to break something."
 - **Writing a changeset:** PRs with user-visible changes run `pnpm changeset` locally and commit the generated `.changeset/*.md`. Internal-only refactors can skip it. **Docs-only PRs add a `patch` changeset** so the snapshot script rebuilds the current minor's snapshot on release — without it, the docs fix only reaches `/next/`, not `/`.
 - **Publishing flow:** Changesets' GitHub Action opens a "Version Packages" PR on `main` that consumes queued `.changeset/*.md` entries and bumps versions. Merging runs `pnpm release` → `changeset publish` via trusted publishing (GitHub OIDC → short-lived npm token; provenance attestation on). See `.github/workflows/release.yml`.
-- **Docs versioning:** `scripts/snapshot-docs-version.mjs` snapshots `apps/docs/docs/` into `apps/docs/versioned_docs/version-<minor>/` and updates `versions.json` + `versioned_sidebars/`. Runs as part of the release. Turbo's `build` task includes the snapshot dirs in its input hash so the cache invalidates when a snapshot lands.
+- **Docs versioning:** `scripts/snapshot-docs-version.mjs` runs as part of the release. Drops every prior `version-*/` dir + sidebar, resets `versions.json` to `[]`, then snapshots current `apps/docs/docs/` into `apps/docs/versioned_docs/version-<minor>/`. Steady state: one stable snapshot on `/`, current `docs/` on `/next/`. Turbo's `build` task includes the snapshot dirs in its input hash so the cache invalidates when a snapshot lands.
 
 ## Plan governance
 
