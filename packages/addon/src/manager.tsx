@@ -3,7 +3,7 @@ import { COLOR_FORMATS, ColorFormatSelector } from '#/ColorFormatSelector.tsx';
 import type { ColorFormat } from '#/ColorFormatSelector.tsx';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
-import { IconButton, WithTooltipPure } from 'storybook/internal/components';
+import { Button, ToggleButton, WithTooltip } from 'storybook/internal/components';
 import { addons, types, useGlobals, useStorybookApi } from 'storybook/manager-api';
 import type {
   InitPayload,
@@ -169,7 +169,7 @@ function AxesToolbar(): ReactElement {
   }, [open]);
 
   /**
-   * `WithTooltipPure`'s built-in `closeOnOutsideClick` misses some cases
+   * `WithTooltip`'s built-in `closeOnOutsideClick` misses some cases
    * (portaled popover + manager iframe boundaries). Belt-and-suspenders:
    * close when the user mouses down anywhere that isn't the trigger wrapper
    * or the popover body.
@@ -201,27 +201,35 @@ function AxesToolbar(): ReactElement {
 
   if (axes.length === 0) {
     return h(
-      IconButton,
-      { key: TOOL_ID, title: 'Swatchbook theme (loading…)', disabled: true },
+      Button,
+      {
+        key: TOOL_ID,
+        ariaLabel: 'Swatchbook theme (loading…)',
+        tooltip: 'Swatchbook theme (loading…)',
+        disabled: true,
+      },
       h(SwatchbookIcon),
     );
   }
 
   const summary = axes.map((a) => activeTuple[a.name] ?? a.default).join(' · ');
-  const title = `Swatchbook · ${summary}`;
+  const label = `Swatchbook · ${summary}`;
 
   const button = h(
-    IconButton,
+    ToggleButton,
     {
       key: TOOL_ID,
-      title,
-      active: open,
+      ariaLabel: label,
+      tooltip: label,
+      pressed: open,
       onClick: () => setOpen((prev) => !prev),
-      // Screen-reader disclosure semantics for the popover trigger. We
-      // don't set `aria-controls` because the popover is portaled by
-      // Storybook's `WithTooltipPure` with a dynamically-generated id we
-      // don't have a stable handle on; `aria-haspopup` + `aria-expanded`
-      // is the practical subset of the disclosure pattern.
+      /**
+       * Screen-reader disclosure semantics for the popover trigger. We
+       * don't set `aria-controls` because the popover is portaled by
+       * Storybook's `WithTooltip` with a dynamically-generated id we
+       * don't have a stable handle on; `aria-haspopup` + `aria-expanded`
+       * is the practical subset of the disclosure pattern.
+       */
       'aria-haspopup': 'dialog' as const,
       'aria-expanded': open,
     },
@@ -252,7 +260,7 @@ function AxesToolbar(): ReactElement {
   return h(
     'span',
     { ref: bodyRef, style: { display: 'inline-flex', alignItems: 'center' } },
-    h(WithTooltipPure, {
+    h(WithTooltip, {
       placement: 'bottom',
       trigger: 'click',
       visible: open,
