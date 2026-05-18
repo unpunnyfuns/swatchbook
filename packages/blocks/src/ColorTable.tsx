@@ -1,7 +1,7 @@
 import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import cx from 'clsx';
 import type { ReactElement } from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useDeferredValue, useMemo, useState } from 'react';
 import './ColorTable.css';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
@@ -103,6 +103,7 @@ export function ColorTable({
   const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
   const colorFormat = useColorFormat();
   const [query, setQuery] = useState('');
+  const deferredQuery = useDeferredValue(query);
   const [selectedByBase, setSelectedByBase] = useState<Record<string, string>>({});
   const [expandedByBase, setExpandedByBase] = useState<ReadonlySet<string>>(() => new Set());
 
@@ -152,9 +153,9 @@ export function ColorTable({
   }, [resolved, filter, project, sortBy, sortDir, defs, colorFormat]);
 
   const visibleGroups = useMemo(() => {
-    if (!searchable || query.trim() === '') return groups;
-    return fuzzyFilter(groups, query, (g) => g.searchText);
-  }, [groups, query, searchable]);
+    if (!searchable || deferredQuery.trim() === '') return groups;
+    return fuzzyFilter(groups, deferredQuery, (g) => g.searchText);
+  }, [groups, deferredQuery, searchable]);
 
   const totalTokens = useMemo(() => groups.reduce((n, g) => n + g.variants.length, 0), [groups]);
 
