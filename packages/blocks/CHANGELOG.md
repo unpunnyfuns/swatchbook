@@ -1,5 +1,30 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.58.1
+
+### Patch Changes
+
+- acfb0a5: Wrap the search-query state with `useDeferredValue` in `<TokenTable>`, `<TokenNavigator>`, and `<ColorTable>`. The input controls the immediate `query` (still re-renders on every keystroke so the field stays responsive), but the heavy memos — `fuzzyFilter` scans, `pruneTreeForMatches` rebuilds, group visibility — key off the deferred copy and run at React's chosen tempo. Keystroke latency stops scaling with token count on large projects.
+- 12a9059: Two small perf fixes in blocks:
+
+  - `GroupRow` in `<ColorTable>` is now wrapped in `React.memo`. Every variant-pill click or row-expand mutates `selectedByBase` / `expandedByBase` at the parent, but with no memo every row re-rendered on each mutation. With `memo` only the affected row re-renders; the parent's existing `useCallback`-wrapped handlers carry stable identity.
+  - `<Diagnostics>` collapsed the three separate traversals over `diagnostics` (`summaryText` for counts, `hasErrorsOrWarnings` for the open-flag, `summaryVariant` for the className) into one `summarize()` walk that returns `{ text, variant, hasErrorsOrWarnings }`. Wrapped in `useMemo` keyed on `diagnostics` so the walk only runs when the array identity changes.
+
+- 63541d6: Narrow `useMemo` dep arrays in `TokenTable`, `ColorPalette`, `ColorTable`, and the addon preview decorator to the specific fields each memo body actually consumes. Previously they depended on the whole `project` / `globals` / `parameters` object — token-value HMR or Storybook's per-render object recreation invalidated downstream memos even when the consumed fields were unchanged.
+
+  - `resolveCssVar` and `resolveColorValue` in `packages/blocks/src/internal/use-project.ts` now take `Pick<ProjectData, 'listing' | 'cssVarPrefix'>` and `Pick<ProjectData, 'listing'>` respectively. Existing callers passing the full `ProjectData` keep working via structural subtyping.
+  - `resolveTuple` and `resolveColorFormat` in `packages/addon/src/preview.tsx` take their inputs directly (`axesGlobal` + `paramSwatchbook` / `colorFormatGlobal`) instead of the broader `SwatchbookGlobals` + `StoryParameters` bags.
+
+- ea60c22: `<TokenNavigator>` perf cleanup:
+
+  - `LeafPreview` and `LeafRow` are now wrapped in `React.memo`. `LeafPreview` resolves CSS vars + formats values per leaf — on every keystroke the search query churns `flatVisible`, which previously re-rendered every leaf row and its preview. With memo, leaves with unchanged props skip rerendering. `LeafRow` takes `isFocused` as a pre-computed boolean (instead of receiving the full `focusedPath` string and re-deriving it internally) so focus shifts only re-render the previously- and newly-focused rows.
+  - The focused-path repair effect (`useEffect` that called `setFocusedPath` based on `flatVisible`) is replaced with a `useMemo` that derives the visible focused path during render from the user-driven `storedFocus` plus `flatVisible`. Removes the deriving-state-in-effect anti-pattern; no spurious extra render per keystroke.
+  - The DOM-sync `useEffect` that calls `node.focus()` when the active path moves stays in place — it's a legitimate DOM side-effect, not state derivation.
+
+  `TreeNodeRow` itself is intentionally not wrapped in `memo`. Its `expanded: Set` prop changes identity on every toggle, which would defeat memoization anyway; group rows are also cheap relative to leaf rows.
+
+  - @unpunnyfuns/swatchbook-core@0.58.1
+
 ## 0.58.0
 
 ### Minor Changes

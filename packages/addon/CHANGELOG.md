@@ -1,5 +1,22 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.58.1
+
+### Patch Changes
+
+- 63541d6: Narrow `useMemo` dep arrays in `TokenTable`, `ColorPalette`, `ColorTable`, and the addon preview decorator to the specific fields each memo body actually consumes. Previously they depended on the whole `project` / `globals` / `parameters` object — token-value HMR or Storybook's per-render object recreation invalidated downstream memos even when the consumed fields were unchanged.
+
+  - `resolveCssVar` and `resolveColorValue` in `packages/blocks/src/internal/use-project.ts` now take `Pick<ProjectData, 'listing' | 'cssVarPrefix'>` and `Pick<ProjectData, 'listing'>` respectively. Existing callers passing the full `ProjectData` keep working via structural subtyping.
+  - `resolveTuple` and `resolveColorFormat` in `packages/addon/src/preview.tsx` take their inputs directly (`axesGlobal` + `paramSwatchbook` / `colorFormatGlobal`) instead of the broader `SwatchbookGlobals` + `StoryParameters` bags.
+
+- Updated dependencies [acfb0a5]
+- Updated dependencies [12a9059]
+- Updated dependencies [63541d6]
+- Updated dependencies [ea60c22]
+  - @unpunnyfuns/swatchbook-blocks@0.58.1
+  - @unpunnyfuns/swatchbook-core@0.58.1
+  - @unpunnyfuns/swatchbook-switcher@0.58.1
+
 ## 0.58.0
 
 ### Minor Changes
