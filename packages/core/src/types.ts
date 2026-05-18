@@ -165,26 +165,15 @@ export interface AxisConfig {
   default: string;
 }
 
-/** Swatchbook configuration. Supply either `resolver` or `axes`, not both. */
-export interface Config {
-  /**
-   * Glob patterns for base DTCG token files.
-   *
-   * Required when neither `resolver` nor `axes` is set (plain-parse mode),
-   * and when `axes` is set (the layered loader needs a base token list).
-   *
-   * Optional when `resolver` is set: the resolver's own `$ref` targets
-   * fully determine which files get loaded, and the addon's Vite plugin
-   * derives HMR watch paths from the resolved source list. Supplying
-   * `tokens` alongside `resolver` overrides the watch path derivation —
-   * useful when you want HMR to watch directories broader than the
-   * resolver references directly.
-   */
-  tokens?: string[];
-  /** Path to a DTCG 2025.10 resolver file. Mutually exclusive with `axes`. */
-  resolver?: string;
-  /** Authored layered axes. Mutually exclusive with `resolver`. */
-  axes?: AxisConfig[];
+/**
+ * Fields shared across every swatchbook config variant. The three
+ * discriminated subtypes (`ResolverConfig`, `LayeredConfig`,
+ * `PlainConfig`) extend this with their own load-strategy fields plus
+ * `?: never` rejections of the other variants' fields, so an invalid
+ * combination (`resolver` + `axes`, `axes` without `tokens`) is a
+ * compile error before it ever reaches the loader's runtime checks.
+ */
+interface CommonConfig {
   /**
    * Initial active tuple (`{ axisName: contextName }`). Any axis the tuple
    * omits falls back to that axis's own `default`. Unknown axis keys or
@@ -260,6 +249,56 @@ export interface Config {
    */
   terrazzoPlugins?: readonly Plugin[];
 }
+
+/**
+ * Resolver-driven config — axes derived from a DTCG 2025.10 resolver
+ * file's modifiers. `tokens` is optional: the resolver's own `$ref`
+ * targets determine which files get loaded, and the addon's Vite
+ * plugin derives HMR watch paths from the resolved source list.
+ * Supplying `tokens` alongside `resolver` overrides the watch-path
+ * derivation — useful when you want HMR to watch directories broader
+ * than the resolver references directly.
+ */
+export interface ResolverConfig extends CommonConfig {
+  resolver: string;
+  tokens?: string[];
+  /** Mutually exclusive with `resolver`. */
+  axes?: never;
+}
+
+/**
+ * Layered-axes config — authored axes with per-context overlay globs
+ * that layer onto the base `tokens`. The base `tokens` is required:
+ * the layered loader needs a base layer to overlay against.
+ */
+export interface LayeredConfig extends CommonConfig {
+  axes: AxisConfig[];
+  tokens: string[];
+  /** Mutually exclusive with `axes`. */
+  resolver?: never;
+}
+
+/**
+ * Plain-parse config — single synthetic axis (`theme`), no resolver,
+ * no overlays. Just parses the `tokens` globs and exposes a one-cell
+ * project. The fallback for the simplest "I just have token files"
+ * case.
+ */
+export interface PlainConfig extends CommonConfig {
+  tokens: string[];
+  resolver?: never;
+  axes?: never;
+}
+
+/**
+ * Swatchbook configuration. Discriminated by which load-strategy
+ * field is present: `resolver` (resolver-driven), `axes` (layered),
+ * or neither (plain-parse). Invalid combinations (`resolver` + `axes`,
+ * `axes` without `tokens`) are compile-time errors; the loader still
+ * checks at runtime as defense-in-depth for JS callers that bypass
+ * the type system.
+ */
+export type Config = ResolverConfig | LayeredConfig | PlainConfig;
 
 export type DiagnosticSeverity = 'error' | 'warn' | 'info';
 

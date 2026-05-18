@@ -12,6 +12,10 @@ import { normalizePermutations } from '#/permutations/normalize.ts';
 import type { Config } from '#/types.ts';
 
 it('throws when both `resolver` and `axes` are supplied', async () => {
+  // @ts-expect-error — invalid construct on purpose. The discriminated
+  // Config union rejects this at compile time (resolver?: never on
+  // LayeredConfig, axes?: never on ResolverConfig); the runtime throw
+  // is defense-in-depth for JS callers bypassing the type system.
   const config: Config = {
     resolver: 'whatever.json',
     axes: [{ name: 'mode', contexts: { Light: [], Dark: [] }, default: 'Light' }],
@@ -22,6 +26,9 @@ it('throws when both `resolver` and `axes` are supplied', async () => {
 });
 
 it('throws when `axes` is set but `tokens` is missing', async () => {
+  // @ts-expect-error — invalid construct on purpose. LayeredConfig
+  // requires `tokens: string[]`; this would fail at compile time. The
+  // runtime throw is defense-in-depth for JS callers.
   const config: Config = {
     axes: [{ name: 'mode', contexts: { Light: [], Dark: [] }, default: 'Light' }],
   };
