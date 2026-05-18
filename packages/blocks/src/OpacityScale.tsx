@@ -2,7 +2,8 @@ import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
 import './OpacityScale.css';
 import { themeAttrs } from '#/internal/data-attr.ts';
-import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
+import { sortTokens } from '#/internal/sort-tokens.ts';
+import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 

@@ -1,10 +1,10 @@
 import { pathToFileURL } from 'node:url';
-import { build, defineConfig, Logger, type Plugin } from '@terrazzo/parser';
-import cssPlugin, { type CSSPluginOptions } from '@terrazzo/plugin-css';
-import tokenListingPlugin, {
-  type ListedToken,
-  type TokenListingPluginOptions,
-} from '@terrazzo/plugin-token-listing';
+import { build, defineConfig, Logger } from '@terrazzo/parser';
+import type { Plugin } from '@terrazzo/parser';
+import cssPlugin from '@terrazzo/plugin-css';
+import type { CSSPluginOptions } from '@terrazzo/plugin-css';
+import tokenListingPlugin from '@terrazzo/plugin-token-listing';
+import type { ListedToken, TokenListingPluginOptions } from '@terrazzo/plugin-token-listing';
 import { makeCSSVar } from '@terrazzo/token-tools/css';
 import type { Diagnostic, ParserInput } from '#/types.ts';
 

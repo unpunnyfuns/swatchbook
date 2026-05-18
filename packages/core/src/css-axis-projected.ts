@@ -4,7 +4,8 @@ import { CHROME_ROLES, CHROME_VAR_PREFIX, DEFAULT_CHROME_MAP } from '#/chrome.ts
 import { cssEscape } from '#/css-escape.ts';
 import { dataAttr } from '#/data-attr.ts';
 import type { Project, TokenMap } from '#/types.ts';
-import { analyzeProjectVariance, type VarianceInfo } from '#/variance-analysis.ts';
+import { analyzeProjectVariance } from '#/variance-analysis.ts';
+import type { VarianceInfo } from '#/variance-analysis.ts';
 
 /**
  * Internal alias: the raw Terrazzo-shape map this emitter passes into

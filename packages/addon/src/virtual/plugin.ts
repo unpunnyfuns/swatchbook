@@ -1,7 +1,8 @@
 import type { Config, Project, SwatchbookIntegration } from '@unpunnyfuns/swatchbook-core';
 import { emitAxisProjectedCss, loadProject } from '@unpunnyfuns/swatchbook-core';
 import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
-import { type FSWatcher, watch as fsWatch } from 'node:fs';
+import { watch as fsWatch } from 'node:fs';
+import type { FSWatcher } from 'node:fs';
 import { basename, dirname, isAbsolute, resolve as resolvePath } from 'node:path';
 import picomatch from 'picomatch';
 import type { Plugin } from 'vite';

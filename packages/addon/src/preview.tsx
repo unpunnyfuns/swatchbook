@@ -31,12 +31,11 @@ import {
 import {
   AxesContext,
   COLOR_FORMATS,
-  type ColorFormat,
   ColorFormatContext,
-  type ProjectSnapshot,
   SwatchbookContext,
   ThemeContext,
 } from '@unpunnyfuns/swatchbook-blocks';
+import type { ColorFormat, ProjectSnapshot } from '@unpunnyfuns/swatchbook-blocks';
 import {
   AXES_GLOBAL_KEY,
   COLOR_FORMAT_GLOBAL_KEY,

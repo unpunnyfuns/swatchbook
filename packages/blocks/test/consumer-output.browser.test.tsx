@@ -1,11 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import {
-  ConsumerOutput,
-  type ProjectSnapshot,
-  SwatchbookProvider,
-  type VirtualTokenListingShape,
-} from '#/index.ts';
+import { ConsumerOutput, SwatchbookProvider } from '#/index.ts';
+import type { ProjectSnapshot, VirtualTokenListingShape } from '#/index.ts';
 
 function makeSnapshot(
   listing?: Readonly<Record<string, VirtualTokenListingShape>>,

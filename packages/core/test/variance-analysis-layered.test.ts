@@ -13,7 +13,8 @@ import { dirname, resolve } from 'node:path';
 import { beforeAll, expect, it } from 'vitest';
 import { loadProject } from '#/load.ts';
 import type { Config, Project } from '#/types.ts';
-import { analyzeProjectVariance, type VarianceInfo } from '#/variance-analysis.ts';
+import { analyzeProjectVariance } from '#/variance-analysis.ts';
+import type { VarianceInfo } from '#/variance-analysis.ts';
 
 let layeredProject: Project;
 let variance: Map<string, VarianceInfo>;

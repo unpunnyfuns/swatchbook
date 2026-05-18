@@ -1,5 +1,6 @@
 import cx from 'clsx';
-import React, { type KeyboardEvent, type ReactElement } from 'react';
+import React from 'react';
+import type { KeyboardEvent, ReactElement } from 'react';
 import './ThemeSwitcher.css';
 import { presetTuple } from '#/preset-tuple.ts';
 import type { SwitcherAxis, SwitcherPreset } from '#/types.ts';

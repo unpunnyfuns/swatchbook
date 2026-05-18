@@ -4,14 +4,8 @@ import { createRequire } from 'node:module';
 import { isAbsolute, resolve as resolvePath } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { defineConfig as defineTerrazzoConfig, loadResolver, parse } from '@terrazzo/parser';
-import {
-  permutationID,
-  type Axis,
-  type Diagnostic,
-  type ParserInput,
-  type Permutation,
-  type TokenMap,
-} from '#/types.ts';
+import { permutationID } from '#/types.ts';
+import type { Axis, Diagnostic, ParserInput, Permutation, TokenMap } from '#/types.ts';
 import type { BufferedLogger } from '#/diagnostics.ts';
 import { collectGlobbedFiles } from '#/permutations/util.ts';
 

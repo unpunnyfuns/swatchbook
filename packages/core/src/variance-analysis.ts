@@ -1,4 +1,5 @@
-import { permutationID, type Project, type TokenMap } from '#/types.ts';
+import { permutationID } from '#/types.ts';
+import type { Project, TokenMap } from '#/types.ts';
 import { valueKey } from '#/value-key.ts';
 
 /**

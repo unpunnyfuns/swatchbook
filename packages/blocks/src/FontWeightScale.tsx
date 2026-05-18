@@ -3,7 +3,8 @@ import { useMemo } from 'react';
 import './FontWeightScale.css';
 import { cssVarAsNumber } from '#/internal/css-var-style.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
-import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
+import { sortTokens } from '#/internal/sort-tokens.ts';
+import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 

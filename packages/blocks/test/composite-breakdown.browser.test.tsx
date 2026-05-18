@@ -1,6 +1,7 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { CompositeBreakdown, type ProjectSnapshot, SwatchbookProvider } from '#/index.ts';
+import { CompositeBreakdown, SwatchbookProvider } from '#/index.ts';
+import type { ProjectSnapshot } from '#/index.ts';
 
 function makeSnapshot(): ProjectSnapshot {
   return {

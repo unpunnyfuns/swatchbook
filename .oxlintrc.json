@@ -10,7 +10,8 @@
     "no-unused-vars": "warn",
     "typescript/no-explicit-any": "error",
     "react/react-in-jsx-scope": "off",
-    "import/no-unassigned-import": "off"
+    "import/no-unassigned-import": "off",
+    "import/consistent-type-specifier-style": ["error", "prefer-top-level"]
   },
   "overrides": [
     {

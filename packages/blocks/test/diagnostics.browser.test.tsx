@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { Diagnostics, type ProjectSnapshot, SwatchbookProvider } from '#/index.ts';
+import { Diagnostics, SwatchbookProvider } from '#/index.ts';
+import type { ProjectSnapshot } from '#/index.ts';
 
 function makeSnapshot(diagnostics: ProjectSnapshot['diagnostics'] = []): ProjectSnapshot {
   return {

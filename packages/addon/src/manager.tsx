@@ -1,12 +1,14 @@
 import { presetTuple, ThemeSwitcher } from '@unpunnyfuns/swatchbook-switcher';
-import { COLOR_FORMATS, type ColorFormat, ColorFormatSelector } from '#/ColorFormatSelector.tsx';
-import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
+import { COLOR_FORMATS, ColorFormatSelector } from '#/ColorFormatSelector.tsx';
+import type { ColorFormat } from '#/ColorFormatSelector.tsx';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
 import { IconButton, WithTooltipPure } from 'storybook/internal/components';
 import { addons, types, useGlobals, useStorybookApi } from 'storybook/manager-api';
-import {
-  type InitPayload,
-  type VirtualAxis as AxisEntry,
-  type VirtualPreset as PresetEntry,
+import type {
+  InitPayload,
+  VirtualAxis as AxisEntry,
+  VirtualPreset as PresetEntry,
 } from '#/channel-types.ts';
 import {
   ADDON_ID,

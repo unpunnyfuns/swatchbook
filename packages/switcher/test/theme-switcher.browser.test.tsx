@@ -2,7 +2,8 @@ import { cleanup, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { userEvent } from '@vitest/browser/context';
-import { type SwitcherAxis, ThemeSwitcher } from '#/index.ts';
+import { ThemeSwitcher } from '#/index.ts';
+import type { SwitcherAxis } from '#/index.ts';
 
 // Classic-JSX compile: every file using `<…/>` needs React in scope.
 void React;

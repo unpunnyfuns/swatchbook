@@ -5,7 +5,8 @@ import { useColorFormat } from '#/contexts.ts';
 import type { ColorFormat } from '#/format-color.ts';
 import { dataAttr } from '@unpunnyfuns/swatchbook-core/data-attr';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
-import { type DetailToken, useTokenDetailData } from '#/token-detail/internal.ts';
+import { useTokenDetailData } from '#/token-detail/internal.ts';
+import type { DetailToken } from '#/token-detail/internal.ts';
 
 export interface AxisVarianceProps {
   /** Full dot-path of the token. */

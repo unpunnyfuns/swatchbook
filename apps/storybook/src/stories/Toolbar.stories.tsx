@@ -18,12 +18,10 @@
  * Refs the "Toolbar UI — zero play-function coverage" finding from
  * pre-1.0 dossier #704.
  */
-import {
-  type SwitcherAxis,
-  type SwitcherPreset,
-  ThemeSwitcher,
-} from '@unpunnyfuns/swatchbook-addon';
-import { type ReactElement, useState } from 'react';
+import { ThemeSwitcher } from '@unpunnyfuns/swatchbook-addon';
+import type { SwitcherAxis, SwitcherPreset } from '@unpunnyfuns/swatchbook-addon';
+import { useState } from 'react';
+import type { ReactElement } from 'react';
 import { expect, userEvent, within } from 'storybook/test';
 import preview from '../../.storybook/preview.tsx';
 

@@ -9,7 +9,8 @@
  */
 import { beforeAll, expect, it } from 'vitest';
 import type { Project } from '#/types.ts';
-import { analyzeProjectVariance, type VarianceInfo } from '#/variance-analysis.ts';
+import { analyzeProjectVariance } from '#/variance-analysis.ts';
+import type { VarianceInfo } from '#/variance-analysis.ts';
 import { loadWithPrefix } from './_helpers.ts';
 
 let referenceProject: Project;

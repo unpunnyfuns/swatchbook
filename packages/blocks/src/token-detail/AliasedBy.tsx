@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
-import { type DetailToken, useTokenDetailData } from '#/token-detail/internal.ts';
+import { useTokenDetailData } from '#/token-detail/internal.ts';
+import type { DetailToken } from '#/token-detail/internal.ts';
 
 export interface AliasedByProps {
   /** Full dot-path of the token. */

@@ -8,7 +8,8 @@
  * transport. Pass `--no-watch` to opt out (e.g. CI). Loader / watcher errors
  * print to stderr — stdout is reserved for MCP protocol frames.
  */
-import { type FSWatcher, watch as fsWatch } from 'node:fs';
+import { watch as fsWatch } from 'node:fs';
+import type { FSWatcher } from 'node:fs';
 import { basename, dirname, isAbsolute, resolve } from 'node:path';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { loadFromConfig } from '#/load-config.ts';

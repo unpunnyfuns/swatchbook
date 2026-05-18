@@ -5,7 +5,8 @@ import type { TypographyValue } from '#/internal/composite-types.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { useProject } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
-import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
+import { sortTokens } from '#/internal/sort-tokens.ts';
+import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 
 /**
  * Dimension sub-values in DTCG 2025.10 use a `{ value, unit }` envelope

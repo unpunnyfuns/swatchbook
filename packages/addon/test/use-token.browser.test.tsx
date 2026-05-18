@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { AxesContext, ThemeContext } from '@unpunnyfuns/swatchbook-blocks';

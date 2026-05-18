@@ -1,5 +1,6 @@
 import type { VirtualTokenListingShape } from '#/contexts.ts';
-import { type ColorFormat, formatColor } from '#/format-color.ts';
+import { formatColor } from '#/format-color.ts';
+import type { ColorFormat } from '#/format-color.ts';
 import type {
   BorderValue,
   DashedStrokeStyleValue,

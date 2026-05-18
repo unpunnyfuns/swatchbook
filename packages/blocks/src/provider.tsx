@@ -1,5 +1,6 @@
 import type { ReactElement, ReactNode } from 'react';
-import { type ProjectSnapshot, SwatchbookContext, useOptionalSwatchbookData } from '#/contexts.ts';
+import { SwatchbookContext, useOptionalSwatchbookData } from '#/contexts.ts';
+import type { ProjectSnapshot } from '#/contexts.ts';
 
 export type { ProjectSnapshot };
 

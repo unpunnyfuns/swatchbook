@@ -1,7 +1,8 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { userEvent } from '@vitest/browser/context';
-import { type ProjectSnapshot, SwatchbookProvider, TokenNavigator } from '#/index.ts';
+import { SwatchbookProvider, TokenNavigator } from '#/index.ts';
+import type { ProjectSnapshot } from '#/index.ts';
 
 function makeSnapshot(): ProjectSnapshot {
   return {

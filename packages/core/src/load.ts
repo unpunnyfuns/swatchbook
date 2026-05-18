@@ -10,14 +10,8 @@ import { normalizePermutations } from '#/permutations/normalize.ts';
 import { buildResolveAt } from '#/resolve-at.ts';
 import { computeTokenListing } from '#/token-listing.ts';
 import { buildVarianceByPath } from '#/variance-by-path.ts';
-import {
-  permutationID,
-  type Axis,
-  type Config,
-  type Permutation,
-  type Project,
-  type TokenMap,
-} from '#/types.ts';
+import { permutationID } from '#/types.ts';
+import type { Axis, Config, Permutation, Project, TokenMap } from '#/types.ts';
 
 /**
  * Load a swatchbook project from a config. Read tokens at any axis

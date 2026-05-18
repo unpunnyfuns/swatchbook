@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { useColorFormat } from '#/contexts.ts';
-import { type ColorFormat, formatColor } from '#/format-color.ts';
+import { formatColor } from '#/format-color.ts';
+import type { ColorFormat } from '#/format-color.ts';
 import type {
   BorderValue,
   GradientStop,
@@ -8,7 +9,8 @@ import type {
   TransitionValue,
   TypographyValue,
 } from '#/internal/composite-types.ts';
-import { type DetailToken, useTokenDetailData } from '#/token-detail/internal.ts';
+import { useTokenDetailData } from '#/token-detail/internal.ts';
+import type { DetailToken } from '#/token-detail/internal.ts';
 
 export interface CompositeBreakdownProps {
   /** Full dot-path of the token. */

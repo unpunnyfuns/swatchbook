@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, expect, it } from 'vitest';
 import type { Project } from '@unpunnyfuns/swatchbook-core';
-import { loadFixtureProject, type McpTestHarness, startTestServer } from './_helpers.ts';
+import { loadFixtureProject, startTestServer } from './_helpers.ts';
+import type { McpTestHarness } from './_helpers.ts';
 
 let project: Project;
 let mcp: McpTestHarness;

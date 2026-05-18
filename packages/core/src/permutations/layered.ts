@@ -3,14 +3,8 @@ import { pathToFileURL } from 'node:url';
 import { defineConfig as defineTerrazzoConfig, parse } from '@terrazzo/parser';
 import type { BufferedLogger } from '#/diagnostics.ts';
 import { collectGlobbedFiles } from '#/permutations/util.ts';
-import {
-  type Axis,
-  type AxisConfig,
-  type Diagnostic,
-  type Permutation,
-  permutationID,
-  type TokenMap,
-} from '#/types.ts';
+import { permutationID } from '#/types.ts';
+import type { Axis, AxisConfig, Diagnostic, Permutation, TokenMap } from '#/types.ts';
 
 export interface LayeredLoadResult {
   axes: Axis[];

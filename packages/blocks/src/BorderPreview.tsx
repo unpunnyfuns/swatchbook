@@ -3,9 +3,11 @@ import { useMemo } from 'react';
 import './BorderPreview.css';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
-import { type ColorFormat, formatColor } from '#/format-color.ts';
+import { formatColor } from '#/format-color.ts';
+import type { ColorFormat } from '#/format-color.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
-import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
+import { sortTokens } from '#/internal/sort-tokens.ts';
+import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 

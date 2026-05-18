@@ -1,4 +1,5 @@
-import { Logger, type LogEntry, type LogSeverity } from '@terrazzo/parser';
+import { Logger } from '@terrazzo/parser';
+import type { LogEntry, LogSeverity } from '@terrazzo/parser';
 import type { Diagnostic, DiagnosticSeverity } from '#/types.ts';
 
 interface BufferedEntry {

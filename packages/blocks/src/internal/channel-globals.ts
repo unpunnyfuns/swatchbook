@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { addons } from 'storybook/preview-api';
-import { COLOR_FORMATS, type ColorFormat } from '#/format-color.ts';
+import { COLOR_FORMATS } from '#/format-color.ts';
+import type { ColorFormat } from '#/format-color.ts';
 
 /**
  * Shared subscription to Storybook's globals channel, lifted out of React

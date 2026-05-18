@@ -6,11 +6,8 @@ import { themeAttrs } from '#/internal/data-attr.ts';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
-import {
-  MotionSample,
-  type MotionSpeed,
-  resolveMotionSpec,
-} from '#/motion-preview/MotionSample.tsx';
+import { MotionSample, resolveMotionSpec } from '#/motion-preview/MotionSample.tsx';
+import type { MotionSpeed } from '#/motion-preview/MotionSample.tsx';
 
 export type { MotionSpeed };
 

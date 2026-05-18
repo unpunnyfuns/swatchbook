@@ -1,7 +1,8 @@
 import { dirname } from 'node:path';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { loadProject, type Project } from '@unpunnyfuns/swatchbook-core';
+import { loadProject } from '@unpunnyfuns/swatchbook-core';
+import type { Project } from '@unpunnyfuns/swatchbook-core';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { createServer } from '#/server.ts';
 
