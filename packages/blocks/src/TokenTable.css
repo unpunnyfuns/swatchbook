@@ -133,3 +133,16 @@
 .sb-token-table__row:focus-within .sb-token-table__copy-wrap {
   opacity: 1;
 }
+
+/* Screen-reader-only live region for search match-count announcements. */
+.sb-token-table__sr-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

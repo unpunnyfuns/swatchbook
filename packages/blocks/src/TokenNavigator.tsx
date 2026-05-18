@@ -474,6 +474,11 @@ export function TokenNavigator({
         {typeLabel}
         {trimmedQuery !== '' ? ` · ${matchCount} matching "${trimmedQuery}"` : ''} · {activeTheme}
       </div>
+      {searchable && (
+        <span role="status" aria-live="polite" className="sb-token-navigator__sr-status">
+          {trimmedQuery !== '' ? `${matchCount} tokens matching "${trimmedQuery}"` : ''}
+        </span>
+      )}
       {visibleTree.length === 0 ? (
         <div className="sb-block__empty">No tokens match "{trimmedQuery}".</div>
       ) : (

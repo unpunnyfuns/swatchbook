@@ -132,6 +132,13 @@ export function TokenTable({
           />
         </div>
       )}
+      {searchable && (
+        <span role="status" aria-live="polite" className="sb-token-table__sr-status">
+          {query.trim() !== ''
+            ? `${visibleRows.length} of ${rows.length} tokens match "${query.trim()}"`
+            : ''}
+        </span>
+      )}
       <table className="sb-token-table__table">
         <caption className="sb-token-table__caption">{captionText}</caption>
         <thead>

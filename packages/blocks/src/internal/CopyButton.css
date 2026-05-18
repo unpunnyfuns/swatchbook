@@ -43,3 +43,16 @@
 .sb-copy-button--copied {
   color: var(--swatchbook-accent-default, Highlight);
 }
+
+/* Screen-reader-only live region: visually hidden, still announced by AT. */
+.sb-copy-button__sr-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

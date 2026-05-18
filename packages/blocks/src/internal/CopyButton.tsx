@@ -57,21 +57,28 @@ export function CopyButton({
   if (className) classes.push(className);
 
   return (
-    <button
-      type="button"
-      className={classes.join(' ')}
-      onClick={handleClick}
-      aria-label={ariaLabel}
-      title={ariaLabel}
-      data-copied={copied ? 'true' : undefined}
-    >
-      {variant === 'text' ? (
-        <span className="sb-copy-button__text">{copied ? 'Copied' : 'Copy'}</span>
-      ) : (
-        <span className="sb-copy-button__glyph" aria-hidden>
-          {copied ? '✓' : '⧉'}
-        </span>
-      )}
-    </button>
+    <>
+      <button
+        type="button"
+        className={classes.join(' ')}
+        onClick={handleClick}
+        aria-label={ariaLabel}
+        title={ariaLabel}
+        data-copied={copied ? 'true' : undefined}
+      >
+        {variant === 'text' ? (
+          <span className="sb-copy-button__text">{copied ? 'Copied' : 'Copy'}</span>
+        ) : (
+          <span className="sb-copy-button__glyph" aria-hidden>
+            {copied ? '✓' : '⧉'}
+          </span>
+        )}
+      </button>
+      {/* Polite live region announces the transition to SR users — the
+          icon variant's "✓ Copied" cue is otherwise visual-only. */}
+      <span role="status" aria-live="polite" className="sb-copy-button__sr-status">
+        {copied ? 'Copied' : ''}
+      </span>
+    </>
   );
 }
