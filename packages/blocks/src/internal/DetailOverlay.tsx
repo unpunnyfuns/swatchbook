@@ -43,15 +43,37 @@ export function DetailOverlay({
   const panelRef = useRef<HTMLDivElement | null>(null);
   const openerRef = useRef<HTMLElement | null>(null);
 
-  // Save the opener + focus the panel on mount; restore the opener's
-  // focus on unmount. Document-level activeElement is the only reliable
-  // signal of what triggered the overlay since the click might have come
-  // from a row, a tree item, a programmatic open, etc.
+  // Set up focus management + sibling inerting in one effect so the
+  // teardown ordering is explicit: un-inert siblings BEFORE restoring
+  // focus to the opener (`.focus()` is a no-op on an inert element).
+  //
+  // `aria-modal="true"` alone is widely known to be insufficient —
+  // VoiceOver + NVDA virtual cursor + swipe gestures still pierce the
+  // dialog and read sibling content behind the backdrop. Marking every
+  // other top-level body branch `inert` while the overlay is mounted
+  // closes that gap.
   useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
     openerRef.current =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    panelRef.current?.focus();
+    panel.focus();
+    const overlayBranch = findBodyChildContaining(panel);
+    const restorers: (() => void)[] = [];
+    if (overlayBranch) {
+      for (const sibling of Array.from(document.body.children)) {
+        if (sibling === overlayBranch) continue;
+        if (!(sibling instanceof HTMLElement)) continue;
+        const hadInert = sibling.inert;
+        sibling.inert = true;
+        restorers.push(() => {
+          sibling.inert = hadInert;
+        });
+      }
+    }
     return () => {
+      // Un-inert first — focusing an inert element is a no-op.
+      for (const restore of restorers) restore();
       openerRef.current?.focus();
     };
   }, []);
@@ -125,4 +147,18 @@ export function DetailOverlay({
       </div>
     </div>
   );
+}
+
+/**
+ * Walk up from `node` to the direct child of `<body>` that contains it.
+ * Returns `null` when the node isn't attached to the document (mid-mount,
+ * post-unmount). Used to identify which top-level branch to *not* mark
+ * inert when the overlay opens.
+ */
+function findBodyChildContaining(node: HTMLElement): HTMLElement | null {
+  let cursor: HTMLElement | null = node;
+  while (cursor && cursor.parentElement !== document.body) {
+    cursor = cursor.parentElement;
+  }
+  return cursor;
 }
