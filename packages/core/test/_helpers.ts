@@ -40,7 +40,7 @@ export function extractBlock(css: string, selector: string): string {
  */
 export function tupleSelector(
   tuple: Readonly<Record<string, string>>,
-  prefix: string = 'sb',
+  prefix = 'sb',
 ): string {
   const attr = prefix ? `data-${prefix}-` : 'data-';
   return Object.entries(tuple)

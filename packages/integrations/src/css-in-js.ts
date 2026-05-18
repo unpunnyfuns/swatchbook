@@ -96,7 +96,9 @@ function collectPaths(project: Project): string[] {
   return [...project.varianceByPath.keys()].toSorted();
 }
 
-type TreeNode = { [key: string]: TreeNode | string };
+interface TreeNode {
+  [key: string]: TreeNode | string;
+}
 
 /**
  * Build a nested object tree from a sorted path list. Leaves hold the

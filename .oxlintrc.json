@@ -25,7 +25,10 @@
     "typescript/array-type": "error",
     "unicorn/throw-new-error": "error",
     "unicorn/catch-error-name": "error",
-    "unicorn/prefer-includes": "error"
+    "unicorn/prefer-includes": "error",
+    "no-throw-literal": "error",
+    "typescript/no-inferrable-types": "error",
+    "typescript/consistent-type-definitions": ["error", "interface"]
   },
   "overrides": [
     {
