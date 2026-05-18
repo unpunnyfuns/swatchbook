@@ -488,7 +488,7 @@ export function TokenNavigator({
           aria-label="Token graph"
           onKeyDown={handleTreeKeyDown}
         >
-          {visibleTree.map((node) => (
+          {visibleTree.map((node, i) => (
             <TreeNodeRow
               key={node.path || node.segment}
               node={node}
@@ -498,6 +498,9 @@ export function TokenNavigator({
               onToggle={toggle}
               onFocusPath={setFocusedPath}
               onLeafClick={handleLeafClick}
+              level={1}
+              setsize={visibleTree.length}
+              posinset={i + 1}
             />
           ))}
         </ul>
@@ -522,6 +525,12 @@ interface TreeNodeRowProps {
   onToggle(path: string): void;
   onFocusPath(path: string): void;
   onLeafClick(path: string): void;
+  /** 1-indexed depth in the tree (top-level = 1). */
+  level: number;
+  /** Number of siblings at this level (including self). */
+  setsize: number;
+  /** 1-indexed position among siblings. */
+  posinset: number;
 }
 
 function TreeNodeRow({
@@ -532,6 +541,9 @@ function TreeNodeRow({
   onToggle,
   onFocusPath,
   onLeafClick,
+  level,
+  setsize,
+  posinset,
 }: TreeNodeRowProps): ReactElement {
   if (node.kind === 'leaf') {
     return (
@@ -541,6 +553,9 @@ function TreeNodeRow({
         registerTreeItem={registerTreeItem}
         onFocusPath={onFocusPath}
         onLeafClick={onLeafClick}
+        level={level}
+        setsize={setsize}
+        posinset={posinset}
       />
     );
   }
@@ -551,6 +566,9 @@ function TreeNodeRow({
       ref={registerTreeItem(node.path)}
       role="treeitem"
       aria-expanded={isOpen}
+      aria-level={level}
+      aria-setsize={setsize}
+      aria-posinset={posinset}
       tabIndex={isFocused ? 0 : -1}
       onFocus={() => onFocusPath(node.path)}
       data-path={node.path}
@@ -579,7 +597,7 @@ function TreeNodeRow({
       </div>
       {isOpen && (
         <ul className="sb-token-navigator__nested" role="group">
-          {node.children.map((c) => (
+          {node.children.map((c, i) => (
             <TreeNodeRow
               key={c.path || c.segment}
               node={c}
@@ -589,6 +607,9 @@ function TreeNodeRow({
               onToggle={onToggle}
               onFocusPath={onFocusPath}
               onLeafClick={onLeafClick}
+              level={level + 1}
+              setsize={node.children.length}
+              posinset={i + 1}
             />
           ))}
         </ul>
@@ -603,6 +624,12 @@ interface LeafRowProps {
   registerTreeItem(path: string): (el: HTMLLIElement | null) => void;
   onFocusPath(path: string): void;
   onLeafClick(path: string): void;
+  /** 1-indexed depth in the tree (top-level = 1). */
+  level: number;
+  /** Number of siblings at this level (including self). */
+  setsize: number;
+  /** 1-indexed position among siblings. */
+  posinset: number;
 }
 
 function LeafRow({
@@ -611,6 +638,9 @@ function LeafRow({
   registerTreeItem,
   onFocusPath,
   onLeafClick,
+  level,
+  setsize,
+  posinset,
 }: LeafRowProps): ReactElement {
   const type = node.token.$type ?? '';
   const isFocused = focusedPath === node.path;
@@ -618,6 +648,9 @@ function LeafRow({
     <li
       ref={registerTreeItem(node.path)}
       role="treeitem"
+      aria-level={level}
+      aria-setsize={setsize}
+      aria-posinset={posinset}
       tabIndex={isFocused ? 0 : -1}
       onFocus={() => onFocusPath(node.path)}
       data-path={node.path}
