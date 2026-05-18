@@ -1,4 +1,4 @@
-import { type ColorFormat } from '@unpunnyfuns/swatchbook-blocks';
+import type { ColorFormat } from '@unpunnyfuns/swatchbook-blocks';
 import React, { type ReactElement } from 'react';
 
 export type { ColorFormat };
@@ -18,6 +18,16 @@ export type { ColorFormat };
  * Uses `React.createElement` (via `h`) to survive embedding in Storybook's
  * manager bundle, which doesn't expose `react/jsx-runtime`.
  */
+
+/**
+ * Runtime list of valid color formats. Declared here (alongside
+ * `COLOR_FORMAT_OPTIONS`) rather than imported from blocks because the
+ * manager bundle can't pull from `@unpunnyfuns/swatchbook-blocks` — that
+ * package's barrel has a top-level `import 'virtual:swatchbook/tokens'`
+ * which the manager has no resolver for. The `ColorFormat` type above
+ * stays imported (type-only erases at compile time).
+ */
+export const COLOR_FORMATS: readonly ColorFormat[] = ['hex', 'rgb', 'hsl', 'oklch', 'raw'];
 
 const COLOR_FORMAT_OPTIONS: readonly { id: ColorFormat; label: string }[] = [
   { id: 'hex', label: 'Hex' },

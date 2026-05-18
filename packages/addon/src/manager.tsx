@@ -1,6 +1,5 @@
 import { presetTuple, ThemeSwitcher } from '@unpunnyfuns/swatchbook-switcher';
-import { COLOR_FORMATS } from '@unpunnyfuns/swatchbook-blocks';
-import { type ColorFormat, ColorFormatSelector } from '#/ColorFormatSelector.tsx';
+import { COLOR_FORMATS, type ColorFormat, ColorFormatSelector } from '#/ColorFormatSelector.tsx';
 import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { IconButton, WithTooltipPure } from 'storybook/internal/components';
 import { addons, types, useGlobals, useStorybookApi } from 'storybook/manager-api';
