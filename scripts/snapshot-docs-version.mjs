@@ -1,15 +1,18 @@
 #!/usr/bin/env node
 // Snapshot the docusaurus docs/ tree under versioned_docs/version-<MAJOR.MINOR>/
-// on every release. Every release rebuilds the current minor's snapshot so doc
-// fixes that accompany the release reach the stable docs; a new minor or major
-// bump adds a new snapshot alongside the existing ones and leaves older minors
-// frozen.
+// on every release. Pre-1.0 the docs site keeps **one stable snapshot + the
+// current `docs/` tree** — every release drops the previous snapshot, the
+// previous sidebars file, and the previous versions.json entries before
+// `docusaurus docs:version` writes the new one. Visitors land on the latest
+// stable at `/` and the in-flight main-branch docs at `/next/`; nothing older
+// is preserved because pre-1.0 minors carry breaking changes and the older
+// snapshots become misleading faster than they stay useful.
 //
 // Runs from the root `version` script (after `changeset version` has bumped
 // workspace package.json versions), so the snapshot lands in the same
 // "Version Packages" PR that Changesets opens.
 
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,32 +32,34 @@ if (!match) {
 const [, major, minor] = match;
 const series = `${major}.${minor}`;
 
-const versionedDocs = join(repoRoot, 'apps/docs/versioned_docs', `version-${series}`);
-const versionedSidebar = join(
-  repoRoot,
-  'apps/docs/versioned_sidebars',
-  `version-${series}-sidebars.json`,
-);
+const versionedDocsRoot = join(repoRoot, 'apps/docs/versioned_docs');
+const versionedSidebarsRoot = join(repoRoot, 'apps/docs/versioned_sidebars');
 const versionsJsonPath = join(repoRoot, 'apps/docs/versions.json');
 
-// docusaurus docs:version refuses to overwrite, so drop any prior snapshot for
-// this series (plus its versions.json entry) before re-running. Older minors
-// are left alone — they stay frozen at their last patch's snapshot.
-if (existsSync(versionedDocs)) {
-  rmSync(versionedDocs, { recursive: true, force: true });
-}
-if (existsSync(versionedSidebar)) {
-  rmSync(versionedSidebar, { force: true });
-}
-if (existsSync(versionsJsonPath)) {
-  const list = JSON.parse(readFileSync(versionsJsonPath, 'utf8'));
-  const filtered = list.filter((v) => v !== series);
-  if (filtered.length !== list.length) {
-    writeFileSync(versionsJsonPath, `${JSON.stringify(filtered, null, 2)}\n`);
+// Drop every existing versioned_docs/ snapshot and matching sidebar file —
+// docusaurus docs:version below will write the current release's snapshot
+// fresh. Pre-1.0 single-stable policy: only the just-built snapshot survives
+// on disk. Idempotent + safe to re-run.
+if (existsSync(versionedDocsRoot)) {
+  for (const entry of readdirSync(versionedDocsRoot)) {
+    if (entry.startsWith('version-')) {
+      rmSync(join(versionedDocsRoot, entry), { recursive: true, force: true });
+    }
   }
 }
+if (existsSync(versionedSidebarsRoot)) {
+  for (const entry of readdirSync(versionedSidebarsRoot)) {
+    if (entry.startsWith('version-') && entry.endsWith('-sidebars.json')) {
+      rmSync(join(versionedSidebarsRoot, entry), { force: true });
+    }
+  }
+}
+// Reset versions.json so `docusaurus docs:version` writes a clean single-entry
+// list. Without the reset it would prepend, accumulating prior entries that
+// no longer have snapshots on disk.
+writeFileSync(versionsJsonPath, '[]\n');
 
-console.log(`[snapshot-docs] (re)snapshotting docs for ${series} (release ${next})`);
+console.log(`[snapshot-docs] snapshotting docs for ${series} (release ${next})`);
 const result = spawnSync(
   'pnpm',
   ['--filter', '@unpunnyfuns/swatchbook-docs', 'exec', 'docusaurus', 'docs:version', series],
