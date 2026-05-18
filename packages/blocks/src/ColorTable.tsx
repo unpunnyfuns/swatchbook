@@ -272,7 +272,6 @@ function GroupRow({
     else onToggleExpand(group.base);
   };
 
-  const detailId = `sb-color-table-detail-${group.base.replaceAll('.', '-')}`;
   return (
     <>
       <tr
@@ -294,9 +293,7 @@ function GroupRow({
               ? `Collapse ${group.base}`
               : `Expand ${group.base}`
         }
-        {...(onSelect
-          ? { 'aria-haspopup': 'dialog' as const }
-          : { 'aria-expanded': expanded, 'aria-controls': detailId })}
+        {...(onSelect ? { 'aria-haspopup': 'dialog' as const } : {})}
         data-testid="color-table-row"
         data-path={active.path}
         data-base={group.base}
@@ -370,7 +367,7 @@ function GroupRow({
         </td>
       </tr>
       {expanded && !onSelect && (
-        <tr className="sb-color-table__detail-row" id={detailId} data-testid="color-table-detail">
+        <tr className="sb-color-table__detail-row" data-testid="color-table-detail">
           <td colSpan={COLUMN_COUNT} className="sb-color-table__td sb-color-table__detail-cell">
             <ExpandedDetail group={group} active={active} />
           </td>
