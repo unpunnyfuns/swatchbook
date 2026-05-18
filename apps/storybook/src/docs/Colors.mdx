@@ -24,7 +24,7 @@ Groups the role colors by sub-path (`color.surface.*`, `color.text.*`,
 `color.accent.*`, `color.border.*`, `color.status.*`). Switch the theme
 in the toolbar to see every swatch repaint.
 
-<ColorPalette filter="color.*" />
+<ColorPalette filter="color.**" />
 
 ## Semantic roles (variant-grouped)
 
@@ -34,7 +34,7 @@ side-by-side. The `status` row bundles its `-bg` / `-fg` hyphen pairs
 under each status name.
 
 <ColorTable
-  filter="color.surface.*"
+  filter="color.surface.**"
   variants={{
     default: 'default',
     muted: 'muted',
@@ -45,7 +45,7 @@ under each status name.
 />
 
 <ColorTable
-  filter="color.text.*"
+  filter="color.text.**"
   variants={{
     default: 'default',
     muted: 'muted',
@@ -55,28 +55,28 @@ under each status name.
   }}
 />
 
-<ColorTable filter="color.accent.*" variants={{ bg: 'bg', fg: 'fg', hover: '-hover' }} />
+<ColorTable filter="color.accent.**" variants={{ bg: 'bg', fg: 'fg', hover: '-hover' }} />
 
 <ColorTable
-  filter="color.border.*"
+  filter="color.border.**"
   variants={{ default: 'default', strong: 'strong', focus: 'focus' }}
 />
 
-<ColorTable filter="color.status.*" variants={{ bg: '-bg', fg: '-fg' }} />
+<ColorTable filter="color.status.**" variants={{ bg: '-bg', fg: '-fg' }} />
 
 ## Palette
 
 Every primitive hue. Use as the alias source when authoring new roles,
 not when styling components directly.
 
-<ColorPalette filter="color.palette.*" />
+<ColorPalette filter="color.palette.**" />
 
 ## Raw table
 
 The same tokens as rows with resolved values, types, and CSS var names —
 handy when you know the path you're looking for.
 
-<TokenTable filter="color.*" type="color" />
+<TokenTable filter="color.**" type="color" />
 
 ## Opacity
 
@@ -85,7 +85,7 @@ in `[0, 1]`. The bare number (`0.4`) tells you less than the visible
 effect; `<OpacityScale>` renders each token as the sample colour at that
 opacity over a checkerboard so the transparency reads.
 
-<OpacityScale filter="number.opacity.*" />
+<OpacityScale filter="number.opacity.**" />
 
 The swatch colour is `color.accent.bg` by default. Pass `sampleColor` to
 demo the token against whatever surface role matters — scrims against

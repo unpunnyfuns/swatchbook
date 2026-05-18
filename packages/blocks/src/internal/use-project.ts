@@ -1,5 +1,6 @@
 import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
 import { makeCssVar } from '@unpunnyfuns/swatchbook-core/css-var';
+import { tupleToName } from '@unpunnyfuns/swatchbook-core/themes';
 import type { Axis, Cells, JointOverrides } from '@unpunnyfuns/swatchbook-core';
 import { useEffect, useMemo } from 'react';
 import type { VirtualTokenListingShape, VirtualVarianceByPathShape } from '#/contexts.ts';
@@ -62,19 +63,6 @@ function defaultTuple(axes: readonly VirtualAxis[]): Record<string, string> {
   const out: Record<string, string> = {};
   for (const axis of axes) out[axis.name] = axis.default;
   return out;
-}
-
-/**
- * Synthesize a permutation name from a tuple — same form
- * `permutationID` produces server-side (axis values joined by ` · `).
- * Used by the AxisVariance grid for `data-<prefix>-theme` attribution
- * and similar display-only callers.
- */
-function tupleToName(
-  axes: readonly VirtualAxis[],
-  tuple: Readonly<Record<string, string>>,
-): string {
-  return axes.map((a) => tuple[a.name] ?? a.default).join(' · ');
 }
 
 /**
@@ -317,30 +305,4 @@ export function resolveColorValue(
     }
   }
   return formatColor(raw, colorFormat);
-}
-
-/**
- * Match a dot-separated DTCG token path against a block `filter` prop.
- *
- * **Supported shapes** (the narrow subset we need — DTCG paths don't have
- * directories, brace expansion, or regex, so we skip a full glob engine):
- *
- * | Pattern            | Matches                                             |
- * | ------------------ | --------------------------------------------------- |
- * | `undefined` / `''` | everything                                          |
- * | `*` or `**`        | everything                                          |
- * | `color`            | exact path `color`, or any descendant `color.*`     |
- * | `color.*`      | any path whose fixed prefix is `color.`         |
- * | `color**`          | any path starting with `color`                      |
- *
- * Not supported (all pass through as literal segment matchers): brace
- * expansion (`{a,b}`), mid-path globs (`color.*.bg`), negation (`!foo`),
- * character classes (`[sys]`). If you hit those, pre-filter by hand.
- */
-export function globMatch(path: string, glob: string | undefined): boolean {
-  if (!glob) return true;
-  if (glob === '*' || glob === '**') return true;
-  if (glob.endsWith('.*')) return path.startsWith(`${glob.slice(0, -2)}.`);
-  if (glob.endsWith('**')) return path.startsWith(glob.slice(0, -2));
-  return path === glob || path.startsWith(`${glob}.`);
 }

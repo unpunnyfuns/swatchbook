@@ -8,7 +8,8 @@ import { type ColorFormat, formatColor, type NormalizedColor } from '#/format-co
 import { CopyButton } from '#/internal/CopyButton.tsx';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
-import { globMatch, resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 const BASE_LABEL = 'base';
 const COLUMN_COUNT = 6;
@@ -108,7 +109,7 @@ export function ColorTable({
   const groups = useMemo<Group[]>(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
       if (token.$type !== 'color') return false;
-      return globMatch(path, filter);
+      return matchPath(path, filter);
     });
     const sorted = sortTokens(filtered, { by: sortBy, dir: sortDir });
 

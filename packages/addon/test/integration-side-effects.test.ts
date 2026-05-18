@@ -6,7 +6,7 @@
 // the common regressions — empty body, `autoInject` filtering,
 // import-statement shape — at a fraction of the cost.
 import type { Config, SwatchbookIntegration } from '@unpunnyfuns/swatchbook-core';
-import { describe, expect, it } from 'vitest';
+import { expect, it } from 'vitest';
 import {
   INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID,
   RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID,
@@ -51,47 +51,45 @@ function integration(name: string, virtualId: string, autoInject: boolean): Swat
   };
 }
 
-describe('integration-side-effects aggregate virtual module', () => {
-  it('resolveId maps the public virtual ID to the resolved form', () => {
-    const plugin = swatchbookTokensPlugin({ config: NOOP_CONFIG, cwd: CWD });
-    expect(invokeResolve(plugin, INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID)).toBe(
-      RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID,
-    );
-  });
+it('resolveId maps the public virtual ID to the resolved form', () => {
+  const plugin = swatchbookTokensPlugin({ config: NOOP_CONFIG, cwd: CWD });
+  expect(invokeResolve(plugin, INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID)).toBe(
+    RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID,
+  );
+});
 
-  it('load returns an empty body when no integration opts in', () => {
-    const plugin = swatchbookTokensPlugin({ config: NOOP_CONFIG, cwd: CWD });
-    expect(invokeLoad(plugin, RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID)).toBe('');
-  });
+it('load returns an empty body when no integration opts in', () => {
+  const plugin = swatchbookTokensPlugin({ config: NOOP_CONFIG, cwd: CWD });
+  expect(invokeLoad(plugin, RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID)).toBe('');
+});
 
-  it('load returns an empty body when every integration opts out', () => {
-    const plugin = swatchbookTokensPlugin({
-      config: NOOP_CONFIG,
-      cwd: CWD,
-      integrations: [integration('opaque', 'virtual:swatchbook/opaque', false)],
-    });
-    expect(invokeLoad(plugin, RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID)).toBe('');
+it('load returns an empty body when every integration opts out', () => {
+  const plugin = swatchbookTokensPlugin({
+    config: NOOP_CONFIG,
+    cwd: CWD,
+    integrations: [integration('opaque', 'virtual:swatchbook/opaque', false)],
   });
+  expect(invokeLoad(plugin, RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID)).toBe('');
+});
 
-  it('load emits one side-effect import per auto-inject integration, skipping opt-outs', () => {
-    const plugin = swatchbookTokensPlugin({
-      config: NOOP_CONFIG,
-      cwd: CWD,
-      integrations: [
-        integration('tailwind', 'virtual:swatchbook/tailwind.css', true),
-        integration('theme', 'virtual:swatchbook/theme', false),
-        integration('another', 'virtual:swatchbook/another.css', true),
-      ],
-    });
-    const body = invokeLoad(plugin, RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID);
-    expect(body).toBe(
-      `import "virtual:swatchbook/tailwind.css";\nimport "virtual:swatchbook/another.css";`,
-    );
-    expect(body).not.toContain('virtual:swatchbook/theme');
+it('load emits one side-effect import per auto-inject integration, skipping opt-outs', () => {
+  const plugin = swatchbookTokensPlugin({
+    config: NOOP_CONFIG,
+    cwd: CWD,
+    integrations: [
+      integration('tailwind', 'virtual:swatchbook/tailwind.css', true),
+      integration('theme', 'virtual:swatchbook/theme', false),
+      integration('another', 'virtual:swatchbook/another.css', true),
+    ],
   });
+  const body = invokeLoad(plugin, RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID);
+  expect(body).toBe(
+    `import "virtual:swatchbook/tailwind.css";\nimport "virtual:swatchbook/another.css";`,
+  );
+  expect(body).not.toContain('virtual:swatchbook/theme');
+});
 
-  it('load returns null for unrelated IDs so Vite can fall through to the next plugin', () => {
-    const plugin = swatchbookTokensPlugin({ config: NOOP_CONFIG, cwd: CWD });
-    expect(invokeLoad(plugin, '\0some-other-virtual')).toBeNull();
-  });
+it('load returns null for unrelated IDs so Vite can fall through to the next plugin', () => {
+  const plugin = swatchbookTokensPlugin({ config: NOOP_CONFIG, cwd: CWD });
+  expect(invokeLoad(plugin, '\0some-other-virtual')).toBeNull();
 });

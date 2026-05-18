@@ -22,7 +22,7 @@ describe('ColorTable — grouping', () => {
   it('collapses sibling variants into one row with a pill per variant', () => {
     render(
       <SwatchbookProvider value={makeVariantSnapshot()}>
-        <ColorTable filter="color.bg.*" variants={{ hover: 'h', disabled: 'd' }} />
+        <ColorTable filter="color.bg.**" variants={{ hover: 'h', disabled: 'd' }} />
       </SwatchbookProvider>,
     );
 
@@ -41,7 +41,7 @@ describe('ColorTable — grouping', () => {
   it('defaults to the "base" variant when one is present', () => {
     render(
       <SwatchbookProvider value={makeVariantSnapshot()}>
-        <ColorTable filter="color.bg.*" variants={{ hover: 'h', disabled: 'd' }} />
+        <ColorTable filter="color.bg.**" variants={{ hover: 'h', disabled: 'd' }} />
       </SwatchbookProvider>,
     );
 
@@ -56,7 +56,7 @@ describe('ColorTable — grouping', () => {
   it('clicking a pill swaps the active variant and the displayed values', async () => {
     render(
       <SwatchbookProvider value={makeVariantSnapshot()}>
-        <ColorTable filter="color.bg.*" variants={{ hover: 'h', disabled: 'd' }} />
+        <ColorTable filter="color.bg.**" variants={{ hover: 'h', disabled: 'd' }} />
       </SwatchbookProvider>,
     );
 
@@ -87,7 +87,7 @@ describe('ColorTable — grouping', () => {
     });
     render(
       <SwatchbookProvider value={snap}>
-        <ColorTable filter="color.bg.*" variants={{ hover: 'hover', disabled: 'disabled' }} />
+        <ColorTable filter="color.bg.**" variants={{ hover: 'hover', disabled: 'disabled' }} />
       </SwatchbookProvider>,
     );
 
@@ -100,7 +100,7 @@ describe('ColorTable — grouping', () => {
   it('ignores variants that would match characters inside a segment (neutral-900 ≠ suffix 0)', () => {
     render(
       <SwatchbookProvider value={makeColorTableSnapshot()}>
-        <ColorTable filter="color.palette.*" variants={{ zero: '0' }} />
+        <ColorTable filter="color.palette.**" variants={{ zero: '0' }} />
       </SwatchbookProvider>,
     );
     expect(screen.queryAllByTestId('color-table-variant').length).toBe(0);

@@ -4,7 +4,8 @@ import './FontWeightScale.css';
 import { cssVarAsNumber } from '#/internal/css-var-style.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
-import { globMatch, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface FontWeightScaleProps {
   /**
@@ -56,7 +57,7 @@ export function FontWeightScale({
   const rows = useMemo<Row[]>(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
       if (token.$type !== 'fontWeight') return false;
-      return globMatch(path, filter);
+      return matchPath(path, filter);
     });
     return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
       path,

@@ -48,8 +48,8 @@ export const ColorsOnly = meta.story({
   args: { type: 'color' },
   play: async ({ canvasElement }) => assertTableRenders(canvasElement),
 });
-export const SysColors = meta.story({ args: { filter: 'color.*' } });
-export const SysTypography = meta.story({ args: { filter: 'typography.*' } });
+export const SysColors = meta.story({ args: { filter: 'color.**' } });
+export const SysTypography = meta.story({ args: { filter: 'typography.**' } });
 export const DimensionsOnly = meta.story({
   args: { type: 'dimension' },
   play: async ({ canvasElement }) => assertTableRenders(canvasElement),
