@@ -69,8 +69,11 @@ describe('alias-graph', () => {
     expect(graph.reachableFromPath.get('color.fg')).toEqual(
       new Set(['color.fg', 'color.intermediate', 'color.palette.black']),
     );
+    // border.default's reach now includes color.fg's onward chain
+    // — `expandReach` recurses into partialAliasOf targets so the
+    // composite picks up its sub-field's transitive alias closure.
     expect(graph.reachableFromPath.get('border.default')).toEqual(
-      new Set(['border.default', 'color.fg']),
+      new Set(['border.default', 'color.fg', 'color.intermediate', 'color.palette.black']),
     );
   });
 
@@ -195,6 +198,143 @@ describe('alias-graph', () => {
     expect(graph.reachableFromPath.get('shadow.lg')).toEqual(
       new Set(['shadow.lg', 'color.palette.neutral.900']),
     );
+  });
+
+  it('reachableFromPath transits aliasChain through partialAliasOf targets', () => {
+    // Designer indirection pattern:
+    //   border.default → partialAliasOf.color = 'color.fg'
+    //   color.fg → aliasChain = ['color.palette.brand', 'color.palette.neutral.0']
+    // Without transitive reach, border.default's reach is {self, color.fg};
+    // a sibling axis writing color.palette.brand would be falsely classified
+    // as orthogonal because the aliasChain past color.fg never enters
+    // border.default's reach set. Transitive expansion recursively chases
+    // each partialAliasOf target through its own aliasChain + partialAliasOf.
+    const baseline: TokenMap = {
+      'border.default': {
+        $type: 'border',
+        $value: {
+          color: '#000',
+          width: { value: 1, unit: 'px' },
+          style: 'solid',
+        },
+        partialAliasOf: { color: 'color.fg' },
+      } as never,
+      'color.fg': {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', components: [0, 0, 0] },
+        aliasOf: 'color.palette.brand',
+        aliasChain: ['color.palette.brand', 'color.palette.neutral.0'],
+      } as never,
+      'color.palette.brand': {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', components: [0, 0, 0] },
+        aliasOf: 'color.palette.neutral.0',
+        aliasChain: ['color.palette.neutral.0'],
+      } as never,
+      'color.palette.neutral.0': {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', components: [0, 0, 0] },
+      },
+    };
+    const graph = buildAliasGraph({ axes: [], resolverModifiers: {}, baseline });
+    expect(graph.reachableFromPath.get('border.default')).toEqual(
+      new Set(['border.default', 'color.fg', 'color.palette.brand', 'color.palette.neutral.0']),
+    );
+  });
+
+  it('connectedAxes mediated by composite partialAliasOf transitivity', () => {
+    // Axis A writes only the composite token; axis B writes the
+    // terminal node of A's transitive partialAliasOf chain. Without
+    // transitive expansion, A and B classify as disconnected and the
+    // probe silently skips a real joint divergence. With transitivity,
+    // A's axisReach includes the terminal node and B intersects.
+    const axes: Axis[] = [
+      { name: 'theme', contexts: ['light', 'dark'], default: 'light', source: 'resolver' },
+      { name: 'brand', contexts: ['default', 'a'], default: 'default', source: 'resolver' },
+    ];
+    const baseline: TokenMap = {
+      'border.default': {
+        $type: 'border',
+        $value: {
+          color: '#000',
+          width: { value: 1, unit: 'px' },
+          style: 'solid',
+        },
+        partialAliasOf: { color: 'color.fg' },
+      } as never,
+      'color.fg': {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', components: [0, 0, 0] },
+        aliasOf: 'color.palette.brand',
+        aliasChain: ['color.palette.brand'],
+      } as never,
+      'color.palette.brand': {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', components: [0, 0, 0] },
+      },
+    };
+    const resolverModifiers = {
+      theme: {
+        default: 'light',
+        contexts: {
+          light: [],
+          dark: [
+            {
+              border: {
+                $type: 'border',
+                default: {
+                  $value: {
+                    color: '#fff',
+                    width: { value: 1, unit: 'px' },
+                    style: 'solid',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      brand: {
+        default: 'default',
+        contexts: {
+          default: [],
+          a: [
+            {
+              color: {
+                $type: 'color',
+                palette: {
+                  brand: { $value: { colorSpace: 'srgb', components: [0.3, 0, 0.5] } },
+                },
+              },
+            },
+          ],
+        },
+      },
+    };
+    const graph = buildAliasGraph({ axes, resolverModifiers, baseline });
+    expect(graph.connectedAxes.get('theme')?.has('brand')).toBe(true);
+    expect(graph.connectedAxes.get('brand')?.has('theme')).toBe(true);
+  });
+
+  it('reachableFromPath handles cyclic partialAliasOf without infinite recursion', () => {
+    // Synthetic cycle: A.partialAliasOf → B, B.partialAliasOf → A.
+    // Should terminate via reach-set dedup; both paths' reach sets
+    // converge to {A, B}.
+    const baseline: TokenMap = {
+      'border.a': {
+        $type: 'border',
+        $value: { color: '#000', width: { value: 1, unit: 'px' }, style: 'solid' },
+        partialAliasOf: { color: 'border.b' },
+      } as never,
+      'border.b': {
+        $type: 'border',
+        $value: { color: '#000', width: { value: 1, unit: 'px' }, style: 'solid' },
+        partialAliasOf: { color: 'border.a' },
+      } as never,
+    };
+    const graph = buildAliasGraph({ axes: [], resolverModifiers: {}, baseline });
+    expect(graph.reachableFromPath.get('border.a')).toEqual(new Set(['border.a', 'border.b']));
+    expect(graph.reachableFromPath.get('border.b')).toEqual(new Set(['border.a', 'border.b']));
   });
 
   it('connectedAxes via direct-write overlap', () => {
