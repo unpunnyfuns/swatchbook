@@ -62,12 +62,13 @@ export function TokenTable({
   onSelect,
 }: TokenTableProps): ReactElement {
   const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
   const colorFormat = useColorFormat();
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [query, setQuery] = useState('');
 
   const rows = useMemo(() => {
+    const projectFields = { listing, cssVarPrefix };
     const filtered = Object.entries(resolved).filter(([path, token]) => {
       if (!matchPath(path, filter)) return false;
       if (type && token.$type !== type) return false;
@@ -76,17 +77,19 @@ export function TokenTable({
     const entries = sortTokens(filtered, { by: sortBy, dir: sortDir });
     return entries.map(([path, token]) => {
       const isColor = token.$type === 'color';
-      const color = isColor ? resolveColorValue(path, token.$value, colorFormat, project) : null;
+      const color = isColor
+        ? resolveColorValue(path, token.$value, colorFormat, projectFields)
+        : null;
       return {
         path,
         type: token.$type ?? '',
-        value: formatTokenValue(token.$value, token.$type, colorFormat, project.listing[path]),
+        value: formatTokenValue(token.$value, token.$type, colorFormat, listing[path]),
         outOfGamut: color?.outOfGamut ?? false,
-        cssVar: resolveCssVar(path, project),
+        cssVar: resolveCssVar(path, projectFields),
         isColor,
       };
     });
-  }, [resolved, filter, type, project, colorFormat, sortBy, sortDir]);
+  }, [resolved, listing, cssVarPrefix, filter, type, colorFormat, sortBy, sortDir]);
 
   const visibleRows = useMemo(() => {
     if (!searchable || query.trim() === '') return rows;
