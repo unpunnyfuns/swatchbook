@@ -77,7 +77,6 @@ For a working example, the docs site you're reading mounts `<ThemeSwitcher>` ins
 interface ThemeSwitcherProps {
   axes: readonly SwitcherAxis[];
   presets?: readonly SwitcherPreset[];
-  themes?: readonly SwitcherPermutation[];
   activeTuple: Readonly<Record<string, string>>;
   defaults: Readonly<Record<string, string>>;
   lastApplied: string | null;
@@ -92,7 +91,6 @@ interface ThemeSwitcherProps {
 | --- | --- | --- |
 | `axes` | yes | Axes the project ships. The component renders one row per entry. Omit this to draw a presets-only menu. |
 | `presets` | no | Saved tuple snapshots rendered above the axes. Empty / omitted = no presets section. |
-| `themes` | no | The full resolved theme list. Used only to determine whether the active tuple has drifted from the most recent applied preset (the "modified" dot on the preset pill). |
 | `activeTuple` | yes | Active axis selections, keyed by axis name. Drives which pill in each axis row is `--active`. |
 | `defaults` | yes | Fallback values used to fill in axes a preset doesn't explicitly set. |
 | `lastApplied` | yes | Name of the most recently applied preset, or `null`. Drives the "modified since applied" dot. |
@@ -117,14 +115,9 @@ interface SwitcherPreset {
   axes: Partial<Record<string, string>>;
   description?: string;
 }
-
-interface SwitcherPermutation {
-  name: string;
-  input: Record<string, string>;
-}
 ```
 
-`SwitcherAxis` / `SwitcherPreset` / `SwitcherPermutation` are structurally compatible with `Project.axes` / `Project.presets` / `Project.permutations` from `@unpunnyfuns/swatchbook-core` — pass them through unchanged. The shapes are re-declared in the switcher package so it stays framework-agnostic and doesn't pull `core` as a runtime dependency.
+`SwitcherAxis` and `SwitcherPreset` are structurally compatible with `Project.axes` / `Project.presets` from `@unpunnyfuns/swatchbook-core` — pass them through unchanged. The shapes are re-declared in the switcher package so it stays framework-agnostic and doesn't pull `core` as a runtime dependency.
 
 ## Axis-state propagation
 

@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # Core
 
-Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via Terrazzo, resolves aliases, composes per-permutation token snapshots through a resolver or layered-axes config. No React, no Storybook dependency.
+Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via Terrazzo, resolves aliases, composes per-axis cells through a DTCG resolver or authored layered axes. No React, no Storybook dependency.
 
 ## Install
 
@@ -67,12 +67,15 @@ Cached per-token variance classification, built at load time and stored on `Proj
 
 ```ts
 const info = project.varianceByPath.get('color.accent.bg');
-// info?.kind: 'constant' | 'single' | 'multi'
-// info?.varyingAxes: axes whose contexts change this token
-// info?.perAxis: per-axis contexts → stringified resolved values
+if (info?.kind === 'single') {
+  // info.axis : string  (the single varying axis)
+  // info.varyingAxes : readonly [string]
+} else if (info?.kind === 'multi') {
+  // info.varyingAxes : readonly [string, string, ...string[]]
+}
 ```
 
-See [`AxisVarianceResult`](#axisvarianceresult) for the entry shape.
+See [`AxisVarianceResult`](#axisvarianceresult) for the discriminated-union shape.
 
 ### `emitAxisProjectedCss(project, options?)`
 
@@ -88,6 +91,23 @@ const css = emitAxisProjectedCss(project);
 ```
 
 For production builds, prefer Terrazzo's CLI — `emitAxisProjectedCss` exists primarily for tooling that wants the same emission the addon does.
+
+## Browser-safe subpaths
+
+Leaf utilities consumers need without the loader's Node deps live on dedicated subpaths. Each is tree-shake-clean, no `@terrazzo/parser`, no `node:*` imports — safe to import from preview-side bundles, the Storybook manager, or any browser consumer.
+
+| Subpath | Export | Purpose |
+| --- | --- | --- |
+| `/resolve-at` | `buildResolveAt(axes, cells, jointOverrides, defaultTuple)` | Compose tokens for any tuple without the loader. |
+| `/snapshot-for-wire` | `snapshotForWire(project, css)` + `SnapshotForWire` type | JSON-friendly subset of `Project` for cross-boundary transport. |
+| `/fuzzy` | `fuzzyFilter` + `fuzzyMatches` | uFuzzy-backed token search; powers the MCP `search_tokens` tool. |
+| `/css-var` | `makeCssVar(path, prefix)` | Compose `var(--prefix-path)` strings — same shape Terrazzo's plugin-css emits. |
+| `/data-attr` | `dataAttr(prefix, key)` | Compose `data-prefix-key` attribute names — namespaced to `cssVarPrefix`. |
+
+```ts
+import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
+import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
+```
 
 ## Constants
 
@@ -126,21 +146,45 @@ type ChromeRole = (typeof CHROME_ROLES)[number];
 
 ### `Config`
 
+Discriminated union of `ResolverConfig | LayeredConfig | PlainConfig`. Each variant has a different load strategy; field-presence narrowing enforces the mutually-exclusive trio at compile time (invalid combos like `{ resolver, axes }` are TS errors). See [Config reference](./config.mdx) for the full per-field semantics.
+
 ```ts
-interface Config {
-  /** Required for plain-parse and layered; optional when `resolver` is set. */
+type Config = ResolverConfig | LayeredConfig | PlainConfig;
+```
+
+### `ResolverConfig`
+
+Resolver-driven: axes derived from a DTCG 2025.10 resolver file's modifiers. `tokens` is optional (the resolver's `$ref` targets determine which files load).
+
+```ts
+interface ResolverConfig extends CommonConfig {
+  resolver: string;
   tokens?: string[];
-  resolver?: string; // mutually exclusive with `axes`
-  axes?: AxisConfig[]; // mutually exclusive with `resolver`
-  presets?: Preset[];
-  /** Partial tuple keyed by axis name — e.g. `{ mode: 'Dark', brand: 'Brand A' }`. Omitted axes fall back to each axis's own `default`. */
-  default?: Partial<Record<string, string>>;
-  /** Axis names to suppress from the toolbar and CSS emission; each is pinned to its default context. */
-  disabledAxes?: string[];
-  /** Map from block chrome roles (CHROME_ROLES) to target token paths — emits :root aliases redirecting --swatchbook-* chrome reads to consumer tokens. */
-  chrome?: Record<string, string>;
-  cssVarPrefix?: string;
-  outDir?: string;
+  axes?: never;
+}
+```
+
+### `LayeredConfig`
+
+Authored layered axes — per-context overlay globs that layer onto the base `tokens`. The base `tokens` is required.
+
+```ts
+interface LayeredConfig extends CommonConfig {
+  axes: AxisConfig[];
+  tokens: string[];
+  resolver?: never;
+}
+```
+
+### `PlainConfig`
+
+Plain-parse: single synthetic axis (`theme`), no resolver, no overlays. The simplest "I just have token files" case.
+
+```ts
+interface PlainConfig extends CommonConfig {
+  tokens: string[];
+  resolver?: never;
+  axes?: never;
 }
 ```
 
@@ -170,7 +214,7 @@ interface Preset {
 ```ts
 interface Axis {
   name: string;
-  contexts: string[];
+  contexts: readonly string[];
   default: string;
   description?: string;
   source: 'resolver' | 'layered' | 'synthetic';
@@ -182,17 +226,17 @@ interface Axis {
 ```ts
 interface Project {
   config: Config;
-  axes: Axis[];
+  axes: readonly Axis[];
   /** Axis names suppressed via `config.disabledAxes` and validated against the resolver. */
-  disabledAxes: string[];
-  presets: Preset[];
+  disabledAxes: readonly string[];
+  presets: readonly Preset[];
   /** Validated chrome-alias entries from `config.chrome`. Invalid entries are dropped and reported as diagnostics. */
   chrome: Record<string, string>;
   /** Resolved TokenMap at the default tuple. Convenience for global views. */
   defaultTokens: TokenMap;
   /** Per-axis cell maps: `cells[axisName][contextName]` is the resolved TokenMap for `{ ...defaults, [axisName]: contextName }`. */
   cells: Cells;
-  /** Joint-variant partial-tuple overrides — values that diverge from cells composition. */
+  /** Joint-variant partial-tuple overrides — values that diverge from cells composition. Array of `[canonicalKey, override]` pairs in ascending arity order. */
   jointOverrides: JointOverrides;
   /** Axis defaults — `{ axisName: axis.default }` for every axis. */
   defaultTuple: Record<string, string>;
@@ -216,6 +260,29 @@ interface Project {
   diagnostics: Diagnostic[];
 }
 ```
+
+### `Cells`
+
+```ts
+type Cells = Record<string, Record<string, TokenMap>>;
+```
+
+Per-axis resolved maps: `cells[axisName][contextName]` is the resolved `TokenMap` for `{ ...defaults, [axisName]: contextName }`. Non-default cells store only tokens whose value differs from the default-cell baseline (delta cells). Bounded by `Σ(axes × contexts)`, independent of the cartesian product size.
+
+### `JointOverride` / `JointOverrides`
+
+```ts
+interface JointOverride {
+  /** axisName → contextName for the divergent combination (arity ≥ 2). */
+  axes: Record<string, string>;
+  /** Only the tokens whose resolved value at this tuple diverges from cells composition. */
+  tokens: TokenMap;
+}
+
+type JointOverrides = ReadonlyArray<readonly [string, JointOverride]>;
+```
+
+Array of `[canonicalKey, override]` pairs in ascending arity order — higher-order divergences win over lower-order ones when applied in sequence. Same shape consumers read on the wire (no Map ↔ array marshaling).
 
 ### `TokenListingByPath`
 
@@ -243,16 +310,6 @@ interface SwatchbookIntegration {
 
 See the [Integrations guide](../guides/integrations/index.mdx) for factories that build these for Tailwind and CSS-in-JS.
 
-### `Permutation`
-
-```ts
-interface Permutation {
-  name: string;
-  input: Record<string, string>; // the axis tuple
-  sources: string[];
-}
-```
-
 ### `Diagnostic`
 
 ```ts
@@ -274,41 +331,43 @@ type DiagnosticSeverity = 'error' | 'warn' | 'info';
 
 ### `AxisVarianceResult`
 
-Each entry of [`project.varianceByPath`](#projectvariancebypath). `kind` classifies the overall variance shape; `perAxis` records the resolved value seen in each context with other axes held at their defaults.
+Each entry of [`project.varianceByPath`](#projectvariancebypath). Discriminated on `kind`; the cardinality of `varyingAxes` is reflected in the tuple type so consumers narrow exhaustively. The `single` variant adds a convenience `axis: string` accessor.
 
 ```ts
-interface AxisVarianceResult {
-  path: string;
-  kind: VarianceKind;
-  /** Axes whose contexts change this token's resolved value. */
-  varyingAxes: string[];
-  /** Axes whose contexts do not change the resolved value. */
-  constantAcrossAxes: string[];
-  perAxis: Record<
-    string,
-    {
-      varying: boolean;
-      contexts: Record<string, string>;
+type AxisVarianceResult =
+  | {
+      path: string;
+      kind: 'constant';
+      varyingAxes: readonly [];
+      constantAcrossAxes: readonly string[];
+      perAxis: AxisVariancePerAxis;
     }
-  >;
-}
+  | {
+      path: string;
+      kind: 'single';
+      axis: string;
+      varyingAxes: readonly [string];
+      constantAcrossAxes: readonly string[];
+      perAxis: AxisVariancePerAxis;
+    }
+  | {
+      path: string;
+      kind: 'multi';
+      varyingAxes: readonly [string, string, ...string[]];
+      constantAcrossAxes: readonly string[];
+      perAxis: AxisVariancePerAxis;
+    };
+
+type AxisVariancePerAxis = Record<
+  string,
+  { varying: boolean; contexts: Record<string, string> }
+>;
 ```
 
 ### `VarianceKind`
 
 ```ts
 type VarianceKind = 'constant' | 'single' | 'multi';
-```
-
-### `ResolvedPermutation`
-
-Pair of `(name, tokens)` returned by [`resolvePermutation`](#resolvepermutationproject-name).
-
-```ts
-interface ResolvedPermutation {
-  name: string;
-  tokens: TokenMap;
-}
 ```
 
 ### `TokenMap`
@@ -323,22 +382,17 @@ type TokenMap = Record<string, TokenNormalized>;
 
 The per-token shape from `@terrazzo/plugin-token-listing`, re-exported for typing convenience. Each entry carries the authoritative plugin-css-emitted CSS variable names, a CSS-ready `previewValue`, the pre-resolution `originalValue`, and a `source.loc` pointer to the authoring file + line. Composed map: [`TokenListingByPath`](#tokenlistingbypath).
 
-### `ParserInput`
-
-Retained Terrazzo parse output threaded through the project for downstream plugin emission. Consumers should treat this as opaque; reach for it only when wiring custom Terrazzo plugins.
+### `ResolveAt`
 
 ```ts
-interface ParserInput {
-  tokens: Record<string, TokenNormalized>;
-  sources: InputSourceWithDocument[];
-  resolver: Resolver;
-}
+type ResolveAt = (tuple: Record<string, string>) => TokenMap;
 ```
 
-`InputSourceWithDocument` and `Resolver` come from `@terrazzo/parser`.
+The shape of `project.resolveAt` — also returned by `buildResolveAt()` from the [`/resolve-at`](#browser-safe-subpaths) subpath.
 
 ## Do / don't
 
 - ✅ Use this package at build time — Node scripts, SSR, Storybook presets. It has no DOM dependency.
+- ✅ Ship `project.cells` / `project.jointOverrides` / `project.defaultTokens` to the browser via the [`/snapshot-for-wire`](#browser-safe-subpaths) subpath — that's exactly what the addon's preview does.
 - ❌ Don't import from `@terrazzo/parser` directly unless you need features core doesn't expose.
-- ❌ Don't ship `Project` objects to the browser — they carry full raw-AST references on `parserInput`. Ship the cells / `defaultTokens` projections instead (the addon's virtual module does exactly this).
+- ❌ Don't ship the full `Project` object to the browser — `parserInput` carries the raw Terrazzo AST. Use `snapshotForWire(project, css)` to get a JSON-friendly subset.
