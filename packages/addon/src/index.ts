@@ -4,6 +4,21 @@ import * as previewExports from '#/preview.tsx';
 export type { AddonOptions } from '#/options.ts';
 
 /**
+ * Public namespace constants — addon ID, parameter / global keys, the
+ * canonical virtual module ID. Useful for consumer code that needs to
+ * reach into the addon's namespace (custom toolbar registrations,
+ * channel events, manager hooks that need a stable handle on these keys).
+ */
+export {
+  ADDON_ID,
+  AXES_GLOBAL_KEY,
+  COLOR_FORMAT_GLOBAL_KEY,
+  PARAM_KEY,
+  TOOL_ID,
+  VIRTUAL_MODULE_ID,
+} from '#/constants.ts';
+
+/**
  * Re-export the full user-facing surface from `@unpunnyfuns/swatchbook-blocks`
  * and `@unpunnyfuns/swatchbook-switcher` so consumers can
  * `import { TokenTable, ThemeSwitcher, useToken } from '@unpunnyfuns/swatchbook-addon'`

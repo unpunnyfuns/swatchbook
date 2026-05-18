@@ -49,7 +49,7 @@ Leaf utilities consumers need without the loader's Node deps live on dedicated s
 - ✅ Build-time use — Node, scripts, SSR, Storybook presets.
 - ✅ Pair with [Terrazzo](https://terrazzo.app/)'s CLI for production artifact emission (CSS / JS / Tailwind / Swift / Sass / …).
 - ✅ Ship `project.cells` / `project.jointOverrides` / `project.defaultTokens` to the browser via the `snapshot-for-wire` subpath — that's exactly what the addon's preview does.
-- ❌ Don't ship the full `Project` object to the browser. `parserInput` carries the raw Terrazzo AST; use `snapshotForWire(project, css)` to get a JSON-friendly subset.
+- ❌ Don't ship the full `Project` object to the browser. `resolveAt` is a function, `varianceByPath` is a Map, and `cwd` is a Node-side absolute path; use `snapshotForWire(project, css)` to get a JSON-friendly subset.
 - ❌ Don't reach into `@terrazzo/parser` directly. Stay on the core surface so upgrades don't churn your code.
 
 ## Credits
