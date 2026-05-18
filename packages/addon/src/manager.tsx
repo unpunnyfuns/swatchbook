@@ -229,8 +229,14 @@ function AxesToolbar(): ReactElement {
        * Storybook's `WithTooltip` with a dynamically-generated id we
        * don't have a stable handle on; `aria-haspopup` + `aria-expanded`
        * is the practical subset of the disclosure pattern.
+       *
+       * `aria-haspopup="true"` (generic) rather than `"dialog"`: the
+       * switcher body is `role="group"` (it's a settings panel of
+       * independent controls, not a modal dialog), so promising
+       * `"dialog"` would misalign the trigger with what AT finds when
+       * focus enters the popover.
        */
-      'aria-haspopup': 'dialog' as const,
+      'aria-haspopup': true as const,
       'aria-expanded': open,
     },
     h(SwatchbookIcon),

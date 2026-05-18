@@ -71,13 +71,18 @@ export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
           {headingText}
         </summary>
         {diagnostics.length > 0 && (
-          <ul className="sb-diagnostics__list">
+          <ul role="list" className="sb-diagnostics__list">
             {diagnostics.map((d, i) => (
-              <li key={diagnosticKey(d, i)} className="sb-diagnostics__row">
+              <li
+                key={diagnosticKey(d, i)}
+                className="sb-diagnostics__row"
+                aria-label={`${severityLabel[d.severity]}: ${d.message}`}
+              >
                 <span
                   className={cx('sb-diagnostics__label', {
                     [`sb-diagnostics__label--${d.severity}`]: d.severity !== 'info',
                   })}
+                  aria-hidden
                 >
                   {severityLabel[d.severity]}
                 </span>

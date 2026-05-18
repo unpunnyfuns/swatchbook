@@ -110,11 +110,6 @@ function OptionPill({ label, active, title, onClick, trailing }: OptionPillProps
       type="button"
       title={title}
       onClick={onClick}
-      // Skip focus on mouse click so host permutations that paint a :focus
-      // border-color don't stick it on the previously-clicked pill.
-      // Keyboard tabbing still lands focus normally; only preventDefault
-      // on mousedown blocks the implicit focus-on-click behavior.
-      onMouseDown={(event) => event.preventDefault()}
       className={cx('sb-switcher__pill', active && 'sb-switcher__pill--active')}
     >
       {label}
