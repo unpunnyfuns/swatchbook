@@ -1,7 +1,7 @@
 import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import cx from 'clsx';
 import type { ReactElement } from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import './ColorTable.css';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
@@ -248,21 +248,23 @@ export function ColorTable({
   );
 }
 
-function GroupRow({
-  group,
-  selectedLabel,
-  expanded,
-  onToggleExpand,
-  onSelectVariant,
-  onSelect,
-}: {
+interface GroupRowProps {
   group: Group;
   selectedLabel: string | undefined;
   expanded: boolean;
   onToggleExpand(base: string): void;
   onSelectVariant(base: string, label: string): void;
   onSelect?(path: string): void;
-}): ReactElement {
+}
+
+const GroupRow = memo(function GroupRow({
+  group,
+  selectedLabel,
+  expanded,
+  onToggleExpand,
+  onSelectVariant,
+  onSelect,
+}: GroupRowProps): ReactElement {
   const multi = group.variants.length > 1;
   const active =
     group.variants.find((v) => v.label === selectedLabel) ?? (group.variants[0] as Variant);
@@ -376,7 +378,7 @@ function GroupRow({
       )}
     </>
   );
-}
+});
 
 function ExpandedDetail({ group, active }: { group: Group; active: Variant }): ReactElement {
   const hasDescription = active.description !== undefined && active.description.length > 0;
