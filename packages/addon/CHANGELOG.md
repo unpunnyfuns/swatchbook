@@ -1,5 +1,59 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.58.0
+
+### Minor Changes
+
+- 33550f4: Drop the composed `data-<prefix>-theme="<tuple name>"` attribute. The per-axis attributes (`data-<prefix>-<axis>="<context>"`) are the actual scoping surface — the smart CSS emitter targets single-axis selectors plus joint compounds across multiple, never `[data-*-theme]`. The composed attribute was a v0.5-era artifact from before axes landed.
+
+  - `themeAttrs(prefix, tuple)` (blocks): signature change. Now takes the active tuple and returns per-axis attrs + the stable `data-swatchbook-block` marker + wrapper classes. Replaces the old `themeAttrs(prefix, themeName)` shape.
+  - `perAxisAttrs(prefix, tuple)` (blocks): new helper for elements that want per-axis cell scoping without block-wrapper chrome — used by `AxisVariance` so each grid swatch's CSS vars resolve at the cell's tuple instead of the document root's active tuple. **Fixes a visual bug**: grid swatches previously all showed the active tuple's color because the per-cell `data-<prefix>-theme` they wrote had zero CSS rules keyed against it.
+  - Preview decorator (addon): stops writing `data-<prefix>-theme` on `<html>` and the story wrapper.
+  - `ProjectData.themeNameForTuple` / `TokenDetailData.themeNameForTuple` (blocks): removed. Synthesise tuple names locally with `tupleToName` if needed.
+
+### Patch Changes
+
+- f82fe37: Add toggle/group semantics to `OptionPill` (used by `ThemeSwitcher`) and the addon's `ColorFormatSelector`:
+
+  - `aria-pressed={active}` on every pill so SR users hear "Dark pressed" / "Light not pressed" instead of just the bare label.
+  - `role="group"` + `aria-labelledby` wrapping the axis pill row + the color-format pill row so SR users hear the grouping context ("mode group: Dark pressed, Light not pressed").
+  - `aria-label="<context> (<axis>)"` disambiguates pills that share a label across axes (e.g. `Default` on both `mode` and `brand`).
+  - Dropped `onMouseDown={(e) => e.preventDefault()}` from `ColorFormatSelector`'s buttons (was hiding focus on mouse-click; the `:focus-visible` rule gates ring-on-mouse so no sticky-ring regression).
+
+  Test expectations updated for the new accessible names (`Light (mode)`, `Hex color format`, etc.).
+
+- ecf7823: Three small ThemeSwitcher / addon-toolbar / Diagnostics a11y touches bundled.
+
+  - **Addon toolbar `aria-haspopup`** — was `"dialog"` but the switcher body renders `role="group"` (settings panel, not modal dialog). Promised more than the popover delivered; switched to generic `aria-haspopup={true}` so the trigger announces "has popup" without claiming a dialog flavour that doesn't match.
+  - **ThemeSwitcher `OptionPill`** — dropped `onMouseDown={(e) => e.preventDefault()}`. The preventDefault stripped focus on mouse-click so subsequent Tab restarted at the manager toolbar instead of the just-clicked pill, hurting keyboard users alternating mouse + Tab. The pill's `:focus-visible` ring already gates ring-on-mouse, so removing preventDefault doesn't bring back sticky focus rings for normal users.
+  - **Diagnostics severity SR distinction** — explicit `role="list"` on the diagnostics `<ul>` (CSS-styled lists can shed list semantics in some AT combos), `aria-hidden` on the redundant severity-label span, and `aria-label="<severity>: <message>"` on each row so SR users hear "Error: <message>" / "Warning: <message>" / "Info: <message>" as one announcement unit.
+
+- f73637a: Tighten the canonical `Project` type surface — pre-1.0 readonly + closed-set narrowing pass.
+
+  - `Project.chrome: Record<string, string>` → `Partial<Record<ChromeRole, string>>`. The `validateChrome` loader already enforces keys ∈ `CHROME_ROLES` at runtime; the type now reflects it. Same on `CommonConfig.chrome`.
+  - `Project.axes: Axis[]` → `readonly Axis[]`. Matches the existing `readonly` on sibling fields (`disabledAxes`, `presets`); post-load the array is immutable in practice.
+  - `Project.sourceFiles: string[]` → `readonly string[]`. Same rationale.
+  - `SnapshotForWire.varianceByPath` drops the `ReturnType<Project['varianceByPath']['get']>` indirection (which carries an unused `| undefined`) for the direct `Record<string, AxisVarianceResult>` it always actually is.
+  - `Permutation.input: Record<string, string>` → `Readonly<Record<string, string>>`. Internal `@internal` field; readonly matches its consumer pattern.
+  - Added `never` exhaustiveness `default:` branches to two switches over closed unions: `axisTouchesToken` over `VarianceInfo` (`packages/core/src/css-axis-projected.ts`) and `AxisVariance`'s render switch over `AxisVarianceResult` (`packages/blocks/src/token-detail/AxisVariance.tsx`). A future variant lands and these throw loudly at runtime instead of falling through silently.
+  - Aligned `addon/channel-types.ts` `VirtualToken` with `blocks/contexts.ts` `VirtualTokenShape` — added the missing `aliasOf` / `aliasChain` / `aliasedBy` / `partialAliasOf` fields so what ships over the channel matches what blocks expect to read.
+
+  Closes #940
+
+- Updated dependencies [c1da921]
+- Updated dependencies [1f2af27]
+- Updated dependencies [39b3b2a]
+- Updated dependencies [f82fe37]
+- Updated dependencies [1d4453e]
+- Updated dependencies [ecf7823]
+- Updated dependencies [3de4efb]
+- Updated dependencies [33550f4]
+- Updated dependencies [f73637a]
+- Updated dependencies [1f65ada]
+  - @unpunnyfuns/swatchbook-blocks@0.58.0
+  - @unpunnyfuns/swatchbook-switcher@0.58.0
+  - @unpunnyfuns/swatchbook-core@0.58.0
+
 ## 0.57.1
 
 ### Patch Changes

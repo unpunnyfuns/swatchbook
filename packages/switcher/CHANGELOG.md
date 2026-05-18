@@ -1,5 +1,24 @@
 # @unpunnyfuns/swatchbook-switcher
 
+## 0.58.0
+
+### Patch Changes
+
+- f82fe37: Add toggle/group semantics to `OptionPill` (used by `ThemeSwitcher`) and the addon's `ColorFormatSelector`:
+
+  - `aria-pressed={active}` on every pill so SR users hear "Dark pressed" / "Light not pressed" instead of just the bare label.
+  - `role="group"` + `aria-labelledby` wrapping the axis pill row + the color-format pill row so SR users hear the grouping context ("mode group: Dark pressed, Light not pressed").
+  - `aria-label="<context> (<axis>)"` disambiguates pills that share a label across axes (e.g. `Default` on both `mode` and `brand`).
+  - Dropped `onMouseDown={(e) => e.preventDefault()}` from `ColorFormatSelector`'s buttons (was hiding focus on mouse-click; the `:focus-visible` rule gates ring-on-mouse so no sticky-ring regression).
+
+  Test expectations updated for the new accessible names (`Light (mode)`, `Hex color format`, etc.).
+
+- ecf7823: Three small ThemeSwitcher / addon-toolbar / Diagnostics a11y touches bundled.
+
+  - **Addon toolbar `aria-haspopup`** — was `"dialog"` but the switcher body renders `role="group"` (settings panel, not modal dialog). Promised more than the popover delivered; switched to generic `aria-haspopup={true}` so the trigger announces "has popup" without claiming a dialog flavour that doesn't match.
+  - **ThemeSwitcher `OptionPill`** — dropped `onMouseDown={(e) => e.preventDefault()}`. The preventDefault stripped focus on mouse-click so subsequent Tab restarted at the manager toolbar instead of the just-clicked pill, hurting keyboard users alternating mouse + Tab. The pill's `:focus-visible` ring already gates ring-on-mouse, so removing preventDefault doesn't bring back sticky focus rings for normal users.
+  - **Diagnostics severity SR distinction** — explicit `role="list"` on the diagnostics `<ul>` (CSS-styled lists can shed list semantics in some AT combos), `aria-hidden` on the redundant severity-label span, and `aria-label="<severity>: <message>"` on each row so SR users hear "Error: <message>" / "Warning: <message>" / "Info: <message>" as one announcement unit.
+
 ## 0.57.1
 
 ## 0.57.0

@@ -1,5 +1,36 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.58.0
+
+### Minor Changes
+
+- f73637a: Tighten the canonical `Project` type surface — pre-1.0 readonly + closed-set narrowing pass.
+
+  - `Project.chrome: Record<string, string>` → `Partial<Record<ChromeRole, string>>`. The `validateChrome` loader already enforces keys ∈ `CHROME_ROLES` at runtime; the type now reflects it. Same on `CommonConfig.chrome`.
+  - `Project.axes: Axis[]` → `readonly Axis[]`. Matches the existing `readonly` on sibling fields (`disabledAxes`, `presets`); post-load the array is immutable in practice.
+  - `Project.sourceFiles: string[]` → `readonly string[]`. Same rationale.
+  - `SnapshotForWire.varianceByPath` drops the `ReturnType<Project['varianceByPath']['get']>` indirection (which carries an unused `| undefined`) for the direct `Record<string, AxisVarianceResult>` it always actually is.
+  - `Permutation.input: Record<string, string>` → `Readonly<Record<string, string>>`. Internal `@internal` field; readonly matches its consumer pattern.
+  - Added `never` exhaustiveness `default:` branches to two switches over closed unions: `axisTouchesToken` over `VarianceInfo` (`packages/core/src/css-axis-projected.ts`) and `AxisVariance`'s render switch over `AxisVarianceResult` (`packages/blocks/src/token-detail/AxisVariance.tsx`). A future variant lands and these throw loudly at runtime instead of falling through silently.
+  - Aligned `addon/channel-types.ts` `VirtualToken` with `blocks/contexts.ts` `VirtualTokenShape` — added the missing `aliasOf` / `aliasChain` / `aliasedBy` / `partialAliasOf` fields so what ships over the channel matches what blocks expect to read.
+
+  Closes #940
+
+### Patch Changes
+
+- 1f65ada: Tighten weak / smoke-only test assertions across packages — sweep from the audit's test-invariant-quality lens. Each previously-weak assertion now pins a meaningful, falsifiable invariant.
+
+  - `variance-analysis-layered.test.ts` (closes #930) — was silently passing when the fixture's `color.accent` wasn't actually multi-touch. Extended the layered fixture (`brands/brand-a.json`) so `color.text` is overridden by both `mode` and `brand` axes; the test now asserts the actual classifier output (`orthogonal-after-probe` with `touching: {mode, brand}`). Surfaced a separate docstring-vs-implementation discrepancy filed as #942.
+  - `prefers-reduced-motion.browser.test.tsx` — admitted in a comment it couldn't tell apart "initial-render default" from "useEffect set false". Now captures the full `observed[]` sequence + asserts `matchMedia` was actually called.
+  - `variance-analysis-reference.test.ts` — joint-case loop was `toBeTruthy()` per field; now pins the known Dark+Brand A case end-to-end: `permutationName` shape, `cartesianValueKey` matches `JSON.stringify(jointOverrides[...].$value)`.
+  - `cells.test.ts` — "default cell on each axis is the shared baseline" was a length-check; now asserts reference identity (`.toBe(baseline)`), the contract that lets `resolveAt` skip copies.
+  - `config-terrazzo-options.test.ts` — `terrazzoPlugins` test ended with `expect(entry).toBeDefined()`; now also asserts the listing populated alongside the plugin invocations.
+  - `computed-and-emit.test.ts` `get_color_formats` — `raw` field only had `.toBeDefined()`; now asserts `JSON.parse(raw.value)` round-trips with `colorSpace` + `components|channels`.
+  - `computed-and-emit.test.ts` `resolve_theme` — partial-tuple test asserted `toBeTruthy()` on every axis; now asserts equality to each axis's declared `default`.
+  - `token-introspection.test.ts` `get_token` — per-theme entries asserted only `toBeTruthy()`; now asserts Light-themed vs. Dark-themed value sets actually differ (a resolver bug emitting the same value across modes would slip through `toBeTruthy`).
+
+  Plus the smaller nits: dropped a no-op `expect(resolverPath).toBeDefined()` in `resolver-edge-cases.test.ts`, added `group: 'swatchbook/presets'` / `'swatchbook/chrome'` literal pins to two diagnostic-assertion tests where prose was the only signal, swapped a tight diagnostic-prose regex for substring match.
+
 ## 0.57.1
 
 ### Patch Changes
