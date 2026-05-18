@@ -54,6 +54,7 @@ interface Project {
   varianceByPath: ReadonlyMap<string, AxisVarianceResult>; // O(1) per-token variance lookup
   sourceFiles: string[];       // every file that fed the build (for watchers)
   cwd: string;                 // loader cwd — config-relative paths resolve here
+  listing: TokenListingByPath; // per-token plugin-token-listing data: names.<platform>, previewValue, source
   diagnostics: Diagnostic[];   // parser / validator / resolver findings
 }
 ```

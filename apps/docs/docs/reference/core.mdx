@@ -315,6 +315,12 @@ interface SwatchbookIntegration {
   virtualModule?: {
     virtualId: string;                 // e.g. 'virtual:swatchbook/tailwind.css'
     render(project: Project): string;  // produce the module body
+    /** When `true`, the addon's preset auto-injects `import '<virtualId>';`
+     * into the preview bundle. Appropriate for integrations contributing
+     * global CSS (Tailwind's `@theme` block, a rules-heavy stylesheet).
+     * Leave `false` (default) when consumers import named exports from
+     * the virtual module per-site. */
+    autoInject?: boolean;
   };
 }
 ```
@@ -423,4 +429,4 @@ The shape of `project.resolveAt` — also returned by `buildResolveAt()` from th
 - ✅ Use this package at build time — Node scripts, SSR, Storybook presets. It has no DOM dependency.
 - ✅ Ship `project.cells` / `project.jointOverrides` / `project.defaultTokens` to the browser via the [`/snapshot-for-wire`](#browser-safe-subpaths) subpath — that's exactly what the addon's preview does.
 - ❌ Don't import from `@terrazzo/parser` directly unless you need features core doesn't expose.
-- ❌ Don't ship the full `Project` object to the browser — `parserInput` carries the raw Terrazzo AST. Use `snapshotForWire(project, css)` to get a JSON-friendly subset.
+- ❌ Don't ship the full `Project` object to the browser — `resolveAt` is a function, `varianceByPath` is a Map, and `cwd` is a Node-side absolute path. Use `snapshotForWire(project, css)` to get a JSON-friendly subset.
