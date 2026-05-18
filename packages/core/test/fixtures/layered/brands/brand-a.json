@@ -1,6 +1,7 @@
 {
   "color": {
     "$type": "color",
-    "accent": { "$value": "{color.red}" }
+    "accent": { "$value": "{color.red}" },
+    "text":   { "$value": "{color.red}" }
   }
 }

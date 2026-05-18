@@ -41,21 +41,24 @@ beforeAll(async () => {
   variance = analyzeProjectVariance(layeredProject);
 }, 30_000);
 
-it("classifies multi-touch tokens conservatively as joint-variant with empty `jointCases` (no resolver to probe with)", () => {
-  // `color.accent` is overridden by both modes/dark.json and brands/brand-a.json
-  // in this layered fixture — multi-touch.
-  const info = variance.get('color.accent');
-  // Fixture might not define it; skip rather than fail.
-  if (!info) return;
-  if (info.kind !== 'joint-variant') return;
-  expect(info.touching.size).toBeGreaterThanOrEqual(2);
-  // Empty jointCases — the emitter takes this as "fall back to cartesian-style emit."
-  expect(info.jointCases).toEqual([]);
+it("classifies multi-touch tokens in a layered project as orthogonal-after-probe (Phase 3 skipped, jointCases empty)", () => {
+  // `color.text` is overridden by both modes/dark.json and brands/brand-a.json
+  // in this layered fixture — multi-touch by construction. The classifier's
+  // top-of-file docstring claims layered projects conservatively classify
+  // these as `joint-variant` with empty `jointCases`; the implementation
+  // actually returns `orthogonal-after-probe` (see `variance-analysis.ts:208`
+  // — when `jointCases.length === 0`, the kind is `orthogonal-after-probe`,
+  // not `joint-variant`). Tracked separately; this test pins current behaviour.
+  const info = variance.get('color.text');
+  expect(info, 'fixture must define color.text as a multi-touch token').toBeDefined();
+  expect(info?.kind).toBe('orthogonal-after-probe');
+  if (info?.kind !== 'orthogonal-after-probe') throw new Error('unreachable');
+  expect(info.touching).toEqual(new Set(['mode', 'brand']));
 });
 
 it('still classifies single-axis tokens normally', () => {
   // `color.surface` is touched only by mode (dark.json), not by brand.
   const info = variance.get('color.surface');
-  if (!info) return;
-  expect(info.kind).toBe('single-axis');
+  expect(info, 'fixture must define color.surface as a single-axis token').toBeDefined();
+  expect(info?.kind).toBe('single-axis');
 });

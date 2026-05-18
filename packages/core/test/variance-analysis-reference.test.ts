@@ -52,16 +52,41 @@ it("classifies `color.accent.fg` as joint-variant — Dark mode + brand=Brand A 
   // catches conservatively.
   expect(info.touching.has('mode')).toBe(true);
   expect(info.touching.has('brand')).toBe(true);
-  // At least one joint case must be recorded.
   expect(info.jointCases.length).toBeGreaterThan(0);
-  // Joint cases name an axis pair + non-default contexts + a stringified
-  // cartesian value + a permutation name. After the singleton-only
-  // loader switch, the joint tuple is no longer materialized in
-  // `permutationsResolved` — the name is informational, and the
-  // cartesian-correct value lives in `project.jointOverrides`.
+
+  // Pin the known Dark + Brand A case end-to-end: the joint cell must
+  // carry the cartesian-correct value (taken from the resolver-built
+  // joint overrides) and the synthesized permutation name must follow
+  // the documented `axisValues.join(' · ')` shape.
+  const darkBrandA = info.jointCases.find(
+    (c) =>
+      ((c.axisA === 'mode' && c.ctxA === 'Dark' && c.axisB === 'brand' && c.ctxB === 'Brand A') ||
+        (c.axisA === 'brand' && c.ctxA === 'Brand A' && c.axisB === 'mode' && c.ctxB === 'Dark')),
+  );
+  expect(darkBrandA, 'reference fixture must produce a Dark+Brand A joint case').toBeDefined();
+  if (!darkBrandA) throw new Error('unreachable');
+  // `permutationName` is `axisValues.join(' · ')` over the full default tuple
+  // with the joint axes overridden — pin the substring so axis ordering of
+  // the underlying default tuple doesn't lock the test, but the joint
+  // contexts must appear.
+  expect(darkBrandA.permutationName).toContain('Dark');
+  expect(darkBrandA.permutationName).toContain('Brand A');
+  expect(darkBrandA.permutationName.split(' · ')).toHaveLength(referenceProject.axes.length);
+  // `cartesianValueKey` is the JSON-stringified `$value` at the joint
+  // tuple from `resolver.apply`. Cross-check against `jointOverrides`
+  // — the override tokens at the same tuple must serialize to the same key.
+  const overrideEntry = referenceProject.jointOverrides.find(
+    ([, o]) => o.axes['mode'] === 'Dark' && o.axes['brand'] === 'Brand A',
+  );
+  expect(overrideEntry, 'jointOverrides must carry the Dark+Brand A divergence').toBeDefined();
+  if (!overrideEntry) throw new Error('unreachable');
+  const overrideToken = overrideEntry[1].tokens['color.accent.fg'];
+  expect(overrideToken, 'override must include color.accent.fg').toBeDefined();
+  expect(darkBrandA.cartesianValueKey).toBe(JSON.stringify(overrideToken?.$value));
+
+  // The remaining joint cases (if any) still satisfy the structural
+  // contract — pair non-default contexts on distinct axes.
   for (const c of info.jointCases) {
-    expect(c.axisA).toBeTruthy();
-    expect(c.axisB).toBeTruthy();
     expect(c.axisA).not.toBe(c.axisB);
     expect(c.cartesianValueKey).toBeTruthy();
     expect(c.permutationName).toBeTruthy();

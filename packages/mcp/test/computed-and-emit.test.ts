@@ -35,7 +35,15 @@ it('get_color_formats: returns hex / rgb / hsl / oklch / raw entries for a color
   expect(result.formats['hex']?.value).toMatch(/^#|^rgb\(/);
   expect(result.formats['rgb']?.value).toMatch(/^rgb\(/);
   expect(result.formats['oklch']?.value).toMatch(/^oklch\(/);
-  expect(result.formats['raw']).toBeDefined();
+  // `raw` is compact JSON of the normalized Terrazzo color shape — it
+  // must round-trip back to an object carrying at least colorSpace +
+  // components|channels, the fields downstream `formatColor` reads.
+  const raw = result.formats['raw'];
+  expect(raw).toBeDefined();
+  expect(raw?.format).toBe('raw');
+  const parsed = JSON.parse(raw!.value);
+  expect(parsed).toMatchObject({ colorSpace: expect.any(String) });
+  expect(Array.isArray(parsed.components) || Array.isArray(parsed.channels)).toBe(true);
 });
 
 it('get_color_formats: returns text fallback for a non-color $type', async () => {
@@ -152,9 +160,12 @@ it('resolve_theme: returns the full token map for a partial tuple, filling axis 
     tuple: { mode: 'Dark' },
   });
   expect(result.tuple['mode']).toBe('Dark');
-  // Other axes filled from their defaults.
+  // Every axis other than `mode` must equal its declared default — the
+  // tool's contract is "fill axis defaults," not just "produce any
+  // non-empty string per axis."
   for (const axis of project.axes) {
-    expect(result.tuple[axis.name]).toBeTruthy();
+    if (axis.name === 'mode') continue;
+    expect(result.tuple[axis.name]).toBe(axis.default);
   }
   expect(result.count).toBeGreaterThan(0);
 });
