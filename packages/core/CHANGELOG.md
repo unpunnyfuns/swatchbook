@@ -1,5 +1,29 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.59.1
+
+### Patch Changes
+
+- 1792d02: Conservatively widen alias-graph connectivity when a modifier uses DTCG `$extends`. Terrazzo's `loadResolver` leaves `$extends` directives un-flattened in `resolver.source.modifiers` (flattening runs lazily inside `apply()`), so a literal walk of the modifier source misses inherited token paths. Rather than silently mis-cull a real joint divergence, an axis whose overlays use `$extends` is now marked wildcard-connected — connected to every other axis, giving up the orthogonality skip but preserving correctness.
+
+  Configs without `$extends` (including the reference and stress fixtures) are unaffected. Configs that adopt `$extends` keep their pair-and-up correctness; speedup degrades on the affected axes only. Active `$extends` expansion (recovering the speedup) remains tracked as future work.
+
+- 4f6073f: Optimize `probeJointOverrides` to skip orthogonal axis combinations via an alias-reachability graph built from the resolver's parsed source. The graph identifies axis pairs whose token-path reach sets don't intersect — those combinations cannot produce a joint divergence by construction, so the probe spends zero `resolver.apply` calls on them.
+
+  Output is byte-identical to the brute-force probe on every existing fixture (verified empirically: reference fixture's known `accent.fg` joint case still detected; algorithmic invariants pinned in unit tests). Configs with concern-disjoint axes (e.g. mode→color, density→dimension) see substantial speedups; configs whose axes all share paths see no savings but no regression.
+
+  Internal-only change. No public API additions: `probeJointOverrides` isn't exported, and the new `ProbeOptions { maxArity? }` interface stays internal too.
+
+- c9a401b: Tighten `isAxisComboConnected` to require a single connected component over the induced subgraph (BFS from `combo[0]`) instead of "every axis has ≥1 in-combo partner." The prior heuristic accepted combos spanning two disjoint sub-clusters when each sub-cluster was internally connected — such combos can't produce a joint divergence, since the cross-cluster cartesian is the independent product of two unrelated value sets.
+
+  Pair-arity (arity 2) is unchanged. Higher-arity culling tightens on configs with multiple disjoint clusters; configs that form a single big cluster see no change. Correctness preserved: the new test is strictly more selective than the old, never the other direction.
+
+- e27a20b: Make `expandReach` recursively chase `partialAliasOf` targets so the alias-graph captures composite tokens' full transitive reach. Previously, a composite C whose `partialAliasOf` referenced a primitive X stopped at X — if X itself aliased onward to Y (via `aliasChain`), Y was missing from C's reach set, causing axes that wrote Y to be falsely classified as orthogonal to axes that wrote C. The probe could silently skip the corresponding combinations.
+
+  Single-hop `aliasChain` walks remain — Terrazzo already populates that chain transitively, so one read captures the full sequence. Only `partialAliasOf` needed the recursive treatment, since each composite carries only its immediate sub-field targets. Cycle protection via the existing reach-set dedup; cost is the per-token transitive closure depth, negligible in practice.
+
+  Configs with shallow alias topology (no composite-through-primitive-through-alias chains) see no behavior change. Configs with such chains gain coverage on previously mis-culled axis pairs at the cost of running those previously-skipped probes — a correctness fix paid for in `resolver.apply` calls only on configs that needed it.
+
 ## 0.59.0
 
 ### Minor Changes
