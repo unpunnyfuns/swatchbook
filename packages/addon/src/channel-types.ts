@@ -28,9 +28,19 @@ export type VirtualPreset = Preset;
 export type VirtualDiagnostic = Diagnostic;
 
 export interface VirtualToken {
-  $type?: string;
+  $type?: string | undefined;
   $value?: unknown;
-  $description?: string;
+  $description?: string | undefined;
+  aliasOf?: string | undefined;
+  aliasChain?: readonly string[] | undefined;
+  aliasedBy?: readonly string[] | undefined;
+  /**
+   * Per-sub-field alias map for composite tokens — same shape as
+   * `blocks/contexts.ts`'s `VirtualTokenShape.partialAliasOf`. Typed as
+   * `unknown` because the structure varies per composite `$type`; the
+   * block narrows it at the consumer.
+   */
+  partialAliasOf?: unknown;
 }
 
 /**

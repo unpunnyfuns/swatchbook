@@ -48,6 +48,10 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
         return { kind: 'one-axis', axis: result.axis, varyingAxes: result.varyingAxes };
       case 'multi':
         return { kind: 'multi-axis', varyingAxes: result.varyingAxes };
+      default: {
+        const exhaustive: never = result;
+        throw new Error(`unhandled AxisVarianceResult kind: ${JSON.stringify(exhaustive)}`);
+      }
     }
   }, [path, varianceByPath]);
 

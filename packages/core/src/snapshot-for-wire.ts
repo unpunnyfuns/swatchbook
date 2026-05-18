@@ -25,7 +25,7 @@
  * import-resolution constraints.
  */
 import type { ListedToken } from '#/token-listing.ts';
-import type { JointOverrides, Project } from '#/types.ts';
+import type { AxisVarianceResult, JointOverrides, Project } from '#/types.ts';
 
 /**
  * Slimmed `ListedToken` — the three fields blocks actually consume.
@@ -59,7 +59,7 @@ export interface SnapshotForWire {
   listing: Readonly<Record<string, SlimListedToken>>;
   cells: Project['cells'];
   jointOverrides: JointOverrides;
-  varianceByPath: Record<string, ReturnType<Project['varianceByPath']['get']>>;
+  varianceByPath: Record<string, AxisVarianceResult>;
   defaultTuple: Project['defaultTuple'];
 }
 

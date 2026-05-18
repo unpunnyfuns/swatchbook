@@ -197,6 +197,10 @@ function axisTouchesToken(axisName: string, info: VarianceInfo | undefined): boo
     case 'orthogonal-after-probe':
     case 'joint-variant':
       return info.touching.has(axisName);
+    default: {
+      const exhaustive: never = info;
+      throw new Error(`unhandled VarianceInfo kind: ${JSON.stringify(exhaustive)}`);
+    }
   }
 }
 

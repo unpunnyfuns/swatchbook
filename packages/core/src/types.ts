@@ -2,6 +2,7 @@ import type { InputSourceWithDocument } from '@terrazzo/json-schema-tools';
 import type { Plugin, Resolver, TokenNormalized } from '@terrazzo/parser';
 import type { CSSPluginOptions } from '@terrazzo/plugin-css';
 import type { TokenListingPluginOptions } from '@terrazzo/plugin-token-listing';
+import type { ChromeRole } from '#/chrome.ts';
 import type { TokenListingByPath } from '#/token-listing.ts';
 
 /**
@@ -149,7 +150,7 @@ export type ResolveAt = (tuple: Record<string, string>) => TokenMap;
 export interface Permutation {
   name: string;
   /** The resolver input tuple (e.g. `{ theme: 'Light' }` or `{ mode: 'Dark', brand: 'Brand A' }`). */
-  input: Record<string, string>;
+  input: Readonly<Record<string, string>>;
   /** Source files this tuple was parsed from (layered loader populates; resolver mode leaves empty). */
   sources: readonly string[];
 }
@@ -238,7 +239,7 @@ interface CommonConfig {
    * `swatchbook/chrome`) and are dropped. Without a chrome map, blocks
    * fall back to the `Canvas` / `CanvasText` system colors.
    */
-  chrome?: Record<string, string>;
+  chrome?: Partial<Record<ChromeRole, string>>;
   /**
    * Options forwarded to the `@terrazzo/plugin-css` instance swatchbook
    * runs internally (for the stylesheet it emits and for the Token
@@ -349,7 +350,7 @@ export interface Diagnostic {
  */
 export interface Project {
   config: Config;
-  axes: Axis[];
+  axes: readonly Axis[];
   /**
    * Axis names suppressed via `config.disabledAxes`. Validated against the
    * resolver's axis list at load time — unknown names are dropped here and
@@ -361,12 +362,13 @@ export interface Project {
   /** Validated + sanitized presets from `config.presets`. Empty if unset. */
   presets: readonly Preset[];
   /**
-   * Validated chrome-alias map from `config.chrome`. Keys are swatchbook
-   * block chrome paths; values are token paths that resolve in at least
-   * one permutation. Invalid entries from the raw config are dropped and
-   * reported as diagnostics. Empty if the config doesn't supply any.
+   * Validated chrome-alias map from `config.chrome`. Keys are members
+   * of the closed `ChromeRole` set; values are token paths that resolve
+   * in at least one permutation. Invalid entries from the raw config
+   * are dropped and reported as diagnostics. Empty when the config
+   * doesn't supply any.
    */
-  chrome: Record<string, string>;
+  chrome: Partial<Record<ChromeRole, string>>;
   /** Resolved tokens at the project's default tuple. Convenience for global views. */
   defaultTokens: TokenMap;
   /**
@@ -411,7 +413,7 @@ export interface Project {
    * the plain-parse fallback consumed. Consumers use this for file-watching
    * (the addon's Vite plugin does exactly that).
    */
-  sourceFiles: string[];
+  sourceFiles: readonly string[];
   /**
    * Absolute path of the directory all config-relative paths (resolver,
    * token globs, layered overlays) resolved against. Passed into
