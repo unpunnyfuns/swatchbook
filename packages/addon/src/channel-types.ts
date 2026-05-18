@@ -20,6 +20,7 @@ import type {
   Diagnostic,
   DiagnosticSeverity,
   Preset,
+  TupleKey,
 } from '@unpunnyfuns/swatchbook-core';
 
 export type { DiagnosticSeverity };
@@ -100,7 +101,7 @@ export interface VirtualJointOverride {
  * as an array of `[key, entry]` pairs so JSON round-trips don't drop
  * the iteration order or the entry structure.
  */
-export type VirtualJointOverrides = readonly (readonly [string, VirtualJointOverride])[];
+export type VirtualJointOverrides = readonly (readonly [TupleKey, VirtualJointOverride])[];
 
 /**
  * Wire-payload variance types — re-exports of core's discriminated

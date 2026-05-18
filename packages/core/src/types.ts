@@ -4,6 +4,7 @@ import type { CSSPluginOptions } from '@terrazzo/plugin-css';
 import type { TokenListingPluginOptions } from '@terrazzo/plugin-token-listing';
 import type { ChromeRole } from '#/chrome.ts';
 import type { TokenListingByPath } from '#/token-listing.ts';
+import type { TupleKey } from '#/tuple-key.ts';
 
 /**
  * Swatchbook's public token shape — the contract surfaced on
@@ -130,7 +131,7 @@ export interface JointOverride {
  * uses a temporary Map keyed on canonical tuple, materialized to this
  * array shape on return.
  */
-export type JointOverrides = readonly (readonly [string, JointOverride])[];
+export type JointOverrides = readonly (readonly [TupleKey, JointOverride])[];
 
 /**
  * Compute the resolved `TokenMap` for any tuple of axis selections

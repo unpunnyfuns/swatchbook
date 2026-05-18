@@ -12,6 +12,7 @@ import {
   presets as initialPresets,
   varianceByPath as initialVarianceByPath,
 } from 'virtual:swatchbook/tokens';
+import type { TupleKey } from '@unpunnyfuns/swatchbook-core';
 import type {
   VirtualJointOverrideShape,
   VirtualTokenListingShape,
@@ -50,7 +51,7 @@ export interface TokenSnapshot {
   readonly cssVarPrefix: string;
   readonly listing: Readonly<Record<string, VirtualTokenListingShape>>;
   readonly cells: Record<string, Record<string, Record<string, VirtualToken>>>;
-  readonly jointOverrides: readonly (readonly [string, VirtualJointOverrideShape])[];
+  readonly jointOverrides: readonly (readonly [TupleKey, VirtualJointOverrideShape])[];
   readonly varianceByPath: VirtualVarianceByPathShape;
   readonly defaultTuple: Record<string, string>;
   /** Monotonic counter, bumped on each update. Useful as a React key. */

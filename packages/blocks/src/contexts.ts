@@ -1,4 +1,10 @@
-import type { Axis, AxisVarianceResult, Diagnostic, Preset } from '@unpunnyfuns/swatchbook-core';
+import type {
+  Axis,
+  AxisVarianceResult,
+  Diagnostic,
+  Preset,
+  TupleKey,
+} from '@unpunnyfuns/swatchbook-core';
 import type { SlimListedToken } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
 import { createContext, useContext } from 'react';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
@@ -113,7 +119,7 @@ export interface ProjectSnapshot {
    * Same ascending-arity iteration order the Map carries on the
    * server side. Empty array when no joint divergences exist.
    */
-  jointOverrides: readonly (readonly [string, VirtualJointOverrideShape])[];
+  jointOverrides: readonly (readonly [TupleKey, VirtualJointOverrideShape])[];
   /**
    * Cached per-path variance results. Blocks read this for O(1) axis
    * variance lookup instead of recomputing on each render.
