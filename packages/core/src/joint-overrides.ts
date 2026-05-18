@@ -45,25 +45,76 @@ export interface JointProbeResult {
  * dark, Dark+BrandA → white), so the touching signal flags brand
  * even though no override is needed.
  *
- * Pair-only at this stage. Triple-and-higher joint variance is a
- * documented limitation; the algorithm extends naturally to arity N.
+ * The probe iterates arity 2..`maxArity` (default `axes.length`). At
+ * each arity, every divergent partial tuple is recorded as an override
+ * the cell-composer can patch back in. Higher arities are bounded only
+ * by `C(N, k) × Π(ctx_i - 1)` over the chosen combo — combinatorial
+ * at scale (11 axes with rich context counts → millions of
+ * `resolver.apply` calls). `options.maxArity` caps the sweep; pair-only
+ * is empirically sufficient for real-world joint divergences observed
+ * so far, and is the bench's default for large fixtures.
  *
  * Resolver-less projects (layered / plain-parse) return empty
  * collections — no resolver to probe with.
  */
+export interface ProbeOptions {
+  /**
+   * Inclusive maximum arity to probe. Defaults to `axes.length` — the
+   * full sweep. Capping is useful for benchmarks and for projects with
+   * many axes where arity-3+ probes explode combinatorially: at 11
+   * axes a context-rich fixture can reach millions of `resolver.apply`
+   * calls. Real-world joint divergences observed so far are pair-
+   * shaped; higher arities are conservative coverage, not load-bearing
+   * correctness.
+   */
+  maxArity?: number;
+}
+
 export function probeJointOverrides(
   axes: readonly Axis[],
   cells: Cells,
   defaultTuple: Readonly<Record<string, string>>,
   resolver: Resolver | undefined,
+  options: ProbeOptions = {},
 ): JointProbeResult {
   if (!resolver || axes.length < 2) {
     return { overrides: [], jointTouching: new Map() };
   }
 
+  // Consume the per-arity generator and accumulate. Generator yields
+  // an incremental snapshot after each arity so callers that only want
+  // pair-level divergence (the bench, or a `maxArity: 2` consumer) can
+  // stop early without paying for higher arities.
+  let result: JointProbeResult = { overrides: [], jointTouching: new Map() };
+  for (const snapshot of probeJointOverridesByArity(axes, cells, defaultTuple, resolver, options)) {
+    result = snapshot;
+  }
+  return result;
+}
+
+/**
+ * Per-arity generator. Yields the accumulated `{ overrides, jointTouching }`
+ * after completing each arity from 2 up to `options.maxArity ?? axes.length`.
+ *
+ * Each yielded value is a fresh materialization — caller-visible iteration
+ * order is "after arity 2 ... after arity 3 ..." Caller decides when to
+ * stop; breaking out of the `for...of` skips remaining arities, which is
+ * the load-bearing affordance for the bench harness and for caller-driven
+ * budgeting (e.g. abort when wall-clock exceeds a threshold).
+ *
+ * The generator itself is internal; the publicly-exported entry is the
+ * materializing wrapper above. Both share the same options.
+ */
+export function* probeJointOverridesByArity(
+  axes: readonly Axis[],
+  cells: Cells,
+  defaultTuple: Readonly<Record<string, string>>,
+  resolver: Resolver,
+  options: ProbeOptions = {},
+): Generator<JointProbeResult> {
   // Internal Map keyed on canonicalKey for dedupe across arity passes.
-  // Materialized to the public array shape on return so the wire
-  // boundary doesn't have to marshal a Map.
+  // Materialized to the public array shape on each yield so consumers
+  // see the same wire-friendly shape `loadProject` expects.
   const overrides = new Map<TupleKey, JointOverride>();
   const jointTouching = new Map<string, Set<string>>();
   // Baseline carries the values for paths that delta cells omit;
@@ -81,12 +132,13 @@ export function probeJointOverrides(
     set.add(axisName);
   };
 
-  // Iterate arity 2..axes.length. At each arity, build a composer
-  // over `cells + accumulated overrides` so arity-N probes see the
-  // (N-1)-level corrections already recorded — higher-arity
-  // divergences get recorded only when they're not already implied
-  // by a lower-arity override.
-  for (let arity = 2; arity <= axes.length; arity++) {
+  const maxArity = Math.min(options.maxArity ?? axes.length, axes.length);
+
+  // Iterate arity 2..maxArity. At each arity, build a composer over
+  // `cells + accumulated overrides` so arity-N probes see the (N-1)-level
+  // corrections already recorded — higher-arity divergences get recorded
+  // only when they're not already implied by a lower-arity override.
+  for (let arity = 2; arity <= maxArity; arity++) {
     const composer = buildResolveAt(axes, cells, [...overrides.entries()], defaultTuple);
 
     for (const axisCombo of axisCombinations(axes, arity)) {
@@ -142,9 +194,9 @@ export function probeJointOverrides(
         }
       }
     }
-  }
 
-  return { overrides: [...overrides.entries()], jointTouching };
+    yield { overrides: [...overrides.entries()], jointTouching };
+  }
 }
 
 function* axisCombinations(axes: readonly Axis[], k: number): Generator<readonly Axis[]> {

@@ -40,3 +40,7 @@ __screenshots__/
 
 # Superpowers local working artifacts (specs/plans not meant to ship)
 docs/superpowers/
+
+# Bench harness writes a phase-log + baseline per run; the harness +
+# fixture + generator ship, the per-run output stays local.
+packages/core/bench/phase-log.txt

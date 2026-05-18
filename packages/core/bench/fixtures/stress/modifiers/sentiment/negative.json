@@ -1,0 +1,335 @@
+{
+  "number": {
+    "t000": {
+      "$type": "number",
+      "$value": 9.3
+    },
+    "t093": {
+      "$type": "number",
+      "$value": 6.8
+    },
+    "t170": {
+      "$type": "number",
+      "$value": 2.2
+    }
+  },
+  "color": {
+    "t004": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.26327859493903816,
+          0.03930887533351779,
+          0.8417824965436012
+        ]
+      }
+    },
+    "t006": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.28273700387217104,
+          0.0474382983520627,
+          0.469632440013811
+        ]
+      }
+    },
+    "t007": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.3931774527300149,
+          0.9355734009295702,
+          0.5512502656783909
+        ]
+      }
+    },
+    "t008": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.6600692609790713,
+          0.022699161432683468,
+          0.5577517102938145
+        ]
+      }
+    },
+    "t013": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.9363745658192784,
+          0.11023830715566874,
+          0.6542862623464316
+        ]
+      }
+    },
+    "t014": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.4864188798237592,
+          0.6220066156238317,
+          0.7979392313864082
+        ]
+      }
+    },
+    "t017": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.45664126379415393,
+          0.035684936912730336,
+          0.705682635307312
+        ]
+      }
+    },
+    "t032": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.4829611396417022,
+          0.1270300771575421,
+          0.9752486306242645
+        ]
+      }
+    },
+    "t057": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.02352845878340304,
+          0.9439244167879224,
+          0.025921889347955585
+        ]
+      }
+    },
+    "t079": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.7776924348436296,
+          0.7361760654021055,
+          0.7013314124196768
+        ]
+      }
+    },
+    "t089": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.9028863406274468,
+          0.12220087368041277,
+          0.645330861909315
+        ]
+      }
+    },
+    "t102": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.04787121317349374,
+          0.06717558251693845,
+          0.6725569798145443
+        ]
+      }
+    },
+    "t103": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.5006098940502852,
+          0.9199620238505304,
+          0.02381777693517506
+        ]
+      }
+    },
+    "t109": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.5738530112430453,
+          0.9196073028724641,
+          0.581881761085242
+        ]
+      }
+    },
+    "t112": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.5959342566784471,
+          0.7046656650491059,
+          0.8521838358137757
+        ]
+      }
+    },
+    "t157": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.4945438918657601,
+          0.9076758271548897,
+          0.34226296562701464
+        ]
+      }
+    },
+    "t183": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.6596525320783257,
+          0.36702564801089466,
+          0.6028233072720468
+        ]
+      }
+    },
+    "t188": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.08995072566904128,
+          0.467712233774364,
+          0.9419912460725754
+        ]
+      }
+    }
+  },
+  "duration": {
+    "t005": {
+      "$type": "duration",
+      "$value": {
+        "value": 115,
+        "unit": "ms"
+      }
+    },
+    "t088": {
+      "$type": "duration",
+      "$value": {
+        "value": 544,
+        "unit": "ms"
+      }
+    },
+    "t121": {
+      "$type": "duration",
+      "$value": {
+        "value": 101,
+        "unit": "ms"
+      }
+    },
+    "t192": {
+      "$type": "duration",
+      "$value": {
+        "value": 249,
+        "unit": "ms"
+      }
+    }
+  },
+  "dimension": {
+    "t015": {
+      "$type": "dimension",
+      "$value": {
+        "value": 19,
+        "unit": "px"
+      }
+    },
+    "t053": {
+      "$type": "dimension",
+      "$value": {
+        "value": 34,
+        "unit": "px"
+      }
+    },
+    "t056": {
+      "$type": "dimension",
+      "$value": {
+        "value": 58,
+        "unit": "px"
+      }
+    },
+    "t059": {
+      "$type": "dimension",
+      "$value": {
+        "value": 40,
+        "unit": "px"
+      }
+    },
+    "t069": {
+      "$type": "dimension",
+      "$value": {
+        "value": 6,
+        "unit": "px"
+      }
+    },
+    "t122": {
+      "$type": "dimension",
+      "$value": {
+        "value": 44,
+        "unit": "px"
+      }
+    },
+    "t138": {
+      "$type": "dimension",
+      "$value": {
+        "value": 36,
+        "unit": "px"
+      }
+    },
+    "t142": {
+      "$type": "dimension",
+      "$value": {
+        "value": 19,
+        "unit": "px"
+      }
+    },
+    "t187": {
+      "$type": "dimension",
+      "$value": {
+        "value": 5,
+        "unit": "px"
+      }
+    },
+    "t190": {
+      "$type": "dimension",
+      "$value": {
+        "value": 11,
+        "unit": "px"
+      }
+    },
+    "t199": {
+      "$type": "dimension",
+      "$value": {
+        "value": 43,
+        "unit": "px"
+      }
+    }
+  },
+  "fontWeight": {
+    "t077": {
+      "$type": "fontWeight",
+      "$value": 500
+    },
+    "t094": {
+      "$type": "fontWeight",
+      "$value": 500
+    }
+  }
+}

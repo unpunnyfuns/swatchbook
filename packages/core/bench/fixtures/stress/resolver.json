@@ -1,0 +1,133 @@
+{
+  "$schema": "https://www.designtokens.org/TR/2025.10/resolver/",
+  "version": "2025.10",
+  "name": "swatchbook-stress",
+  "description": "Stress fixture v2.0.0: realistic 6-axis shape matching the torquens.bill.works/token-adventure demo. 200 tokens (~40% aliases), 6 modifiers with 2/2/3/4/3/2 contexts. Each non-default modifier-context overlay redefines ~30% of tokens with primitive values; no joint divergences seeded so probeJointOverrides should produce zero overrides. Generated from gen.mts (seed \"swatchbook-stress-2026\").",
+  "sets": {
+    "base": {
+      "description": "Base set — mixed primitive + alias tokens across DTCG types.",
+      "sources": [
+        {
+          "$ref": "./sets/base.json"
+        }
+      ]
+    }
+  },
+  "modifiers": {
+    "disabled": {
+      "description": "Stress fixture modifier disabled.",
+      "contexts": {
+        "enabled": [],
+        "disabled": [
+          {
+            "$ref": "./modifiers/disabled/disabled.json"
+          }
+        ]
+      },
+      "default": "enabled"
+    },
+    "forced": {
+      "description": "Stress fixture modifier forced.",
+      "contexts": {
+        "standard": [],
+        "forced": [
+          {
+            "$ref": "./modifiers/forced/forced.json"
+          }
+        ]
+      },
+      "default": "standard"
+    },
+    "container": {
+      "description": "Stress fixture modifier container.",
+      "contexts": {
+        "panel": [],
+        "control-primary": [
+          {
+            "$ref": "./modifiers/container/control-primary.json"
+          }
+        ],
+        "control-secondary": [
+          {
+            "$ref": "./modifiers/container/control-secondary.json"
+          }
+        ]
+      },
+      "default": "panel"
+    },
+    "sentiment": {
+      "description": "Stress fixture modifier sentiment.",
+      "contexts": {
+        "neutral": [],
+        "positive": [
+          {
+            "$ref": "./modifiers/sentiment/positive.json"
+          }
+        ],
+        "negative": [
+          {
+            "$ref": "./modifiers/sentiment/negative.json"
+          }
+        ],
+        "warning": [
+          {
+            "$ref": "./modifiers/sentiment/warning.json"
+          }
+        ]
+      },
+      "default": "neutral"
+    },
+    "state": {
+      "description": "Stress fixture modifier state.",
+      "contexts": {
+        "default": [],
+        "hover": [
+          {
+            "$ref": "./modifiers/state/hover.json"
+          }
+        ],
+        "active": [
+          {
+            "$ref": "./modifiers/state/active.json"
+          }
+        ]
+      },
+      "default": "default"
+    },
+    "mode": {
+      "description": "Stress fixture modifier mode.",
+      "contexts": {
+        "light": [],
+        "dark": [
+          {
+            "$ref": "./modifiers/mode/dark.json"
+          }
+        ]
+      },
+      "default": "light"
+    }
+  },
+  "resolutionOrder": [
+    {
+      "$ref": "#/sets/base"
+    },
+    {
+      "$ref": "#/modifiers/disabled"
+    },
+    {
+      "$ref": "#/modifiers/forced"
+    },
+    {
+      "$ref": "#/modifiers/container"
+    },
+    {
+      "$ref": "#/modifiers/sentiment"
+    },
+    {
+      "$ref": "#/modifiers/state"
+    },
+    {
+      "$ref": "#/modifiers/mode"
+    }
+  ]
+}

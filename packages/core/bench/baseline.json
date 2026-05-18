@@ -1,0 +1,28 @@
+{
+  "fixtureVersion": "2.0.0",
+  "node": "v24.15.0",
+  "generatedAt": "2026-05-18T15:11:02.388Z",
+  "loadMs": {
+    "parse": 112.86,
+    "buildCells": 2.58,
+    "probe": 2015.23,
+    "variance": 3.55,
+    "listing": 13.99,
+    "snapshotWire": 0.14,
+    "emitCss": 6.61,
+    "total": 2154.96
+  },
+  "resolverApplyCount": {
+    "atCells": 11,
+    "atProbe": 277,
+    "total": 288
+  },
+  "wireBytes": 0,
+  "cssBytes": 39451,
+  "jointOverrideCount": 7,
+  "axisCount": 6,
+  "defaultTokenCount": 200,
+  "errors": {
+    "snapshotWire": "Cannot read properties of undefined (reading 'app.terrazzo.listing')"
+  }
+}

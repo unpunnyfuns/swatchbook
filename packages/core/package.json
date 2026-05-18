@@ -78,7 +78,9 @@
     "test:watch": "vitest",
     "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src test",
     "format": "oxfmt -c ../../.oxfmtrc.json src",
-    "format:check": "oxfmt --check -c ../../.oxfmtrc.json src"
+    "format:check": "oxfmt --check -c ../../.oxfmtrc.json src",
+    "bench:gen": "node bench/fixtures/stress/gen.mts",
+    "bench": "node bench/run.mts"
   },
   "dependencies": {
     "@leeoniya/ufuzzy": "1.0.19",
