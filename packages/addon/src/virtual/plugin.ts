@@ -1,11 +1,6 @@
-import type {
-  Config,
-  ListedToken,
-  Project,
-  SwatchbookIntegration,
-  TokenListingByPath,
-} from '@unpunnyfuns/swatchbook-core';
+import type { Config, Project, SwatchbookIntegration } from '@unpunnyfuns/swatchbook-core';
 import { emitAxisProjectedCss, loadProject } from '@unpunnyfuns/swatchbook-core';
+import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
 import { type FSWatcher, watch as fsWatch } from 'node:fs';
 import { basename, dirname, isAbsolute, resolve as resolvePath } from 'node:path';
 import picomatch from 'picomatch';
@@ -107,23 +102,23 @@ export function swatchbookTokensPlugin({
       }
       if (id !== RESOLVED_VIRTUAL_MODULE_ID) return null;
       if (!project) return 'export default null;';
-      // Emit a typed ESM module. Values are JSON-stringified for stability.
-      // `jointOverrides` is already an array of `[key, entry]` pairs on
-      // the server side — same shape consumers read on the wire.
-      const varianceByPathObj = Object.fromEntries(project.varianceByPath.entries());
+      // Emit a typed ESM module. `snapshotForWire` does the field set +
+      // Map-to-Object conversion in one place; we destructure here and
+      // JSON-stringify each field for ESM export.
+      const snap = snapshotForWire(project, css);
       return [
         `/* swatchbook virtual module — generated */`,
-        `export const axes = ${JSON.stringify(project.axes)};`,
-        `export const presets = ${JSON.stringify(project.presets)};`,
-        `export const disabledAxes = ${JSON.stringify(project.disabledAxes)};`,
-        `export const diagnostics = ${JSON.stringify(project.diagnostics)};`,
-        `export const css = ${JSON.stringify(css)};`,
-        `export const cssVarPrefix = ${JSON.stringify(config.cssVarPrefix ?? '')};`,
-        `export const listing = ${JSON.stringify(slimListing(project.listing))};`,
-        `export const cells = ${JSON.stringify(project.cells)};`,
-        `export const jointOverrides = ${JSON.stringify(project.jointOverrides)};`,
-        `export const varianceByPath = ${JSON.stringify(varianceByPathObj)};`,
-        `export const defaultTuple = ${JSON.stringify(project.defaultTuple)};`,
+        `export const axes = ${JSON.stringify(snap.axes)};`,
+        `export const presets = ${JSON.stringify(snap.presets)};`,
+        `export const disabledAxes = ${JSON.stringify(snap.disabledAxes)};`,
+        `export const diagnostics = ${JSON.stringify(snap.diagnostics)};`,
+        `export const css = ${JSON.stringify(snap.css)};`,
+        `export const cssVarPrefix = ${JSON.stringify(snap.cssVarPrefix)};`,
+        `export const listing = ${JSON.stringify(snap.listing)};`,
+        `export const cells = ${JSON.stringify(snap.cells)};`,
+        `export const jointOverrides = ${JSON.stringify(snap.jointOverrides)};`,
+        `export const varianceByPath = ${JSON.stringify(snap.varianceByPath)};`,
+        `export const defaultTuple = ${JSON.stringify(snap.defaultTuple)};`,
       ].join('\n');
     },
 
@@ -176,19 +171,7 @@ export function swatchbookTokensPlugin({
             server.ws.send({
               type: 'custom',
               event: HMR_EVENT,
-              data: {
-                axes: project.axes,
-                disabledAxes: project.disabledAxes,
-                presets: project.presets,
-                diagnostics: project.diagnostics,
-                css,
-                cssVarPrefix: config.cssVarPrefix ?? '',
-                listing: slimListing(project.listing),
-                cells: project.cells,
-                jointOverrides: project.jointOverrides,
-                varianceByPath: Object.fromEntries(project.varianceByPath.entries()),
-                defaultTuple: project.defaultTuple,
-              },
+              data: snapshotForWire(project, css),
             });
           })();
         }, 100);
@@ -267,28 +250,4 @@ export function collectWatchPaths(
 function resolveFromCwd(p: string, cwd: string): string {
   if (isAbsolute(p)) return p;
   return resolvePath(cwd, p);
-}
-
-type SlimListedToken = Pick<
-  ListedToken['$extensions']['app.terrazzo.listing'],
-  'names' | 'previewValue' | 'source'
->;
-
-/**
- * Reduce the full Token Listing surface down to the fields blocks read.
- * Drops `originalValue` (large, not needed for display), `$value`, `$type`,
- * `mode`, `subtype` for now — the blocks don't consume them yet. Keeps the
- * virtual module payload lean, especially for large projects where each
- * token's raw listing entry can weigh a few KB.
- */
-function slimListing(listing: TokenListingByPath): Record<string, SlimListedToken> {
-  const out: Record<string, SlimListedToken> = {};
-  for (const [path, entry] of Object.entries(listing)) {
-    const ext = entry.$extensions['app.terrazzo.listing'];
-    const slim: SlimListedToken = { names: ext.names };
-    if (ext.previewValue !== undefined) slim.previewValue = ext.previewValue;
-    if (ext.source !== undefined) slim.source = ext.source;
-    out[path] = slim;
-  }
-  return out;
 }
