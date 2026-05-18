@@ -74,6 +74,97 @@ describe('alias-graph', () => {
     );
   });
 
+  it('partialAliasOf handles typography composite (object map)', () => {
+    // Empirically pinned from `@terrazzo/parser` 2.1: typography
+    // tokens whose `$value.fontFamily` / `$value.fontWeight` reference
+    // other tokens produce a flat object-map `partialAliasOf` of the
+    // same shape as border tokens.
+    const baseline: TokenMap = {
+      'family.sans': {
+        $type: 'fontFamily',
+        $value: ['Inter'],
+      } as never,
+      'weight.bold': {
+        $type: 'fontWeight',
+        $value: 700,
+      } as never,
+      heading: {
+        $type: 'typography',
+        $value: {
+          fontFamily: ['Inter'],
+          fontWeight: 700,
+          fontSize: { value: 24, unit: 'px' },
+          lineHeight: { value: 32, unit: 'px' },
+          letterSpacing: { value: 0, unit: 'px' },
+        },
+        partialAliasOf: { fontFamily: 'family.sans', fontWeight: 'weight.bold' },
+      } as never,
+    };
+    const graph = buildAliasGraph({ axes: [], resolverModifiers: {}, baseline });
+    expect(graph.reachableFromPath.get('heading')).toEqual(
+      new Set(['heading', 'family.sans', 'weight.bold']),
+    );
+  });
+
+  it('partialAliasOf handles transition composite (object map)', () => {
+    // Empirically pinned: transition tokens with aliased `duration` /
+    // `timingFunction` produce an object-map `partialAliasOf` —
+    // structurally identical to typography and border. The walker's
+    // generic recursive descent handles all three uniformly.
+    const baseline: TokenMap = {
+      'dur.short': {
+        $type: 'duration',
+        $value: { value: 100, unit: 'ms' },
+      } as never,
+      'ease.standard': {
+        $type: 'cubicBezier',
+        $value: [0.4, 0, 0.2, 1],
+      } as never,
+      enter: {
+        $type: 'transition',
+        $value: {
+          duration: { value: 100, unit: 'ms' },
+          timingFunction: [0.4, 0, 0.2, 1],
+          delay: { value: 0, unit: 'ms' },
+        },
+        partialAliasOf: { duration: 'dur.short', timingFunction: 'ease.standard' },
+      } as never,
+    };
+    const graph = buildAliasGraph({ axes: [], resolverModifiers: {}, baseline });
+    expect(graph.reachableFromPath.get('enter')).toEqual(
+      new Set(['enter', 'dur.short', 'ease.standard']),
+    );
+  });
+
+  it('partialAliasOf handles gradient composite (array of objects)', () => {
+    // Empirically pinned: gradient tokens whose `$value` is an array
+    // of stops with aliased `color` produce an array-of-object-maps
+    // `partialAliasOf` — structurally identical to shadow. The
+    // recursive walker treats both the same way.
+    const baseline: TokenMap = {
+      'color.red': {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', components: [1, 0, 0], alpha: 1 },
+      } as never,
+      'color.blue': {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', components: [0, 0, 1], alpha: 1 },
+      } as never,
+      bg: {
+        $type: 'gradient',
+        $value: [
+          { color: { colorSpace: 'srgb', components: [1, 0, 0], alpha: 1 }, position: 0 },
+          { color: { colorSpace: 'srgb', components: [0, 0, 1], alpha: 1 }, position: 1 },
+        ],
+        partialAliasOf: [{ color: 'color.red' }, { color: 'color.blue' }],
+      } as never,
+    };
+    const graph = buildAliasGraph({ axes: [], resolverModifiers: {}, baseline });
+    expect(graph.reachableFromPath.get('bg')).toEqual(
+      new Set(['bg', 'color.red', 'color.blue']),
+    );
+  });
+
   it('partialAliasOf handles shadow composite (array of objects)', () => {
     const baseline: TokenMap = {
       'shadow.lg': {
