@@ -4,7 +4,36 @@ import type { CSSPluginOptions } from '@terrazzo/plugin-css';
 import type { TokenListingPluginOptions } from '@terrazzo/plugin-token-listing';
 import type { TokenListingByPath } from '#/token-listing.ts';
 
-export type TokenMap = Record<string, TokenNormalized>;
+/**
+ * Swatchbook's public token shape — the contract surfaced on
+ * `Project.defaultTokens` and `Project.resolveAt()` output. A strict
+ * subset of `@terrazzo/parser`'s `TokenNormalized`: the seven fields
+ * downstream blocks actually read, no internals (`id`, `source`,
+ * `originalValue`, `group`, `dependencies`, `$extensions`, `$extends`,
+ * `$deprecated`) leaked through.
+ *
+ * Insulates swatchbook consumers from Terrazzo type churn: a future
+ * `TokenNormalized` field rename or restructure won't ripple into the
+ * `@unpunnyfuns/swatchbook-core` API surface. Assignable from
+ * `TokenNormalized` by structural subtyping — internal core code can
+ * pass resolver output straight into a `TokenMap` without casts.
+ */
+export interface SwatchbookToken {
+  $type?: string | undefined;
+  $value?: unknown;
+  $description?: string | undefined;
+  aliasOf?: string | undefined;
+  aliasChain?: readonly string[] | undefined;
+  aliasedBy?: readonly string[] | undefined;
+  /**
+   * Per-sub-field alias map for composite tokens whose value blends
+   * primitives with aliased fragments. Shape varies per composite type;
+   * typed as `unknown` so consumers narrow at the use-site.
+   */
+  partialAliasOf?: unknown;
+}
+
+export type TokenMap = Record<string, SwatchbookToken>;
 
 /**
  * How a token's resolved value depends on the project's axes.
