@@ -1,5 +1,241 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.56.0
+
+### Minor Changes
+
+- afaebb8: Closes #825. `AxisVarianceResult` is now a discriminated union on `kind`:
+
+  - `constant` — `varyingAxes: readonly []`
+  - `single` — adds `axis: string` shortcut + `varyingAxes: readonly [string]`
+  - `multi` — `varyingAxes: readonly [string, string, ...string[]]`
+
+  Consumers get exhaustive `switch (result.kind)` narrowing, and the `single` variant exposes `axis: string` directly so blocks no longer need to defensively check `varyingAxes[0]` for undefined. Same applied to the addon-side `VirtualVarianceEntry` wire shape and the virtual module's ambient `VirtualAxisVarianceEntry` declaration.
+
+  JSON wire shape is identical to the previous flat interface — MCP `get_axis_variance` and snapshot payloads keep working unchanged. New helper type `AxisVariancePerAxis` exported for consumers that want to reference the shared `perAxis` sub-shape without reaching into the union.
+
+  `#866` and `#865` carry the remaining `JointOverrides` and `Config` discriminated-union refactors from the same audit — each higher-churn and earning a standalone PR.
+
+- de4cc3d: Closes #815. The cartesian-era `Project.permutations` / `Project.permutationsResolved` fields exit `@unpunnyfuns/swatchbook-core`'s public surface entirely, along with the `Permutation` type and the `permutationID()` function (both kept internal to the loader for now). `Project.graph` renamed to `Project.defaultTokens` for accuracy — it's the resolved TokenMap at the default tuple, not a reference graph.
+
+  ### Removed (pre-1.0 minor bump)
+
+  - `Project.permutations: Permutation[]`
+  - `Project.permutationsResolved: Record<string, TokenMap>`
+  - `Project.graph` (renamed to `Project.defaultTokens`)
+  - `Permutation` type export from the `core` barrel
+  - `permutationID()` function export from the `core` barrel
+  - `@unpunnyfuns/swatchbook-blocks`: `ProjectSnapshot.permutations` + `ProjectSnapshot.permutationsResolved` + `VirtualPermutation` / `VirtualPermutationShape` types
+
+  ### Added / changed
+
+  - `Project.disabledAxes` and `Project.presets` are now `readonly` arrays.
+  - `Project.defaultTokens: TokenMap` (replaces `Project.graph`).
+  - `@unpunnyfuns/swatchbook-blocks` test fixtures (`packages/blocks/test/*`) now declare the `cells` / `jointOverrides` / `defaultTuple` shape directly. The interim `withCellsShape` helper introduced in #844 is deleted; the legacy `snapshotResolveAt` fallback in `use-project.ts` (which already lost its `permutationsResolved` branch in #844) is unchanged.
+
+  ### Migration
+
+  ```ts
+  // before
+  project.permutations.find((p) => p.name === name);
+  project.permutationsResolved["Dark · Brand A"]?.["color.accent.bg"];
+  project.graph;
+
+  // after
+  project.resolveAt({ mode: "Dark", brand: "Brand A" })["color.accent.bg"];
+  project.defaultTokens;
+  // theme names synthesized when needed: `axisValues.join(' · ')`
+  ```
+
+  `emit-via-terrazzo`'s `selection: 'permutations'` (default) derives the singleton set from `axes + presets + defaultTuple` directly — same set the resolver loader produces, no `Project.permutations` dependency.
+
+  `@unpunnyfuns/swatchbook-mcp`: tool I/O unchanged. The CLI's reload log derives `themeCount` from axis cardinality.
+
+  `@unpunnyfuns/swatchbook-integrations`: `tailwind` reads `project.defaultTokens` (was `project.graph`).
+
+- b1befb6: Closes #834.
+
+  **`@unpunnyfuns/swatchbook-core`** — documents why the `./resolve-at` and `./fuzzy` subpath exports exist (browser-safe, no Terrazzo parser transitively). They're load-bearing for the addon's preview bundle and any browser consumer, not just internal organization leaking through. Source-file JSDoc updated; no API changes.
+
+  **`@unpunnyfuns/swatchbook-addon`** — drops four internal-only constants from the package barrel (`ADDON_ID`, `AXES_GLOBAL_KEY`, `PARAM_KEY`, `VIRTUAL_MODULE_ID`). None had external consumers in this workspace; the manager/preview/blocks codebase imports them via `#/constants.ts` directly. Pre-1.0 minor bump for the public-surface narrowing.
+
+  Sibling `RESOLVED_*` constants and channel event names (`INIT_EVENT`, `HMR_EVENT`, etc.) remain unexported; they're Vite-internal markers (`\0`-prefixed virtual module IDs) or addon-private channel names that consumers shouldn't wire against.
+
+### Patch Changes
+
+- d54dd78: Closes #827. Internal-only — strips remaining stale JSDoc / inline comments that referenced the cartesian-drop chain, "PR 6a" / "wire format change" phases, "see commit 893331f", and "Replaces the legacy …" patterns. The bulk of these were already cleaned up in #816 / #841 / #846 as those PRs deleted the code they pointed at; this PR catches the few that survived as stranded references.
+
+  No behavior changes.
+
+- b962d1f: Second of three sub-PRs for #818. Sweeps `fireEvent` calls out of the blocks and addon browser-mode test suites — replaces with `userEvent` from `@vitest/browser/context` (project convention for browser-mode tests). Affects five blocks test files plus the addon's color-format-selector test.
+
+  Specific conversions:
+
+  - `fireEvent.change(input, { target: { value: 'x' } })` → `await userEvent.fill(input, 'x')` (matches intent + faster than `.type()` — translates to a single Playwright `locator.fill()` call).
+  - `fireEvent.click(el)` → `await userEvent.click(el)`. Drops the wrapping `act()` since userEvent handles act internally.
+  - Affected `it()` functions become `async`.
+
+  Surfaced one real-browser-only difference along the way: `userEvent.click(<tr>)` under Playwright's actionability checks doesn't reliably trigger a `<tr>`'s `onClick` handler the way React's synthetic `fireEvent.click(<tr>)` did. The `ColorTable — expansion` tests switched to keyboard activation (`row.focus()` + `userEvent.keyboard('{Enter}')`) — the row already exposes `tabIndex={0}` and an Enter/Space handler for the accessibility contract; this exercises the same path a keyboard user takes, which is the more representative real-user interaction here anyway.
+
+  #818's third sub-PR (split blocks tests into node + browser projects) is independent and lands separately.
+
+- b8372c1: Internal migration. Core's own consumers of `Project.permutations` / `permutationsResolved` now route through abstractions that are upstream of the singleton enumeration:
+
+  - **`buildCells`** takes a `resolveTuple: (tuple) => TokenMap` callback. Resolver-backed projects pass `resolver.apply` directly (no scan of the singleton enumeration); layered / plain-parse projects pass a lookup over the loader's per-tuple parse output. Drops the `findPermByTuple` helper and the dependence on `Permutation[]` + `Record<string, TokenMap>` inputs.
+  - **`validateChrome`** takes a `ReadonlySet<string>` of token IDs instead of iterating `permutationsResolved` itself. `loadProject` computes the set from `varianceByPath.keys()` (same union of every path that appears in any theme, by construction).
+  - **`load.ts`** wires both new signatures; `validateChrome` now runs after `varianceByPath` is built so the token-ID set is ready. Order-only change; chrome diagnostics still land in the same `Project.diagnostics` order.
+
+  Part 2 of 3 for #815. With this PR, the only remaining `permutationsResolved` reads in core live in `load.ts` itself (the legacy `Project.permutationsResolved` field is still populated for `Project.graph` and the snapshot fallback in `blocks/use-project.ts`). Field removals + public-API exits land in Part 3, blocked on #842 (migrating blocks test snapshots off the legacy fallback).
+
+- 0def2d3: Closes #824. Third and final half — consolidates the three `dataAttr` impls onto a single `@unpunnyfuns/swatchbook-core/data-attr` subpath, matching the shape of `/css-var`, `/resolve-at`, and `/fuzzy`.
+
+  Previously `dataAttr` lived in three places with identical bodies:
+
+  - `packages/core/src/css-axis-projected.ts:8` — private inline
+  - `packages/addon/src/data-attr.ts` — standalone file, used by `preview.tsx` (5 call sites)
+  - `packages/blocks/src/internal/data-attr.ts` — alongside `themeAttrs` / `BLOCK_ATTR` / `WRAPPER_CLASSES`, used by `themeAttrs` internally and `AxisVariance.tsx` directly
+
+  The duplication existed because addon and blocks couldn't import from core's main barrel (Node-only loader deps), so each made a local copy. The browser-safe subpath pattern (established by `/resolve-at` and `/fuzzy`) eliminates the dilemma.
+
+  Touched files:
+
+  - new `packages/core/src/data-attr.ts` + `./data-attr` export in `package.json`
+  - `packages/core/src/css-axis-projected.ts` — drops inline, imports from `#/data-attr.ts`
+  - `packages/addon/src/data-attr.ts` deleted; `preview.tsx` imports from the core subpath
+  - `packages/blocks/src/internal/data-attr.ts` — drops local `dataAttr`, imports from core; keeps `themeAttrs` / `BLOCK_ATTR` / `WRAPPER_CLASSES`
+  - `packages/blocks/src/token-detail/AxisVariance.tsx` — direct subpath import (was reaching through blocks' internal file)
+  - `data-attr.test.ts` moves from addon's test dir to core's (test follows the impl)
+
+  Closes the audit's #824 consolidation cluster: `canonicalKey` / `valueKey` / `cssEscape` (PR #869), `findPermByTuple` (eliminated by cartesian drop), `makeCssVar` (PR #880), and `dataAttr` (this PR). The `defaultTuple` builder remains explicitly skipped — 2-line inlines per the original audit comment, extracting it adds an import for no real win.
+
+  Minor bump on core (new public subpath); patch on blocks + addon.
+
+- fe5fa59: Second of three `#824` halves. Consolidates the two `makeCssVar` impls onto a single source — `packages/addon/src/hooks/use-token.ts:55`'s hand-rolled `path.replaceAll('.', '-')` version was a confirmed drift risk (no Terrazzo casing / unicode pass), while `packages/blocks/src/internal/use-project.ts:287`'s correct wrapper around `@terrazzo/token-tools/css`'s `makeCSSVar` was internal-only.
+
+  Adds `@unpunnyfuns/swatchbook-core/css-var` subpath exporting `makeCssVar(path, prefix)` — same browser-safe-subpath pattern as `/resolve-at` and `/fuzzy`. Both blocks and addon now import from there; the local impls are deleted. Future Terrazzo naming-policy shifts reach both surfaces in lockstep.
+
+  Minor bump on core because the subpath is a new public surface area; patch on blocks + addon (no public API change, just consumer-side cleanup).
+
+  The remaining `#824` half (`dataAttr` consolidation across 3 sites in core / addon / blocks) follows the same subpath shape and lands separately.
+
+- 144e07d: Closes #837. The addon preview's global-axis applier and the blocks channel-globals subscriber both subscribe to all three of Storybook's `globalsUpdated` / `setGlobals` / `updateGlobals` events. Subscribing to all three is intentional (each carries the payload at a different point in the preview lifecycle — init, toolbar tick, cross-frame echo) but the handlers previously ran their full update path on every fire, so a single toolbar change fan-out to 3× DOM writes / 3× snapshot updates / 3× consumer re-renders.
+
+  Both handlers now content-dedupe on a stringified fingerprint (`axes` JSON + `format`). The first fire of each tick applies; the second and third no-op. No behavior change beyond fewer redundant updates.
+
+  The blocks-side previous identity-equality guard (`if (next !== snapshot)`) didn't dedupe because the spread (`{ ...next, axes: nextAxes }`) produced a fresh object identity on every fire even when content was unchanged.
+
+- 158f2e1: `@unpunnyfuns/swatchbook-core`: legacy cartesian-era code paths deleted.
+
+  Removed (pre-1.0 minor bump):
+
+  - `analyzeAxisVariance()` function + its `@unpunnyfuns/swatchbook-core/variance` subpath export. Replaced by `Project.varianceByPath`, the load-time-built `ReadonlyMap<string, AxisVarianceResult>` consumed by the smart CSS emitter, the MCP `get_axis_variance` tool, and the `AxisVariance` doc block. Read `project.varianceByPath.get(path)` directly.
+  - `buildJointOverrides()` shim (deprecated wrapper around `probeJointOverrides`, no non-test callers).
+  - Internal `emitCss()` (the 200-line cartesian-fan-out CSS emitter) — replaced by `emitAxisProjectedCss()` in v0.54.
+  - Internal `composeProjectCss()` from `@unpunnyfuns/swatchbook-addon` (`@internal` test-only re-export of `emitAxisProjectedCss`).
+
+  Type-only kept on the barrel: `AxisVarianceResult` + `VarianceKind` (relocated from `variance.ts` into `types.ts` since they're load-bearing for `Project.varianceByPath` and the wire-format shape).
+
+  Migration: replace `analyzeAxisVariance(path, ...)` with `project.varianceByPath.get(path)`. Replace `buildJointOverrides(...)` with `probeJointOverrides(...).overrides`.
+
+  Docs site updated to document `project.varianceByPath` instead of the removed function.
+
+- 5953b56: Partial close of #835. Eliminates 11 of 13 `as string` / `as number` casts that worked around `noUncheckedIndexedAccess`. Each was replaced with a proper narrowing pattern (`typeof` checks, hoisted-variable + undefined-check, or `for…of` over `.entries()`):
+
+  - `packages/core/src/types.ts` — `permutationID` uses destructured `[first, ...rest]` to narrow the array.
+  - `packages/core/src/joint-overrides.ts` — `partialTuple[axis.name]` reads narrow via `undefined`-check `continue`.
+  - `packages/core/src/variance-analysis.ts` — single-touching-axis case narrows by checking `axis !== undefined`.
+  - `packages/core/src/fuzzy.ts` — ranked-index walk uses `flatMap` to drop undefined entries.
+  - `packages/blocks/src/TokenNavigator.tsx` — segments loop narrows + continues on undefined.
+  - `packages/blocks/src/format-color.ts` — `hexVal` hoisted then `typeof` narrowed.
+  - `packages/blocks/src/internal/sort-tokens.ts` — `safeNumber` helper narrows `number | null | undefined` from `colorjs.io`'s `coords`.
+  - `packages/addon/src/manager.tsx` — `rawTuple` / `rawColorFormat` narrow via `typeof` + literal-equality check.
+
+  Two casts remain, both intentional: `sort-tokens.ts:187` (`source as string` for `colorjs.io`'s constructor union — documented in the surrounding comment) and `preview.tsx:294` (`previewResolveAt as unknown as ...` — structural mismatch the audit specifically flagged for a separate fix; tracked in #835 follow-up).
+
+- a7025fe: Closes #866. Collapses `JointOverrides` from `ReadonlyMap<string, JointOverride>` to `ReadonlyArray<readonly [string, JointOverride]>` — the same shape consumers already saw on the wire (virtual module, Storybook channel) and what blocks-side `makeResolveAt` already reconstructed Maps from on every snapshot read.
+
+  No consumer uses keyed lookup. The three downstream callers (`buildResolveAt` in `resolve-at.ts`, `analyzeProjectVariance` in `variance-analysis.ts`, the smart emitter's `collectJointBlocks` in `css-axis-projected.ts`) all do `for (const … of …values())` iteration; switching to `for (const [, override] of …)` array destructuring is the only call-site change. Tests using `.size` switch to `.length`.
+
+  `probeJointOverrides` still uses an internal `Map<string, JointOverride>` for canonical-key dedupe across arity passes; the public return is materialized to the array shape on emit. The Map-↔-array marshaling on the wire boundary disappears: `addon/virtual/plugin.ts` (both module body and HMR re-broadcast) stops calling `[...project.jointOverrides.entries()]`, and `blocks/internal/use-project.ts` stops `new Map(...)` reconstructing on every render.
+
+  Pre-1.0 minor bump (`JointOverrides` is a public type export from core).
+
+- 09d957f: Internal migration. Non-core read sites that iterated `Project.permutations` or indexed into `Project.permutationsResolved[name]` now route through `cells` / `resolveAt` / `varianceByPath` / `defaultTuple` instead. Theme name strings (e.g. `"Dark · Brand A"`) are synthesized from `axes + defaultTuple` at the call sites that need them, independent of the soon-to-be-removed `Project.permutations` array.
+
+  Touched consumers:
+
+  - `@unpunnyfuns/swatchbook-mcp` server tools (`describe_project`, `list_tokens`, `get_token`, `list_axes`, `get_alias_chain`, `get_aliased_by`, `get_color_formats`, `get_color_contrast`, `get_axis_variance`, `search_tokens`, `resolve_theme`, `get_consumer_output`) + the CLI's reload log line.
+  - `@unpunnyfuns/swatchbook-integrations` css-in-js `collectPaths` (now reads `varianceByPath.keys()`).
+  - `@unpunnyfuns/swatchbook-addon` preset `renderTokenTypes` (dropped the `permutationsResolved` fallback; enumerates singleton theme names from axes/presets/defaultTuple).
+  - `@unpunnyfuns/swatchbook-blocks` `use-project` (dropped the legacy `nameForTuple` / `tuplesEqual` helpers; narrowed the snapshot fallback to the active-permutation path only).
+
+  `Project.permutations` and `Project.permutationsResolved` are unchanged in this PR. Part 1 of 3 for #815 — the field removals and `Permutation`/`permutationID` exit from the public API land in subsequent PRs.
+
+  Three vestigial MCP tests dropped (asserted a "No permutations in project." error string from guards the migrated tools no longer need; the new default-theme-name path always resolves).
+
+- 63eb55a: Closes #863. Drops the last `as unknown as` cast in `packages/addon/src/preview.tsx` by structurally aligning `VirtualTokenShape` with what `buildResolveAt` actually returns: optional string fields widened to `?: T | undefined` so they accept Terrazzo's `string | undefined` shape under `exactOptionalPropertyTypes`, and `partialAliasOf` retyped as `unknown` since its per-composite-type structure is heterogeneous (color's `components: (string | undefined)[]` doesn't fit `Record<string, string | undefined>`; the `CompositeBreakdown` consumer already narrows at runtime).
+- 96cb51d: Closes #838. The addon's preset now calls `loadProject` once at Storybook startup and shares the result with both the typed-token codegen and the Vite plugin's first virtual-module render. Previously each ran its own independent `loadProject` call, parsing the same DTCG sources twice in sequence at startup.
+
+  `swatchbookTokensPlugin` gains an optional `initialProject` field; when supplied, the plugin's first `buildStart` skips its `loadProject` call and uses the pre-loaded project directly. HMR-triggered reloads still call `loadProject` as before (no behavior change for live reloads).
+
+  Storybook startup is now a single `loadProject` pass for the addon. Order of operations and emitted outputs unchanged.
+
+- fedef53: First half of #819. Extracts the wire-format snapshot helper that the addon's virtual-module plugin was duplicating across its two emit sites (module-body emission + HMR custom event) into a single browser-safe core subpath: `@unpunnyfuns/swatchbook-core/snapshot-for-wire`.
+
+  **New exports** (subpath: `/snapshot-for-wire`):
+
+  - `SnapshotForWire` interface — names the 11 fields the wire payload carries (axes, disabledAxes, presets, diagnostics, cssVarPrefix, css, listing, cells, jointOverrides, varianceByPath, defaultTuple) with JSON-friendly types (`Record` instead of `Map` for varianceByPath, slimmed `SlimListedToken` instead of the full `ListedToken`).
+  - `SnapshotForWire`'s sub-types `SlimListedToken` — the three fields blocks actually read from each listing entry.
+  - `snapshotForWire(project, css)` — builds a `SnapshotForWire` from a loaded `Project`. Does the Map-to-Object conversion for `varianceByPath` and the `slimListing` reduction in one place. The `css` arg is the `emitAxisProjectedCss(project)` output the plugin computes alongside the project load — not on `Project` itself.
+
+  **Refactor:**
+
+  - `packages/addon/src/virtual/plugin.ts` — both emit sites now call `snapshotForWire(project, css)`:
+    - Module-body emit destructures and JSON-stringifies each field for ESM exports.
+    - HMR `server.ws.send` passes the snapshot as the event `data` directly.
+  - The duplicated `slimListing` helper + `SlimListedToken` type are removed from the plugin (they live in core now).
+
+  **Still open for follow-up #819 work:** type-shape duplication across `packages/blocks/src/contexts.ts`, `packages/blocks/src/virtual.d.ts`, `packages/addon/src/channel-types.ts`, and `packages/addon/src/virtual.d.ts` (VirtualToken declared 3×, disabledAxes absent from blocks/virtual.d.ts, etc.). This PR consolidates the builders; the type-consolidation half follows separately because it cascades through ambient-module declarations + the manager-bundle import constraint.
+
+  Minor bump on core (new public subpath); patch on addon (no public API change, internal cleanup).
+
+- Updated dependencies [d54dd78]
+- Updated dependencies [afaebb8]
+- Updated dependencies [a310586]
+- Updated dependencies [182e82d]
+- Updated dependencies [b962d1f]
+- Updated dependencies [b8372c1]
+- Updated dependencies [808d146]
+- Updated dependencies [40616f8]
+- Updated dependencies [0def2d3]
+- Updated dependencies [fe5fa59]
+- Updated dependencies [a455b2b]
+- Updated dependencies [a2e3971]
+- Updated dependencies [144e07d]
+- Updated dependencies [158f2e1]
+- Updated dependencies [444433e]
+- Updated dependencies [fa3878b]
+- Updated dependencies [de4cc3d]
+- Updated dependencies [0f10c72]
+- Updated dependencies [5cf90c2]
+- Updated dependencies [5953b56]
+- Updated dependencies [8fbe3e9]
+- Updated dependencies [a7025fe]
+- Updated dependencies [bd6a031]
+- Updated dependencies [09d957f]
+- Updated dependencies [570211b]
+- Updated dependencies [63eb55a]
+- Updated dependencies [1c84b01]
+- Updated dependencies [fedef53]
+- Updated dependencies [a2a0c61]
+- Updated dependencies [575ccb6]
+- Updated dependencies [b1befb6]
+- Updated dependencies [d8a8bdf]
+- Updated dependencies [686c5b0]
+  - @unpunnyfuns/swatchbook-core@0.56.0
+  - @unpunnyfuns/swatchbook-blocks@0.56.0
+  - @unpunnyfuns/swatchbook-switcher@0.56.0
+
 ## 0.55.0
 
 ### Minor Changes

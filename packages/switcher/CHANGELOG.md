@@ -1,5 +1,90 @@
 # @unpunnyfuns/swatchbook-switcher
 
+## 0.56.0
+
+### Patch Changes
+
+- b8372c1: Internal migration. Core's own consumers of `Project.permutations` / `permutationsResolved` now route through abstractions that are upstream of the singleton enumeration:
+
+  - **`buildCells`** takes a `resolveTuple: (tuple) => TokenMap` callback. Resolver-backed projects pass `resolver.apply` directly (no scan of the singleton enumeration); layered / plain-parse projects pass a lookup over the loader's per-tuple parse output. Drops the `findPermByTuple` helper and the dependence on `Permutation[]` + `Record<string, TokenMap>` inputs.
+  - **`validateChrome`** takes a `ReadonlySet<string>` of token IDs instead of iterating `permutationsResolved` itself. `loadProject` computes the set from `varianceByPath.keys()` (same union of every path that appears in any theme, by construction).
+  - **`load.ts`** wires both new signatures; `validateChrome` now runs after `varianceByPath` is built so the token-ID set is ready. Order-only change; chrome diagnostics still land in the same `Project.diagnostics` order.
+
+  Part 2 of 3 for #815. With this PR, the only remaining `permutationsResolved` reads in core live in `load.ts` itself (the legacy `Project.permutationsResolved` field is still populated for `Project.graph` and the snapshot fallback in `blocks/use-project.ts`). Field removals + public-API exits land in Part 3, blocked on #842 (migrating blocks test snapshots off the legacy fallback).
+
+- 158f2e1: `@unpunnyfuns/swatchbook-core`: legacy cartesian-era code paths deleted.
+
+  Removed (pre-1.0 minor bump):
+
+  - `analyzeAxisVariance()` function + its `@unpunnyfuns/swatchbook-core/variance` subpath export. Replaced by `Project.varianceByPath`, the load-time-built `ReadonlyMap<string, AxisVarianceResult>` consumed by the smart CSS emitter, the MCP `get_axis_variance` tool, and the `AxisVariance` doc block. Read `project.varianceByPath.get(path)` directly.
+  - `buildJointOverrides()` shim (deprecated wrapper around `probeJointOverrides`, no non-test callers).
+  - Internal `emitCss()` (the 200-line cartesian-fan-out CSS emitter) — replaced by `emitAxisProjectedCss()` in v0.54.
+  - Internal `composeProjectCss()` from `@unpunnyfuns/swatchbook-addon` (`@internal` test-only re-export of `emitAxisProjectedCss`).
+
+  Type-only kept on the barrel: `AxisVarianceResult` + `VarianceKind` (relocated from `variance.ts` into `types.ts` since they're load-bearing for `Project.varianceByPath` and the wire-format shape).
+
+  Migration: replace `analyzeAxisVariance(path, ...)` with `project.varianceByPath.get(path)`. Replace `buildJointOverrides(...)` with `probeJointOverrides(...).overrides`.
+
+  Docs site updated to document `project.varianceByPath` instead of the removed function.
+
+- de4cc3d: Closes #815. The cartesian-era `Project.permutations` / `Project.permutationsResolved` fields exit `@unpunnyfuns/swatchbook-core`'s public surface entirely, along with the `Permutation` type and the `permutationID()` function (both kept internal to the loader for now). `Project.graph` renamed to `Project.defaultTokens` for accuracy — it's the resolved TokenMap at the default tuple, not a reference graph.
+
+  ### Removed (pre-1.0 minor bump)
+
+  - `Project.permutations: Permutation[]`
+  - `Project.permutationsResolved: Record<string, TokenMap>`
+  - `Project.graph` (renamed to `Project.defaultTokens`)
+  - `Permutation` type export from the `core` barrel
+  - `permutationID()` function export from the `core` barrel
+  - `@unpunnyfuns/swatchbook-blocks`: `ProjectSnapshot.permutations` + `ProjectSnapshot.permutationsResolved` + `VirtualPermutation` / `VirtualPermutationShape` types
+
+  ### Added / changed
+
+  - `Project.disabledAxes` and `Project.presets` are now `readonly` arrays.
+  - `Project.defaultTokens: TokenMap` (replaces `Project.graph`).
+  - `@unpunnyfuns/swatchbook-blocks` test fixtures (`packages/blocks/test/*`) now declare the `cells` / `jointOverrides` / `defaultTuple` shape directly. The interim `withCellsShape` helper introduced in #844 is deleted; the legacy `snapshotResolveAt` fallback in `use-project.ts` (which already lost its `permutationsResolved` branch in #844) is unchanged.
+
+  ### Migration
+
+  ```ts
+  // before
+  project.permutations.find((p) => p.name === name);
+  project.permutationsResolved["Dark · Brand A"]?.["color.accent.bg"];
+  project.graph;
+
+  // after
+  project.resolveAt({ mode: "Dark", brand: "Brand A" })["color.accent.bg"];
+  project.defaultTokens;
+  // theme names synthesized when needed: `axisValues.join(' · ')`
+  ```
+
+  `emit-via-terrazzo`'s `selection: 'permutations'` (default) derives the singleton set from `axes + presets + defaultTuple` directly — same set the resolver loader produces, no `Project.permutations` dependency.
+
+  `@unpunnyfuns/swatchbook-mcp`: tool I/O unchanged. The CLI's reload log derives `themeCount` from axis cardinality.
+
+  `@unpunnyfuns/swatchbook-integrations`: `tailwind` reads `project.defaultTokens` (was `project.graph`).
+
+- 09d957f: Internal migration. Non-core read sites that iterated `Project.permutations` or indexed into `Project.permutationsResolved[name]` now route through `cells` / `resolveAt` / `varianceByPath` / `defaultTuple` instead. Theme name strings (e.g. `"Dark · Brand A"`) are synthesized from `axes + defaultTuple` at the call sites that need them, independent of the soon-to-be-removed `Project.permutations` array.
+
+  Touched consumers:
+
+  - `@unpunnyfuns/swatchbook-mcp` server tools (`describe_project`, `list_tokens`, `get_token`, `list_axes`, `get_alias_chain`, `get_aliased_by`, `get_color_formats`, `get_color_contrast`, `get_axis_variance`, `search_tokens`, `resolve_theme`, `get_consumer_output`) + the CLI's reload log line.
+  - `@unpunnyfuns/swatchbook-integrations` css-in-js `collectPaths` (now reads `varianceByPath.keys()`).
+  - `@unpunnyfuns/swatchbook-addon` preset `renderTokenTypes` (dropped the `permutationsResolved` fallback; enumerates singleton theme names from axes/presets/defaultTuple).
+  - `@unpunnyfuns/swatchbook-blocks` `use-project` (dropped the legacy `nameForTuple` / `tuplesEqual` helpers; narrowed the snapshot fallback to the active-permutation path only).
+
+  `Project.permutations` and `Project.permutationsResolved` are unchanged in this PR. Part 1 of 3 for #815 — the field removals and `Permutation`/`permutationID` exit from the public API land in subsequent PRs.
+
+  Three vestigial MCP tests dropped (asserted a "No permutations in project." error string from guards the migrated tools no longer need; the new default-theme-name path always resolves).
+
+- d8a8bdf: First of three sub-PRs for #818. Migrates the switcher test suite from jsdom to vitest's real-browser mode (Chromium + Firefox via `@vitest/browser-playwright`) — the same shape `packages/blocks` and `packages/addon` already use. Project convention bans jsdom (its partial keyboard/focus/pointer simulation is the kind of thing that hides real regressions); the switcher was the last holdout.
+
+  Drops `jsdom@^29.0.2` from dev deps; adds `@vitest/browser@^4.1.4`, `@vitest/browser-playwright@^4.1.4`, `playwright@^1.59.1`. The `react()` plugin keeps `jsxRuntime: 'classic'` so tests still exercise the manager-bundle-compatible JSX output the switcher ships.
+
+  In the test file: `fireEvent.click` → `userEvent.click` from `@vitest/browser/context` (project convention for browser-mode tests). Two click handlers gain `async/await` since `userEvent.click` returns a Promise. Removed the wrapping `describe('ThemeSwitcher', …)` block since the project convention is one-describe-per-file at most, and the file's name already carries that grouping.
+
+  CI no-op: the existing Playwright-image-based job already covers any package that uses the browser provider; no workflow edits needed. `fireEvent → userEvent` in `packages/blocks/test/` and the `apps/storybook` browser-mode harness changes are tracked as separate sub-PRs of #818.
+
 ## 0.55.0
 
 ### Minor Changes
