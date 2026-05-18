@@ -1,5 +1,80 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.58.0
+
+### Minor Changes
+
+- 33550f4: Drop the composed `data-<prefix>-theme="<tuple name>"` attribute. The per-axis attributes (`data-<prefix>-<axis>="<context>"`) are the actual scoping surface — the smart CSS emitter targets single-axis selectors plus joint compounds across multiple, never `[data-*-theme]`. The composed attribute was a v0.5-era artifact from before axes landed.
+
+  - `themeAttrs(prefix, tuple)` (blocks): signature change. Now takes the active tuple and returns per-axis attrs + the stable `data-swatchbook-block` marker + wrapper classes. Replaces the old `themeAttrs(prefix, themeName)` shape.
+  - `perAxisAttrs(prefix, tuple)` (blocks): new helper for elements that want per-axis cell scoping without block-wrapper chrome — used by `AxisVariance` so each grid swatch's CSS vars resolve at the cell's tuple instead of the document root's active tuple. **Fixes a visual bug**: grid swatches previously all showed the active tuple's color because the per-cell `data-<prefix>-theme` they wrote had zero CSS rules keyed against it.
+  - Preview decorator (addon): stops writing `data-<prefix>-theme` on `<html>` and the story wrapper.
+  - `ProjectData.themeNameForTuple` / `TokenDetailData.themeNameForTuple` (blocks): removed. Synthesise tuple names locally with `tupleToName` if needed.
+
+### Patch Changes
+
+- c1da921: `<DetailOverlay>` now sets `inert` on every other top-level body branch while it's mounted, restoring each sibling's original state on unmount. `aria-modal="true"` alone is widely known to be insufficient — VoiceOver and NVDA virtual cursors + swipe gestures still pierce the dialog and read sibling content behind the backdrop. `inert` is the modern fix; browsers without it (very old Safari/Firefox/Chrome) fall back to the existing focus trap + `aria-modal`.
+
+  Bundled focus + inert in one `useEffect` so cleanup runs un-inert _before_ opener-focus restore — `.focus()` on an inert element is a no-op, so the order matters.
+
+- 1f2af27: Add `aria-live` polite live regions for status transitions that were previously visual-only:
+
+  - `<CopyButton>` — copy success transition. The icon variant's `✓` glyph is `aria-hidden`; the new sr-only live region announces "Copied" for SR users.
+  - `<TokenTable>` + `<TokenNavigator>` — search match-count. The caption text already updates visually, but `<caption>` isn't re-announced by AT mid-interaction. New sr-only live regions announce `N tokens matching "<query>"` as the user types.
+
+  Each component carries its own component-namespaced sr-only utility class (`__sr-status` / `__sr-only`) following the existing pattern in `ColorTable`. A future tidy could extract a shared utility.
+
+  Audited finding from #932 scoped to the two clear wins; theme/axis-flip page-level announcements are deferred — that wants a debounced single live region in the addon preview decorator and rises above this PR's risk envelope. Gamut warnings already carry `aria-label="out of gamut"` everywhere (`TokenDetail`, `TokenTable`, `ColorPalette`, `ColorTable`); audit's finding there was outdated.
+
+- 39b3b2a: `<MotionSample>`'s reduced-motion fallback prose wrapped the CSS media query in literal backticks (`Animation suppressed by \`prefers-reduced-motion: reduce\`.`). Screen-readers read the backticks aloud verbatim. Wrap the identifier in `<code>` instead — readable in print, parsed as a code-span by SR voicing.
+- 1d4453e: Add disclosure semantics to clickable `<TokenTable>` rows and `<ColorTable>` group rows.
+
+  - `<TokenTable>` rows already carry `tabIndex={0}` + `aria-label="Inspect <path>"` + Enter/Space activation; they now also carry `aria-haspopup="dialog"` so SR users hear the row will open a dialog before activating.
+  - `<ColorTable>` group rows split by mode:
+    - When `onSelect` is set (consumer owns the follow-up UI), the row carries `aria-haspopup="dialog"` — same as TokenTable.
+    - In the default in-place-expand mode, the row's `aria-label` already rotates between `"Expand <base>"` and `"Collapse <base>"` to communicate state. No additional ARIA: `aria-expanded` on `<tr>` is invalid outside a `treegrid`, and the row isn't a popup trigger.
+
+  `<tr>` elements keep their table-row semantics; the ARIA attributes layer disclosure cues on top without replacing roles.
+
+- ecf7823: Three small ThemeSwitcher / addon-toolbar / Diagnostics a11y touches bundled.
+
+  - **Addon toolbar `aria-haspopup`** — was `"dialog"` but the switcher body renders `role="group"` (settings panel, not modal dialog). Promised more than the popover delivered; switched to generic `aria-haspopup={true}` so the trigger announces "has popup" without claiming a dialog flavour that doesn't match.
+  - **ThemeSwitcher `OptionPill`** — dropped `onMouseDown={(e) => e.preventDefault()}`. The preventDefault stripped focus on mouse-click so subsequent Tab restarted at the manager toolbar instead of the just-clicked pill, hurting keyboard users alternating mouse + Tab. The pill's `:focus-visible` ring already gates ring-on-mouse, so removing preventDefault doesn't bring back sticky focus rings for normal users.
+  - **Diagnostics severity SR distinction** — explicit `role="list"` on the diagnostics `<ul>` (CSS-styled lists can shed list semantics in some AT combos), `aria-hidden` on the redundant severity-label span, and `aria-label="<severity>: <message>"` on each row so SR users hear "Error: <message>" / "Warning: <message>" / "Info: <message>" as one announcement unit.
+
+- 3de4efb: `<TokenNavigator>` treeitem rows (both group and leaf) now carry the full WAI-ARIA tree-position metadata: `aria-level` (1-indexed depth), `aria-setsize` (count of siblings at this level), and `aria-posinset` (1-indexed position among siblings). Screen readers can now announce "item 3 of 12, level 2" instead of just "item" — required by the tree pattern when DOM ancestry alone doesn't carry the cardinality info AT needs.
+
+  Threaded through `TreeNodeRow` + `LeafRow` props from the root render; recursion increments level + recomputes sibling counts at each step.
+
+- f73637a: Tighten the canonical `Project` type surface — pre-1.0 readonly + closed-set narrowing pass.
+
+  - `Project.chrome: Record<string, string>` → `Partial<Record<ChromeRole, string>>`. The `validateChrome` loader already enforces keys ∈ `CHROME_ROLES` at runtime; the type now reflects it. Same on `CommonConfig.chrome`.
+  - `Project.axes: Axis[]` → `readonly Axis[]`. Matches the existing `readonly` on sibling fields (`disabledAxes`, `presets`); post-load the array is immutable in practice.
+  - `Project.sourceFiles: string[]` → `readonly string[]`. Same rationale.
+  - `SnapshotForWire.varianceByPath` drops the `ReturnType<Project['varianceByPath']['get']>` indirection (which carries an unused `| undefined`) for the direct `Record<string, AxisVarianceResult>` it always actually is.
+  - `Permutation.input: Record<string, string>` → `Readonly<Record<string, string>>`. Internal `@internal` field; readonly matches its consumer pattern.
+  - Added `never` exhaustiveness `default:` branches to two switches over closed unions: `axisTouchesToken` over `VarianceInfo` (`packages/core/src/css-axis-projected.ts`) and `AxisVariance`'s render switch over `AxisVarianceResult` (`packages/blocks/src/token-detail/AxisVariance.tsx`). A future variant lands and these throw loudly at runtime instead of falling through silently.
+  - Aligned `addon/channel-types.ts` `VirtualToken` with `blocks/contexts.ts` `VirtualTokenShape` — added the missing `aliasOf` / `aliasChain` / `aliasedBy` / `partialAliasOf` fields so what ships over the channel matches what blocks expect to read.
+
+  Closes #940
+
+- 1f65ada: Tighten weak / smoke-only test assertions across packages — sweep from the audit's test-invariant-quality lens. Each previously-weak assertion now pins a meaningful, falsifiable invariant.
+
+  - `variance-analysis-layered.test.ts` (closes #930) — was silently passing when the fixture's `color.accent` wasn't actually multi-touch. Extended the layered fixture (`brands/brand-a.json`) so `color.text` is overridden by both `mode` and `brand` axes; the test now asserts the actual classifier output (`orthogonal-after-probe` with `touching: {mode, brand}`). Surfaced a separate docstring-vs-implementation discrepancy filed as #942.
+  - `prefers-reduced-motion.browser.test.tsx` — admitted in a comment it couldn't tell apart "initial-render default" from "useEffect set false". Now captures the full `observed[]` sequence + asserts `matchMedia` was actually called.
+  - `variance-analysis-reference.test.ts` — joint-case loop was `toBeTruthy()` per field; now pins the known Dark+Brand A case end-to-end: `permutationName` shape, `cartesianValueKey` matches `JSON.stringify(jointOverrides[...].$value)`.
+  - `cells.test.ts` — "default cell on each axis is the shared baseline" was a length-check; now asserts reference identity (`.toBe(baseline)`), the contract that lets `resolveAt` skip copies.
+  - `config-terrazzo-options.test.ts` — `terrazzoPlugins` test ended with `expect(entry).toBeDefined()`; now also asserts the listing populated alongside the plugin invocations.
+  - `computed-and-emit.test.ts` `get_color_formats` — `raw` field only had `.toBeDefined()`; now asserts `JSON.parse(raw.value)` round-trips with `colorSpace` + `components|channels`.
+  - `computed-and-emit.test.ts` `resolve_theme` — partial-tuple test asserted `toBeTruthy()` on every axis; now asserts equality to each axis's declared `default`.
+  - `token-introspection.test.ts` `get_token` — per-theme entries asserted only `toBeTruthy()`; now asserts Light-themed vs. Dark-themed value sets actually differ (a resolver bug emitting the same value across modes would slip through `toBeTruthy`).
+
+  Plus the smaller nits: dropped a no-op `expect(resolverPath).toBeDefined()` in `resolver-edge-cases.test.ts`, added `group: 'swatchbook/presets'` / `'swatchbook/chrome'` literal pins to two diagnostic-assertion tests where prose was the only signal, swapped a tight diagnostic-prose regex for substring match.
+
+- Updated dependencies [f73637a]
+- Updated dependencies [1f65ada]
+  - @unpunnyfuns/swatchbook-core@0.58.0
+
 ## 0.57.1
 
 ### Patch Changes
