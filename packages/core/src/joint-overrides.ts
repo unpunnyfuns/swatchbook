@@ -44,8 +44,9 @@ export interface JointProbeResult {
 }
 
 /**
- * Probe every pair of `(axis, non-default-context)` combinations via
- * `resolver.apply` and derive two distinct signals from each probe:
+ * Probe `(axis-combo, context-product)` combinations via `resolver.apply`
+ * (capped by `options.maxArity`, default = `axes.length`) and derive two
+ * distinct signals from each probe:
  *
  *   1. `overrides` — records the cartesian-correct values for tokens
  *      whose joint value differs from cells composition. Drives
