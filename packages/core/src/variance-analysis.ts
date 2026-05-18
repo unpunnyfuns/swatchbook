@@ -40,9 +40,13 @@ import { valueKey } from '#/value-key.ts';
  * `$extensions` annotation is the future override).
  *
  * Layered and plain-parse projects don't have `project.parserInput.resolver`,
- * so Phase 3 is skipped — multi-touch tokens in those projects are
- * conservatively classified as `joint-variant` with empty `jointCases`.
- * The downstream emitter falls back to cartesian-style emit for them.
+ * so `project.jointOverrides` is empty — there's no resolver to probe for
+ * joint divergence in Phase 3. Multi-touch tokens in those projects
+ * classify as `orthogonal-after-probe`: cascade composition over per-axis
+ * cells IS the spec for layered modifiers (the loader builds the cells
+ * by cascade in the first place), so there's no hidden joint resolution
+ * to surface. The emitter routes them via projection, which produces
+ * the same result the layered config defined.
  */
 
 /** Distinguishes a token's variance shape so the emitter can route it. */

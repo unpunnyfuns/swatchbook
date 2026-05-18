@@ -41,14 +41,14 @@ beforeAll(async () => {
   variance = analyzeProjectVariance(layeredProject);
 }, 30_000);
 
-it("classifies multi-touch tokens in a layered project as orthogonal-after-probe (Phase 3 skipped, jointCases empty)", () => {
+it('classifies multi-touch tokens in a layered project as orthogonal-after-probe', () => {
   // `color.text` is overridden by both modes/dark.json and brands/brand-a.json
-  // in this layered fixture — multi-touch by construction. The classifier's
-  // top-of-file docstring claims layered projects conservatively classify
-  // these as `joint-variant` with empty `jointCases`; the implementation
-  // actually returns `orthogonal-after-probe` (see `variance-analysis.ts:208`
-  // — when `jointCases.length === 0`, the kind is `orthogonal-after-probe`,
-  // not `joint-variant`). Tracked separately; this test pins current behaviour.
+  // in this layered fixture — multi-touch by construction. Layered projects
+  // have no resolver to probe in Phase 3, so `jointOverrides` is empty.
+  // Cascade composition over per-axis cells IS the spec for layered
+  // modifiers (the loader builds the cells by cascade), so multi-touch
+  // tokens correctly classify as `orthogonal-after-probe` — projection
+  // emit produces the same result the layered config defined.
   const info = variance.get('color.text');
   expect(info, 'fixture must define color.text as a multi-touch token').toBeDefined();
   expect(info?.kind).toBe('orthogonal-after-probe');
