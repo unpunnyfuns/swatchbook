@@ -23,16 +23,33 @@ const config = defineSwatchbookConfig({
 });
 
 const project = await loadProject(config, process.cwd());
-// project.permutationsResolved[permutationName] — ready to read, no further I/O.
+
+// Read the default-tuple snapshot directly.
+const defaults = project.defaultTokens;
+
+// Read any tuple via the composer — bounded over per-axis cells +
+// joint overrides, no resolver round-trip.
+const darkBrandA = project.resolveAt({ mode: 'Dark', brand: 'Brand A' });
 ```
 
-The [config reference](https://unpunnyfuns.github.io/swatchbook/reference/config) covers every field; the [core reference](https://unpunnyfuns.github.io/swatchbook/reference/core) covers the `Project` shape and exported helpers (`resolvePermutation`, `permutationID`, typed `Axis` / `Permutation` / `Diagnostic`).
+The [config reference](https://unpunnyfuns.github.io/swatchbook/reference/config) covers every field; the [core reference](https://unpunnyfuns.github.io/swatchbook/reference/core) covers the `Project` shape and exported helpers (`emitAxisProjectedCss`, `jointOverrideKey`, typed `Axis` / `Config` / `Diagnostic` / `Project`).
+
+## Browser-safe subpaths
+
+Leaf utilities consumers need without the loader's Node deps live on dedicated subpaths — each tree-shake-clean, no `@terrazzo/parser`, no `node:*` imports:
+
+- `@unpunnyfuns/swatchbook-core/resolve-at` — `buildResolveAt(axes, cells, jointOverrides, defaultTuple)`
+- `@unpunnyfuns/swatchbook-core/snapshot-for-wire` — `snapshotForWire(project, css)` + `SnapshotForWire` type
+- `@unpunnyfuns/swatchbook-core/fuzzy` — uFuzzy-backed token search
+- `@unpunnyfuns/swatchbook-core/css-var` — `makeCssVar(path, prefix)`
+- `@unpunnyfuns/swatchbook-core/data-attr` — `dataAttr(prefix, key)`
 
 ## Boundaries
 
 - ✅ Build-time use — Node, scripts, SSR, Storybook presets.
 - ✅ Pair with [Terrazzo](https://terrazzo.app/)'s CLI for production artifact emission (CSS / JS / Tailwind / Swift / Sass / …).
-- ❌ Don't ship the `Project` object to the browser — it carries full raw-AST references. Use `permutationsResolved` projections instead.
+- ✅ Ship `project.cells` / `project.jointOverrides` / `project.defaultTokens` to the browser via the `snapshot-for-wire` subpath — that's exactly what the addon's preview does.
+- ❌ Don't ship the full `Project` object to the browser. `parserInput` carries the raw Terrazzo AST; use `snapshotForWire(project, css)` to get a JSON-friendly subset.
 - ❌ Don't reach into `@terrazzo/parser` directly. Stay on the core surface so upgrades don't churn your code.
 
 ## Credits
