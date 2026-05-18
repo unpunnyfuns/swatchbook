@@ -132,10 +132,11 @@ export function probeJointOverrides(
     const composer = buildResolveAt(axes, cells, [...overrides.entries()], defaultTuple);
 
     for (const axisCombo of axisCombinations(axes, arity)) {
-      // Graph cull: every axis must have an in-combo connection, or
-      // the combo is provably orthogonal and can't contribute a
-      // joint divergence. Skipped entirely on resolvers without
-      // source data (test mocks); production flow always has it.
+      // Graph cull: the combo's induced subgraph must be a single
+      // connected component, or it spans disjoint clusters whose
+      // cross-cluster cartesian can't produce a joint divergence.
+      // Skipped entirely on resolvers without source data (test
+      // mocks); production flow always has it.
       if (aliasGraph && !isAxisComboConnected(aliasGraph, axisCombo)) continue;
       for (const partialTuple of contextProducts(axisCombo)) {
         const fullTuple = { ...defaultTuple, ...partialTuple };

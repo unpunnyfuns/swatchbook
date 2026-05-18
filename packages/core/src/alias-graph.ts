@@ -19,9 +19,12 @@ import type { Axis, TokenMap } from '#/types.ts';
  * Composing the two: axis A's "reach" is `⋃ over non-default contexts
  * c of writes[A][c] ∪ reachableFromPath[P] for P in writes[A][c]`.
  * Two axes are `connected` iff their reach sets intersect.
- * `isAxisComboConnected` extends to arity N: every axis in the combo
- * must connect to at least one other axis in the combo (conservative
- * — errs toward keeping the combo, never drops a real divergence).
+ * `isAxisComboConnected` extends to arity N by requiring the combo's
+ * induced subgraph (axis nodes, edges restricted to in-combo
+ * endpoints) to be a single connected component — a combo that
+ * spans two disjoint clusters can't produce a joint divergence and
+ * is safely culled. Stays conservative: false orthogonals would drop
+ * a real divergence; false connecteds just probe an extra tuple.
  *
  * `probeJointOverrides` accepts an optional graph and skips
  * combinations the graph reports as orthogonal. Without one, it
@@ -126,9 +129,9 @@ export function buildAliasGraph(input: BuildAliasGraphInput): AliasGraph {
         connectedAxes.get(b.name)!.add(a.name);
         continue;
       }
-      const reachA = axisReach.get(a.name);
-      const reachB = axisReach.get(b.name);
-      if (!reachA || !reachB || reachA.size === 0 || reachB.size === 0) continue;
+      const reachA = axisReach.get(a.name)!;
+      const reachB = axisReach.get(b.name)!;
+      if (reachA.size === 0 || reachB.size === 0) continue;
       if (setsIntersect(reachA, reachB)) {
         connectedAxes.get(a.name)!.add(b.name);
         connectedAxes.get(b.name)!.add(a.name);
