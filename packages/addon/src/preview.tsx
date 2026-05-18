@@ -33,7 +33,7 @@ import {
   ColorFormatContext,
   type ProjectSnapshot,
   SwatchbookContext,
-  PermutationContext,
+  ThemeContext,
 } from '@unpunnyfuns/swatchbook-blocks';
 import {
   AXES_GLOBAL_KEY,
@@ -98,7 +98,7 @@ function forEachPinnedAxis(cb: (name: string, value: string) => void): void {
  * signal. Returns empty string when there are no axes (no name to
  * write).
  */
-function matchPermutationName(tuple: Readonly<Record<string, string>>): string {
+function matchThemeName(tuple: Readonly<Record<string, string>>): string {
   if (virtualAxes.length === 0) return '';
   return virtualAxes.map((axis) => tuple[axis.name] ?? axis.default).join(' · ');
 }
@@ -159,7 +159,7 @@ function defaultTuple(): Record<string, string> {
 /**
  * Reverse-engineer a tuple from a `Light · Brand A · Normal`-shape
  * theme name. Splits on ` · ` and zips with `virtualAxes` in declared
- * order — matches `matchPermutationName`'s production direction so a
+ * order — matches `matchThemeName`'s production direction so a
  * round-trip is lossless. Returns `undefined` when the segment count
  * doesn't match the axis count.
  */
@@ -248,7 +248,7 @@ const themedDecorator: Decorator = (Story, context) => {
   const parameters = context.parameters as StoryParameters;
   const tuple = useMemo(() => resolveTuple(globals, parameters), [globals, parameters]);
   const colorFormat = useMemo(() => resolveColorFormat(globals), [globals]);
-  const themeName = useMemo(() => matchPermutationName(tuple), [tuple]);
+  const themeName = useMemo(() => matchThemeName(tuple), [tuple]);
 
   useEffect(() => {
     ensureStylesheet();
@@ -274,7 +274,7 @@ const themedDecorator: Decorator = (Story, context) => {
       axes: virtualAxes,
       disabledAxes: virtualDisabledAxes,
       presets: virtualPresets,
-      activePermutation: themeName,
+      activeTheme: themeName,
       activeAxes: tuple,
       cssVarPrefix,
       diagnostics,
@@ -291,7 +291,7 @@ const themedDecorator: Decorator = (Story, context) => {
 
   return (
     <SwatchbookContext.Provider value={snapshot}>
-      <PermutationContext.Provider value={themeName}>
+      <ThemeContext.Provider value={themeName}>
         <AxesContext.Provider value={tuple}>
           <ColorFormatContext.Provider value={colorFormat}>
             <div
@@ -305,7 +305,7 @@ const themedDecorator: Decorator = (Story, context) => {
             </div>
           </ColorFormatContext.Provider>
         </AxesContext.Provider>
-      </PermutationContext.Provider>
+      </ThemeContext.Provider>
     </SwatchbookContext.Provider>
   );
 };
@@ -371,7 +371,7 @@ function installGlobalAxisApplier(): void {
   const apply = (globals: SwatchbookGlobals): void => {
     ensureStylesheet();
     const tuple = resolveTuple(globals, {});
-    setRootAxes(matchPermutationName(tuple), tuple);
+    setRootAxes(matchThemeName(tuple), tuple);
   };
   // Storybook fires `globalsUpdated`, `setGlobals`, and `updateGlobals`
   // for the same logical change (preview init + every toolbar tick).
@@ -386,7 +386,7 @@ function installGlobalAxisApplier(): void {
   const onGlobals = (payload: { globals?: SwatchbookGlobals }): void => {
     if (!payload.globals) return;
     const tuple = resolveTuple(payload.globals, {});
-    const fingerprint = matchPermutationName(tuple);
+    const fingerprint = matchThemeName(tuple);
     if (fingerprint === lastApplied) return;
     lastApplied = fingerprint;
     apply(payload.globals);

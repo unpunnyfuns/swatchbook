@@ -51,7 +51,7 @@ export function FontWeightScale({
   sortDir = 'asc',
 }: FontWeightScaleProps): ReactElement {
   const project = useProject();
-  const { resolved, activePermutation, cssVarPrefix } = project;
+  const { resolved, activeTheme, cssVarPrefix } = project;
 
   const rows = useMemo<Row[]>(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
@@ -68,18 +68,18 @@ export function FontWeightScale({
 
   const captionText =
     caption ??
-    `${rows.length} fontWeight token${rows.length === 1 ? '' : 's'}${filter && filter !== 'fontWeight' ? ` matching \`${filter}\`` : ''} · ${activePermutation}`;
+    `${rows.length} fontWeight token${rows.length === 1 ? '' : 's'}${filter && filter !== 'fontWeight' ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activePermutation)}>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
         <div className="sb-block__empty">No fontWeight tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activePermutation)}>
+    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} className="sb-font-weight-scale__row">

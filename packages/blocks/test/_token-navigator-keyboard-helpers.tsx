@@ -25,7 +25,7 @@ export function snapshot(): ProjectSnapshot {
     },
     jointOverrides: [],
     defaultTuple: { theme: 'Light' },
-    activePermutation: 'Light',
+    activeTheme: 'Light',
     activeAxes: { theme: 'Light' },
     cssVarPrefix: 'sb',
     diagnostics: [],

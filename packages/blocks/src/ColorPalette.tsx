@@ -70,7 +70,7 @@ export function ColorPalette({
   sortDir = 'asc',
 }: ColorPaletteProps): ReactElement {
   const project = useProject();
-  const { resolved, activePermutation, cssVarPrefix } = project;
+  const { resolved, activeTheme, cssVarPrefix } = project;
   const colorFormat = useColorFormat();
 
   const groups = useMemo(() => {
@@ -109,18 +109,18 @@ export function ColorPalette({
   const totalCount = groups.reduce((acc, [, swatches]) => acc + swatches.length, 0);
   const captionText =
     caption ??
-    `${totalCount} color${totalCount === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activePermutation}`;
+    `${totalCount} color${totalCount === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
 
   if (totalCount === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activePermutation)}>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
         <div className="sb-block__empty">No color tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activePermutation)}>
+    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {groups.map(([group, swatches]) => (
         <section key={group} className="sb-color-palette__group">

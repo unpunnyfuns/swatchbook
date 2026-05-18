@@ -1,21 +1,21 @@
 import { type ReactNode } from 'react';
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { AxesContext, PermutationContext } from '@unpunnyfuns/swatchbook-blocks';
+import { AxesContext, ThemeContext } from '@unpunnyfuns/swatchbook-blocks';
 import { useToken } from '#/hooks/use-token.ts';
 
 /**
  * The hook resolves through `useActiveAxes` (the post-cells contract);
- * tests previously only set `PermutationContext`, which the legacy
+ * tests previously only set `ThemeContext`, which the legacy
  * `useToken` translated to a permutation-name lookup. We set both so
  * the test fixtures work under either contract.
  */
 function withPermutation(name: string, axes: Record<string, string>) {
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
-      <PermutationContext.Provider value={name}>
+      <ThemeContext.Provider value={name}>
         <AxesContext.Provider value={axes}>{children}</AxesContext.Provider>
-      </PermutationContext.Provider>
+      </ThemeContext.Provider>
     );
   };
 }
@@ -45,7 +45,7 @@ describe('useToken', () => {
   });
 
   it('falls back to defaultPermutation when context is empty', () => {
-    // Without a provider, useActivePermutation returns the empty string.
+    // Without a provider, useActiveTheme returns the empty string.
     // The hook then reads from `defaultPermutation` (`Light` in the stub).
     const { result } = renderHook(() => useToken('color.accent.bg'));
     expect(result.current.value).toEqual({ colorSpace: 'srgb', components: [0, 0.4, 1] });

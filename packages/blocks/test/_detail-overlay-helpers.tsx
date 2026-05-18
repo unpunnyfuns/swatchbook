@@ -19,7 +19,7 @@ export function emptySnapshot(): ProjectSnapshot {
     cells: {},
     jointOverrides: [],
     defaultTuple: {},
-    activePermutation: '',
+    activeTheme: '',
     activeAxes: {},
     cssVarPrefix: '',
     diagnostics: [],

@@ -10,7 +10,7 @@ function makeSnapshot(diagnostics: ProjectSnapshot['diagnostics'] = []): Project
     cells: { theme: { Light: {} } },
     jointOverrides: [],
     defaultTuple: { theme: 'Light' },
-    activePermutation: 'Light',
+    activeTheme: 'Light',
     activeAxes: { theme: 'Light' },
     cssVarPrefix: 'sb',
     diagnostics,

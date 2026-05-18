@@ -6,7 +6,7 @@ sidebar_position: 2
 
 # Addon
 
-Published as `@unpunnyfuns/swatchbook-addon`. Storybook addon. Loads your config at build time via `@unpunnyfuns/swatchbook-core`, exposes the resolved graph as a virtual module, registers a preview decorator + manager toolbar, and ships a `useToken` hook. Block-side hooks (`useSwatchbookData`, `useActivePermutation`, `useActiveAxes`, `useColorFormat`) live in `@unpunnyfuns/swatchbook-blocks`.
+Published as `@unpunnyfuns/swatchbook-addon`. Storybook addon. Loads your config at build time via `@unpunnyfuns/swatchbook-core`, exposes the resolved graph as a virtual module, registers a preview decorator + manager toolbar, and ships a `useToken` hook. Block-side hooks (`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`) live in `@unpunnyfuns/swatchbook-blocks`.
 
 ## Install
 
@@ -104,7 +104,7 @@ Paths autocomplete from the generated `.swatchbook/tokens.d.ts`. Add `"include":
 
 ### Block-side hooks live in `@unpunnyfuns/swatchbook-blocks`
 
-`useSwatchbookData`, `useActivePermutation`, `useActiveAxes`, `useColorFormat`, and the contexts that back them (`SwatchbookContext`, `PermutationContext`, `AxesContext`, `ColorFormatContext`) are exported from `@unpunnyfuns/swatchbook-blocks` — see the [blocks reference](./blocks/index.mdx). They are **not** re-exported from the addon; import them from blocks.
+`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the contexts that back them (`SwatchbookContext`, `ThemeContext`, `AxesContext`, `ColorFormatContext`) are exported from `@unpunnyfuns/swatchbook-blocks` — see the [blocks reference](./blocks/index.mdx). They are **not** re-exported from the addon; import them from blocks.
 
 The preview decorator mounts a `SwatchbookProvider` (from blocks) that populates every context, so the hooks resolve wherever the addon is registered.
 
