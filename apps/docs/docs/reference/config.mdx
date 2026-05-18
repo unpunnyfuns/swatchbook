@@ -82,7 +82,7 @@ Glob patterns (relative to the config's cwd) for base DTCG token files.
 
 Path to a [DTCG 2025.10 resolver](https://www.designtokens.org/TR/2025.10/resolver/) document. Mutually exclusive with `axes`.
 
-Terrazzo normalizes the document, then Swatchbook enumerates permutations via `resolver.listPermutations()` and realizes each with `resolver.apply()`. One `Axis` surfaces per modifier; the resolver file itself and every `$ref` target it pulls in land on `Project.sourceFiles`.
+Terrazzo normalizes the document, then Swatchbook enumerates singleton tuples (axes-defaults plus one per non-default `(axis, context)`) and realizes each via `resolver.apply()`. One `Axis` surfaces per modifier; the resolver file itself and every `$ref` target it pulls in land on `Project.sourceFiles`.
 
 ### `axes?: AxisConfig[]`
 
@@ -225,7 +225,7 @@ Four fields are managed internally and stripped from the allowed type:
 - `filename` — the internal stylesheet is captured in memory, never written to disk.
 - `skipBuild` — setting `true` would null out the listing's `previewValue` derivation, breaking every block that displays a value.
 
-Everything else passes through. Deprecated knobs (`baseSelector`, `baseScheme`, `modeSelectors`) still pass the type check but do nothing under swatchbook's permutation-based emission; setting any of them produces a `swatchbook/css-options` warn diagnostic with a pointer to what to use instead.
+Everything else passes through. Three plugin-css selectors (`baseSelector`, `baseScheme`, `modeSelectors`) pass the type check but swatchbook ignores them — `permutations`-based emission supersedes them. Setting any produces a `swatchbook/css-options` warn diagnostic.
 
 ```ts
 defineSwatchbookConfig({

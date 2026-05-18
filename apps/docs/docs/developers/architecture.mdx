@@ -16,7 +16,7 @@ Monorepo under `@unpunnyfuns`. pnpm workspaces + Turborepo orchestration. Every 
 
 | Package | Role | Depends on |
 | --- | --- | --- |
-| `@unpunnyfuns/swatchbook-core` | Framework-free DTCG loader. Parses a resolver, normalizes axes, resolves permutations, emits CSS and diagnostics. | — |
+| `@unpunnyfuns/swatchbook-core` | Framework-free DTCG loader. Parses a resolver, normalizes axes, resolves themes via cells + joint overrides, emits CSS and diagnostics. | — |
 | `@unpunnyfuns/swatchbook-addon` | Storybook 10 addon. Toolbar, preview decorator, Vite plugin that publishes a virtual module. Re-exports `-blocks` + `-switcher`. | core, blocks, switcher |
 | `@unpunnyfuns/swatchbook-blocks` | MDX doc blocks + the `SwatchbookProvider` + hooks. Pure React, framework-agnostic beyond Storybook. | — (peer: storybook) |
 | `@unpunnyfuns/swatchbook-switcher` | Framework-agnostic axis / preset popover UI. Used by the addon toolbar and the docs-site navbar. | — |
@@ -158,7 +158,7 @@ useChannelGlobals() store            ← packages/blocks/src/internal/channel-gl
    ↓
 useProject() recomputes activeTheme  ← packages/blocks/src/internal/use-project.ts
    ↓
-blocks re-render with new active permutation / resolved tokens
+blocks re-render with new active theme / resolved tokens
 ```
 
 Two paths through `useProject`:
