@@ -3,7 +3,7 @@
 "@unpunnyfuns/swatchbook-switcher": patch
 ---
 
-Closes #888. Refreshes the npm landing page + apps/docs reference against the current post-cartesian-drop public API. The single biggest user-visible debt heading into 0.60.
+Refreshes the npm landing page + apps/docs reference against the current post-cartesian-drop public API. The single biggest user-visible debt heading into 0.60.
 
 **`packages/core/README.md`** — rewritten Usage example (removed `permutationsResolved` access; shows `defaultTokens` + `resolveAt`), added Browser-safe subpaths section (5 subpaths), updated Boundaries to reference `snapshot-for-wire` instead of removed `permutationsResolved` projections.
 

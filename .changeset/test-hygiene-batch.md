@@ -4,7 +4,7 @@
 "@unpunnyfuns/swatchbook-switcher": patch
 ---
 
-Closes #896. Four contained test-hygiene items bundled into one PR:
+Four contained test-hygiene items bundled into one PR:
 
 **Switcher `.browser.test.tsx` infix** (#896 #14) — `packages/switcher/test/theme-switcher.test.tsx` → `theme-switcher.browser.test.tsx`. Matches the convention established by #877 (`.browser.` opt-in for tests requiring the browser harness). Switcher's `include: ['test/**/*.test.{ts,tsx}']` glob continues to match.
 
