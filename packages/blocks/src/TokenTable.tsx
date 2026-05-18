@@ -167,6 +167,7 @@ export function TokenTable({
                 }
               }}
               tabIndex={0}
+              aria-haspopup="dialog"
               aria-label={`Inspect ${row.path}`}
               data-testid="token-table-row"
               data-path={row.path}
