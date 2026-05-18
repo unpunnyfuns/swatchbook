@@ -318,29 +318,3 @@ export function resolveColorValue(
   }
   return formatColor(raw, colorFormat);
 }
-
-/**
- * Match a dot-separated DTCG token path against a block `filter` prop.
- *
- * **Supported shapes** (the narrow subset we need — DTCG paths don't have
- * directories, brace expansion, or regex, so we skip a full glob engine):
- *
- * | Pattern            | Matches                                             |
- * | ------------------ | --------------------------------------------------- |
- * | `undefined` / `''` | everything                                          |
- * | `*` or `**`        | everything                                          |
- * | `color`            | exact path `color`, or any descendant `color.*`     |
- * | `color.*`      | any path whose fixed prefix is `color.`         |
- * | `color**`          | any path starting with `color`                      |
- *
- * Not supported (all pass through as literal segment matchers): brace
- * expansion (`{a,b}`), mid-path globs (`color.*.bg`), negation (`!foo`),
- * character classes (`[sys]`). If you hit those, pre-filter by hand.
- */
-export function globMatch(path: string, glob: string | undefined): boolean {
-  if (!glob) return true;
-  if (glob === '*' || glob === '**') return true;
-  if (glob.endsWith('.*')) return path.startsWith(`${glob.slice(0, -2)}.`);
-  if (glob.endsWith('**')) return path.startsWith(glob.slice(0, -2));
-  return path === glob || path.startsWith(`${glob}.`);
-}

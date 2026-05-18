@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react';
 import './MotionPreview.css';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
-import { globMatch, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import {
   MotionSample,
   type MotionSpeed,
@@ -54,7 +55,7 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
   const rows = useMemo(() => {
     const collected: Row[] = [];
     for (const [path, token] of Object.entries(resolved)) {
-      if (filter && !globMatch(path, filter)) continue;
+      if (filter && !matchPath(path, filter)) continue;
       if (!filter && !['transition', 'duration', 'cubicBezier'].includes(token.$type ?? '')) {
         continue;
       }

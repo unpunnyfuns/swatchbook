@@ -1,9 +1,19 @@
 /**
- * Minimal DTCG-flavoured path matcher. Accepts exact paths (`color.bg`), single-
- * segment globs (`color.*`), multi-segment globs (`color.**`), or a trailing `*`
- * mid-segment (`color.palette.blue.*`). No brace expansion, no regex — DTCG
- * paths are dot-delimited and this matches the parity the blocks' `globMatch`
- * ships. Case-sensitive.
+ * Browser-safe DTCG-flavoured path matcher. Exported through the
+ * `@unpunnyfuns/swatchbook-core/match-path` subpath so both the
+ * blocks-side `<TypographyScale>` / `<DimensionScale>` / etc. filters
+ * and the MCP `list_tokens` / `search_tokens` tools share one
+ * implementation — the matcher consumers reach for stays in lockstep.
+ *
+ * Accepts:
+ *   - exact paths (`color.accent.bg`)
+ *   - single-segment wildcard (`color.*`, `color.*.bg`)
+ *   - multi-segment trailing globstar (`color.**`)
+ *   - multi-segment interior globstar (`color.**.500`)
+ *
+ * No brace expansion, no regex, no character classes — DTCG paths are
+ * dot-delimited and this matches what consumers actually want. Case-
+ * sensitive.
  */
 export function matchPath(path: string, filter: string | undefined): boolean {
   if (!filter) return true;

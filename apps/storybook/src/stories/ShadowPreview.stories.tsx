@@ -13,7 +13,7 @@ const meta = preview.meta({
 export default meta;
 
 export const SystemShadows = meta.story({
-  args: { filter: 'shadow.*' },
+  args: { filter: 'shadow.**' },
   play: async ({ canvasElement }) => {
     await waitFor(() => {
       const samples = canvasElement.querySelectorAll('[aria-hidden="true"]');

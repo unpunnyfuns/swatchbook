@@ -5,7 +5,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { computeContrast } from '#/contrast.ts';
 import { formatColorEveryWay } from '#/format-color.ts';
-import { matchPath } from '#/match.ts';
+import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 /**
  * Build a swatchbook MCP server bound to a loaded project. Tools expose the
