@@ -278,7 +278,7 @@ export const TokenDetailCompositeBreakdownGradient = meta.story({
  * sample text visible.
  */
 export const TypographyScaleRenders = meta.story({
-  render: () => <TypographyScale filter="typography" sample="Sphinx of black quartz" />,
+  render: () => <TypographyScale filter="typography.**" sample="Sphinx of black quartz" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'section, [role="table"], div');
     const samples = [...canvasElement.querySelectorAll('div')].filter((el) =>

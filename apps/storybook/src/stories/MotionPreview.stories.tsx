@@ -13,7 +13,7 @@ const meta = preview.meta({
 export default meta;
 
 export const SystemTransitions = meta.story({
-  args: { filter: 'transition.*' },
+  args: { filter: 'transition.**' },
   play: async ({ canvasElement }) => {
     await waitFor(() => {
       const wrapper = canvasElement.querySelector('[data-sb-theme]');
@@ -24,6 +24,6 @@ export const SystemTransitions = meta.story({
     });
   },
 });
-export const Durations = meta.story({ args: { filter: 'duration.*' } });
-export const Easings = meta.story({ args: { filter: 'cubicBezier.*' } });
+export const Durations = meta.story({ args: { filter: 'duration.**' } });
+export const Easings = meta.story({ args: { filter: 'cubicBezier.**' } });
 export const All = meta.story();

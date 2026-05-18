@@ -14,7 +14,7 @@ const meta = preview.meta({
 export default meta;
 
 export const NumberOpacities = meta.story({
-  args: { filter: 'number.opacity.*' },
+  args: { filter: 'number.opacity.**' },
   play: async ({ canvasElement }) => {
     await waitFor(() => {
       const cards = canvasElement.querySelectorAll('[aria-hidden="true"]');
@@ -24,11 +24,11 @@ export const NumberOpacities = meta.story({
 });
 
 export const TextSampleColor = meta.story({
-  args: { filter: 'number.opacity.*', sampleColor: 'color.text.default' },
+  args: { filter: 'number.opacity.**', sampleColor: 'color.text.default' },
 });
 
 export const EmptyFilter = meta.story({
-  args: { filter: 'nonexistent.*' },
+  args: { filter: 'nonexistent.**' },
   play: async ({ canvasElement }) => {
     expect(canvasElement.textContent).toContain('No opacity tokens match');
   },
