@@ -1,4 +1,5 @@
 import type { Axis, Cells, TokenMap } from '#/types.ts';
+import { valueKey } from '#/value-key.ts';
 
 /**
  * Build `Project.cells` by calling `resolveTuple` once per
@@ -42,22 +43,11 @@ export function buildCells(
       for (const path of Object.keys(resolved)) {
         const cellValue = resolved[path];
         if (!cellValue) continue;
-        if (!sameValue(cellValue, baseline[path])) delta[path] = cellValue;
+        if (valueKey(cellValue) !== valueKey(baseline[path])) delta[path] = cellValue;
       }
       axisCells[ctx] = delta;
     }
     cells[axis.name] = axisCells;
   }
   return cells;
-}
-
-function sameValue(a: unknown, b: unknown): boolean {
-  return JSON.stringify(getValue(a)) === JSON.stringify(getValue(b));
-}
-
-function getValue(t: unknown): unknown {
-  if (t && typeof t === 'object' && '$value' in t) {
-    return (t as { $value: unknown }).$value;
-  }
-  return undefined;
 }

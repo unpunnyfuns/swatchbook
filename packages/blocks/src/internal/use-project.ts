@@ -1,5 +1,9 @@
 import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
 import { makeCssVar } from '@unpunnyfuns/swatchbook-core/css-var';
+import {
+  ensureStyleElement,
+  SWATCHBOOK_STYLE_ELEMENT_ID,
+} from '@unpunnyfuns/swatchbook-core/style-element';
 import type { Axis, Cells, JointOverrides, TokenMap } from '@unpunnyfuns/swatchbook-core';
 import { useEffect, useMemo } from 'react';
 import type { VirtualTokenListingShape, VirtualVarianceByPathShape } from '#/contexts.ts';
@@ -45,17 +49,8 @@ export interface ProjectData {
   permutationNameForTuple: (tuple: Record<string, string>) => string | undefined;
 }
 
-const STYLE_ELEMENT_ID = 'swatchbook-tokens';
-
 function ensureStylesheet(css: string): void {
-  if (typeof document === 'undefined') return;
-  let style = document.getElementById(STYLE_ELEMENT_ID) as HTMLStyleElement | null;
-  if (!style) {
-    style = document.createElement('style');
-    style.id = STYLE_ELEMENT_ID;
-    document.head.appendChild(style);
-  }
-  if (style.textContent !== css) style.textContent = css;
+  ensureStyleElement(SWATCHBOOK_STYLE_ELEMENT_ID, css);
 }
 
 function defaultTuple(axes: readonly VirtualAxis[]): Record<string, string> {

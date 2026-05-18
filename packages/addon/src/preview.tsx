@@ -9,6 +9,7 @@ import type { Decorator, Preview } from '@storybook/react-vite';
 import { useEffect, useMemo } from 'react';
 import { addons } from 'storybook/preview-api';
 import { dataAttr } from '@unpunnyfuns/swatchbook-core/data-attr';
+import { ensureStyleElement } from '@unpunnyfuns/swatchbook-core/style-element';
 // Side-effect import for integrations that opted into `autoInject`
 // (e.g. Tailwind's `@theme` block). When no integration opts in, the
 // virtual module body is empty — still a valid no-op.
@@ -47,33 +48,31 @@ import {
 } from '#/constants.ts';
 import type { StoryParameters, SwatchbookGlobals } from '#/globals.ts';
 
-/** CSS var name with the active prefix applied. */
-function v(name: string): string {
-  return cssVarPrefix ? `--${cssVarPrefix}-${name}` : `--${name}`;
-}
-
 /**
- * Inject the per-theme stylesheet plus a tiny `html, body { ... }` block so
- * the iframe's own chrome (outside any decorator wrapper — Docs mode,
- * autodocs, empty gutters) also picks up the active theme.
+ * The `html, body { ... }` rules that paint the iframe's own chrome
+ * (outside any decorator wrapper — Docs mode, autodocs, empty gutters)
+ * with the active theme's surface + text vars. Composed alongside the
+ * emitted token CSS so both load through the same `<style>` element.
  */
-function ensureStylesheet(): void {
-  if (typeof document === 'undefined') return;
-  const bodyRules = `
+function iframeChromeRules(prefix: string): string {
+  const surface = prefix ? `--${prefix}-color-surface-default` : '--color-surface-default';
+  const text = prefix ? `--${prefix}-color-text-default` : '--color-text-default';
+  return `
 html, body {
-  background: var(${v('color-surface-default')}, Canvas);
-  color: var(${v('color-text-default')}, CanvasText);
+  background: var(${surface}, Canvas);
+  color: var(${text}, CanvasText);
   margin: 0;
 }
 `;
-  const text = `${css}\n${bodyRules}`;
-  let style = document.getElementById(STYLE_ELEMENT_ID) as HTMLStyleElement | null;
-  if (!style) {
-    style = document.createElement('style');
-    style.id = STYLE_ELEMENT_ID;
-    document.head.appendChild(style);
-  }
-  if (style.textContent !== text) style.textContent = text;
+}
+
+/**
+ * Inject the per-theme stylesheet plus the iframe-chrome block. Shared
+ * with the HMR re-emit path below so a token refresh updates the
+ * iframe's chrome rules from the same source.
+ */
+function ensureStylesheet(cssText: string, prefix: string): void {
+  ensureStyleElement(STYLE_ELEMENT_ID, `${cssText}\n${iframeChromeRules(prefix)}`);
 }
 
 /**
@@ -130,23 +129,58 @@ function setRootAxes(themeName: string, tuple: Readonly<Record<string, string>>)
 }
 
 /**
+ * Subset of an INIT_EVENT-shaped object the manager bundle needs. The 9
+ * fields are the union of what the toolbar and panel read; named so
+ * `broadcastInit` (module-level virtual exports) and the HMR re-emit
+ * (`payload`-shaped) compose the same payload from the same shape.
+ */
+interface InitFieldsSource {
+  axes: typeof virtualAxes;
+  disabledAxes: typeof virtualDisabledAxes;
+  presets: typeof virtualPresets;
+  diagnostics: typeof diagnostics;
+  cssVarPrefix: string;
+  cells: typeof virtualCells;
+  jointOverrides: typeof virtualJointOverrides;
+  varianceByPath: typeof virtualVarianceByPath;
+  defaultTuple: typeof virtualDefaultTuple;
+}
+
+function pickInitFields(source: InitFieldsSource): InitFieldsSource {
+  return {
+    axes: source.axes,
+    disabledAxes: source.disabledAxes,
+    presets: source.presets,
+    diagnostics: source.diagnostics,
+    cssVarPrefix: source.cssVarPrefix,
+    cells: source.cells,
+    jointOverrides: source.jointOverrides,
+    varianceByPath: source.varianceByPath,
+    defaultTuple: source.defaultTuple,
+  };
+}
+
+/**
  * Emit the full virtual-module payload to the manager over Storybook's
  * channel so the toolbar + panel (which run in the manager bundle and
  * can't import our virtual module) can render from it.
  */
 function broadcastInit(): void {
   const channel = addons.getChannel();
-  channel.emit(INIT_EVENT, {
-    axes: virtualAxes,
-    disabledAxes: virtualDisabledAxes,
-    presets: virtualPresets,
-    diagnostics,
-    cssVarPrefix,
-    cells: virtualCells,
-    jointOverrides: virtualJointOverrides,
-    varianceByPath: virtualVarianceByPath,
-    defaultTuple: virtualDefaultTuple,
-  });
+  channel.emit(
+    INIT_EVENT,
+    pickInitFields({
+      axes: virtualAxes,
+      disabledAxes: virtualDisabledAxes,
+      presets: virtualPresets,
+      diagnostics,
+      cssVarPrefix,
+      cells: virtualCells,
+      jointOverrides: virtualJointOverrides,
+      varianceByPath: virtualVarianceByPath,
+      defaultTuple: virtualDefaultTuple,
+    }),
+  );
 }
 
 /** Axis-default tuple, used as the baseline before overrides. */
@@ -251,7 +285,7 @@ const themedDecorator: Decorator = (Story, context) => {
   const themeName = useMemo(() => matchPermutationName(tuple), [tuple]);
 
   useEffect(() => {
-    ensureStylesheet();
+    ensureStylesheet(css, cssVarPrefix);
     broadcastInit();
   }, []);
 
@@ -359,7 +393,7 @@ function installGlobalAxisApplier(): void {
    * story/decorator ever runs (bare MDX docs pages). Without these, the
    * toolbar sits in its disabled "loading…" state and nothing is styled.
    */
-  ensureStylesheet();
+  ensureStylesheet(css, cssVarPrefix);
   broadcastInit();
   /**
    * If the manager subscribes to INIT_EVENT after our initial broadcast,
@@ -369,7 +403,7 @@ function installGlobalAxisApplier(): void {
    */
   channel.on(INIT_REQUEST_EVENT, broadcastInit);
   const apply = (globals: SwatchbookGlobals): void => {
-    ensureStylesheet();
+    ensureStylesheet(css, cssVarPrefix);
     const tuple = resolveTuple(globals, {});
     setRootAxes(matchPermutationName(tuple), tuple);
   };
@@ -439,35 +473,9 @@ interface HmrSnapshot {
 }
 if (import.meta.hot) {
   import.meta.hot.on(HMR_EVENT, (payload: HmrSnapshot) => {
-    if (typeof document !== 'undefined') {
-      const bodyRules = `
-html, body {
-  background: var(${payload.cssVarPrefix ? `--${payload.cssVarPrefix}-` : '--'}color-surface-default, Canvas);
-  color: var(${payload.cssVarPrefix ? `--${payload.cssVarPrefix}-` : '--'}color-text-default, CanvasText);
-  margin: 0;
-}
-`;
-      const text = `${payload.css}\n${bodyRules}`;
-      let style = document.getElementById(STYLE_ELEMENT_ID) as HTMLStyleElement | null;
-      if (!style) {
-        style = document.createElement('style');
-        style.id = STYLE_ELEMENT_ID;
-        document.head.appendChild(style);
-      }
-      if (style.textContent !== text) style.textContent = text;
-    }
+    ensureStylesheet(payload.css, payload.cssVarPrefix);
     const channel = addons.getChannel();
-    channel.emit(INIT_EVENT, {
-      axes: payload.axes,
-      disabledAxes: payload.disabledAxes,
-      presets: payload.presets,
-      diagnostics: payload.diagnostics,
-      cssVarPrefix: payload.cssVarPrefix,
-      cells: payload.cells,
-      jointOverrides: payload.jointOverrides,
-      varianceByPath: payload.varianceByPath,
-      defaultTuple: payload.defaultTuple,
-    });
+    channel.emit(INIT_EVENT, pickInitFields(payload));
     channel.emit(TOKENS_UPDATED_EVENT, payload);
   });
 }
