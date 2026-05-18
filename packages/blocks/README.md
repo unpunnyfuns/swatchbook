@@ -19,8 +19,8 @@ Inside Storybook the addon mounts a `SwatchbookProvider` for you:
 ```mdx
 import { ColorPalette, TokenTable, TokenDetail } from '@unpunnyfuns/swatchbook-addon';
 
-<ColorPalette filter="color.*" />
-<TokenTable filter="color.*" type="color" />
+<ColorPalette filter="color.**" />
+<TokenTable filter="color.**" type="color" />
 <TokenDetail path="color.accent.bg" />
 ```
 

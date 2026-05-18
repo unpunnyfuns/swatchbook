@@ -2,7 +2,8 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './FontFamilySample.css';
 import { themeAttrs } from '#/internal/data-attr.ts';
-import { globMatch, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
 
 export interface FontFamilySampleProps {
@@ -50,7 +51,7 @@ export function FontFamilySample({
   const rows = useMemo<Row[]>(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
       if (token.$type !== 'fontFamily') return false;
-      return globMatch(path, filter);
+      return matchPath(path, filter);
     });
     return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
       path,

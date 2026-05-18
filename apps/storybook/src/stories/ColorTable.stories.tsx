@@ -32,11 +32,11 @@ export const All = meta.story({
   play: async ({ canvasElement }) => assertTableRenders(canvasElement),
 });
 export const SysOnly = meta.story({
-  args: { filter: 'color.*' },
+  args: { filter: 'color.**' },
   play: async ({ canvasElement }) => assertTableRenders(canvasElement),
 });
 export const RefBlue = meta.story({
-  args: { filter: 'color.palette.blue.*' },
+  args: { filter: 'color.palette.blue.**' },
   play: async ({ canvasElement }) => assertTableRenders(canvasElement),
 });
 export const SortedPerceptually = meta.story({
@@ -45,7 +45,7 @@ export const SortedPerceptually = meta.story({
 });
 export const GroupedVariants = meta.story({
   args: {
-    filter: 'color.*',
+    filter: 'color.**',
     variants: { hover: 'hover' },
   },
   play: async ({ canvasElement }) => assertTableRenders(canvasElement),
@@ -57,7 +57,7 @@ export const GroupedVariants = meta.story({
  * Closes the "ColorTable — no expansion play" gap from #704.
  */
 export const ExpandsOnRowClick = meta.story({
-  args: { filter: 'color.palette.blue.*' },
+  args: { filter: 'color.palette.blue.**' },
   parameters: { chromatic: { disableSnapshot: true } },
   play: async ({ canvasElement }) => {
     await assertTableRenders(canvasElement);

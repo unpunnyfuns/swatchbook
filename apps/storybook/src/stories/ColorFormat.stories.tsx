@@ -41,7 +41,7 @@ async function waitForMatch(
  * should display a `#rrggbb` string.
  */
 export const DefaultHex = meta.story({
-  render: () => <TokenTable filter="color.*" type="color" />,
+  render: () => <TokenTable filter="color.**" type="color" />,
   play: async ({ canvasElement }) => {
     const text = await waitForMatch(canvasElement, (t) => /#[0-9a-f]{6}/i.test(t), 'expected hex');
     expect(text).toMatch(/#[0-9a-f]{6}/i);
@@ -56,7 +56,7 @@ export const DefaultHex = meta.story({
  */
 export const RgbFormat = meta.story({
   globals: { swatchbookColorFormat: 'rgb' },
-  render: () => <TokenTable filter="color.*" type="color" />,
+  render: () => <TokenTable filter="color.**" type="color" />,
   play: async ({ canvasElement }) => {
     const text = await waitForMatch(
       canvasElement,
@@ -69,7 +69,7 @@ export const RgbFormat = meta.story({
 
 export const OklchFormat = meta.story({
   globals: { swatchbookColorFormat: 'oklch' },
-  render: () => <TokenTable filter="color.*" type="color" />,
+  render: () => <TokenTable filter="color.**" type="color" />,
   play: async ({ canvasElement }) => {
     const text = await waitForMatch(
       canvasElement,
@@ -82,7 +82,7 @@ export const OklchFormat = meta.story({
 
 export const RawFormat = meta.story({
   globals: { swatchbookColorFormat: 'raw' },
-  render: () => <TokenTable filter="color.*" type="color" />,
+  render: () => <TokenTable filter="color.**" type="color" />,
   play: async ({ canvasElement }) => {
     const text = await waitForMatch(
       canvasElement,
