@@ -1,6 +1,6 @@
 import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import type { KeyboardEvent, ReactElement } from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './TokenNavigator.css';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
@@ -271,7 +271,10 @@ export function TokenNavigator({
   // WAI-ARIA tree pattern's roving tabindex — exactly one treeitem at a
   // time has tabIndex={0}; the rest are -1. Tab into / out of the tree
   // hits that one item; arrow keys move focus between items inside.
-  const [focusedPath, setFocusedPath] = useState<string | null>(null);
+  // `storedFocus` is the user-driven state; the derived `focusedPath`
+  // below repairs the focus to the first visible item when storedFocus
+  // points at a now-hidden row (e.g. after a search narrows the tree).
+  const [storedFocus, setStoredFocus] = useState<string | null>(null);
   const treeItemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
   const registerTreeItem = useCallback(
     (path: string) =>
@@ -288,36 +291,27 @@ export function TokenNavigator({
     return out;
   }, [visibleTree, effectiveExpanded]);
 
-  // Reset / repair focused path whenever the visible set changes. Keep
-  // the existing focus if it's still visible; otherwise fall back to
-  // the first item.
-  useEffect(() => {
-    if (flatVisible.length === 0) {
-      setFocusedPath(null);
-      return;
+  const focusedPath = useMemo<string | null>(() => {
+    if (flatVisible.length === 0) return null;
+    if (storedFocus && flatVisible.some((entry) => entry.path === storedFocus)) {
+      return storedFocus;
     }
-    setFocusedPath((prev) => {
-      if (prev && flatVisible.some((entry) => entry.path === prev)) return prev;
-      return flatVisible[0]?.path ?? null;
-    });
-  }, [flatVisible]);
+    return flatVisible[0]?.path ?? null;
+  }, [flatVisible, storedFocus]);
 
   const focusByPath = useCallback((path: string): void => {
     const node = treeItemRefs.current.get(path);
-    if (node) {
-      node.focus();
-      setFocusedPath(path);
-    } else {
-      // Ref will register on the next render; flag the path so the
-      // focus-repair effect can move focus once the node mounts.
-      setFocusedPath(path);
-    }
+    // If the ref isn't mounted yet (e.g. after expanding a group via
+    // Right-arrow, before the new children render), flag the path so
+    // the DOM-sync effect below can move focus once the node mounts.
+    if (node) node.focus();
+    setStoredFocus(path);
   }, []);
 
   // After expanding a group via Right-arrow, the new children mount on
-  // the following render. If a path was queued via setFocusedPath but
-  // the corresponding ref didn't exist at the time, repair focus now
-  // that the children are live.
+  // the following render. If a path was queued via `setStoredFocus`
+  // but the corresponding ref didn't exist at the time, repair focus
+  // now that the children are live.
   useEffect(() => {
     if (focusedPath === null) return;
     const node = treeItemRefs.current.get(focusedPath);
@@ -496,7 +490,7 @@ export function TokenNavigator({
               focusedPath={focusedPath}
               registerTreeItem={registerTreeItem}
               onToggle={toggle}
-              onFocusPath={setFocusedPath}
+              onFocusPath={setStoredFocus}
               onLeafClick={handleLeafClick}
               level={1}
               setsize={visibleTree.length}
@@ -549,7 +543,7 @@ function TreeNodeRow({
     return (
       <LeafRow
         node={node}
-        focusedPath={focusedPath}
+        isFocused={focusedPath === node.path}
         registerTreeItem={registerTreeItem}
         onFocusPath={onFocusPath}
         onLeafClick={onLeafClick}
@@ -620,7 +614,7 @@ function TreeNodeRow({
 
 interface LeafRowProps {
   node: LeafNode;
-  focusedPath: string | null;
+  isFocused: boolean;
   registerTreeItem(path: string): (el: HTMLLIElement | null) => void;
   onFocusPath(path: string): void;
   onLeafClick(path: string): void;
@@ -632,9 +626,9 @@ interface LeafRowProps {
   posinset: number;
 }
 
-function LeafRow({
+const LeafRow = memo(function LeafRow({
   node,
-  focusedPath,
+  isFocused,
   registerTreeItem,
   onFocusPath,
   onLeafClick,
@@ -643,7 +637,6 @@ function LeafRow({
   posinset,
 }: LeafRowProps): ReactElement {
   const type = node.token.$type ?? '';
-  const isFocused = focusedPath === node.path;
   return (
     <li
       ref={registerTreeItem(node.path)}
@@ -675,14 +668,14 @@ function LeafRow({
       </div>
     </li>
   );
-}
+});
 
 interface LeafPreviewProps {
   path: string;
   token: VirtualToken;
 }
 
-function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
+const LeafPreview = memo(function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
   const project = useProject();
   const colorFormat = useColorFormat();
   const type = token.$type;
@@ -749,4 +742,4 @@ function LeafPreview({ path, token }: LeafPreviewProps): ReactElement {
       </span>
     </span>
   );
-}
+});
