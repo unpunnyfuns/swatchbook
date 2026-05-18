@@ -1,6 +1,7 @@
 import type { Resolver } from '@terrazzo/parser';
 import { buildResolveAt } from '#/resolve-at.ts';
 import { canonicalKey } from '#/tuple-key.ts';
+import type { TupleKey } from '#/tuple-key.ts';
 import type { Axis, Cells, JointOverride, JointOverrides, TokenMap } from '#/types.ts';
 import { valueKey } from '#/value-key.ts';
 
@@ -63,7 +64,7 @@ export function probeJointOverrides(
   // Internal Map keyed on canonicalKey for dedupe across arity passes.
   // Materialized to the public array shape on return so the wire
   // boundary doesn't have to marshal a Map.
-  const overrides = new Map<string, JointOverride>();
+  const overrides = new Map<TupleKey, JointOverride>();
   const jointTouching = new Map<string, Set<string>>();
   // Baseline carries the values for paths that delta cells omit;
   // touching detection compares against this to avoid flagging
@@ -179,6 +180,6 @@ function* contextProducts(axisCombo: readonly Axis[]): Generator<Record<string, 
  * Canonical key for a partial tuple — axes sorted by name so
  * `{A:a,B:b}` and `{B:b,A:a}` produce the same lookup key.
  */
-export function jointOverrideKey(axes: Readonly<Record<string, string>>): string {
+export function jointOverrideKey(axes: Readonly<Record<string, string>>): TupleKey {
   return canonicalKey(axes);
 }

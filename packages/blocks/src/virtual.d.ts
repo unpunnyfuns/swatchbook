@@ -8,6 +8,7 @@
  * the `addon/src/virtual.d.ts` → `addon/src/channel-types.ts` pattern.
  */
 declare module 'virtual:swatchbook/tokens' {
+  import type { TupleKey } from '@unpunnyfuns/swatchbook-core';
   import type {
     VirtualAxisShape,
     VirtualDiagnosticShape,
@@ -26,7 +27,7 @@ declare module 'virtual:swatchbook/tokens' {
   export const cssVarPrefix: string;
   export const listing: Readonly<Record<string, VirtualTokenListingShape>>;
   export const cells: Record<string, Record<string, Record<string, VirtualTokenShape>>>;
-  export const jointOverrides: readonly (readonly [string, VirtualJointOverrideShape])[];
+  export const jointOverrides: readonly (readonly [TupleKey, VirtualJointOverrideShape])[];
   export const varianceByPath: VirtualVarianceByPathShape;
   export const defaultTuple: Record<string, string>;
 }

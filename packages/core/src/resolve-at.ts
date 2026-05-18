@@ -9,6 +9,7 @@
  * shipping `@terrazzo/parser` to the client.
  */
 import { canonicalKey } from '#/tuple-key.ts';
+import type { TupleKey } from '#/tuple-key.ts';
 import type { Axis, Cells, JointOverrides, ResolveAt, TokenMap } from '#/types.ts';
 
 /**
@@ -40,7 +41,7 @@ export function buildResolveAt(
   jointOverrides: JointOverrides,
   defaultTuple: Readonly<Record<string, string>>,
 ): ResolveAt {
-  const memo = new Map<string, TokenMap>();
+  const memo = new Map<TupleKey, TokenMap>();
   return function resolveAt(tuple: Record<string, string>): TokenMap {
     const full: Record<string, string> = { ...defaultTuple };
     for (const axis of axes) {
