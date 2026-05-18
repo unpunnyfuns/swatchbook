@@ -18,7 +18,7 @@ import { resolverPath } from '@unpunnyfuns/swatchbook-tokens';
 import { BufferedLogger } from '#/diagnostics.ts';
 import { loadResolverPermutations } from '#/permutations/resolver.ts';
 import type { Project } from '#/types.ts';
-import { fixtureCwd, loadWithPrefix } from './_helpers';
+import { fixtureCwd, loadWithPrefix } from './_helpers.ts';
 
 let project: Project;
 let resolver: Resolver;

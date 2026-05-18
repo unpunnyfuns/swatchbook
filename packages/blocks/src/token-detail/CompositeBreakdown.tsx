@@ -157,7 +157,7 @@ export function CompositeBreakdownContent({
 }
 
 function renderKeyValueList(
-  rows: Array<[string, string | null, readonly string[] | undefined]>,
+  rows: [string, string | null, readonly string[] | undefined][],
 ): ReactElement {
   return (
     <div className="sb-token-detail__breakdown-section">
@@ -239,9 +239,9 @@ function pickObjectAliases(v: unknown): Record<string, string | undefined> | und
   return v as Record<string, string | undefined>;
 }
 
-function pickArrayAliases(v: unknown): Array<Record<string, string | undefined>> | undefined {
+function pickArrayAliases(v: unknown): Record<string, string | undefined>[] | undefined {
   if (!Array.isArray(v)) return undefined;
-  return v as Array<Record<string, string | undefined>>;
+  return v as Record<string, string | undefined>[];
 }
 
 /**

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { resolverPath } from '@unpunnyfuns/swatchbook-tokens';
 import { loadProject } from '#/load.ts';
-import { fixtureCwd } from './_helpers';
+import { fixtureCwd } from './_helpers.ts';
 
 // `Project.defaultTuple` is the axis-defaults baseline that `cells` /
 // `resolveAt` are built against — always the axes' own defaults,

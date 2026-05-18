@@ -97,8 +97,8 @@ function setupReload(
     if (pending) clearTimeout(pending);
     pending = setTimeout(() => {
       pending = null;
-      reload().catch((err) => {
-        console.error('swatchbook-mcp: reload failed —', err);
+      reload().catch((error) => {
+        console.error('swatchbook-mcp: reload failed —', error);
       });
     }, 100);
   };
@@ -161,7 +161,7 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((err) => {
-  console.error('swatchbook-mcp failed to start:', err);
+main().catch((error) => {
+  console.error('swatchbook-mcp failed to start:', error);
   process.exit(1);
 });

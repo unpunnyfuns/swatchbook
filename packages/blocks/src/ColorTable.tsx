@@ -1,7 +1,7 @@
 import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import cx from 'clsx';
 import type { ReactElement } from 'react';
-import { Fragment, useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import './ColorTable.css';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
@@ -273,7 +273,7 @@ function GroupRow({
   };
 
   return (
-    <Fragment>
+    <>
       <tr
         className={cx('sb-color-table__row', {
           'sb-color-table__row--expanded': expanded,
@@ -372,7 +372,7 @@ function GroupRow({
           </td>
         </tr>
       )}
-    </Fragment>
+    </>
   );
 }
 

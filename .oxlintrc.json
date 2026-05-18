@@ -11,7 +11,21 @@
     "typescript/no-explicit-any": "error",
     "react/react-in-jsx-scope": "off",
     "import/no-unassigned-import": "off",
-    "import/consistent-type-specifier-style": ["error", "prefer-top-level"]
+    "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
+    "import/extensions": ["error", "always", { "ignorePackages": true }],
+    "no-inline-comments": "error",
+    "eqeqeq": ["error", "smart"],
+    "no-var": "error",
+    "prefer-const": "error",
+    "object-shorthand": "error",
+    "no-else-return": "error",
+    "react/self-closing-comp": "error",
+    "react/jsx-boolean-value": "error",
+    "react/jsx-fragments": "error",
+    "typescript/array-type": "error",
+    "unicorn/throw-new-error": "error",
+    "unicorn/catch-error-name": "error",
+    "unicorn/prefer-includes": "error"
   },
   "overrides": [
     {

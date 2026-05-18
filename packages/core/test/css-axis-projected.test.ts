@@ -25,7 +25,7 @@
 import { beforeAll, expect, it } from 'vitest';
 import { emitAxisProjectedCss } from '#/css-axis-projected.ts';
 import type { Project } from '#/types.ts';
-import { extractBlock, loadWithPrefix } from './_helpers';
+import { extractBlock, loadWithPrefix } from './_helpers.ts';
 
 let project: Project;
 

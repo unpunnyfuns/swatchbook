@@ -45,7 +45,8 @@ it("classifies multi-touch tokens conservatively as joint-variant with empty `jo
   // `color.accent` is overridden by both modes/dark.json and brands/brand-a.json
   // in this layered fixture — multi-touch.
   const info = variance.get('color.accent');
-  if (!info) return; // fixture might not define it; skip rather than fail
+  // Fixture might not define it; skip rather than fail.
+  if (!info) return;
   if (info.kind !== 'joint-variant') return;
   expect(info.touching.size).toBeGreaterThanOrEqual(2);
   // Empty jointCases — the emitter takes this as "fall back to cartesian-style emit."

@@ -152,8 +152,8 @@ it('rejects or warns when a modifier has no default and no contexts', async () =
   let threw: unknown;
   try {
     project = await loadProject({ resolver: 'resolver.json', default: {} }, workspace);
-  } catch (err) {
-    threw = err;
+  } catch (error) {
+    threw = error;
   }
   if (threw !== undefined) {
     expect(threw).toBeInstanceOf(Error);

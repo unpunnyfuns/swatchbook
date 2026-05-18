@@ -5,7 +5,7 @@
 // entries without overcollecting.
 import { beforeAll, expect, it } from 'vitest';
 import type { Project } from '#/types.ts';
-import { loadWithPrefix } from './_helpers';
+import { loadWithPrefix } from './_helpers.ts';
 
 let project: Project;
 

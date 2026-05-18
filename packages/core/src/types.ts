@@ -129,7 +129,7 @@ export interface JointOverride {
  * uses a temporary Map keyed on canonical tuple, materialized to this
  * array shape on return.
  */
-export type JointOverrides = ReadonlyArray<readonly [string, JointOverride]>;
+export type JointOverrides = readonly (readonly [string, JointOverride])[];
 
 /**
  * Compute the resolved `TokenMap` for any tuple of axis selections

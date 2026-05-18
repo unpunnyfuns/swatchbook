@@ -112,7 +112,8 @@ function compareValue(
   const ak = keys.get(a);
   const bk = keys.get(b);
   if (!ak || !bk) return 0;
-  if (ak.kind !== bk.kind) return 0; // matches a.$type === b.$type check above
+  // Matches the `a.$type === b.$type` check above.
+  if (ak.kind !== bk.kind) return 0;
 
   if (ak.kind === 'numeric' && bk.kind === 'numeric') {
     if (ak.valid && bk.valid) return ak.value - bk.value;

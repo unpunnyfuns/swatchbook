@@ -74,7 +74,7 @@ it('composite sub-field flips when its alias target is re-aimed under an axis (s
   // of authored shape, so single-layer shadows still expose `[0].color`.
   const dark = project.resolveAt({ mode: 'Dark', brand: 'Default' });
   const layers = dark['shadow.md']?.$value as
-    | ReadonlyArray<{ color?: { components?: number[] } }>
+    | readonly { color?: { components?: number[] } }[]
     | undefined;
   expect(layers?.[0]?.color?.components).toEqual([1, 1, 1]);
 });

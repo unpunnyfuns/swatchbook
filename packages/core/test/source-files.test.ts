@@ -2,7 +2,7 @@ import { dirname, resolve as resolvePath } from 'node:path';
 import { expect, it } from 'vitest';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { loadProject } from '#/load.ts';
-import { fixtureCwd } from './_helpers';
+import { fixtureCwd } from './_helpers.ts';
 
 it('populates sourceFiles with every $ref target when config.tokens is omitted', async () => {
   const project = await loadProject({ resolver: resolverPath }, fixtureCwd);

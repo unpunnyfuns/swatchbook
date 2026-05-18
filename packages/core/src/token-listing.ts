@@ -109,8 +109,8 @@ export async function computeTokenListing(
       byPath[entry.$name] = entry;
     }
     return { listing: byPath, diagnostics: [] };
-  } catch (err) {
-    return { listing: {}, diagnostics: [crashedListingDiagnostic(err)] };
+  } catch (error) {
+    return { listing: {}, diagnostics: [crashedListingDiagnostic(error)] };
   }
 }
 
