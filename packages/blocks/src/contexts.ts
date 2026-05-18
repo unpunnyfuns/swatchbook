@@ -1,4 +1,5 @@
 import type { Axis, AxisVarianceResult, Diagnostic, Preset } from '@unpunnyfuns/swatchbook-core';
+import type { SlimListedToken } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
 import { createContext, useContext } from 'react';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
 import type { ColorFormat } from '#/format-color.ts';
@@ -51,20 +52,11 @@ export interface VirtualTokenShape {
  * variable name and `previewValue` for the display-ready CSS string.
  * `source.loc` enables "jump to authoring source" affordances.
  *
- * Only the fields blocks consume are typed here; the plugin's full shape
- * lives in `@unpunnyfuns/swatchbook-core`.
+ * Aliases `SlimListedToken` from core's `/snapshot-for-wire` subpath —
+ * the single canonical wire shape; both the addon's plugin (server-side
+ * emit) and blocks (consumer-side read) reference the same definition.
  */
-export interface VirtualTokenListingShape {
-  names: Record<string, string>;
-  previewValue?: string | number;
-  source?: {
-    resource: string;
-    loc?: {
-      start: { line: number; column: number; offset: number };
-      end: { line: number; column: number; offset: number };
-    };
-  };
-}
+export type VirtualTokenListingShape = SlimListedToken;
 
 export type VirtualPresetShape = Preset;
 
