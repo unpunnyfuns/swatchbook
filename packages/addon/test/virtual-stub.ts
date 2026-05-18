@@ -17,43 +17,34 @@ export const axes = [
 ];
 export const disabledAxes = [] as readonly string[];
 export const presets = [] as const;
-export const permutations = [
-  { name: 'Light', input: { mode: 'Light' }, sources: [] },
-  { name: 'Dark', input: { mode: 'Dark' }, sources: [] },
-];
-export const defaultPermutation = 'Light';
-export const permutationsResolved: Record<string, Record<string, unknown>> = {
-  Light: {
-    'color.accent.bg': {
-      $type: 'color',
-      $value: { colorSpace: 'srgb', components: [0, 0.4, 1] },
-      $description: 'Accent background',
-    },
-    'space.md': {
-      $type: 'dimension',
-      $value: '16px',
-    },
-  },
-  Dark: {
-    'color.accent.bg': {
-      $type: 'color',
-      $value: { colorSpace: 'srgb', components: [0.3, 0.6, 1] },
-      $description: 'Accent background',
-    },
-    'space.md': {
-      $type: 'dimension',
-      $value: '16px',
-    },
-  },
-};
 export const diagnostics = [] as const;
 export const css = '';
 export const cssVarPrefix = 'sb';
 export const listing = {};
 export const cells: Record<string, Record<string, Record<string, unknown>>> = {
   mode: {
-    Light: permutationsResolved.Light ?? {},
-    Dark: permutationsResolved.Dark ?? {},
+    Light: {
+      'color.accent.bg': {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', components: [0, 0.4, 1] },
+        $description: 'Accent background',
+      },
+      'space.md': {
+        $type: 'dimension',
+        $value: '16px',
+      },
+    },
+    Dark: {
+      'color.accent.bg': {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', components: [0.3, 0.6, 1] },
+        $description: 'Accent background',
+      },
+      'space.md': {
+        $type: 'dimension',
+        $value: '16px',
+      },
+    },
   },
 };
 export const jointOverrides: readonly (readonly [string, unknown])[] = [];
