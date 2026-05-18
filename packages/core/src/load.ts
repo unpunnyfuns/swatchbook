@@ -179,7 +179,6 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     varianceByPath,
     sourceFiles: normalized.sourceFiles,
     cwd,
-    ...(normalized.parserInput !== undefined && { parserInput: normalized.parserInput }),
     listing,
     diagnostics: [
       ...toDiagnostics(logger),
