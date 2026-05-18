@@ -210,10 +210,18 @@ function collectPathsWithValue(node: unknown, prefix: string, out: Set<string>):
  * Expand the reach set for a given path: add every entry from the
  * token's `aliasChain` (Terrazzo populates transitively, so one read
  * captures the full chain) plus every direct target referenced in its
- * `partialAliasOf` map. Per-path reach is the immediate neighborhood —
- * downstream callers that need cross-path closure get it via the
- * union over multiple paths' reach entries (`axisReach` does exactly
- * this), so single-hop here is sufficient for axis connectivity.
+ * `partialAliasOf` map. `partialAliasOf` is NOT transitive in
+ * Terrazzo — each composite carries only its immediate sub-field
+ * targets — so we recursively chase each target through its own
+ * `aliasChain` + `partialAliasOf` to capture the full transitive
+ * reach. Without this, a composite whose sub-field points to a token
+ * with its own onward alias chain would under-report its reach,
+ * causing the axis graph to silently mis-cull connected axis pairs.
+ *
+ * The `reach` Set doubles as a cycle guard: a recursive visit that
+ * lands on an already-reached path returns immediately, so a cyclic
+ * `partialAliasOf` (A→B→A) terminates with `reach = {A, B}` on each
+ * starting path.
  */
 function expandReach(path: string, baseline: TokenMap, reach: Set<string>): void {
   const token = baseline[path];
@@ -222,7 +230,11 @@ function expandReach(path: string, baseline: TokenMap, reach: Set<string>): void
     for (const next of token.aliasChain) reach.add(next);
   }
   if (token.partialAliasOf !== undefined) {
-    collectPartialAliasTargets(token.partialAliasOf, (next) => reach.add(next));
+    collectPartialAliasTargets(token.partialAliasOf, (next) => {
+      if (reach.has(next)) return;
+      reach.add(next);
+      expandReach(next, baseline, reach);
+    });
   }
 }
 
