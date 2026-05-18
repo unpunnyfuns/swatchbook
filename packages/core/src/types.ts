@@ -115,8 +115,7 @@ export type ResolveAt = (tuple: Record<string, string>) => TokenMap;
  * (default tuple + per-axis non-default cells + presets). No longer
  * surfaced on `Project`; kept here as the shape `normalize` /
  * `loadResolverPermutations` / `loadLayeredPermutations` produce
- * internally, consumed by the cells builder via a resolver callback
- * and by emit-via-terrazzo's tuple selection.
+ * internally, consumed by the cells builder via a resolver callback.
  */
 export interface Permutation {
   name: string;
@@ -392,20 +391,6 @@ export interface Project {
    */
   cwd: string;
   /**
-   * @internal Raw Terrazzo parse output retained so downstream
-   * emitters can drive Terrazzo's plugin pipeline
-   * (`emitViaTerrazzo(project, [...plugins])`) without re-parsing
-   * from disk. Present for resolver-backed projects; currently
-   * `undefined` for layered + plain-parse paths — those would need
-   * a synthesized resolver before `build()` accepts them.
-   *
-   * Consumers should pass the `Project` itself to
-   * `emitViaTerrazzo` rather than reaching for this field directly —
-   * the `ParserInput` shape is not part of the public type surface
-   * and may move under a different name in future releases.
-   */
-  parserInput?: ParserInput;
-  /**
    * Path-indexed Token Listing data from `@terrazzo/plugin-token-listing`.
    * Each entry carries the plugin-css-authoritative var name under
    * `$extensions["app.terrazzo.listing"].names.css`, a `previewValue`
@@ -422,13 +407,15 @@ export interface Project {
 
 /**
  * Pass-through bag of the three values `@terrazzo/parser`'s `build()`
- * requires alongside a config. Retained verbatim from `loadResolver()`
- * so the addon-internal Terrazzo emission wrapper can re-run builds
- * without re-parsing from disk.
+ * requires alongside a config. Threaded through `loadResolver()` →
+ * `loadProject()` → `computeTokenListing()` during the load and then
+ * dropped — never lands on the public `Project` shape, never crosses
+ * a package boundary.
  *
- * @internal Consumers should not depend on this shape. It exists for
- * the addon + integrations; external consumers driving their own build
- * should use Terrazzo's CLI against the DTCG sources directly.
+ * @internal Internal to the loader pipeline. The `ParserInput` shape
+ * leaks Terrazzo types (`Resolver`, `InputSourceWithDocument`) that
+ * would otherwise pin our public API to a peer dep's evolving surface;
+ * keeping it private lets the swatchbook surface stay stable.
  */
 export interface ParserInput {
   tokens: Record<string, TokenNormalized>;

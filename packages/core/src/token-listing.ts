@@ -26,9 +26,10 @@ export type TokenListingByPath = Record<string, ListedToken>;
  * Run Terrazzo's build pipeline with `plugin-css` + `plugin-token-listing`
  * and parse the resulting listing JSON into a path-indexed map.
  *
- * Reuses the same `plugin-css` variable-naming rule emitViaTerrazzo uses,
- * so the `names.css` field in every entry matches exactly what emission
- * would produce — by construction, no parallel logic to drift.
+ * Uses the same `plugin-css` variable-naming rule the smart-axis-
+ * projected emitter uses, so the `names.css` field in every entry
+ * matches exactly what emission would produce — by construction, no
+ * parallel logic to drift.
  *
  * Returns `{ listing, diagnostics }`. On any failure (missing listing
  * output, parse error, plugin crash inside a user-supplied

@@ -6,14 +6,35 @@
 // The joint-override composition handles the joint-variance fixture
 // (`color.accent.fg` under mode=Dark + brand=Brand A) without invoking
 // the resolver again at runtime.
+//
+// The resolver itself is loaded out-of-band via `loadResolverPermutations`
+// (internal loader helper) because `Project.parserInput` was removed
+// from the public type to stop leaking Terrazzo types onto the public
+// surface. Side-channel access is fine for tests; consumers shouldn't
+// need it.
 import { beforeAll, expect, it } from 'vitest';
+import type { Resolver } from '@terrazzo/parser';
+import { resolverPath } from '@unpunnyfuns/swatchbook-tokens';
+import { BufferedLogger } from '#/diagnostics.ts';
+import { loadResolverPermutations } from '#/permutations/resolver.ts';
 import type { Project } from '#/types.ts';
-import { loadWithPrefix } from './_helpers';
+import { fixtureCwd, loadWithPrefix } from './_helpers';
 
 let project: Project;
+let resolver: Resolver;
 
 beforeAll(async () => {
   project = await loadWithPrefix('sb');
+  const result = await loadResolverPermutations(
+    resolverPath,
+    undefined,
+    fixtureCwd,
+    new BufferedLogger(),
+  );
+  if (!result.parserInput?.resolver) {
+    throw new Error('reference fixture must load a resolver');
+  }
+  resolver = result.parserInput.resolver;
 }, 30_000);
 
 function valueKey(value: unknown): string {
@@ -36,10 +57,8 @@ function* cartesianTuples(
 }
 
 it('matches resolver.apply for every cartesian tuple, value-by-value', () => {
-  const resolver = project.parserInput?.resolver;
-  expect(resolver, 'reference fixture must be resolver-backed').toBeDefined();
   for (const tuple of cartesianTuples(project.axes)) {
-    const expected = resolver!.apply(tuple);
+    const expected = resolver.apply(tuple);
     const actual = project.resolveAt(tuple);
     const expectedPaths = Object.keys(expected).toSorted();
     const actualPaths = Object.keys(actual).toSorted();
@@ -69,14 +88,12 @@ it("reproduces the fixture's joint-variance value at (Dark, Brand A) via joint o
   // jointly the cartesian truth differs from the projection composition,
   // so `probeJointOverrides` records an override that `resolveAt`
   // applies to land on the correct value.
-  const parserInput = project.parserInput;
-  expect(parserInput?.resolver, 'reference fixture must be resolver-backed').toBeDefined();
-  const cartesianTokens = parserInput?.resolver?.apply({
+  const cartesianTokens = resolver.apply({
     ...project.defaultTuple,
     mode: 'Dark',
     brand: 'Brand A',
   });
-  const expectedVal = valueKey(cartesianTokens?.['color.accent.fg']?.$value);
+  const expectedVal = valueKey(cartesianTokens['color.accent.fg']?.$value);
   const actual = project.resolveAt({ ...project.defaultTuple, mode: 'Dark', brand: 'Brand A' });
   const actualVal = valueKey(actual['color.accent.fg']?.$value);
   expect(actualVal).toBe(expectedVal);
