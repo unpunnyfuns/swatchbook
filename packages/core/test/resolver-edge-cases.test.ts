@@ -84,7 +84,7 @@ it('records sourceFiles for every file pulled through $ref', async () => {
   writeJSON('tokens.json', {
     color: { red: { $type: 'color', $value: { colorSpace: 'srgb', components: [1, 0, 0] } } },
   });
-  const resolverPath = writeJSON('resolver.json', {
+  writeJSON('resolver.json', {
     $schema: 'https://www.designtokens.org/TR/2025.10/resolver/',
     version: '2025.10',
     sets: { main: { sources: [{ $ref: './tokens.json' }] } },
@@ -94,7 +94,6 @@ it('records sourceFiles for every file pulled through $ref', async () => {
   expect(project.sourceFiles).toContain(join(workspace, 'tokens.json'));
   // Resolver file itself may or may not land in sourceFiles depending on how
   // Terrazzo reports its own input; the referenced target definitely should.
-  expect(resolverPath).toBeDefined();
 });
 
 it('resolves a `config.resolver` bare package specifier through the consumer cwd node_modules', async () => {

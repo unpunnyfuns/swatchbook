@@ -16,6 +16,7 @@ beforeAll(async () => {
 }, 30_000);
 
 it("populates one cell per (axis, context) — including each axis's default — for the reference fixture", () => {
+  expect(project.axes.length).toBeGreaterThan(0);
   for (const axis of project.axes) {
     for (const ctx of axis.contexts) {
       expect(project.cells[axis.name]?.[ctx]).toBeDefined();
@@ -23,23 +24,26 @@ it("populates one cell per (axis, context) — including each axis's default —
   }
 });
 
-it("the default cell on each axis is the full baseline TokenMap (every axis's default cell is the same data)", () => {
+it("the default cell on each axis IS the same baseline TokenMap reference (shared identity, not a copy)", () => {
   const [first] = project.axes;
-  if (!first) return;
+  expect(first, 'reference fixture must have at least one axis').toBeDefined();
+  if (!first) throw new Error('unreachable');
   const baseline = project.cells[first.name]?.[first.default];
   expect(baseline).toBeDefined();
-  // Every other axis's default cell should reference the same baseline
-  // data (they're all the resolver-apply'd default tuple).
+  // The implementation shares the baseline reference across every
+  // axis's default cell — `buildCells` writes the same object pointer
+  // for `axisCells[axis.default]`. Reference equality (not just deep
+  // equality) is the contract that lets `resolveAt` skip copies for
+  // default-tuple lookups.
   for (const axis of project.axes) {
-    const defaultCell = project.cells[axis.name]?.[axis.default];
-    expect(defaultCell).toBeDefined();
-    expect(Object.keys(defaultCell ?? {}).length).toBeGreaterThan(0);
+    expect(project.cells[axis.name]?.[axis.default]).toBe(baseline);
   }
 });
 
 it("non-default cells store only delta tokens (paths whose value differs from baseline)", () => {
   const [first] = project.axes;
-  if (!first) return;
+  expect(first, 'reference fixture must have at least one axis').toBeDefined();
+  if (!first) throw new Error('unreachable');
   const baseline = project.cells[first.name]?.[first.default] ?? {};
   for (const axis of project.axes) {
     for (const ctx of axis.contexts) {

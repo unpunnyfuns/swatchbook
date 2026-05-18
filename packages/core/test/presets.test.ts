@@ -41,6 +41,7 @@ describe('validatePresets', () => {
     expect(presets).toEqual([{ name: 'Weird', axes: { mode: 'Dark' } }]);
     expect(diagnostics).toHaveLength(1);
     expect(diagnostics[0]?.severity).toBe('warn');
+    expect(diagnostics[0]?.group).toBe('swatchbook/presets');
     expect(diagnostics[0]?.message).toMatch(/unknown axis "nonsense"/);
     expect(diagnostics[0]?.message).toMatch(/"Weird"/);
   });
@@ -53,6 +54,7 @@ describe('validatePresets', () => {
     expect(presets).toEqual([{ name: 'Bad Mode', axes: {} }]);
     expect(diagnostics).toHaveLength(1);
     expect(diagnostics[0]?.severity).toBe('warn');
+    expect(diagnostics[0]?.group).toBe('swatchbook/presets');
     expect(diagnostics[0]?.message).toMatch(/"Sepia"/);
   });
 

@@ -51,7 +51,10 @@ it('validateChrome drops entries whose target resolves in no theme', () => {
   expect(entries).toEqual({});
   expect(diagnostics).toHaveLength(1);
   expect(diagnostics[0]?.severity).toBe('warn');
-  expect(diagnostics[0]?.message).toMatch(/"color\.nowhere" is not a token/);
+  expect(diagnostics[0]?.group).toBe('swatchbook/chrome');
+  // Substring match — survives prose rewording without losing the
+  // "what was rejected" signal.
+  expect(diagnostics[0]?.message).toContain('color.nowhere');
 });
 
 it('CHROME_ROLES and DEFAULT_CHROME_MAP cover the same ten roles', () => {

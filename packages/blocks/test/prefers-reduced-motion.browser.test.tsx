@@ -37,11 +37,11 @@ it("returns true when Chromatic's user-agent is present, even if matchMedia woul
   expect(observed).toBe(true);
 });
 
-it('follows matchMedia when not inside Chromatic', () => {
+it('follows matchMedia when not inside Chromatic (transitions from default-false to matchMedia=true)', () => {
   vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(
     'Mozilla/5.0 (Macintosh) AppleWebKit/537.36',
   );
-  vi.spyOn(window, 'matchMedia').mockImplementation(
+  const matchMedia = vi.spyOn(window, 'matchMedia').mockImplementation(
     () =>
       ({
         matches: true,
@@ -49,16 +49,19 @@ it('follows matchMedia when not inside Chromatic', () => {
         removeEventListener: () => {},
       }) as unknown as MediaQueryList,
   );
-  let observed: boolean | null = null;
-  render(<Probe onValue={(v) => (observed = v)} />);
-  expect(observed).toBe(true);
+  const observed: boolean[] = [];
+  render(<Probe onValue={(v) => observed.push(v)} />);
+  // Sequence: initial render returns the useState default (false), then
+  // the useEffect's matchMedia read flips to true and re-renders.
+  expect(observed).toEqual([false, true]);
+  expect(matchMedia).toHaveBeenCalledWith('(prefers-reduced-motion: reduce)');
 });
 
 it('falls through to matchMedia=false when neither Chromatic nor user preference reports reduced', () => {
   vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(
     'Mozilla/5.0 (Macintosh) AppleWebKit/537.36',
   );
-  vi.spyOn(window, 'matchMedia').mockImplementation(
+  const matchMedia = vi.spyOn(window, 'matchMedia').mockImplementation(
     () =>
       ({
         matches: false,
@@ -66,9 +69,11 @@ it('falls through to matchMedia=false when neither Chromatic nor user preference
         removeEventListener: () => {},
       }) as unknown as MediaQueryList,
   );
-  let observed: boolean | null = null;
-  render(<Probe onValue={(v) => (observed = v)} />);
-  // After mount, useEffect ran and called setReduced(false). The initial
-  // render returned the default (false), so observed is false either way.
-  expect(observed).toBe(false);
+  const observed: boolean[] = [];
+  render(<Probe onValue={(v) => observed.push(v)} />);
+  // The effect's `setReduced(false)` matches the existing state, so React
+  // bails out of the re-render; we only observe the initial false. The
+  // positive signal that the effect actually ran is the matchMedia call.
+  expect(observed).toEqual([false]);
+  expect(matchMedia).toHaveBeenCalledWith('(prefers-reduced-motion: reduce)');
 });

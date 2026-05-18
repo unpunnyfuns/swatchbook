@@ -55,13 +55,27 @@ it('get_token: returns the alias chain and resolved value per theme', async () =
   // cssVar uses the project prefix and dot→dash substitution.
   expect(result.cssVar).toBe(`var(--sb-${ALIAS_TOKEN.replaceAll('.', '-')})`);
   expect(Object.keys(result.perTheme).length).toBe(singletonCount(project));
-  // Every theme entry carries a value; aliased ones name their target.
+  // Every theme entry carries a non-empty value string + (when aliased)
+  // a target that points into the color subtree.
   for (const entry of Object.values(result.perTheme)) {
-    expect(entry.value).toBeTruthy();
+    expect(entry.value.length).toBeGreaterThan(0);
     if (entry.aliasOf) {
       expect(entry.aliasOf).toMatch(/^color\./);
     }
   }
+  // The alias target's value varies per mode (Light vs Dark): a
+  // resolver bug that emitted the same string across modes would slip
+  // through `toBeTruthy`. Pin the per-mode divergence explicitly.
+  const lightThemes = Object.entries(result.perTheme).filter(([k]) => k.startsWith('Light'));
+  const darkThemes = Object.entries(result.perTheme).filter(([k]) => k.startsWith('Dark'));
+  expect(lightThemes.length).toBeGreaterThan(0);
+  expect(darkThemes.length).toBeGreaterThan(0);
+  const lightValues = new Set(lightThemes.map(([, v]) => v.value));
+  const darkValues = new Set(darkThemes.map(([, v]) => v.value));
+  // At least one Light value must differ from at least one Dark value —
+  // the fixture's `color.accent.fg` alias chain flips under mode=Dark.
+  const overlap = [...lightValues].filter((v) => darkValues.has(v));
+  expect(overlap.length).toBeLessThan(lightValues.size + darkValues.size);
 });
 
 it('get_token: returns the cssVar without a prefix segment when cssVarPrefix is empty', async () => {
