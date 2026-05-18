@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { userEvent } from '@vitest/browser/context';
 import { SwatchbookProvider, TokenTable } from '#/index.ts';
@@ -128,16 +128,19 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     const before = within(screen.getByRole('table')).getAllByRole('row').length;
     expect(before).toBeGreaterThan(2);
 
-    // Typing narrows rows to those whose path contains the needle.
+    // Typing narrows rows to those whose path contains the needle. The
+    // filter runs through `useDeferredValue`, so wait for the deferred
+    // render to commit before asserting on the row set.
     await userEvent.fill(input, 'surface');
 
-    const after = within(screen.getByRole('table')).getAllByRole('row');
-    // Header row + at least one matching row; no non-matching rows.
-    const bodyRows = after.filter((r) => r.getAttribute('data-path'));
-    expect(bodyRows.length).toBeGreaterThan(0);
-    for (const row of bodyRows) {
-      expect(row.getAttribute('data-path')).toContain('surface');
-    }
+    await waitFor(() => {
+      const after = within(screen.getByRole('table')).getAllByRole('row');
+      const bodyRows = after.filter((r) => r.getAttribute('data-path'));
+      expect(bodyRows.length).toBeGreaterThan(0);
+      for (const row of bodyRows) {
+        expect(row.getAttribute('data-path')).toContain('surface');
+      }
+    });
     expect(container.textContent).toContain('matching "surface"');
   });
 
@@ -152,7 +155,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     const input = screen.getByTestId('token-table-search') as HTMLInputElement;
     await userEvent.fill(input, 'xyz-no-match');
 
-    screen.getByText(/No tokens match "xyz-no-match"/);
+    await screen.findByText(/No tokens match "xyz-no-match"/);
   });
 
   it('hides the search input when searchable={false}', () => {

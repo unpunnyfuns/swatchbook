@@ -1,6 +1,6 @@
 import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import type { KeyboardEvent, ReactElement } from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import './TokenNavigator.css';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
@@ -231,18 +231,19 @@ export function TokenNavigator({
 
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const deferredQuery = useDeferredValue(query);
 
   const { visibleTree, searchExpanded } = useMemo(() => {
-    if (!searchable || query.trim() === '') {
+    if (!searchable || deferredQuery.trim() === '') {
       return { visibleTree: tree, searchExpanded: null as Set<string> | null };
     }
     const leafPaths: string[] = [];
     collectLeafPaths(tree, leafPaths);
-    const matches = new Set(fuzzyFilter(leafPaths, query, (p) => p));
+    const matches = new Set(fuzzyFilter(leafPaths, deferredQuery, (p) => p));
     const expandOut = new Set<string>();
     const pruned = matches.size === 0 ? [] : pruneTreeForMatches(tree, matches, expandOut);
     return { visibleTree: pruned, searchExpanded: expandOut };
-  }, [tree, query, searchable]);
+  }, [tree, deferredQuery, searchable]);
 
   const effectiveExpanded = useMemo(() => {
     if (!searchExpanded) return expanded;

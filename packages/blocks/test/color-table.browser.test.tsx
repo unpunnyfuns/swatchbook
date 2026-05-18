@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { userEvent } from '@vitest/browser/context';
 import { ColorTable, SwatchbookProvider } from '#/index.ts';
@@ -62,9 +62,13 @@ describe('ColorTable — base rendering', () => {
     const input = screen.getByTestId('color-table-search') as HTMLInputElement;
     await userEvent.fill(input, 'default text');
 
-    const rows = screen.getAllByTestId('color-table-row');
-    expect(rows.length).toBe(1);
-    expect(rows[0]?.getAttribute('data-path')).toBe('color.text.default');
+    // Filter is deferred via `useDeferredValue`; wait for the narrow
+    // commit before asserting on the row set.
+    await waitFor(() => {
+      const rows = screen.getAllByTestId('color-table-row');
+      expect(rows.length).toBe(1);
+      expect(rows[0]?.getAttribute('data-path')).toBe('color.text.default');
+    });
   });
 
   it('renders the empty state when the filter matches no colors', () => {
