@@ -209,7 +209,7 @@ export function TokenNavigator({
   searchable = true,
   onSelect,
 }: TokenNavigatorProps): ReactElement {
-  const { resolved, activeTheme, cssVarPrefix } = useProject();
+  const { resolved, activeTheme, activeAxes, cssVarPrefix } = useProject();
 
   const typeFilter = useMemo<ReadonlySet<string> | undefined>(() => {
     if (type === undefined) return undefined;
@@ -442,7 +442,7 @@ export function TokenNavigator({
 
   if (tree.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+      <div {...themeAttrs(cssVarPrefix, activeAxes)}>
         <EmptyState>
           {root
             ? `No tokens under "${root}"${typeFilter ? ` matching ${typeLabel.slice(3)}` : ''}.`
@@ -455,7 +455,7 @@ export function TokenNavigator({
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+    <div {...themeAttrs(cssVarPrefix, activeAxes)}>
       {searchable && (
         <div className="sb-token-navigator__search">
           <input

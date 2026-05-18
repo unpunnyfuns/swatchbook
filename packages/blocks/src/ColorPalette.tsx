@@ -72,7 +72,7 @@ export function ColorPalette({
   sortDir = 'asc',
 }: ColorPaletteProps): ReactElement {
   const project = useProject();
-  const { resolved, activeTheme, cssVarPrefix } = project;
+  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
   const colorFormat = useColorFormat();
 
   const groups = useMemo(() => {
@@ -115,14 +115,14 @@ export function ColorPalette({
 
   if (totalCount === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+      <div {...themeAttrs(cssVarPrefix, activeAxes)}>
         <div className="sb-block__empty">No color tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+    <div {...themeAttrs(cssVarPrefix, activeAxes)}>
       <div className="sb-block__caption">{captionText}</div>
       {groups.map(([group, swatches]) => (
         <section key={group} className="sb-color-palette__group">

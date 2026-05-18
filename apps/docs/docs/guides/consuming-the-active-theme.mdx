@@ -87,7 +87,7 @@ Inside the preview, prefer `useActiveAxes()` — it's reactive without the obser
 
 ## What the DOM contract guarantees
 
-1. **`data-<prefix>-<axisName>="<context>"` attributes on `<html>`** — one per active axis, plus `data-<prefix>-theme` holding the composed tuple string (`"Dark · Brand A · Normal"`). `<prefix>` follows your `cssVarPrefix` config (default `swatch`).
+1. **`data-<prefix>-<axisName>="<context>"` attributes on `<html>`** — one per active axis. `<prefix>` follows your `cssVarPrefix` config (default `swatch`).
 2. **The same attributes on each story's wrapper element.** Redundant with `<html>` in most cases, but useful if your story iframe hosts multiple wrappers.
 3. **Per-tuple CSS** emitted under compound attribute selectors — `[data-<prefix>-mode="Dark"][data-<prefix>-brand="Brand A"] { … }`. One block per tuple, with the default tuple's values in `:root` as the fallback.
 4. **Attributes update on toolbar flip.** Synchronously, before the next paint — observers fire on the microtask queue.

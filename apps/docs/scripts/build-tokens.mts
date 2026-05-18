@@ -42,14 +42,8 @@ const rawCss = emitAxisProjectedCss(project);
  * built-in `[data-theme]` toggle on `<html>` (lowercased), while the
  * non-mode axes (`a11y`, `brand`) keep their prefixed `data-sb-<axis>`
  * attributes that the navbar switcher provider owns.
- *
- * Single-axis projects key everything on `theme` regardless of the
- * resolver's axis name (see `selectorFor` in core). Multi-axis keeps
- * the axis name (`mode`, `a11y`, `brand`). Cover both shapes.
  */
 const css = rawCss
-  .replaceAll('[data-sb-theme="Light"]', '[data-theme="light"]')
-  .replaceAll('[data-sb-theme="Dark"]', '[data-theme="dark"]')
   .replaceAll('[data-sb-mode="Light"]', '[data-theme="light"]')
   .replaceAll('[data-sb-mode="Dark"]', '[data-theme="dark"]');
 

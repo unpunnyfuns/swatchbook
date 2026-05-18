@@ -92,9 +92,9 @@ function forEachPinnedAxis(cb: (name: string, value: string) => void): void {
 
 /**
  * Compose a stable theme name from a tuple — `axisValues.join(' · ')`
- * in axis order. Used for the `data-<prefix>-theme` attribute and the
- * `swatchbook/theme` channel signal. Returns empty string when there
- * are no axes (no name to write).
+ * in axis order. Used for the `ThemeContext` value the blocks read and
+ * the addon-channel signals downstream consumers subscribe to. Returns
+ * empty string when there are no axes (no name to write).
  */
 function matchThemeName(tuple: Readonly<Record<string, string>>): string {
   if (virtualAxes.length === 0) return '';
@@ -102,17 +102,15 @@ function matchThemeName(tuple: Readonly<Record<string, string>>): string {
 }
 
 /**
- * Write the composed permutation ID to `data-<prefix>-theme` plus one
- * `data-<prefix>-<axis>=<context>` per axis. Prefix follows `cssVarPrefix`
- * so the attr namespace and the emitted-CSS selectors stay in lockstep;
- * empty prefix keeps the bare `data-theme` form.
+ * Write one `data-<prefix>-<axis>=<context>` per axis on `<html>`.
+ * The smart CSS emitter targets these single-axis selectors (and
+ * joint compounds across multiple) — that's the actual scoping
+ * surface the cascade resolves through. Prefix follows `cssVarPrefix`
+ * so attr namespace and emitted selectors stay in lockstep.
  */
-function setRootAxes(themeName: string, tuple: Readonly<Record<string, string>>): void {
+function setRootAxes(tuple: Readonly<Record<string, string>>): void {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
-  const themeAttr = dataAttr(cssVarPrefix, 'theme');
-  if (themeName) root.setAttribute(themeAttr, themeName);
-  else root.removeAttribute(themeAttr);
   for (const axis of virtualAxes) {
     const attr = dataAttr(cssVarPrefix, axis.name);
     const value = tuple[axis.name];
@@ -289,11 +287,10 @@ const themedDecorator: Decorator = (Story, context) => {
   }, []);
 
   useEffect(() => {
-    setRootAxes(themeName, tuple);
-  }, [themeName, tuple]);
+    setRootAxes(tuple);
+  }, [tuple]);
 
   const wrapperAttrs: Record<string, string> = {};
-  if (themeName) wrapperAttrs[dataAttr(cssVarPrefix, 'theme')] = themeName;
   for (const axis of virtualAxes) {
     const value = tuple[axis.name];
     if (value !== undefined) wrapperAttrs[dataAttr(cssVarPrefix, axis.name)] = value;
@@ -404,7 +401,7 @@ function installGlobalAxisApplier(): void {
   const apply = (globals: SwatchbookGlobals): void => {
     ensureStylesheet(css, cssVarPrefix);
     const tuple = resolveTuple(globals, {});
-    setRootAxes(matchThemeName(tuple), tuple);
+    setRootAxes(tuple);
   };
   // Storybook fires `globalsUpdated`, `setGlobals`, and `updateGlobals`
   // for the same logical change (preview init + every toolbar tick).

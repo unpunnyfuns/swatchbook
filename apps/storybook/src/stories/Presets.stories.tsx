@@ -1,4 +1,4 @@
-import { expect, waitFor } from 'storybook/test';
+import { waitFor } from 'storybook/test';
 import preview from '../../.storybook/preview.tsx';
 import { Button } from '../components/Button.tsx';
 import { Card } from '../components/Card.tsx';
@@ -51,7 +51,7 @@ export const DefaultLightPreset = meta.story({
     const wrapper = await findWrapper(canvasElement);
     await waitForAttr(wrapper, 'data-sb-mode', 'Light');
     await waitForAttr(wrapper, 'data-sb-brand', 'Default');
-    expect(wrapper.getAttribute('data-sb-theme')).toBe('Light · Default · Normal');
+    await waitForAttr(wrapper, 'data-sb-contrast', 'Normal');
   },
 });
 
@@ -67,6 +67,6 @@ export const BrandADarkPreset = meta.story({
     const wrapper = await findWrapper(canvasElement);
     await waitForAttr(wrapper, 'data-sb-mode', 'Dark');
     await waitForAttr(wrapper, 'data-sb-brand', 'Brand A');
-    expect(wrapper.getAttribute('data-sb-theme')).toBe('Dark · Brand A · Normal');
+    await waitForAttr(wrapper, 'data-sb-contrast', 'Normal');
   },
 });

@@ -62,7 +62,7 @@ export function TokenTable({
   onSelect,
 }: TokenTableProps): ReactElement {
   const project = useProject();
-  const { resolved, activeTheme, cssVarPrefix } = project;
+  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
   const colorFormat = useColorFormat();
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -111,14 +111,14 @@ export function TokenTable({
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+      <div {...themeAttrs(cssVarPrefix, activeAxes)}>
         <div className="sb-block__empty">No tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+    <div {...themeAttrs(cssVarPrefix, activeAxes)}>
       {searchable && (
         <div className="sb-token-table__search">
           <input

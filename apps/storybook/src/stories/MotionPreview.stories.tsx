@@ -16,7 +16,7 @@ export const SystemTransitions = meta.story({
   args: { filter: 'transition.**' },
   play: async ({ canvasElement }) => {
     await waitFor(() => {
-      const wrapper = canvasElement.querySelector('[data-sb-theme]');
+      const wrapper = canvasElement.querySelector('[data-swatchbook-block]');
       expect(
         wrapper?.textContent,
         'motion preview should include at least one transition path',
