@@ -1,0 +1,116 @@
+---
+id: tailwind
+title: Tailwind
+sidebar_position: 2
+---
+
+# Tailwind
+
+`@unpunnyfuns/swatchbook-integrations/tailwind` aliases [Tailwind v4](https://tailwindcss.com/docs/v4-beta) utility scales to your DTCG tokens. Classes like `bg-sb-surface-default` / `p-sb-md` / `rounded-sb-lg` resolve through the same `var(--sb-*)` chain the swatchbook toolbar flips.
+
+## Install
+
+```bash
+npm install -D @unpunnyfuns/swatchbook-integrations tailwindcss @tailwindcss/vite
+```
+
+Tailwind v4's Vite plugin is required to process the `@theme` block the integration serves.
+
+## Configure
+
+Add `tailwindcss()` to Storybook's Vite plugins alongside the integration:
+
+```ts title=".storybook/main.ts"
+import tailwindcss from '@tailwindcss/vite';
+import tailwindIntegration from '@unpunnyfuns/swatchbook-integrations/tailwind';
+
+export default defineMain({
+  addons: [
+    {
+      name: '@unpunnyfuns/swatchbook-addon',
+      options: {
+        configPath: '../swatchbook.config.ts',
+        integrations: [tailwindIntegration()],
+      },
+    },
+  ],
+  viteFinal(config) {
+    const plugins = Array.isArray(config.plugins) ? [...config.plugins] : [];
+    plugins.push(tailwindcss());
+    return { ...config, plugins };
+  },
+});
+```
+
+No hand-written `tailwind.css`, no manual `@theme` block to maintain, no extra import in `preview.tsx`.
+
+## What gets generated
+
+With `cssVarPrefix: 'sb'` in your swatchbook config, the addon serves an `@theme` block like:
+
+```css
+@import 'tailwindcss';
+
+@theme {
+  /* color */
+  --color-sb-surface-default: var(--sb-color-surface-default);
+  --color-sb-accent-bg: var(--sb-color-accent-bg);
+  /* spacing */
+  --spacing-sb-md: var(--sb-space-md);
+  /* radius */
+  --radius-sb-lg: var(--sb-radius-lg);
+  /* shadow */
+  --shadow-sb-md: var(--sb-shadow-md);
+}
+```
+
+Tailwind's compiler sees the block and emits utilities:
+
+```css
+.bg-sb-surface-default { background-color: var(--color-sb-surface-default); }
+.p-sb-md { padding: var(--spacing-sb-md); }
+```
+
+At runtime the toolbar flips `data-sb-mode` / `data-sb-brand` / `data-sb-contrast` on `<html>`, the per-tuple stylesheet redefines `--sb-*` vars, and every Tailwind utility re-paints via cascade.
+
+## The `sb-` prefix
+
+Every `@theme` entry is nested under your project's `cssVarPrefix`. Tailwind's default scales (`--color-red-500`, `--spacing-4`, `--container-md`) stay intact — `bg-red-500` works alongside `bg-sb-surface-default`, `p-4` alongside `p-sb-md`.
+
+This matters because Tailwind v4's `max-w-<name>` / `w-<name>` / `size-<name>` utilities read from the `--spacing-*` namespace. Without the prefix, an entry named `--spacing-sm` would shadow Tailwind's default `--container-sm`, making `max-w-sm` tiny. The double-prefix sidesteps that.
+
+## How the role map is built
+
+Zero-config: the integration walks your project's default-theme token graph at render time and classifies each token into a Tailwind scale by `$type` + path:
+
+| DTCG `$type` | Path shape | Tailwind scale | Role name |
+| --- | --- | --- | --- |
+| `color` | any | `color` | path minus `color.` prefix |
+| `dimension` | `space.*` / `spacing.*` | `spacing` | path minus that prefix |
+| `dimension` | `radius.*` / `borderRadius.*` / `border-radius.*` | `radius` | path minus that prefix |
+| `dimension` | anything else | `spacing` | full path dot→dash |
+| `shadow` | any | `shadow` | path minus `shadow.` prefix |
+| `fontFamily` | any | `font` | path minus `font.` / `font.family.` / `fontFamily.` prefix |
+
+Font-size-ish dimensions (`font.size.*`, `text.*`) are skipped — Tailwind's `--text-*` entries want size+line-height pairs this integration doesn't synthesize.
+
+Pass a `roles` map to replace the derivation outright when you want a curated subset, explicit names for non-standard paths, or scales the derivation doesn't cover (`--animate-*`, etc.):
+
+```ts
+tailwindIntegration({
+  roles: {
+    color: [
+      ['brand', 'color.brand.primary'],
+      ['surface', 'color.surface.default'],
+    ],
+  },
+});
+```
+
+Tailwind scale names are keys; each entry is `[tailwindEntryName, dtcgPath]`.
+
+## What this doesn't do
+
+- Doesn't produce production CSS. Run Tailwind's CLI / Vite plugin against your own `@theme` source for that.
+- Doesn't enable `@tailwindcss/vite` outside Storybook. Your app's own build is independent.
+- Doesn't proxy Tailwind's plugin system. Variants, plugins, `darkMode` config, arbitrary values — all pass through to Tailwind untouched.

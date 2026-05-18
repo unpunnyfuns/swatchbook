@@ -1,5 +1,57 @@
 # @unpunnyfuns/swatchbook-switcher
 
+## 0.57.0
+
+### Patch Changes
+
+- c69dec1: Refreshes the npm landing page + apps/docs reference against the current post-cartesian-drop public API. The single biggest user-visible debt heading into 0.60.
+
+  **`packages/core/README.md`** — rewritten Usage example (removed `permutationsResolved` access; shows `defaultTokens` + `resolveAt`), added Browser-safe subpaths section (5 subpaths), updated Boundaries to reference `snapshot-for-wire` instead of removed `permutationsResolved` projections.
+
+  **`apps/docs/docs/reference/core.mdx`** — removed sections for `Permutation` / `ResolvedPermutation` / `resolvePermutation` (none exported anymore); rewrote `AxisVarianceResult` as the discriminated union it actually is (`kind: 'constant' | 'single' | 'multi'` with cardinality-typed `varyingAxes` tuples + the `axis: string` shortcut on the `single` variant); rewrote `Config` section as the new discriminated union (`ResolverConfig | LayeredConfig | PlainConfig`); added Browser-safe subpaths table; added `Cells` / `JointOverride` / `JointOverrides` / `ResolveAt` type docs; replaced "per-permutation token snapshots" framing with "per-axis cells."
+
+  **`apps/docs/docs/reference/switcher.mdx`** — removed the nonexistent `themes?:` prop documentation and the `SwitcherPermutation` type (neither has ever been in the switcher's actual exports — `packages/switcher/src/index.ts` only exports `ThemeSwitcher` / `ThemeSwitcherProps` / `SwitcherAxis` / `SwitcherPreset`). Updated the closing paragraph to drop the `Project.permutations` reference.
+
+  **`apps/docs/docs/reference/config.mdx`** — added discriminated-union framing to "Picking a theming input" (`Config = ResolverConfig | LayeredConfig | PlainConfig`; invalid combos are compile errors); replaced cartesian framing on `axes` docs with singleton-tuple framing (`Σ(axes × (contexts - 1))`, joint divergences via `Project.jointOverrides`).
+
+  Patch bump because the docs ship via the docs-site snapshot — without a changeset, the fix only reaches `/next/` instead of `/`.
+
+- c5d9089: Five small helper consolidations across the addon, blocks, switcher, and core, each previously duplicated across two or more sites.
+
+  - New `@unpunnyfuns/swatchbook-core/style-element` subpath exporting `ensureStyleElement(id, text)` + `SWATCHBOOK_STYLE_ELEMENT_ID`. Replaces three hand-rolled `<style>`-injection blocks in the addon preview and blocks' internal `useProject`.
+  - New `presetTuple` export from `@unpunnyfuns/swatchbook-switcher` — the addon's manager toolbar now imports the helper instead of carrying a byte-identical copy.
+  - `cells.ts` reuses the existing `value-key.ts` helper instead of re-deriving the same `JSON.stringify($value)` comparison.
+  - `ColorFormat` runtime validation in the addon manager now reads through `COLOR_FORMATS.includes()` from `@unpunnyfuns/swatchbook-blocks`, matching the preview path and dropping a hand-maintained five-way `||` chain. The `ColorFormat` type itself re-exports from blocks.
+  - The 9-field `INIT_EVENT` payload subset is built once via a `pickInitFields` helper, shared between the live broadcast and the HMR re-emit.
+
+- 1c56c88: Sweep stale "permutation" prose to "theme" across docs and the switcher README, mirroring the API rename that landed in PR #905. The literal Terrazzo field name `cssOptions.permutations` and the rendered `'permutations'` keyword stay as-is — they're Terrazzo API surface, not swatchbook's. Switcher README also drops the stale `permutations={...}` prop and the removed `SwitcherPermutation` type from its usage example.
+
+  Tightened the prose around `baseSelector` / `baseScheme` / `modeSelectors` to describe current behavior neutrally ("swatchbook ignores them — `permutations`-based emission supersedes them") instead of upgrade-flavoured "deprecated" framing.
+
+  Docs-only change; docs-site snapshot patch bump per the standing policy so the fix reaches `/`, not just `/next/`.
+
+- 55ee410: Four contained test-hygiene items bundled into one PR:
+
+  **Switcher `.browser.test.tsx` infix** (#896 #14) — `packages/switcher/test/theme-switcher.test.tsx` → `theme-switcher.browser.test.tsx`. Matches the convention established by #877 (`.browser.` opt-in for tests requiring the browser harness). Switcher's `include: ['test/**/*.test.{ts,tsx}']` glob continues to match.
+
+  **`diagnostics.test.ts` split** (#896 #15) — `packages/core/test/diagnostics.test.ts` had two top-level `describe` blocks (`BufferedLogger` + `toDiagnostics`), a hard "one describe per file" rule violation #879's split sweep missed. Now: `diagnostics-buffered-logger.test.ts` + `diagnostics-to-diagnostics.test.ts`.
+
+  **Cosmetic describes dropped** from addon tests:
+
+  - `packages/addon/test/preset.test.ts` — `describe('renderTokenTypes', …)` wrapper removed
+  - `packages/addon/test/virtual-plugin.test.ts` — `describe('collectWatchPaths', …)` wrapper removed
+  - `packages/addon/test/integration-side-effects.test.ts` — `describe('integration-side-effects aggregate virtual module', …)` wrapper removed
+
+  Each file already conveys the subject; the wrapping describe added nothing.
+
+  **Ghost-field test fixtures cleaned** (#896 #19):
+
+  - `packages/addon/test/preset.test.ts` — `fakeProject()` stub dropped `permutations: []`, `permutationsResolved: {}`, `graph: {}` (removed from `Project` shape post-cartesian-drop; tests pass because callers don't read these, but the fakes were bit-rotted documentation). Added the real fields the stub was missing (`defaultTokens`, `cwd`, `chrome`).
+  - `packages/addon/test/virtual-plugin.test.ts` — same fields dropped from local `project()` helper.
+  - `packages/addon/test/virtual-stub.ts` — `permutations`, `defaultPermutation`, `permutationsResolved` exports dropped; the `cells` object now declares its tokens inline rather than indirecting through the removed `permutationsResolved`.
+
+  **Clean-config smoke test** (#896 #18) — new `packages/core/test/clean-config-smoke.test.ts` pins the meta-invariant that loading the reference fixture with no edge-case config produces zero diagnostics. Every diagnostic group has positive-fire coverage elsewhere; nothing was asserting the silence on the happy path. Catches the case where an upstream Terrazzo bump starts spitting warns / info without anyone noticing.
+
 ## 0.56.0
 
 ### Patch Changes

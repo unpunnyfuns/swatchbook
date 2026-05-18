@@ -1,5 +1,116 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.57.0
+
+### Minor Changes
+
+- 975944d: Consolidates the two divergent path-matchers onto a single `@unpunnyfuns/swatchbook-core/match-path` subpath:
+
+  - `packages/blocks/src/internal/use-project.ts:globMatch` (5-line prefix matcher; treated `color.*` as "any descendants")
+  - `packages/mcp/src/match.ts:matchPath` (full mid-string `*` / `**` matcher; treated `color.*` as strict single-segment per conventional glob spec)
+
+  The blocks version was a documented narrow subset; the audit (#887 worth-a-PR #8) flagged them as "diverged despite a comment claiming parity." On closer inspection they're genuinely divergent — different semantic for `color.*`. Going with the **conventional glob spec** as the unified semantics (mcp's version): `*` matches a single segment, `**` matches any number of segments. This is a pre-1.0 minor break for blocks' `filter` prop.
+
+  **Blocks-side migration:** any consumer passing `filter="color.*"` to a block (`<ColorPalette>`, `<ColorTable>`, `<TokenTable>`, `<TypographyScale>`, `<DimensionScale>`, etc.) expecting "all descendants of color" needs to update to `filter="color.**"`. The single `*` now means exactly one segment after the prefix. The doc-site MDX (`apps/storybook/src/docs/*`, `apps/docs/docs/quickstart.mdx`, `apps/docs/docs/guides/authoring-doc-stories.mdx`, `apps/docs/docs/reference/blocks/*.mdx`) and every blocks test fixture is migrated in this PR.
+
+  **Touched files:**
+
+  - New `packages/core/src/match-path.ts` + `./match-path` subpath in core's `package.json` exports + tsdown entry.
+  - `packages/mcp/src/server.ts` — imports `matchPath` from the core subpath; deleted `packages/mcp/src/match.ts`.
+  - `packages/blocks/src/internal/use-project.ts` — `globMatch` export removed; the 13 consuming blocks (`ColorTable`, `ColorPalette`, `TokenTable`, `TypographyScale`, `OpacityScale`, `FontWeightScale`, `FontFamilySample`, `DimensionScale`, `MotionPreview`, `ShadowPreview`, `BorderPreview`, `StrokeStyleSample`, `GradientPalette`) import `matchPath` from the core subpath directly.
+  - Test moved: `packages/mcp/test/match.test.ts` → `packages/core/test/match-path.test.ts`. 5 blocks-test files updated to use `**` for descendant matches; same for ~10 MDX files in apps/storybook + apps/docs.
+
+  The unified spec also gains mid-string globs (`color.**.500`) for blocks consumers that didn't have them before.
+
+- 87e4c44: **Breaking — blocks public surface:** vocabulary rename from "permutation" to "theme", aligning blocks with the rest of the swatchbook surface (MCP renamed in #862; the addon channel/panel already uses "theme"; the docs-site switcher already labels its dropdown "Theme").
+
+  - `PermutationContext` → `ThemeContext`
+  - `useActivePermutation()` → `useActiveTheme()`
+  - `ProjectSnapshot.activePermutation` → `ProjectSnapshot.activeTheme`
+  - `ProjectData.permutationNameForTuple` → `themeNameForTuple`
+
+  The addon's preview decorator follows: its internal `matchPermutationName` helper is now `matchThemeName`, and it provides the snapshot via `ThemeContext.Provider value={themeName}` plus `snapshot.activeTheme`. Story-parameter shape (`parameters.swatchbook.permutation`) and the legacy `swatchbookTheme` global are unchanged — those are author-facing inputs covered by their own deprecation path.
+
+  Documentation: the "Consuming the active permutation" guide moves to `consuming-the-active-theme.mdx`; in-doc references update in lockstep.
+
+  Pre-1.0 minor bump. Consumers update their imports + field reads; type errors at every callsite make the rename mechanically straightforward.
+
+  Closes #896
+
+### Patch Changes
+
+- 3302705: Enable a batch of oxlint quality rules and sweep the existing codebase via autofix.
+
+  Direct enforcement of project conventions (`CLAUDE.md`):
+
+  - `no-inline-comments` — "No inline end-of-line comments."
+  - `import/extensions` (with `ignorePackages`) — "Import specifiers: explicit extensions, always" for relative + `#/` imports; npm package imports stay extensionless.
+
+  Style + correctness (all autofixable, applied via `oxlint --fix`):
+
+  - `eqeqeq` (with `smart` so `== null` stays as the "null-or-undefined" idiom)
+  - `no-var`, `prefer-const`, `object-shorthand`, `no-else-return`
+  - `react/self-closing-comp`, `react/jsx-boolean-value`, `react/jsx-fragments`
+  - `typescript/array-type`
+  - `unicorn/throw-new-error`, `unicorn/catch-error-name`, `unicorn/prefer-includes`
+
+  CI catches future regressions; new contributors don't need to memorise the conventions.
+
+- cb161ec: Enable `import/consistent-type-specifier-style: ["error", "prefer-top-level"]` in `.oxlintrc.json` so mixed-syntax type imports (`import { type X, value }`) are caught at lint time and autofixed to the pure top-level form (`import type { X }` / `import { value }`). Sweep over the existing codebase via `oxlint --fix`.
+
+  Mixed-syntax type imports erase the type binding under tsc, but the bundler still sees a side-effect import — esbuild in particular can drag the entire upstream bundle just because the import statement exists. Pure top-level form is fully erased.
+
+- c5d9089: Five small helper consolidations across the addon, blocks, switcher, and core, each previously duplicated across two or more sites.
+
+  - New `@unpunnyfuns/swatchbook-core/style-element` subpath exporting `ensureStyleElement(id, text)` + `SWATCHBOOK_STYLE_ELEMENT_ID`. Replaces three hand-rolled `<style>`-injection blocks in the addon preview and blocks' internal `useProject`.
+  - New `presetTuple` export from `@unpunnyfuns/swatchbook-switcher` — the addon's manager toolbar now imports the helper instead of carrying a byte-identical copy.
+  - `cells.ts` reuses the existing `value-key.ts` helper instead of re-deriving the same `JSON.stringify($value)` comparison.
+  - `ColorFormat` runtime validation in the addon manager now reads through `COLOR_FORMATS.includes()` from `@unpunnyfuns/swatchbook-blocks`, matching the preview path and dropping a hand-maintained five-way `||` chain. The `ColorFormat` type itself re-exports from blocks.
+  - The 9-field `INIT_EVENT` payload subset is built once via a `pickInitFields` helper, shared between the live broadcast and the HMR re-emit.
+
+- 4146d9f: Brand the public `TokenMap` shape as `SwatchbookToken` — a strict subset of `@terrazzo/parser`'s `TokenNormalized` covering only the seven fields downstream consumers actually read (`$type`, `$value`, `$description`, `aliasOf`, `aliasChain`, `aliasedBy`, `partialAliasOf`). `Project.defaultTokens` and `Project.resolveAt()` now return `Record<string, SwatchbookToken>` instead of leaking the full `TokenNormalized` shape (with `id`, `source`, `originalValue`, `group`, `dependencies`, `$extensions`, `$extends`, `$deprecated`) onto the public surface.
+
+  Insulates swatchbook consumers from future Terrazzo type churn: a rename or restructure inside `TokenNormalized` won't ripple through the swatchbook API. Pre-1.0 coordinated break worth doing before 1.0 commits us.
+
+  `SwatchbookToken` is structurally compatible with `TokenNormalized` — internal core code that bridges resolver output into a `TokenMap` keeps working without changes. The smart emitter (`css-axis-projected.ts`) is the one site that genuinely needs the full Terrazzo shape to drive `transformCSSValue` / `generateShorthand`; it casts at the boundary via a documented `asRawTokens` helper.
+
+  Closes #892
+
+- 062276b: Adds `@unpunnyfuns/swatchbook-core/themes` subpath consolidating the "themes-a-project-surfaces" enumeration + the `tupleToName` join. Eliminates duplicated `enumerateThemeNames` / `buildTupleByName` / inline `tupleToName` impls across 4 packages.
+
+  **New exports** (subpath: `/themes`):
+
+  - `tupleToName(axes, tuple)` — synthesizes the canonical theme name (`axisValues.join(' · ')` in declared axis order) for the `data-<prefix>-theme` attribute. Same form `Project.cells` keys against.
+  - `enumerateThemes({ axes, presets, defaultTuple })` — iterates default tuple + per-axis non-default singletons + presets, deduped by name. Same order the loader produces.
+  - `ThemeEntry`, `ThemeEnumAxis`, `ThemeEnumPreset` types.
+
+  Pure functions, structural input types — no `Project` import, no Terrazzo parser, no Node deps.
+
+  **Consumer migrations:**
+
+  - `packages/addon/src/preset.ts` — `enumerateThemeNames` (16-line local impl with its own inline `tupleToName`) replaced with `enumerateThemes(project).map(t => t.name)`.
+  - `packages/addon/src/preview.tsx` — `matchPermutationName` now wraps `tupleToName(virtualAxes, tuple)` instead of inlining the join.
+  - `packages/blocks/src/internal/use-project.ts` — local `tupleToName` helper deleted; consumers import from core subpath.
+  - `packages/mcp/src/server.ts` — local `buildTupleByName` (20-line preset-fill impl) and `tupleToName` (5-line) deleted; `buildTupleByName` now wraps `enumerateThemes(project)`.
+
+  The internal `permutationID` in `core/types.ts` stays (still used by the loader's per-tuple keys via `Object.values(input).join(…)`); it's a slightly different signature (joins `Object.values` not `axes.map`) and remains an internal detail. The new `tupleToName(axes, tuple)` is the consumer-facing replacement that's explicit about axis ordering.
+
+  Sixth core subpath (joining `/fuzzy`, `/resolve-at`, `/css-var`, `/data-attr`, `/snapshot-for-wire`, `/match-path`). Pre-1.0 minor bump on core (new public subpath); patch on consumer packages.
+
+- Updated dependencies [4bc19e8]
+- Updated dependencies [f82eb5c]
+- Updated dependencies [c69dec1]
+- Updated dependencies [76ba600]
+- Updated dependencies [6188fa8]
+- Updated dependencies [3302705]
+- Updated dependencies [cb161ec]
+- Updated dependencies [c5d9089]
+- Updated dependencies [975944d]
+- Updated dependencies [4146d9f]
+- Updated dependencies [55ee410]
+- Updated dependencies [062276b]
+  - @unpunnyfuns/swatchbook-core@0.57.0
+
 ## 0.56.0
 
 ### Minor Changes

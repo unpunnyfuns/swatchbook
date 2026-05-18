@@ -1,5 +1,31 @@
 # @unpunnyfuns/swatchbook-integrations
 
+## 0.57.0
+
+### Patch Changes
+
+- 6188fa8: Enable a small batch of correctness-leaning oxlint rules — the ones without safe autofix that nudge style consistency rather than mechanical reshape.
+
+  - `no-throw-literal` — throw `Error` (or subclass), not strings. Better stack traces; matches established codebase pattern.
+  - `typescript/no-inferrable-types` — strip redundant annotations like `let x: string = 'foo'`. Lets TS do its job.
+  - `typescript/consistent-type-definitions: ["error", "interface"]` — pick `interface` for object shapes; `type` stays valid for unions / intersections / primitives.
+
+  Codebase was nearly compliant — only two pre-existing violations across the monorepo. Fixed both in the same PR.
+
+- Updated dependencies [4bc19e8]
+- Updated dependencies [f82eb5c]
+- Updated dependencies [c69dec1]
+- Updated dependencies [76ba600]
+- Updated dependencies [6188fa8]
+- Updated dependencies [3302705]
+- Updated dependencies [cb161ec]
+- Updated dependencies [c5d9089]
+- Updated dependencies [975944d]
+- Updated dependencies [4146d9f]
+- Updated dependencies [55ee410]
+- Updated dependencies [062276b]
+  - @unpunnyfuns/swatchbook-core@0.57.0
+
 ## 0.56.0
 
 ### Patch Changes

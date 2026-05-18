@@ -1,5 +1,119 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.57.0
+
+### Patch Changes
+
+- f82eb5c: Doc-audit drift fixes (third of three thematic PRs after #918 and #920):
+
+  - `core.mdx` + `core/README.md` "Boundaries" / "Do / don't" — rewrite the stale `parserInput`-references-the-AST line. `parserInput` no longer ships on `Project` (removed in #901); the real reason not to ship `Project` to the browser is that `resolveAt` is a function, `varianceByPath` is a Map, and `cwd` is a Node-side absolute path.
+  - `core.mdx` `SwatchbookIntegration` example — add the previously-omitted `autoInject?: boolean` field with its documented semantics.
+  - `architecture.mdx` `Project` inline shape — add the missing `listing: TokenListingByPath` field.
+  - `addon.mdx` block-side hooks section — soften the wrong "not re-exported from the addon" claim; the addon's main entry does `export * from blocks` + `from switcher`, so block-side hooks are reachable from `@unpunnyfuns/swatchbook-addon` directly.
+  - `addon/src/index.ts` — actually export the addon-namespace constants (`ADDON_ID`, `AXES_GLOBAL_KEY`, `COLOR_FORMAT_GLOBAL_KEY`, `PARAM_KEY`, `TOOL_ID`, `VIRTUAL_MODULE_ID`) that `addon.mdx`'s "Exported constants" section claimed were importable but weren't. `TOOL_ID` added to the doc list.
+
+- cb161ec: Enable `import/consistent-type-specifier-style: ["error", "prefer-top-level"]` in `.oxlintrc.json` so mixed-syntax type imports (`import { type X, value }`) are caught at lint time and autofixed to the pure top-level form (`import type { X }` / `import { value }`). Sweep over the existing codebase via `oxlint --fix`.
+
+  Mixed-syntax type imports erase the type binding under tsc, but the bundler still sees a side-effect import — esbuild in particular can drag the entire upstream bundle just because the import statement exists. Pure top-level form is fully erased.
+
+- c5d9089: Five small helper consolidations across the addon, blocks, switcher, and core, each previously duplicated across two or more sites.
+
+  - New `@unpunnyfuns/swatchbook-core/style-element` subpath exporting `ensureStyleElement(id, text)` + `SWATCHBOOK_STYLE_ELEMENT_ID`. Replaces three hand-rolled `<style>`-injection blocks in the addon preview and blocks' internal `useProject`.
+  - New `presetTuple` export from `@unpunnyfuns/swatchbook-switcher` — the addon's manager toolbar now imports the helper instead of carrying a byte-identical copy.
+  - `cells.ts` reuses the existing `value-key.ts` helper instead of re-deriving the same `JSON.stringify($value)` comparison.
+  - `ColorFormat` runtime validation in the addon manager now reads through `COLOR_FORMATS.includes()` from `@unpunnyfuns/swatchbook-blocks`, matching the preview path and dropping a hand-maintained five-way `||` chain. The `ColorFormat` type itself re-exports from blocks.
+  - The 9-field `INIT_EVENT` payload subset is built once via a `pickInitFields` helper, shared between the live broadcast and the HMR re-emit.
+
+- 87e4c44: **Breaking — blocks public surface:** vocabulary rename from "permutation" to "theme", aligning blocks with the rest of the swatchbook surface (MCP renamed in #862; the addon channel/panel already uses "theme"; the docs-site switcher already labels its dropdown "Theme").
+
+  - `PermutationContext` → `ThemeContext`
+  - `useActivePermutation()` → `useActiveTheme()`
+  - `ProjectSnapshot.activePermutation` → `ProjectSnapshot.activeTheme`
+  - `ProjectData.permutationNameForTuple` → `themeNameForTuple`
+
+  The addon's preview decorator follows: its internal `matchPermutationName` helper is now `matchThemeName`, and it provides the snapshot via `ThemeContext.Provider value={themeName}` plus `snapshot.activeTheme`. Story-parameter shape (`parameters.swatchbook.permutation`) and the legacy `swatchbookTheme` global are unchanged — those are author-facing inputs covered by their own deprecation path.
+
+  Documentation: the "Consuming the active permutation" guide moves to `consuming-the-active-theme.mdx`; in-doc references update in lockstep.
+
+  Pre-1.0 minor bump. Consumers update their imports + field reads; type errors at every callsite make the rename mechanically straightforward.
+
+  Closes #896
+
+- 6e1d2d7: Migrate the manager toolbar off three components deprecated in Storybook 10 and slated for removal in Storybook 11:
+
+  - `IconButton` → `Button` (loading-state button) and `ToggleButton` (active disclosure button, with `pressed={open}` replacing the deprecated `active` prop).
+  - `WithTooltipPure` → `WithTooltip` (controlled `visible` + `onVisibleChange` props still work the same).
+  - `ariaLabel` (about to become mandatory) is now supplied on both buttons. The visible-on-hover tooltip moves from the legacy HTML `title` attribute to the new `tooltip` prop.
+
+  No behaviour change — the toolbar pill, popover open/close mechanics, screen-reader semantics, and outside-click handling all preserved.
+
+- 55ee410: Four contained test-hygiene items bundled into one PR:
+
+  **Switcher `.browser.test.tsx` infix** (#896 #14) — `packages/switcher/test/theme-switcher.test.tsx` → `theme-switcher.browser.test.tsx`. Matches the convention established by #877 (`.browser.` opt-in for tests requiring the browser harness). Switcher's `include: ['test/**/*.test.{ts,tsx}']` glob continues to match.
+
+  **`diagnostics.test.ts` split** (#896 #15) — `packages/core/test/diagnostics.test.ts` had two top-level `describe` blocks (`BufferedLogger` + `toDiagnostics`), a hard "one describe per file" rule violation #879's split sweep missed. Now: `diagnostics-buffered-logger.test.ts` + `diagnostics-to-diagnostics.test.ts`.
+
+  **Cosmetic describes dropped** from addon tests:
+
+  - `packages/addon/test/preset.test.ts` — `describe('renderTokenTypes', …)` wrapper removed
+  - `packages/addon/test/virtual-plugin.test.ts` — `describe('collectWatchPaths', …)` wrapper removed
+  - `packages/addon/test/integration-side-effects.test.ts` — `describe('integration-side-effects aggregate virtual module', …)` wrapper removed
+
+  Each file already conveys the subject; the wrapping describe added nothing.
+
+  **Ghost-field test fixtures cleaned** (#896 #19):
+
+  - `packages/addon/test/preset.test.ts` — `fakeProject()` stub dropped `permutations: []`, `permutationsResolved: {}`, `graph: {}` (removed from `Project` shape post-cartesian-drop; tests pass because callers don't read these, but the fakes were bit-rotted documentation). Added the real fields the stub was missing (`defaultTokens`, `cwd`, `chrome`).
+  - `packages/addon/test/virtual-plugin.test.ts` — same fields dropped from local `project()` helper.
+  - `packages/addon/test/virtual-stub.ts` — `permutations`, `defaultPermutation`, `permutationsResolved` exports dropped; the `cells` object now declares its tokens inline rather than indirecting through the removed `permutationsResolved`.
+
+  **Clean-config smoke test** (#896 #18) — new `packages/core/test/clean-config-smoke.test.ts` pins the meta-invariant that loading the reference fixture with no edge-case config produces zero diagnostics. Every diagnostic group has positive-fire coverage elsewhere; nothing was asserting the silence on the happy path. Catches the case where an upstream Terrazzo bump starts spitting warns / info without anyone noticing.
+
+- 062276b: Adds `@unpunnyfuns/swatchbook-core/themes` subpath consolidating the "themes-a-project-surfaces" enumeration + the `tupleToName` join. Eliminates duplicated `enumerateThemeNames` / `buildTupleByName` / inline `tupleToName` impls across 4 packages.
+
+  **New exports** (subpath: `/themes`):
+
+  - `tupleToName(axes, tuple)` — synthesizes the canonical theme name (`axisValues.join(' · ')` in declared axis order) for the `data-<prefix>-theme` attribute. Same form `Project.cells` keys against.
+  - `enumerateThemes({ axes, presets, defaultTuple })` — iterates default tuple + per-axis non-default singletons + presets, deduped by name. Same order the loader produces.
+  - `ThemeEntry`, `ThemeEnumAxis`, `ThemeEnumPreset` types.
+
+  Pure functions, structural input types — no `Project` import, no Terrazzo parser, no Node deps.
+
+  **Consumer migrations:**
+
+  - `packages/addon/src/preset.ts` — `enumerateThemeNames` (16-line local impl with its own inline `tupleToName`) replaced with `enumerateThemes(project).map(t => t.name)`.
+  - `packages/addon/src/preview.tsx` — `matchPermutationName` now wraps `tupleToName(virtualAxes, tuple)` instead of inlining the join.
+  - `packages/blocks/src/internal/use-project.ts` — local `tupleToName` helper deleted; consumers import from core subpath.
+  - `packages/mcp/src/server.ts` — local `buildTupleByName` (20-line preset-fill impl) and `tupleToName` (5-line) deleted; `buildTupleByName` now wraps `enumerateThemes(project)`.
+
+  The internal `permutationID` in `core/types.ts` stays (still used by the loader's per-tuple keys via `Object.values(input).join(…)`); it's a slightly different signature (joins `Object.values` not `axes.map`) and remains an internal detail. The new `tupleToName(axes, tuple)` is the consumer-facing replacement that's explicit about axis ordering.
+
+  Sixth core subpath (joining `/fuzzy`, `/resolve-at`, `/css-var`, `/data-attr`, `/snapshot-for-wire`, `/match-path`). Pre-1.0 minor bump on core (new public subpath); patch on consumer packages.
+
+- 0332e75: `addon/channel-types.ts` now type-only-imports `Axis`, `Preset`, `Diagnostic`, `DiagnosticSeverity`, `AxisVarianceResult`, and `AxisVariancePerAxis` from `@unpunnyfuns/swatchbook-core` instead of re-declaring them verbatim. Closes the "manager bundle can't import core" excuse for the seven types where it never applied — type-only imports erase before the bundler sees them under `verbatimModuleSyntax`. Storybook manager bundle build verified unchanged.
+
+  `VirtualToken`, `VirtualCells`, `VirtualJointOverride/s` stay declared locally because they carry the wire-narrowed token shape, not core's `TokenMap` (which leaks Terrazzo internals via `TokenNormalized`).
+
+  Closes #891
+
+- Updated dependencies [4bc19e8]
+- Updated dependencies [f82eb5c]
+- Updated dependencies [c69dec1]
+- Updated dependencies [76ba600]
+- Updated dependencies [6188fa8]
+- Updated dependencies [3302705]
+- Updated dependencies [cb161ec]
+- Updated dependencies [c5d9089]
+- Updated dependencies [975944d]
+- Updated dependencies [87e4c44]
+- Updated dependencies [4146d9f]
+- Updated dependencies [1c56c88]
+- Updated dependencies [55ee410]
+- Updated dependencies [062276b]
+  - @unpunnyfuns/swatchbook-core@0.57.0
+  - @unpunnyfuns/swatchbook-switcher@0.57.0
+  - @unpunnyfuns/swatchbook-blocks@0.57.0
+
 ## 0.56.0
 
 ### Minor Changes

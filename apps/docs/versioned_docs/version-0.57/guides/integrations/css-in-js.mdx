@@ -1,0 +1,106 @@
+---
+id: css-in-js
+title: CSS-in-JS
+sidebar_position: 3
+---
+
+# CSS-in-JS
+
+`@unpunnyfuns/swatchbook-integrations/css-in-js` exposes a typed JS accessor whose leaves are `var(--<cssVarPrefix>-*)` string references. Drop-in for any `ThemeProvider` that passes its theme through as-is — emotion, styled-components, or a hand-rolled provider. The toolbar flips every value at once via CSS cascade.
+
+## Install
+
+```bash
+npm install -D @unpunnyfuns/swatchbook-integrations
+```
+
+No additional Vite plugins — the virtual module is plain JavaScript.
+
+## Configure
+
+```ts title=".storybook/main.ts"
+import cssInJsIntegration from '@unpunnyfuns/swatchbook-integrations/css-in-js';
+
+export default defineMain({
+  addons: [
+    {
+      name: '@unpunnyfuns/swatchbook-addon',
+      options: {
+        configPath: '../swatchbook.config.ts',
+        integrations: [cssInJsIntegration()],
+      },
+    },
+  ],
+});
+```
+
+Import in any story or component:
+
+```ts
+import { theme, color, space, radius, shadow } from 'virtual:swatchbook/theme';
+```
+
+## What gets generated
+
+Per-group exports plus an aggregate `theme` constant, one leaf per DTCG path:
+
+```js
+export const color = {
+  "accent": {
+    "bg": "var(--sb-color-accent-bg)",
+    "bgHover": "var(--sb-color-accent-bg-hover)",
+    "fg": "var(--sb-color-accent-fg)"
+  },
+  "surface": {
+    "default": "var(--sb-color-surface-default)",
+  },
+};
+export const space = {
+  "md": "var(--sb-space-md)",
+};
+
+export const theme = { color, space, radius, shadow, typography };
+```
+
+Values are stable across tuples. The toolbar flipping `data-sb-mode="Dark"` doesn't change any value in this module — it changes what `--sb-color-surface-default` resolves to at the CSS level. One theme object, any number of tuples, runtime switching via cascade.
+
+## Usage
+
+With a provider (emotion / styled-components):
+
+```tsx title=".storybook/preview.tsx"
+import { ThemeProvider } from '@emotion/react';
+import { theme } from 'virtual:swatchbook/theme';
+
+export default {
+  decorators: [
+    (Story) => <ThemeProvider theme={theme}><Story /></ThemeProvider>,
+  ],
+};
+```
+
+```ts
+const Button = styled.button`
+  background: ${(props) => props.theme.color.accent.bg};
+  padding: ${(props) => props.theme.space.md};
+`;
+```
+
+Or direct references, no provider:
+
+```tsx
+import { color, space } from 'virtual:swatchbook/theme';
+
+<div style={{ background: color.surface.raised, padding: space.lg }} />
+```
+
+## Naming
+
+- Dashed DTCG segments (`color.accent.bg-hover`) render as `color.accent.bgHover`. CamelCased for valid JS identifiers without bracket notation.
+- Numeric segments render bare (`color.palette.neutral.500` → `color.palette.neutral[500]`). Leading-zero numerics (`size.050`) stay quoted because bare `050` is an octal under strict mode.
+
+## What this doesn't do
+
+- Doesn't produce a resolved-value theme. Leaves are `var()` references, not literal colours. For libraries that derive dependent slots at factory time (MUI's `createTheme` computing `palette.primary.light` / `contrastText`), you need literal values — run [Terrazzo](https://terrazzo.app/)'s CLI with `@terrazzo/plugin-js`.
+- Doesn't handle composite tokens structurally. A DTCG `typography` composite lives as a single `var()` reference, not as `{ fontFamily, fontSize, … }`. If your library needs the sub-fields, same caveat.
+- Doesn't auto-inject a `ThemeProvider`. You wire it yourself.
