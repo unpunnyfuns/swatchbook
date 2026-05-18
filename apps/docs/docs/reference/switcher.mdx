@@ -26,14 +26,14 @@ The component is a *menu*, not a *button*. It draws no trigger of its own — yo
 
 ## Mount example
 
-Minimal React usage. Pull `axes` / `presets` / `themes` / `defaults` from `@unpunnyfuns/swatchbook-core`'s `loadProject` output (or any other source that produces matching shapes); track the active tuple yourself.
+Minimal React usage. Pull `axes` / `presets` / `defaults` from `@unpunnyfuns/swatchbook-core`'s `loadProject` output (or any other source that produces matching shapes); track the active tuple yourself.
 
 ```tsx title="src/components/MySwitcher.tsx"
 import { ThemeSwitcher, type SwitcherPreset } from '@unpunnyfuns/swatchbook-switcher';
 import '@unpunnyfuns/swatchbook-switcher/style.css';
 import { useState, useCallback } from 'react';
 
-export function MySwitcher({ axes, presets, themes, defaults }) {
+export function MySwitcher({ axes, presets, defaults }) {
   const [activeTuple, setActiveTuple] = useState(defaults);
   const [lastApplied, setLastApplied] = useState<string | null>(null);
 
@@ -56,7 +56,6 @@ export function MySwitcher({ axes, presets, themes, defaults }) {
     <ThemeSwitcher
       axes={axes}
       presets={presets}
-      themes={themes}
       activeTuple={activeTuple}
       defaults={defaults}
       lastApplied={lastApplied}
