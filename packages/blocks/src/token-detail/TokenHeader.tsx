@@ -9,12 +9,12 @@ export interface TokenHeaderProps {
 }
 
 export function TokenHeader({ path, heading }: TokenHeaderProps): ReactElement {
-  const { token, cssVar, activePermutation } = useTokenDetailData(path);
+  const { token, cssVar, activeTheme } = useTokenDetailData(path);
 
   if (!token) {
     return (
       <div className="sb-token-detail__missing">
-        Token <code>{path}</code> not found in theme <strong>{activePermutation}</strong>.
+        Token <code>{path}</code> not found in theme <strong>{activeTheme}</strong>.
       </div>
     );
   }

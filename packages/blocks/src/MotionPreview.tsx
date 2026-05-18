@@ -46,7 +46,7 @@ function formatSpec(row: Row): string {
 
 export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactElement {
   const project = useProject();
-  const { resolved, activePermutation, cssVarPrefix } = project;
+  const { resolved, activeTheme, cssVarPrefix } = project;
   const [speed, setSpeed] = useState<MotionSpeed>(1);
   const [run, setRun] = useState(0);
   const reducedMotion = usePrefersReducedMotion();
@@ -79,18 +79,18 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
 
   const captionText =
     caption ??
-    `${rows.length} motion token${rows.length === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activePermutation}`;
+    `${rows.length} motion token${rows.length === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activePermutation)}>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
         <div className="sb-block__empty">No motion tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activePermutation)}>
+    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       <div className="sb-motion-preview__controls">
         <span className="sb-motion-preview__control-label">Speed</span>

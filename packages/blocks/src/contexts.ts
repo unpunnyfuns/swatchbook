@@ -87,7 +87,7 @@ export interface ProjectSnapshot {
   /** Axis names suppressed via `config.disabledAxes` — pinned to their defaults, hidden from the toolbar. */
   disabledAxes: readonly string[];
   presets: readonly VirtualPresetShape[];
-  activePermutation: string;
+  activeTheme: string;
   activeAxes: Readonly<Record<string, string>>;
   cssVarPrefix: string;
   diagnostics: readonly VirtualDiagnosticShape[];
@@ -154,15 +154,15 @@ export function useOptionalSwatchbookData(): ProjectSnapshot | null {
  * `useGlobals` so the same hook works in autodocs / MDX renders where the
  * preview-hooks context isn't available.
  */
-export const PermutationContext = createContext<string>('');
+export const ThemeContext = createContext<string>('');
 
-export function useActivePermutation(): string {
-  return useContext(PermutationContext);
+export function useActiveTheme(): string {
+  return useContext(ThemeContext);
 }
 
 /**
  * Active axis tuple for the current story/docs render — `Record<axisName,
- * contextName>`. Derived from the same input as {@link PermutationContext}; split
+ * contextName>`. Derived from the same input as {@link ThemeContext}; split
  * out so consumers needing per-axis info (toolbar, panel, tuple-aware
  * blocks) don't have to reparse the composed permutation ID.
  */

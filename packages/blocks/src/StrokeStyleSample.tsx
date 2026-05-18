@@ -54,7 +54,7 @@ export function StrokeStyleSample({
   sortDir = 'asc',
 }: StrokeStyleSampleProps): ReactElement {
   const project = useProject();
-  const { resolved, activePermutation, cssVarPrefix } = project;
+  const { resolved, activeTheme, cssVarPrefix } = project;
 
   const rows = useMemo<Row[]>(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
@@ -71,18 +71,18 @@ export function StrokeStyleSample({
 
   const captionText =
     caption ??
-    `${rows.length} strokeStyle token${rows.length === 1 ? '' : 's'}${filter && filter !== 'strokeStyle' ? ` matching \`${filter}\`` : ''} · ${activePermutation}`;
+    `${rows.length} strokeStyle token${rows.length === 1 ? '' : 's'}${filter && filter !== 'strokeStyle' ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activePermutation)}>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
         <div className="sb-block__empty">No strokeStyle tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activePermutation)}>
+    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} className="sb-stroke-style-sample__row">

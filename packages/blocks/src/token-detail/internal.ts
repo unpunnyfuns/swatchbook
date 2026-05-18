@@ -23,7 +23,7 @@ export interface DetailToken {
 export interface TokenDetailData {
   token: DetailToken | undefined;
   cssVar: string;
-  activePermutation: string;
+  activeTheme: string;
   activeAxes: Record<string, string>;
   axes: readonly Axis[];
   resolved: Record<string, DetailToken>;
@@ -42,32 +42,32 @@ export interface TokenDetailData {
    * the `data-<prefix>-theme` attribute for each cell without an
    * `Array.find` scan per render cell.
    */
-  permutationNameForTuple: (tuple: Record<string, string>) => string | undefined;
+  themeNameForTuple: (tuple: Record<string, string>) => string | undefined;
 }
 
 export function useTokenDetailData(path: string): TokenDetailData {
   const project = useProject();
   const {
-    activePermutation,
+    activeTheme,
     activeAxes,
     axes,
     resolved,
     cssVarPrefix,
     varianceByPath,
     resolveAt,
-    permutationNameForTuple,
+    themeNameForTuple,
   } = project;
   const typedResolved = resolved as Record<string, DetailToken>;
   return {
     token: typedResolved[path],
     cssVar: resolveCssVar(path, project),
-    activePermutation,
+    activeTheme,
     activeAxes,
     axes,
     resolved: typedResolved,
     cssVarPrefix,
     varianceByPath,
     resolveAt: resolveAt as (tuple: Record<string, string>) => Record<string, DetailToken>,
-    permutationNameForTuple,
+    themeNameForTuple,
   };
 }

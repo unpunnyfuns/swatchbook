@@ -60,7 +60,7 @@ export function TokenTable({
   onSelect,
 }: TokenTableProps): ReactElement {
   const project = useProject();
-  const { resolved, activePermutation, cssVarPrefix } = project;
+  const { resolved, activeTheme, cssVarPrefix } = project;
   const colorFormat = useColorFormat();
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -105,18 +105,18 @@ export function TokenTable({
     caption ??
     `${rows.length} token${rows.length === 1 ? '' : 's'}${
       filter ? ` matching \`${filter}\`` : ''
-    }${type ? ` · $type=${type}` : ''}${matchSuffix} · ${activePermutation}`;
+    }${type ? ` · $type=${type}` : ''}${matchSuffix} · ${activeTheme}`;
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activePermutation)}>
+      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
         <div className="sb-block__empty">No tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activePermutation)}>
+    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
       {searchable && (
         <div className="sb-token-table__search">
           <input

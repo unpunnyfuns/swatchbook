@@ -38,7 +38,7 @@ function makeSnapshot(): ProjectSnapshot {
     },
     jointOverrides: [],
     defaultTuple: { mode: 'light' },
-    activePermutation: 'Light',
+    activeTheme: 'Light',
     activeAxes: { mode: 'light' },
     cssVarPrefix: 'sb',
     diagnostics: [],

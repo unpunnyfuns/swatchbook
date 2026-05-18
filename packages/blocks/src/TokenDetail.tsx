@@ -25,15 +25,15 @@ export interface TokenDetailProps {
 }
 
 export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
-  const { token, cssVar, activePermutation, cssVarPrefix } = useTokenDetailData(path);
+  const { token, cssVar, activeTheme, cssVarPrefix } = useTokenDetailData(path);
   const colorFormat = useColorFormat();
-  const theme = themeAttrs(cssVarPrefix, activePermutation);
+  const theme = themeAttrs(cssVarPrefix, activeTheme);
 
   if (!token) {
     return (
       <div {...theme} className={cx(theme['className'], 'sb-token-detail')}>
         <div className="sb-token-detail__missing">
-          Token <code>{path}</code> not found in theme <strong>{activePermutation}</strong>.
+          Token <code>{path}</code> not found in theme <strong>{activeTheme}</strong>.
         </div>
       </div>
     );
@@ -49,7 +49,7 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
     <div {...theme} className={cx(theme['className'], 'sb-token-detail')}>
       <TokenHeader path={path} {...(heading !== undefined && { heading })} />
 
-      <div className="sb-token-detail__section-header">Resolved value · {activePermutation}</div>
+      <div className="sb-token-detail__section-header">Resolved value · {activeTheme}</div>
       <CompositePreview path={path} />
       <CompositeBreakdown path={path} />
       <div className="sb-token-detail__chain">

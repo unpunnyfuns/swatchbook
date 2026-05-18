@@ -26,7 +26,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
     cssVarPrefix,
     varianceByPath,
     resolveAt,
-    permutationNameForTuple,
+    themeNameForTuple,
   } = useTokenDetailData(path);
   const colorFormat = useColorFormat();
   const tokenType = token?.$type;
@@ -86,7 +86,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
     if (!axis) return <></>;
     const contextValues = axis.contexts.map((ctx) => {
       const target = { ...activeAxes, [axisName]: ctx };
-      const themeName = permutationNameForTuple(target) ?? '';
+      const themeName = themeNameForTuple(target) ?? '';
       return {
         ctx,
         themeName,
@@ -166,7 +166,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                   [rowAxis.name]: row,
                   [colAxis.name]: col,
                 };
-                const name = permutationNameForTuple(target);
+                const name = themeNameForTuple(target);
                 const value = formatFn(resolveAt(target)[path] as DetailToken | undefined);
                 return (
                   <td
