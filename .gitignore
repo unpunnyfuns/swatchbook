@@ -37,3 +37,6 @@ npm-debug.log*
 pnpm-debug.log*
 .vitest-attachments/
 __screenshots__/
+
+# Superpowers local working artifacts (specs/plans not meant to ship)
+docs/superpowers/

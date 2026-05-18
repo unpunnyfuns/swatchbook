@@ -163,7 +163,7 @@ export function MotionSample({ path, speed = 1, runKey = 0 }: MotionSampleProps)
   if (reducedMotion) {
     return (
       <div style={styles.reducedMotion}>
-        Animation suppressed by `prefers-reduced-motion: reduce`.
+        Animation suppressed by <code>prefers-reduced-motion: reduce</code>.
       </div>
     );
   }
