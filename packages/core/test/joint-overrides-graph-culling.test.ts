@@ -1,35 +1,22 @@
 /**
- * End-to-end correctness for the alias-graph-culled probe.
+ * End-to-end correctness for the alias-graph-culled probe against
+ * the reference fixture's canonical joint case.
  *
- * `loadProject` pre-builds an `AliasGraph` from the resolver source +
- * baseline tokens and threads it into `probeJointOverrides`. The
- * probe skips axis combinations the graph reports as orthogonal.
- * These tests pin that the optimization preserves every joint
- * override the brute-force probe found:
+ * `probeJointOverrides` builds an `AliasGraph` internally from the
+ * resolver source + baseline tokens and skips axis combinations the
+ * graph reports as orthogonal. This test pins that the optimization
+ * preserves `color.accent.fg`'s joint divergence at `{mode: Dark,
+ * brand: Brand A}` — the canonical resolver-only-correctness witness.
  *
- *   - Stress fixture: 7 baseline-equal-collision divergences (the
- *     Phase-0 pinning baseline).
- *   - Reference fixture: `color.accent.fg`'s joint case at
- *     `{mode: Dark, brand: Brand A}` (the canonical resolver-only-
- *     correctness witness).
+ * The baseline-equal-collision case is covered separately by the
+ * `connectedAxes detects direct path overlap` test in
+ * `alias-graph.test.ts` — two modifiers writing the same path,
+ * regardless of value, must classify as connected.
  */
 import { describe, expect, it } from 'vitest';
-import { loadProject } from '#/load.ts';
 import { loadWithPrefix } from './_helpers.ts';
 
 describe('graph-culled probe end-to-end correctness', () => {
-  it('preserves all 7 baseline-equal-collision divergences on the stress fixture', async () => {
-    const project = await loadProject(
-      { resolver: 'resolver.json' },
-      'bench/fixtures/stress',
-    );
-    expect(project.jointOverrides.length).toBe(7);
-    const target = project.jointOverrides.find(
-      ([key]) => key === 'forced:forced|mode:dark',
-    );
-    expect(target?.[1].tokens['dimension.t064']).toBeDefined();
-  });
-
   it('preserves accent.fg joint divergence on the reference fixture', async () => {
     const project = await loadWithPrefix(undefined);
     const found = project.jointOverrides.some(([, override]) =>
