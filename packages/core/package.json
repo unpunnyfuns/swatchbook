@@ -51,6 +51,10 @@
       "types": "./dist/snapshot-for-wire.d.mts",
       "import": "./dist/snapshot-for-wire.mjs"
     },
+    "./match-path": {
+      "types": "./dist/match-path.d.mts",
+      "import": "./dist/match-path.mjs"
+    },
     "./style-element": {
       "types": "./dist/style-element.d.mts",
       "import": "./dist/style-element.mjs"
@@ -64,7 +68,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsdown src/index.ts src/fuzzy.ts src/resolve-at.ts src/css-var.ts src/data-attr.ts src/snapshot-for-wire.ts src/style-element.ts --format esm --dts --clean --sourcemap",
+    "build": "tsdown src/index.ts src/fuzzy.ts src/resolve-at.ts src/css-var.ts src/data-attr.ts src/snapshot-for-wire.ts src/match-path.ts src/style-element.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
