@@ -30,15 +30,15 @@ import { ColorPalette, ColorTable, TokenTable } from '@unpunnyfuns/swatchbook-bl
 
 ## Primitive palette
 
-<ColorPalette filter="color.palette.*" />
+<ColorPalette filter="color.palette.**" />
 
 ## Semantic slots
 
-<ColorTable filter="color.*" />
+<ColorTable filter="color.**" />
 
 ## Everything as a table
 
-<TokenTable filter="color.*" type="color" />
+<TokenTable filter="color.**" type="color" />
 ```
 
 `ColorTable` groups variants under their base path — `color.accent.bg` + `color.accent.bg-hover` collapse to one `accent.bg` row with a `default` / `hover` pill selector, and each row expands inline to show all variants side-by-side. `<TokenTable>` is the flat view for comparison. Visit `Docs / Colors`; swatches and values update as you flip the toolbar.
@@ -64,7 +64,7 @@ import { Diagnostics, TokenNavigator, TokenTable } from '@unpunnyfuns/swatchbook
 <TokenTable />
 ```
 
-`Diagnostics` auto-collapses on clean loads, so it's safe at the top of every page without adding noise. Scope the tree or table with a prop: `<TokenNavigator root="color" />`, `<TokenTable filter="space.*" />`.
+`Diagnostics` auto-collapses on clean loads, so it's safe at the top of every page without adding noise. Scope the tree or table with a prop: `<TokenNavigator root="color" />`, `<TokenTable filter="space.**" />`.
 
 ## Blocks at a glance
 

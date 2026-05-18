@@ -25,9 +25,9 @@ Inside Storybook, register `@unpunnyfuns/swatchbook-addon` alongside these block
 ```tsx
 import { ColorPalette, ColorTable, TokenTable, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
 
-<ColorPalette filter="color.*" />
-<ColorTable filter="color.*" />
-<TokenTable filter="size.*" type="dimension" />
+<ColorPalette filter="color.**" />
+<ColorTable filter="color.**" />
+<TokenTable filter="size.**" type="dimension" />
 <TokenDetail path="color.accent.bg" />
 ```
 
@@ -72,6 +72,6 @@ All blocks subscribe to Storybook's `globalsUpdated` channel event and re-render
 ## Do / don't
 
 - ✅ Use blocks in MDX `*.mdx` docs pages for rich token references.
-- ✅ Filter aggressively — `<TokenTable filter="color.*" type="color" />` beats unfiltered tables for browsability.
+- ✅ Filter aggressively — `<TokenTable filter="color.**" type="color" />` beats unfiltered tables for browsability.
 - ✅ Use blocks outside Storybook by wrapping the tree in `SwatchbookProvider` and passing a `ProjectSnapshot`. The blocks themselves are framework-free.
 - ✅ Either `@unpunnyfuns/swatchbook-blocks` or `@unpunnyfuns/swatchbook-addon` works as an import source — the addon re-exports the blocks surface so you don't have to pin a second dependency in consumer projects that already have the addon.

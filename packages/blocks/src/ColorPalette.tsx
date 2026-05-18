@@ -4,7 +4,8 @@ import './ColorPalette.css';
 import { useColorFormat } from '#/contexts.ts';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { type SortBy, type SortDir, sortTokens } from '#/internal/sort-tokens.ts';
-import { globMatch, resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface ColorPaletteProps {
   /**
@@ -76,7 +77,7 @@ export function ColorPalette({
   const groups = useMemo(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
       if (token.$type !== 'color') return false;
-      return globMatch(path, filter);
+      return matchPath(path, filter);
     });
     const entries = sortTokens(filtered, { by: sortBy, dir: sortDir });
 

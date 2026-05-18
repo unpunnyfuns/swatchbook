@@ -58,13 +58,15 @@ The separate file path (`configPath`) is useful when the same config is consumed
 
 ## Picking a theming input
 
+`Config` is a discriminated union — `ResolverConfig | LayeredConfig | PlainConfig`. TypeScript narrows on which load-strategy field is present, and invalid combinations (like `{ resolver, axes }` or `{ axes }` without `tokens`) are compile-time errors. The runtime loader still checks the same invariants as defense-in-depth for JS callers.
+
 Exactly three shapes are legal:
 
-- **Resolver** — `resolver: 'path/to/resolver.json'`. The DTCG-spec-native path; the file declares sets, modifiers, and resolutionOrder, and the modifiers become your axes. Recommended.
-- **Layered** — `axes: [...]` + `tokens: [...]`. For projects without a resolver document. You declare axes inline; each context names overlay files that layer onto the base `tokens`.
-- **Plain parse** — `tokens: [...]` alone. Single synthetic `theme` axis; every token loaded as one tuple. Useful for smoke-testing a token set before adopting a resolver.
+- **Resolver** (`ResolverConfig`) — `resolver: 'path/to/resolver.json'`. The DTCG-spec-native path; the file declares sets, modifiers, and resolutionOrder, and the modifiers become your axes. Recommended.
+- **Layered** (`LayeredConfig`) — `axes: [...]` + `tokens: [...]`. For projects without a resolver document. You declare axes inline; each context names overlay files that layer onto the base `tokens`.
+- **Plain parse** (`PlainConfig`) — `tokens: [...]` alone. Single synthetic `theme` axis; every token loaded as one tuple. Useful for smoke-testing a token set before adopting a resolver.
 
-Setting `resolver` and `axes` at the same time is an error. Setting none of the three (no `resolver`, no `axes`, no `tokens`) throws at load time.
+All three variants extend a shared base (`cssVarPrefix`, `presets`, `disabledAxes`, `chrome`, `cssOptions`, `listingOptions`, `terrazzoPlugins`, `default`, `outDir`). The discriminant is which load-strategy field is present.
 
 ## Fields
 
@@ -97,7 +99,7 @@ interface AxisConfig {
 
 `contexts` is a map from context name to an ordered list of overlay files (paths or globs, relative to the config's cwd). An empty array is legal — it means "no override," which is the baseline for an axis that introduces nothing by default (`Default: []`).
 
-Themes are every combination of contexts across all axes. Last write wins on duplicate token paths across base + overlays; overlay files listed later in `axes` win over earlier ones.
+The loader materializes a singleton tuple per `(axis, context)` cell — bounded by `Σ(axes × (contexts - 1))`, not the cartesian product. Joint divergences across multiple axes are detected via a targeted probe and patched in via `Project.jointOverrides`. Last write wins on duplicate token paths across base + overlays; overlay files listed later in `axes` win over earlier ones.
 
 ### `default?: Partial<Record<string, string>>`
 
