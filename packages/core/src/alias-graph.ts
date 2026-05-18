@@ -57,7 +57,10 @@ export function buildAliasGraph(input: BuildAliasGraphInput): AliasGraph {
   const { axes, resolverModifiers, baseline } = input;
 
   // 1. Walk resolver source modifiers → per-axis, per-context declared paths.
+  // Track which axes use `$extends` in any non-default context — those
+  // axes get a wildcard-connection marker (see step 4).
   const pathsByAxisContext = new Map<string, Map<string, Set<string>>>();
+  const wildcardAxes = new Set<string>();
   for (const axis of axes) {
     const modifier = resolverModifiers[axis.name];
     if (!modifier?.contexts) continue;
@@ -68,7 +71,11 @@ export function buildAliasGraph(input: BuildAliasGraphInput): AliasGraph {
       // its writes either.
       if (contextName === axis.default) continue;
       const paths = new Set<string>();
-      for (const node of groupNodes) collectPathsWithValue(node, '', paths);
+      let sawExtends = false;
+      for (const node of groupNodes) {
+        if (collectPathsWithValue(node, '', paths)) sawExtends = true;
+      }
+      if (sawExtends) wildcardAxes.add(axis.name);
       if (paths.size > 0) perContext.set(contextName, paths);
     }
     pathsByAxisContext.set(axis.name, perContext);
@@ -100,17 +107,28 @@ export function buildAliasGraph(input: BuildAliasGraphInput): AliasGraph {
     axisReach.set(axis.name, reach);
   }
 
-  // 4. Pair (A, B) connected iff axisReach[A] ∩ axisReach[B] non-empty.
+  // 4. Pair (A, B) connected iff axisReach[A] ∩ axisReach[B] non-empty,
+  //    OR either axis is wildcard-marked (used `$extends`). The wildcard
+  //    marker is the conservative bail for `$extends`: Terrazzo's
+  //    `loadResolver` leaves `$extends` directives un-flattened in
+  //    `resolver.source.modifiers`, so the literal walk above misses
+  //    inherited paths. Rather than silently mis-cull, we widen the
+  //    affected axes to "could be anywhere" and let the probe re-confirm.
   const connectedAxes = new Map<string, Set<string>>();
   for (const axis of axes) connectedAxes.set(axis.name, new Set());
   for (let i = 0; i < axes.length; i++) {
     const a = axes[i]!;
-    const reachA = axisReach.get(a.name);
-    if (!reachA || reachA.size === 0) continue;
     for (let j = i + 1; j < axes.length; j++) {
       const b = axes[j]!;
+      const wildcard = wildcardAxes.has(a.name) || wildcardAxes.has(b.name);
+      if (wildcard) {
+        connectedAxes.get(a.name)!.add(b.name);
+        connectedAxes.get(b.name)!.add(a.name);
+        continue;
+      }
+      const reachA = axisReach.get(a.name);
       const reachB = axisReach.get(b.name);
-      if (!reachB || reachB.size === 0) continue;
+      if (!reachA || !reachB || reachA.size === 0 || reachB.size === 0) continue;
       if (setsIntersect(reachA, reachB)) {
         connectedAxes.get(a.name)!.add(b.name);
         connectedAxes.get(b.name)!.add(a.name);
@@ -156,18 +174,28 @@ export function isAxisComboConnected(graph: AliasGraph, combo: readonly Axis[]):
  * `$value` is a token leaf; its absolute path is `prefix` joined with
  * the keys we descended through. Skip DTCG meta keys (`$type`,
  * `$description`, `$extensions`, `$defs`) and the `$value` itself.
+ *
+ * Returns `true` if any `$extends` directive was encountered during
+ * the walk. Terrazzo's `loadResolver` leaves these un-flattened in
+ * `resolver.source.modifiers` (flattening only runs lazily inside
+ * `apply()`), so the literal walk can't observe the inherited paths.
+ * The caller widens the affected axis to wildcard-connected rather
+ * than risk a silent mis-cull. See issue #971 for the active-expand
+ * follow-up.
  */
-function collectPathsWithValue(node: unknown, prefix: string, out: Set<string>): void {
-  if (!isPlainObject(node)) return;
+function collectPathsWithValue(node: unknown, prefix: string, out: Set<string>): boolean {
+  if (!isPlainObject(node)) return false;
   if ('$value' in node) {
     if (prefix) out.add(prefix);
-    return;
+    return false;
   }
+  let sawExtends = '$extends' in node;
   for (const [key, child] of Object.entries(node)) {
     if (key.startsWith('$')) continue;
     const childPath = prefix ? `${prefix}.${key}` : key;
-    collectPathsWithValue(child, childPath, out);
+    if (collectPathsWithValue(child, childPath, out)) sawExtends = true;
   }
+  return sawExtends;
 }
 
 /**

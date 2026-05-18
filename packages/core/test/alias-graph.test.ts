@@ -323,6 +323,79 @@ describe('alias-graph', () => {
     expect(isAxisComboConnected(graph, axes)).toBe(false);
   });
 
+  it('axis becomes wildcard-connected when its modifier uses $extends', () => {
+    // Terrazzo's `loadResolver` does NOT pre-flatten `$extends` in
+    // `resolver.source.modifiers[A].contexts[c]` — flattening only
+    // happens lazily during `apply()`. A literal walk of the context
+    // Groups therefore misses inherited paths. To avoid silently
+    // mis-culling a real joint divergence, an axis that uses
+    // `$extends` anywhere in its overlays is marked as connected to
+    // every other axis (conservative bail; gives up speedup but keeps
+    // correctness).
+    const axes: Axis[] = [
+      { name: 'mode', contexts: ['light', 'dark'], default: 'light', source: 'resolver' },
+      { name: 'brand', contexts: ['default', 'a'], default: 'default', source: 'resolver' },
+      {
+        name: 'density',
+        contexts: ['comfortable', 'compact'],
+        default: 'comfortable',
+        source: 'resolver',
+      },
+    ];
+    const resolverModifiers = {
+      mode: {
+        default: 'light',
+        contexts: {
+          light: [],
+          dark: [
+            {
+              color: {
+                $extends: '{base.dark-palette}',
+                $type: 'color',
+              },
+            },
+          ],
+        },
+      },
+      brand: {
+        default: 'default',
+        contexts: {
+          default: [],
+          a: [
+            {
+              spacing: {
+                $type: 'dimension',
+                md: { $value: { value: 16, unit: 'px' } },
+              },
+            },
+          ],
+        },
+      },
+      density: {
+        default: 'comfortable',
+        contexts: {
+          comfortable: [],
+          compact: [
+            {
+              radius: {
+                $type: 'dimension',
+                sm: { $value: { value: 4, unit: 'px' } },
+              },
+            },
+          ],
+        },
+      },
+    };
+    const graph = buildAliasGraph({ axes, resolverModifiers, baseline: {} });
+    // mode used $extends — wildcard-connect to brand and density even
+    // though brand+density write strictly disjoint paths.
+    expect(graph.connectedAxes.get('mode')?.has('brand')).toBe(true);
+    expect(graph.connectedAxes.get('mode')?.has('density')).toBe(true);
+    // brand vs density remain disconnected — neither used $extends and
+    // their paths don't overlap.
+    expect(graph.connectedAxes.get('brand')?.has('density') ?? false).toBe(false);
+  });
+
   it('isAxisComboConnected returns true trivially for arity < 2', () => {
     const graph = buildAliasGraph({ axes: [], resolverModifiers: {}, baseline: {} });
     expect(isAxisComboConnected(graph, [])).toBe(true);
