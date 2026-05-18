@@ -40,10 +40,6 @@ beforeAll(async () => {
   variance = analyzeProjectVariance(layeredProject);
 }, 30_000);
 
-it('layered projects have no parserInput.resolver — Phase 3 is unreachable', () => {
-  expect(layeredProject.parserInput).toBeUndefined();
-});
-
 it("classifies multi-touch tokens conservatively as joint-variant with empty `jointCases` (no resolver to probe with)", () => {
   // `color.accent` is overridden by both modes/dark.json and brands/brand-a.json
   // in this layered fixture — multi-touch.

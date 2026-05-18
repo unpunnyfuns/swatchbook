@@ -58,6 +58,10 @@
     "./style-element": {
       "types": "./dist/style-element.d.mts",
       "import": "./dist/style-element.mjs"
+    },
+    "./themes": {
+      "types": "./dist/themes.d.mts",
+      "import": "./dist/themes.mjs"
     }
   },
   "imports": {
@@ -68,7 +72,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsdown src/index.ts src/fuzzy.ts src/resolve-at.ts src/css-var.ts src/data-attr.ts src/snapshot-for-wire.ts src/match-path.ts src/style-element.ts --format esm --dts --clean --sourcemap",
+    "build": "tsdown src/index.ts src/fuzzy.ts src/resolve-at.ts src/css-var.ts src/data-attr.ts src/snapshot-for-wire.ts src/match-path.ts src/style-element.ts src/themes.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",

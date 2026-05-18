@@ -1,6 +1,7 @@
 import type { Project, TokenMap } from '@unpunnyfuns/swatchbook-core';
 import { emitAxisProjectedCss } from '@unpunnyfuns/swatchbook-core';
 import { fuzzyFilter, fuzzyMatches } from '@unpunnyfuns/swatchbook-core/fuzzy';
+import { enumerateThemes, tupleToName } from '@unpunnyfuns/swatchbook-core/themes';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { computeContrast } from '#/contrast.ts';
@@ -576,35 +577,10 @@ export function createServer(initial: Project): McpServer & {
  */
 function buildTupleByName(project: Project): Map<string, Record<string, string>> {
   const out = new Map<string, Record<string, string>>();
-  const defaultName = tupleToName(project.axes, project.defaultTuple);
-  out.set(defaultName, { ...project.defaultTuple });
-  for (const axis of project.axes) {
-    for (const ctx of axis.contexts) {
-      if (ctx === axis.default) continue;
-      const tuple = { ...project.defaultTuple, [axis.name]: ctx };
-      out.set(tupleToName(project.axes, tuple), tuple);
-    }
-  }
-  for (const preset of project.presets) {
-    const tuple: Record<string, string> = { ...project.defaultTuple };
-    for (const [axis, ctx] of Object.entries(preset.axes)) {
-      if (ctx !== undefined) tuple[axis] = ctx;
-    }
-    out.set(tupleToName(project.axes, tuple), tuple);
+  for (const { name, tuple } of enumerateThemes(project)) {
+    out.set(name, { ...tuple });
   }
   return out;
-}
-
-/**
- * Synthesize the tuple's stable name — axis values joined by ` · ` in
- * axis order. Inlined here rather than imported so MCP doesn't depend
- * on `permutationID` staying in core's public API.
- */
-function tupleToName(
-  axes: readonly { name: string; default: string }[],
-  tuple: Readonly<Record<string, string>>,
-): string {
-  return axes.map((a) => tuple[a.name] ?? a.default).join(' · ');
 }
 
 function stringifyValue(value: unknown): string {
