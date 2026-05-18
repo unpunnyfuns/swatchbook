@@ -102,19 +102,29 @@ interface OptionPillProps {
   title?: string;
   onClick(): void;
   trailing?: ReactElement | null;
+  /**
+   * Optional accessible-label prefix — disambiguates pills that share a
+   * label across sections (e.g. `Default` appears on both `mode` and
+   * `brand`). The full accessible name becomes `"<label> <ariaLabelSuffix>"`.
+   */
+  ariaLabelSuffix?: string;
 }
 
-function OptionPill({ label, active, title, onClick, trailing }: OptionPillProps): ReactElement {
+function OptionPill({
+  label,
+  active,
+  title,
+  onClick,
+  trailing,
+  ariaLabelSuffix,
+}: OptionPillProps): ReactElement {
   return (
     <button
       type="button"
       title={title}
+      aria-pressed={active}
+      aria-label={ariaLabelSuffix ? `${label} (${ariaLabelSuffix})` : undefined}
       onClick={onClick}
-      // Skip focus on mouse click so host permutations that paint a :focus
-      // border-color don't stick it on the previously-clicked pill.
-      // Keyboard tabbing still lands focus normally; only preventDefault
-      // on mousedown blocks the implicit focus-on-click behavior.
-      onMouseDown={(event) => event.preventDefault()}
       className={cx('sb-switcher__pill', active && 'sb-switcher__pill--active')}
     >
       {label}
@@ -174,16 +184,26 @@ interface AxisSectionProps {
 }
 
 function AxisSection({ axis, active, onSelect }: AxisSectionProps): ReactElement {
+  const label = displayLabelFor(axis);
   return (
     <div className="sb-switcher__axis-row">
-      <div className="sb-switcher__axis-label" title={axis.description}>
-        {displayLabelFor(axis)}
+      <div
+        className="sb-switcher__axis-label"
+        title={axis.description}
+        id={`sb-axis-${axis.name}-label`}
+      >
+        {label}
       </div>
-      <div className="sb-switcher__axis-pills">
+      <div
+        className="sb-switcher__axis-pills"
+        role="group"
+        aria-labelledby={`sb-axis-${axis.name}-label`}
+      >
         {axis.contexts.map((ctx) => (
           <OptionPill
             key={`${axis.name}/${ctx}`}
             label={ctx}
+            ariaLabelSuffix={label}
             active={ctx === active}
             onClick={() => onSelect(ctx)}
           />

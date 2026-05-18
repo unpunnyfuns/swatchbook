@@ -37,8 +37,8 @@ it('renders one pill per axis context and marks the active one', () => {
   render(<ThemeSwitcher {...props} />);
 
   const switcher = screen.getByTestId('swatchbook-switcher');
-  const lightPill = within(switcher).getByRole('button', { name: 'Light' });
-  const darkPill = within(switcher).getByRole('button', { name: 'Dark' });
+  const lightPill = within(switcher).getByRole('button', { name: 'Light (mode)' });
+  const darkPill = within(switcher).getByRole('button', { name: 'Dark (mode)' });
 
   expect(lightPill.className).toContain('sb-switcher__pill--active');
   expect(darkPill.className).not.toContain('sb-switcher__pill--active');
@@ -48,7 +48,7 @@ it('calls onAxisChange with the axis name and picked context', async () => {
   const props = baseProps();
   render(<ThemeSwitcher {...props} />);
 
-  await userEvent.click(screen.getByRole('button', { name: 'Dark' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Dark (mode)' }));
   expect(props.onAxisChange).toHaveBeenCalledWith('mode', 'Dark');
 });
 

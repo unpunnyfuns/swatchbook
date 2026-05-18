@@ -49,26 +49,35 @@ export function ColorFormatSelector({ active, onSelect }: ColorFormatSelectorPro
   return h(
     'div',
     null,
-    h('div', { className: 'sb-switcher__section-label' }, 'Color format'),
     h(
       'div',
-      { className: 'sb-switcher__section-body' },
-      ...COLOR_FORMAT_OPTIONS.map((opt) =>
-        h(
+      { className: 'sb-switcher__section-label', id: 'sb-color-format-label' },
+      'Color format',
+    ),
+    h(
+      'div',
+      {
+        className: 'sb-switcher__section-body',
+        role: 'group',
+        'aria-labelledby': 'sb-color-format-label',
+      },
+      ...COLOR_FORMAT_OPTIONS.map((opt) => {
+        const isActive = opt.id === active;
+        return h(
           'button',
           {
             key: `color-format/${opt.id}`,
             type: 'button',
+            'aria-pressed': isActive,
+            'aria-label': `${opt.label} color format`,
             onClick: () => onSelect(opt.id),
-            onMouseDown: (event: React.MouseEvent) => event.preventDefault(),
-            className:
-              opt.id === active
-                ? 'sb-switcher__pill sb-switcher__pill--active'
-                : 'sb-switcher__pill',
+            className: isActive
+              ? 'sb-switcher__pill sb-switcher__pill--active'
+              : 'sb-switcher__pill',
           },
           opt.label,
-        ),
-      ),
+        );
+      }),
     ),
   );
 }
