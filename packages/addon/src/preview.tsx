@@ -232,27 +232,24 @@ function normalizeTuple(partial: Readonly<Record<string, string>>): Record<strin
  *   4. virtual module default.
  */
 function resolveTuple(
-  globals: SwatchbookGlobals,
-  parameters: StoryParameters,
+  axesGlobal: SwatchbookGlobals[typeof AXES_GLOBAL_KEY],
+  paramSwatchbook: StoryParameters['swatchbook'],
 ): Record<string, string> {
-  const param = parameters.swatchbook;
-  const paramAxes = param?.axes;
+  const paramAxes = paramSwatchbook?.axes;
   if (paramAxes) {
     return normalizeTuple(paramAxes);
   }
-  if (param?.permutation) {
-    const hit = tupleForName(param.permutation);
+  if (paramSwatchbook?.permutation) {
+    const hit = tupleForName(paramSwatchbook.permutation);
     if (hit) return normalizeTuple(hit);
   }
-  const globalAxes = globals[AXES_GLOBAL_KEY];
-  if (globalAxes && typeof globalAxes === 'object') {
-    return normalizeTuple(globalAxes as Record<string, string>);
+  if (axesGlobal && typeof axesGlobal === 'object') {
+    return normalizeTuple(axesGlobal as Record<string, string>);
   }
   return defaultTuple();
 }
 
-function resolveColorFormat(globals: SwatchbookGlobals): ColorFormat {
-  const raw = globals[COLOR_FORMAT_GLOBAL_KEY];
+function resolveColorFormat(raw: SwatchbookGlobals[typeof COLOR_FORMAT_GLOBAL_KEY]): ColorFormat {
   if (typeof raw === 'string' && (COLOR_FORMATS as readonly string[]).includes(raw)) {
     return raw as ColorFormat;
   }
@@ -277,8 +274,14 @@ const previewResolveAt = buildResolveAt(
 const themedDecorator: Decorator = (Story, context) => {
   const globals = context.globals as SwatchbookGlobals;
   const parameters = context.parameters as StoryParameters;
-  const tuple = useMemo(() => resolveTuple(globals, parameters), [globals, parameters]);
-  const colorFormat = useMemo(() => resolveColorFormat(globals), [globals]);
+  const axesGlobal = globals[AXES_GLOBAL_KEY];
+  const colorFormatGlobal = globals[COLOR_FORMAT_GLOBAL_KEY];
+  const paramSwatchbook = parameters.swatchbook;
+  const tuple = useMemo(
+    () => resolveTuple(axesGlobal, paramSwatchbook),
+    [axesGlobal, paramSwatchbook],
+  );
+  const colorFormat = useMemo(() => resolveColorFormat(colorFormatGlobal), [colorFormatGlobal]);
   const themeName = useMemo(() => matchThemeName(tuple), [tuple]);
 
   useEffect(() => {
@@ -400,7 +403,7 @@ function installGlobalAxisApplier(): void {
   channel.on(INIT_REQUEST_EVENT, broadcastInit);
   const apply = (globals: SwatchbookGlobals): void => {
     ensureStylesheet(css, cssVarPrefix);
-    const tuple = resolveTuple(globals, {});
+    const tuple = resolveTuple(globals[AXES_GLOBAL_KEY], undefined);
     setRootAxes(tuple);
   };
   // Storybook fires `globalsUpdated`, `setGlobals`, and `updateGlobals`
@@ -415,7 +418,7 @@ function installGlobalAxisApplier(): void {
   let lastApplied = '';
   const onGlobals = (payload: { globals?: SwatchbookGlobals }): void => {
     if (!payload.globals) return;
-    const tuple = resolveTuple(payload.globals, {});
+    const tuple = resolveTuple(payload.globals[AXES_GLOBAL_KEY], undefined);
     const fingerprint = matchThemeName(tuple);
     if (fingerprint === lastApplied) return;
     lastApplied = fingerprint;

@@ -72,10 +72,11 @@ export function ColorPalette({
   sortDir = 'asc',
 }: ColorPaletteProps): ReactElement {
   const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
   const colorFormat = useColorFormat();
 
   const groups = useMemo(() => {
+    const projectFields = { listing, cssVarPrefix };
     const filtered = Object.entries(resolved).filter(([path, token]) => {
       if (token.$type !== 'color') return false;
       return matchPath(path, filter);
@@ -92,11 +93,11 @@ export function ColorPalette({
       const groupKey = segments.slice(0, effectiveGroupBy).join('.');
       const leaf = segments.slice(effectiveGroupBy).join('.') || segments.at(-1) || path;
       const list = bucket.get(groupKey) ?? [];
-      const formatted = resolveColorValue(path, token.$value, colorFormat, project);
+      const formatted = resolveColorValue(path, token.$value, colorFormat, projectFields);
       list.push({
         path,
         leaf,
-        cssVar: resolveCssVar(path, project),
+        cssVar: resolveCssVar(path, projectFields),
         value: formatted.value,
         outOfGamut: formatted.outOfGamut,
       });
@@ -106,7 +107,7 @@ export function ColorPalette({
     return [...bucket.entries()].toSorted(([a], [b]) =>
       a.localeCompare(b, undefined, { numeric: true }),
     );
-  }, [resolved, filter, groupBy, project, colorFormat, sortBy, sortDir]);
+  }, [resolved, listing, cssVarPrefix, filter, groupBy, colorFormat, sortBy, sortDir]);
 
   const totalCount = groups.reduce((acc, [, swatches]) => acc + swatches.length, 0);
   const captionText =

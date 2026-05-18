@@ -100,7 +100,7 @@ export function ColorTable({
   variants,
 }: ColorTableProps): ReactElement {
   const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
   const colorFormat = useColorFormat();
   const [query, setQuery] = useState('');
   const [selectedByBase, setSelectedByBase] = useState<Record<string, string>>({});
@@ -109,6 +109,7 @@ export function ColorTable({
   const defs = useMemo(() => buildVariantDefs(variants), [variants]);
 
   const groups = useMemo<Group[]>(() => {
+    const projectFields = { listing, cssVarPrefix };
     const filtered = Object.entries(resolved).filter(([path, token]) => {
       if (token.$type !== 'color') return false;
       return matchPath(path, filter);
@@ -118,7 +119,7 @@ export function ColorTable({
     const groupMap = new Map<string, { base: string; variants: Variant[] }>();
     for (const [path, token] of sorted) {
       const raw = token.$value as NormalizedColor;
-      const hex = resolveColorValue(path, raw, 'hex', project);
+      const hex = resolveColorValue(path, raw, 'hex', projectFields);
       const hsl = formatColor(raw, 'hsl');
       const oklch = formatColor(raw, 'oklch');
       const active = pickActiveFormat(raw, colorFormat, hex, hsl, oklch);
@@ -126,7 +127,7 @@ export function ColorTable({
       const variant: Variant = {
         label: match?.label ?? BASE_LABEL,
         path,
-        cssVar: resolveCssVar(path, project),
+        cssVar: resolveCssVar(path, projectFields),
         value: active.value,
         outOfGamut: active.outOfGamut,
         hex: hex.value,
@@ -149,7 +150,7 @@ export function ColorTable({
       out.push({ base, variants: vs, searchText });
     }
     return out;
-  }, [resolved, filter, project, sortBy, sortDir, defs, colorFormat]);
+  }, [resolved, listing, cssVarPrefix, filter, sortBy, sortDir, defs, colorFormat]);
 
   const visibleGroups = useMemo(() => {
     if (!searchable || query.trim() === '') return groups;
