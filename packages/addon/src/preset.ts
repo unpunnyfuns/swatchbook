@@ -3,6 +3,7 @@ import { dirname, isAbsolute, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
 import { loadProject } from '@unpunnyfuns/swatchbook-core';
+import { enumerateThemes } from '@unpunnyfuns/swatchbook-core/themes';
 import { createJiti } from 'jiti';
 import type { InlineConfig } from 'vite';
 import type { AddonOptions } from '#/options.ts';
@@ -85,7 +86,7 @@ async function writeTokenCodegen(project: Project, options: PresetOptions): Prom
 export function renderTokenTypes(project: Project): string {
   const sorted = [...project.varianceByPath.keys()].toSorted();
   const tokenEntries = sorted.map((p) => `    ${JSON.stringify(p)}: string;`);
-  const themeNames = enumerateThemeNames(project);
+  const themeNames = project.axes.length === 0 ? [] : enumerateThemes(project).map((t) => t.name);
   const themeUnion =
     themeNames.length > 0 ? themeNames.map((n) => JSON.stringify(n)).join(' | ') : 'string';
 
@@ -100,31 +101,4 @@ export function renderTokenTypes(project: Project): string {
     '}',
     '',
   ].join('\n');
-}
-
-/**
- * Default tuple + one per non-default cell on each axis + each
- * preset — same set the resolver loader's singleton enumeration
- * produces.
- */
-function enumerateThemeNames(project: Project): string[] {
-  if (project.axes.length === 0) return [];
-  const names = new Set<string>();
-  const tupleToName = (tuple: Record<string, string>): string =>
-    project.axes.map((a) => tuple[a.name] ?? a.default).join(' · ');
-  names.add(tupleToName(project.defaultTuple));
-  for (const axis of project.axes) {
-    for (const ctx of axis.contexts) {
-      if (ctx === axis.default) continue;
-      names.add(tupleToName({ ...project.defaultTuple, [axis.name]: ctx }));
-    }
-  }
-  for (const preset of project.presets) {
-    const tuple: Record<string, string> = { ...project.defaultTuple };
-    for (const [axis, ctx] of Object.entries(preset.axes)) {
-      if (ctx !== undefined) tuple[axis] = ctx;
-    }
-    names.add(tupleToName(tuple));
-  }
-  return [...names];
 }
