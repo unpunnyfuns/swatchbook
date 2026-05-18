@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { userEvent } from '@vitest/browser/context';
 import { SwatchbookProvider, TokenNavigator } from '#/index.ts';
@@ -128,11 +128,14 @@ describe('TokenNavigator', () => {
     await userEvent.fill(input, 'bg');
 
     // `color.bg` is the single leaf matching 'bg'; `radius` and `color.fg` /
-    // `color.palette.blue.500` prune out.
-    const leafPaths = within(screen.getByRole('tree'))
-      .getAllByTestId('token-navigator-leaf')
-      .map((el) => el.getAttribute('data-path'));
-    expect(leafPaths).toEqual(['color.bg']);
+    // `color.palette.blue.500` prune out. The filter runs through
+    // `useDeferredValue`, so wait for the deferred render to commit.
+    await waitFor(() => {
+      const leafPaths = within(screen.getByRole('tree'))
+        .getAllByTestId('token-navigator-leaf')
+        .map((el) => el.getAttribute('data-path'));
+      expect(leafPaths).toEqual(['color.bg']);
+    });
     expect(container.textContent).toContain('matching "bg"');
   });
 
@@ -148,11 +151,14 @@ describe('TokenNavigator', () => {
 
     // `color.palette.blue.500` is nested under `color > palette > blue`.
     // Even though `initiallyExpanded={0}` leaves everything collapsed, the
-    // search should reveal the matching leaf.
-    const leafPaths = within(screen.getByRole('tree'))
-      .getAllByTestId('token-navigator-leaf')
-      .map((el) => el.getAttribute('data-path'));
-    expect(leafPaths).toContain('color.palette.blue.500');
+    // search should reveal the matching leaf once the deferred render
+    // commits.
+    await waitFor(() => {
+      const leafPaths = within(screen.getByRole('tree'))
+        .getAllByTestId('token-navigator-leaf')
+        .map((el) => el.getAttribute('data-path'));
+      expect(leafPaths).toContain('color.palette.blue.500');
+    });
   });
 
   it('shows an empty message when the search matches nothing', async () => {
@@ -165,7 +171,7 @@ describe('TokenNavigator', () => {
     const input = screen.getByTestId('token-navigator-search') as HTMLInputElement;
     await userEvent.fill(input, 'xyz-no-match');
 
-    screen.getByText(/No tokens match "xyz-no-match"/);
+    await screen.findByText(/No tokens match "xyz-no-match"/);
     expect(screen.queryByRole('tree')).toBeNull();
   });
 
