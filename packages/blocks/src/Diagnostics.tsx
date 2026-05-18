@@ -1,5 +1,6 @@
 import cx from 'clsx';
 import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 import './Diagnostics.css';
 import { themeAttrs } from '#/internal/data-attr.ts';
 import { useProject } from '#/internal/use-project.ts';
@@ -18,26 +19,38 @@ const severityLabel: Record<DiagnosticSeverity, string> = {
   info: 'INFO',
 };
 
-function summaryText(diagnostics: readonly VirtualDiagnostic[]): string {
-  if (diagnostics.length === 0) return '✔ OK · no diagnostics';
-  const counts = { error: 0, warn: 0, info: 0 };
-  for (const d of diagnostics) counts[d.severity] += 1;
+interface DiagnosticsSummary {
+  text: string;
+  variant: 'ok' | 'error' | 'warn' | null;
+  hasErrorsOrWarnings: boolean;
+}
+
+function summarize(diagnostics: readonly VirtualDiagnostic[]): DiagnosticsSummary {
+  if (diagnostics.length === 0) {
+    return { text: '✔ OK · no diagnostics', variant: 'ok', hasErrorsOrWarnings: false };
+  }
+  let errors = 0;
+  let warnings = 0;
+  let infos = 0;
+  for (const d of diagnostics) {
+    if (d.severity === 'error') errors += 1;
+    else if (d.severity === 'warn') warnings += 1;
+    else infos += 1;
+  }
   const parts: string[] = [];
-  if (counts.error > 0) parts.push(`✖ ${counts.error} error${counts.error === 1 ? '' : 's'}`);
-  if (counts.warn > 0) parts.push(`⚠ ${counts.warn} warning${counts.warn === 1 ? '' : 's'}`);
-  if (counts.info > 0) parts.push(`${counts.info} info`);
-  return parts.join(' · ');
+  if (errors > 0) parts.push(`✖ ${errors} error${errors === 1 ? '' : 's'}`);
+  if (warnings > 0) parts.push(`⚠ ${warnings} warning${warnings === 1 ? '' : 's'}`);
+  if (infos > 0) parts.push(`${infos} info`);
+  const variant = errors > 0 ? 'error' : warnings > 0 ? 'warn' : null;
+  return {
+    text: parts.join(' · '),
+    variant,
+    hasErrorsOrWarnings: errors > 0 || warnings > 0,
+  };
 }
 
 function diagnosticKey(d: VirtualDiagnostic, i: number): string {
   return `${d.severity}:${d.group}:${d.filename ?? ''}:${d.line ?? ''}:${d.message}:${i}`;
-}
-
-function summaryVariant(diagnostics: readonly VirtualDiagnostic[]): 'ok' | 'error' | 'warn' | null {
-  if (diagnostics.length === 0) return 'ok';
-  if (diagnostics.some((d) => d.severity === 'error')) return 'error';
-  if (diagnostics.some((d) => d.severity === 'warn')) return 'warn';
-  return null;
 }
 
 /**
@@ -52,20 +65,16 @@ function summaryVariant(diagnostics: readonly VirtualDiagnostic[]): 'ok' | 'erro
  */
 export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
   const { activeAxes, cssVarPrefix, diagnostics } = useProject();
-
-  const hasErrorsOrWarnings = diagnostics.some(
-    (d) => d.severity === 'error' || d.severity === 'warn',
-  );
-  const headingText = caption ?? `Diagnostics · ${summaryText(diagnostics)}`;
-  const variant = summaryVariant(diagnostics);
+  const summary = useMemo(() => summarize(diagnostics), [diagnostics]);
+  const headingText = caption ?? `Diagnostics · ${summary.text}`;
 
   return (
     <div {...themeAttrs(cssVarPrefix, activeAxes)} data-testid="diagnostics">
-      <details open={hasErrorsOrWarnings}>
+      <details open={summary.hasErrorsOrWarnings}>
         <summary
           className={cx(
             'sb-diagnostics__summary',
-            variant && `sb-diagnostics__summary--${variant}`,
+            summary.variant && `sb-diagnostics__summary--${summary.variant}`,
           )}
         >
           {headingText}

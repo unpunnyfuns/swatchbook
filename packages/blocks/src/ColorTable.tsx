@@ -1,7 +1,7 @@
 import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import cx from 'clsx';
 import type { ReactElement } from 'react';
-import { useCallback, useDeferredValue, useMemo, useState } from 'react';
+import { memo, useCallback, useDeferredValue, useMemo, useState } from 'react';
 import './ColorTable.css';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
@@ -100,7 +100,7 @@ export function ColorTable({
   variants,
 }: ColorTableProps): ReactElement {
   const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
   const colorFormat = useColorFormat();
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
@@ -110,6 +110,7 @@ export function ColorTable({
   const defs = useMemo(() => buildVariantDefs(variants), [variants]);
 
   const groups = useMemo<Group[]>(() => {
+    const projectFields = { listing, cssVarPrefix };
     const filtered = Object.entries(resolved).filter(([path, token]) => {
       if (token.$type !== 'color') return false;
       return matchPath(path, filter);
@@ -119,7 +120,7 @@ export function ColorTable({
     const groupMap = new Map<string, { base: string; variants: Variant[] }>();
     for (const [path, token] of sorted) {
       const raw = token.$value as NormalizedColor;
-      const hex = resolveColorValue(path, raw, 'hex', project);
+      const hex = resolveColorValue(path, raw, 'hex', projectFields);
       const hsl = formatColor(raw, 'hsl');
       const oklch = formatColor(raw, 'oklch');
       const active = pickActiveFormat(raw, colorFormat, hex, hsl, oklch);
@@ -127,7 +128,7 @@ export function ColorTable({
       const variant: Variant = {
         label: match?.label ?? BASE_LABEL,
         path,
-        cssVar: resolveCssVar(path, project),
+        cssVar: resolveCssVar(path, projectFields),
         value: active.value,
         outOfGamut: active.outOfGamut,
         hex: hex.value,
@@ -150,7 +151,7 @@ export function ColorTable({
       out.push({ base, variants: vs, searchText });
     }
     return out;
-  }, [resolved, filter, project, sortBy, sortDir, defs, colorFormat]);
+  }, [resolved, listing, cssVarPrefix, filter, sortBy, sortDir, defs, colorFormat]);
 
   const visibleGroups = useMemo(() => {
     if (!searchable || deferredQuery.trim() === '') return groups;
@@ -248,21 +249,23 @@ export function ColorTable({
   );
 }
 
-function GroupRow({
-  group,
-  selectedLabel,
-  expanded,
-  onToggleExpand,
-  onSelectVariant,
-  onSelect,
-}: {
+interface GroupRowProps {
   group: Group;
   selectedLabel: string | undefined;
   expanded: boolean;
   onToggleExpand(base: string): void;
   onSelectVariant(base: string, label: string): void;
   onSelect?(path: string): void;
-}): ReactElement {
+}
+
+const GroupRow = memo(function GroupRow({
+  group,
+  selectedLabel,
+  expanded,
+  onToggleExpand,
+  onSelectVariant,
+  onSelect,
+}: GroupRowProps): ReactElement {
   const multi = group.variants.length > 1;
   const active =
     group.variants.find((v) => v.label === selectedLabel) ?? (group.variants[0] as Variant);
@@ -376,7 +379,7 @@ function GroupRow({
       )}
     </>
   );
-}
+});
 
 function ExpandedDetail({ group, active }: { group: Group; active: Variant }): ReactElement {
   const hasDescription = active.description !== undefined && active.description.length > 0;

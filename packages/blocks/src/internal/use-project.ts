@@ -262,7 +262,10 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
  * path — covers non-resolver projects, hand-built snapshots, and any
  * listing-plugin miss.
  */
-export function resolveCssVar(path: string, project: ProjectData): string {
+export function resolveCssVar(
+  path: string,
+  project: Pick<ProjectData, 'listing' | 'cssVarPrefix'>,
+): string {
   const listed = project.listing[path]?.names?.['css'];
   if (listed) return `var(${listed})`;
   return makeCssVar(path, project.cssVarPrefix);
@@ -284,7 +287,7 @@ export function resolveColorValue(
   path: string | undefined,
   raw: unknown,
   colorFormat: ColorFormat,
-  project: ProjectData,
+  project: Pick<ProjectData, 'listing'>,
 ): FormatColorResult {
   if (path !== undefined && colorFormat === 'hex') {
     const listed = project.listing[path]?.previewValue;
