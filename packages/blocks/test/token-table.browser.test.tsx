@@ -188,7 +188,7 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
       </SwatchbookProvider>,
     );
 
-    const wrapper = container.querySelector('[data-swatch-theme]') as HTMLElement | null;
+    const wrapper = container.querySelector('[data-swatchbook-block]') as HTMLElement | null;
     expect(wrapper).not.toBeNull();
     expect(wrapper?.style.getPropertyValue('--swatchbook-color-border-default')).toBe('');
     expect(wrapper?.style.getPropertyValue('--sb-color-border-default')).toBe('');

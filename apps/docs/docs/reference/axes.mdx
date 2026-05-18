@@ -25,7 +25,7 @@ Every resolved token, every CSS selector, every panel readout keys on this tuple
 When a tuple is active, the preview decorator writes one `data-<prefix>-<axisName>="<context>"` attribute per axis to `<html>` and the story wrapper. The prefix follows `cssVarPrefix` (default `swatch`):
 
 ```html
-<html data-swatch-mode="Dark" data-swatch-brand="Brand A" data-swatch-theme="Dark · Brand A">
+<html data-swatch-mode="Dark" data-swatch-brand="Brand A">
 ```
 
 CSS emission matches those attributes with compound selectors. Each non-default tuple gets its own flat block — every var redeclared — with `:root` carrying the default:

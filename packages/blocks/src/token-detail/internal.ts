@@ -36,27 +36,12 @@ export interface TokenDetailData {
    * a derived tuple name.
    */
   resolveAt: (tuple: Record<string, string>) => Record<string, DetailToken>;
-  /**
-   * O(1) tuple → permutation-name lookup, backed by a `Map` built
-   * once per snapshot. The `AxisVariance` grid uses this to derive
-   * the `data-<prefix>-theme` attribute for each cell without an
-   * `Array.find` scan per render cell.
-   */
-  themeNameForTuple: (tuple: Record<string, string>) => string | undefined;
 }
 
 export function useTokenDetailData(path: string): TokenDetailData {
   const project = useProject();
-  const {
-    activeTheme,
-    activeAxes,
-    axes,
-    resolved,
-    cssVarPrefix,
-    varianceByPath,
-    resolveAt,
-    themeNameForTuple,
-  } = project;
+  const { activeTheme, activeAxes, axes, resolved, cssVarPrefix, varianceByPath, resolveAt } =
+    project;
   const typedResolved = resolved as Record<string, DetailToken>;
   return {
     token: typedResolved[path],
@@ -68,6 +53,5 @@ export function useTokenDetailData(path: string): TokenDetailData {
     cssVarPrefix,
     varianceByPath,
     resolveAt: resolveAt as (tuple: Record<string, string>) => Record<string, DetailToken>,
-    themeNameForTuple,
   };
 }

@@ -100,7 +100,7 @@ export function ColorTable({
   variants,
 }: ColorTableProps): ReactElement {
   const project = useProject();
-  const { resolved, activeTheme, cssVarPrefix } = project;
+  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
   const colorFormat = useColorFormat();
   const [query, setQuery] = useState('');
   const [selectedByBase, setSelectedByBase] = useState<Record<string, string>>({});
@@ -183,14 +183,14 @@ export function ColorTable({
 
   if (groups.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+      <div {...themeAttrs(cssVarPrefix, activeAxes)}>
         <div className="sb-block__empty">No color tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeTheme)}>
+    <div {...themeAttrs(cssVarPrefix, activeAxes)}>
       {searchable && (
         <div className="sb-color-table__search">
           <input

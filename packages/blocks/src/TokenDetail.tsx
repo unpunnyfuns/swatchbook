@@ -25,9 +25,9 @@ export interface TokenDetailProps {
 }
 
 export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
-  const { token, cssVar, activeTheme, cssVarPrefix } = useTokenDetailData(path);
+  const { token, cssVar, activeTheme, activeAxes, cssVarPrefix } = useTokenDetailData(path);
   const colorFormat = useColorFormat();
-  const theme = themeAttrs(cssVarPrefix, activeTheme);
+  const theme = themeAttrs(cssVarPrefix, activeAxes);
 
   if (!token) {
     return (

@@ -115,8 +115,9 @@ export const PerAxisDataAttrs = meta.story({
     if (!wrapper) throw new Error('expected story wrapper with data-sb-mode attribute');
     expect(wrapper.getAttribute('data-sb-mode')).toBe('Dark');
     expect(wrapper.getAttribute('data-sb-brand')).toBe('Brand A');
-    expect(wrapper.getAttribute('data-sb-theme')).toBe('Dark · Brand A · Normal');
+    expect(wrapper.getAttribute('data-sb-contrast')).toBe('Normal');
     expect(document.documentElement.getAttribute('data-sb-mode')).toBe('Dark');
     expect(document.documentElement.getAttribute('data-sb-brand')).toBe('Brand A');
+    expect(document.documentElement.getAttribute('data-sb-theme')).toBeNull();
   },
 });

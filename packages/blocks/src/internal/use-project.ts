@@ -43,12 +43,6 @@ export interface ProjectData {
    * wire — no resolver needed.
    */
   resolveAt: (tuple: Record<string, string>) => ResolvedTokens;
-  /**
-   * Synthesize a display name for a full tuple — `axisValues.join(' · ')`,
-   * matching the form `permutationID` produces server-side. Used by
-   * the AxisVariance grid for `data-<prefix>-theme` attribution.
-   */
-  themeNameForTuple: (tuple: Record<string, string>) => string | undefined;
 }
 
 function ensureStylesheet(css: string): void {
@@ -165,7 +159,6 @@ export function useProject(): ProjectData {
       listing: listing ?? {},
       varianceByPath: varianceByPath ?? {},
       resolveAt,
-      themeNameForTuple: (tuple) => tupleToName(axes, tuple),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -247,7 +240,6 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
       listing: tokens.listing,
       varianceByPath: tokens.varianceByPath,
       resolveAt,
-      themeNameForTuple: (tuple) => tupleToName(tokens.axes, tuple),
     }),
     [
       activeTheme,

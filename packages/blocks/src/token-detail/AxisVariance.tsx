@@ -3,7 +3,7 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useColorFormat } from '#/contexts.ts';
 import type { ColorFormat } from '#/format-color.ts';
-import { dataAttr } from '@unpunnyfuns/swatchbook-core/data-attr';
+import { perAxisAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { useTokenDetailData } from '#/token-detail/internal.ts';
 import type { DetailToken } from '#/token-detail/internal.ts';
@@ -19,16 +19,8 @@ type Variance =
   | { kind: 'multi-axis'; varyingAxes: readonly [string, string, ...string[]] };
 
 export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
-  const {
-    token,
-    cssVar,
-    axes,
-    activeAxes,
-    cssVarPrefix,
-    varianceByPath,
-    resolveAt,
-    themeNameForTuple,
-  } = useTokenDetailData(path);
+  const { token, cssVar, axes, activeAxes, cssVarPrefix, varianceByPath, resolveAt } =
+    useTokenDetailData(path);
   const colorFormat = useColorFormat();
   const tokenType = token?.$type;
   const isColor = tokenType === 'color';
@@ -91,10 +83,9 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
     if (!axis) return <></>;
     const contextValues = axis.contexts.map((ctx) => {
       const target = { ...activeAxes, [axisName]: ctx };
-      const themeName = themeNameForTuple(target) ?? '';
       return {
         ctx,
-        themeName,
+        target,
         value: formatFn(resolveAt(target)[path] as DetailToken | undefined),
       };
     });
@@ -114,11 +105,11 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                   {row.ctx}
                 </td>
                 <td className="sb-token-detail__theme-cell">
-                  {isColor && row.themeName && (
+                  {isColor && (
                     <span
                       className="sb-token-detail__swatch"
                       style={{ background: cssVar }}
-                      {...{ [dataAttr(cssVarPrefix, 'theme')]: row.themeName }}
+                      {...perAxisAttrs(cssVarPrefix, row.target)}
                       aria-hidden
                     />
                   )}
@@ -171,7 +162,6 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                   [rowAxis.name]: row,
                   [colAxis.name]: col,
                 };
-                const name = themeNameForTuple(target);
                 const value = formatFn(resolveAt(target)[path] as DetailToken | undefined);
                 return (
                   <td
@@ -180,11 +170,11 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                     data-row={row}
                     data-col={col}
                   >
-                    {isColor && name && (
+                    {isColor && (
                       <span
                         className="sb-token-detail__swatch"
                         style={{ background: cssVar }}
-                        {...{ [dataAttr(cssVarPrefix, 'theme')]: name }}
+                        {...perAxisAttrs(cssVarPrefix, target)}
                         aria-hidden
                       />
                     )}
