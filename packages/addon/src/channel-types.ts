@@ -3,41 +3,34 @@
  * preview (emitter) and the manager-side consumers (`manager.tsx`,
  * `panel.tsx`) pin their shapes here so the three don't drift.
  *
- * The types intentionally mirror what `@unpunnyfuns/swatchbook-core`
- * produces, but are re-declared locally because the manager bundle runs
- * in a Node-free environment and can't import from core at runtime (core
- * pulls `node:fs/promises` via the loader).
+ * Manager bundle is Node-free and can't pull core at **runtime**, but
+ * type-only imports (`import type`) erase before the bundler sees them
+ * under `verbatimModuleSyntax`, so the canonical shapes can come
+ * directly from core for the fields that aren't blocks-narrowed.
+ *
+ * `VirtualToken` and the wire-cells / wire-jointOverrides shapes that
+ * reference it stay local — those carry a narrower token shape than
+ * core's `TokenMap` so the channel payload doesn't drag Terrazzo's full
+ * `TokenNormalized` into the wire surface.
  */
+import type {
+  Axis,
+  AxisVariancePerAxis,
+  AxisVarianceResult,
+  Diagnostic,
+  DiagnosticSeverity,
+  Preset,
+} from '@unpunnyfuns/swatchbook-core';
 
-export type DiagnosticSeverity = 'error' | 'warn' | 'info';
+export type { DiagnosticSeverity };
+export type VirtualAxis = Axis;
+export type VirtualPreset = Preset;
+export type VirtualDiagnostic = Diagnostic;
 
 export interface VirtualToken {
   $type?: string;
   $value?: unknown;
   $description?: string;
-}
-
-export interface VirtualAxis {
-  name: string;
-  contexts: readonly string[];
-  default: string;
-  description?: string;
-  source: 'resolver' | 'layered' | 'synthetic';
-}
-
-export interface VirtualPreset {
-  name: string;
-  axes: Partial<Record<string, string>>;
-  description?: string;
-}
-
-export interface VirtualDiagnostic {
-  severity: DiagnosticSeverity;
-  group: string;
-  message: string;
-  filename?: string;
-  line?: number;
-  column?: number;
 }
 
 /**
@@ -100,38 +93,10 @@ export interface VirtualJointOverride {
 export type VirtualJointOverrides = readonly (readonly [string, VirtualJointOverride])[];
 
 /**
- * Wire shape of one cached `AxisVarianceResult` entry — discriminated
- * on `kind` so consumers narrow `varyingAxes`'s cardinality and (for
- * the single-axis variant) reach `axis: string` directly. Mirrors
- * core's discriminated union; JSON-shape-identical so the wire
- * payload doesn't carry a translation step.
+ * Wire-payload variance types — re-exports of core's discriminated
+ * union, since the wire shape is byte-identical (the only difference
+ * between server and client is `Map` ↔ `Record`, captured below).
  */
-export type VirtualVariancePerAxis = Record<
-  string,
-  { varying: boolean; contexts: Record<string, string> }
->;
-export type VirtualVarianceEntry =
-  | {
-      path: string;
-      kind: 'constant';
-      varyingAxes: readonly [];
-      constantAcrossAxes: readonly string[];
-      perAxis: VirtualVariancePerAxis;
-    }
-  | {
-      path: string;
-      kind: 'single';
-      axis: string;
-      varyingAxes: readonly [string];
-      constantAcrossAxes: readonly string[];
-      perAxis: VirtualVariancePerAxis;
-    }
-  | {
-      path: string;
-      kind: 'multi';
-      varyingAxes: readonly [string, string, ...string[]];
-      constantAcrossAxes: readonly string[];
-      perAxis: VirtualVariancePerAxis;
-    };
-
-export type VirtualVarianceByPath = Record<string, VirtualVarianceEntry>;
+export type VirtualVariancePerAxis = AxisVariancePerAxis;
+export type VirtualVarianceEntry = AxisVarianceResult;
+export type VirtualVarianceByPath = Record<string, AxisVarianceResult>;
