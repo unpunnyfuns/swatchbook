@@ -140,33 +140,41 @@ export function buildAliasGraph(input: BuildAliasGraphInput): AliasGraph {
 }
 
 /**
- * A combo of axes is "connected" iff every axis in the combo has at
- * least one connection to another axis in the combo. Arity < 2
- * combos pass trivially — the joint-probe skips them anyway, but
- * the helper stays well-defined.
+ * A combo of axes is "connected" iff the subgraph induced by the
+ * combo (axis nodes, edges restricted to in-combo endpoints) is a
+ * single connected component. Arity < 2 combos pass trivially —
+ * `probeJointOverrides` skips them anyway, but the helper stays
+ * well-defined.
  *
- * Conservative: if any axis pair in the combo is connected, the
- * graph errs toward probing. Falsely orthogonal classifications
- * would skip a real divergence — falsely connected classifications
- * just probe a tuple that finds no divergence, costing a few
- * `resolver.apply` calls but no correctness.
+ * Implementation: BFS from `combo[0]`, only traversing edges whose
+ * other endpoint is also in `combo`. Combo is connected iff every
+ * axis is visited.
+ *
+ * Conservative still: falsely orthogonal classifications would skip a
+ * real divergence — falsely connected classifications just probe a
+ * tuple that finds no divergence, costing a few `resolver.apply`
+ * calls. The strict-component test tightens culling over the prior
+ * "every axis has ≥1 in-combo partner" heuristic without crossing
+ * into the wrong-answer side: a combo spanning two disjoint clusters
+ * can't produce a joint divergence — the cross-cluster cartesian is
+ * the independent product of two unrelated value sets.
  */
 export function isAxisComboConnected(graph: AliasGraph, combo: readonly Axis[]): boolean {
   if (combo.length < 2) return true;
-  for (const axis of combo) {
-    const connections = graph.connectedAxes.get(axis.name);
-    if (!connections) return false;
-    let foundPartner = false;
-    for (const other of combo) {
-      if (other.name === axis.name) continue;
-      if (connections.has(other.name)) {
-        foundPartner = true;
-        break;
-      }
+  const inCombo = new Set(combo.map((a) => a.name));
+  const visited = new Set<string>([combo[0]!.name]);
+  const queue: string[] = [combo[0]!.name];
+  while (queue.length > 0) {
+    const cur = queue.shift()!;
+    const neighbours = graph.connectedAxes.get(cur);
+    if (!neighbours) continue;
+    for (const n of neighbours) {
+      if (!inCombo.has(n) || visited.has(n)) continue;
+      visited.add(n);
+      queue.push(n);
     }
-    if (!foundPartner) return false;
   }
-  return true;
+  return visited.size === combo.length;
 }
 
 /**

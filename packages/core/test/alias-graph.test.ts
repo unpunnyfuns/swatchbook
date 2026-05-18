@@ -257,7 +257,7 @@ describe('alias-graph', () => {
     expect(graph.connectedAxes.get('density')?.has('mode') ?? false).toBe(false);
   });
 
-  it('isAxisComboConnected: every axis must have >=1 in-combo connection', () => {
+  it('isAxisComboConnected rejects combos with a fully-isolated axis', () => {
     const axes: Axis[] = [
       { name: 'mode', contexts: ['light', 'dark'], default: 'light', source: 'resolver' },
       { name: 'brand', contexts: ['default', 'a'], default: 'default', source: 'resolver' },
@@ -318,8 +318,98 @@ describe('alias-graph', () => {
     expect(isAxisComboConnected(graph, [axes[0]!, axes[1]!])).toBe(true);
     // mode + density disjoint.
     expect(isAxisComboConnected(graph, [axes[0]!, axes[2]!])).toBe(false);
-    // All three: density has no in-combo partner, so the combo
-    // is rejected even though mode and brand are connected.
+    // All three: density has no edge at all — BFS from mode reaches
+    // {mode, brand} but never density. The combo is rejected.
+    expect(isAxisComboConnected(graph, axes)).toBe(false);
+  });
+
+  it('isAxisComboConnected rejects combos spanning disjoint clusters', () => {
+    // 4 axes in two disjoint clusters:
+    //   {mode, brand} share `color.bg`.
+    //   {density, motion} share `dimension.md`.
+    //   No edges between clusters.
+    // Combo of all four: every axis has an in-combo partner, but the
+    // induced subgraph has two components. The probe can't produce a
+    // joint divergence here — a tuple `{mode, brand, density, motion}`
+    // is the cross-product of two independent groups whose value sets
+    // never interact. Strict-component test correctly rejects.
+    const axes: Axis[] = [
+      { name: 'mode', contexts: ['light', 'dark'], default: 'light', source: 'resolver' },
+      { name: 'brand', contexts: ['default', 'a'], default: 'default', source: 'resolver' },
+      {
+        name: 'density',
+        contexts: ['comfortable', 'compact'],
+        default: 'comfortable',
+        source: 'resolver',
+      },
+      { name: 'motion', contexts: ['normal', 'fast'], default: 'normal', source: 'resolver' },
+    ];
+    const resolverModifiers = {
+      mode: {
+        default: 'light',
+        contexts: {
+          light: [],
+          dark: [
+            {
+              color: {
+                $type: 'color',
+                bg: { $value: { colorSpace: 'srgb', components: [0, 0, 0] } },
+              },
+            },
+          ],
+        },
+      },
+      brand: {
+        default: 'default',
+        contexts: {
+          default: [],
+          a: [
+            {
+              color: {
+                $type: 'color',
+                bg: { $value: { colorSpace: 'srgb', components: [0.1, 0, 0] } },
+              },
+            },
+          ],
+        },
+      },
+      density: {
+        default: 'comfortable',
+        contexts: {
+          comfortable: [],
+          compact: [
+            {
+              dimension: {
+                $type: 'dimension',
+                md: { $value: { value: 12, unit: 'px' } },
+              },
+            },
+          ],
+        },
+      },
+      motion: {
+        default: 'normal',
+        contexts: {
+          normal: [],
+          fast: [
+            {
+              dimension: {
+                $type: 'dimension',
+                md: { $value: { value: 8, unit: 'px' } },
+              },
+            },
+          ],
+        },
+      },
+    };
+    const graph = buildAliasGraph({ axes, resolverModifiers, baseline: {} });
+
+    // Sub-clusters are connected on their own.
+    expect(isAxisComboConnected(graph, [axes[0]!, axes[1]!])).toBe(true);
+    expect(isAxisComboConnected(graph, [axes[2]!, axes[3]!])).toBe(true);
+    // Cross-cluster pairs disconnected.
+    expect(isAxisComboConnected(graph, [axes[0]!, axes[2]!])).toBe(false);
+    // Full combo: two components — strict test rejects.
     expect(isAxisComboConnected(graph, axes)).toBe(false);
   });
 
