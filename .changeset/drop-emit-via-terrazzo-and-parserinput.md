@@ -2,7 +2,7 @@
 "@unpunnyfuns/swatchbook-core": minor
 ---
 
-Closes #891. Removes the dead `emitViaTerrazzo` emitter and drops `Project.parserInput` from the public type. Two birds, one PR — `emitViaTerrazzo` was the only remaining public consumer of `parserInput`, and removing it lets the field move into a loader-internal closed-over local.
+Removes the dead `emitViaTerrazzo` emitter and drops `Project.parserInput` from the public type. Two birds, one PR — `emitViaTerrazzo` was the only remaining public consumer of `parserInput`, and removing it lets the field move into a loader-internal closed-over local.
 
 **What's gone:**
 - `packages/core/src/emit-via-terrazzo.ts` — ~260 lines of code, dead since the "smart emitter is the only emitter" commit (905165d / PR #806). No consumer in any package; the smart `emitAxisProjectedCss` is the sole emission path.

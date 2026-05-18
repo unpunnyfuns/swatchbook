@@ -4,7 +4,7 @@
 "@unpunnyfuns/swatchbook-mcp": patch
 ---
 
-Closes #890. Consolidates the two divergent path-matchers onto a single `@unpunnyfuns/swatchbook-core/match-path` subpath:
+Consolidates the two divergent path-matchers onto a single `@unpunnyfuns/swatchbook-core/match-path` subpath:
 
 - `packages/blocks/src/internal/use-project.ts:globMatch` (5-line prefix matcher; treated `color.*` as "any descendants")
 - `packages/mcp/src/match.ts:matchPath` (full mid-string `*` / `**` matcher; treated `color.*` as strict single-segment per conventional glob spec)
