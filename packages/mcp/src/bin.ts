@@ -149,7 +149,7 @@ async function main(): Promise<void> {
         1 +
         next.axes.reduce((acc, a) => acc + Math.max(0, a.contexts.length - 1), 0) +
         next.presets.length;
-      const tokenCount = next.varianceByPath.size;
+      const tokenCount = Object.keys(next.tokenGraph.nodes).length;
       console.error(
         `swatchbook-mcp: project reloaded — ${tokenCount} tokens across ${themeCount} theme${themeCount === 1 ? '' : 's'}.`,
       );

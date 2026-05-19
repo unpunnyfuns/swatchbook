@@ -1,5 +1,6 @@
 import type { Project, TokenMap } from '@unpunnyfuns/swatchbook-core';
 import { emitAxisProjectedCss } from '@unpunnyfuns/swatchbook-core';
+import { getVariance } from '@unpunnyfuns/swatchbook-core/graph';
 import { fuzzyFilter, fuzzyMatches } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import { enumerateThemes, tupleToName } from '@unpunnyfuns/swatchbook-core/themes';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -388,9 +389,9 @@ export function createServer(initial: Project): McpServer & {
       },
     },
     ({ path }) => {
-      const cached = project.varianceByPath.get(path);
-      if (!cached) return textResult(`Token not found in any theme: ${path}`);
-      return jsonResult(cached);
+      if (!project.tokenGraph.nodes[path])
+        return textResult(`Token not found in any theme: ${path}`);
+      return jsonResult(getVariance(project.tokenGraph, path));
     },
   );
 
