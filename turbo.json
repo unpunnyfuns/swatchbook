@@ -30,6 +30,11 @@
       "inputs": ["src/**", "test/**", "tokens/**", "vitest.config.*", "package.json"],
       "outputs": []
     },
+    "test:bench": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "bench/**", "vitest.config.*", "package.json"],
+      "outputs": []
+    },
     "test:storybook": {
       "dependsOn": ["^build"],
       "inputs": ["src/**", "tokens/**", ".storybook/**", "vitest.config.*", "vitest.setup.*"],

@@ -117,6 +117,13 @@ jobs:
           set -o pipefail
           pnpm turbo run test:storybook 2>&1 | tee .ci-storybook.log
 
+      - name: Bench (token-graph)
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm turbo run test:bench --filter='@unpunnyfuns/swatchbook-core' 2>&1 | tee .ci-bench.log
+        timeout-minutes: 5
+
       - name: Test results summary
         if: always()
         shell: bash

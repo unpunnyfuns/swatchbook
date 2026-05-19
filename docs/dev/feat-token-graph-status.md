@@ -37,6 +37,7 @@ Long-lived feature branch implementing the **token-graph redesign**: replacing `
 - `Project.tokenGraph` for layered/plain-parse projects (no resolver) is an empty graph; only resolver-backed projects build a real one. Phase 5+ may revisit if layered projects need walker support.
 - **Phase 6 blocker (alias provenance):** the walker (`resolveAt(graph, path, tuple)`) returns the resolved leaf token without preserving the SOURCE path's `aliasOf` field. The CSS emitter needs that to emit `var(--sb-…)` references instead of literal values. Task 4.1 worked around this by using `project.resolveAt()` (still legacy-backed) for token maps and the walker only for `valueKey`-based delta detection. Phase 6 needs an alias-preserving query helper (or a walker option) before the legacy `resolveAt` can be deleted.
 - `.prettierignore` files added at repo root and `packages/core/` to exclude `__snapshots__/` directories from oxfmt — the format sweep in commit `4a51e57` had quietly corrupted the golden CSS snapshot, hiding for nearly a phase.
+- CI bench gate (closes #995): `test:bench` task runs in CI for execution-time visibility, catches build-breaking regressions in the bench file itself, and surfaces gross runtime regressions via the 5-minute timeout. A numeric-threshold gate (`resolveAt` < 10 µs, etc.) is deferred — vitest's bench mode doesn't expose a clean `expect`-style assertion API, so threshold checks would require a custom comparator script.
 
 ## File index
 
