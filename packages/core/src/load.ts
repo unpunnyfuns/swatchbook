@@ -8,10 +8,11 @@ import { normalizePermutations } from '#/permutations/normalize.ts';
 import { computeTokenListing } from '#/token-listing.ts';
 import { buildTokenGraph, buildTokenGraphFromLayered } from '#/token-graph/build.ts';
 import type { BuildTokenGraphResult } from '#/token-graph/build.ts';
+import { buildFailedDiagnostic } from '#/token-graph/diagnostics.ts';
 import { listPaths } from '#/token-graph/queries.ts';
 import { resolveAllAt } from '#/token-graph/walk.ts';
 import { permutationID } from '#/types.ts';
-import type { Axis, Config, Permutation, Project, TokenMap } from '#/types.ts';
+import type { Axis, Config, Diagnostic, Permutation, Project, TokenMap } from '#/types.ts';
 
 /**
  * Load a swatchbook project from a config. Read tokens at any axis
@@ -110,19 +111,32 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
   // Resolver; layered / plain-parse projects infer writes by diffing
   // per-singleton resolved maps.
   let tokenGraphResult: BuildTokenGraphResult;
-  if (normalized.parserInput?.resolver) {
-    tokenGraphResult = buildTokenGraph(normalized.parserInput, filteredAxes, projectDefaultTuple);
-  } else {
-    const baselineFromLayered =
-      filteredResolved[permutationID(projectDefaultTuple)] ??
-      filteredResolved[Object.values(filteredPermutations)[0]?.name ?? ''] ??
-      {};
-    tokenGraphResult = buildTokenGraphFromLayered(
-      filteredAxes,
-      baselineFromLayered,
-      filteredResolved,
-      projectDefaultTuple,
-    );
+  try {
+    if (normalized.parserInput?.resolver) {
+      tokenGraphResult = buildTokenGraph(normalized.parserInput, filteredAxes, projectDefaultTuple);
+    } else {
+      const baselineFromLayered =
+        filteredResolved[permutationID(projectDefaultTuple)] ??
+        filteredResolved[Object.values(filteredPermutations)[0]?.name ?? ''] ??
+        {};
+      tokenGraphResult = buildTokenGraphFromLayered(
+        filteredAxes,
+        baselineFromLayered,
+        filteredResolved,
+        projectDefaultTuple,
+      );
+    }
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    tokenGraphResult = {
+      graph: {
+        nodes: {},
+        axes: filteredAxes.map((a) => a.name),
+        axisDefaults: projectDefaultTuple,
+        axisContexts: Object.fromEntries(filteredAxes.map((a) => [a.name, a.contexts])),
+      },
+      diagnostics: [buildFailedDiagnostic(detail)] as readonly Diagnostic[],
+    };
   }
 
   // resolveAt: graph-backed for all projects. Fills in axis defaults (so
