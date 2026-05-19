@@ -32,9 +32,9 @@ export interface ThemeEnumPreset {
 
 /**
  * Synthesize the canonical theme name from a tuple — axis values joined
- * by ` · ` in axis declaration order. Same form `Project.cells` keys
- * against and the `data-<prefix>-theme` attribute holds. Falls back to
- * each axis's `default` when the tuple omits it.
+ * by ` · ` in axis declaration order. Same form the
+ * `data-<prefix>-theme` attribute holds. Falls back to each axis's
+ * `default` when the tuple omits it.
  */
 export function tupleToName(
   axes: readonly { readonly name: string; readonly default: string }[],

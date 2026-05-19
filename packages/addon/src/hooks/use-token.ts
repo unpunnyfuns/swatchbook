@@ -1,17 +1,10 @@
 import {
-  axes as virtualAxes,
-  cells as virtualCells,
   cssVarPrefix as virtualCssVarPrefix,
   defaultTuple as virtualDefaultTuple,
-  jointOverrides as virtualJointOverrides,
+  tokenGraph as virtualTokenGraph,
 } from 'virtual:swatchbook/tokens';
-import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
+import { resolveAllAt } from '@unpunnyfuns/swatchbook-core/graph';
 import { makeCssVar } from '@unpunnyfuns/swatchbook-core/css-var';
-import type {
-  Axis as CoreAxis,
-  Cells as CoreCells,
-  JointOverrides,
-} from '@unpunnyfuns/swatchbook-core';
 import { useActiveAxes, useOptionalSwatchbookData } from '@unpunnyfuns/swatchbook-blocks';
 
 /**
@@ -21,12 +14,7 @@ import { useActiveAxes, useOptionalSwatchbookData } from '@unpunnyfuns/swatchboo
  * file so the hook can be called outside the addon's preview wrapper
  * (autodocs / MDX renders).
  */
-const fallbackResolveAt = buildResolveAt(
-  virtualAxes as readonly CoreAxis[],
-  virtualCells as CoreCells,
-  virtualJointOverrides as JointOverrides,
-  virtualDefaultTuple,
-);
+const fallbackResolveAt = (tuple: Record<string, string>) => resolveAllAt(virtualTokenGraph, tuple);
 
 /**
  * Consumers augment this interface (via the addon's generated

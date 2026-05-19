@@ -1,4 +1,5 @@
 import type { Project, SwatchbookIntegration } from '@unpunnyfuns/swatchbook-core';
+import { listPaths } from '@unpunnyfuns/swatchbook-core/graph';
 
 export interface CssInJsIntegrationOptions {
   /**
@@ -93,7 +94,7 @@ function renderTheme(project: Project): string {
 }
 
 function collectPaths(project: Project): string[] {
-  return [...project.varianceByPath.keys()].toSorted();
+  return [...listPaths(project.tokenGraph)].toSorted();
 }
 
 interface TreeNode {

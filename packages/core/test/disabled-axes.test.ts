@@ -90,10 +90,10 @@ it('emits CSS with no data-contrast selectors', () => {
   expect(css).not.toMatch(/data-contrast/);
 });
 
-it('keeps cells keyed against the surviving axes only', () => {
-  const cellAxes = Object.keys(project.cells).toSorted();
+it('keeps graph axisContexts keyed against the surviving axes only', () => {
+  const graphAxes = Object.keys(project.tokenGraph.axisContexts).toSorted();
   const projectAxes = project.axes.map((a) => a.name).toSorted();
-  expect(cellAxes).toEqual(projectAxes);
+  expect(graphAxes).toEqual(projectAxes);
 });
 
 it('surfaces a warn diagnostic when disabledAxes references an unknown axis', async () => {

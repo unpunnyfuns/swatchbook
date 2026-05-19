@@ -6,10 +6,8 @@
  * live in one place rather than three.
  *
  * Builds a JSON-friendly subset of `Project` plus the emitter's CSS
- * string. Drops fields that don't survive `JSON.stringify` and would
- * either crash the wire (`parserInput`'s resolver, `resolveAt`'s
- * function) or be useless after deserialisation. Converts the
- * `varianceByPath` Map to a plain Record at the boundary; slims
+ * string. Drops fields that don't survive `JSON.stringify` (the
+ * resolver function on `parserInput`, the `resolveAt` closure). Slims
  * `listing` entries down to the three fields blocks actually read
  * (`names`, `previewValue`, `source`).
  *
@@ -26,7 +24,7 @@
  */
 import type { ListedToken } from '#/token-listing.ts';
 import type { TokenGraph } from '#/token-graph/types.ts';
-import type { AxisVarianceResult, JointOverrides, Project } from '#/types.ts';
+import type { Project } from '#/types.ts';
 
 /**
  * Slimmed `ListedToken` — the three fields blocks actually consume.
@@ -45,10 +43,6 @@ export interface SlimListedToken {
  * module body, HMR custom event, Storybook channel TOKENS_UPDATED_EVENT).
  * Field set is the union every blocks-side consumer reads; the
  * manager-side INIT_EVENT shape is a subset (no `css` / `listing`).
- *
- * Note `varianceByPath` is `Record`, not `Map` — `JSON.stringify` drops
- * Map entries. Browser consumers read it as a plain object via O(1)
- * key lookup; the original Map identity stays server-side on `Project`.
  */
 export interface SnapshotForWire {
   axes: Project['axes'];
@@ -58,9 +52,6 @@ export interface SnapshotForWire {
   cssVarPrefix: string;
   css: string;
   listing: Readonly<Record<string, SlimListedToken>>;
-  cells: Project['cells'];
-  jointOverrides: JointOverrides;
-  varianceByPath: Record<string, AxisVarianceResult>;
   defaultTuple: Project['defaultTuple'];
   tokenGraph: TokenGraph;
 }
@@ -80,9 +71,6 @@ export function snapshotForWire(project: Project, css: string): SnapshotForWire 
     cssVarPrefix: project.config.cssVarPrefix ?? '',
     css,
     listing: slimListing(project.listing),
-    cells: project.cells,
-    jointOverrides: project.jointOverrides,
-    varianceByPath: Object.fromEntries(project.varianceByPath.entries()),
     defaultTuple: project.defaultTuple,
     tokenGraph: project.tokenGraph,
   };

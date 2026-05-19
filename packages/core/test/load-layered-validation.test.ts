@@ -25,6 +25,6 @@ describe('loadProject — layered config validation', () => {
       { name: 'theme', contexts: ['default'], default: 'default', source: 'synthetic' },
     ]);
     expect(project.defaultTuple).toEqual({ theme: 'default' });
-    expect(Object.keys(project.cells)).toEqual(['theme']);
+    expect(Object.keys(project.tokenGraph.axisContexts)).toEqual(['theme']);
   });
 });

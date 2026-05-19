@@ -1,6 +1,7 @@
-import type { Axis } from '@unpunnyfuns/swatchbook-core';
-import type { VirtualVarianceByPathShape } from '#/contexts.ts';
+import type { Axis, AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+
+type VirtualVarianceByPathShape = Record<string, AxisVarianceResult>;
 
 export interface DetailToken {
   $type?: string;

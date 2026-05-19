@@ -73,9 +73,8 @@ export interface ChromeValidationResult {
  * Surviving entries land on `Project.chrome` and override the
  * hard-coded `DEFAULT_CHROME_MAP` literals during CSS emission.
  *
- * Caller pre-computes `tokenIDs` (typically the union of every path
- * in `Project.cells` or `Project.varianceByPath.keys()`) so this
- * function doesn't reach into `permutationsResolved`.
+ * Caller pre-computes `tokenIDs` (typically from `listPaths(project.tokenGraph)`)
+ * so this function doesn't reach into the resolver directly.
  */
 export function validateChrome(
   raw: Record<string, string> | undefined,

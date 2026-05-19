@@ -1,10 +1,4 @@
-import type {
-  Axis,
-  AxisVarianceResult,
-  Diagnostic,
-  Preset,
-  TupleKey,
-} from '@unpunnyfuns/swatchbook-core';
+import type { Axis, Diagnostic, Preset } from '@unpunnyfuns/swatchbook-core';
 import type { TokenGraph } from '@unpunnyfuns/swatchbook-core/graph';
 import type { SlimListedToken } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
 import { createContext, useContext } from 'react';
@@ -68,23 +62,6 @@ export type VirtualTokenListingShape = SlimListedToken;
 export type VirtualPresetShape = Preset;
 
 /**
- * Wire shape of one `Project.jointOverrides` entry — same as core's
- * `JointOverride` but with the block's `VirtualTokenShape` for the
- * token values that ship over the wire.
- */
-export interface VirtualJointOverrideShape {
-  axes: Record<string, string>;
-  tokens: Record<string, VirtualTokenShape>;
-}
-
-/**
- * Map from path → cached `AxisVarianceResult`. Snapshot carries this
- * so the `AxisVariance` block can O(1) look up which axes affect a
- * token instead of re-running variance analysis on every render.
- */
-export type VirtualVarianceByPathShape = Record<string, AxisVarianceResult>;
-
-/**
  * Wire shape of the token graph — aliased from core's authoritative
  * `TokenGraph` so both the virtual module declaration and the React
  * context stay aligned with the same definition.
@@ -115,53 +92,19 @@ export interface ProjectSnapshot {
    */
   listing?: Readonly<Record<string, VirtualTokenListingShape>>;
   /**
-   * @deprecated Legacy wire field; the blocks hook now backs resolution
-   * from `tokenGraph`. Removed entirely in Phase 6 of the token-graph
-   * redesign.
-   *
-   * Per-axis cell maps — `cells[axis][context]` is the resolved token
-   * data for `{ ...defaults, [axis]: context }`. Bounded by
-   * `Σ(axes × contexts)` regardless of cartesian product size.
-   * Non-default cells store only the tokens whose value differs from
-   * the default-cell baseline (delta cells).
-   */
-  cells: Record<string, Record<string, Record<string, VirtualTokenShape>>>;
-  /**
-   * @deprecated Legacy wire field; the blocks hook now backs resolution
-   * from `tokenGraph`. Removed entirely in Phase 6 of the token-graph
-   * redesign.
-   *
-   * `Project.jointOverrides` flattened to entries for wire transport.
-   * Same ascending-arity iteration order the Map carries on the
-   * server side. Empty array when no joint divergences exist.
-   */
-  jointOverrides: readonly (readonly [TupleKey, VirtualJointOverrideShape])[];
-  /**
-   * @deprecated Legacy wire field; the blocks hook now derives variance
-   * from `tokenGraph` via `getVariance`. Removed entirely in Phase 6
-   * of the token-graph redesign.
-   *
-   * Cached per-path variance results. Blocks read this for O(1) axis
-   * variance lookup instead of recomputing on each render.
-   */
-  varianceByPath?: VirtualVarianceByPathShape;
-  /**
    * Pre-built token graph for the project. JSON-serializable; nodes
    * carry per-axis writes plus alias edges. The blocks hook backs
-   * `resolveAt` and `varianceByPath` from this graph.
+   * `resolveAt` and variance from this graph.
    */
   tokenGraph?: VirtualTokenGraph;
   /** The default tuple — `{ axis: axis.default }` for every axis. */
   defaultTuple: Record<string, string>;
   /**
    * Pre-built `resolveAt(tuple)` accessor. The addon's preview
-   * decorator instantiates this once per iframe lifetime — the
-   * underlying virtual-module exports (cells, jointOverrides, axes,
-   * defaultTuple) are stable, so a single resolver instance with
-   * internal per-tuple memoization is correct and avoids the
-   * per-render rebuild dance the blocks side used to do. Hand-built
+   * decorator instantiates this once per iframe lifetime, backed by
+   * `resolveAllAt` over the stable `tokenGraph` export. Hand-built
    * snapshots (tests, MDX) can omit this; blocks fall back to
-   * building locally from `cells` / `permutationsResolved`.
+   * building a graph-backed resolver from `tokenGraph`.
    */
   resolveAt?: (tuple: Record<string, string>) => Record<string, VirtualTokenShape>;
 }

@@ -28,10 +28,10 @@ describe('loadProject — resolver mode', () => {
     // 1 default + 3 axes × 1 non-default ctx = 4 singletons.
     const expected = 1 + project.axes.reduce((acc, a) => acc + (a.contexts.length - 1), 0);
     expect(expected).toBe(4);
-    // Cells carry the per-axis baseline + delta entries.
+    // Graph records every context for each axis.
     for (const axis of project.axes) {
       for (const ctx of axis.contexts) {
-        expect(project.cells[axis.name]?.[ctx]).toBeDefined();
+        expect(project.tokenGraph.axisContexts[axis.name]).toContain(ctx);
       }
     }
     expect(Object.keys(project.defaultTokens).length).toBeGreaterThan(100);
@@ -65,7 +65,7 @@ describe('loadProject — resolver mode', () => {
     ]);
   });
 
-  it('resolveAt composes any tuple from cells + jointOverrides — no listPermutations needed', () => {
+  it('resolveAt composes any tuple from the token graph — no listPermutations needed', () => {
     const light = project.resolveAt({ mode: 'Light', brand: 'Default', contrast: 'Normal' });
     const accentBg = light['color.accent.bg'];
     expect(accentBg).toBeDefined();

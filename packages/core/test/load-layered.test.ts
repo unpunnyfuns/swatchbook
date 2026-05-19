@@ -57,14 +57,14 @@ describe('loadProject — layered axes', () => {
     ]);
   });
 
-  it('cells per (axis, context) cover every singleton tuple', () => {
+  it('graph axisContexts cover every (axis, context) pair', () => {
     // Singleton enumeration: default tuple + Σ(contexts - 1) per-axis
     // non-default singletons. For mode (Light, Dark) × brand (Default,
     // Brand A) that's 1 + 1 + 1 = 3 singletons; the joint Dark · Brand A
-    // tuple is not materialized — composeAt produces it from per-axis cells.
+    // tuple is not materialized — resolveAt produces it from the graph.
     for (const axis of project.axes) {
       for (const ctx of axis.contexts) {
-        expect(project.cells[axis.name]?.[ctx]).toBeDefined();
+        expect(project.tokenGraph.axisContexts[axis.name]).toContain(ctx);
       }
     }
   });
@@ -110,7 +110,7 @@ describe('loadProject — layered axes', () => {
       ],
     };
     const p = await loadProject(config, fixtureCwd);
-    expect(Object.keys(p.cells['brand'] ?? {}).toSorted()).toEqual(['Brand A', 'Default']);
+    expect((p.tokenGraph.axisContexts['brand'] ?? []).toSorted()).toEqual(['Brand A', 'Default']);
     expect(p.defaultTokens['color.accent']?.$value).toMatchObject({
       components: [0.1, 0.3, 0.9],
     });

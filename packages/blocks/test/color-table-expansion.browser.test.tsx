@@ -50,8 +50,7 @@ describe('ColorTable — expansion', () => {
   });
 
   it('multi-variant expansion lists all variants in a sub-table', async () => {
-    const snap = makeColorTableSnapshot();
-    Object.assign(snap.cells['mode']!['light']!, {
+    const snap = makeColorTableSnapshot({
       'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
       'color.bg.hi-h': { $type: 'color', $value: { hex: '#222222' } },
       'color.bg.hi-d': { $type: 'color', $value: { hex: '#333333' } },
@@ -86,8 +85,7 @@ describe('ColorTable — expansion', () => {
   });
 
   it('clicking a pill does not toggle the row expansion', () => {
-    const snap = makeColorTableSnapshot();
-    Object.assign(snap.cells['mode']!['light']!, {
+    const snap = makeColorTableSnapshot({
       'color.bg.hi': { $type: 'color', $value: { hex: '#111111' } },
       'color.bg.hi-h': { $type: 'color', $value: { hex: '#222222' } },
     });

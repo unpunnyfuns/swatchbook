@@ -81,8 +81,8 @@ it('loads a resolver with one modifier + two contexts (no override overlays)', a
   const axis = project.axes.find((a) => a.name === 'mode');
   expect(axis).toBeDefined();
   expect(axis?.contexts).toEqual(['Light', 'Dark']);
-  // Singletons: default tuple + 1 per non-default context = 2 cells on `mode`.
-  expect(Object.keys(project.cells['mode'] ?? {}).toSorted()).toEqual(['Dark', 'Light']);
+  // Graph records every context for the mode axis.
+  expect((project.tokenGraph.axisContexts['mode'] ?? []).toSorted()).toEqual(['Dark', 'Light']);
 });
 
 it('records sourceFiles for every file pulled through $ref', async () => {

@@ -14,17 +14,14 @@ import { tupleToName } from '@unpunnyfuns/swatchbook-core/themes';
 import 'virtual:swatchbook/integration-side-effects';
 import {
   axes as virtualAxes,
-  cells as virtualCells,
   css,
   cssVarPrefix,
   defaultTuple as virtualDefaultTuple,
   diagnostics,
   disabledAxes as virtualDisabledAxes,
-  jointOverrides as virtualJointOverrides,
   listing as virtualListing,
   presets as virtualPresets,
   tokenGraph as virtualTokenGraph,
-  varianceByPath as virtualVarianceByPath,
 } from 'virtual:swatchbook/tokens';
 import {
   AxesContext,
@@ -142,7 +139,7 @@ function setRootAxes(tuple: Readonly<Record<string, string>>): void {
 }
 
 /**
- * Subset of an INIT_EVENT-shaped object the manager bundle needs. The 9
+ * Subset of an INIT_EVENT-shaped object the manager bundle needs. The
  * fields are the union of what the toolbar and panel read; named so
  * `broadcastInit` (module-level virtual exports) and the HMR re-emit
  * (`payload`-shaped) compose the same payload from the same shape.
@@ -153,9 +150,6 @@ interface InitFieldsSource {
   presets: typeof virtualPresets;
   diagnostics: typeof diagnostics;
   cssVarPrefix: string;
-  cells: typeof virtualCells;
-  jointOverrides: typeof virtualJointOverrides;
-  varianceByPath: typeof virtualVarianceByPath;
   defaultTuple: typeof virtualDefaultTuple;
 }
 
@@ -166,9 +160,6 @@ function pickInitFields(source: InitFieldsSource): InitFieldsSource {
     presets: source.presets,
     diagnostics: source.diagnostics,
     cssVarPrefix: source.cssVarPrefix,
-    cells: source.cells,
-    jointOverrides: source.jointOverrides,
-    varianceByPath: source.varianceByPath,
     defaultTuple: source.defaultTuple,
   };
 }
@@ -188,9 +179,6 @@ function broadcastInit(): void {
       presets: virtualPresets,
       diagnostics,
       cssVarPrefix,
-      cells: virtualCells,
-      jointOverrides: virtualJointOverrides,
-      varianceByPath: virtualVarianceByPath,
       defaultTuple: virtualDefaultTuple,
     }),
   );
@@ -342,9 +330,6 @@ const themedDecorator: Decorator = (Story, context) => {
       diagnostics,
       css,
       listing: virtualListing,
-      cells: virtualCells,
-      jointOverrides: virtualJointOverrides,
-      varianceByPath: virtualVarianceByPath,
       tokenGraph: virtualTokenGraph,
       defaultTuple: virtualDefaultTuple,
       resolveAt: previewResolveAt,
@@ -498,9 +483,6 @@ interface HmrSnapshot {
   css: string;
   cssVarPrefix: string;
   listing: typeof virtualListing;
-  cells: typeof virtualCells;
-  jointOverrides: typeof virtualJointOverrides;
-  varianceByPath: typeof virtualVarianceByPath;
   tokenGraph: typeof virtualTokenGraph;
   defaultTuple: typeof virtualDefaultTuple;
 }

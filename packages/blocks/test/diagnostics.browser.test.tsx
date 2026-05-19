@@ -2,15 +2,13 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Diagnostics, SwatchbookProvider } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
-import { makeResolveAtFromCells } from './_snapshot-helpers.ts';
+import { makeResolveAt } from './_snapshot-helpers.ts';
 
 function makeSnapshot(diagnostics: ProjectSnapshot['diagnostics'] = []): ProjectSnapshot {
   const snap: ProjectSnapshot = {
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
     disabledAxes: [],
     presets: [],
-    cells: { theme: { Light: {} } },
-    jointOverrides: [],
     defaultTuple: { theme: 'Light' },
     activeTheme: 'Light',
     activeAxes: { theme: 'Light' },
@@ -18,7 +16,7 @@ function makeSnapshot(diagnostics: ProjectSnapshot['diagnostics'] = []): Project
     diagnostics,
     css: '',
   };
-  snap.resolveAt = makeResolveAtFromCells(snap);
+  snap.resolveAt = makeResolveAt({});
   return snap;
 }
 

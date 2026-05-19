@@ -2,40 +2,35 @@ import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { CompositeBreakdown, SwatchbookProvider } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
-import { makeResolveAtFromCells } from './_snapshot-helpers.ts';
+import { makeResolveAt } from './_snapshot-helpers.ts';
 
 function makeSnapshot(): ProjectSnapshot {
+  const tokens = {
+    'color.palette.blue.500': { $type: 'color', $value: { hex: '#3b82f6' } },
+    'color.border.default': {
+      $type: 'color',
+      $value: { hex: '#3b82f6' },
+      aliasOf: 'color.palette.blue.500',
+      aliasChain: ['color.palette.blue.500'],
+    },
+    'border.default': {
+      $type: 'border',
+      $value: {
+        color: { hex: '#3b82f6' },
+        width: { value: 1, unit: 'px' },
+        style: 'solid',
+      },
+      partialAliasOf: {
+        color: 'color.border.default',
+        width: undefined,
+        style: undefined,
+      },
+    },
+  };
   const snap: ProjectSnapshot = {
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
     disabledAxes: [],
     presets: [],
-    cells: {
-      theme: {
-        Light: {
-          'color.palette.blue.500': { $type: 'color', $value: { hex: '#3b82f6' } },
-          'color.border.default': {
-            $type: 'color',
-            $value: { hex: '#3b82f6' },
-            aliasOf: 'color.palette.blue.500',
-            aliasChain: ['color.palette.blue.500'],
-          },
-          'border.default': {
-            $type: 'border',
-            $value: {
-              color: { hex: '#3b82f6' },
-              width: { value: 1, unit: 'px' },
-              style: 'solid',
-            },
-            partialAliasOf: {
-              color: 'color.border.default',
-              width: undefined,
-              style: undefined,
-            },
-          },
-        },
-      },
-    },
-    jointOverrides: [],
     defaultTuple: { theme: 'Light' },
     activeTheme: 'Light',
     activeAxes: { theme: 'Light' },
@@ -43,7 +38,7 @@ function makeSnapshot(): ProjectSnapshot {
     diagnostics: [],
     css: '',
   };
-  snap.resolveAt = makeResolveAtFromCells(snap);
+  snap.resolveAt = makeResolveAt(tokens);
   return snap;
 }
 

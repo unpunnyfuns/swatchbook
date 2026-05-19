@@ -7,11 +7,9 @@ import {
 import { tupleToName } from '@unpunnyfuns/swatchbook-core/themes';
 import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
 import { useEffect, useMemo } from 'react';
-import type {
-  VirtualTokenGraph,
-  VirtualTokenListingShape,
-  VirtualVarianceByPathShape,
-} from '#/contexts.ts';
+import type { VirtualTokenGraph, VirtualTokenListingShape } from '#/contexts.ts';
+
+type VirtualVarianceByPathShape = Record<string, AxisVarianceResult>;
 import { useActiveAxes, useActiveTheme, useOptionalSwatchbookData } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import type { ColorFormat, FormatColorResult } from '#/format-color.ts';
@@ -44,14 +42,12 @@ export interface ProjectData {
   /**
    * Pre-built token graph. JSON-safe; nodes carry per-axis writes
    * plus alias edges. The hook backs `resolveAt` and `varianceByPath`
-   * from this graph; `cells + jointOverrides` are no longer read at
-   * runtime.
+   * from this graph.
    */
   tokenGraph: VirtualTokenGraph;
   /**
    * Compose the resolved `TokenMap` for any tuple of axis selections.
-   * Backed browser-side by `resolveAllAt` over the `tokenGraph` —
-   * no cells/jointOverrides reconstruction needed.
+   * Backed browser-side by `resolveAllAt` over the `tokenGraph`.
    */
   resolveAt: (tuple: Record<string, string>) => ResolvedTokens;
 }
@@ -85,8 +81,8 @@ function makeResolveAt(
  * snapshot's own `resolveAt` (the addon's preview decorator
  * pre-builds one at module load — see `previewResolveAt` in
  * `packages/addon/src/preview.tsx`), otherwise builds one from
- * `tokenGraph` via `makeResolveAt`. Hand-built snapshots can omit
- * `resolveAt`; the graph-backed fallback covers them.
+ * `tokenGraph`. Hand-built snapshots can omit `resolveAt`;
+ * the graph-backed fallback covers them.
  */
 function snapshotResolveAt(
   snapshot: ProjectSnapshot,
@@ -120,10 +116,9 @@ export function useProject(): ProjectData {
   // `useMemo([resolved, …])` calls would recompute forever; the
   // `TokenNavigator`'s focus-repair `useEffect` (deps include the
   // recomputed `flatVisible`) would `setState` in an infinite loop.
-  // The underlying `cells` / `jointOverrides` / `defaultTuple` /
-  // `axes` references are stable module-level exports, so depending
-  // on them directly keeps `resolveAt` (and the resolved map it
-  // returns) referentially stable across renders.
+  // The underlying `tokenGraph` reference is a stable module-level
+  // virtual-module export, so depending on it directly keeps `resolveAt`
+  // (and the resolved map it returns) referentially stable across renders.
   const axes = snapshot?.axes;
   const activeAxes = snapshot?.activeAxes;
   const activeTheme = snapshot?.activeTheme;

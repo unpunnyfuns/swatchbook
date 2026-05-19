@@ -7,6 +7,8 @@
  * `vi.doMock('virtual:swatchbook/tokens', () => …)` ahead of importing
  * the unit under test.
  */
+import type { TokenGraph } from '@unpunnyfuns/swatchbook-core/graph';
+
 export const axes = [
   {
     name: 'mode',
@@ -21,43 +23,45 @@ export const diagnostics = [] as const;
 export const css = '';
 export const cssVarPrefix = 'sb';
 export const listing = {};
-export const cells: Record<string, Record<string, Record<string, unknown>>> = {
-  mode: {
-    Light: {
-      'color.accent.bg': {
+export const defaultTuple: Record<string, string> = { mode: 'Light' };
+export const tokenGraph: TokenGraph = {
+  nodes: {
+    'color.accent.bg': {
+      baselineValue: {
         $type: 'color',
         $value: { colorSpace: 'srgb', components: [0, 0.4, 1] },
         $description: 'Accent background',
       },
-      'space.md': {
-        $type: 'dimension',
-        $value: '16px',
+      baselineKind: 'literal',
+      writes: {
+        mode: {
+          Dark: {
+            kind: 'literal',
+            value: {
+              $type: 'color',
+              $value: { colorSpace: 'srgb', components: [0, 0.2, 0.8] },
+              $description: 'Accent background',
+            },
+          },
+        },
       },
+      aliases: [],
+      aliasedBy: [],
+      affectedBy: ['mode'],
     },
-    Dark: {
-      'color.accent.bg': {
-        $type: 'color',
-        $value: { colorSpace: 'srgb', components: [0.3, 0.6, 1] },
-        $description: 'Accent background',
-      },
-      'space.md': {
+    'space.md': {
+      baselineValue: {
         $type: 'dimension',
         $value: '16px',
       },
+      baselineKind: 'literal',
+      writes: {},
+      aliases: [],
+      aliasedBy: [],
+      affectedBy: [],
     },
   },
-};
-export const jointOverrides: readonly (readonly [string, unknown])[] = [];
-export const varianceByPath: Record<string, unknown> = {};
-export const defaultTuple: Record<string, string> = { mode: 'Light' };
-export const tokenGraph: {
-  nodes: Record<string, unknown>;
-  axes: readonly string[];
-  axisDefaults: Record<string, string>;
-  axisContexts: Record<string, readonly string[]>;
-} = {
-  nodes: {},
-  axes: [],
-  axisDefaults: {},
-  axisContexts: {},
+  axes: ['mode'],
+  axisDefaults: { mode: 'Light' },
+  axisContexts: { mode: ['Light', 'Dark'] },
 };

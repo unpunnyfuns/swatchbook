@@ -15,8 +15,8 @@ import { valueKey } from '#/value-key.ts';
  * structural subset (`SwatchbookToken`) of `TokenNormalized` — every
  * value in any `TokenMap` here actually carries the full Terrazzo
  * fields, because it came from `resolver.apply()` and was stored
- * verbatim into cells / jointOverrides. The cast at the boundary
- * (`asRawTokens`) is safe by construction.
+ * verbatim by the graph. The cast at the boundary (`asRawTokens`) is
+ * safe by construction.
  */
 type RawTokenMap = Record<string, TokenNormalized>;
 

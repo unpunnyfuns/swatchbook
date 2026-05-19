@@ -4,9 +4,25 @@
 // pure function is materially cheaper than a full codegen-write-read-parse
 // round-trip while asserting the same observable output. If the signature
 // ever changes, this test should move to a snapshot of the written file.
-import type { Project, VarianceInfo } from '@unpunnyfuns/swatchbook-core';
+import type { Project } from '@unpunnyfuns/swatchbook-core';
+import type { TokenGraph } from '@unpunnyfuns/swatchbook-core/graph';
 import { expect, it } from 'vitest';
 import { renderTokenTypes } from '#/preset.ts';
+
+function emptyGraph(paths: readonly string[] = []): TokenGraph {
+  const nodes: TokenGraph['nodes'] = {};
+  for (const path of paths) {
+    nodes[path] = {
+      baselineValue: { $type: 'color', $value: { colorSpace: 'srgb', components: [0, 0, 0] } },
+      baselineKind: 'literal',
+      writes: {},
+      aliases: [],
+      aliasedBy: [],
+      affectedBy: [],
+    };
+  }
+  return { nodes, axes: [], axisDefaults: {}, axisContexts: {} };
+}
 
 function fakeProject(partial: Partial<Project>): Project {
   return {
@@ -14,27 +30,17 @@ function fakeProject(partial: Partial<Project>): Project {
     axes: [],
     disabledAxes: [],
     presets: [],
-    cells: {},
-    jointOverrides: [],
     defaultTokens: {},
     defaultTuple: {},
     resolveAt: () => ({}),
-    varianceByPath: new Map(),
+    tokenGraph: emptyGraph(),
     sourceFiles: [],
     listing: {},
     diagnostics: [],
     cwd: '',
     chrome: {},
     ...partial,
-  } as Project;
-}
-
-function variance(paths: readonly string[]): ReadonlyMap<string, VarianceInfo> {
-  const out = new Map<string, VarianceInfo>();
-  for (const p of paths) {
-    out.set(p, { kind: 'baseline-only' } as VarianceInfo);
-  }
-  return out;
+  } as unknown as Project;
 }
 
 it('emits a do-not-edit banner + module augmentation', () => {
@@ -46,7 +52,7 @@ it('emits a do-not-edit banner + module augmentation', () => {
 
 it('sorts token paths alphabetically', () => {
   const project = fakeProject({
-    varianceByPath: variance(['color.bg', 'color.fg', 'color.accent']),
+    tokenGraph: emptyGraph(['color.bg', 'color.fg', 'color.accent']),
   });
   const out = renderTokenTypes(project);
   const bgIdx = out.indexOf('"color.bg"');
@@ -95,9 +101,9 @@ it('includes preset tuples in the theme name union', () => {
   expect(out).toContain('"Dark · BrandA"');
 });
 
-it('emits each path once even when surfaced multiple times in varianceByPath', () => {
+it('emits each path once even when the graph has the path once', () => {
   const project = fakeProject({
-    varianceByPath: variance(['color.bg', 'color.bg']),
+    tokenGraph: emptyGraph(['color.bg']),
   });
   const out = renderTokenTypes(project);
   const hits = (out.match(/"color\.bg": string;/g) ?? []).length;

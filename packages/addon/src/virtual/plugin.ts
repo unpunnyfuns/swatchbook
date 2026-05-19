@@ -1,5 +1,6 @@
 import type { Config, Project, SwatchbookIntegration } from '@unpunnyfuns/swatchbook-core';
 import { emitAxisProjectedCss, loadProject } from '@unpunnyfuns/swatchbook-core';
+import { listPaths } from '@unpunnyfuns/swatchbook-core/graph';
 import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
 import { watch as fsWatch } from 'node:fs';
 import type { FSWatcher } from 'node:fs';
@@ -116,9 +117,6 @@ export function swatchbookTokensPlugin({
         `export const css = ${JSON.stringify(snap.css)};`,
         `export const cssVarPrefix = ${JSON.stringify(snap.cssVarPrefix)};`,
         `export const listing = ${JSON.stringify(snap.listing)};`,
-        `export const cells = ${JSON.stringify(snap.cells)};`,
-        `export const jointOverrides = ${JSON.stringify(snap.jointOverrides)};`,
-        `export const varianceByPath = ${JSON.stringify(snap.varianceByPath)};`,
         `export const defaultTuple = ${JSON.stringify(snap.defaultTuple)};`,
         `export const tokenGraph = ${JSON.stringify(snap.tokenGraph)};`,
       ].join('\n');
@@ -147,7 +145,7 @@ export function swatchbookTokensPlugin({
           void (async () => {
             await refresh();
             if (!project) return;
-            const tokenCount = project.varianceByPath.size;
+            const tokenCount = [...listPaths(project.tokenGraph)].length;
             const diagCount = project.diagnostics.length;
             server.config.logger.info(
               `\x1b[36m[swatchbook]\x1b[0m tokens reloaded — ${tokenCount} tokens, ${diagCount} diagnostic${diagCount === 1 ? '' : 's'}`,

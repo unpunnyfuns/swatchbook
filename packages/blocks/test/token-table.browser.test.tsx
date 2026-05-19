@@ -3,9 +3,25 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { userEvent } from '@vitest/browser/context';
 import { SwatchbookProvider, TokenTable } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
-import { makeResolveAtFromCells } from './_snapshot-helpers.ts';
+import { makeResolveAt } from './_snapshot-helpers.ts';
 
 function makeSnapshot(): ProjectSnapshot {
+  const tokens = {
+    'color.text': {
+      $type: 'color',
+      $value: { hex: '#111111' },
+      $description: 'Primary text.',
+    },
+    'color.surface': {
+      $type: 'color',
+      $value: { hex: '#ffffff' },
+      $description: 'Default surface.',
+    },
+    'space.md': {
+      $type: 'dimension',
+      $value: { value: 16, unit: 'px' },
+    },
+  };
   const snap: ProjectSnapshot = {
     axes: [
       {
@@ -17,28 +33,6 @@ function makeSnapshot(): ProjectSnapshot {
     ],
     disabledAxes: [],
     presets: [],
-    cells: {
-      mode: {
-        light: {
-          'color.text': {
-            $type: 'color',
-            $value: { hex: '#111111' },
-            $description: 'Primary text.',
-          },
-          'color.surface': {
-            $type: 'color',
-            $value: { hex: '#ffffff' },
-            $description: 'Default surface.',
-          },
-          'space.md': {
-            $type: 'dimension',
-            $value: { value: 16, unit: 'px' },
-          },
-        },
-        dark: {},
-      },
-    },
-    jointOverrides: [],
     defaultTuple: { mode: 'light' },
     activeTheme: 'Light',
     activeAxes: { mode: 'light' },
@@ -46,7 +40,7 @@ function makeSnapshot(): ProjectSnapshot {
     diagnostics: [],
     css: '',
   };
-  snap.resolveAt = makeResolveAtFromCells(snap);
+  snap.resolveAt = makeResolveAt(tokens);
   return snap;
 }
 

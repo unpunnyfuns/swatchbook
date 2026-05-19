@@ -1,8 +1,6 @@
-import { buildCells } from '#/cells.ts';
 import { validateChrome } from '#/chrome.ts';
 import { BufferedLogger, toDiagnostics } from '#/diagnostics.ts';
 import { validateDisabledAxes } from '#/disabled-axes.ts';
-import { probeJointOverrides } from '#/joint-overrides.ts';
 import { fillPresetTuple, validatePresets } from '#/presets.ts';
 import { validateCssOptions } from '#/terrazzo-options.ts';
 import { resolveDefaultTuple } from '#/permutations/default.ts';
@@ -10,18 +8,15 @@ import { normalizePermutations } from '#/permutations/normalize.ts';
 import { computeTokenListing } from '#/token-listing.ts';
 import { buildTokenGraph, buildTokenGraphFromLayered } from '#/token-graph/build.ts';
 import type { BuildTokenGraphResult } from '#/token-graph/build.ts';
+import { listPaths } from '#/token-graph/queries.ts';
 import { resolveAllAt } from '#/token-graph/walk.ts';
-import { buildVarianceByPath } from '#/variance-by-path.ts';
 import { permutationID } from '#/types.ts';
 import type { Axis, Config, Permutation, Project, TokenMap } from '#/types.ts';
 
 /**
  * Load a swatchbook project from a config. Read tokens at any axis
  * tuple via `project.resolveAt(tuple)`; read the default-tuple
- * snapshot directly via `project.defaultTokens`. The bounded
- * primitives (`cells`, `jointOverrides`, `varianceByPath`) are
- * pre-computed at load time so downstream consumers don't pay
- * resolver costs.
+ * snapshot directly via `project.defaultTokens`.
  *
  * The `cwd` defaults to `process.cwd()`. All relative paths in
  * `config` (token globs, `resolver`, layered axis overlay globs)
@@ -107,52 +102,13 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
         )
       : { listing: {}, diagnostics: [] };
 
-  // `defaultTuple` here is the post-disabledAxes-filter version,
-  // matching what `cells` is keyed against.
+  // `defaultTuple` here is the post-disabledAxes-filter version.
   const projectDefaultTuple: Record<string, string> = {};
   for (const axis of filteredAxes) projectDefaultTuple[axis.name] = axis.default;
 
-  // `buildCells` calls `resolveTuple` once per `(axis, context)`
-  // singleton. Resolver-backed projects route through `resolver.apply`
-  // directly (no scan of the singleton-enumeration shape); layered /
-  // plain-parse projects look up the loader's per-tuple parse output
-  // by `permutationID(tuple)`. Either way the data source is
-  // upstream of `Project.permutations` / `permutationsResolved`.
-  const resolveTuple = normalized.parserInput?.resolver
-    ? (tuple: Readonly<Record<string, string>>): TokenMap =>
-        normalized.parserInput!.resolver!.apply(tuple as Record<string, string>)
-    : (tuple: Readonly<Record<string, string>>): TokenMap =>
-        filteredResolved[permutationID(tuple)] ?? {};
-  const cells = buildCells(filteredAxes, resolveTuple, projectDefaultTuple);
-
-  // Pair-only joint-divergence probe via `resolver.apply` — bounded
-  // by `Σ pairs (contexts_a - 1) × (contexts_b - 1)` calls,
-  // independent of the cartesian product size. Returns two derived
-  // signals: `overrides` for resolveAt correctness, `jointTouching`
-  // for variance display (axes that genuinely contribute to a joint
-  // divergence on a path, separated from cell-composition artifacts).
-  const { overrides: jointOverrides, jointTouching } = probeJointOverrides(
-    filteredAxes,
-    cells,
-    projectDefaultTuple,
-    normalized.parserInput?.resolver,
-  );
-
-  // Pre-compute per-path variance from cells + jointOverrides — the
-  // bounded surface, no cartesian dependency.
-  const baselineForVariance = filteredAxes[0]
-    ? (cells[filteredAxes[0].name]?.[filteredAxes[0].default] ?? {})
-    : defaultTokens;
-  const varianceByPath = buildVarianceByPath(
-    filteredAxes,
-    cells,
-    jointTouching,
-    baselineForVariance,
-  );
-
-  // Build the token-graph alongside the legacy cells/jointOverrides
-  // path. Resolver-backed projects build from the live Resolver; layered /
-  // plain-parse projects infer writes by diffing per-singleton resolved maps.
+  // Build the token graph. Resolver-backed projects build from the live
+  // Resolver; layered / plain-parse projects infer writes by diffing
+  // per-singleton resolved maps.
   let tokenGraphResult: BuildTokenGraphResult;
   if (normalized.parserInput?.resolver) {
     tokenGraphResult = buildTokenGraph(normalized.parserInput, filteredAxes, projectDefaultTuple);
@@ -190,11 +146,10 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     };
   })();
 
-  // `validateChrome` checks targets against the project's path
-  // universe. `varianceByPath.keys()` is the union of every path
-  // that appears in any theme by construction — same set the prior
-  // `permutationsResolved`-scan produced, computed once at load time.
-  const tokenIDs = new Set<string>(varianceByPath.keys());
+  // `validateChrome` checks targets against the project's path universe.
+  // `listPaths` returns every path present in the graph — same set the
+  // prior `permutationsResolved`-scan produced.
+  const tokenIDs = new Set<string>(listPaths(tokenGraphResult.graph));
   const { entries: chrome, diagnostics: chromeDiagnostics } = validateChrome(
     config.chrome,
     tokenIDs,
@@ -207,11 +162,8 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     presets,
     chrome,
     defaultTokens,
-    cells,
-    jointOverrides,
     defaultTuple: projectDefaultTuple,
     resolveAt,
-    varianceByPath,
     tokenGraph: tokenGraphResult.graph,
     sourceFiles: normalized.sourceFiles,
     cwd,

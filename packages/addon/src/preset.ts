@@ -3,6 +3,7 @@ import { dirname, isAbsolute, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
 import { loadProject } from '@unpunnyfuns/swatchbook-core';
+import { listPaths } from '@unpunnyfuns/swatchbook-core/graph';
 import { enumerateThemes } from '@unpunnyfuns/swatchbook-core/themes';
 import { createJiti } from 'jiti';
 import type { InlineConfig } from 'vite';
@@ -78,7 +79,7 @@ async function writeTokenCodegen(project: Project, options: PresetOptions): Prom
 
 /** @internal Exported for tests; not part of the public API. */
 export function renderTokenTypes(project: Project): string {
-  const sorted = [...project.varianceByPath.keys()].toSorted();
+  const sorted = [...listPaths(project.tokenGraph)].toSorted();
   const tokenEntries = sorted.map((p) => `    ${JSON.stringify(p)}: string;`);
   const themeNames = project.axes.length === 0 ? [] : enumerateThemes(project).map((t) => t.name);
   const themeUnion =
