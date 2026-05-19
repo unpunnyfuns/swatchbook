@@ -1,4 +1,5 @@
 import sassPlugin from '@terrazzo/plugin-sass';
+import swiftPlugin from '@terrazzo/plugin-swift';
 import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
 import { resolverPath } from '@unpunnyfuns/swatchbook-tokens';
 
@@ -35,18 +36,38 @@ export default defineSwatchbookConfig({
     bodyFontFamily: 'typography.body.font-family',
     bodyFontSize: 'typography.body.font-size',
   },
-  // Load plugin-sass so the Token Listing's `names.sass` column populates
-  // beyond CSS. Purely for preview — the plugin doesn't emit files through
-  // swatchbook; it contributes its identifier-naming logic so
-  // `<TokenDetail>`'s Consumer Output renders the Sass identifier alongside
-  // the CSS var. plugin-js is intentionally absent: it doesn't register
-  // transforms via `getTransforms`, so plugin-token-listing can't look up
-  // a `js` format and the listing build fails outright.
-  terrazzoPlugins: [sassPlugin({ filename: 'tokens.scss' })],
+  // Demonstrate the consumer-plugin pathway across a cross-section of
+  // terrazzo's published platform plugins. Purely for preview — these
+  // plugins don't emit files through swatchbook; they contribute their
+  // identifier-naming logic via `getTransforms` so `<TokenDetail>`'s
+  // Consumer Output can render each platform's identifier alongside
+  // the CSS var.
+  //
+  // Three published plugins are intentionally absent:
+  //
+  // - `plugin-js` (2.2.0): doesn't register transforms via
+  //   `getTransforms`, so plugin-token-listing's lookup fails outright.
+  // - `plugin-vanilla-extract` (2.2.0): same architectural shape as
+  //   plugin-js — a build-time emitter, not a transform contributor.
+  //   plugin-token-listing's lookup for format
+  //   `@terrazzo/plugin-vanilla-extract` (and the `vanilla-extract`
+  //   fallback) returns nothing.
+  // - `plugin-tailwind` (2.2.0): requires a real `template` CSS file
+  //   with `@tz` directives plus a `theme` object mapping Tailwind
+  //   concepts to token paths. Wiring a meaningful tailwind preview is
+  //   its own piece of work and would conflate "demo the listing flow"
+  //   with "build a real tailwind pipeline."
+  //
+  // See issue #987 for the verification trail.
+  terrazzoPlugins: [
+    sassPlugin({ filename: 'tokens.scss' }),
+    swiftPlugin({ catalogName: 'Tokens' }),
+  ],
   listingOptions: {
     platforms: {
       css: { name: '@terrazzo/plugin-css', description: 'CSS custom properties' },
       sass: { name: '@terrazzo/plugin-sass', description: 'Sass variables' },
+      swift: { name: '@terrazzo/plugin-swift', description: 'Swift constants' },
     },
   },
   presets: [
