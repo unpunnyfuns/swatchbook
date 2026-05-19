@@ -19,16 +19,16 @@ Long-lived feature branch implementing the **token-graph redesign**: replacing `
 | 3 | ✅ done | Migrated `packages/blocks/src/internal/use-project.ts` + `channel-tokens.ts` + addon `preview.tsx` to back `resolveAt` and `varianceByPath` from `tokenGraph`. Block components were unchanged (they go through `useProject()`). Single commit (`9c5a9d6`) covered the work; the plan's per-block decomposition collapsed because the audit showed no block reads legacy fields directly. |
 | 4 | ✅ done | Smart emitter (`css-axis-projected.ts`, commit `0ef47bb`) + MCP `get_axis_variance` (commit `ce8bdfd`) both switched to graph walks. CSS snapshot byte-for-byte preserved. MCP wire shape unchanged. |
 | 5 | ✅ done | Synthetic baselines captured (no real-consumer fixture available). `bench/token-graph.bench.ts` + `bench/compare-legacy.ts` + `test:bench` script added. |
-| 6 | pending | Delete `cells.ts`, `joint-overrides.ts`, `alias-graph.ts`, `resolve-at.ts`, `variance-by-path.ts`, `variance-analysis.ts`; remove legacy fields from `Project`. |
-| 7 | pending | Sync with main, changeset, docs-site updates, open PR. |
+| 6 | ✅ done | Added `resolveAliasAt` (commit `90627bd`); dropped legacy `resolveAt` from emitter + load.ts (`f06380a`); extended graph builder to layered/plain-parse projects (`64305f5`); deletion sweep removed cells/joint-overrides/alias-graph/resolve-at/variance-by-path (`bd06d44`); inlined variance classification into the emitter (`a726f01`). All `Project.cells`/`.jointOverrides`/`.varianceByPath` fields removed from public type. |
+| 7 | ⏳ in progress | Sync with main, changeset, docs-site updates, open PR. |
 
 ## Last completed task
 
-**Phase 5** — Synthetic baselines captured. `bench/token-graph.bench.ts` added with real benchmarks for `buildTokenGraph`, `resolveAt`, `resolveAllAt`, and `getVariance` against the reference fixture. `bench/compare-legacy.ts` added as a one-shot comparison script. `test:bench` script wired; vitest config extended to include `bench/**/*.bench.ts`. Phase 5 closed out with synthetic-only baseline numbers (no real-consumer fixture available — see Phase 5 baselines section below).
+**Phase 6** — Legacy resolution code deleted (commits `90627bd`, `f06380a`, `64305f5`, `bd06d44`, `a726f01`). All `Project.cells`/`.jointOverrides`/`.varianceByPath` fields removed; `cells.ts`, `joint-overrides.ts`, `alias-graph.ts`, `resolve-at.ts`, `variance-by-path.ts`, `variance-analysis.ts`, `compare-legacy.ts` bench, cartesian-truth test deleted. Variance classification for the smart emitter inlined as file-local helpers in `css-axis-projected.ts`. All 11 packages pass tests, lint, typecheck, and build.
 
 ## Next up
 
-**Phase 6 — Delete legacy code.** Delete `cells.ts`, `joint-overrides.ts`, `alias-graph.ts`, `resolve-at.ts`, `variance-by-path.ts`, `variance-analysis.ts`; remove legacy fields from `Project`. Gated on resolving the alias-provenance blocker noted below.
+**Phase 7 — PR to main.** Sync `feat/token-graph` with `origin/main` (merge in if any non-trivial drift), write the changeset (minor bump per pre-1.0 semver, all six published packages), update `apps/docs/docs/reference/model/` to describe the new graph and remove cells/joint-overrides pages, open the PR.
 
 ## In-flight decisions / notes
 
