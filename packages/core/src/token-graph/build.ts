@@ -186,7 +186,11 @@ export function buildTokenGraph(
   }
 
   const axisDefaults: Record<string, string> = {};
-  for (const axis of axes) axisDefaults[axis.name] = axis.default;
+  const axisContexts: Record<string, readonly string[]> = {};
+  for (const axis of axes) {
+    axisDefaults[axis.name] = axis.default;
+    axisContexts[axis.name] = axis.contexts;
+  }
 
   computeAffectedBy(
     nodes,
@@ -194,7 +198,7 @@ export function buildTokenGraph(
   );
 
   return {
-    graph: { nodes, axes: axes.map((a) => a.name), axisDefaults },
+    graph: { nodes, axes: axes.map((a) => a.name), axisDefaults, axisContexts },
     diagnostics: [],
   };
 }

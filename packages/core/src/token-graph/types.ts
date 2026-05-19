@@ -77,4 +77,13 @@ export interface TokenGraph {
    * the requested tuple.
    */
   axisDefaults: Record<string, string>;
+  /**
+   * Per-axis context list, keyed by axis name. `axisContexts[axisName]`
+   * is the ordered list of all context names for that axis, including
+   * the default. Carries enough info for `getVariance` to iterate each
+   * axis's contexts without needing the original `Axis[]` array. Wire
+   * payload includes this so browser consumers can derive variance
+   * shape from the graph alone.
+   */
+  axisContexts: Record<string, readonly string[]>;
 }
