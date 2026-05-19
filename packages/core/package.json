@@ -35,6 +35,10 @@
       "types": "./dist/fuzzy.d.mts",
       "import": "./dist/fuzzy.mjs"
     },
+    "./graph": {
+      "types": "./dist/token-graph/index.d.mts",
+      "import": "./dist/token-graph/index.mjs"
+    },
     "./resolve-at": {
       "types": "./dist/resolve-at.d.mts",
       "import": "./dist/resolve-at.mjs"
@@ -72,7 +76,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsdown src/index.ts src/fuzzy.ts src/resolve-at.ts src/css-var.ts src/data-attr.ts src/snapshot-for-wire.ts src/match-path.ts src/style-element.ts src/themes.ts --format esm --dts --clean --sourcemap",
+    "build": "tsdown src/index.ts src/fuzzy.ts src/resolve-at.ts src/token-graph/index.ts src/css-var.ts src/data-attr.ts src/snapshot-for-wire.ts src/match-path.ts src/style-element.ts src/themes.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
