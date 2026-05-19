@@ -132,7 +132,7 @@ The [blocks reference](./reference/blocks/index.mdx) has the full prop list for 
 
 ## Theme the block chrome against your tokens
 
-The MDX doc blocks read their surfaces, text, and accent colours from a fixed `--swatchbook-*` CSS-variable namespace. Out of the box those variables fall back to light/dark literals that flip with the active `color-scheme`, which means the blocks render legibly before you wire anything up. To have them reflect your own tokens, supply a `chrome` map — one entry per role, each pointing at a token path in your project:
+The MDX doc blocks read their surfaces, text, and accent colours from a fixed `--swatchbook-*` CSS-variable namespace. By default, those variables fall back to light/dark literals that flip with the active `color-scheme`, which means the blocks render legibly before you wire anything up. To have them reflect your own tokens, supply a `chrome` map — one entry per role, each pointing at a token path in your project:
 
 ```ts title=".storybook/main.ts"
 {

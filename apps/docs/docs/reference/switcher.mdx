@@ -39,6 +39,7 @@ export function MySwitcher({ axes, presets, defaults }) {
 
   const onAxisChange = useCallback((axis: string, next: string) => {
     setActiveTuple((prev) => ({ ...prev, [axis]: next }));
+    // prefix from loadProject config; must match cssVarPrefix
     document.documentElement.setAttribute(`data-sb-${axis}`, next);
     setLastApplied(null);
   }, []);
@@ -47,6 +48,7 @@ export function MySwitcher({ axes, presets, defaults }) {
     const tuple = { ...defaults, ...preset.axes };
     setActiveTuple(tuple);
     for (const [axis, value] of Object.entries(tuple)) {
+      // prefix from loadProject config; must match cssVarPrefix
       document.documentElement.setAttribute(`data-sb-${axis}`, value);
     }
     setLastApplied(preset.name);

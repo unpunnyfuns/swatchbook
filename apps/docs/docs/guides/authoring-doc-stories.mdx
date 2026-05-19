@@ -89,7 +89,7 @@ See the [blocks reference](../reference/blocks/index.mdx) for the full prop surf
 If you need a token's resolved value (not just a CSS var reference), use `useToken`. It reads from the virtual graph + active tuple and returns `{ value, cssVar, type, description }` with typed paths:
 
 ```tsx
-import { useToken } from '@unpunnyfuns/swatchbook-addon';
+import { useToken } from '@unpunnyfuns/swatchbook-addon/hooks';
 
 function Badge({ level }: { level: 'info' | 'warn' }) {
   const tokenName = level === 'info' ? 'color.accent.bg' : 'color.warning.bg';
@@ -126,5 +126,5 @@ channel.on('globalsUpdated', (payload) => {
 ## See also
 
 - [Reference: blocks](../reference/blocks/index.mdx) — every block's props.
-- [Reference: addon](../reference/addon.mdx) — `useToken` and the other hooks.
+- [Reference: addon](../reference/addon.mdx) — the `useToken` hook and its types.
 - [Live Storybook](pathname:///storybook/) — doc stories you can steal from.

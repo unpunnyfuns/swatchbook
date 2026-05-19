@@ -42,7 +42,9 @@ import { theme, color, space, radius, shadow } from 'virtual:swatchbook/theme';
 
 ## What gets generated
 
-Per-group exports plus an aggregate `theme` constant, one leaf per DTCG path:
+Per-group exports plus an aggregate `theme` constant, one leaf per DTCG path.
+
+The example below assumes `cssVarPrefix: 'sb'` in your config; the default is `swatch`, so variables and attributes use `--swatch-*` / `data-swatch-*` instead.
 
 ```js
 export const color = {
