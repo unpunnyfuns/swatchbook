@@ -41,6 +41,7 @@ __screenshots__/
 
 # Superpowers local working artifacts (specs/plans not meant to ship)
 docs/superpowers/
+.superpowers/
 
 # Bench harness writes per-run phase logs; the harness lives on a
 # sibling branch but the gitignore travels with main so future runs
