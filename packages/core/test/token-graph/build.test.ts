@@ -157,6 +157,34 @@ describe('extractWritesFromModifiers', () => {
     expect(writes['a']?.mode?.Dark).toEqual({ kind: 'literal', value: { $value: '#000' } });
     expect(writes['a']?.brand).toBeUndefined();
   });
+
+  it('inherits $type from a parent group node when the leaf lacks its own', () => {
+    // Modifier source where `border` group declares $type, and child leaves
+    // (`default`) carry only $value. Without inheritance, toWriteValue can't
+    // detect alias sub-fields and would classify as 'literal'.
+    const modifiers = {
+      contrast: {
+        contexts: {
+          High: [
+            {
+              border: {
+                $type: 'border',
+                default: {
+                  $value: { color: '{color.border.default}', width: '2px', style: 'solid' },
+                },
+              },
+            },
+          ],
+        },
+        default: 'Normal',
+      },
+    };
+    const axes: Axis[] = [
+      { name: 'contrast', contexts: ['Normal', 'High'], default: 'Normal', source: 'resolver' },
+    ];
+    const writes = extractWritesFromModifiers(modifiers, axes);
+    expect(writes['border.default']?.contrast?.High?.kind).toBe('partial-alias');
+  });
 });
 
 describe('buildTokenGraph baseline seeding', () => {

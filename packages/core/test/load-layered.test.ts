@@ -225,7 +225,12 @@ describe('buildTokenGraphFromLayered — alias-target switch with coincident res
     };
 
     const darkId = permutationID({ mode: 'Dark' });
-    const { graph } = buildTokenGraphFromLayered(axes, baseline, { [darkId]: darkResolved }, defaultTuple);
+    const { graph } = buildTokenGraphFromLayered(
+      axes,
+      baseline,
+      { [darkId]: darkResolved },
+      defaultTuple,
+    );
 
     const xWrite = graph.nodes['color.x']?.writes?.['mode']?.['Dark'];
     expect(xWrite).toBeDefined();
@@ -254,7 +259,12 @@ describe('buildTokenGraphFromLayered — alias-target switch with coincident res
     };
 
     const darkId = permutationID({ mode: 'Dark' });
-    const { graph } = buildTokenGraphFromLayered(axes, baseline, { [darkId]: darkResolved }, defaultTuple);
+    const { graph } = buildTokenGraphFromLayered(
+      axes,
+      baseline,
+      { [darkId]: darkResolved },
+      defaultTuple,
+    );
 
     const xWrite = graph.nodes['color.x']?.writes?.['mode']?.['Dark'];
     expect(xWrite).toBeUndefined();
