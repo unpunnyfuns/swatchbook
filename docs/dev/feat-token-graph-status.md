@@ -17,24 +17,26 @@ Long-lived feature branch implementing the **token-graph redesign**: replacing `
 | 1 | ✅ done | `packages/core/src/token-graph/` module: builder, walker, queries, diagnostics, `/graph` subpath. Cross-validated against `resolver.apply` for the entire reference-fixture cartesian. Wired into `loadProject` alongside legacy fields. (range: c6df619..2a4274b) |
 | 2 | ✅ done | `snapshot-for-wire`, addon virtual module, blocks React context all expose `tokenGraph` (commits 513baa1, 7df5da0, 6b7db4e). |
 | 3 | ✅ done | Migrated `packages/blocks/src/internal/use-project.ts` + `channel-tokens.ts` + addon `preview.tsx` to back `resolveAt` and `varianceByPath` from `tokenGraph`. Block components were unchanged (they go through `useProject()`). Single commit (`9c5a9d6`) covered the work; the plan's per-block decomposition collapsed because the audit showed no block reads legacy fields directly. |
-| 4 | ⏳ in progress | Smart emitter (`css-axis-projected.ts`) + MCP `get_axis_variance` switch to graph walks. CSS byte-for-byte regression gate. |
-| 5 | pending | Bench against real-consumer workload. **Gate**: build < 200ms, resolveAt < 1ms/call, ≥5× faster loadProject startup. STOP if gate fails. |
+| 4 | ✅ done | Smart emitter (`css-axis-projected.ts`, commit `0ef47bb`) + MCP `get_axis_variance` (commit `ce8bdfd`) both switched to graph walks. CSS snapshot byte-for-byte preserved. MCP wire shape unchanged. |
+| 5 | ⏳ in progress | Bench against real-consumer workload. **Gate**: build < 200ms, resolveAt < 1ms/call, ≥5× faster loadProject startup. STOP if gate fails. |
 | 6 | pending | Delete `cells.ts`, `joint-overrides.ts`, `alias-graph.ts`, `resolve-at.ts`, `variance-by-path.ts`, `variance-analysis.ts`; remove legacy fields from `Project`. |
 | 7 | pending | Sync with main, changeset, docs-site updates, open PR. |
 
 ## Last completed task
 
-**Phase 3** — `useProject()` hook + addon preview decorator migrated to `tokenGraph` (commit `9c5a9d6`). Phase 3 closed out as a single commit because the per-block scope collapsed.
+**Phase 4** — Smart emitter migrated to graph walks (commit `0ef47bb`); MCP `get_axis_variance` derives from `tokenGraph` (commit `ce8bdfd`). Phase 4 closed out.
 
 ## Next up
 
-**Phase 4 — Smart emitter + MCP.** Switch `packages/core/src/css-axis-projected.ts` to back its emit from `tokenGraph` walks instead of cells. **Regression gate:** emitted CSS must be byte-for-byte identical to the legacy path on the reference fixture (snapshot test). Then switch `packages/mcp/src/tools/get-axis-variance.ts` derivation — wire shape unchanged.
+**Phase 5 — Bench + real-consumer validation gate.** Requires the anonymized real-consumer fixture that triggered the 15M-apply problem. **STOP-and-confirm checkpoint**: this phase cannot proceed without that fixture (synthetic benches alone don't satisfy the gating criteria). Task 5.1 surfaces this to the user; tasks 5.2–5.3 land once the fixture is in place.
 
 ## In-flight decisions / notes
 
 - `valueKey` was updated in Phase 1 (commit `03bb7b9`) to sort object keys recursively. This was originally framed as a violation of "alongside existing code" but was clarified as in-scope for long-lived feature branches.
 - `tsdown.config.ts` doesn't exist in `packages/core`; the build is driven by `scripts.build` CLI invocation in `package.json`. New entrypoints (`/graph` was the first) are added there.
 - `Project.tokenGraph` for layered/plain-parse projects (no resolver) is an empty graph; only resolver-backed projects build a real one. Phase 5+ may revisit if layered projects need walker support.
+- **Phase 6 blocker (alias provenance):** the walker (`resolveAt(graph, path, tuple)`) returns the resolved leaf token without preserving the SOURCE path's `aliasOf` field. The CSS emitter needs that to emit `var(--sb-…)` references instead of literal values. Task 4.1 worked around this by using `project.resolveAt()` (still legacy-backed) for token maps and the walker only for `valueKey`-based delta detection. Phase 6 needs an alias-preserving query helper (or a walker option) before the legacy `resolveAt` can be deleted.
+- `.prettierignore` files added at repo root and `packages/core/` to exclude `__snapshots__/` directories from oxfmt — the format sweep in commit `4a51e57` had quietly corrupted the golden CSS snapshot, hiding for nearly a phase.
 
 ## File index
 
