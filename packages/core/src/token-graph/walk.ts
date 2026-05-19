@@ -78,7 +78,6 @@ export function resolveAt(
         matchedWrite.aliasFields,
         tuple,
         ownMemo,
-        matchedWrite.originalKeyOrder,
       );
     }
   }
@@ -163,7 +162,6 @@ export function resolveAliasAt(
     directWrite.aliasFields,
     tuple,
     new Map(),
-    directWrite.originalKeyOrder,
   );
   return {
     ...node.baselineValue,
@@ -188,7 +186,6 @@ export function composePartial(
   fields: Record<string, string>,
   tuple: Record<string, string>,
   memo: Map<string, SwatchbookToken | typeof CYCLE_SENTINEL>,
-  originalKeyOrder?: readonly string[],
 ): SwatchbookToken {
   const result = { ...base };
   const baseValue = base.$value;
@@ -206,19 +203,6 @@ export function composePartial(
     if (resolved?.$value !== undefined) {
       assignByPath(value as object, fieldPath, resolved.$value);
     }
-  }
-
-  // When an originalKeyOrder is available (plain-object composites), rebuild the
-  // $value in source order so CSS sub-field emission matches the token definition.
-  if (originalKeyOrder && isPlainObject(value)) {
-    const ordered: Record<string, unknown> = {};
-    for (const k of originalKeyOrder) {
-      if (Object.hasOwn(value, k)) ordered[k] = value[k];
-    }
-    for (const k of Object.keys(value)) {
-      if (!Object.hasOwn(ordered, k)) ordered[k] = value[k];
-    }
-    value = ordered;
   }
 
   result.$value = value;

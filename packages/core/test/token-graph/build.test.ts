@@ -134,7 +134,10 @@ describe('extractWritesFromModifiers', () => {
         '0.color': 'color.brand.a',
         '1.color': 'color.brand.b',
       });
-      expect(write.baseValue.$value).toEqual([{ position: 0 }, { position: 1 }]);
+      expect(write.baseValue.$value).toEqual([
+        { color: '{color.brand.a}', position: 0 },
+        { color: '{color.brand.b}', position: 1 },
+      ]);
     }
   });
 

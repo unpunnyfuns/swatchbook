@@ -74,18 +74,10 @@ function toWriteValue(
     const aliasFields: Record<string, string> = {};
     walkPartialAliasFields(value, '', aliasFields);
     if (Object.keys(aliasFields).length > 0) {
-      const baseValue: SwatchbookToken = {
-        ...withType,
-        $value: stripAliasFields(value, aliasFields),
-      } as SwatchbookToken;
-      // Record the original key order from the full $value so composePartial
-      // can reconstruct the merged object in source order.
-      const originalKeyOrder = collectTopLevelKeyOrder(value);
       return {
         kind: 'partial-alias',
-        baseValue,
+        baseValue: withType,
         aliasFields,
-        ...(originalKeyOrder !== undefined ? { originalKeyOrder } : {}),
       };
     }
   }
@@ -111,60 +103,6 @@ function walkPartialAliasFields(value: unknown, prefix: string, out: Record<stri
     return;
   }
   // Numbers, booleans, and other primitives carry no alias syntax — skip silently.
-}
-
-function stripAliasFields(value: object, aliasFields: Record<string, string>): unknown {
-  const result: unknown = Array.isArray(value) ? [...value] : { ...value };
-  for (const fieldPath of Object.keys(aliasFields)) {
-    const parts = fieldPath.split('.');
-    let cur: unknown = result;
-    for (let i = 0; i < parts.length - 1; i++) {
-      const part = parts[i]!;
-      if (Array.isArray(cur)) {
-        const idx = Number(part);
-        if (!Number.isInteger(idx) || idx < 0 || idx >= (cur as unknown[]).length) {
-          cur = undefined;
-          break;
-        }
-        const child = (cur as unknown[])[idx];
-        if (Array.isArray(child)) (cur as unknown[])[idx] = [...child];
-        else if (isPlainObject(child)) (cur as unknown[])[idx] = { ...child };
-        else {
-          cur = undefined;
-          break;
-        }
-        cur = (cur as unknown[])[idx];
-      } else if (isPlainObject(cur)) {
-        const child = (cur as Record<string, unknown>)[part];
-        if (Array.isArray(child)) (cur as Record<string, unknown>)[part] = [...child];
-        else if (isPlainObject(child)) (cur as Record<string, unknown>)[part] = { ...child };
-        else {
-          cur = undefined;
-          break;
-        }
-        cur = (cur as Record<string, unknown>)[part];
-      } else {
-        cur = undefined;
-        break;
-      }
-    }
-    if (cur === undefined) continue;
-    const finalPart = parts[parts.length - 1]!;
-    if (Array.isArray(cur)) {
-      const idx = Number(finalPart);
-      if (Number.isInteger(idx) && idx >= 0 && idx < (cur as unknown[]).length) {
-        delete (cur as unknown[])[idx];
-      }
-    } else if (isPlainObject(cur)) {
-      delete (cur as Record<string, unknown>)[finalPart];
-    }
-  }
-  return result;
-}
-
-function collectTopLevelKeyOrder(value: unknown): readonly string[] | undefined {
-  if (isPlainObject(value)) return Object.keys(value);
-  return undefined;
 }
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
