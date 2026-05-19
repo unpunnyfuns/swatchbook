@@ -156,18 +156,12 @@ export function resolveAliasAt(
       $value: targetLeaf?.$value,
     };
   }
-  const composed = composePartial(
-    graph,
-    directWrite.baseValue,
-    directWrite.aliasFields,
-    tuple,
-    new Map(),
-  );
+  const composed = resolveAt(graph, path, tuple);
   return {
     ...node.baselineValue,
     ...directWrite.baseValue,
     partialAliasOf: directWrite.aliasFields,
-    $value: composed.$value,
+    $value: composed?.$value,
   };
 }
 
