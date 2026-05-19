@@ -1,4 +1,4 @@
-import type { Axis, Diagnostic, ParserInput, SwatchbookToken } from '#/types.ts';
+import type { Axis, Diagnostic, ParserInput, SwatchbookToken, TokenMap } from '#/types.ts';
 import type { TokenGraph, TokenGraphNode, WriteValue } from '#/token-graph/types.ts';
 
 const COMPOSITE_TYPES = new Set(['border', 'typography', 'transition', 'gradient', 'shadow']);
@@ -162,17 +162,18 @@ export function buildTokenGraph(
     axes,
   );
 
-  // Singleton applies seed the path universe — paths that exist only
-  // in non-default contexts are added to the union. Their resolved
-  // values aren't stored on the node (we rely on the walker to
-  // reconstruct them via writes + alias chains), but the universe
-  // must include them so downstream queries see every path.
+  // Singleton-apply sweep: each non-default (axis, ctx) tuple.
+  // Records resolved values per singleton so writes-only paths
+  // (absent from the default-tuple resolve) get a meaningful
+  // baselineValue from the first axis/context they appear in.
   const pathUniverse = new Set<string>(Object.keys(baseline));
+  const singletonResolves: { tuple: Record<string, string>; resolved: TokenMap }[] = [];
   for (const axis of axes) {
     for (const ctx of axis.contexts) {
       if (ctx === axis.default) continue;
-      const singletonTuple = { ...defaultTuple, [axis.name]: ctx };
-      const resolved = parserInput.resolver.apply(singletonTuple);
+      const tuple = { ...defaultTuple, [axis.name]: ctx };
+      const resolved = parserInput.resolver.apply(tuple);
+      singletonResolves.push({ tuple, resolved });
       for (const path of Object.keys(resolved)) pathUniverse.add(path);
     }
   }
@@ -180,7 +181,8 @@ export function buildTokenGraph(
 
   const nodes: Record<string, TokenGraphNode> = {};
   for (const path of pathUniverse) {
-    nodes[path] = buildNode(path, baseline[path], writesByPath[path] ?? {});
+    const baselineForNode = baseline[path] ?? findFirstSingletonValue(path, singletonResolves);
+    nodes[path] = buildNode(baselineForNode, writesByPath[path] ?? {});
   }
 
   const axisDefaults: Record<string, string> = {};
@@ -192,37 +194,43 @@ export function buildTokenGraph(
   };
 }
 
+function findFirstSingletonValue(
+  path: string,
+  singletons: readonly { tuple: Record<string, string>; resolved: TokenMap }[],
+): SwatchbookToken | undefined {
+  for (const { resolved } of singletons) {
+    if (resolved[path]) return resolved[path];
+  }
+  return undefined;
+}
+
 function buildNode(
-  _path: string,
   baselineToken: SwatchbookToken | undefined,
   writes: Record<string, Record<string, WriteValue>>,
 ): TokenGraphNode {
   if (!baselineToken) {
-    return {
-      baselineValue: {},
-      baselineKind: 'literal',
-      writes,
-      affectedBy: [],
-      aliases: [],
-      aliasedBy: [],
-    };
+    throw new Error(
+      'buildTokenGraph: path has writes but no resolvable value at default or any singleton tuple — graph cannot represent it',
+    );
   }
   const baselineKind = detectBaselineKind(baselineToken);
   const aliases: string[] = [];
-  if (baselineKind === 'alias' && typeof baselineToken.aliasOf === 'string') {
-    aliases.push(baselineToken.aliasOf);
-  }
+  let baselineAliasTarget: string | undefined;
   let baselinePartialFields: Record<string, string> | undefined;
-  if (baselineKind === 'partial-alias') {
+
+  if (baselineKind === 'alias') {
+    // detectBaselineKind only returns 'alias' when aliasOf is a string
+    baselineAliasTarget = baselineToken.aliasOf as string;
+    aliases.push(baselineAliasTarget);
+  } else if (baselineKind === 'partial-alias') {
     baselinePartialFields = extractPartialAliasFields(baselineToken.partialAliasOf);
     for (const target of Object.values(baselinePartialFields)) aliases.push(target);
   }
+
   return {
     baselineValue: baselineToken,
     baselineKind,
-    ...(baselineKind === 'alias' && typeof baselineToken.aliasOf === 'string'
-      ? { baselineAliasTarget: baselineToken.aliasOf }
-      : {}),
+    ...(baselineAliasTarget !== undefined ? { baselineAliasTarget } : {}),
     ...(baselinePartialFields !== undefined ? { baselinePartialFields } : {}),
     writes,
     affectedBy: [],
@@ -262,5 +270,7 @@ function walkPartialAliasTargets(
     for (const [k, v] of Object.entries(value)) {
       walkPartialAliasTargets(v, prefix ? `${prefix}.${k}` : k, out);
     }
+    return;
   }
+  // partialAliasOf values are strings or nested structures; primitives carry no path data.
 }

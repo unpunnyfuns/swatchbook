@@ -172,7 +172,17 @@ describe('buildTokenGraph baseline seeding', () => {
   it('seeds writes from each non-default singleton', async () => {
     const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
     const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
-    expect(graph.nodes['color.accent.bg']?.writes['mode']?.['Dark']).toBeDefined();
+    expect(graph.nodes['color.accent.bg']?.writes['mode']?.['Dark']).toMatchObject({
+      kind: 'alias',
+    });
+  });
+
+  it('every node has a defined baselineValue', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
+    for (const [path, node] of Object.entries(graph.nodes)) {
+      expect(node.baselineValue.$value, `${path} has undefined $value`).toBeDefined();
+    }
   });
 
   it('returns axis-ordered axes + defaults', async () => {
