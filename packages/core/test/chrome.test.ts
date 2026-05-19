@@ -99,12 +99,8 @@ it('emitAxisProjectedCss emits every chrome role — user entry as var, others a
   expect(chromeBlock).toBeDefined();
   expect(chromeBlock).toContain('color-scheme: light dark;');
   expect(chromeBlock).toContain('--swatchbook-surface-default: var(--sb-color-palette-blue-500);');
-  expect(chromeBlock).toContain(
-    `--swatchbook-accent-bg: ${DEFAULT_CHROME_MAP.accentBg};`,
-  );
-  expect(chromeBlock).toContain(
-    `--swatchbook-body-font-size: ${DEFAULT_CHROME_MAP.bodyFontSize};`,
-  );
+  expect(chromeBlock).toContain(`--swatchbook-accent-bg: ${DEFAULT_CHROME_MAP.accentBg};`);
+  expect(chromeBlock).toContain(`--swatchbook-body-font-size: ${DEFAULT_CHROME_MAP.bodyFontSize};`);
 });
 
 it('emitAxisProjectedCss emits all ten roles even when chrome config is absent', async () => {

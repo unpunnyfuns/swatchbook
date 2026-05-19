@@ -163,9 +163,7 @@ describe('alias-graph', () => {
       } as never,
     };
     const graph = buildAliasGraph({ axes: [], resolverModifiers: {}, baseline });
-    expect(graph.reachableFromPath.get('bg')).toEqual(
-      new Set(['bg', 'color.red', 'color.blue']),
-    );
+    expect(graph.reachableFromPath.get('bg')).toEqual(new Set(['bg', 'color.red', 'color.blue']));
   });
 
   it('partialAliasOf handles shadow composite (array of objects)', () => {

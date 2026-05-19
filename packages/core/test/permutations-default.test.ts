@@ -78,7 +78,10 @@ describe('resolveDefaultTuple', () => {
     expect(tuple).toEqual({ mode: 'Dark', brand: 'Default', contrast: 'Normal' });
     expect(diagnostics).toHaveLength(2);
     expect(diagnostics.map((d) => d.message)).toEqual(
-      expect.arrayContaining([expect.stringContaining('brand'), expect.stringContaining('density')]),
+      expect.arrayContaining([
+        expect.stringContaining('brand'),
+        expect.stringContaining('density'),
+      ]),
     );
   });
 

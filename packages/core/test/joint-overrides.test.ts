@@ -17,7 +17,7 @@ it('produces at least one entry for the reference fixture (which has a known joi
   expect(project.jointOverrides.length).toBeGreaterThan(0);
 });
 
-it("every entry covers a partial tuple of size ≥ 2 (joint by definition; singleton variance is single-axis, captured in cells)", () => {
+it('every entry covers a partial tuple of size ≥ 2 (joint by definition; singleton variance is single-axis, captured in cells)', () => {
   for (const [, override] of project.jointOverrides) {
     expect(Object.keys(override.axes).length).toBeGreaterThanOrEqual(2);
   }
@@ -29,7 +29,7 @@ it('every entry holds at least one token whose value at the partial tuple diverg
   }
 });
 
-it("iteration order is ascending arity (so composition can apply lower-order overrides before higher-order ones)", () => {
+it('iteration order is ascending arity (so composition can apply lower-order overrides before higher-order ones)', () => {
   let prevArity = 0;
   for (const [, override] of project.jointOverrides) {
     const arity = Object.keys(override.axes).length;

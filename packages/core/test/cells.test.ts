@@ -24,7 +24,7 @@ it("populates one cell per (axis, context) — including each axis's default —
   }
 });
 
-it("the default cell on each axis IS the same baseline TokenMap reference (shared identity, not a copy)", () => {
+it('the default cell on each axis IS the same baseline TokenMap reference (shared identity, not a copy)', () => {
   const [first] = project.axes;
   expect(first, 'reference fixture must have at least one axis').toBeDefined();
   if (!first) throw new Error('unreachable');
@@ -40,7 +40,7 @@ it("the default cell on each axis IS the same baseline TokenMap reference (share
   }
 });
 
-it("non-default cells store only delta tokens (paths whose value differs from baseline)", () => {
+it('non-default cells store only delta tokens (paths whose value differs from baseline)', () => {
   const [first] = project.axes;
   expect(first, 'reference fixture must have at least one axis').toBeDefined();
   if (!first) throw new Error('unreachable');

@@ -4,6 +4,7 @@ import type { CSSPluginOptions } from '@terrazzo/plugin-css';
 import type { TokenListingPluginOptions } from '@terrazzo/plugin-token-listing';
 import type { ChromeRole } from '#/chrome.ts';
 import type { TokenListingByPath } from '#/token-listing.ts';
+import type { TokenGraph } from '#/token-graph/types.ts';
 import type { TupleKey } from '#/tuple-key.ts';
 
 /**
@@ -407,6 +408,16 @@ export interface Project {
    * spans every path that appears in any permutation's resolved map.
    */
   varianceByPath: ReadonlyMap<string, AxisVarianceResult>;
+  /**
+   * Walkable token graph — the new primary resolution data structure
+   * (see token-graph subpath and the redesign spec). Currently sits
+   * alongside `cells` / `jointOverrides` / `varianceByPath` during
+   * Phase 1 of the redesign; consumers can query through it via the
+   * `@unpunnyfuns/swatchbook-core/graph` subpath helpers (`resolveAt`,
+   * `getVariance`, etc.). Phase 6 of the redesign removes the legacy
+   * materialized fields; this becomes the sole resolution surface.
+   */
+  tokenGraph: TokenGraph;
   /**
    * Absolute paths of every file loaded while building the project —
    * the resolver file (if any), every `$ref` target it pulled in, every

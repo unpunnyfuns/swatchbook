@@ -15,10 +15,9 @@ describe('graph walk vs resolver.apply', () => {
         const resolver = parserInput.resolver.apply(tuple);
         for (const path of Object.keys(resolver)) {
           const fromGraph = resolveAt(graph, path, tuple);
-          expect(
-            valueKey(fromGraph),
-            `${path} at ${JSON.stringify(tuple)}`,
-          ).toBe(valueKey(resolver[path]));
+          expect(valueKey(fromGraph), `${path} at ${JSON.stringify(tuple)}`).toBe(
+            valueKey(resolver[path]),
+          );
         }
       }
     }
@@ -31,18 +30,15 @@ describe('graph walk vs resolver.apply', () => {
       const resolver = parserInput.resolver.apply(tuple);
       for (const path of Object.keys(resolver)) {
         const fromGraph = resolveAt(graph, path, tuple);
-        expect(
-          valueKey(fromGraph),
-          `${path} at ${JSON.stringify(tuple)}`,
-        ).toBe(valueKey(resolver[path]));
+        expect(valueKey(fromGraph), `${path} at ${JSON.stringify(tuple)}`).toBe(
+          valueKey(resolver[path]),
+        );
       }
     }
   });
 });
 
-function* enumerateCartesian(
-  axes: readonly Axis[],
-): Generator<Record<string, string>> {
+function* enumerateCartesian(axes: readonly Axis[]): Generator<Record<string, string>> {
   if (axes.length === 0) {
     yield {};
     return;

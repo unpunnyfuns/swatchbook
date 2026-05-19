@@ -9,6 +9,8 @@ import { resolveDefaultTuple } from '#/permutations/default.ts';
 import { normalizePermutations } from '#/permutations/normalize.ts';
 import { buildResolveAt } from '#/resolve-at.ts';
 import { computeTokenListing } from '#/token-listing.ts';
+import { buildTokenGraph } from '#/token-graph/build.ts';
+import type { TokenGraph } from '#/token-graph/types.ts';
 import { buildVarianceByPath } from '#/variance-by-path.ts';
 import { permutationID } from '#/types.ts';
 import type { Axis, Config, Permutation, Project, TokenMap } from '#/types.ts';
@@ -149,6 +151,21 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     baselineForVariance,
   );
 
+  // Build the token-graph alongside the legacy cells/jointOverrides
+  // path. Resolver-backed projects get the real graph; layered /
+  // plain-parse projects get an empty graph for now (no parserInput).
+  const tokenGraphResult = normalized.parserInput?.resolver
+    ? buildTokenGraph(normalized.parserInput, filteredAxes, projectDefaultTuple)
+    : {
+        graph: {
+          nodes: {},
+          axes: filteredAxes.map((a) => a.name),
+          axisDefaults: projectDefaultTuple,
+          axisContexts: Object.fromEntries(filteredAxes.map((a) => [a.name, a.contexts])),
+        } satisfies TokenGraph,
+        diagnostics: [],
+      };
+
   // `validateChrome` checks targets against the project's path
   // universe. `varianceByPath.keys()` is the union of every path
   // that appears in any theme by construction — same set the prior
@@ -171,6 +188,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     defaultTuple: projectDefaultTuple,
     resolveAt,
     varianceByPath,
+    tokenGraph: tokenGraphResult.graph,
     sourceFiles: normalized.sourceFiles,
     cwd,
     listing,
@@ -183,6 +201,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
       ...chromeDiagnostics,
       ...cssOptionsDiagnostics,
       ...listingDiagnostics,
+      ...tokenGraphResult.diagnostics,
     ],
   };
 }

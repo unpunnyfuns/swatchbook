@@ -116,9 +116,7 @@ it('respects options.chrome override (passes through to chrome alias block)', ()
   const css = emitAxisProjectedCss(project, {
     chrome: { surfaceDefault: 'color.palette.blue.500' },
   });
-  expect(css).toContain(
-    '--swatchbook-surface-default: var(--sb-color-palette-blue-500);',
-  );
+  expect(css).toContain('--swatchbook-surface-default: var(--sb-color-palette-blue-500);');
 });
 
 // Golden snapshot. Substring matchers above cover individual shape

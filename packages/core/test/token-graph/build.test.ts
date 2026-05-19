@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { buildTokenGraph, computeAffectedBy, extractWritesFromModifiers } from '#/token-graph/build.ts';
+import {
+  buildTokenGraph,
+  computeAffectedBy,
+  extractWritesFromModifiers,
+} from '#/token-graph/build.ts';
 import type { Axis } from '#/types.ts';
 import type { TokenGraphNode } from '#/token-graph/types.ts';
 import { loadReferenceFixtureParserInput } from '../_helpers.ts';

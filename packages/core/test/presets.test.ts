@@ -25,18 +25,14 @@ const axes: Axis[] = [
 
 describe('validatePresets', () => {
   it('passes a well-formed preset through unchanged', () => {
-    const raw: Preset[] = [
-      { name: 'Brand A Dark', axes: { mode: 'Dark', brand: 'Brand A' } },
-    ];
+    const raw: Preset[] = [{ name: 'Brand A Dark', axes: { mode: 'Dark', brand: 'Brand A' } }];
     const { presets, diagnostics } = validatePresets(raw, axes);
     expect(diagnostics).toEqual([]);
     expect(presets).toEqual(raw);
   });
 
   it('sanitizes unknown axis keys and emits a warn diagnostic', () => {
-    const raw: Preset[] = [
-      { name: 'Weird', axes: { mode: 'Dark', nonsense: 'Whatever' } },
-    ];
+    const raw: Preset[] = [{ name: 'Weird', axes: { mode: 'Dark', nonsense: 'Whatever' } }];
     const { presets, diagnostics } = validatePresets(raw, axes);
     expect(presets).toEqual([{ name: 'Weird', axes: { mode: 'Dark' } }]);
     expect(diagnostics).toHaveLength(1);
@@ -47,9 +43,7 @@ describe('validatePresets', () => {
   });
 
   it('sanitizes invalid context values and emits a warn diagnostic', () => {
-    const raw: Preset[] = [
-      { name: 'Bad Mode', axes: { mode: 'Sepia' } },
-    ];
+    const raw: Preset[] = [{ name: 'Bad Mode', axes: { mode: 'Sepia' } }];
     const { presets, diagnostics } = validatePresets(raw, axes);
     expect(presets).toEqual([{ name: 'Bad Mode', axes: {} }]);
     expect(diagnostics).toHaveLength(1);
@@ -78,4 +72,3 @@ describe('validatePresets', () => {
     expect(diagnostics).toEqual([]);
   });
 });
-

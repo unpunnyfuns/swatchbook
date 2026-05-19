@@ -58,9 +58,7 @@ describe('Token Listing integration', () => {
       fixtureCwd,
     );
     expect(Object.keys(project.listing)).toHaveLength(0);
-    const listingDiagnostics = project.diagnostics.filter(
-      (d) => d.group === 'swatchbook/listing',
-    );
+    const listingDiagnostics = project.diagnostics.filter((d) => d.group === 'swatchbook/listing');
     expect(listingDiagnostics).toHaveLength(1);
     expect(listingDiagnostics[0]?.severity).toBe('warn');
     expect(listingDiagnostics[0]?.message).toContain('plugin asplode');

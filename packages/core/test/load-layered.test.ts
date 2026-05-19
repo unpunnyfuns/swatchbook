@@ -116,4 +116,3 @@ describe('loadProject — layered axes', () => {
     });
   });
 });
-

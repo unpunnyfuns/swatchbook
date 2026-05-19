@@ -24,9 +24,7 @@ function tok(value: unknown): TokenNormalized {
 // five fields (apply / listPermutations / getPermutationID / source /
 // isValidInput); none of the others are reached, so a typed mock would
 // be dead weight.
-function mockResolver(
-  apply: (input: Record<string, string>) => TokenMap,
-): Resolver | undefined {
+function mockResolver(apply: (input: Record<string, string>) => TokenMap): Resolver | undefined {
   return { apply } as unknown as Resolver;
 }
 
@@ -163,9 +161,7 @@ it('marks every participating axis touching when an arity-3+ divergence is found
     { mode: 'Light', brand: 'Default', contrast: 'Normal' },
     resolver,
   );
-  const tripleEntries = overrides
-    .map(([, o]) => o)
-    .filter((o) => Object.keys(o.axes).length === 3);
+  const tripleEntries = overrides.map(([, o]) => o).filter((o) => Object.keys(o.axes).length === 3);
   expect(tripleEntries).toHaveLength(1);
   expect(tripleEntries[0]?.tokens['color.fg']?.$value).toBe('red');
   // Arity-3 conservative marking: every participating axis flagged.

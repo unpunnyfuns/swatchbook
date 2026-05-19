@@ -2,19 +2,19 @@
   "color": {
     "$type": "color",
     "surface": { "$value": "{color.white}" },
-    "text":    { "$value": "{color.black}" },
-    "accent":  { "$value": "{color.blue}" },
-    "fg":      { "$value": "{color.text}" }
+    "text": { "$value": "{color.black}" },
+    "accent": { "$value": "{color.blue}" },
+    "fg": { "$value": "{color.text}" }
   },
   "shadow": {
     "$type": "shadow",
     "md": {
       "$value": {
-        "color":   "{color.black}",
+        "color": "{color.black}",
         "offsetX": { "value": 0, "unit": "px" },
         "offsetY": "{dimension.xs}",
-        "blur":    "{dimension.sm}",
-        "spread":  { "value": 0, "unit": "px" }
+        "blur": "{dimension.sm}",
+        "spread": { "value": 0, "unit": "px" }
       }
     }
   },
@@ -32,8 +32,8 @@
     "$type": "transition",
     "enter": {
       "$value": {
-        "duration":       "{duration.fast}",
-        "delay":          { "value": 0, "unit": "ms" },
+        "duration": "{duration.fast}",
+        "delay": { "value": 0, "unit": "ms" },
         "timingFunction": "{cubicBezier.ease-out}"
       }
     }
@@ -42,10 +42,10 @@
     "$type": "typography",
     "heading": {
       "$value": {
-        "fontFamily":    "{fontFamily.sans}",
-        "fontSize":      { "value": 24, "unit": "px" },
-        "fontWeight":    "{fontWeight.bold}",
-        "lineHeight":    1.2,
+        "fontFamily": "{fontFamily.sans}",
+        "fontSize": { "value": 24, "unit": "px" },
+        "fontWeight": "{fontWeight.bold}",
+        "lineHeight": 1.2,
         "letterSpacing": { "value": 0, "unit": "px" }
       }
     }
