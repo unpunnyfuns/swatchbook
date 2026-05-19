@@ -1,5 +1,5 @@
-import type { Axis, SwatchbookToken } from '#/types.ts';
-import type { WriteValue } from '#/token-graph/types.ts';
+import type { Axis, Diagnostic, ParserInput, SwatchbookToken } from '#/types.ts';
+import type { TokenGraph, TokenGraphNode, WriteValue } from '#/token-graph/types.ts';
 
 const COMPOSITE_TYPES = new Set(['border', 'typography', 'transition', 'gradient', 'shadow']);
 const ALIAS_RE = /^\{(.+)\}$/;
@@ -144,4 +144,123 @@ function stripAliasFields(value: object, aliasFields: Record<string, string>): u
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+
+export interface BuildTokenGraphResult {
+  graph: TokenGraph;
+  diagnostics: readonly Diagnostic[];
+}
+
+export function buildTokenGraph(
+  parserInput: ParserInput,
+  axes: readonly Axis[],
+  defaultTuple: Record<string, string>,
+): BuildTokenGraphResult {
+  const baseline = parserInput.resolver.apply(defaultTuple);
+  const writesByPath = extractWritesFromModifiers(
+    parserInput.resolver.source?.modifiers ?? {},
+    axes,
+  );
+
+  // Singleton applies seed the path universe — paths that exist only
+  // in non-default contexts are added to the union. Their resolved
+  // values aren't stored on the node (we rely on the walker to
+  // reconstruct them via writes + alias chains), but the universe
+  // must include them so downstream queries see every path.
+  const pathUniverse = new Set<string>(Object.keys(baseline));
+  for (const axis of axes) {
+    for (const ctx of axis.contexts) {
+      if (ctx === axis.default) continue;
+      const singletonTuple = { ...defaultTuple, [axis.name]: ctx };
+      const resolved = parserInput.resolver.apply(singletonTuple);
+      for (const path of Object.keys(resolved)) pathUniverse.add(path);
+    }
+  }
+  for (const path of Object.keys(writesByPath)) pathUniverse.add(path);
+
+  const nodes: Record<string, TokenGraphNode> = {};
+  for (const path of pathUniverse) {
+    nodes[path] = buildNode(path, baseline[path], writesByPath[path] ?? {});
+  }
+
+  const axisDefaults: Record<string, string> = {};
+  for (const axis of axes) axisDefaults[axis.name] = axis.default;
+
+  return {
+    graph: { nodes, axes: axes.map((a) => a.name), axisDefaults },
+    diagnostics: [],
+  };
+}
+
+function buildNode(
+  _path: string,
+  baselineToken: SwatchbookToken | undefined,
+  writes: Record<string, Record<string, WriteValue>>,
+): TokenGraphNode {
+  if (!baselineToken) {
+    return {
+      baselineValue: {},
+      baselineKind: 'literal',
+      writes,
+      affectedBy: [],
+      aliases: [],
+      aliasedBy: [],
+    };
+  }
+  const baselineKind = detectBaselineKind(baselineToken);
+  const aliases: string[] = [];
+  if (baselineKind === 'alias' && typeof baselineToken.aliasOf === 'string') {
+    aliases.push(baselineToken.aliasOf);
+  }
+  let baselinePartialFields: Record<string, string> | undefined;
+  if (baselineKind === 'partial-alias') {
+    baselinePartialFields = extractPartialAliasFields(baselineToken.partialAliasOf);
+    for (const target of Object.values(baselinePartialFields)) aliases.push(target);
+  }
+  return {
+    baselineValue: baselineToken,
+    baselineKind,
+    ...(baselineKind === 'alias' && typeof baselineToken.aliasOf === 'string'
+      ? { baselineAliasTarget: baselineToken.aliasOf }
+      : {}),
+    ...(baselinePartialFields !== undefined ? { baselinePartialFields } : {}),
+    writes,
+    affectedBy: [],
+    aliases,
+    aliasedBy: [],
+  };
+}
+
+function detectBaselineKind(token: SwatchbookToken): 'literal' | 'alias' | 'partial-alias' {
+  if (typeof token.aliasOf === 'string') return 'alias';
+  if (token.partialAliasOf !== undefined) return 'partial-alias';
+  return 'literal';
+}
+
+function extractPartialAliasFields(partialAliasOf: unknown): Record<string, string> {
+  const fields: Record<string, string> = {};
+  walkPartialAliasTargets(partialAliasOf, '', fields);
+  return fields;
+}
+
+function walkPartialAliasTargets(
+  value: unknown,
+  prefix: string,
+  out: Record<string, string>,
+): void {
+  if (typeof value === 'string') {
+    if (prefix) out[prefix] = value;
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((entry, i) =>
+      walkPartialAliasTargets(entry, prefix ? `${prefix}.${i}` : String(i), out),
+    );
+    return;
+  }
+  if (isPlainObject(value)) {
+    for (const [k, v] of Object.entries(value)) {
+      walkPartialAliasTargets(v, prefix ? `${prefix}.${k}` : k, out);
+    }
+  }
 }

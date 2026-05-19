@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { extractWritesFromModifiers } from '#/token-graph/build.ts';
+import { buildTokenGraph, extractWritesFromModifiers } from '#/token-graph/build.ts';
 import type { Axis } from '#/types.ts';
+import { loadReferenceFixtureParserInput } from '../_helpers.ts';
 
 describe('extractWritesFromModifiers', () => {
   it('extracts literal writes', () => {
@@ -147,5 +148,37 @@ describe('extractWritesFromModifiers', () => {
     const writes = extractWritesFromModifiers(modifiers, axes);
     expect(writes['a']?.mode?.Dark).toEqual({ kind: 'literal', value: { $value: '#000' } });
     expect(writes['a']?.brand).toBeUndefined();
+  });
+});
+
+describe('buildTokenGraph baseline seeding', () => {
+  it('creates one node per baseline path with literal baselineKind for leaf tokens', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
+    const blueLeaf = graph.nodes['color.palette.blue.500'];
+    expect(blueLeaf).toBeDefined();
+    expect(blueLeaf?.baselineKind).toBe('literal');
+    expect(blueLeaf?.baselineValue.$value).toBeDefined();
+  });
+
+  it('marks alias tokens with baselineKind=alias and target path', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
+    const accentBg = graph.nodes['color.accent.bg'];
+    expect(accentBg?.baselineKind).toBe('alias');
+    expect(accentBg?.baselineAliasTarget).toBeDefined();
+  });
+
+  it('seeds writes from each non-default singleton', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
+    expect(graph.nodes['color.accent.bg']?.writes['mode']?.['Dark']).toBeDefined();
+  });
+
+  it('returns axis-ordered axes + defaults', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
+    expect(graph.axes).toEqual(axes.map((a) => a.name));
+    expect(graph.axisDefaults).toEqual({ mode: 'Light', brand: 'Default', contrast: 'Normal' });
   });
 });
