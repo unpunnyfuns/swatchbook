@@ -2,11 +2,12 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ConsumerOutput, SwatchbookProvider } from '#/index.ts';
 import type { ProjectSnapshot, VirtualTokenListingShape } from '#/index.ts';
+import { makeResolveAtFromCells } from './_snapshot-helpers.ts';
 
 function makeSnapshot(
   listing?: Readonly<Record<string, VirtualTokenListingShape>>,
 ): ProjectSnapshot {
-  return {
+  const snap: ProjectSnapshot = {
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
     disabledAxes: [],
     presets: [],
@@ -26,6 +27,8 @@ function makeSnapshot(
     css: '',
     ...(listing !== undefined && { listing }),
   };
+  snap.resolveAt = makeResolveAtFromCells(snap);
+  return snap;
 }
 
 describe('ConsumerOutput', () => {

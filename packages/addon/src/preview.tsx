@@ -1,10 +1,6 @@
 /// <reference types="vite/client" />
-import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
-import type {
-  Axis as CoreAxis,
-  Cells as CoreCells,
-  JointOverrides,
-} from '@unpunnyfuns/swatchbook-core';
+import { resolveAllAt } from '@unpunnyfuns/swatchbook-core/graph';
+import type { TokenMap } from '@unpunnyfuns/swatchbook-core';
 import type { Decorator, Preview } from '@storybook/react-vite';
 import type { CSSProperties } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -27,6 +23,7 @@ import {
   jointOverrides as virtualJointOverrides,
   listing as virtualListing,
   presets as virtualPresets,
+  tokenGraph as virtualTokenGraph,
   varianceByPath as virtualVarianceByPath,
 } from 'virtual:swatchbook/tokens';
 import {
@@ -277,18 +274,14 @@ function resolveColorFormat(raw: SwatchbookGlobals[typeof COLOR_FORMAT_GLOBAL_KE
 
 /**
  * Single shared `resolveAt` instance for the lifetime of the preview
- * iframe. The inputs (`virtualAxes`, `virtualCells`, …) are all
- * module-level virtual-module exports with stable identity, so this
- * never needs to rebuild; downstream `ProjectSnapshot` consumers can
- * key memos on the snapshot wrapper without worrying about
- * `resolveAt` churning when Storybook recreates `context.globals`.
+ * iframe. `virtualTokenGraph` is a module-level virtual-module export
+ * with stable identity, so this closure never needs to rebuild;
+ * downstream `ProjectSnapshot` consumers can key memos on the snapshot
+ * wrapper without worrying about `resolveAt` churning when Storybook
+ * recreates `context.globals`.
  */
-const previewResolveAt = buildResolveAt(
-  virtualAxes as readonly CoreAxis[],
-  virtualCells as CoreCells,
-  virtualJointOverrides as JointOverrides,
-  virtualDefaultTuple,
-);
+const previewResolveAt = (tuple: Record<string, string>): TokenMap =>
+  resolveAllAt(virtualTokenGraph, tuple);
 
 const themedDecorator: Decorator = (Story, context) => {
   const globals = context.globals as SwatchbookGlobals;
@@ -352,6 +345,7 @@ const themedDecorator: Decorator = (Story, context) => {
       cells: virtualCells,
       jointOverrides: virtualJointOverrides,
       varianceByPath: virtualVarianceByPath,
+      tokenGraph: virtualTokenGraph,
       defaultTuple: virtualDefaultTuple,
       resolveAt: previewResolveAt,
     }),
@@ -507,6 +501,7 @@ interface HmrSnapshot {
   cells: typeof virtualCells;
   jointOverrides: typeof virtualJointOverrides;
   varianceByPath: typeof virtualVarianceByPath;
+  tokenGraph: typeof virtualTokenGraph;
   defaultTuple: typeof virtualDefaultTuple;
 }
 if (import.meta.hot) {

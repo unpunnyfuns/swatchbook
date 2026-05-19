@@ -8,9 +8,10 @@
 import { render, screen, within } from '@testing-library/react';
 import { SwatchbookProvider, TokenNavigator } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
+import { makeResolveAtFromCells } from './_snapshot-helpers.ts';
 
 export function snapshot(): ProjectSnapshot {
-  return {
+  const snap: ProjectSnapshot = {
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
     disabledAxes: [],
     presets: [],
@@ -32,6 +33,8 @@ export function snapshot(): ProjectSnapshot {
     diagnostics: [],
     css: '',
   };
+  snap.resolveAt = makeResolveAtFromCells(snap);
+  return snap;
 }
 
 export function renderNav(

@@ -2,9 +2,10 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { SwatchbookProvider, ColorPalette } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
+import { makeResolveAtFromCells } from './_snapshot-helpers.ts';
 
 function makeSnapshot(): ProjectSnapshot {
-  return {
+  const snap: ProjectSnapshot = {
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
     disabledAxes: [],
     presets: [],
@@ -27,6 +28,8 @@ function makeSnapshot(): ProjectSnapshot {
     diagnostics: [],
     css: '',
   };
+  snap.resolveAt = makeResolveAtFromCells(snap);
+  return snap;
 }
 
 describe('ColorPalette', () => {

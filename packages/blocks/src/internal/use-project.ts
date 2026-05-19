@@ -1,11 +1,11 @@
-import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
+import { resolveAllAt, getVariance, listPaths } from '@unpunnyfuns/swatchbook-core/graph';
 import { makeCssVar } from '@unpunnyfuns/swatchbook-core/css-var';
 import {
   ensureStyleElement,
   SWATCHBOOK_STYLE_ELEMENT_ID,
 } from '@unpunnyfuns/swatchbook-core/style-element';
 import { tupleToName } from '@unpunnyfuns/swatchbook-core/themes';
-import type { Axis, Cells, JointOverrides } from '@unpunnyfuns/swatchbook-core';
+import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
 import { useEffect, useMemo } from 'react';
 import type {
   VirtualTokenGraph,
@@ -43,14 +43,15 @@ export interface ProjectData {
   varianceByPath: VirtualVarianceByPathShape;
   /**
    * Pre-built token graph. JSON-safe; nodes carry per-axis writes
-   * plus alias edges. Phase 3 block migrations will read from this
-   * instead of `cells + jointOverrides`.
+   * plus alias edges. The hook backs `resolveAt` and `varianceByPath`
+   * from this graph; `cells + jointOverrides` are no longer read at
+   * runtime.
    */
   tokenGraph: VirtualTokenGraph;
   /**
    * Compose the resolved `TokenMap` for any tuple of axis selections.
-   * Built browser-side from `cells + jointOverrides` shipped over the
-   * wire — no resolver needed.
+   * Backed browser-side by `resolveAllAt` over the `tokenGraph` —
+   * no cells/jointOverrides reconstruction needed.
    */
   resolveAt: (tuple: Record<string, string>) => ResolvedTokens;
 }
@@ -66,45 +67,33 @@ function defaultTuple(axes: readonly VirtualAxis[]): Record<string, string> {
 }
 
 /**
- * Reconstruct a `resolveAt` accessor from snapshot data. Both `cells`
- * and `jointOverrides` ship as plain JSON in the same shape core uses
- * internally — no Map reconstruction at the boundary. Stable identity
- * across calls with the same snapshot — `useMemo` keyed on the
- * snapshot fields produces a referentially stable function.
+ * Build a `resolveAt` accessor backed by the token graph. Returns an
+ * empty resolver when no graph is present (test stubs, partial
+ * snapshots). Stable identity when memoized on `tokenGraph` — the
+ * graph is a module-level virtual-module export so its reference stays
+ * constant for the lifetime of the iframe.
  */
-function makeResolveAt(snapshot: {
-  axes: readonly VirtualAxis[];
-  cells?: ProjectSnapshot['cells'];
-  jointOverrides?: ProjectSnapshot['jointOverrides'];
-  defaultTuple?: ProjectSnapshot['defaultTuple'];
-}): (tuple: Record<string, string>) => ResolvedTokens {
-  const cells = (snapshot.cells ?? {}) as Cells;
-  const jointOverrides = (snapshot.jointOverrides ?? []) as JointOverrides;
-  const defaults = snapshot.defaultTuple ?? defaultTuple(snapshot.axes);
-  const resolver = buildResolveAt(
-    snapshot.axes as readonly Axis[],
-    cells,
-    jointOverrides,
-    defaults,
-  );
-  return (tuple) => resolver(tuple);
+function makeResolveAt(
+  graph: VirtualTokenGraph | undefined,
+): (tuple: Record<string, string>) => ResolvedTokens {
+  if (!graph) return () => ({});
+  return (tuple) => resolveAllAt(graph, tuple) as unknown as ResolvedTokens;
 }
 
 /**
  * Build the `resolveAt` accessor for a snapshot. Prefers the
  * snapshot's own `resolveAt` (the addon's preview decorator
  * pre-builds one at module load — see `previewResolveAt` in
- * `packages/addon/src/preview.tsx`), otherwise composes one from
- * `cells` + `jointOverrides` via `makeResolveAt`. Hand-built
- * snapshots should provide both via the test `withCellsShape`
- * helper or by populating the fields directly.
+ * `packages/addon/src/preview.tsx`), otherwise builds one from
+ * `tokenGraph` via `makeResolveAt`. Hand-built snapshots can omit
+ * `resolveAt`; the graph-backed fallback covers them.
  */
 function snapshotResolveAt(
   snapshot: ProjectSnapshot,
 ): (tuple: Record<string, string>) => ResolvedTokens {
   if (snapshot.resolveAt)
     return snapshot.resolveAt as (tuple: Record<string, string>) => ResolvedTokens;
-  return makeResolveAt(snapshot);
+  return makeResolveAt(snapshot.tokenGraph);
 }
 
 /**
@@ -136,23 +125,33 @@ export function useProject(): ProjectData {
   // on them directly keeps `resolveAt` (and the resolved map it
   // returns) referentially stable across renders.
   const axes = snapshot?.axes;
-  const cells = snapshot?.cells;
-  const jointOverrides = snapshot?.jointOverrides;
-  const dataDefaultTuple = snapshot?.defaultTuple;
   const activeAxes = snapshot?.activeAxes;
   const activeTheme = snapshot?.activeTheme;
   const diagnostics = snapshot?.diagnostics;
   const cssVarPrefix = snapshot?.cssVarPrefix;
   const listing = snapshot?.listing;
-  const varianceByPath = snapshot?.varianceByPath;
   const tokenGraph = snapshot?.tokenGraph;
   const resolveAt = useMemo(() => {
     if (!snapshot) return null;
     return snapshotResolveAt(snapshot);
     // The deps below are deliberately the stable inner fields rather
     // than `snapshot` itself; see the long block comment above.
+    // `tokenGraph` is a stable module-level virtual-module export, so
+    // depending on it directly keeps `resolveAt` (and the resolved map
+    // it returns) referentially stable across renders.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [axes, cells, jointOverrides, dataDefaultTuple, activeTheme]);
+  }, [tokenGraph, activeTheme]);
+  // Pre-compute variance for every path in the graph. `getVariance` is
+  // cheap (O(paths × axes)); wrapping in `useMemo` keyed on `tokenGraph`
+  // ensures it only recomputes when the graph itself changes.
+  const derivedVarianceByPath = useMemo<VirtualVarianceByPathShape>(() => {
+    if (!tokenGraph) return {};
+    const out: Record<string, AxisVarianceResult> = {};
+    for (const path of listPaths(tokenGraph)) {
+      out[path] = getVariance(tokenGraph, path);
+    }
+    return out;
+  }, [tokenGraph]);
   // Memoize the returned ProjectData against the same stable inner
   // fields — without this, blocks `useMemo([project, …])` calls
   // invalidate every render (the function returns a fresh object
@@ -168,7 +167,7 @@ export function useProject(): ProjectData {
       diagnostics: diagnostics ?? [],
       cssVarPrefix: cssVarPrefix ?? '',
       listing: listing ?? {},
-      varianceByPath: varianceByPath ?? {},
+      varianceByPath: derivedVarianceByPath,
       tokenGraph: tokenGraph ?? { nodes: {}, axes: [], axisDefaults: {}, axisContexts: {} },
       resolveAt,
     };
@@ -177,15 +176,12 @@ export function useProject(): ProjectData {
     snapshot,
     resolveAt,
     axes,
-    cells,
-    jointOverrides,
-    dataDefaultTuple,
     activeTheme,
     activeAxes,
     diagnostics,
     cssVarPrefix,
     listing,
-    varianceByPath,
+    derivedVarianceByPath,
     tokenGraph,
   ]);
   const fallback = useVirtualModuleFallback(snapshot === null);
@@ -223,21 +219,23 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
 
   const activeTheme = contextPermutation || tupleToName(tokens.axes, activeAxes);
 
-  // `buildResolveAt` returns a closure that memoizes on the canonical
-  // tuple key, so wrapping the call in another `useMemo` would be
-  // redundant — the inner memo handles the per-tuple cache. We only
-  // need `useMemo` for the outer `resolveAt` itself so React's
-  // reference equality stays stable between renders.
-  const resolveAt = useMemo(
-    () =>
-      makeResolveAt({
-        axes: tokens.axes,
-        cells: tokens.cells,
-        jointOverrides: tokens.jointOverrides,
-        defaultTuple: tokens.defaultTuple,
-      }),
-    [tokens.axes, tokens.cells, tokens.jointOverrides, tokens.defaultTuple],
-  );
+  // `resolveAllAt` is a pure function over the graph; the only memo
+  // we need is for the outer closure so React's reference equality
+  // stays stable between renders. `tokens.tokenGraph` is the stable
+  // module-level virtual-module export — changes only on HMR refresh.
+  const resolveAt = useMemo(() => makeResolveAt(tokens.tokenGraph), [tokens.tokenGraph]);
+
+  // Pre-compute variance for every path in the graph, matching the
+  // provider path's approach for consistent O(1) block lookups.
+  const fallbackVarianceByPath = useMemo<VirtualVarianceByPathShape>(() => {
+    const graph = tokens.tokenGraph;
+    if (!graph) return {};
+    const out: Record<string, AxisVarianceResult> = {};
+    for (const path of listPaths(graph)) {
+      out[path] = getVariance(graph, path);
+    }
+    return out;
+  }, [tokens.tokenGraph]);
 
   // Memoize the returned ProjectData against the stable inner fields
   // for the same reason the provider path does — fresh object identity
@@ -251,7 +249,7 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
       diagnostics: tokens.diagnostics,
       cssVarPrefix: tokens.cssVarPrefix,
       listing: tokens.listing,
-      varianceByPath: tokens.varianceByPath,
+      varianceByPath: fallbackVarianceByPath,
       tokenGraph: tokens.tokenGraph,
       resolveAt,
     }),
@@ -262,7 +260,7 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
       tokens.diagnostics,
       tokens.cssVarPrefix,
       tokens.listing,
-      tokens.varianceByPath,
+      fallbackVarianceByPath,
       tokens.tokenGraph,
       resolveAt,
     ],

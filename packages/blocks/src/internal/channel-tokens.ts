@@ -2,25 +2,16 @@ import { useSyncExternalStore } from 'react';
 import { addons } from 'storybook/preview-api';
 import {
   axes as initialAxes,
-  cells as initialCells,
   css as initialCss,
   cssVarPrefix as initialCssVarPrefix,
   defaultTuple as initialDefaultTuple,
   diagnostics as initialDiagnostics,
-  jointOverrides as initialJointOverrides,
   listing as initialListing,
   presets as initialPresets,
   tokenGraph as initialTokenGraph,
-  varianceByPath as initialVarianceByPath,
 } from 'virtual:swatchbook/tokens';
-import type { TupleKey } from '@unpunnyfuns/swatchbook-core';
-import type {
-  VirtualJointOverrideShape,
-  VirtualTokenGraph,
-  VirtualTokenListingShape,
-  VirtualVarianceByPathShape,
-} from '#/contexts.ts';
-import type { VirtualAxis, VirtualDiagnostic, VirtualToken } from '#/types.ts';
+import type { VirtualTokenGraph, VirtualTokenListingShape } from '#/contexts.ts';
+import type { VirtualAxis, VirtualDiagnostic } from '#/types.ts';
 
 /**
  * Live token snapshot backed by the addon's preview dev-time HMR event.
@@ -52,9 +43,6 @@ export interface TokenSnapshot {
   readonly css: string;
   readonly cssVarPrefix: string;
   readonly listing: Readonly<Record<string, VirtualTokenListingShape>>;
-  readonly cells: Record<string, Record<string, Record<string, VirtualToken>>>;
-  readonly jointOverrides: readonly (readonly [TupleKey, VirtualJointOverrideShape])[];
-  readonly varianceByPath: VirtualVarianceByPathShape;
   readonly tokenGraph: VirtualTokenGraph;
   readonly defaultTuple: Record<string, string>;
   /** Monotonic counter, bumped on each update. Useful as a React key. */
@@ -68,9 +56,6 @@ let snapshot: TokenSnapshot = {
   css: initialCss,
   cssVarPrefix: initialCssVarPrefix,
   listing: initialListing ?? {},
-  cells: initialCells ?? {},
-  jointOverrides: initialJointOverrides ?? [],
-  varianceByPath: initialVarianceByPath ?? {},
   tokenGraph: initialTokenGraph,
   defaultTuple: initialDefaultTuple ?? {},
   version: 0,
@@ -91,9 +76,6 @@ function ensureSubscribed(): void {
       css: payload.css ?? snapshot.css,
       cssVarPrefix: payload.cssVarPrefix ?? snapshot.cssVarPrefix,
       listing: payload.listing ?? snapshot.listing,
-      cells: payload.cells ?? snapshot.cells,
-      jointOverrides: payload.jointOverrides ?? snapshot.jointOverrides,
-      varianceByPath: payload.varianceByPath ?? snapshot.varianceByPath,
       tokenGraph: payload.tokenGraph ?? snapshot.tokenGraph,
       defaultTuple: payload.defaultTuple ?? snapshot.defaultTuple,
       version: snapshot.version + 1,

@@ -1,12 +1,16 @@
 import type { ProjectSnapshot } from '#/index.ts';
+import { makeResolveAtFromCells } from './_snapshot-helpers.ts';
 
 /**
  * Hand-built test snapshot for ColorTable scenarios. Single-axis
  * (mode/light), single cell. Tests that append tokens after
  * construction mutate `snap.cells.mode.light` directly.
+ *
+ * `resolveAt` is built as a closure over the `cells` reference so
+ * post-construction mutations are visible on the next call.
  */
 export function makeColorTableSnapshot(): ProjectSnapshot {
-  return {
+  const snap: ProjectSnapshot = {
     axes: [{ name: 'mode', contexts: ['light'], default: 'light', source: 'resolver' }],
     disabledAxes: [],
     presets: [],
@@ -43,4 +47,6 @@ export function makeColorTableSnapshot(): ProjectSnapshot {
     diagnostics: [],
     css: '',
   };
+  snap.resolveAt = makeResolveAtFromCells(snap);
+  return snap;
 }

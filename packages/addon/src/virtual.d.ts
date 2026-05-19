@@ -16,6 +16,7 @@ declare module 'virtual:swatchbook/tokens' {
     VirtualPreset,
     VirtualVarianceByPath,
   } from '#/channel-types.ts';
+  import type { TokenGraph } from '@unpunnyfuns/swatchbook-core/graph';
 
   export const axes: readonly VirtualAxis[];
   export const disabledAxes: readonly string[];
@@ -28,6 +29,7 @@ declare module 'virtual:swatchbook/tokens' {
   export const jointOverrides: VirtualJointOverrides;
   export const varianceByPath: VirtualVarianceByPath;
   export const defaultTuple: Record<string, string>;
+  export const tokenGraph: TokenGraph;
 }
 
 declare module 'virtual:swatchbook/integration-side-effects';

@@ -115,6 +115,10 @@ export interface ProjectSnapshot {
    */
   listing?: Readonly<Record<string, VirtualTokenListingShape>>;
   /**
+   * @deprecated Legacy wire field; the blocks hook now backs resolution
+   * from `tokenGraph`. Removed entirely in Phase 6 of the token-graph
+   * redesign.
+   *
    * Per-axis cell maps — `cells[axis][context]` is the resolved token
    * data for `{ ...defaults, [axis]: context }`. Bounded by
    * `Σ(axes × contexts)` regardless of cartesian product size.
@@ -123,20 +127,28 @@ export interface ProjectSnapshot {
    */
   cells: Record<string, Record<string, Record<string, VirtualTokenShape>>>;
   /**
+   * @deprecated Legacy wire field; the blocks hook now backs resolution
+   * from `tokenGraph`. Removed entirely in Phase 6 of the token-graph
+   * redesign.
+   *
    * `Project.jointOverrides` flattened to entries for wire transport.
    * Same ascending-arity iteration order the Map carries on the
    * server side. Empty array when no joint divergences exist.
    */
   jointOverrides: readonly (readonly [TupleKey, VirtualJointOverrideShape])[];
   /**
+   * @deprecated Legacy wire field; the blocks hook now derives variance
+   * from `tokenGraph` via `getVariance`. Removed entirely in Phase 6
+   * of the token-graph redesign.
+   *
    * Cached per-path variance results. Blocks read this for O(1) axis
    * variance lookup instead of recomputing on each render.
    */
   varianceByPath?: VirtualVarianceByPathShape;
   /**
    * Pre-built token graph for the project. JSON-serializable; nodes
-   * carry per-axis writes plus alias edges. Blocks will migrate from
-   * `cells + jointOverrides` to reading from this graph in Phase 3.
+   * carry per-axis writes plus alias edges. The blocks hook backs
+   * `resolveAt` and `varianceByPath` from this graph.
    */
   tokenGraph?: VirtualTokenGraph;
   /** The default tuple — `{ axis: axis.default }` for every axis. */
