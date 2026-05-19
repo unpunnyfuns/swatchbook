@@ -35,7 +35,7 @@ Long-lived feature branch implementing the **token-graph redesign**: replacing `
 - `valueKey` was updated in Phase 1 (commit `03bb7b9`) to sort object keys recursively. This was originally framed as a violation of "alongside existing code" but was clarified as in-scope for long-lived feature branches.
 - `tsdown.config.ts` doesn't exist in `packages/core`; the build is driven by `scripts.build` CLI invocation in `package.json`. New entrypoints (`/graph` was the first) are added there.
 - `Project.tokenGraph` for layered/plain-parse projects (no resolver) is an empty graph; only resolver-backed projects build a real one. Phase 5+ may revisit if layered projects need walker support.
-- **Phase 6 blocker (alias provenance):** the walker (`resolveAt(graph, path, tuple)`) returns the resolved leaf token without preserving the SOURCE path's `aliasOf` field. The CSS emitter needs that to emit `var(--sb-…)` references instead of literal values. Task 4.1 worked around this by using `project.resolveAt()` (still legacy-backed) for token maps and the walker only for `valueKey`-based delta detection. Phase 6 needs an alias-preserving query helper (or a walker option) before the legacy `resolveAt` can be deleted.
+- **Phase 6 blocker (alias provenance) resolved:** `resolveAliasAt`/`resolveAliasAllAt` added in commit `90627bd`. The CSS emitter calls `resolveAliasAllAt(graph, tuple)` to get tokens with `aliasOf`/`partialAliasOf` preserved for `var(--…)` emission.
 - `.prettierignore` files added at repo root and `packages/core/` to exclude `__snapshots__/` directories from oxfmt — the format sweep in commit `4a51e57` had quietly corrupted the golden CSS snapshot, hiding for nearly a phase.
 - CI bench gate (closes #995): `test:bench` task runs in CI for execution-time visibility, catches build-breaking regressions in the bench file itself, and surfaces gross runtime regressions via the 5-minute timeout. A numeric-threshold gate (`resolveAt` < 10 µs, etc.) is deferred — vitest's bench mode doesn't expose a clean `expect`-style assertion API, so threshold checks would require a custom comparator script.
 
@@ -45,7 +45,7 @@ Files added or substantially changed by this branch (cumulative through current 
 
 - `packages/core/src/token-graph/types.ts` — `TokenGraph`, `TokenGraphNode`, `WriteValue`
 - `packages/core/src/token-graph/build.ts` — `buildTokenGraph`, `extractWritesFromModifiers`, `computeAffectedBy`, `computeAliasTargets`
-- `packages/core/src/token-graph/walk.ts` — `resolveAt`, `resolveAllAt`, `composePartial`
+- `packages/core/src/token-graph/walk.ts` — `resolveAt`, `resolveAllAt`, `resolveAliasAt`, `resolveAliasAllAt`
 - `packages/core/src/token-graph/queries.ts` — `getVariance`, `getAffectedBy`, `listPaths`
 - `packages/core/src/token-graph/diagnostics.ts` — `swatchbook/token-graph` diagnostic builders
 - `packages/core/src/token-graph/index.ts` — `/graph` subpath barrel
@@ -53,10 +53,9 @@ Files added or substantially changed by this branch (cumulative through current 
 - `packages/core/src/load.ts` — calls `buildTokenGraph`, attaches result to `Project`
 - `packages/core/src/value-key.ts` — sorted-key replacer for canonical comparison
 - `packages/core/package.json` — `./graph` export entry + tsdown entrypoint
-- `packages/core/test/token-graph/{build,walk,queries,cycle,cartesian-truth}.test.ts` — 36 tests
+- `packages/core/test/token-graph/{build,walk,queries,cycle}.test.ts` — 36 tests
 - `packages/core/test/_helpers.ts` — `loadReferenceFixtureParserInput` helper
 - `packages/core/bench/token-graph.bench.ts` — Phase 5 benchmarks (buildTokenGraph, resolveAt, resolveAllAt, getVariance)
-- `packages/core/bench/compare-legacy.ts` — one-shot legacy-vs-new comparison script
 
 ## Phase 5 baselines (synthetic only — no real-consumer fixture)
 
@@ -82,4 +81,4 @@ Comparison (one-shot script, 10 runs, median):
 | New (`buildTokenGraph`) | 0.39 ms |
 | Ratio (legacy / new) | **8.24×** |
 
-Note: `probeJointOverrides` on the reference fixture makes a small number of `resolver.apply` calls (the fixture has limited joint divergence). The 15M-apply workload that triggered the redesign is not represented here — these are synthetic baselines for future regression-tracking, not satisfying the spec's "≥5× speedup on real consumer workload" gate. When real-consumer data is available, re-run `compare-legacy.ts` and `vitest bench --run` against it.
+Note: `probeJointOverrides` on the reference fixture makes a small number of `resolver.apply` calls (the fixture has limited joint divergence). The 15M-apply workload that triggered the redesign is not represented here — these are synthetic baselines for future regression-tracking, not satisfying the spec's "≥5× speedup on real consumer workload" gate. When real-consumer data arrives, re-run `vitest bench --run` against the new fixture; compare numbers to the synthetic baselines above for a regression check.
