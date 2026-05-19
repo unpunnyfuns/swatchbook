@@ -11,7 +11,6 @@ import { beforeAll, expect, it } from 'vitest';
 import type { Project } from '#/types.ts';
 import { analyzeProjectVariance } from '#/variance-analysis.ts';
 import type { VarianceInfo } from '#/variance-analysis.ts';
-import { valueKey } from '#/value-key.ts';
 import { loadWithPrefix } from './_helpers.ts';
 
 let referenceProject: Project;
@@ -31,7 +30,7 @@ it('classifies palette primitives as baseline-only (no axis touches them)', () =
   expect(info?.kind).toBe('baseline-only');
 });
 
-it('classifies surface roles as single-axis on `mode` (only mode overlays touch `color.surface.*`)', () => {
+it("classifies surface roles as single-axis on `mode` (only mode overlays touch `color.surface.*`)", () => {
   const info = variance.get('color.surface.default');
   expect(info).toBeDefined();
   if (info?.kind !== 'single-axis') {
@@ -40,7 +39,7 @@ it('classifies surface roles as single-axis on `mode` (only mode overlays touch 
   expect(info.axis).toBe('mode');
 });
 
-it('classifies `color.accent.fg` as joint-variant — Dark mode + brand=Brand A diverges from projection composition', () => {
+it("classifies `color.accent.fg` as joint-variant — Dark mode + brand=Brand A diverges from projection composition", () => {
   const info = variance.get('color.accent.fg');
   expect(info).toBeDefined();
   if (info?.kind !== 'joint-variant') {
@@ -61,8 +60,8 @@ it('classifies `color.accent.fg` as joint-variant — Dark mode + brand=Brand A 
   // the documented `axisValues.join(' · ')` shape.
   const darkBrandA = info.jointCases.find(
     (c) =>
-      (c.axisA === 'mode' && c.ctxA === 'Dark' && c.axisB === 'brand' && c.ctxB === 'Brand A') ||
-      (c.axisA === 'brand' && c.ctxA === 'Brand A' && c.axisB === 'mode' && c.ctxB === 'Dark'),
+      ((c.axisA === 'mode' && c.ctxA === 'Dark' && c.axisB === 'brand' && c.ctxB === 'Brand A') ||
+        (c.axisA === 'brand' && c.ctxA === 'Brand A' && c.axisB === 'mode' && c.ctxB === 'Dark')),
   );
   expect(darkBrandA, 'reference fixture must produce a Dark+Brand A joint case').toBeDefined();
   if (!darkBrandA) throw new Error('unreachable');
@@ -83,7 +82,7 @@ it('classifies `color.accent.fg` as joint-variant — Dark mode + brand=Brand A 
   if (!overrideEntry) throw new Error('unreachable');
   const overrideToken = overrideEntry[1].tokens['color.accent.fg'];
   expect(overrideToken, 'override must include color.accent.fg').toBeDefined();
-  expect(darkBrandA.cartesianValueKey).toBe(valueKey({ $value: overrideToken?.$value }));
+  expect(darkBrandA.cartesianValueKey).toBe(JSON.stringify(overrideToken?.$value));
 
   // The remaining joint cases (if any) still satisfy the structural
   // contract — pair non-default contexts on distinct axes.
