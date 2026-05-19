@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # Core
 
-Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via Terrazzo, resolves aliases, composes per-axis cells through a DTCG resolver or authored layered axes. No React, no Storybook dependency.
+Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via Terrazzo, builds a walkable token graph, resolves aliases per tuple. No React, no Storybook dependency.
 
 ## Install
 
@@ -32,19 +32,19 @@ export default defineSwatchbookConfig({
 
 ### `loadProject(config, cwd?)`
 
-Parse + resolve a project. Returns a `Project` carrying per-axis cells, joint overrides, and a `resolveAt(tuple)` accessor — no resolver calls happen at consumer-read time.
+Parse + resolve a project. Returns a `Project` carrying the token graph and a `resolveAt(tuple)` accessor — no resolver calls happen at consumer-read time.
 
 ```ts
 import { loadProject } from '@unpunnyfuns/swatchbook-core';
 
 const project = await loadProject(config, process.cwd());
-// project: { config, axes, presets, cells, jointOverrides, defaultTuple,
-//            defaultTokens, resolveAt, varianceByPath, diagnostics, … }
+// project: { config, axes, presets, tokenGraph, defaultTuple,
+//            defaultTokens, resolveAt, diagnostics, … }
 ```
 
 ### `project.resolveAt(tuple)`
 
-Compose the resolved `TokenMap` for any axis tuple. Pure function over `cells + jointOverrides + axes + defaultTuple`; accepts partial tuples (omitted axes fall back to their defaults). Memoized on the tuple key.
+Compose the resolved `TokenMap` for any axis tuple. Graph-backed; accepts partial tuples (omitted axes fall back to their defaults). Memoized on the canonical tuple key.
 
 ```ts
 const dark = project.resolveAt({ mode: 'Dark' });
@@ -61,25 +61,9 @@ for (const [path, token] of Object.entries(project.defaultTokens)) {
 }
 ```
 
-### `project.varianceByPath`
-
-Cached per-token variance classification, built at load time and stored on `Project.varianceByPath: ReadonlyMap<string, AxisVarianceResult>`. The `AxisVariance` block, the MCP `get_axis_variance` tool, and the smart CSS emitter all read this map for O(1) lookup instead of re-running the analysis per call.
-
-```ts
-const info = project.varianceByPath.get('color.accent.bg');
-if (info?.kind === 'single') {
-  // info.axis : string  (the single varying axis)
-  // info.varyingAxes : readonly [string]
-} else if (info?.kind === 'multi') {
-  // info.varyingAxes : readonly [string, string, ...string[]]
-}
-```
-
-See [`AxisVarianceResult`](#axisvarianceresult) for the discriminated-union shape.
-
 ### `emitAxisProjectedCss(project, options?)`
 
-Emit the project's resolved CSS as a string — the same output the addon publishes into `virtual:swatchbook/tokens` at preview time. Each per-axis non-default cell gets its own `[data-<prefix>-<axis>="<context>"]` selector block; the default cell's tokens are written to `:root`; joint-divergent tokens get compound `[data-axis-A][data-axis-B]` blocks. Size bounded by `Σ(axes × contexts)` regardless of cartesian product size.
+Emit the project's resolved CSS as a string — the same output the addon publishes into `virtual:swatchbook/tokens` at preview time. The emitter walks the token graph: each per-axis non-default context gets its own `[data-<prefix>-<axis>="<context>"]` selector block; the default-tuple tokens go to `:root`; multi-axis divergences get compound `[data-axis-A][data-axis-B]` blocks. Size bounded by `Σ(axes × contexts)` regardless of cartesian product size.
 
 ```ts
 import { loadProject, emitAxisProjectedCss } from '@unpunnyfuns/swatchbook-core';
@@ -92,21 +76,13 @@ const css = emitAxisProjectedCss(project);
 
 For production builds, prefer Terrazzo's CLI — `emitAxisProjectedCss` exists primarily for tooling that wants the same emission the addon does.
 
-### `jointOverrideKey(axes)`
-
-```ts
-function jointOverrideKey(axes: Readonly<Record<string, string>>): string;
-```
-
-Canonical stringification of a joint-override's `axes` tuple — `{ mode: 'Dark', brand: 'Brand A' }` becomes `"brand:Brand A|mode:Dark"` (alphabetical-by-axis, pipe-joined `axis:context` pairs). The same key shape `Project.jointOverrides` uses internally; reach for it when you need to look up or compare joint-override entries from outside the loader.
-
 ## Browser-safe subpaths
 
 Leaf utilities consumers need without the loader's Node deps live on dedicated subpaths. Each is tree-shake-clean, no `@terrazzo/parser`, no `node:*` imports — safe to import from preview-side bundles, the Storybook manager, or any browser consumer.
 
 | Subpath | Export | Purpose |
 | --- | --- | --- |
-| `/resolve-at` | `buildResolveAt(axes, cells, jointOverrides, defaultTuple)` | Compose tokens for any tuple without the loader. |
+| `/graph` | `resolveAt`, `resolveAllAt`, `resolveAliasAt`, `resolveAliasAllAt`, `getVariance`, `getAffectedBy`, `listPaths` + `TokenGraph` / `TokenGraphNode` / `WriteValue` types | Graph query helpers — browser-safe, no Terrazzo dependency at query time. See [Graph queries](#graph-queries) below. |
 | `/snapshot-for-wire` | `snapshotForWire(project, css)` + `SnapshotForWire` type | JSON-friendly subset of `Project` for cross-boundary transport. |
 | `/themes` | `enumerateThemes({axes, presets, defaultTuple})` + `tupleToName(axes, tuple)` + `ThemeEntry` / `ThemeEnumAxis` / `ThemeEnumPreset` types | Enumerate axis singletons + presets as a unified theme list; compose stable theme IDs from tuples. |
 | `/match-path` | `matchPath(path, filter)` | Glob-style path matcher (`*` single-segment, `**` multi-segment, bare prefix treated as descendants); shared by blocks' filter prop and the MCP `list_tokens` tool. |
@@ -116,8 +92,41 @@ Leaf utilities consumers need without the loader's Node deps live on dedicated s
 | `/style-element` | `ensureStyleElement(elementId, text)` + `SWATCHBOOK_STYLE_ELEMENT_ID` | Idempotent `<style>` injector — shared between the addon's preview decorator and the blocks-side stylesheet path. |
 
 ```ts
-import { buildResolveAt } from '@unpunnyfuns/swatchbook-core/resolve-at';
+import { resolveAt, getVariance } from '@unpunnyfuns/swatchbook-core/graph';
 import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
+```
+
+## Graph queries
+
+`@unpunnyfuns/swatchbook-core/graph` exports the full set of graph query helpers. All are browser-safe — no `@terrazzo/parser`, no `node:*` imports. Import from this subpath whenever resolution or variance queries are needed outside the Node build context (the preview, the Storybook manager, integrations).
+
+| Export | Signature | Description |
+| --- | --- | --- |
+| `resolveAt` | `(graph, path, tuple) → SwatchbookToken \| undefined` | Resolved leaf value for one token at a given tuple. Memoizable across calls with the same shared `memo` map. |
+| `resolveAllAt` | `(graph, tuple) → TokenMap` | Resolved `TokenMap` for every path in the graph at a given tuple. |
+| `resolveAliasAt` | `(graph, path, tuple) → SwatchbookToken \| undefined` | Alias-preserving view — stops at the first alias/partial-alias write and returns a token with `aliasOf` populated rather than recursing to a leaf. |
+| `resolveAliasAllAt` | `(graph, tuple) → TokenMap` | Full `TokenMap` with alias-preserving view for every path. |
+| `getVariance` | `(graph, path) → AxisVarianceResult` | `AxisVarianceResult` for one token path — which axes affect it, and the stringified value per context per axis. |
+| `getAffectedBy` | `(graph, path) → readonly string[]` | Set of axis names that can change this token's resolved value at any tuple. |
+| `listPaths` | `(graph) → readonly string[]` | Sorted array of every token path in the graph. |
+
+```ts
+import { resolveAt, getVariance, listPaths } from '@unpunnyfuns/swatchbook-core/graph';
+
+// Resolved value at a non-default tuple:
+const token = resolveAt(project.tokenGraph, 'color.accent.bg', { mode: 'Dark' });
+
+// Per-token variance:
+const info = getVariance(project.tokenGraph, 'color.accent.bg');
+if (info.kind === 'single') {
+  // info.axis : string
+  // info.varyingAxes : readonly [string]
+} else if (info.kind === 'multi') {
+  // info.varyingAxes : readonly [string, string, ...string[]]
+}
+
+// All paths in the graph:
+const paths = listPaths(project.tokenGraph);
 ```
 
 ## Constants
@@ -242,21 +251,20 @@ interface Project {
   disabledAxes: readonly string[];
   presets: readonly Preset[];
   /** Validated chrome-alias entries from `config.chrome`. Invalid entries are dropped and reported as diagnostics. */
-  chrome: Record<string, string>;
+  chrome: Partial<Record<ChromeRole, string>>;
   /** Resolved TokenMap at the default tuple. Convenience for global views. */
   defaultTokens: TokenMap;
-  /** Per-axis cell maps: `cells[axisName][contextName]` is the resolved TokenMap for `{ ...defaults, [axisName]: contextName }`. */
-  cells: Cells;
-  /** Joint-variant partial-tuple overrides — values that diverge from cells composition. Array of `[canonicalKey, override]` pairs in ascending arity order. */
-  jointOverrides: JointOverrides;
   /** Axis defaults — `{ axisName: axis.default }` for every axis. */
   defaultTuple: Record<string, string>;
-  /** Compose the resolved TokenMap for any tuple of axis selections. */
+  /** Compose the resolved TokenMap for any tuple of axis selections. Graph-backed; memoized on the canonical tuple key. */
   resolveAt: (tuple: Record<string, string>) => TokenMap;
-  /** Pre-computed per-path variance classification (O(1) lookup). */
-  varianceByPath: ReadonlyMap<string, AxisVarianceResult>;
+  /**
+   * Walkable token graph — the primary resolution data structure.
+   * Query via `@unpunnyfuns/swatchbook-core/graph` helpers.
+   */
+  tokenGraph: TokenGraph;
   /** Absolute paths of every file loaded while building the project (resolver + `$ref` targets, overlay files, or globbed plain-parse files). */
-  sourceFiles: string[];
+  sourceFiles: readonly string[];
   /** Loader cwd — what all config-relative paths resolved against. */
   cwd: string;
   /**
@@ -272,28 +280,35 @@ interface Project {
 }
 ```
 
-### `Cells`
+### `TokenGraph`
 
 ```ts
-type Cells = Record<string, Record<string, TokenMap>>;
-```
-
-Per-axis resolved maps: `cells[axisName][contextName]` is the resolved `TokenMap` for `{ ...defaults, [axisName]: contextName }`. Non-default cells store only tokens whose value differs from the default-cell baseline (delta cells). Bounded by `Σ(axes × contexts)`, independent of the cartesian product size.
-
-### `JointOverride` / `JointOverrides`
-
-```ts
-interface JointOverride {
-  /** axisName → contextName for the divergent combination (arity ≥ 2). */
-  axes: Record<string, string>;
-  /** Only the tokens whose resolved value at this tuple diverges from cells composition. */
-  tokens: TokenMap;
+interface TokenGraph {
+  nodes: Record<string, TokenGraphNode>;
+  axes: readonly string[];
+  axisDefaults: Record<string, string>;
+  axisContexts: Record<string, readonly string[]>;
 }
-
-type JointOverrides = ReadonlyArray<readonly [string, JointOverride]>;
 ```
 
-Array of `[canonicalKey, override]` pairs in ascending arity order — higher-order divergences win over lower-order ones when applied in sequence. Same shape consumers read on the wire (no Map ↔ array marshaling).
+Walkable graph keyed by token path. JSON-serializable — no Maps or Sets — so the same shape works on Node and in the browser. `axisDefaults` and `axisContexts` carry enough axis metadata for variance queries without needing the original `Axis[]` array.
+
+### `TokenGraphNode`
+
+```ts
+interface TokenGraphNode {
+  baselineValue: SwatchbookToken;
+  baselineKind: 'literal' | 'alias' | 'partial-alias';
+  baselineAliasTarget?: string;
+  baselinePartialFields?: Record<string, string>;
+  writes: Record<string, Record<string, WriteValue>>;
+  aliases: readonly string[];
+  aliasedBy: readonly string[];
+  affectedBy: readonly string[];
+}
+```
+
+Per-token-path node. `baselineValue` is the resolved leaf at the default tuple. `writes[axisName][contextName]` holds per-(axis, context) overlay declarations. `affectedBy` is the precomputed axis-sensitivity index — the set of axes whose writes can change this token's resolved value, used by the walker's fast-path to skip resolution for constant tokens.
 
 ### `TokenListingByPath`
 
@@ -348,7 +363,7 @@ type DiagnosticSeverity = 'error' | 'warn' | 'info';
 
 ### `AxisVarianceResult`
 
-Each entry of [`project.varianceByPath`](#projectvariancebypath). Discriminated on `kind`; the cardinality of `varyingAxes` is reflected in the tuple type so consumers narrow exhaustively. The `single` variant adds a convenience `axis: string` accessor.
+Return type of [`getVariance(graph, path)`](#graph-queries). Discriminated on `kind`; the cardinality of `varyingAxes` is reflected in the tuple type so consumers narrow exhaustively. The `single` variant adds a convenience `axis: string` accessor.
 
 ```ts
 type AxisVarianceResult =
@@ -410,7 +425,7 @@ The seven fields downstream consumers actually read off a resolved token. Struct
 type TokenMap = Record<string, SwatchbookToken>;
 ```
 
-Resolved-token map keyed by DTCG flat path (`"color.accent.bg"`). The shape `project.defaultTokens`, `project.resolveAt(tuple)`, and every `cells[axis][context]` cell carry.
+Resolved-token map keyed by DTCG flat path (`"color.accent.bg"`). The shape `project.defaultTokens` and `project.resolveAt(tuple)` return.
 
 ### `ListedToken`
 
@@ -422,11 +437,12 @@ The per-token shape from `@terrazzo/plugin-token-listing`, re-exported for typin
 type ResolveAt = (tuple: Record<string, string>) => TokenMap;
 ```
 
-The shape of `project.resolveAt` — also returned by `buildResolveAt()` from the [`/resolve-at`](#browser-safe-subpaths) subpath.
+The shape of `project.resolveAt`.
 
 ## Do / don't
 
 - ✅ Use this package at build time — Node scripts, SSR, Storybook presets. It has no DOM dependency.
-- ✅ Ship `project.cells` / `project.jointOverrides` / `project.defaultTokens` to the browser via the [`/snapshot-for-wire`](#browser-safe-subpaths) subpath — that's exactly what the addon's preview does.
+- ✅ Ship `project.tokenGraph` to the browser via [`/snapshot-for-wire`](#browser-safe-subpaths) — `TokenGraph` is JSON-serializable. Query it on the browser side with the [`/graph`](#graph-queries) helpers.
+- ✅ Use `getVariance(graph, path)` from `/graph` for per-token variance classification.
 - ❌ Don't import from `@terrazzo/parser` directly unless you need features core doesn't expose.
-- ❌ Don't ship the full `Project` object to the browser — `resolveAt` is a function, `varianceByPath` is a Map, and `cwd` is a Node-side absolute path. Use `snapshotForWire(project, css)` to get a JSON-friendly subset.
+- ❌ Don't ship the full `Project` object to the browser — `resolveAt` is a function and `cwd` is a Node-side absolute path. Use `snapshotForWire(project, css)` to get a JSON-friendly subset.
