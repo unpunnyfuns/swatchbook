@@ -406,8 +406,23 @@ function extractWritesFromLayeredSingletons(
       if (!resolved) continue;
       for (const [path, token] of Object.entries(resolved)) {
         const baselineToken = baseline[path];
-        if (baselineToken !== undefined && valueKey(token) === valueKey(baselineToken)) continue;
+        const sameAsBaseline =
+          baselineToken !== undefined && valueKey(token) === valueKey(baselineToken);
         const writeValue = toWriteValueFromResolvedToken(token);
+        // Always record alias-shape writes — even when they happen to resolve to
+        // the same value at this singleton, the alias target may differ from
+        // baseline's, and that difference matters at joint tuples where the
+        // target's value diverges. Only literal writes can be safely skipped on
+        // value coincidence (a literal == literal at all tuples it applies to).
+        if (writeValue.kind === 'literal' && sameAsBaseline) continue;
+        if (
+          writeValue.kind === 'alias' &&
+          typeof baselineToken?.aliasOf === 'string' &&
+          baselineToken.aliasOf === writeValue.target &&
+          sameAsBaseline
+        )
+          continue;
+        // partial-alias: rare for both sides to have identical aliasFields; just always record
         (out[path] ??= {})[axis.name] ??= {};
         out[path]![axis.name]![ctx] = writeValue;
       }
