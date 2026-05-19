@@ -5,6 +5,7 @@ import type {
   Preset,
   TupleKey,
 } from '@unpunnyfuns/swatchbook-core';
+import type { TokenGraph } from '@unpunnyfuns/swatchbook-core/graph';
 import type { SlimListedToken } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
 import { createContext, useContext } from 'react';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
@@ -84,6 +85,13 @@ export interface VirtualJointOverrideShape {
 export type VirtualVarianceByPathShape = Record<string, AxisVarianceResult>;
 
 /**
+ * Wire shape of the token graph — aliased from core's authoritative
+ * `TokenGraph` so both the virtual module declaration and the React
+ * context stay aligned with the same definition.
+ */
+export type VirtualTokenGraph = TokenGraph;
+
+/**
  * Full project data read by blocks. Populated by the addon's preview
  * decorator (from the virtual module) or constructed by hand in
  * non-Storybook consumers.
@@ -125,6 +133,12 @@ export interface ProjectSnapshot {
    * variance lookup instead of recomputing on each render.
    */
   varianceByPath?: VirtualVarianceByPathShape;
+  /**
+   * Pre-built token graph for the project. JSON-serializable; nodes
+   * carry per-axis writes plus alias edges. Blocks will migrate from
+   * `cells + jointOverrides` to reading from this graph in Phase 3.
+   */
+  tokenGraph?: VirtualTokenGraph;
   /** The default tuple — `{ axis: axis.default }` for every axis. */
   defaultTuple: Record<string, string>;
   /**

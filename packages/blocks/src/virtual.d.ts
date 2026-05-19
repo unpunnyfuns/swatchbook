@@ -14,6 +14,7 @@ declare module 'virtual:swatchbook/tokens' {
     VirtualDiagnosticShape,
     VirtualJointOverrideShape,
     VirtualPresetShape,
+    VirtualTokenGraph,
     VirtualTokenListingShape,
     VirtualTokenShape,
     VirtualVarianceByPathShape,
@@ -30,6 +31,7 @@ declare module 'virtual:swatchbook/tokens' {
   export const jointOverrides: readonly (readonly [TupleKey, VirtualJointOverrideShape])[];
   export const varianceByPath: VirtualVarianceByPathShape;
   export const defaultTuple: Record<string, string>;
+  export const tokenGraph: VirtualTokenGraph;
 }
 
 declare module '*.css';

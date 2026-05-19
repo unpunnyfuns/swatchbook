@@ -7,7 +7,11 @@ import {
 import { tupleToName } from '@unpunnyfuns/swatchbook-core/themes';
 import type { Axis, Cells, JointOverrides } from '@unpunnyfuns/swatchbook-core';
 import { useEffect, useMemo } from 'react';
-import type { VirtualTokenListingShape, VirtualVarianceByPathShape } from '#/contexts.ts';
+import type {
+  VirtualTokenGraph,
+  VirtualTokenListingShape,
+  VirtualVarianceByPathShape,
+} from '#/contexts.ts';
 import { useActiveAxes, useActiveTheme, useOptionalSwatchbookData } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import type { ColorFormat, FormatColorResult } from '#/format-color.ts';
@@ -37,6 +41,12 @@ export interface ProjectData {
    * render.
    */
   varianceByPath: VirtualVarianceByPathShape;
+  /**
+   * Pre-built token graph. JSON-safe; nodes carry per-axis writes
+   * plus alias edges. Phase 3 block migrations will read from this
+   * instead of `cells + jointOverrides`.
+   */
+  tokenGraph: VirtualTokenGraph;
   /**
    * Compose the resolved `TokenMap` for any tuple of axis selections.
    * Built browser-side from `cells + jointOverrides` shipped over the
@@ -135,6 +145,7 @@ export function useProject(): ProjectData {
   const cssVarPrefix = snapshot?.cssVarPrefix;
   const listing = snapshot?.listing;
   const varianceByPath = snapshot?.varianceByPath;
+  const tokenGraph = snapshot?.tokenGraph;
   const resolveAt = useMemo(() => {
     if (!snapshot) return null;
     return snapshotResolveAt(snapshot);
@@ -158,6 +169,7 @@ export function useProject(): ProjectData {
       cssVarPrefix: cssVarPrefix ?? '',
       listing: listing ?? {},
       varianceByPath: varianceByPath ?? {},
+      tokenGraph: tokenGraph ?? { nodes: {}, axes: [], axisDefaults: {}, axisContexts: {} },
       resolveAt,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -174,6 +186,7 @@ export function useProject(): ProjectData {
     cssVarPrefix,
     listing,
     varianceByPath,
+    tokenGraph,
   ]);
   const fallback = useVirtualModuleFallback(snapshot === null);
   return providerData ?? fallback;
@@ -239,6 +252,7 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
       cssVarPrefix: tokens.cssVarPrefix,
       listing: tokens.listing,
       varianceByPath: tokens.varianceByPath,
+      tokenGraph: tokens.tokenGraph,
       resolveAt,
     }),
     [
@@ -249,6 +263,7 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
       tokens.cssVarPrefix,
       tokens.listing,
       tokens.varianceByPath,
+      tokens.tokenGraph,
       resolveAt,
     ],
   );

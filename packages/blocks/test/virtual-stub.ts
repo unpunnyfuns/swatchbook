@@ -15,3 +15,14 @@ export const cells = {} as const;
 export const jointOverrides = [] as const;
 export const varianceByPath = {} as const;
 export const defaultTuple = {} as const;
+export const tokenGraph: {
+  nodes: Record<string, unknown>;
+  axes: readonly string[];
+  axisDefaults: Record<string, string>;
+  axisContexts: Record<string, readonly string[]>;
+} = {
+  nodes: {},
+  axes: [],
+  axisDefaults: {},
+  axisContexts: {},
+};

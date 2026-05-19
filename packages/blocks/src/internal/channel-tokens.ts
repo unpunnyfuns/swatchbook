@@ -10,11 +10,13 @@ import {
   jointOverrides as initialJointOverrides,
   listing as initialListing,
   presets as initialPresets,
+  tokenGraph as initialTokenGraph,
   varianceByPath as initialVarianceByPath,
 } from 'virtual:swatchbook/tokens';
 import type { TupleKey } from '@unpunnyfuns/swatchbook-core';
 import type {
   VirtualJointOverrideShape,
+  VirtualTokenGraph,
   VirtualTokenListingShape,
   VirtualVarianceByPathShape,
 } from '#/contexts.ts';
@@ -53,6 +55,7 @@ export interface TokenSnapshot {
   readonly cells: Record<string, Record<string, Record<string, VirtualToken>>>;
   readonly jointOverrides: readonly (readonly [TupleKey, VirtualJointOverrideShape])[];
   readonly varianceByPath: VirtualVarianceByPathShape;
+  readonly tokenGraph: VirtualTokenGraph;
   readonly defaultTuple: Record<string, string>;
   /** Monotonic counter, bumped on each update. Useful as a React key. */
   readonly version: number;
@@ -68,6 +71,7 @@ let snapshot: TokenSnapshot = {
   cells: initialCells ?? {},
   jointOverrides: initialJointOverrides ?? [],
   varianceByPath: initialVarianceByPath ?? {},
+  tokenGraph: initialTokenGraph,
   defaultTuple: initialDefaultTuple ?? {},
   version: 0,
 };
@@ -90,6 +94,7 @@ function ensureSubscribed(): void {
       cells: payload.cells ?? snapshot.cells,
       jointOverrides: payload.jointOverrides ?? snapshot.jointOverrides,
       varianceByPath: payload.varianceByPath ?? snapshot.varianceByPath,
+      tokenGraph: payload.tokenGraph ?? snapshot.tokenGraph,
       defaultTuple: payload.defaultTuple ?? snapshot.defaultTuple,
       version: snapshot.version + 1,
     };
