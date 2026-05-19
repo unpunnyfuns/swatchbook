@@ -256,18 +256,14 @@ function extractPartialAliasFields(partialAliasOf: unknown): Record<string, stri
   return fields;
 }
 
+// Generous cycle guard. Acyclic propagation terminates in at most
+// (max alias-chain depth) iterations — 1000 covers any realistic project.
 const AFFECTED_BY_FIXPOINT_BOUND = 1000;
 
-function computeAffectedBy(
+export function computeAliasTargets(
   nodes: Record<string, TokenGraphNode>,
-  axisOrder: readonly string[],
-): void {
-  const affected: Record<string, Set<string>> = {};
-  for (const [path, node] of Object.entries(nodes)) {
-    affected[path] = new Set(Object.keys(node.writes));
-  }
-
-  const aliasTargets: Record<string, Set<string>> = {};
+): Record<string, Set<string>> {
+  const out: Record<string, Set<string>> = {};
   for (const [path, node] of Object.entries(nodes)) {
     const targets = new Set<string>(node.aliases);
     for (const axisWrites of Object.values(node.writes)) {
@@ -278,8 +274,21 @@ function computeAffectedBy(
         }
       }
     }
-    aliasTargets[path] = targets;
+    out[path] = targets;
   }
+  return out;
+}
+
+export function computeAffectedBy(
+  nodes: Record<string, TokenGraphNode>,
+  axisOrder: readonly string[],
+): void {
+  const affected: Record<string, Set<string>> = {};
+  for (const [path, node] of Object.entries(nodes)) {
+    affected[path] = new Set(Object.keys(node.writes));
+  }
+
+  const aliasTargets = computeAliasTargets(nodes);
 
   let iterations = 0;
   let changed = true;
@@ -312,8 +321,8 @@ function computeAffectedBy(
   }
 
   const aliasedBy: Record<string, Set<string>> = {};
-  for (const [path, node] of Object.entries(nodes)) {
-    for (const target of node.aliases) {
+  for (const [path, targets] of Object.entries(aliasTargets)) {
+    for (const target of targets) {
       (aliasedBy[target] ??= new Set()).add(path);
     }
   }

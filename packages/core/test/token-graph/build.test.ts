@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { buildTokenGraph, extractWritesFromModifiers } from '#/token-graph/build.ts';
+import { buildTokenGraph, computeAffectedBy, extractWritesFromModifiers } from '#/token-graph/build.ts';
 import type { Axis } from '#/types.ts';
+import type { TokenGraphNode } from '#/token-graph/types.ts';
 import { loadReferenceFixtureParserInput } from '../_helpers.ts';
 
 describe('extractWritesFromModifiers', () => {
@@ -203,11 +204,67 @@ describe('affectedBy fixpoint', () => {
     );
   });
 
-  it('propagates affectedBy backward through alias edges', async () => {
-    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
-    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
-    // color.accent.fg is an alias; its target gets axis writes, so fg.affectedBy includes those axes
-    expect(graph.nodes['color.accent.fg']?.affectedBy.length).toBeGreaterThan(0);
+  it('propagates affectedBy from alias target to source through transitive chain', () => {
+    // Synthetic graph: A aliases B aliases C. Only C has a direct write.
+    // Expectation: A.affectedBy and B.affectedBy both include the axis that
+    // writes C.
+    const nodes: Record<string, TokenGraphNode> = {
+      A: {
+        baselineValue: { $value: '#000' },
+        baselineKind: 'alias',
+        baselineAliasTarget: 'B',
+        writes: {},
+        affectedBy: [],
+        aliases: ['B'],
+        aliasedBy: [],
+      },
+      B: {
+        baselineValue: { $value: '#000' },
+        baselineKind: 'alias',
+        baselineAliasTarget: 'C',
+        writes: {},
+        affectedBy: [],
+        aliases: ['C'],
+        aliasedBy: [],
+      },
+      C: {
+        baselineValue: { $value: '#000' },
+        baselineKind: 'literal',
+        writes: { mode: { Dark: { kind: 'literal', value: { $value: '#fff' } } } },
+        affectedBy: [],
+        aliases: [],
+        aliasedBy: [],
+      },
+    };
+    computeAffectedBy(nodes, ['mode']);
+    expect(nodes.A!.affectedBy).toEqual(['mode']);
+    expect(nodes.B!.affectedBy).toEqual(['mode']);
+    expect(nodes.C!.affectedBy).toEqual(['mode']);
+  });
+
+  it('populates aliasedBy from write-introduced aliases (not just baseline)', () => {
+    // X has no baseline alias; X's mode=Dark write aliases Y.
+    // Expectation: Y.aliasedBy includes X.
+    const nodes: Record<string, TokenGraphNode> = {
+      X: {
+        baselineValue: { $value: '#000' },
+        baselineKind: 'literal',
+        writes: { mode: { Dark: { kind: 'alias', target: 'Y' } } },
+        affectedBy: [],
+        aliases: [],
+        aliasedBy: [],
+      },
+      Y: {
+        baselineValue: { $value: '#fff' },
+        baselineKind: 'literal',
+        writes: {},
+        affectedBy: [],
+        aliases: [],
+        aliasedBy: [],
+      },
+    };
+    computeAffectedBy(nodes, ['mode']);
+    expect(nodes.Y!.aliasedBy).toContain('X');
   });
 
   it('returns affectedBy sorted by project axis order', async () => {
