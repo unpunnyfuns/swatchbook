@@ -26,3 +26,5 @@ Replace `Project.cells` + `Project.jointOverrides` + `Project.varianceByPath` wi
 **Internal:** `cells.ts`, `joint-overrides.ts`, `alias-graph.ts`, `resolve-at.ts`, `variance-by-path.ts`, `variance-analysis.ts` are deleted. Variance classification used by the smart CSS emitter is now an unexported helper inside `css-axis-projected.ts`.
 
 **Performance:** synthetic baseline on the reference fixture shows `buildTokenGraph` at 0.39 ms vs `buildCells + probeJointOverrides + buildVarianceByPath` at 3.24 ms — 8.24× faster. Real-consumer workload not measured in this branch; baselines tracked in `packages/core/bench/token-graph.bench.ts` for future regression-tracking.
+
+Wire payload reduction: graph stores slim `SwatchbookToken` shapes (only `$value`, `$type`, `$description`, `aliasOf`, `aliasChain`, `partialAliasOf`, `aliasedBy` — strips Terrazzo's `source.node`/`mode`/`group`/etc.). Reference-fixture payload: 607 KB → 45 KB un-gzipped (13×).

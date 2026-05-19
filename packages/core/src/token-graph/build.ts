@@ -5,6 +5,36 @@ import { valueKey } from '#/value-key.ts';
 import { isPlainObject } from '#/token-graph/internal-utils.ts';
 
 const COMPOSITE_TYPES = new Set(['border', 'typography', 'transition', 'gradient', 'shadow']);
+
+const SLIM_KEYS = [
+  '$value',
+  '$type',
+  '$description',
+  'aliasOf',
+  'aliasChain',
+  'partialAliasOf',
+  'aliasedBy',
+] as const;
+
+/**
+ * Strip a Terrazzo-shaped token to only the fields swatchbook consumers
+ * read. Terrazzo's `TokenNormalized` carries `source.node`, `mode`,
+ * `group`, `originalValue`, `jsonID`, `id`, `dependencies` — none of
+ * which any swatchbook consumer reads, but which together account for
+ * ~530 KB of the wire payload on the reference fixture (`source.node`
+ * alone is 245 KB).
+ *
+ * Apply at graph-build time so the in-memory graph carries only the
+ * slim shape; the wire payload then naturally serializes the slim shape.
+ */
+function slimToken(token: SwatchbookToken): SwatchbookToken {
+  const result: Record<string, unknown> = {};
+  for (const key of SLIM_KEYS) {
+    const value = (token as Record<string, unknown>)[key];
+    if (value !== undefined) result[key] = value;
+  }
+  return result as SwatchbookToken;
+}
 const ALIAS_RE = /^\{(.+)\}$/;
 
 export function extractWritesFromModifiers(
@@ -69,7 +99,7 @@ function toWriteValue(
   if (typeof value === 'string') {
     const match = ALIAS_RE.exec(value);
     if (match) return { kind: 'alias', target: match[1]! };
-    return { kind: 'literal', value: withType };
+    return { kind: 'literal', value: slimToken(withType) };
   }
   if ($type && COMPOSITE_TYPES.has($type) && (isPlainObject(value) || Array.isArray(value))) {
     const aliasFields: Record<string, string> = {};
@@ -77,12 +107,12 @@ function toWriteValue(
     if (Object.keys(aliasFields).length > 0) {
       return {
         kind: 'partial-alias',
-        baseValue: withType,
+        baseValue: slimToken(withType),
         aliasFields,
       };
     }
   }
-  return { kind: 'literal', value: withType };
+  return { kind: 'literal', value: slimToken(withType) };
 }
 
 // Walks raw DTCG `$value` looking for `{path}`-shaped alias syntax. Used during modifier-source extraction.
@@ -207,7 +237,7 @@ function buildNode(
   }
 
   return {
-    baselineValue: baselineToken,
+    baselineValue: slimToken(baselineToken),
     baselineKind,
     ...(baselineAliasTarget !== undefined ? { baselineAliasTarget } : {}),
     ...(baselinePartialFields !== undefined ? { baselinePartialFields } : {}),
@@ -421,9 +451,9 @@ function toWriteValueFromResolvedToken(token: SwatchbookToken): WriteValue {
   if (token.partialAliasOf !== undefined) {
     return {
       kind: 'partial-alias',
-      baseValue: token,
+      baseValue: slimToken(token),
       aliasFields: extractPartialAliasFields(token.partialAliasOf),
     };
   }
-  return { kind: 'literal', value: token };
+  return { kind: 'literal', value: slimToken(token) };
 }

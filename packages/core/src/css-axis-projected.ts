@@ -11,17 +11,25 @@ import { valueKey } from '#/value-key.ts';
 
 /**
  * Internal alias: the raw Terrazzo-shape map this emitter passes into
- * `transformCSSValue` / `generateShorthand`. The public `TokenMap` is a
- * structural subset (`SwatchbookToken`) of `TokenNormalized` — every
- * value in any `TokenMap` here actually carries the full Terrazzo
- * fields, because it came from `resolver.apply()` and was stored
- * verbatim by the graph. The cast at the boundary (`asRawTokens`) is
- * safe by construction.
+ * `transformCSSValue` / `generateShorthand`. The graph stores slim
+ * `SwatchbookToken` shapes (no `id`, `source`, `mode`, etc.). The CSS
+ * emitter needs `token.id` (= the token path) for `transformAlias` and
+ * `defaultAliasTransform`. `withSyntheticIds` injects `id: path` so
+ * `transformCSSValue` can resolve alias var references correctly without
+ * requiring the full Terrazzo shape in the graph.
  */
 type RawTokenMap = Record<string, TokenNormalized>;
 
+function withSyntheticIds(map: TokenMap): RawTokenMap {
+  const out: RawTokenMap = {};
+  for (const [path, token] of Object.entries(map)) {
+    out[path] = { ...token, id: path } as unknown as TokenNormalized;
+  }
+  return out;
+}
+
 function asRawTokens(map: TokenMap): RawTokenMap {
-  return map as RawTokenMap;
+  return withSyntheticIds(map);
 }
 
 /** Distinguishes a token's variance shape so the emitter can route it. */
