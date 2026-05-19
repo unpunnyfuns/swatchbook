@@ -87,15 +87,6 @@ Omit an axis and it falls back to that axis's default. Invalid axis keys or cont
 
 A resolver may declare more modifiers than a given Storybook wants to surface. List the axis name in `config.disabledAxes` and the project behaves as if that axis didn't exist for this session: no toolbar dropdown, no extra CSS blocks, the axis pinned to its `default` context in the active tuple. The Design Tokens panel shows a faint pinned indicator so the suppression isn't invisible. See the [`disabledAxes`](./config.mdx#disabledaxes) field for details.
 
-## Scoping large modifier spaces
-
-`loadProject` enumerates one tuple per non-default `(axis, context)` pair plus the default tuple — the count grows with axis cardinality, not with every possible combination. A resolver with 20 axes × 5 contexts loads around 80 tuples regardless of whether the full combination space is hundreds or millions. The toolbar surfaces every axis; the CSS emitter writes per-axis cell blocks plus compound blocks only for tokens with genuine joint divergence; runtime CSS composition lands the right value at any multi-axis selector.
-
-The loader never materializes the full combination space. Two scoping levers remain, both presentational:
-
-- **`presets`** — author named tuples for the handful of themes that matter (`Default Light`, `Brand A Dark`, `A11y High Contrast`). Toolbar surfaces them as quick-select pills; emit pipelines can fan out on `'presets'` instead of every axis-attribute combination. The right answer when only a handful of tuples are presentational.
-- **`disabledAxes`** — pin state-space modifiers (locale, density, motion-pref, …) to their defaults. They vanish from the toolbar, drop from the project's axis list, and don't contribute to emitted CSS. The right answer when an axis exists in the resolver but doesn't represent presentational variation.
-
 ## See also
 
 - [Config reference](./config.mdx) — the `resolver` / `axes` / `default` / `disabledAxes` / `presets` fields.
