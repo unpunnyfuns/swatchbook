@@ -78,6 +78,7 @@ export function resolveAt(
         matchedWrite.aliasFields,
         tuple,
         ownMemo,
+        matchedWrite.originalKeyOrder,
       );
     }
   }
@@ -128,25 +129,33 @@ export function resolveAliasAt(
   if (!directWrite) {
     if (node.baselineKind === 'literal') return node.baselineValue;
     if (node.baselineKind === 'alias') {
-      const targetLeaf = resolveAt(graph, node.baselineAliasTarget!, tuple);
+      const aliasTarget = node.baselineAliasTarget!;
+      const targetLeaf = resolveAt(graph, aliasTarget, tuple);
       return {
         ...node.baselineValue,
-        aliasOf: node.baselineAliasTarget,
+        aliasOf: aliasTarget,
+        aliasChain: [aliasTarget],
         $value: targetLeaf?.$value,
       };
     }
+    // Partial-alias baseline: preserve the original partialAliasOf structure from
+    // node.baselineValue (nested, as transformCSSValue expects), only refresh $value.
     const composed = resolveAt(graph, path, tuple);
     return {
       ...node.baselineValue,
-      partialAliasOf: node.baselinePartialFields,
       $value: composed?.$value,
     };
   }
 
-  if (directWrite.kind === 'literal') return directWrite.value;
+  if (directWrite.kind === 'literal') return { ...node.baselineValue, ...directWrite.value };
   if (directWrite.kind === 'alias') {
     const targetLeaf = resolveAt(graph, directWrite.target, tuple);
-    return { ...node.baselineValue, aliasOf: directWrite.target, $value: targetLeaf?.$value };
+    return {
+      ...node.baselineValue,
+      aliasOf: directWrite.target,
+      aliasChain: [directWrite.target],
+      $value: targetLeaf?.$value,
+    };
   }
   const composed = composePartial(
     graph,
@@ -154,8 +163,10 @@ export function resolveAliasAt(
     directWrite.aliasFields,
     tuple,
     new Map(),
+    directWrite.originalKeyOrder,
   );
   return {
+    ...node.baselineValue,
     ...directWrite.baseValue,
     partialAliasOf: directWrite.aliasFields,
     $value: composed.$value,
@@ -177,6 +188,7 @@ export function composePartial(
   fields: Record<string, string>,
   tuple: Record<string, string>,
   memo: Map<string, SwatchbookToken | typeof CYCLE_SENTINEL>,
+  originalKeyOrder?: readonly string[],
 ): SwatchbookToken {
   const result = { ...base };
   const baseValue = base.$value;
@@ -195,6 +207,20 @@ export function composePartial(
       assignByPath(value as object, fieldPath, resolved.$value);
     }
   }
+
+  // When an originalKeyOrder is available (plain-object composites), rebuild the
+  // $value in source order so CSS sub-field emission matches the token definition.
+  if (originalKeyOrder && isPlainObject(value)) {
+    const ordered: Record<string, unknown> = {};
+    for (const k of originalKeyOrder) {
+      if (Object.hasOwn(value, k)) ordered[k] = value[k];
+    }
+    for (const k of Object.keys(value)) {
+      if (!Object.hasOwn(ordered, k)) ordered[k] = value[k];
+    }
+    value = ordered;
+  }
+
   result.$value = value;
   return result;
 }

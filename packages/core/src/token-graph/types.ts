@@ -13,7 +13,18 @@ import type { SwatchbookToken } from '#/types.ts';
 export type WriteValue =
   | { kind: 'literal'; value: SwatchbookToken }
   | { kind: 'alias'; target: string }
-  | { kind: 'partial-alias'; baseValue: SwatchbookToken; aliasFields: Record<string, string> };
+  | {
+      kind: 'partial-alias';
+      baseValue: SwatchbookToken;
+      aliasFields: Record<string, string>;
+      /**
+       * Original top-level key order from the composite `$value` object
+       * (before alias-field stripping). Present when `$value` is a plain
+       * object; absent for array composites. Used by `composePartial` to
+       * reconstruct the merged value in source order.
+       */
+      originalKeyOrder?: readonly string[];
+    };
 
 /**
  * Per-token-path node. JSON-serializable — no Map/Set in the wire

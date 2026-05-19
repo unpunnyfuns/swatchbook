@@ -7,10 +7,11 @@ import { fillPresetTuple, validatePresets } from '#/presets.ts';
 import { validateCssOptions } from '#/terrazzo-options.ts';
 import { resolveDefaultTuple } from '#/permutations/default.ts';
 import { normalizePermutations } from '#/permutations/normalize.ts';
-import { buildResolveAt } from '#/resolve-at.ts';
 import { computeTokenListing } from '#/token-listing.ts';
 import { buildTokenGraph } from '#/token-graph/build.ts';
 import type { TokenGraph } from '#/token-graph/types.ts';
+import { resolveAllAt } from '#/token-graph/walk.ts';
+import { buildResolveAt } from '#/resolve-at.ts';
 import { buildVarianceByPath } from '#/variance-by-path.ts';
 import { permutationID } from '#/types.ts';
 import type { Axis, Config, Permutation, Project, TokenMap } from '#/types.ts';
@@ -137,7 +138,6 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     projectDefaultTuple,
     normalized.parserInput?.resolver,
   );
-  const resolveAt = buildResolveAt(filteredAxes, cells, jointOverrides, projectDefaultTuple);
 
   // Pre-compute per-path variance from cells + jointOverrides — the
   // bounded surface, no cartesian dependency.
@@ -165,6 +165,30 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
         } satisfies TokenGraph,
         diagnostics: [],
       };
+
+  // resolveAt: graph-backed for resolver projects (real graph nodes),
+  // legacy buildResolveAt for layered / plain-parse projects (empty graph).
+  // Graph path fills in axis defaults (so partial tuples canonicalize to the
+  // same key as a fully-specified equivalent) and memoizes by canonical key
+  // so repeated calls with the same effective tuple return the same instance.
+  const resolveAt = normalized.parserInput?.resolver
+    ? (() => {
+        const memo = new Map<string, TokenMap>();
+        return (tuple: Record<string, string>): TokenMap => {
+          const full: Record<string, string> = { ...projectDefaultTuple };
+          for (const axis of filteredAxes) {
+            const val = tuple[axis.name];
+            if (val !== undefined) full[axis.name] = val;
+          }
+          const key = filteredAxes.map((a) => `${a.name}=${full[a.name]}`).join('|');
+          const cached = memo.get(key);
+          if (cached) return cached;
+          const result = resolveAllAt(tokenGraphResult.graph, full);
+          memo.set(key, result);
+          return result;
+        };
+      })()
+    : buildResolveAt(filteredAxes, cells, jointOverrides, projectDefaultTuple);
 
   // `validateChrome` checks targets against the project's path
   // universe. `varianceByPath.keys()` is the union of every path

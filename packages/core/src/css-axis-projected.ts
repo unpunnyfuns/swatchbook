@@ -3,7 +3,7 @@ import { generateShorthand, makeCSSVar, transformCSSValue } from '@terrazzo/toke
 import { CHROME_ROLES, CHROME_VAR_PREFIX, DEFAULT_CHROME_MAP } from '#/chrome.ts';
 import { cssEscape } from '#/css-escape.ts';
 import { dataAttr } from '#/data-attr.ts';
-import { resolveAllAt } from '#/token-graph/walk.ts';
+import { resolveAliasAllAt, resolveAllAt } from '#/token-graph/walk.ts';
 import type { Project, TokenMap } from '#/types.ts';
 import { analyzeProjectVariance } from '#/variance-analysis.ts';
 import type { VarianceInfo } from '#/variance-analysis.ts';
@@ -103,10 +103,10 @@ export function emitAxisProjectedCss(
 
   const defaultTuple = project.defaultTuple;
   // Baseline map from tokenGraph for value-comparison (delta detection).
-  // CSS generation uses project.resolveAt() which preserves alias tokens
-  // in the Terrazzo-native shape transformCSSValue requires.
+  // resolveAliasAllAt preserves alias tokens in the Terrazzo-native shape
+  // transformCSSValue requires.
   const baselineValues = resolveAllAt(tokenGraph, defaultTuple);
-  const baselineTokens = project.resolveAt(defaultTuple);
+  const baselineTokens = resolveAliasAllAt(tokenGraph, defaultTuple);
 
   const blocks: string[] = [];
 
@@ -129,8 +129,6 @@ export function emitAxisProjectedCss(
   // Pre-compute per-axis delta sets using tokenGraph walks. A path is
   // in a delta cell when its resolved value at that singleton tuple
   // differs from the baseline — mirrors the shape buildCells produced.
-  // CSS generation uses project.resolveAt() which carries full alias
-  // token shapes for transformCSSValue.
   const deltaPathsByAxis: Record<string, Record<string, Set<string>>> = {};
   for (const axis of axes) {
     const axisDeltaPaths: Record<string, Set<string>> = {};
@@ -157,7 +155,7 @@ export function emitAxisProjectedCss(
     for (const ctx of axis.contexts) {
       if (ctx === axis.default) continue;
       const cellTuple = { ...defaultTuple, [axis.name]: ctx };
-      const cellTokens = project.resolveAt(cellTuple);
+      const cellTokens = resolveAliasAllAt(tokenGraph, cellTuple);
       const cellTokensForAliases = cellTokens;
       const deltaPaths = deltaPathsByAxis[axis.name]?.[ctx] ?? new Set<string>();
 
@@ -178,8 +176,8 @@ export function emitAxisProjectedCss(
   // 3. Compound joint cells — walk axis combos (arity 2..axes.length)
   //    in the same order probeJointOverrides used, compare tokenGraph
   //    cartesian truth against projection composition, and emit blocks
-  //    for divergent tuples. project.resolveAt() provides the full
-  //    alias-preserving token shapes for transformCSSValue.
+  //    for divergent tuples. resolveAliasAllAt provides alias-preserving
+  //    token shapes for transformCSSValue.
   for (const block of collectJointBlocks(
     project,
     baselineValues,
@@ -251,7 +249,7 @@ interface Axis {
  * accumulated overrides into its composer at each arity level.
  *
  * divergence detection uses valueKey comparisons on graph-walked values.
- * CSS generation uses project.resolveAt() for alias-preserving tokens.
+ * CSS generation uses resolveAliasAllAt for alias-preserving tokens.
  */
 function collectJointBlocks(
   project: Project,
@@ -331,9 +329,9 @@ function collectJointBlocks(
 
         if (divergentPaths.length === 0) continue;
 
-        // CSS generation — use project.resolveAt() for alias-preserving
-        // token shapes that transformCSSValue requires.
-        const fullTokens = asRawTokens(project.resolveAt(fullTuple));
+        // CSS generation — resolveAliasAllAt preserves alias token shapes
+        // that transformCSSValue requires.
+        const fullTokens = asRawTokens(resolveAliasAllAt(tokenGraph, fullTuple));
         const axisEntries = Object.entries(partialTuple);
         const selector = axisEntries
           .map(([axisName, ctx]) => `[${dataAttr(prefix, axisName)}="${cssEscape(ctx)}"]`)

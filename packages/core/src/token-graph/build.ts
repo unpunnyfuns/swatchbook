@@ -58,24 +58,36 @@ function toWriteValue(
 ): WriteValue | undefined {
   const value = token['$value'];
   if (value === undefined) return undefined;
+  const $type = typeof token['$type'] === 'string' ? token['$type'] : effectiveType;
+  const withType: SwatchbookToken =
+    $type !== undefined && token['$type'] === undefined
+      ? ({ ...token, $type } as SwatchbookToken)
+      : (token as SwatchbookToken);
   if (typeof value === 'string') {
     const match = ALIAS_RE.exec(value);
     if (match) return { kind: 'alias', target: match[1]! };
-    return { kind: 'literal', value: token as SwatchbookToken };
+    return { kind: 'literal', value: withType };
   }
-  const $type = typeof token['$type'] === 'string' ? token['$type'] : effectiveType;
   if ($type && COMPOSITE_TYPES.has($type) && (isPlainObject(value) || Array.isArray(value))) {
     const aliasFields: Record<string, string> = {};
     walkPartialAliasFields(value, '', aliasFields);
     if (Object.keys(aliasFields).length > 0) {
       const baseValue: SwatchbookToken = {
-        ...token,
+        ...withType,
         $value: stripAliasFields(value, aliasFields),
       } as SwatchbookToken;
-      return { kind: 'partial-alias', baseValue, aliasFields };
+      // Record the original key order from the full $value so composePartial
+      // can reconstruct the merged object in source order.
+      const originalKeyOrder = collectTopLevelKeyOrder(value);
+      return {
+        kind: 'partial-alias',
+        baseValue,
+        aliasFields,
+        ...(originalKeyOrder !== undefined ? { originalKeyOrder } : {}),
+      };
     }
   }
-  return { kind: 'literal', value: token as SwatchbookToken };
+  return { kind: 'literal', value: withType };
 }
 
 function walkPartialAliasFields(value: unknown, prefix: string, out: Record<string, string>): void {
@@ -108,27 +120,27 @@ function stripAliasFields(value: object, aliasFields: Record<string, string>): u
       const part = parts[i]!;
       if (Array.isArray(cur)) {
         const idx = Number(part);
-        if (!Number.isInteger(idx) || idx < 0 || idx >= cur.length) {
+        if (!Number.isInteger(idx) || idx < 0 || idx >= (cur as unknown[]).length) {
           cur = undefined;
           break;
         }
-        const child = cur[idx];
-        if (Array.isArray(child)) cur[idx] = [...child];
-        else if (isPlainObject(child)) cur[idx] = { ...child };
+        const child = (cur as unknown[])[idx];
+        if (Array.isArray(child)) (cur as unknown[])[idx] = [...child];
+        else if (isPlainObject(child)) (cur as unknown[])[idx] = { ...child };
         else {
           cur = undefined;
           break;
         }
-        cur = cur[idx];
+        cur = (cur as unknown[])[idx];
       } else if (isPlainObject(cur)) {
-        const child = cur[part];
-        if (Array.isArray(child)) cur[part] = [...child];
-        else if (isPlainObject(child)) cur[part] = { ...child };
+        const child = (cur as Record<string, unknown>)[part];
+        if (Array.isArray(child)) (cur as Record<string, unknown>)[part] = [...child];
+        else if (isPlainObject(child)) (cur as Record<string, unknown>)[part] = { ...child };
         else {
           cur = undefined;
           break;
         }
-        cur = cur[part];
+        cur = (cur as Record<string, unknown>)[part];
       } else {
         cur = undefined;
         break;
@@ -138,14 +150,19 @@ function stripAliasFields(value: object, aliasFields: Record<string, string>): u
     const finalPart = parts[parts.length - 1]!;
     if (Array.isArray(cur)) {
       const idx = Number(finalPart);
-      if (Number.isInteger(idx) && idx >= 0 && idx < cur.length) {
-        delete cur[idx];
+      if (Number.isInteger(idx) && idx >= 0 && idx < (cur as unknown[]).length) {
+        delete (cur as unknown[])[idx];
       }
     } else if (isPlainObject(cur)) {
-      delete cur[finalPart];
+      delete (cur as Record<string, unknown>)[finalPart];
     }
   }
   return result;
+}
+
+function collectTopLevelKeyOrder(value: unknown): readonly string[] | undefined {
+  if (isPlainObject(value)) return Object.keys(value);
+  return undefined;
 }
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
