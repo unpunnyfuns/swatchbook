@@ -1,5 +1,5 @@
 import type { SwatchbookToken, TokenMap } from '#/types.ts';
-import type { TokenGraph } from '#/token-graph/types.ts';
+import type { TokenGraph, WriteValue } from '#/token-graph/types.ts';
 import { canonicalKey } from '#/tuple-key.ts';
 
 const CYCLE_SENTINEL: unique symbol = Symbol('cycle');
@@ -13,15 +13,21 @@ export function resolveAt(
   const node = graph.nodes[path];
   if (!node) return undefined;
 
+  const ownMemo = memo ?? new Map<string, SwatchbookToken | typeof CYCLE_SENTINEL>();
+  const cacheKey = path + ' ' + canonicalKey(tuple);
+
   // Fast path: constant token — no axis in tuple is non-default for this node.
-  if (node.affectedBy.length === 0) return node.baselineValue;
+  if (node.affectedBy.length === 0) {
+    ownMemo.set(cacheKey, node.baselineValue);
+    return node.baselineValue;
+  }
   const hasNonDefaultAxis = node.affectedBy.some(
     (axis) => tuple[axis] !== undefined && tuple[axis] !== graph.axisDefaults[axis],
   );
-  if (!hasNonDefaultAxis) return node.baselineValue;
-
-  const ownMemo = memo ?? new Map<string, SwatchbookToken | typeof CYCLE_SENTINEL>();
-  const cacheKey = path + ' ' + canonicalKey(tuple);
+  if (!hasNonDefaultAxis) {
+    ownMemo.set(cacheKey, node.baselineValue);
+    return node.baselineValue;
+  }
 
   const cached = ownMemo.get(cacheKey);
   if (cached !== undefined) {
@@ -32,7 +38,7 @@ export function resolveAt(
   ownMemo.set(cacheKey, CYCLE_SENTINEL);
 
   // Find the last-wins direct write across axes in project order.
-  let matchedWrite = undefined;
+  let matchedWrite: WriteValue | undefined = undefined;
   for (const axis of graph.axes) {
     const ctx = tuple[axis];
     if (ctx === undefined || ctx === graph.axisDefaults[axis]) continue;
@@ -141,7 +147,7 @@ function assignByPath(obj: object, path: string, value: unknown): void {
   const finalPart = parts[parts.length - 1]!;
   if (Array.isArray(cur)) {
     const idx = Number(finalPart);
-    if (Number.isInteger(idx) && idx >= 0) (cur as unknown[])[idx] = value;
+    if (Number.isInteger(idx) && idx >= 0 && idx < cur.length) (cur as unknown[])[idx] = value;
   } else if (cur && typeof cur === 'object') {
     (cur as Record<string, unknown>)[finalPart] = value;
   }

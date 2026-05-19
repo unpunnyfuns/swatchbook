@@ -22,7 +22,7 @@ describe('resolveAt walker', () => {
     expect(constantPath).toBeDefined();
     const tuple = { ...defaultTuple, mode: 'Dark' };
     const fromGraph = resolveAt(graph, constantPath!, tuple);
-    expect(fromGraph).toEqual(graph.nodes[constantPath!]?.baselineValue);
+    expect(fromGraph).toBe(graph.nodes[constantPath!]?.baselineValue);
   });
 
   it('follows alias edges at the tuple', async () => {
