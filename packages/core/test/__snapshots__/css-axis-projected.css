@@ -72,19 +72,16 @@
   --sb-duration-instant: 0ms;
   --sb-duration-normal: 240ms;
   --sb-duration-slow: 400ms;
-  --sb-font-family-comic: 'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', 'Marker Felt', cursive;
-  --sb-font-family-mono: 'JetBrains Mono', 'Menlo', monospace;
-  --sb-font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --sb-font-family-serif: 'Source Serif 4', 'Georgia', serif;
+  --sb-font-family-comic: "Comic Sans MS", "Comic Neue", "Chalkboard SE", "Marker Felt", cursive;
+  --sb-font-family-mono: "JetBrains Mono", "Menlo", monospace;
+  --sb-font-family-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --sb-font-family-serif: "Source Serif 4", "Georgia", serif;
   --sb-font-weight-bold: 700;
   --sb-font-weight-medium: 500;
   --sb-font-weight-regular: 400;
   --sb-font-weight-semibold: 600;
-  --sb-gradient-cool:
-    rgb(11.4% 30.6% 84.7%) 0%, rgb(37.6% 64.7% 98%) 50%, rgb(52.5% 93.7% 67.5%) 100%;
-  --sb-gradient-sunrise:
-    rgb(99.2% 87.8% 27.8%) 0%, rgb(93.7% 26.7% 26.7%) 55.00000000000001%,
-    rgb(48.6% 22.7% 92.9%) 100%;
+  --sb-gradient-cool: rgb(11.4% 30.6% 84.7%) 0%, rgb(37.6% 64.7% 98%) 50%, rgb(52.5% 93.7% 67.5%) 100%;
+  --sb-gradient-sunrise: rgb(99.2% 87.8% 27.8%) 0%, rgb(93.7% 26.7% 26.7%) 55.00000000000001%, rgb(48.6% 22.7% 92.9%) 100%;
   --sb-gradient-surface-fade: rgb(100% 100% 100%) 0%, rgb(6.7% 9.4% 15.3%) 100%;
   --sb-number-line-height-loose: 1.7;
   --sb-number-line-height-normal: 1.4;
@@ -97,9 +94,7 @@
   --sb-radius-pill: 9999px;
   --sb-radius-sm: var(--sb-size-100);
   --sb-radius-xl: var(--sb-size-500);
-  --sb-shadow-lg:
-    0 8px 16px 0 var(--sb-color-palette-neutral-900),
-    0 2px 4px 0 var(--sb-color-palette-neutral-900);
+  --sb-shadow-lg: 0 8px 16px 0 var(--sb-color-palette-neutral-900), 0 2px 4px 0 var(--sb-color-palette-neutral-900);
   --sb-shadow-md: 0 4px 8px 0 var(--sb-color-palette-neutral-900);
   --sb-shadow-sm: 0 1px 2px 0 var(--sb-color-palette-neutral-900);
   --sb-size-000: 0;
@@ -133,12 +128,9 @@
   --sb-stroke-style-dotted: dotted;
   --sb-stroke-style-double: double;
   --sb-stroke-style-solid: solid;
-  --sb-transition-emphasized: var(--sb-duration-slow) var(--sb-duration-instant)
-    var(--sb-cubic-bezier-emphasized);
-  --sb-transition-enter: var(--sb-duration-normal) var(--sb-duration-instant)
-    var(--sb-cubic-bezier-decelerated);
-  --sb-transition-exit: var(--sb-duration-fast) var(--sb-duration-instant)
-    var(--sb-cubic-bezier-accelerated);
+  --sb-transition-emphasized: var(--sb-duration-slow) var(--sb-duration-instant) var(--sb-cubic-bezier-emphasized);
+  --sb-transition-enter: var(--sb-duration-normal) var(--sb-duration-instant) var(--sb-cubic-bezier-decelerated);
+  --sb-transition-exit: var(--sb-duration-fast) var(--sb-duration-instant) var(--sb-cubic-bezier-accelerated);
   --sb-typography-body-font-family: var(--sb-font-family-sans);
   --sb-typography-body-font-size: var(--sb-size-rem-400);
   --sb-typography-body-font-weight: var(--sb-font-weight-regular);
@@ -161,7 +153,7 @@
   --sb-typography-heading-letter-spacing: -0.5px;
 }
 
-[data-sb-mode='Dark'] {
+[data-sb-mode="Dark"] {
   --sb-border-dashed: 1px dashed var(--sb-color-border-default);
   --sb-border-default: 1px solid var(--sb-color-border-default);
   --sb-border-strong: 1px solid var(--sb-color-border-strong);
@@ -187,7 +179,7 @@
   --sb-color-text-subtle: var(--sb-color-palette-neutral-400);
 }
 
-[data-sb-brand='Brand A'] {
+[data-sb-brand="Brand A"] {
   --sb-border-focus: 2px solid var(--sb-color-border-focus);
   --sb-color-accent-bg: var(--sb-color-violet-700);
   --sb-color-accent-bg-hover: var(--sb-color-violet-900);
@@ -195,7 +187,7 @@
   --sb-color-text-accent: var(--sb-color-violet-700);
 }
 
-[data-sb-contrast='High'] {
+[data-sb-contrast="High"] {
   --sb-border-dashed: 1px dashed var(--sb-color-border-default);
   --sb-border-default: 2px solid var(--sb-color-border-default);
   --sb-border-focus: 3px solid var(--sb-color-border-focus);
@@ -223,22 +215,22 @@
   --sb-typography-heading-letter-spacing: 0;
 }
 
-[data-sb-mode='Dark'][data-sb-brand='Brand A'] {
+[data-sb-mode="Dark"][data-sb-brand="Brand A"] {
   --sb-color-accent-fg: var(--sb-color-palette-neutral-0);
 }
 
-[data-sb-mode='Dark'][data-sb-contrast='High'] {
+[data-sb-mode="Dark"][data-sb-contrast="High"] {
   --sb-color-accent-bg: var(--sb-color-accessible-accent-bg);
   --sb-color-accent-bg-hover: var(--sb-color-accessible-accent-bg-hover);
   --sb-color-text-muted: var(--sb-color-accessible-text-muted);
   --sb-color-text-subtle: var(--sb-color-accessible-text-subtle);
 }
 
-[data-sb-brand='Brand A'][data-sb-contrast='High'] {
+[data-sb-brand="Brand A"][data-sb-contrast="High"] {
   --sb-color-accent-bg-hover: var(--sb-color-accessible-accent-bg-hover);
 }
 
-[data-sb-mode='Dark'][data-sb-brand='Brand A'][data-sb-contrast='High'] {
+[data-sb-mode="Dark"][data-sb-brand="Brand A"][data-sb-contrast="High"] {
   --sb-color-accent-bg-hover: var(--sb-color-accessible-accent-bg-hover);
   --sb-color-accent-fg: var(--sb-color-accessible-accent-fg);
 }
@@ -253,6 +245,6 @@
   --swatchbook-text-muted: light-dark(#4b5563, #94a3b8);
   --swatchbook-accent-bg: light-dark(#1d4ed8, #3b82f6);
   --swatchbook-accent-fg: light-dark(#ffffff, #0b1220);
-  --swatchbook-body-font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --swatchbook-body-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --swatchbook-body-font-size: 14px;
 }

@@ -3,9 +3,11 @@ import { generateShorthand, makeCSSVar, transformCSSValue } from '@terrazzo/toke
 import { CHROME_ROLES, CHROME_VAR_PREFIX, DEFAULT_CHROME_MAP } from '#/chrome.ts';
 import { cssEscape } from '#/css-escape.ts';
 import { dataAttr } from '#/data-attr.ts';
+import { resolveAllAt } from '#/token-graph/walk.ts';
 import type { Project, TokenMap } from '#/types.ts';
 import { analyzeProjectVariance } from '#/variance-analysis.ts';
 import type { VarianceInfo } from '#/variance-analysis.ts';
+import { valueKey } from '#/value-key.ts';
 
 /**
  * Internal alias: the raw Terrazzo-shape map this emitter passes into
@@ -96,19 +98,22 @@ export function emitAxisProjectedCss(
   const transformAlias = (token: TokenNormalized): string =>
     makeCSSVar(token.id, { ...varOpts, wrapVar: true });
 
-  const { axes } = project;
+  const { axes, tokenGraph } = project;
   const variance = options.variance ?? analyzeProjectVariance(project);
 
   const defaultTuple = project.defaultTuple;
-  const firstAxis = axes[0];
-  const baselineTokens = firstAxis ? project.cells[firstAxis.name]?.[firstAxis.default] : undefined;
+  // Baseline map from tokenGraph for value-comparison (delta detection).
+  // CSS generation uses project.resolveAt() which preserves alias tokens
+  // in the Terrazzo-native shape transformCSSValue requires.
+  const baselineValues = resolveAllAt(tokenGraph, defaultTuple);
+  const baselineTokens = project.resolveAt(defaultTuple);
 
   const blocks: string[] = [];
 
   // 1. Baseline `:root` — every token's baseline value lives here.
   //    Baseline-only tokens never appear elsewhere; all other variance
   //    kinds also need a baseline value to start the cascade from.
-  if (baselineTokens) {
+  {
     const baselineRaw = asRawTokens(baselineTokens);
     const lines = collectLines(
       baselineRaw,
@@ -121,6 +126,27 @@ export function emitAxisProjectedCss(
     if (lines.length > 0) blocks.push(`:root {\n${lines.join('\n')}\n}`);
   }
 
+  // Pre-compute per-axis delta sets using tokenGraph walks. A path is
+  // in a delta cell when its resolved value at that singleton tuple
+  // differs from the baseline — mirrors the shape buildCells produced.
+  // CSS generation uses project.resolveAt() which carries full alias
+  // token shapes for transformCSSValue.
+  const deltaPathsByAxis: Record<string, Record<string, Set<string>>> = {};
+  for (const axis of axes) {
+    const axisDeltaPaths: Record<string, Set<string>> = {};
+    for (const ctx of axis.contexts) {
+      if (ctx === axis.default) continue;
+      const cellTuple = { ...defaultTuple, [axis.name]: ctx };
+      const cellValues = resolveAllAt(tokenGraph, cellTuple);
+      const delta = new Set<string>();
+      for (const [path, token] of Object.entries(cellValues)) {
+        if (valueKey(token) !== valueKey(baselineValues[path])) delta.add(path);
+      }
+      axisDeltaPaths[ctx] = delta;
+    }
+    deltaPathsByAxis[axis.name] = axisDeltaPaths;
+  }
+
   // 2. Per-axis singleton cells — emit every token this axis touches.
   //    Under smart dedup we don't drop "matches baseline" values; the
   //    cascade needs them to win against other axes that might have
@@ -130,18 +156,15 @@ export function emitAxisProjectedCss(
   for (const axis of axes) {
     for (const ctx of axis.contexts) {
       if (ctx === axis.default) continue;
-      const cellTokens = project.cells[axis.name]?.[ctx];
-      if (!cellTokens) continue;
       const cellTuple = { ...defaultTuple, [axis.name]: ctx };
-      // The cell carries only delta tokens; alias resolution needs
-      // the full composed TokenMap at the cell's tuple to find
-      // non-delta targets.
-      const cellTokensForAliases = project.resolveAt(cellTuple);
+      const cellTokens = project.resolveAt(cellTuple);
+      const cellTokensForAliases = cellTokens;
+      const deltaPaths = deltaPathsByAxis[axis.name]?.[ctx] ?? new Set<string>();
 
       const lines = collectLines(
         asRawTokens(cellTokens),
         asRawTokens(cellTokensForAliases),
-        (path) => axisTouchesToken(axis.name, variance.get(path)),
+        (path) => deltaPaths.has(path) && axisTouchesToken(axis.name, variance.get(path)),
         cellTuple,
         varOpts,
         transformAlias,
@@ -152,13 +175,19 @@ export function emitAxisProjectedCss(
     }
   }
 
-  // 3. Compound joint cells — one block per `Project.jointOverrides`
-  //    entry. Each override carries the cartesian-correct values for
-  //    the divergent tokens at that partial tuple; the block selector
-  //    is built from the override's axes (N-arity supported — pairs,
-  //    triples, etc.). Compound-selector specificity beats the
-  //    singleton cells, so the joint cell wins where it applies.
-  for (const block of collectJointBlocks(project, prefix, varOpts, transformAlias)) {
+  // 3. Compound joint cells — walk axis combos (arity 2..axes.length)
+  //    in the same order probeJointOverrides used, compare tokenGraph
+  //    cartesian truth against projection composition, and emit blocks
+  //    for divergent tuples. project.resolveAt() provides the full
+  //    alias-preserving token shapes for transformCSSValue.
+  for (const block of collectJointBlocks(
+    project,
+    baselineValues,
+    deltaPathsByAxis,
+    prefix,
+    varOpts,
+    transformAlias,
+  )) {
     blocks.push(block);
   }
 
@@ -204,55 +233,160 @@ function axisTouchesToken(axisName: string, info: VarianceInfo | undefined): boo
   }
 }
 
+interface Axis {
+  name: string;
+  contexts: readonly string[];
+  default: string;
+}
+
 /**
- * Iterate `Project.jointOverrides` and emit one compound-selector
- * block per entry. Each override entry carries the spec-correct
- * cartesian values for its divergent tokens at the entry's partial
- * tuple, so the block content comes from the override's `tokens` map
- * directly — no \`permutationsResolved[jointCase.permutationName]\`
- * roundtrip.
+ * Walk all axis combos of arity 2..axes.length in the same order
+ * probeJointOverrides used. For each partial tuple, compare the
+ * tokenGraph's cartesian truth against projection composition — which
+ * mirrors what CSS cascade actually produces given the emitted blocks.
  *
- * Selector arity matches the override's `axes` arity — pairs produce
- * `[data-A="a"][data-B="b"]`, triples produce a 3-attribute compound
- * selector, etc. Compound-selector specificity beats the singleton
- * cells emitted in Phase 2.
+ * CSS cascade at a triple selector applies after all pairs, so the
+ * composition at arity N must include the already-accumulated arity-(N-1)
+ * corrections. This matches what probeJointOverrides did by passing
+ * accumulated overrides into its composer at each arity level.
  *
- * Composite tokens with alias references resolve against
- * `project.resolveAt(fullTuple)` — the full TokenMap at the joint
- * tuple, so cross-token aliases find their targets.
+ * divergence detection uses valueKey comparisons on graph-walked values.
+ * CSS generation uses project.resolveAt() for alias-preserving tokens.
  */
 function collectJointBlocks(
   project: Project,
+  baselineValues: TokenMap,
+  deltaPathsByAxis: Record<string, Record<string, Set<string>>>,
   prefix: string,
   varOpts: VarOpts,
   transformAlias: (token: TokenNormalized) => string,
 ): string[] {
-  const blocks: string[] = [];
-  for (const [, override] of project.jointOverrides) {
-    const fullTuple = { ...project.defaultTuple, ...override.axes };
-    const fullTokens = asRawTokens(project.resolveAt(fullTuple));
-    const axisEntries = Object.entries(override.axes);
-    const selector = axisEntries
-      .map(([axisName, ctx]) => `[${dataAttr(prefix, axisName)}="${cssEscape(ctx)}"]`)
-      .join('');
+  const { axes, tokenGraph, defaultTuple } = project;
+  if (axes.length < 2) return [];
 
-    const lines: string[] = [];
-    for (const [path, token] of Object.entries(asRawTokens(override.tokens))) {
-      for (const decl of collectTokenDeclarations(
-        path,
-        token,
-        fullTokens,
-        fullTuple,
-        varOpts,
-        transformAlias,
-      )) {
-        lines.push(`  ${decl.varName}: ${decl.value};`);
+  const blocks: string[] = [];
+
+  // Accumulated lower-arity joint corrections, keyed by canonical partial
+  // tuple (sorted axis entries joined as "axis=ctx|axis=ctx"). Used by
+  // higher-arity composition to include corrections from pairs before
+  // computing triple divergences — same as probeJointOverrides' composer.
+  const accumulatedCorrections = new Map<string, Map<string, TokenMap>>();
+
+  for (let arity = 2; arity <= axes.length; arity++) {
+    for (const axisCombo of axisCombinations(axes, arity)) {
+      for (const partialTuple of contextProducts(axisCombo)) {
+        const fullTuple = { ...defaultTuple, ...partialTuple };
+        const cartesian = resolveAllAt(tokenGraph, fullTuple);
+
+        // Build projection composition: baseline values + per-axis delta
+        // layers + all lower-arity joint corrections that apply to this
+        // fullTuple, in ascending arity order. This mirrors CSS cascade.
+        const composed: TokenMap = { ...baselineValues };
+        for (const axis of axes) {
+          const ctx = fullTuple[axis.name];
+          if (ctx === undefined || ctx === axis.default) continue;
+          const deltaPaths = deltaPathsByAxis[axis.name]?.[ctx];
+          if (!deltaPaths) continue;
+          const cellValues = resolveAllAt(tokenGraph, { ...defaultTuple, [axis.name]: ctx });
+          for (const path of deltaPaths) {
+            const tok = cellValues[path];
+            if (tok !== undefined) composed[path] = tok;
+          }
+        }
+        // Apply lower-arity accumulated corrections. Iterate arity 2..(arity-1)
+        // so higher-order corrections subsume lower ones in the right order.
+        for (let lowerArity = 2; lowerArity < arity; lowerArity++) {
+          const byArity = accumulatedCorrections.get(String(lowerArity));
+          if (!byArity) continue;
+          for (const [correctionKey, correctionValues] of byArity) {
+            // A lower-arity correction applies when every axis=ctx in its key
+            // matches the fullTuple. Parse the correction key back out.
+            if (!correctionKeyIsSubset(correctionKey, fullTuple)) continue;
+            for (const [path, tok] of Object.entries(correctionValues)) {
+              composed[path] = tok;
+            }
+          }
+        }
+
+        // Collect divergent paths (cartesian ≠ projection after corrections).
+        const divergentPaths: string[] = [];
+        const divergentValues: TokenMap = {};
+        for (const path of Object.keys(cartesian)) {
+          if (valueKey(cartesian[path]) !== valueKey(composed[path])) {
+            divergentPaths.push(path);
+            divergentValues[path] = cartesian[path]!;
+          }
+        }
+
+        // Record this arity's corrections for use by higher arities.
+        if (divergentPaths.length > 0) {
+          const corrKey = canonicalPartialKey(partialTuple);
+          let byArity = accumulatedCorrections.get(String(arity));
+          if (!byArity) {
+            byArity = new Map<string, TokenMap>();
+            accumulatedCorrections.set(String(arity), byArity);
+          }
+          byArity.set(corrKey, divergentValues);
+        }
+
+        if (divergentPaths.length === 0) continue;
+
+        // CSS generation — use project.resolveAt() for alias-preserving
+        // token shapes that transformCSSValue requires.
+        const fullTokens = asRawTokens(project.resolveAt(fullTuple));
+        const axisEntries = Object.entries(partialTuple);
+        const selector = axisEntries
+          .map(([axisName, ctx]) => `[${dataAttr(prefix, axisName)}="${cssEscape(ctx)}"]`)
+          .join('');
+
+        const lines: string[] = [];
+        for (const path of divergentPaths) {
+          const token = fullTokens[path];
+          if (!token) continue;
+          for (const decl of collectTokenDeclarations(
+            path,
+            token,
+            fullTokens,
+            fullTuple,
+            varOpts,
+            transformAlias,
+          )) {
+            lines.push(`  ${decl.varName}: ${decl.value};`);
+          }
+        }
+        if (lines.length > 0) blocks.push(`${selector} {\n${lines.join('\n')}\n}`);
       }
     }
-    if (lines.length > 0) blocks.push(`${selector} {\n${lines.join('\n')}\n}`);
   }
 
   return blocks;
+}
+
+/**
+ * Build a stable lookup key for a partial tuple — axis entries joined
+ * in sorted key order so `{A: a, B: b}` and `{B: b, A: a}` match.
+ */
+function canonicalPartialKey(partial: Record<string, string>): string {
+  return Object.entries(partial)
+    .toSorted(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}=${v}`)
+    .join('|');
+}
+
+/**
+ * Check whether a canonicalPartialKey string is a subset of a fullTuple.
+ * `"mode=Dark|brand=Brand A"` is a subset of `{mode: 'Dark', brand: 'Brand A', contrast: 'High'}`.
+ */
+function correctionKeyIsSubset(corrKey: string, fullTuple: Record<string, string>): boolean {
+  const parts = corrKey.split('|');
+  for (const part of parts) {
+    const eq = part.indexOf('=');
+    if (eq < 0) return false;
+    const axis = part.slice(0, eq);
+    const ctx = part.slice(eq + 1);
+    if (fullTuple[axis] !== ctx) return false;
+  }
+  return true;
 }
 
 /**
@@ -316,4 +450,33 @@ function* collectTokenDeclarations(
   }
   const shorthand = generateShorthand({ token, localID });
   if (shorthand) yield { varName, value: shorthand };
+}
+
+function* axisCombinations(axes: readonly Axis[], k: number): Generator<readonly Axis[]> {
+  if (k === 0) {
+    yield [];
+    return;
+  }
+  if (k > axes.length) return;
+  for (let i = 0; i <= axes.length - k; i++) {
+    const head = axes[i] as Axis;
+    for (const tail of axisCombinations(axes.slice(i + 1), k - 1)) {
+      yield [head, ...tail];
+    }
+  }
+}
+
+function* contextProducts(axisCombo: readonly Axis[]): Generator<Record<string, string>> {
+  if (axisCombo.length === 0) {
+    yield {};
+    return;
+  }
+  const [first, ...rest] = axisCombo;
+  if (!first) return;
+  for (const ctx of first.contexts) {
+    if (ctx === first.default) continue;
+    for (const subTuple of contextProducts(rest)) {
+      yield { [first.name]: ctx, ...subTuple };
+    }
+  }
 }
