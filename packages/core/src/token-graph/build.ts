@@ -58,7 +58,7 @@ function toWriteValue(token: Record<string, unknown>): WriteValue | undefined {
     return { kind: 'literal', value: token as SwatchbookToken };
   }
   const $type = typeof token['$type'] === 'string' ? token['$type'] : undefined;
-  if ($type && COMPOSITE_TYPES.has($type) && isPlainObject(value)) {
+  if ($type && COMPOSITE_TYPES.has($type) && (isPlainObject(value) || Array.isArray(value))) {
     const aliasFields: Record<string, string> = {};
     walkPartialAliasFields(value, '', aliasFields);
     if (Object.keys(aliasFields).length > 0) {
@@ -88,21 +88,56 @@ function walkPartialAliasFields(value: unknown, prefix: string, out: Record<stri
     for (const [k, v] of Object.entries(value)) {
       walkPartialAliasFields(v, prefix ? `${prefix}.${k}` : k, out);
     }
+    return;
   }
+  // Numbers, booleans, and other primitives carry no alias syntax — skip silently.
 }
 
 function stripAliasFields(value: object, aliasFields: Record<string, string>): unknown {
-  const result: Record<string, unknown> = isPlainObject(value) ? { ...value } : {};
+  const result: unknown = Array.isArray(value) ? [...value] : { ...value };
   for (const fieldPath of Object.keys(aliasFields)) {
     const parts = fieldPath.split('.');
-    let cur: Record<string, unknown> = result;
+    let cur: unknown = result;
     for (let i = 0; i < parts.length - 1; i++) {
       const part = parts[i]!;
-      if (isPlainObject(cur[part])) cur[part] = { ...(cur[part] as object) };
-      else return result;
-      cur = cur[part] as Record<string, unknown>;
+      if (Array.isArray(cur)) {
+        const idx = Number(part);
+        if (!Number.isInteger(idx) || idx < 0 || idx >= cur.length) {
+          cur = undefined;
+          break;
+        }
+        const child = cur[idx];
+        if (Array.isArray(child)) cur[idx] = [...child];
+        else if (isPlainObject(child)) cur[idx] = { ...child };
+        else {
+          cur = undefined;
+          break;
+        }
+        cur = cur[idx];
+      } else if (isPlainObject(cur)) {
+        const child = cur[part];
+        if (Array.isArray(child)) cur[part] = [...child];
+        else if (isPlainObject(child)) cur[part] = { ...child };
+        else {
+          cur = undefined;
+          break;
+        }
+        cur = cur[part];
+      } else {
+        cur = undefined;
+        break;
+      }
     }
-    delete cur[parts[parts.length - 1]!];
+    if (cur === undefined) continue;
+    const finalPart = parts[parts.length - 1]!;
+    if (Array.isArray(cur)) {
+      const idx = Number(finalPart);
+      if (Number.isInteger(idx) && idx >= 0 && idx < cur.length) {
+        delete cur[idx];
+      }
+    } else if (isPlainObject(cur)) {
+      delete cur[finalPart];
+    }
   }
   return result;
 }

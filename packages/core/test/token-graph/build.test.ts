@@ -96,6 +96,42 @@ describe('extractWritesFromModifiers', () => {
     expect(writes).toEqual({});
   });
 
+  it('extracts partial-alias writes for gradient composites with array stops', () => {
+    const modifiers = {
+      brand: {
+        contexts: {
+          BrandA: [
+            {
+              gradient: {
+                hero: {
+                  $type: 'gradient',
+                  $value: [
+                    { color: '{color.brand.a}', position: 0 },
+                    { color: '{color.brand.b}', position: 1 },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        default: 'Default',
+      },
+    };
+    const axes: Axis[] = [
+      { name: 'brand', contexts: ['Default', 'BrandA'], default: 'Default', source: 'resolver' },
+    ];
+    const writes = extractWritesFromModifiers(modifiers, axes);
+    const write = writes['gradient.hero']?.brand?.BrandA;
+    expect(write?.kind).toBe('partial-alias');
+    if (write?.kind === 'partial-alias') {
+      expect(write.aliasFields).toEqual({
+        '0.color': 'color.brand.a',
+        '1.color': 'color.brand.b',
+      });
+      expect(write.baseValue.$value).toEqual([{ position: 0 }, { position: 1 }]);
+    }
+  });
+
   it('handles axes missing from modifiers (no contribution)', () => {
     const modifiers = {
       mode: {
