@@ -1,3 +1,4 @@
+import jsPlugin from '@terrazzo/plugin-js';
 import sassPlugin from '@terrazzo/plugin-sass';
 import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
 import { resolverPath } from '@unpunnyfuns/swatchbook-tokens';
@@ -35,18 +36,17 @@ export default defineSwatchbookConfig({
     bodyFontFamily: 'typography.body.font-family',
     bodyFontSize: 'typography.body.font-size',
   },
-  // Load plugin-sass so the Token Listing's `names.sass` column populates
-  // beyond CSS. Purely for preview — the plugin doesn't emit files through
-  // swatchbook; it contributes its identifier-naming logic so
-  // `<TokenDetail>`'s Consumer Output renders the Sass identifier alongside
-  // the CSS var. plugin-js is intentionally absent: it doesn't register
-  // transforms via `getTransforms`, so plugin-token-listing can't look up
-  // a `js` format and the listing build fails outright.
-  terrazzoPlugins: [sassPlugin({ filename: 'tokens.scss' })],
+  // Load plugin-sass and plugin-js so the Token Listing's `names.sass`
+  // and `names.js` columns populate beyond CSS. Purely for preview —
+  // these plugins don't emit files through swatchbook; they contribute
+  // their identifier-naming logic so `<TokenDetail>`'s Consumer Output
+  // renders the Sass and JS identifiers alongside the CSS var.
+  terrazzoPlugins: [sassPlugin({ filename: 'tokens.scss' }), jsPlugin({ filename: 'tokens.js' })],
   listingOptions: {
     platforms: {
       css: { name: '@terrazzo/plugin-css', description: 'CSS custom properties' },
       sass: { name: '@terrazzo/plugin-sass', description: 'Sass variables' },
+      js: { name: '@terrazzo/plugin-js', description: 'JS token accessors' },
     },
   },
   presets: [
