@@ -25,6 +25,7 @@
  * import-resolution constraints.
  */
 import type { ListedToken } from '#/token-listing.ts';
+import type { TokenGraph } from '#/token-graph/types.ts';
 import type { AxisVarianceResult, JointOverrides, Project } from '#/types.ts';
 
 /**
@@ -61,6 +62,7 @@ export interface SnapshotForWire {
   jointOverrides: JointOverrides;
   varianceByPath: Record<string, AxisVarianceResult>;
   defaultTuple: Project['defaultTuple'];
+  tokenGraph: TokenGraph;
 }
 
 /**
@@ -82,6 +84,7 @@ export function snapshotForWire(project: Project, css: string): SnapshotForWire 
     jointOverrides: project.jointOverrides,
     varianceByPath: Object.fromEntries(project.varianceByPath.entries()),
     defaultTuple: project.defaultTuple,
+    tokenGraph: project.tokenGraph,
   };
 }
 
