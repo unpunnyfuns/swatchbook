@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { pathToFileURL } from 'node:url';
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
 import { loadProject } from '@unpunnyfuns/swatchbook-core';
 import { enumerateThemes } from '@unpunnyfuns/swatchbook-core/themes';
@@ -45,12 +45,6 @@ export async function viteFinal(
   );
 
   return { ...viteConfig, plugins };
-}
-
-/** Storybook appends this module into the manager bundle so our toolbar tool registers. */
-export function managerEntries(entry: string[] = []): string[] {
-  const managerUrl = import.meta.resolve('@unpunnyfuns/swatchbook-addon/manager');
-  return [...entry, fileURLToPath(managerUrl)];
 }
 
 async function resolveConfig(options: PresetOptions): Promise<{ config: Config; cwd: string }> {
