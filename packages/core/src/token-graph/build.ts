@@ -188,6 +188,11 @@ export function buildTokenGraph(
   const axisDefaults: Record<string, string> = {};
   for (const axis of axes) axisDefaults[axis.name] = axis.default;
 
+  computeAffectedBy(
+    nodes,
+    axes.map((a) => a.name),
+  );
+
   return {
     graph: { nodes, axes: axes.map((a) => a.name), axisDefaults },
     diagnostics: [],
@@ -249,6 +254,73 @@ function extractPartialAliasFields(partialAliasOf: unknown): Record<string, stri
   const fields: Record<string, string> = {};
   walkPartialAliasTargets(partialAliasOf, '', fields);
   return fields;
+}
+
+const AFFECTED_BY_FIXPOINT_BOUND = 1000;
+
+function computeAffectedBy(
+  nodes: Record<string, TokenGraphNode>,
+  axisOrder: readonly string[],
+): void {
+  const affected: Record<string, Set<string>> = {};
+  for (const [path, node] of Object.entries(nodes)) {
+    affected[path] = new Set(Object.keys(node.writes));
+  }
+
+  const aliasTargets: Record<string, Set<string>> = {};
+  for (const [path, node] of Object.entries(nodes)) {
+    const targets = new Set<string>(node.aliases);
+    for (const axisWrites of Object.values(node.writes)) {
+      for (const write of Object.values(axisWrites)) {
+        if (write.kind === 'alias') targets.add(write.target);
+        else if (write.kind === 'partial-alias') {
+          for (const t of Object.values(write.aliasFields)) targets.add(t);
+        }
+      }
+    }
+    aliasTargets[path] = targets;
+  }
+
+  let iterations = 0;
+  let changed = true;
+  while (changed) {
+    iterations += 1;
+    if (iterations > AFFECTED_BY_FIXPOINT_BOUND) {
+      throw new Error(
+        `affectedBy fixpoint did not stabilize after ${AFFECTED_BY_FIXPOINT_BOUND} iterations`,
+      );
+    }
+    changed = false;
+    for (const [path, targets] of Object.entries(aliasTargets)) {
+      for (const target of targets) {
+        const targetAffected = affected[target];
+        if (!targetAffected) continue;
+        for (const axis of targetAffected) {
+          if (!affected[path]!.has(axis)) {
+            affected[path]!.add(axis);
+            changed = true;
+          }
+        }
+      }
+    }
+  }
+
+  for (const [path, node] of Object.entries(nodes)) {
+    (node as { affectedBy: readonly string[] }).affectedBy = axisOrder.filter((a) =>
+      affected[path]!.has(a),
+    );
+  }
+
+  const aliasedBy: Record<string, Set<string>> = {};
+  for (const [path, node] of Object.entries(nodes)) {
+    for (const target of node.aliases) {
+      (aliasedBy[target] ??= new Set()).add(path);
+    }
+  }
+  for (const [target, set] of Object.entries(aliasedBy)) {
+    const node = nodes[target];
+    if (node) (node as { aliasedBy: readonly string[] }).aliasedBy = [...set].toSorted();
+  }
 }
 
 function walkPartialAliasTargets(

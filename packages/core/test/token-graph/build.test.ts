@@ -192,3 +192,51 @@ describe('buildTokenGraph baseline seeding', () => {
     expect(graph.axisDefaults).toEqual({ mode: 'Light', brand: 'Default', contrast: 'Normal' });
   });
 });
+
+describe('affectedBy fixpoint', () => {
+  it('marks direct write axes as affecting', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
+    // color.accent.bg is directly written by `mode` (Dark) and `brand` (BrandA) in the reference fixture
+    expect(graph.nodes['color.accent.bg']?.affectedBy).toEqual(
+      expect.arrayContaining(['mode', 'brand']),
+    );
+  });
+
+  it('propagates affectedBy backward through alias edges', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
+    // color.accent.fg is an alias; its target gets axis writes, so fg.affectedBy includes those axes
+    expect(graph.nodes['color.accent.fg']?.affectedBy.length).toBeGreaterThan(0);
+  });
+
+  it('returns affectedBy sorted by project axis order', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
+    for (const node of Object.values(graph.nodes)) {
+      const indexes = node.affectedBy.map((a) => graph.axes.indexOf(a));
+      for (let i = 1; i < indexes.length; i++) {
+        expect(indexes[i]).toBeGreaterThan(indexes[i - 1]!);
+      }
+    }
+  });
+
+  it('populates aliasedBy as the reverse of aliases', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
+    for (const [path, node] of Object.entries(graph.nodes)) {
+      for (const target of node.aliases) {
+        const targetNode = graph.nodes[target];
+        expect(targetNode?.aliasedBy, `${target} should have ${path} in aliasedBy`).toContain(path);
+      }
+    }
+  });
+
+  it('constant tokens have empty affectedBy', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
+    // Find any token unaffected by any axis (likely a palette primitive)
+    const constants = Object.entries(graph.nodes).filter(([, n]) => n.affectedBy.length === 0);
+    expect(constants.length).toBeGreaterThan(0);
+  });
+});
