@@ -6,4 +6,8 @@ export default defineConfig({
     environment: 'node',
     reporters: ['default'],
   },
+  benchmark: {
+    include: ['bench/**/*.bench.ts'],
+    reporters: ['default'],
+  },
 });

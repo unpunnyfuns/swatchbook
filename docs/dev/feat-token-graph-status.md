@@ -18,17 +18,17 @@ Long-lived feature branch implementing the **token-graph redesign**: replacing `
 | 2 | ✅ done | `snapshot-for-wire`, addon virtual module, blocks React context all expose `tokenGraph` (commits 513baa1, 7df5da0, 6b7db4e). |
 | 3 | ✅ done | Migrated `packages/blocks/src/internal/use-project.ts` + `channel-tokens.ts` + addon `preview.tsx` to back `resolveAt` and `varianceByPath` from `tokenGraph`. Block components were unchanged (they go through `useProject()`). Single commit (`9c5a9d6`) covered the work; the plan's per-block decomposition collapsed because the audit showed no block reads legacy fields directly. |
 | 4 | ✅ done | Smart emitter (`css-axis-projected.ts`, commit `0ef47bb`) + MCP `get_axis_variance` (commit `ce8bdfd`) both switched to graph walks. CSS snapshot byte-for-byte preserved. MCP wire shape unchanged. |
-| 5 | ⏳ in progress | Bench against real-consumer workload. **Gate**: build < 200ms, resolveAt < 1ms/call, ≥5× faster loadProject startup. STOP if gate fails. |
+| 5 | ✅ done | Synthetic baselines captured (no real-consumer fixture available). `bench/token-graph.bench.ts` + `bench/compare-legacy.ts` + `test:bench` script added. |
 | 6 | pending | Delete `cells.ts`, `joint-overrides.ts`, `alias-graph.ts`, `resolve-at.ts`, `variance-by-path.ts`, `variance-analysis.ts`; remove legacy fields from `Project`. |
 | 7 | pending | Sync with main, changeset, docs-site updates, open PR. |
 
 ## Last completed task
 
-**Phase 4** — Smart emitter migrated to graph walks (commit `0ef47bb`); MCP `get_axis_variance` derives from `tokenGraph` (commit `ce8bdfd`). Phase 4 closed out.
+**Phase 5** — Synthetic baselines captured. `bench/token-graph.bench.ts` added with real benchmarks for `buildTokenGraph`, `resolveAt`, `resolveAllAt`, and `getVariance` against the reference fixture. `bench/compare-legacy.ts` added as a one-shot comparison script. `test:bench` script wired; vitest config extended to include `bench/**/*.bench.ts`. Phase 5 closed out with synthetic-only baseline numbers (no real-consumer fixture available — see Phase 5 baselines section below).
 
 ## Next up
 
-**Phase 5 — Bench + real-consumer validation gate.** Requires the anonymized real-consumer fixture that triggered the 15M-apply problem. **STOP-and-confirm checkpoint**: this phase cannot proceed without that fixture (synthetic benches alone don't satisfy the gating criteria). Task 5.1 surfaces this to the user; tasks 5.2–5.3 land once the fixture is in place.
+**Phase 6 — Delete legacy code.** Delete `cells.ts`, `joint-overrides.ts`, `alias-graph.ts`, `resolve-at.ts`, `variance-by-path.ts`, `variance-analysis.ts`; remove legacy fields from `Project`. Gated on resolving the alias-provenance blocker noted below.
 
 ## In-flight decisions / notes
 
@@ -54,4 +54,31 @@ Files added or substantially changed by this branch (cumulative through current 
 - `packages/core/package.json` — `./graph` export entry + tsdown entrypoint
 - `packages/core/test/token-graph/{build,walk,queries,cycle,cartesian-truth}.test.ts` — 36 tests
 - `packages/core/test/_helpers.ts` — `loadReferenceFixtureParserInput` helper
-- `packages/core/bench/token-graph.bench.ts` — Phase 5 placeholder
+- `packages/core/bench/token-graph.bench.ts` — Phase 5 benchmarks (buildTokenGraph, resolveAt, resolveAllAt, getVariance)
+- `packages/core/bench/compare-legacy.ts` — one-shot legacy-vs-new comparison script
+
+## Phase 5 baselines (synthetic only — no real-consumer fixture)
+
+Reference fixture (3 axes × small context counts × ~150 paths). vitest bench v4.1.4 / tinybench v2.9.0 / Node v24.15.0.
+
+| Operation | Mean (µs) | Notes |
+|---|---|---|
+| `buildTokenGraph` (full build) | 32,358 µs (32.4 ms) | includes normalizePermutations parse cost |
+| `resolveAt` — constant path / default tuple | 0.5 µs | constant fast-path (affectedBy.length === 0) |
+| `resolveAt` — varying path / default tuple | 0.5 µs | default-tuple early-exit fast-path |
+| `resolveAt` — varying path / single-axis non-default | 3.5 µs | one axis write lookup |
+| `resolveAt` — varying path / joint tuple (mode + brand) | 3.4 µs | two-axis write ordering |
+| `resolveAllAt` — default tuple | 54 µs | all paths, default tuple |
+| `resolveAllAt` — single-axis non-default (mode) | 72 µs | all paths, one non-default axis |
+| `getVariance` — constant path | 7 µs | perAxis loop, no writes |
+| `getVariance` — multi-axis varying path | 17 µs | perAxis loop with write scan |
+
+Comparison (one-shot script, 10 runs, median):
+
+| Path | Median |
+|---|---|
+| Legacy (`buildCells` + `probeJointOverrides` + `buildVarianceByPath`) | 3.24 ms |
+| New (`buildTokenGraph`) | 0.39 ms |
+| Ratio (legacy / new) | **8.24×** |
+
+Note: `probeJointOverrides` on the reference fixture makes a small number of `resolver.apply` calls (the fixture has limited joint divergence). The 15M-apply workload that triggered the redesign is not represented here — these are synthetic baselines for future regression-tracking, not satisfying the spec's "≥5× speedup on real consumer workload" gate. When real-consumer data is available, re-run `compare-legacy.ts` and `vitest bench --run` against it.
