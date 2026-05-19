@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildTokenGraph } from '#/token-graph/build.ts';
-import { resolveAllAt, resolveAt } from '#/token-graph/walk.ts';
+import { resolveAliasAt, resolveAllAt, resolveAt } from '#/token-graph/walk.ts';
 import { valueKey } from '#/value-key.ts';
 import { loadReferenceFixtureParserInput } from '../_helpers.ts';
 
@@ -68,5 +68,40 @@ describe('resolveAllAt', () => {
     for (const path of Object.keys(graph.nodes)) {
       expect(result[path], `${path} should be resolved`).toBeDefined();
     }
+  });
+});
+
+describe('resolveAliasAt', () => {
+  it('returns literal for non-aliased tokens', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
+    const result = resolveAliasAt(graph, 'color.palette.blue.500', defaultTuple);
+    expect(result?.aliasOf).toBeUndefined();
+    expect(result?.$value).toBeDefined();
+  });
+
+  it('preserves aliasOf for aliased tokens at default tuple', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
+    const result = resolveAliasAt(graph, 'color.accent.bg', defaultTuple);
+    expect(result?.aliasOf).toBeDefined();
+    expect(typeof result?.aliasOf).toBe('string');
+    expect(result?.$value).toBeDefined();
+  });
+
+  it('preserves aliasOf for write-introduced aliases', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
+    const tuple = { ...defaultTuple, mode: 'Dark' };
+    const result = resolveAliasAt(graph, 'color.accent.bg', tuple);
+    expect(result?.aliasOf).toBeDefined();
+  });
+
+  it('preserves $value as the resolved leaf', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
+    const leafResult = resolveAt(graph, 'color.accent.bg', defaultTuple);
+    const aliasResult = resolveAliasAt(graph, 'color.accent.bg', defaultTuple);
+    expect(aliasResult?.$value).toEqual(leafResult?.$value);
   });
 });

@@ -96,7 +96,82 @@ export function resolveAllAt(graph: TokenGraph, tuple: Record<string, string>): 
   return result;
 }
 
-function composePartial(
+/**
+ * Like `resolveAt`, but stops at the first alias/partial-alias write
+ * (or baseline structure) and returns the alias view instead of
+ * recursing to a leaf. Returned token retains the source path's
+ * structural shape — useful for emitters that need to reference
+ * `aliasOf` to emit `var(--…)` references rather than literal values.
+ *
+ * - Literal at this tuple → returns the literal token (same as `resolveAt`).
+ * - Alias at this tuple → returns a token with `aliasOf: <target>` and
+ *   `$value: <target's resolved leaf at this tuple>` (preserves alias provenance).
+ * - Partial-alias at this tuple → returns a token with `partialAliasOf: <fields-map>`
+ *   and `$value: <composed value>` (preserves which fields are aliased).
+ */
+export function resolveAliasAt(
+  graph: TokenGraph,
+  path: string,
+  tuple: Record<string, string>,
+): SwatchbookToken | undefined {
+  const node = graph.nodes[path];
+  if (!node) return undefined;
+
+  let directWrite: WriteValue | undefined;
+  for (const axis of graph.axes) {
+    const ctx = tuple[axis];
+    if (!ctx || ctx === graph.axisDefaults[axis]) continue;
+    const w = node.writes[axis]?.[ctx];
+    if (w) directWrite = w;
+  }
+
+  if (!directWrite) {
+    if (node.baselineKind === 'literal') return node.baselineValue;
+    if (node.baselineKind === 'alias') {
+      const targetLeaf = resolveAt(graph, node.baselineAliasTarget!, tuple);
+      return {
+        ...node.baselineValue,
+        aliasOf: node.baselineAliasTarget,
+        $value: targetLeaf?.$value,
+      };
+    }
+    const composed = resolveAt(graph, path, tuple);
+    return {
+      ...node.baselineValue,
+      partialAliasOf: node.baselinePartialFields,
+      $value: composed?.$value,
+    };
+  }
+
+  if (directWrite.kind === 'literal') return directWrite.value;
+  if (directWrite.kind === 'alias') {
+    const targetLeaf = resolveAt(graph, directWrite.target, tuple);
+    return { ...node.baselineValue, aliasOf: directWrite.target, $value: targetLeaf?.$value };
+  }
+  const composed = composePartial(
+    graph,
+    directWrite.baseValue,
+    directWrite.aliasFields,
+    tuple,
+    new Map(),
+  );
+  return {
+    ...directWrite.baseValue,
+    partialAliasOf: directWrite.aliasFields,
+    $value: composed.$value,
+  };
+}
+
+export function resolveAliasAllAt(graph: TokenGraph, tuple: Record<string, string>): TokenMap {
+  const result: TokenMap = {};
+  for (const path of Object.keys(graph.nodes)) {
+    const value = resolveAliasAt(graph, path, tuple);
+    if (value !== undefined) result[path] = value;
+  }
+  return result;
+}
+
+export function composePartial(
   graph: TokenGraph,
   base: SwatchbookToken,
   fields: Record<string, string>,
