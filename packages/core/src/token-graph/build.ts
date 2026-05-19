@@ -3,6 +3,7 @@ import { permutationID } from '#/types.ts';
 import type { TokenGraph, TokenGraphNode, WriteValue } from '#/token-graph/types.ts';
 import { valueKey } from '#/value-key.ts';
 import { isPlainObject } from '#/token-graph/internal-utils.ts';
+import { aliasCycleDiagnostic, unresolvableAliasDiagnostic } from '#/token-graph/diagnostics.ts';
 
 const COMPOSITE_TYPES = new Set(['border', 'typography', 'transition', 'gradient', 'shadow']);
 
@@ -178,6 +179,99 @@ function findFirstSingletonValue(
   return undefined;
 }
 
+function validateAliasTargets(nodes: Record<string, TokenGraphNode>): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  const pathExists = (path: string): boolean => path in nodes;
+
+  for (const [path, node] of Object.entries(nodes)) {
+    if (
+      node.baselineKind === 'alias' &&
+      node.baselineAliasTarget &&
+      !pathExists(node.baselineAliasTarget)
+    ) {
+      diagnostics.push(
+        unresolvableAliasDiagnostic('(baseline)', '(default)', path, node.baselineAliasTarget),
+      );
+    }
+    if (node.baselineKind === 'partial-alias' && node.baselinePartialFields) {
+      for (const target of Object.values(node.baselinePartialFields)) {
+        if (!pathExists(target)) {
+          diagnostics.push(unresolvableAliasDiagnostic('(baseline)', '(default)', path, target));
+        }
+      }
+    }
+    for (const [axis, axisWrites] of Object.entries(node.writes)) {
+      for (const [ctx, write] of Object.entries(axisWrites)) {
+        if (write.kind === 'alias' && !pathExists(write.target)) {
+          diagnostics.push(unresolvableAliasDiagnostic(axis, ctx, path, write.target));
+        } else if (write.kind === 'partial-alias') {
+          for (const target of Object.values(write.aliasFields)) {
+            if (!pathExists(target)) {
+              diagnostics.push(unresolvableAliasDiagnostic(axis, ctx, path, target));
+            }
+          }
+        }
+      }
+    }
+  }
+  return diagnostics;
+}
+
+function detectAliasCycles(nodes: Record<string, TokenGraphNode>): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  const reportedCycles = new Set<string>();
+
+  const aliasTargets = new Map<string, Set<string>>();
+  for (const [path, node] of Object.entries(nodes)) {
+    const targets = new Set<string>();
+    if (node.baselineKind === 'alias' && node.baselineAliasTarget) {
+      targets.add(node.baselineAliasTarget);
+    }
+    if (node.baselineKind === 'partial-alias' && node.baselinePartialFields) {
+      for (const target of Object.values(node.baselinePartialFields)) targets.add(target);
+    }
+    for (const axisWrites of Object.values(node.writes)) {
+      for (const write of Object.values(axisWrites)) {
+        if (write.kind === 'alias') targets.add(write.target);
+        else if (write.kind === 'partial-alias') {
+          for (const target of Object.values(write.aliasFields)) targets.add(target);
+        }
+      }
+    }
+    aliasTargets.set(path, targets);
+  }
+
+  for (const startPath of Object.keys(nodes)) {
+    const stack: string[] = [];
+    const onStack = new Set<string>();
+    const dfs = (current: string): void => {
+      if (onStack.has(current)) {
+        const idx = stack.indexOf(current);
+        const cycle = stack.slice(idx).concat(current);
+        const canonical = [...cycle].toSorted().join(' → ');
+        if (!reportedCycles.has(canonical)) {
+          reportedCycles.add(canonical);
+          diagnostics.push(aliasCycleDiagnostic(cycle[0]!, cycle.slice(1, -1)));
+        }
+        return;
+      }
+      stack.push(current);
+      onStack.add(current);
+      const targets = aliasTargets.get(current);
+      if (targets) {
+        for (const target of targets) {
+          if (target in nodes) dfs(target);
+        }
+      }
+      stack.pop();
+      onStack.delete(current);
+    };
+    dfs(startPath);
+  }
+
+  return diagnostics;
+}
+
 function assembleGraph(
   axes: readonly Axis[],
   baseline: TokenMap,
@@ -202,6 +296,9 @@ function assembleGraph(
     axisContexts[axis.name] = axis.contexts;
   }
 
+  const aliasDiagnostics = validateAliasTargets(nodes);
+  const cycleDiagnostics = detectAliasCycles(nodes);
+
   computeAffectedBy(
     nodes,
     axes.map((a) => a.name),
@@ -209,7 +306,7 @@ function assembleGraph(
 
   return {
     graph: { nodes, axes: axes.map((a) => a.name), axisDefaults, axisContexts },
-    diagnostics: [],
+    diagnostics: [...aliasDiagnostics, ...cycleDiagnostics],
   };
 }
 

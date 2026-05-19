@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildTokenGraph,
+  buildTokenGraphFromLayered,
   computeAffectedBy,
   extractWritesFromModifiers,
 } from '#/token-graph/build.ts';
@@ -330,5 +331,72 @@ describe('affectedBy fixpoint', () => {
     // Find any token unaffected by any axis (likely a palette primitive)
     const constants = Object.entries(graph.nodes).filter(([, n]) => n.affectedBy.length === 0);
     expect(constants.length).toBeGreaterThan(0);
+  });
+});
+
+describe('diagnostic emission', () => {
+  it('reference fixture emits no diagnostics', async () => {
+    const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
+    const { diagnostics } = buildTokenGraph(parserInput, axes, defaultTuple);
+    expect(diagnostics).toHaveLength(0);
+  });
+
+  it('emits unresolvableAliasDiagnostic for a write that aliases a nonexistent path', () => {
+    const axes: Axis[] = [
+      { name: 'mode', contexts: ['Light', 'Dark'], default: 'Light', source: 'resolver' },
+    ];
+    const baseline = {
+      'color.fg': { $value: '#000', $type: 'color' },
+    };
+    // permutationID({ mode: 'Dark' }) = 'Dark'
+    const perSingletonResolved = {
+      Dark: {
+        'color.fg': { $value: '#fff', $type: 'color', aliasOf: 'does.not.exist' },
+      },
+    };
+    const defaultTuple = { mode: 'Light' };
+    const { diagnostics } = buildTokenGraphFromLayered(axes, baseline, perSingletonResolved, defaultTuple);
+    expect(
+      diagnostics.some(
+        (d) => d.group === 'swatchbook/token-graph' && d.message.includes('does.not.exist'),
+      ),
+    ).toBe(true);
+  });
+
+  it('emits aliasCycleDiagnostic for a baseline cycle (A aliases B aliases A)', () => {
+    const axes: Axis[] = [];
+    const baseline = {
+      A: { $value: '#000', $type: 'color', aliasOf: 'B' },
+      B: { $value: '#000', $type: 'color', aliasOf: 'A' },
+    };
+    const { diagnostics } = buildTokenGraphFromLayered(axes, baseline, {}, {});
+    expect(
+      diagnostics.some(
+        (d) =>
+          d.group === 'swatchbook/token-graph' &&
+          d.severity === 'warn' &&
+          (d.message.includes('A') || d.message.includes('B')),
+      ),
+    ).toBe(true);
+  });
+
+  it('does not emit unresolvableAliasDiagnostic when the target exists in the graph', () => {
+    const axes: Axis[] = [
+      { name: 'mode', contexts: ['Light', 'Dark'], default: 'Light', source: 'resolver' },
+    ];
+    const baseline = {
+      'color.fg': { $value: '#000', $type: 'color' },
+      'color.palette.white': { $value: '#fff', $type: 'color' },
+    };
+    // permutationID({ mode: 'Dark' }) = 'Dark'
+    const perSingletonResolved = {
+      Dark: {
+        'color.fg': { $value: '#fff', $type: 'color', aliasOf: 'color.palette.white' },
+        'color.palette.white': { $value: '#fff', $type: 'color' },
+      },
+    };
+    const defaultTuple = { mode: 'Light' };
+    const { diagnostics } = buildTokenGraphFromLayered(axes, baseline, perSingletonResolved, defaultTuple);
+    expect(diagnostics).toHaveLength(0);
   });
 });
