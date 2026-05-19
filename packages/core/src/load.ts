@@ -222,10 +222,21 @@ function applyDisabledAxes(
     }
     return true;
   });
-  const surviving = new Set(filteredPermutations.map((p) => p.name));
-  const filteredResolved: Record<string, TokenMap> = {};
-  for (const [name, tokens] of Object.entries(resolved)) {
-    if (surviving.has(name)) filteredResolved[name] = tokens;
+  const canonicalised: Record<string, TokenMap> = {};
+  for (const perm of filteredPermutations) {
+    const tokens = resolved[perm.name];
+    if (!tokens) continue;
+    const filteredTuple: Record<string, string> = {};
+    for (const axis of filteredAxes)
+      filteredTuple[axis.name] = perm.input[axis.name] ?? axis.default;
+    canonicalised[permutationID(filteredTuple)] = tokens;
   }
-  return { axes: filteredAxes, permutations: filteredPermutations, resolved: filteredResolved };
+  // Re-key permutation names to match the canonicalised (filtered-axes-only) key shape.
+  const rekeyed = filteredPermutations.map((perm) => {
+    const filteredTuple: Record<string, string> = {};
+    for (const axis of filteredAxes)
+      filteredTuple[axis.name] = perm.input[axis.name] ?? axis.default;
+    return { ...perm, name: permutationID(filteredTuple) };
+  });
+  return { axes: filteredAxes, permutations: rekeyed, resolved: canonicalised };
 }
