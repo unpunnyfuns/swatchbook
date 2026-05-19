@@ -8,10 +8,9 @@ import { validateCssOptions } from '#/terrazzo-options.ts';
 import { resolveDefaultTuple } from '#/permutations/default.ts';
 import { normalizePermutations } from '#/permutations/normalize.ts';
 import { computeTokenListing } from '#/token-listing.ts';
-import { buildTokenGraph } from '#/token-graph/build.ts';
-import type { TokenGraph } from '#/token-graph/types.ts';
+import { buildTokenGraph, buildTokenGraphFromLayered } from '#/token-graph/build.ts';
+import type { BuildTokenGraphResult } from '#/token-graph/build.ts';
 import { resolveAllAt } from '#/token-graph/walk.ts';
-import { buildResolveAt } from '#/resolve-at.ts';
 import { buildVarianceByPath } from '#/variance-by-path.ts';
 import { permutationID } from '#/types.ts';
 import type { Axis, Config, Permutation, Project, TokenMap } from '#/types.ts';
@@ -152,43 +151,44 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
   );
 
   // Build the token-graph alongside the legacy cells/jointOverrides
-  // path. Resolver-backed projects get the real graph; layered /
-  // plain-parse projects get an empty graph for now (no parserInput).
-  const tokenGraphResult = normalized.parserInput?.resolver
-    ? buildTokenGraph(normalized.parserInput, filteredAxes, projectDefaultTuple)
-    : {
-        graph: {
-          nodes: {},
-          axes: filteredAxes.map((a) => a.name),
-          axisDefaults: projectDefaultTuple,
-          axisContexts: Object.fromEntries(filteredAxes.map((a) => [a.name, a.contexts])),
-        } satisfies TokenGraph,
-        diagnostics: [],
-      };
+  // path. Resolver-backed projects build from the live Resolver; layered /
+  // plain-parse projects infer writes by diffing per-singleton resolved maps.
+  let tokenGraphResult: BuildTokenGraphResult;
+  if (normalized.parserInput?.resolver) {
+    tokenGraphResult = buildTokenGraph(normalized.parserInput, filteredAxes, projectDefaultTuple);
+  } else {
+    const baselineFromLayered =
+      filteredResolved[permutationID(projectDefaultTuple)] ??
+      filteredResolved[Object.values(filteredPermutations)[0]?.name ?? ''] ??
+      {};
+    tokenGraphResult = buildTokenGraphFromLayered(
+      filteredAxes,
+      baselineFromLayered,
+      filteredResolved,
+      projectDefaultTuple,
+    );
+  }
 
-  // resolveAt: graph-backed for resolver projects (real graph nodes),
-  // legacy buildResolveAt for layered / plain-parse projects (empty graph).
-  // Graph path fills in axis defaults (so partial tuples canonicalize to the
-  // same key as a fully-specified equivalent) and memoizes by canonical key
-  // so repeated calls with the same effective tuple return the same instance.
-  const resolveAt = normalized.parserInput?.resolver
-    ? (() => {
-        const memo = new Map<string, TokenMap>();
-        return (tuple: Record<string, string>): TokenMap => {
-          const full: Record<string, string> = { ...projectDefaultTuple };
-          for (const axis of filteredAxes) {
-            const val = tuple[axis.name];
-            if (val !== undefined) full[axis.name] = val;
-          }
-          const key = filteredAxes.map((a) => `${a.name}=${full[a.name]}`).join('|');
-          const cached = memo.get(key);
-          if (cached) return cached;
-          const result = resolveAllAt(tokenGraphResult.graph, full);
-          memo.set(key, result);
-          return result;
-        };
-      })()
-    : buildResolveAt(filteredAxes, cells, jointOverrides, projectDefaultTuple);
+  // resolveAt: graph-backed for all projects. Fills in axis defaults (so
+  // partial tuples canonicalize to the same key as a fully-specified
+  // equivalent) and memoizes by canonical key so repeated calls with the
+  // same effective tuple return the same instance.
+  const resolveAt = (() => {
+    const memo = new Map<string, TokenMap>();
+    return (tuple: Record<string, string>): TokenMap => {
+      const full: Record<string, string> = { ...projectDefaultTuple };
+      for (const axis of filteredAxes) {
+        const val = tuple[axis.name];
+        if (val !== undefined) full[axis.name] = val;
+      }
+      const key = filteredAxes.map((a) => `${a.name}=${full[a.name]}`).join('|');
+      const cached = memo.get(key);
+      if (cached) return cached;
+      const result = resolveAllAt(tokenGraphResult.graph, full);
+      memo.set(key, result);
+      return result;
+    };
+  })();
 
   // `validateChrome` checks targets against the project's path
   // universe. `varianceByPath.keys()` is the union of every path

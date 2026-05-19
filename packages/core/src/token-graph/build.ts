@@ -1,5 +1,7 @@
 import type { Axis, Diagnostic, ParserInput, SwatchbookToken, TokenMap } from '#/types.ts';
+import { permutationID } from '#/types.ts';
 import type { TokenGraph, TokenGraphNode, WriteValue } from '#/token-graph/types.ts';
+import { valueKey } from '#/value-key.ts';
 
 const COMPOSITE_TYPES = new Set(['border', 'typography', 'transition', 'gradient', 'shadow']);
 const ALIAS_RE = /^\{(.+)\}$/;
@@ -381,4 +383,111 @@ function walkPartialAliasTargets(
     return;
   }
   // partialAliasOf values are strings or nested structures; primitives carry no path data.
+}
+
+/**
+ * Build a token graph from layered / plain-parse projects that produce
+ * per-singleton resolved TokenMaps instead of a live Resolver.
+ *
+ * Writes are inferred by diffing each singleton's resolved TokenMap
+ * against the baseline: any path whose value differs from the baseline
+ * yields a WriteValue derived from the singleton token's alias metadata.
+ *
+ * @param axes - Project axes (post-disabledAxes filter).
+ * @param baseline - Resolved TokenMap for the default tuple.
+ * @param perSingletonResolved - All per-tuple resolved maps, keyed by
+ *   `permutationID(tuple)`. The function only reads singleton tuples
+ *   (one non-default axis at a time); joint tuples in the map are ignored.
+ * @param defaultTuple - The project's default tuple (axisName → defaultContext).
+ */
+export function buildTokenGraphFromLayered(
+  axes: readonly Axis[],
+  baseline: TokenMap,
+  perSingletonResolved: Readonly<Record<string, TokenMap>>,
+  defaultTuple: Readonly<Record<string, string>>,
+): BuildTokenGraphResult {
+  const writesByPath = extractWritesFromLayeredSingletons(
+    axes,
+    baseline,
+    perSingletonResolved,
+    defaultTuple,
+  );
+
+  const pathUniverse = new Set<string>(Object.keys(baseline));
+  const singletonList: { tuple: Record<string, string>; resolved: TokenMap }[] = [];
+  for (const axis of axes) {
+    for (const ctx of axis.contexts) {
+      if (ctx === axis.default) continue;
+      const singletonTuple = { ...defaultTuple, [axis.name]: ctx };
+      const id = permutationID(singletonTuple);
+      const resolved = perSingletonResolved[id];
+      if (!resolved) continue;
+      singletonList.push({ tuple: singletonTuple, resolved });
+      for (const path of Object.keys(resolved)) pathUniverse.add(path);
+    }
+  }
+  for (const path of Object.keys(writesByPath)) pathUniverse.add(path);
+
+  const nodes: Record<string, TokenGraphNode> = {};
+  for (const path of pathUniverse) {
+    const baselineForNode = baseline[path] ?? findFirstSingletonValue(path, singletonList);
+    nodes[path] = buildNode(baselineForNode, writesByPath[path] ?? {});
+  }
+
+  const axisDefaults: Record<string, string> = {};
+  const axisContexts: Record<string, readonly string[]> = {};
+  for (const axis of axes) {
+    axisDefaults[axis.name] = axis.default;
+    axisContexts[axis.name] = axis.contexts;
+  }
+
+  computeAffectedBy(
+    nodes,
+    axes.map((a) => a.name),
+  );
+
+  return {
+    graph: { nodes, axes: axes.map((a) => a.name), axisDefaults, axisContexts },
+    diagnostics: [],
+  };
+}
+
+function extractWritesFromLayeredSingletons(
+  axes: readonly Axis[],
+  baseline: TokenMap,
+  perSingletonResolved: Readonly<Record<string, TokenMap>>,
+  defaultTuple: Readonly<Record<string, string>>,
+): Record<string, Record<string, Record<string, WriteValue>>> {
+  const out: Record<string, Record<string, Record<string, WriteValue>>> = {};
+  for (const axis of axes) {
+    for (const ctx of axis.contexts) {
+      if (ctx === axis.default) continue;
+      const singletonTuple = { ...defaultTuple, [axis.name]: ctx };
+      const id = permutationID(singletonTuple);
+      const resolved = perSingletonResolved[id];
+      if (!resolved) continue;
+      for (const [path, token] of Object.entries(resolved)) {
+        const baselineToken = baseline[path];
+        if (baselineToken !== undefined && valueKey(token) === valueKey(baselineToken)) continue;
+        const writeValue = toWriteValueFromResolvedToken(token);
+        (out[path] ??= {})[axis.name] ??= {};
+        out[path]![axis.name]![ctx] = writeValue;
+      }
+    }
+  }
+  return out;
+}
+
+function toWriteValueFromResolvedToken(token: SwatchbookToken): WriteValue {
+  if (typeof token.aliasOf === 'string') {
+    return { kind: 'alias', target: token.aliasOf };
+  }
+  if (token.partialAliasOf !== undefined) {
+    return {
+      kind: 'partial-alias',
+      baseValue: token,
+      aliasFields: extractPartialAliasFields(token.partialAliasOf),
+    };
+  }
+  return { kind: 'literal', value: token };
 }
