@@ -37,6 +37,7 @@ npm-debug.log*
 pnpm-debug.log*
 .vitest-attachments/
 __screenshots__/
+.playwright-mcp/
 
 # Superpowers local working artifacts (specs/plans not meant to ship)
 docs/superpowers/
