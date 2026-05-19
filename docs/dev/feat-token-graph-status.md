@@ -15,8 +15,8 @@ Long-lived feature branch implementing the **token-graph redesign**: replacing `
 |---|---|---|
 | 0 | ✅ done | Branch created from `main` (c6df619) |
 | 1 | ✅ done | `packages/core/src/token-graph/` module: builder, walker, queries, diagnostics, `/graph` subpath. Cross-validated against `resolver.apply` for the entire reference-fixture cartesian. Wired into `loadProject` alongside legacy fields. (range: c6df619..2a4274b) |
-| 2 | ⏳ in progress | Snapshot/wire-payload swap: `snapshot-for-wire.ts`, addon virtual module, blocks React context expose `tokenGraph`. |
-| 3 | pending | Block migrations one-by-one (TokenTable, ColorTable, TokenDetail, AxisVariance, TokenNavigator). |
+| 2 | ✅ done | `snapshot-for-wire`, addon virtual module, blocks React context all expose `tokenGraph` (commits 513baa1, 7df5da0, 6b7db4e). |
+| 3 | ⏳ in progress | Block migrations one-by-one (TokenTable, ColorTable, TokenDetail, AxisVariance, TokenNavigator). |
 | 4 | pending | Smart emitter (`css-axis-projected.ts`) + MCP `get_axis_variance` switch to graph walks. CSS byte-for-byte regression gate. |
 | 5 | pending | Bench against real-consumer workload. **Gate**: build < 200ms, resolveAt < 1ms/call, ≥5× faster loadProject startup. STOP if gate fails. |
 | 6 | pending | Delete `cells.ts`, `joint-overrides.ts`, `alias-graph.ts`, `resolve-at.ts`, `variance-by-path.ts`, `variance-analysis.ts`; remove legacy fields from `Project`. |
@@ -24,11 +24,11 @@ Long-lived feature branch implementing the **token-graph redesign**: replacing `
 
 ## Last completed task
 
-**Task 1.12** — Bench file stub (commit `2a4274b`). Phase 1 closed out.
+**Task 2.3** — `tokenGraph` exposed on the blocks React context via `useProject()` (commit `6b7db4e`). Phase 2 closed out.
 
 ## Next up
 
-**Task 2.1** — Add `tokenGraph` to `snapshot-for-wire.ts`'s wire payload alongside existing fields. Test that the serialized graph is JSON-roundtrip safe.
+**Phase 3 — Block migrations.** One block at a time, replace `cells` / `varianceByPath` / `jointOverrides` reads with `tokenGraph`-based queries from `@unpunnyfuns/swatchbook-core/graph`. Order: TokenTable, ColorTable, TokenDetail, AxisVariance, TokenNavigator + any remainder.
 
 ## In-flight decisions / notes
 
