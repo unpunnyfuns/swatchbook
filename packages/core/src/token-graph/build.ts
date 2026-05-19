@@ -2,6 +2,7 @@ import type { Axis, Diagnostic, ParserInput, SwatchbookToken, TokenMap } from '#
 import { permutationID } from '#/types.ts';
 import type { TokenGraph, TokenGraphNode, WriteValue } from '#/token-graph/types.ts';
 import { valueKey } from '#/value-key.ts';
+import { isPlainObject } from '#/token-graph/internal-utils.ts';
 
 const COMPOSITE_TYPES = new Set(['border', 'typography', 'transition', 'gradient', 'shadow']);
 const ALIAS_RE = /^\{(.+)\}$/;
@@ -84,6 +85,7 @@ function toWriteValue(
   return { kind: 'literal', value: withType };
 }
 
+// Walks raw DTCG `$value` looking for `{path}`-shaped alias syntax. Used during modifier-source extraction.
 function walkPartialAliasFields(value: unknown, prefix: string, out: Record<string, string>): void {
   if (typeof value === 'string') {
     const match = ALIAS_RE.exec(value);
@@ -105,10 +107,6 @@ function walkPartialAliasFields(value: unknown, prefix: string, out: Record<stri
   // Numbers, booleans, and other primitives carry no alias syntax — skip silently.
 }
 
-function isPlainObject(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
-}
-
 export interface BuildTokenGraphResult {
   graph: TokenGraph;
   diagnostics: readonly Diagnostic[];
@@ -124,27 +122,46 @@ export function buildTokenGraph(
     parserInput.resolver.source?.modifiers ?? {},
     axes,
   );
-
   // Singleton-apply sweep: each non-default (axis, ctx) tuple.
   // Records resolved values per singleton so writes-only paths
   // (absent from the default-tuple resolve) get a meaningful
   // baselineValue from the first axis/context they appear in.
-  const pathUniverse = new Set<string>(Object.keys(baseline));
-  const singletonResolves: { tuple: Record<string, string>; resolved: TokenMap }[] = [];
+  const singletonList: { tuple: Record<string, string>; resolved: TokenMap }[] = [];
   for (const axis of axes) {
     for (const ctx of axis.contexts) {
       if (ctx === axis.default) continue;
       const tuple = { ...defaultTuple, [axis.name]: ctx };
       const resolved = parserInput.resolver.apply(tuple);
-      singletonResolves.push({ tuple, resolved });
-      for (const path of Object.keys(resolved)) pathUniverse.add(path);
+      singletonList.push({ tuple, resolved });
     }
   }
-  for (const path of Object.keys(writesByPath)) pathUniverse.add(path);
+  return assembleGraph(axes, baseline, writesByPath, singletonList);
+}
+
+function findFirstSingletonValue(
+  path: string,
+  singletons: readonly { tuple: Record<string, string>; resolved: TokenMap }[],
+): SwatchbookToken | undefined {
+  for (const { resolved } of singletons) {
+    if (resolved[path]) return resolved[path];
+  }
+  return undefined;
+}
+
+function assembleGraph(
+  axes: readonly Axis[],
+  baseline: TokenMap,
+  writesByPath: Record<string, Record<string, Record<string, WriteValue>>>,
+  singletonList: readonly { tuple: Record<string, string>; resolved: TokenMap }[],
+): BuildTokenGraphResult {
+  const pathUniverse = new Set<string>([...Object.keys(baseline), ...Object.keys(writesByPath)]);
+  for (const { resolved } of singletonList) {
+    for (const path of Object.keys(resolved)) pathUniverse.add(path);
+  }
 
   const nodes: Record<string, TokenGraphNode> = {};
   for (const path of pathUniverse) {
-    const baselineForNode = baseline[path] ?? findFirstSingletonValue(path, singletonResolves);
+    const baselineForNode = baseline[path] ?? findFirstSingletonValue(path, singletonList);
     nodes[path] = buildNode(baselineForNode, writesByPath[path] ?? {});
   }
 
@@ -164,16 +181,6 @@ export function buildTokenGraph(
     graph: { nodes, axes: axes.map((a) => a.name), axisDefaults, axisContexts },
     diagnostics: [],
   };
-}
-
-function findFirstSingletonValue(
-  path: string,
-  singletons: readonly { tuple: Record<string, string>; resolved: TokenMap }[],
-): SwatchbookToken | undefined {
-  for (const { resolved } of singletons) {
-    if (resolved[path]) return resolved[path];
-  }
-  return undefined;
 }
 
 function buildNode(
@@ -299,6 +306,7 @@ export function computeAffectedBy(
   }
 }
 
+// Walks Terrazzo's already-extracted `partialAliasOf` map where values are bare path strings (no braces). Used during baseline node construction.
 function walkPartialAliasTargets(
   value: unknown,
   prefix: string,
@@ -324,8 +332,11 @@ function walkPartialAliasTargets(
 }
 
 /**
- * Build a token graph from layered / plain-parse projects that produce
- * per-singleton resolved TokenMaps instead of a live Resolver.
+ * Build a token-graph from layered/per-tuple resolved output (no resolver
+ * source available). Used for layered configs.
+ *
+ * Plain-parse projects do NOT route here — they go through `buildTokenGraph`
+ * via a synthetic resolver constructed by `loadResolverPermutations`.
  *
  * Writes are inferred by diffing each singleton's resolved TokenMap
  * against the baseline: any path whose value differs from the baseline
@@ -350,44 +361,16 @@ export function buildTokenGraphFromLayered(
     perSingletonResolved,
     defaultTuple,
   );
-
-  const pathUniverse = new Set<string>(Object.keys(baseline));
   const singletonList: { tuple: Record<string, string>; resolved: TokenMap }[] = [];
   for (const axis of axes) {
     for (const ctx of axis.contexts) {
       if (ctx === axis.default) continue;
       const singletonTuple = { ...defaultTuple, [axis.name]: ctx };
-      const id = permutationID(singletonTuple);
-      const resolved = perSingletonResolved[id];
-      if (!resolved) continue;
-      singletonList.push({ tuple: singletonTuple, resolved });
-      for (const path of Object.keys(resolved)) pathUniverse.add(path);
+      const resolved = perSingletonResolved[permutationID(singletonTuple)];
+      if (resolved) singletonList.push({ tuple: singletonTuple, resolved });
     }
   }
-  for (const path of Object.keys(writesByPath)) pathUniverse.add(path);
-
-  const nodes: Record<string, TokenGraphNode> = {};
-  for (const path of pathUniverse) {
-    const baselineForNode = baseline[path] ?? findFirstSingletonValue(path, singletonList);
-    nodes[path] = buildNode(baselineForNode, writesByPath[path] ?? {});
-  }
-
-  const axisDefaults: Record<string, string> = {};
-  const axisContexts: Record<string, readonly string[]> = {};
-  for (const axis of axes) {
-    axisDefaults[axis.name] = axis.default;
-    axisContexts[axis.name] = axis.contexts;
-  }
-
-  computeAffectedBy(
-    nodes,
-    axes.map((a) => a.name),
-  );
-
-  return {
-    graph: { nodes, axes: axes.map((a) => a.name), axisDefaults, axisContexts },
-    diagnostics: [],
-  };
+  return assembleGraph(axes, baseline, writesByPath, singletonList);
 }
 
 function extractWritesFromLayeredSingletons(

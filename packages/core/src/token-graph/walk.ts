@@ -1,6 +1,7 @@
 import type { SwatchbookToken, TokenMap } from '#/types.ts';
 import type { TokenGraph, WriteValue } from '#/token-graph/types.ts';
 import { canonicalKey } from '#/tuple-key.ts';
+import { isPlainObject } from '#/token-graph/internal-utils.ts';
 
 const CYCLE_SENTINEL: unique symbol = Symbol('cycle');
 
@@ -238,8 +239,4 @@ function assignByPath(obj: object, path: string, value: unknown): void {
       enumerable: true,
     });
   }
-}
-
-function isPlainObject(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
