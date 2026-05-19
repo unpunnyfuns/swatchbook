@@ -31,25 +31,31 @@ function collectLeafWrites(
   axisName: string,
   contextName: string,
   out: Record<string, Record<string, Record<string, WriteValue>>>,
+  inheritedType?: string,
 ): void {
   if (!isPlainObject(node)) return;
   if ('$value' in node) {
     if (!prefix) return;
-    const write = toWriteValue(node);
+    const effectiveType = typeof node['$type'] === 'string' ? node['$type'] : inheritedType;
+    const write = toWriteValue(node, effectiveType);
     if (write) {
       (out[prefix] ??= {})[axisName] ??= {};
       out[prefix]![axisName]![contextName] = write;
     }
     return;
   }
+  const nextInheritedType = typeof node['$type'] === 'string' ? node['$type'] : inheritedType;
   for (const [key, child] of Object.entries(node)) {
     if (key.startsWith('$')) continue;
     const childPath = prefix ? `${prefix}.${key}` : key;
-    collectLeafWrites(child, childPath, axisName, contextName, out);
+    collectLeafWrites(child, childPath, axisName, contextName, out, nextInheritedType);
   }
 }
 
-function toWriteValue(token: Record<string, unknown>): WriteValue | undefined {
+function toWriteValue(
+  token: Record<string, unknown>,
+  effectiveType?: string,
+): WriteValue | undefined {
   const value = token['$value'];
   if (value === undefined) return undefined;
   if (typeof value === 'string') {
@@ -57,7 +63,7 @@ function toWriteValue(token: Record<string, unknown>): WriteValue | undefined {
     if (match) return { kind: 'alias', target: match[1]! };
     return { kind: 'literal', value: token as SwatchbookToken };
   }
-  const $type = typeof token['$type'] === 'string' ? token['$type'] : undefined;
+  const $type = typeof token['$type'] === 'string' ? token['$type'] : effectiveType;
   if ($type && COMPOSITE_TYPES.has($type) && (isPlainObject(value) || Array.isArray(value))) {
     const aliasFields: Record<string, string> = {};
     walkPartialAliasFields(value, '', aliasFields);
