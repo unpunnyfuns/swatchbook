@@ -225,8 +225,6 @@ export function composePartial(
   return result;
 }
 
-const FORBIDDEN_KEYS: ReadonlySet<string> = new Set(['__proto__', 'constructor', 'prototype']);
-
 function assignByPath(obj: object, path: string, value: unknown): void {
   const parts = path.split('.');
   let cur: unknown = obj;
@@ -239,7 +237,7 @@ function assignByPath(obj: object, path: string, value: unknown): void {
       else if (cur[idx] && typeof cur[idx] === 'object') cur[idx] = { ...(cur[idx] as object) };
       cur = cur[idx];
     } else if (cur && typeof cur === 'object') {
-      if (FORBIDDEN_KEYS.has(part)) return;
+      if (part === '__proto__' || part === 'constructor' || part === 'prototype') return;
       const rec = cur as Record<string, unknown>;
       if (Array.isArray(rec[part])) rec[part] = [...(rec[part] as unknown[])];
       else if (rec[part] && typeof rec[part] === 'object') rec[part] = { ...(rec[part] as object) };
@@ -253,8 +251,14 @@ function assignByPath(obj: object, path: string, value: unknown): void {
     const idx = Number(finalPart);
     if (Number.isInteger(idx) && idx >= 0 && idx < cur.length) (cur as unknown[])[idx] = value;
   } else if (cur && typeof cur === 'object') {
-    if (FORBIDDEN_KEYS.has(finalPart)) return;
-    (cur as Record<string, unknown>)[finalPart] = value;
+    if (finalPart === '__proto__' || finalPart === 'constructor' || finalPart === 'prototype')
+      return;
+    Object.defineProperty(cur, finalPart, {
+      value,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
   }
 }
 
