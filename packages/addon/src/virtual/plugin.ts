@@ -120,6 +120,7 @@ export function swatchbookTokensPlugin({
         `export const jointOverrides = ${JSON.stringify(snap.jointOverrides)};`,
         `export const varianceByPath = ${JSON.stringify(snap.varianceByPath)};`,
         `export const defaultTuple = ${JSON.stringify(snap.defaultTuple)};`,
+        `export const tokenGraph = ${JSON.stringify(snap.tokenGraph)};`,
       ].join('\n');
     },
 

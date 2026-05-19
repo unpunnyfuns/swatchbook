@@ -5,11 +5,12 @@
 // state set in `buildStart`), so calling them as plain functions catches
 // the common regressions — empty body, `autoInject` filtering,
 // import-statement shape — at a fraction of the cost.
-import type { Config, SwatchbookIntegration } from '@unpunnyfuns/swatchbook-core';
+import type { Config, Project, SwatchbookIntegration } from '@unpunnyfuns/swatchbook-core';
 import { expect, it } from 'vitest';
 import {
   INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID,
   RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID,
+  RESOLVED_VIRTUAL_MODULE_ID,
 } from '#/constants.ts';
 import { swatchbookTokensPlugin } from '#/virtual/plugin.ts';
 
@@ -92,4 +93,36 @@ it('load emits one side-effect import per auto-inject integration, skipping opt-
 it('load returns null for unrelated IDs so Vite can fall through to the next plugin', () => {
   const plugin = swatchbookTokensPlugin({ config: NOOP_CONFIG, cwd: CWD });
   expect(invokeLoad(plugin, '\0some-other-virtual')).toBeNull();
+});
+
+it('main virtual module body exports tokenGraph', () => {
+  const initialProject = {
+    config: {},
+    axes: [],
+    disabledAxes: [],
+    presets: [],
+    sourceFiles: [],
+    diagnostics: [],
+    chrome: {},
+    defaultTokens: {},
+    cells: {},
+    jointOverrides: new Map(),
+    defaultTuple: {},
+    resolveAt: () => ({}),
+    varianceByPath: new Map(),
+    tokenGraph: {
+      nodes: {},
+      axes: [],
+      axisDefaults: {},
+      axisContexts: {},
+    },
+    listing: {},
+  } as unknown as Project;
+  const plugin = swatchbookTokensPlugin({
+    config: NOOP_CONFIG,
+    cwd: CWD,
+    initialProject,
+  });
+  const body = invokeLoad(plugin, RESOLVED_VIRTUAL_MODULE_ID);
+  expect(body).toContain('export const tokenGraph =');
 });

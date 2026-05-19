@@ -50,3 +50,14 @@ export const cells: Record<string, Record<string, Record<string, unknown>>> = {
 export const jointOverrides: readonly (readonly [string, unknown])[] = [];
 export const varianceByPath: Record<string, unknown> = {};
 export const defaultTuple: Record<string, string> = { mode: 'Light' };
+export const tokenGraph: {
+  nodes: Record<string, unknown>;
+  axes: readonly string[];
+  axisDefaults: Record<string, string>;
+  axisContexts: Record<string, readonly string[]>;
+} = {
+  nodes: {},
+  axes: [],
+  axisDefaults: {},
+  axisContexts: {},
+};
