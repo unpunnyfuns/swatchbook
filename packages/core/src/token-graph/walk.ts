@@ -5,38 +5,39 @@ import { isPlainObject } from '#/token-graph/internal-utils.ts';
 
 const CYCLE_SENTINEL: unique symbol = Symbol('cycle');
 
-export function resolveAt(
+type CycleMemo = Map<string, SwatchbookToken | typeof CYCLE_SENTINEL>;
+
+function resolveAtInternal(
   graph: TokenGraph,
   path: string,
   tuple: Record<string, string>,
-  memo?: Map<string, SwatchbookToken | typeof CYCLE_SENTINEL>,
+  memo: CycleMemo,
 ): SwatchbookToken | undefined {
   const node = graph.nodes[path];
   if (!node) return undefined;
 
-  const ownMemo = memo ?? new Map<string, SwatchbookToken | typeof CYCLE_SENTINEL>();
   const cacheKey = path + ' ' + canonicalKey(tuple);
 
   // Fast path: constant token — no axis in tuple is non-default for this node.
   if (node.affectedBy.length === 0) {
-    ownMemo.set(cacheKey, node.baselineValue);
+    memo.set(cacheKey, node.baselineValue);
     return node.baselineValue;
   }
   const hasNonDefaultAxis = node.affectedBy.some(
     (axis) => tuple[axis] !== undefined && tuple[axis] !== graph.axisDefaults[axis],
   );
   if (!hasNonDefaultAxis) {
-    ownMemo.set(cacheKey, node.baselineValue);
+    memo.set(cacheKey, node.baselineValue);
     return node.baselineValue;
   }
 
-  const cached = ownMemo.get(cacheKey);
+  const cached = memo.get(cacheKey);
   if (cached !== undefined) {
     if (cached === CYCLE_SENTINEL) return node.baselineValue;
     return cached;
   }
 
-  ownMemo.set(cacheKey, CYCLE_SENTINEL);
+  memo.set(cacheKey, CYCLE_SENTINEL);
 
   // Find the last-wins direct write across axes in project order.
   let matchedWrite: WriteValue | undefined = undefined;
@@ -56,42 +57,38 @@ export function resolveAt(
     if (node.baselineKind === 'literal') {
       result = node.baselineValue;
     } else if (node.baselineKind === 'alias') {
-      result = resolveAt(graph, node.baselineAliasTarget!, tuple, ownMemo);
+      result = resolveAtInternal(graph, node.baselineAliasTarget!, tuple, memo);
     } else {
-      result = composePartial(
-        graph,
-        node.baselineValue,
-        node.baselinePartialFields!,
-        tuple,
-        ownMemo,
-      );
+      result = composePartial(graph, node.baselineValue, node.baselinePartialFields!, tuple, memo);
     }
   } else {
     // Direct write applies — resolve per write kind.
     if (matchedWrite.kind === 'literal') {
       result = matchedWrite.value;
     } else if (matchedWrite.kind === 'alias') {
-      result = resolveAt(graph, matchedWrite.target, tuple, ownMemo);
+      result = resolveAtInternal(graph, matchedWrite.target, tuple, memo);
     } else {
-      result = composePartial(
-        graph,
-        matchedWrite.baseValue,
-        matchedWrite.aliasFields,
-        tuple,
-        ownMemo,
-      );
+      result = composePartial(graph, matchedWrite.baseValue, matchedWrite.aliasFields, tuple, memo);
     }
   }
 
-  if (result !== undefined) ownMemo.set(cacheKey, result);
+  if (result !== undefined) memo.set(cacheKey, result);
   return result;
 }
 
+export function resolveAt(
+  graph: TokenGraph,
+  path: string,
+  tuple: Record<string, string>,
+): SwatchbookToken | undefined {
+  return resolveAtInternal(graph, path, tuple, new Map());
+}
+
 export function resolveAllAt(graph: TokenGraph, tuple: Record<string, string>): TokenMap {
-  const memo = new Map<string, SwatchbookToken | typeof CYCLE_SENTINEL>();
+  const memo: CycleMemo = new Map();
   const result: TokenMap = {};
   for (const path of Object.keys(graph.nodes)) {
-    const value = resolveAt(graph, path, tuple, memo);
+    const value = resolveAtInternal(graph, path, tuple, memo);
     if (value !== undefined) result[path] = value;
   }
   return result;
@@ -175,12 +172,12 @@ export function resolveAliasAllAt(graph: TokenGraph, tuple: Record<string, strin
   return result;
 }
 
-export function composePartial(
+function composePartial(
   graph: TokenGraph,
   base: SwatchbookToken,
   fields: Record<string, string>,
   tuple: Record<string, string>,
-  memo: Map<string, SwatchbookToken | typeof CYCLE_SENTINEL>,
+  memo: CycleMemo,
 ): SwatchbookToken {
   const result = { ...base };
   const baseValue = base.$value;
@@ -194,7 +191,7 @@ export function composePartial(
   }
 
   for (const [fieldPath, targetPath] of Object.entries(fields)) {
-    const resolved = resolveAt(graph, targetPath, tuple, memo);
+    const resolved = resolveAtInternal(graph, targetPath, tuple, memo);
     if (resolved?.$value !== undefined) {
       assignByPath(value as object, fieldPath, resolved.$value);
     }

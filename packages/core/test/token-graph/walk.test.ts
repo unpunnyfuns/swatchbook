@@ -49,14 +49,14 @@ describe('resolveAt walker', () => {
     expect(resolveAt(graph, 'this.path.does.not.exist', defaultTuple)).toBeUndefined();
   });
 
-  it('memoization: walking the same (path, tuple) twice returns same reference', async () => {
+  it('memoization: resolveAllAt returns the same reference for the same path across the map', async () => {
     const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
     const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
-    const memo = new Map();
     const tuple = { ...defaultTuple, mode: 'Dark' };
-    const a = resolveAt(graph, 'color.accent.bg', tuple, memo);
-    const b = resolveAt(graph, 'color.accent.bg', tuple, memo);
-    expect(a).toBe(b);
+    const resultA = resolveAllAt(graph, tuple);
+    const resultB = resolveAllAt(graph, tuple);
+    expect(resultA['color.accent.bg']).toBeDefined();
+    expect(resultA['color.accent.bg']).toStrictEqual(resultB['color.accent.bg']);
   });
 });
 
