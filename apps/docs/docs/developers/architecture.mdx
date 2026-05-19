@@ -16,7 +16,7 @@ Monorepo under `@unpunnyfuns`. pnpm workspaces + Turborepo orchestration. Every 
 
 | Package | Role | Depends on |
 | --- | --- | --- |
-| `@unpunnyfuns/swatchbook-core` | Framework-free DTCG loader. Parses a resolver, normalizes axes, resolves themes via cells + joint overrides, emits CSS and diagnostics. | — |
+| `@unpunnyfuns/swatchbook-core` | Framework-free DTCG loader. Parses a resolver, normalizes axes, builds a token graph, resolves themes, emits CSS and diagnostics. | — |
 | `@unpunnyfuns/swatchbook-addon` | Storybook 10 addon. Toolbar, preview decorator, Vite plugin that publishes a virtual module. Re-exports `-blocks` + `-switcher`. | core, blocks, switcher |
 | `@unpunnyfuns/swatchbook-blocks` | MDX doc blocks + the `SwatchbookProvider` + hooks. Pure React, framework-agnostic beyond Storybook. | — (peer: storybook) |
 | `@unpunnyfuns/swatchbook-switcher` | Framework-agnostic axis / preset popover UI. Used by the addon toolbar and the docs-site navbar. | — |
@@ -42,17 +42,15 @@ Everything flows through one shape: `Project` in `packages/core/src/types.ts`.
 ```ts
 interface Project {
   config: Config;              // the resolved user config
-  axes: Axis[];                // axes driving composition (mode, brand, contrast…)
+  axes: readonly Axis[];       // axes driving composition (mode, brand, contrast…)
   disabledAxes: readonly string[]; // axes the consumer explicitly suppressed
   presets: readonly Preset[];  // named quick-select axis tuples
-  chrome: Record<string, string>; // block-chrome → consumer-token alias map
+  chrome: Partial<Record<ChromeRole, string>>; // block-chrome → consumer-token alias map
   defaultTokens: TokenMap;     // resolved tokens at the default tuple
-  cells: Cells;                // per-axis (context → TokenMap) cells, bounded by Σ(axes × contexts)
-  jointOverrides: JointOverrides; // partial-tuple divergences cells composition can't reproduce
   defaultTuple: Record<string, string>; // axis defaults
   resolveAt: (tuple: Record<string, string>) => TokenMap; // compose any tuple
-  varianceByPath: ReadonlyMap<string, AxisVarianceResult>; // O(1) per-token variance lookup
-  sourceFiles: string[];       // every file that fed the build (for watchers)
+  tokenGraph: TokenGraph;      // walkable resolution graph (JSON-serializable)
+  sourceFiles: readonly string[]; // every file that fed the build (for watchers)
   cwd: string;                 // loader cwd — config-relative paths resolve here
   listing: TokenListingByPath; // per-token plugin-token-listing data: names.<platform>, previewValue, source
   diagnostics: Diagnostic[];   // parser / validator / resolver findings
@@ -61,7 +59,7 @@ interface Project {
 
 Properties:
 
-- **Tokens are bounded by axis cardinality, not cartesian size.** `cells` carries `Σ(axes × contexts)` resolved TokenMaps; `jointOverrides` carries only the partial-tuple divergences cells composition can't reproduce. `resolveAt(tuple)` composes any tuple on demand — no resolver calls at read time.
+- **`tokenGraph` is the primary resolution surface.** A JSON-serializable `Record<path, TokenGraphNode>` plus axis metadata. Each node carries its baseline value, per-(axis, context) write declarations, alias edges, and a precomputed `affectedBy` index. The graph walker (`resolveAt` in `/graph`) traverses this structure at query time — no resolver calls after build. Browser consumers read the same graph via the [`/graph`](../reference/core.mdx#graph-queries) subpath.
 - **`sourceFiles` is the canonical watch set.** The addon's Vite plugin and the MCP server both use it to decide what to watch for HMR / live-reload.
 - **Diagnostics flow as data, not exceptions.** Parse errors, unresolved aliases, invalid preset axis values — all land in `project.diagnostics` with a severity. The `<Diagnostics />` block renders them.
 - **One axis type.** `Axis.source` is `'resolver'` (DTCG resolver modifier), `'layered'` (authored per-axis layer globs), or `'synthetic'` (single-axis fallback for projects without a resolver or layers). Everything downstream treats them uniformly.
@@ -84,7 +82,7 @@ interface SwatchbookIntegration {
 
 The addon's Vite plugin iterates `integrations[]`, resolves each `virtualId`, serves whatever `render(project)` produces, and invalidates every integration-contributed module on HMR alongside `virtual:swatchbook/tokens`. The addon itself learns nothing about Tailwind, emotion, or anything else — integrations own their library-specific logic.
 
-The `Project` snapshot passed to `render` carries everything: axes, cells, joint overrides, presets, `defaultTokens`, `resolveAt`, `cssVarPrefix`. See the [Integrations guide](../guides/integrations/index.mdx) for factory usage.
+The `Project` snapshot passed to `render` carries everything: axes, `tokenGraph`, presets, `defaultTokens`, `resolveAt`, `cssVarPrefix`. See the [Integrations guide](../guides/integrations/index.mdx) for factory usage.
 
 ## Data flow — static build path
 
@@ -108,7 +106,7 @@ The same `Project` also feeds:
 
 - `project.resolveAt(tuple)` — compose the resolved TokenMap for any axis tuple
 - `project.defaultTokens` — the default-tuple snapshot for global views
-- `project.varianceByPath` — O(1) per-token variance classification
+- `getVariance(project.tokenGraph, path)` from [`/graph`](../reference/core.mdx#graph-queries) — per-token variance classification
 - `project.diagnostics` — the `<Diagnostics />` block reads this
 - the MCP server's tool handlers (all twelve read straight from the project)
 - TypeScript type emission (via Terrazzo's token-tools; not currently exposed as a CLI)
