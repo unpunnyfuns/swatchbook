@@ -399,4 +399,81 @@ describe('diagnostic emission', () => {
     const { diagnostics } = buildTokenGraphFromLayered(axes, baseline, perSingletonResolved, defaultTuple);
     expect(diagnostics).toHaveLength(0);
   });
+
+  it('emits malformedColorShapeDiagnostic when a color token has object $value with no components', () => {
+    const axes: Axis[] = [];
+    const baseline = {
+      'color.broken': {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', alpha: 0.5 },
+      },
+    };
+    const { diagnostics } = buildTokenGraphFromLayered(axes, baseline, {}, {});
+    const match = diagnostics.find(
+      (d) =>
+        d.group === 'swatchbook/token-graph' &&
+        d.severity === 'warn' &&
+        d.message.includes('color.broken') &&
+        d.message.includes('components'),
+    );
+    expect(match).toBeDefined();
+  });
+
+  it('emits malformedColorShapeDiagnostic for object components on a color token', () => {
+    const axes: Axis[] = [];
+    const baseline = {
+      'color.broken': {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', components: { r: 1, g: 0, b: 0 } as unknown as number[] },
+      },
+    };
+    const { diagnostics } = buildTokenGraphFromLayered(axes, baseline, {}, {});
+    const match = diagnostics.find(
+      (d) =>
+        d.group === 'swatchbook/token-graph' &&
+        d.message.includes('color.broken') &&
+        d.message.includes('must be an array'),
+    );
+    expect(match).toBeDefined();
+  });
+
+  it('emits malformedColorShapeDiagnostic for a malformed color sub-field in a border token', () => {
+    const axes: Axis[] = [];
+    const baseline = {
+      'border.thin': {
+        $type: 'border',
+        $value: {
+          color: { colorSpace: 'srgb', alpha: 1 },
+          style: 'solid',
+          width: '1px',
+        },
+      },
+    };
+    const { diagnostics } = buildTokenGraphFromLayered(axes, baseline, {}, {});
+    const match = diagnostics.find(
+      (d) =>
+        d.group === 'swatchbook/token-graph' &&
+        d.message.includes('border.thin') &&
+        d.message.includes('color') &&
+        d.message.includes('components'),
+    );
+    expect(match).toBeDefined();
+  });
+
+  it('does not emit malformedColorShapeDiagnostic for a well-formed color token', () => {
+    const axes: Axis[] = [];
+    const baseline = {
+      'color.ok': {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', components: [1, 0, 0], alpha: 1 },
+      },
+      'color.string-form': {
+        $type: 'color',
+        $value: '#ff0000',
+      },
+    };
+    const { diagnostics } = buildTokenGraphFromLayered(axes, baseline, {}, {});
+    const colorShapeDiags = diagnostics.filter((d) => d.message.includes('structurally invalid'));
+    expect(colorShapeDiags).toHaveLength(0);
+  });
 });
