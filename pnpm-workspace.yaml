@@ -18,6 +18,9 @@ overrides:
   fast-uri: ^3.1.2
   hono: ^4.12.18
   '@babel/plugin-transform-modules-systemjs': ^7.29.4
+  ws: ^8.20.1
+  webpack-dev-server: ^5.2.4
+  'brace-expansion@>=5': ^5.0.6
 
 patchedDependencies:
   '@terrazzo/plugin-css-in-js@2.0.3': patches/@terrazzo__plugin-css-in-js@2.0.3.patch
