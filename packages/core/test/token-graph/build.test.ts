@@ -476,4 +476,55 @@ describe('diagnostic emission', () => {
     const colorShapeDiags = diagnostics.filter((d) => d.message.includes('structurally invalid'));
     expect(colorShapeDiags).toHaveLength(0);
   });
+
+  it('emits unresolvedRefDiagnostic when color components carry an unresolved $ref object', () => {
+    const axes: Axis[] = [];
+    const baseline = {
+      'color.via-ref': {
+        $type: 'color',
+        $value: {
+          colorSpace: 'srgb',
+          components: { $ref: '#/primitives/color/gray/12/$value/components' } as unknown as number[],
+          alpha: 1,
+        },
+      },
+    };
+    const { diagnostics } = buildTokenGraphFromLayered(axes, baseline, {}, {});
+    const match = diagnostics.find(
+      (d) =>
+        d.group === 'swatchbook/token-graph' &&
+        d.severity === 'warn' &&
+        d.message.includes('Unresolved `$ref`') &&
+        d.message.includes('color.via-ref') &&
+        d.message.includes('#/primitives/color/gray/12/$value/components'),
+    );
+    expect(match).toBeDefined();
+
+    // The generic "must be an array" diagnostic should NOT also fire — the
+    // $ref-specific message replaces it.
+    const generic = diagnostics.filter((d) => d.message.includes('must be an array of numbers'));
+    expect(generic).toHaveLength(0);
+  });
+
+  it('still emits generic malformedColorShapeDiagnostic for non-$ref non-array components', () => {
+    const axes: Axis[] = [];
+    const baseline = {
+      'color.bad-shape': {
+        $type: 'color',
+        $value: {
+          colorSpace: 'srgb',
+          components: { r: 1, g: 0, b: 0 } as unknown as number[],
+          alpha: 1,
+        },
+      },
+    };
+    const { diagnostics } = buildTokenGraphFromLayered(axes, baseline, {}, {});
+    const match = diagnostics.find(
+      (d) =>
+        d.group === 'swatchbook/token-graph' &&
+        d.message.includes('color.bad-shape') &&
+        d.message.includes('must be an array of numbers'),
+    );
+    expect(match).toBeDefined();
+  });
 });

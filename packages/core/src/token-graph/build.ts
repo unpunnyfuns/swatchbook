@@ -7,6 +7,7 @@ import {
   aliasCycleDiagnostic,
   malformedColorShapeDiagnostic,
   unresolvableAliasDiagnostic,
+  unresolvedRefDiagnostic,
 } from '#/token-graph/diagnostics.ts';
 
 const COMPOSITE_TYPES = new Set(['border', 'typography', 'transition', 'gradient', 'shadow']);
@@ -272,13 +273,19 @@ function scanValueForColorShape(
         malformedColorShapeDiagnostic(tokenPath, fieldPath, '`components` field is missing'),
       );
     } else if (!Array.isArray(components)) {
-      out.push(
-        malformedColorShapeDiagnostic(
-          tokenPath,
-          fieldPath,
-          `\`components\` must be an array of numbers (got ${typeof components})`,
-        ),
-      );
+      const refTarget = unresolvedRefTarget(components);
+      const componentsField = fieldPath ? `${fieldPath}.components` : 'components';
+      if (refTarget !== undefined) {
+        out.push(unresolvedRefDiagnostic(tokenPath, componentsField, refTarget));
+      } else {
+        out.push(
+          malformedColorShapeDiagnostic(
+            tokenPath,
+            fieldPath,
+            `\`components\` must be an array of numbers (got ${typeof components})`,
+          ),
+        );
+      }
     }
     return;
   }
@@ -287,6 +294,20 @@ function scanValueForColorShape(
     const nextPath = fieldPath ? `${fieldPath}.${key}` : key;
     scanValueForColorShape(tokenPath, child, nextPath, out);
   }
+}
+
+/**
+ * Returns the JSON Pointer if `value` is an unresolved DTCG `$ref` object
+ * (a plain object whose only non-`$`-prefixed shape is a string `$ref`
+ * member). Returns `undefined` for anything else. Used to distinguish a
+ * source-side malformation from an upstream parser failing to substitute
+ * a `$ref` target.
+ */
+function unresolvedRefTarget(value: unknown): string | undefined {
+  if (!isPlainObject(value)) return undefined;
+  const ref = value['$ref'];
+  if (typeof ref !== 'string') return undefined;
+  return ref;
 }
 
 function detectAliasCycles(nodes: Record<string, TokenGraphNode>): Diagnostic[] {
