@@ -1,5 +1,13 @@
 # @unpunnyfuns/swatchbook-integrations
 
+## 0.60.2
+
+### Patch Changes
+
+- d2c7cfb: When the color-shape validator encounters `components` carrying an unresolved DTCG `$ref` object (a plain object with a string `$ref` member), the emitted diagnostic now names the JSON Pointer and identifies the upstream parser's failure to substitute the target — rather than the generic "`components` must be an array of numbers" message, which sends consumers hunting for source-side errors when the source is usually correct. Non-`$ref` non-array components keep the existing generic message.
+- Updated dependencies [d2c7cfb]
+  - @unpunnyfuns/swatchbook-core@0.60.2
+
 ## 0.60.1
 
 ### Patch Changes
