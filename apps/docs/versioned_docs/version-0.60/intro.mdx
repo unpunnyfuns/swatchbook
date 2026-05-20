@@ -55,7 +55,7 @@ The [live Storybook](pathname:///storybook/) runs the addon against this repo's 
 
 ## Migrating from `@storybook/addon-themes`
 
-If you're coming from `@storybook/addon-themes` and have one or two flat theme IDs, translate each ID to an axes tuple — `"brand-a-dark"` becomes `{ brand: 'Brand A', mode: 'Dark' }` — then declare `mode` and `brand` as resolver modifiers. The axes model composes the cartesian product automatically, so no enumerating all combinations. See [axes reference](./reference/axes.mdx) for details.
+If you're coming from `@storybook/addon-themes` and have one or two flat theme IDs, translate each ID to an axes tuple — `"brand-a-dark"` becomes `{ brand: 'Brand A', mode: 'Dark' }` — then declare `mode` and `brand` as resolver modifiers. The axes model composes every combination of axes automatically, so no enumerating all combinations. See [axes reference](./reference/axes.mdx) for details.
 
 ## What these docs assume
 

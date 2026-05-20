@@ -58,7 +58,7 @@ The separate file path (`configPath`) is useful when the same config is consumed
 
 ## Picking a theming input
 
-`Config` is a discriminated union — `ResolverConfig | LayeredConfig | PlainConfig`. TypeScript narrows on which load-strategy field is present, and invalid combinations (like `{ resolver, axes }` or `{ axes }` without `tokens`) are compile-time errors. The runtime loader still checks the same invariants as defense-in-depth for JS callers.
+`Config` has three valid shapes — `ResolverConfig | LayeredConfig | PlainConfig`. Which load-strategy field is present determines the shape, and invalid combinations (like `{ resolver, axes }` or `{ axes }` without `tokens`) are compile-time errors. The runtime also validates the same constraints for plain-JS callers.
 
 Exactly three shapes are legal:
 
@@ -66,7 +66,7 @@ Exactly three shapes are legal:
 - **Layered** (`LayeredConfig`) — `axes: [...]` + `tokens: [...]`. For projects without a resolver document. You declare axes inline; each context names overlay files that layer onto the base `tokens`.
 - **Plain parse** (`PlainConfig`) — `tokens: [...]` alone. Single synthetic `theme` axis; every token loaded as one tuple. Useful for smoke-testing a token set before adopting a resolver.
 
-All three variants extend a shared base (`cssVarPrefix`, `presets`, `disabledAxes`, `chrome`, `cssOptions`, `listingOptions`, `terrazzoPlugins`, `default`, `outDir`). The discriminant is which load-strategy field is present.
+All three variants extend a shared base (`cssVarPrefix`, `presets`, `disabledAxes`, `chrome`, `cssOptions`, `listingOptions`, `terrazzoPlugins`, `default`, `outDir`).
 
 ## Fields
 
@@ -82,7 +82,7 @@ Glob patterns (relative to the config's cwd) for base DTCG token files.
 
 Path to a [DTCG 2025.10 resolver](https://www.designtokens.org/TR/2025.10/resolver/) document. Mutually exclusive with `axes`.
 
-Terrazzo normalizes the document, then Swatchbook enumerates singleton tuples (axes-defaults plus one per non-default `(axis, context)`) and realizes each via `resolver.apply()`. One `Axis` surfaces per modifier; the resolver file itself and every `$ref` target it pulls in land on `Project.sourceFiles`.
+Terrazzo normalizes the document, then Swatchbook enumerates individual tuples (one per non-default `(axis, context)`) and realizes each via `resolver.apply()`. One `Axis` surfaces per modifier; the resolver file itself and every `$ref` target it pulls in land on `Project.sourceFiles`.
 
 ### `axes?: AxisConfig[]`
 
@@ -99,7 +99,7 @@ interface AxisConfig {
 
 `contexts` is a map from context name to an ordered list of overlay files (paths or globs, relative to the config's cwd). An empty array is legal — it means "no override," which is the baseline for an axis that introduces nothing by default (`Default: []`).
 
-The loader materializes a singleton tuple per `(axis, context)` — bounded by `Σ(axes × (contexts - 1))`, not the cartesian product. Last write wins on duplicate token paths across base + overlays; overlay files listed later in `axes` win over earlier ones.
+The loader materializes one entry per non-default context per axis — never every combination at once. Last write wins on duplicate token paths across base + overlays; overlay files listed later in `axes` win over earlier ones.
 
 ### `default?: Partial<Record<string, string>>`
 

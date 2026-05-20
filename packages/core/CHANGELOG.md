@@ -1,5 +1,13 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.60.1
+
+### Patch Changes
+
+- c3ded5b: Patch release to ship the docs audit fixes from PR #1002 into the stable docs snapshot. The fixes (corrected import paths, removed broken anchors, jargon swapped for plain language, prose register tightened) only reached `/next/` after the original PR — this release rebuilds the `version-0.60/` snapshot so they reach `/` too. No package source changes.
+- 0868ed5: When the smart emitter's call to `transformCSSValue` throws on a malformed token `$value`, the thrown error now names the token path, the active axis permutation, and the offending `$value`, with the original error attached as `cause`. Previously a malformed token surfaced as a four-frames-deep colorjs.io traceback with no clue which token was at fault. Healthy tokens are unaffected.
+- 2e6352a: Validate color token `$value` shape at load time. The graph builder now walks every literal value and reports DTCG color objects whose `components` field is missing or non-array — the shape that crashes `colorjs.io` inside `inGamut(...)` with the unactionable `coords.map is not a function` traceback. Covers top-level color tokens and color sub-fields inside composites uniformly: any object whose `colorSpace` is a string is treated as a color and validated. Healthy fixtures see no new diagnostics; the validator finds problems, it doesn't create them.
+
 ## 0.60.0
 
 ### Minor Changes
