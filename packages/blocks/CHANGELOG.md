@@ -1,5 +1,13 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.60.3
+
+### Patch Changes
+
+- 65a7865: Substitute DTCG `$ref` objects in modifier values against the resolver's baseline output. The resolver-based loader's `extractWritesFromModifiers` was reading from `resolver.source.modifiers` directly — a pre-`processTokens` representation where cross-document `$ref` references in modifier source values (e.g. a semantic token's `components` referencing a primitive's `components` array via JSON Pointer) had not yet been resolved. The unresolved `{ $ref }` objects flowed through write values into the walker and reached emit time, where colorjs.io crashed on them. The fix performs the same JSON Pointer substitution at write-extraction time, using the already-resolved baseline as the lookup source. Unresolved pointers are left intact and continue to surface via the existing emit-time error wrap and load-time diagnostic.
+- Updated dependencies [65a7865]
+  - @unpunnyfuns/swatchbook-core@0.60.3
+
 ## 0.60.2
 
 ### Patch Changes
