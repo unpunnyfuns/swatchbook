@@ -1,7 +1,7 @@
 ---
 id: sharing-terrazzo-options
 title: Aligning with your token build
-sidebar_position: 5
+sidebar_position: 6
 ---
 
 # Aligning swatchbook with your production token build
@@ -135,7 +135,7 @@ The shared-options module above closes each of these gaps in one place.
 Five fields are stripped at the type level. They're load-bearing for how swatchbook emits CSS and publishes the listing; letting consumers override them breaks the preview model.
 
 - **`cssOptions.variableName`** — swatchbook routes naming through `@terrazzo/token-tools`' `makeCSSVar` with your `cssVarPrefix`, so every variable carries the prefix and kebab-cases consistently with what the listing records under `names.css`. A custom policy would make the listing's `names.css` disagree with the emitted stylesheet, which is worse than the default.
-- **`cssOptions.permutations`** — swatchbook synthesizes one entry per resolver theme (or per layered tuple) so the emitted stylesheet declares each theme under a compound `data-<prefix>-<axis>` selector. Overriding this defeats axis-aware rendering.
+- **`cssOptions.permutations`** (the internal Terrazzo field that controls per-theme CSS blocks) — swatchbook synthesizes one entry per resolver theme (or per layered tuple) so the emitted stylesheet declares each theme under a compound `data-<prefix>-<axis>` selector. Overriding this defeats axis-aware rendering.
 - **`cssOptions.filename`** — the internal stylesheet is captured in memory, never written to disk.
 - **`cssOptions.skipBuild`** — setting `true` nulls out the listing's `previewValue` derivation, breaking every block that displays a value.
 - **`listingOptions.filename`** — the listing is captured in memory; the `outputFile` handler finds the entry by filename, and swatchbook owns that handshake.

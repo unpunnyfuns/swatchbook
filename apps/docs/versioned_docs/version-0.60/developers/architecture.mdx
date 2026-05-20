@@ -82,7 +82,7 @@ interface SwatchbookIntegration {
 
 The addon's Vite plugin iterates `integrations[]`, resolves each `virtualId`, serves whatever `render(project)` produces, and invalidates every integration-contributed module on HMR alongside `virtual:swatchbook/tokens`. The addon itself learns nothing about Tailwind, emotion, or anything else — integrations own their library-specific logic.
 
-The `Project` snapshot passed to `render` carries everything: axes, `tokenGraph`, presets, `defaultTokens`, `resolveAt`, `cssVarPrefix`. See the [Integrations guide](../guides/integrations/index.mdx) for factory usage.
+The `Project` snapshot passed to `render` carries everything: axes, `tokenGraph`, presets, `defaultTokens`, `resolveAt`, `config` — which carries `cssVarPrefix`, `terrazzoPlugins`, etc. See the [Integrations guide](../guides/integrations/index.mdx) for factory usage.
 
 ## Data flow — static build path
 
@@ -108,7 +108,7 @@ The same `Project` also feeds:
 - `project.defaultTokens` — the default-tuple snapshot for global views
 - `getVariance(project.tokenGraph, path)` from [`/graph`](../reference/core.mdx#graph-queries) — per-token variance classification
 - `project.diagnostics` — the `<Diagnostics />` block reads this
-- the MCP server's tool handlers (all twelve read straight from the project)
+- the MCP server's tool handlers (all fourteen read straight from the project)
 - TypeScript type emission (via Terrazzo's token-tools; not currently exposed as a CLI)
 
 ## Data flow — dev / HMR path
@@ -197,6 +197,6 @@ Fourteen tools, all stateless reads against the in-memory `Project`:
 - `packages/addon/src/virtual/plugin.ts` — the HMR plumbing.
 - `packages/addon/src/preview.tsx` — how the preview decorator wires the provider + channel.
 - `packages/blocks/src/internal/use-project.ts` — the hook every block pulls state through.
-- `packages/mcp/src/server.ts` — the twelve MCP tools in one file.
+- `packages/mcp/src/server.ts` — the fourteen MCP tools in one file.
 
 And the companion [Sharp corners](./sharp-corners.mdx) page for the "don't step there" list.

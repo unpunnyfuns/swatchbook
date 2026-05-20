@@ -10,7 +10,7 @@ Survey many tokens at once. The first two work across every `$type` in the graph
 
 Most blocks in this group take:
 
-- `filter?: string` — path glob (see the [globMatch rules](#) on each block's implementation).
+- `filter?: string` — path glob (see [`matchPath`](../core.mdx#browser-safe-subpaths) in the `/match-path` subpath).
 - `sortBy?: 'path' | 'value' | 'none'` — default `'path'` (exceptions noted per block).
 - `sortDir?: 'asc' | 'desc'` — default `'asc'`.
 - `caption?: string` — override the default summary caption.

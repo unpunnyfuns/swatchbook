@@ -8,7 +8,7 @@ sidebar_position: 5
 
 An **axis** is one independent dimension of your theming model — `mode`, `brand`, `density`, `contrast`, whatever fits your system. Each axis has a set of named **contexts** (one of which is the default), and at any moment exactly one context is selected per axis.
 
-The axis shape is the alternative to a flat string-ID model (`"light"`, `"dark"`, `"brand-a-dark-compact"`). One dimension becomes two; two become four. Modelling each dimension independently keeps that combinatorial math out of your theme names and into composition at runtime. If your system has exactly one dimension and no plans for more, [`@storybook/addon-themes`](https://storybook.js.org/addons/@storybook/addon-themes)' single-string-ID model is simpler and a better fit.
+The axis shape is the alternative to a flat string-ID model (`"light"`, `"dark"`, `"brand-a-dark-compact"`). One dimension becomes two; two become four. Modelling each dimension independently keeps the combination-counting out of your theme names and into composition at runtime. If your system has exactly one dimension and no plans for more, [`@storybook/addon-themes`](https://storybook.js.org/addons/@storybook/addon-themes)' single-string-ID model is simpler and a better fit.
 
 ## Tuples, not strings
 
@@ -86,15 +86,6 @@ Omit an axis and it falls back to that axis's default. Invalid axis keys or cont
 ## Disabling an axis
 
 A resolver may declare more modifiers than a given Storybook wants to surface. List the axis name in `config.disabledAxes` and the project behaves as if that axis didn't exist for this session: no toolbar dropdown, no extra CSS blocks, the axis pinned to its `default` context in the active tuple. The Design Tokens panel shows a faint pinned indicator so the suppression isn't invisible. See the [`disabledAxes`](./config.mdx#disabledaxes) field for details.
-
-## Scoping large modifier spaces
-
-`loadProject` enumerates `1 + Σ(axes × (contexts - 1))` singleton tuples per project — the default tuple plus one per non-default cell on each axis. Bounded by axis cardinality, independent of the cartesian product, so a resolver with 20 axes × 5 contexts loads ~80 tuples regardless of whether the underlying cartesian is hundreds or 15 million. The toolbar surfaces every axis, the smart CSS emitter writes per-axis cell blocks plus compound blocks only for tokens with genuine joint divergence, and runtime CSS composition lands the right value at any multi-axis selector.
-
-The loader can't blow up on a large cartesian because it doesn't materialize the cartesian in the first place. Two scoping levers remain, both presentational:
-
-- **`presets`** — author named tuples for the handful of themes that matter (`Default Light`, `Brand A Dark`, `A11y High Contrast`). Toolbar surfaces them as quick-select pills; emit pipelines can fan out on `'presets'` instead of every axis-attribute combination. The right answer when only a handful of tuples are presentational.
-- **`disabledAxes`** — pin state-space modifiers (locale, density, motion-pref, …) to their defaults. They vanish from the toolbar, drop from the project's axis list, and don't contribute to emitted CSS. The right answer when an axis exists in the resolver but doesn't represent presentational variation.
 
 ## See also
 

@@ -89,7 +89,7 @@ The addon exposes exactly one hook, under `@unpunnyfuns/swatchbook-addon/hooks`.
 
 ### `useToken(path)`
 
-Typed lookup. Returns `{ value, cssVar, type, description }` for the given path; reactive to axis changes.
+Typed lookup. Returns `{ value, cssVar, type?, description? }` for the given path — the `value` is typed as `unknown`; `type` and `description` come from the token's `$type` / `$description` if present. Reactive to axis changes.
 
 ```tsx
 import { useToken } from '@unpunnyfuns/swatchbook-addon/hooks';

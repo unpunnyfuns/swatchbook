@@ -71,7 +71,7 @@ All blocks subscribe to Storybook's `globalsUpdated` channel event and re-render
 
 ## Do / don't
 
-- ✅ Use blocks in MDX `*.mdx` docs pages for rich token references.
+- ✅ Use blocks in MDX `*.mdx` docs pages for token reference tables.
 - ✅ Filter aggressively — `<TokenTable filter="color.**" type="color" />` beats unfiltered tables for browsability.
 - ✅ Use blocks outside Storybook by wrapping the tree in `SwatchbookProvider` and passing a `ProjectSnapshot`. The blocks themselves are framework-free.
 - ✅ Either `@unpunnyfuns/swatchbook-blocks` or `@unpunnyfuns/swatchbook-addon` works as an import source — the addon re-exports the blocks surface so you don't have to pin a second dependency in consumer projects that already have the addon.

@@ -71,7 +71,7 @@ The `mcpServers` shape is the same across MCP hosts; consult the host's docs for
 | `resolve_theme`       | `tuple`, `filter?`, `type?`                               | Resolved token map for an axis tuple (`{ mode: "Dark", brand: "…" }`). Fills omitted axes from defaults.      |
 | `get_token`           | `path`                                                    | Full detail: per-theme value, alias chain, aliased-by list, CSS var reference.                                |
 | `get_alias_chain`     | `path`                                                    | Forward alias chain per theme (`path → ... → primitive`). Empty when the token is a primitive.                |
-| `get_aliased_by`      | `path`, `maxDepth?`                                       | Backward alias tree — every token that resolves through this path. Breadth-first with cycle protection.       |
+| `get_aliased_by`      | `path`, `maxDepth?`                                       | Backward alias tree — every token that resolves through this path. Shallower aliases first; cycles in the alias graph are caught and broken.       |
 | `get_consumer_output` | `path`, `tuple?`                                          | CSS var, resolved value, compound `[data-…]` selector + HTML attrs needed to pin the tuple on `<html>`.        |
 | `get_color_formats`   | `path`, `theme?`                                          | Color token rendered in `hex` / `rgb` / `hsl` / `oklch` / `raw`, each with an `outOfGamut` flag.                |
 | `get_color_contrast`  | `foreground`, `background`, `theme?`, `algorithm?`        | Pair-wise contrast between two color tokens. `wcag21` → ratio + AA/AAA pass flags (normal + large text). `apca` → signed Lc + body / large-text / non-text pass flags. |

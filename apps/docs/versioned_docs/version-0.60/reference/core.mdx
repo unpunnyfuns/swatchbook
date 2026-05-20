@@ -6,7 +6,8 @@ sidebar_position: 1
 
 # Core
 
-Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via Terrazzo, builds a walkable token graph, resolves aliases per tuple. No React, no Storybook dependency.
+Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via Terrazzo, builds a walkable token graph (a data structure you can query for any token's value in any axis combination), resolves aliases per tuple. No React, no Storybook dependency.
+
 
 ## Install
 
@@ -63,7 +64,7 @@ for (const [path, token] of Object.entries(project.defaultTokens)) {
 
 ### `emitAxisProjectedCss(project, options?)`
 
-Emit the project's resolved CSS as a string — the same output the addon publishes into `virtual:swatchbook/tokens` at preview time. The emitter walks the token graph: each per-axis non-default context gets its own `[data-<prefix>-<axis>="<context>"]` selector block; the default-tuple tokens go to `:root`; multi-axis divergences get compound `[data-axis-A][data-axis-B]` blocks. Size bounded by `Σ(axes × contexts)` regardless of cartesian product size.
+Emit the project's resolved CSS as a string — the same output the addon publishes into `virtual:swatchbook/tokens` at preview time. The emitter walks the token graph: each per-axis non-default context gets its own `[data-<prefix>-<axis>="<context>"]` selector block; the default-tuple tokens go to `:root`; tokens whose value differs when more than one axis changes get compound `[data-…][data-…]` selectors. Total block count scales with axes × contexts, not every combination of axes.
 
 ```ts
 import { loadProject, emitAxisProjectedCss } from '@unpunnyfuns/swatchbook-core';
@@ -84,7 +85,7 @@ Leaf utilities consumers need without the loader's Node deps live on dedicated s
 | --- | --- | --- |
 | `/graph` | `resolveAt`, `resolveAllAt`, `resolveAliasAt`, `resolveAliasAllAt`, `getVariance`, `getAffectedBy`, `listPaths` + `TokenGraph` / `TokenGraphNode` / `WriteValue` types | Graph query helpers — browser-safe, no Terrazzo dependency at query time. See [Graph queries](#graph-queries) below. |
 | `/snapshot-for-wire` | `snapshotForWire(project, css)` + `SnapshotForWire` type | JSON-friendly subset of `Project` for cross-boundary transport. |
-| `/themes` | `enumerateThemes({axes, presets, defaultTuple})` + `tupleToName(axes, tuple)` + `ThemeEntry` / `ThemeEnumAxis` / `ThemeEnumPreset` types | Enumerate axis singletons + presets as a unified theme list; compose stable theme IDs from tuples. |
+| `/themes` | `enumerateThemes({axes, presets, defaultTuple})` + `tupleToName(axes, tuple)` + `ThemeEntry` / `ThemeEnumAxis` / `ThemeEnumPreset` types | Enumerate single-axis tuples + presets as a unified theme list; compose stable theme IDs from tuples. |
 | `/match-path` | `matchPath(path, filter)` | Glob-style path matcher (`*` single-segment, `**` multi-segment, bare prefix treated as descendants); shared by blocks' filter prop and the MCP `list_tokens` tool. |
 | `/fuzzy` | `fuzzyFilter` + `fuzzyMatches` | uFuzzy-backed token search; powers the MCP `search_tokens` tool. |
 | `/css-var` | `makeCssVar(path, prefix)` | Compose `var(--prefix-path)` strings — same shape Terrazzo's plugin-css emits. |
@@ -106,7 +107,7 @@ import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire'
 | `resolveAllAt` | `(graph, tuple) → TokenMap` | Resolved `TokenMap` for every path in the graph at a given tuple. |
 | `resolveAliasAt` | `(graph, path, tuple) → SwatchbookToken \| undefined` | Alias-preserving view — stops at the first alias/partial-alias write and returns a token with `aliasOf` populated rather than recursing to a leaf. |
 | `resolveAliasAllAt` | `(graph, tuple) → TokenMap` | Full `TokenMap` with alias-preserving view for every path. |
-| `getVariance` | `(graph, path) → AxisVarianceResult` | `AxisVarianceResult` for one token path — which axes affect it, and the stringified value per context per axis. |
+| `getVariance` | `(graph, path) → AxisVarianceResult` | `AxisVarianceResult` (whether the token's value changes across axes, and which axes) for one token path — which axes affect it, and the stringified value per context per axis. |
 | `getAffectedBy` | `(graph, path) → readonly string[]` | Set of axis names that can change this token's resolved value at any tuple. |
 | `listPaths` | `(graph) → readonly string[]` | Sorted array of every token path in the graph. |
 
@@ -166,7 +167,7 @@ type ChromeRole = (typeof CHROME_ROLES)[number];
 
 ### `Config`
 
-Discriminated union of `ResolverConfig | LayeredConfig | PlainConfig`. Each variant has a different load strategy; field-presence narrowing enforces the mutually-exclusive trio at compile time (invalid combos like `{ resolver, axes }` are TS errors). See [Config reference](./config.mdx) for the full per-field semantics.
+Three valid shapes: `ResolverConfig | LayeredConfig | PlainConfig`. Each variant has a different load strategy; TypeScript picks the right shape based on which field is present, so invalid combinations like `{ resolver, axes }` are caught at compile time. See [Config reference](./config.mdx) for the full per-field semantics.
 
 ```ts
 type Config = ResolverConfig | LayeredConfig | PlainConfig;
@@ -273,7 +274,7 @@ interface Project {
    * a CSS-ready `previewValue`, `originalValue` (pre-resolution), and
    * `source.loc` pointing back to the authoring file + line. Populated for
    * resolver-backed projects; empty `{}` for layered / plain-parse paths.
-   * Downstream blocks prefer this over re-deriving values locally.
+   * Node-side tooling and the wire-payload snapshot draw from this.
    */
   listing: TokenListingByPath;
   diagnostics: Diagnostic[];
@@ -308,11 +309,11 @@ interface TokenGraphNode {
 }
 ```
 
-Per-token-path node. `baselineValue` is the resolved leaf at the default tuple. `writes[axisName][contextName]` holds per-(axis, context) overlay declarations. `affectedBy` is the precomputed axis-sensitivity index — the set of axes whose writes can change this token's resolved value, used by the walker's fast-path to skip resolution for constant tokens.
+Per-token-path node. `baselineValue` is the resolved leaf at the default tuple. `writes[axisName][contextName]` holds per-(axis, context) overlay declarations. `affectedBy` is a precomputed list of axes that can change this token's value through any chain. Used by `resolveAt` to skip resolution for tokens whose value doesn't depend on anything in the requested tuple.
 
 ### `TokenListingByPath`
 
-Path-indexed alias over `@terrazzo/plugin-token-listing`'s `ListedToken` shape. Blocks read authoritative CSS variable names from `listing[path].$extensions['app.terrazzo.listing'].names.css` and preview strings from `.previewValue`. The full entry carries `originalValue` (pre-resolution, aliases preserved) and `source.loc` (file + line range pointing at the authoring source).
+Path-indexed alias over `@terrazzo/plugin-token-listing`'s `ListedToken` shape. Node-side code reads the raw `ListedToken` shape (`listing[path].$extensions['app.terrazzo.listing'].names.css`). Blocks receive the slimmed snapshot form where the access path is `listing[path].names.css` — block authors should call `resolveCssVar(path, project)` rather than indexing the path manually. The full entry carries `originalValue` (pre-resolution, aliases preserved) and `source.loc` (file + line range pointing at the authoring source).
 
 ```ts
 type TokenListingByPath = Record<string, ListedToken>;
@@ -363,7 +364,7 @@ type DiagnosticSeverity = 'error' | 'warn' | 'info';
 
 ### `AxisVarianceResult`
 
-Return type of [`getVariance(graph, path)`](#graph-queries). Discriminated on `kind`; the cardinality of `varyingAxes` is reflected in the tuple type so consumers narrow exhaustively. The `single` variant adds a convenience `axis: string` accessor.
+Return type of [`getVariance(graph, path)`](#graph-queries). The `kind` field distinguishes the three cases. `varyingAxes`'s length is encoded in the TypeScript type so a `switch` on `kind` covers all three exhaustively. The `single` variant adds a convenience `axis: string` accessor.
 
 ```ts
 type AxisVarianceResult =
