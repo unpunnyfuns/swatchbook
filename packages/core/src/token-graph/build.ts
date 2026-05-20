@@ -49,6 +49,7 @@ export function extractWritesFromModifiers(
     { contexts?: Record<string, unknown[]> | undefined; default?: string | undefined }
   >,
   axes: readonly Axis[],
+  refLookup: TokenMap = {},
 ): Record<string, Record<string, Record<string, WriteValue>>> {
   const out: Record<string, Record<string, Record<string, WriteValue>>> = {};
   for (const axis of axes) {
@@ -57,7 +58,7 @@ export function extractWritesFromModifiers(
     for (const [contextName, groupNodes] of Object.entries(modifier.contexts)) {
       if (contextName === axis.default) continue;
       for (const node of groupNodes) {
-        collectLeafWrites(node, '', axis.name, contextName, out);
+        collectLeafWrites(node, '', axis.name, contextName, out, refLookup);
       }
     }
   }
@@ -70,13 +71,14 @@ function collectLeafWrites(
   axisName: string,
   contextName: string,
   out: Record<string, Record<string, Record<string, WriteValue>>>,
+  refLookup: TokenMap,
   inheritedType?: string,
 ): void {
   if (!isPlainObject(node)) return;
   if ('$value' in node) {
     if (!prefix) return;
     const effectiveType = typeof node['$type'] === 'string' ? node['$type'] : inheritedType;
-    const write = toWriteValue(node, effectiveType);
+    const write = toWriteValue(node, effectiveType, refLookup);
     if (write) {
       (out[prefix] ??= {})[axisName] ??= {};
       out[prefix]![axisName]![contextName] = write;
@@ -87,21 +89,24 @@ function collectLeafWrites(
   for (const [key, child] of Object.entries(node)) {
     if (key.startsWith('$')) continue;
     const childPath = prefix ? `${prefix}.${key}` : key;
-    collectLeafWrites(child, childPath, axisName, contextName, out, nextInheritedType);
+    collectLeafWrites(child, childPath, axisName, contextName, out, refLookup, nextInheritedType);
   }
 }
 
 function toWriteValue(
   token: Record<string, unknown>,
   effectiveType?: string,
+  refLookup: TokenMap = {},
 ): WriteValue | undefined {
-  const value = token['$value'];
-  if (value === undefined) return undefined;
+  const rawValue = token['$value'];
+  if (rawValue === undefined) return undefined;
+  const value = resolveRefsInValue(rawValue, refLookup);
   const $type = typeof token['$type'] === 'string' ? token['$type'] : effectiveType;
+  const tokenWithSubstitutedValue = value === rawValue ? token : { ...token, $value: value };
   const withType: SwatchbookToken =
     $type !== undefined && token['$type'] === undefined
-      ? ({ ...token, $type } as SwatchbookToken)
-      : (token as SwatchbookToken);
+      ? ({ ...tokenWithSubstitutedValue, $type } as SwatchbookToken)
+      : (tokenWithSubstitutedValue as SwatchbookToken);
   if (typeof value === 'string') {
     const match = ALIAS_RE.exec(value);
     if (match) return { kind: 'alias', target: match[1]! };
@@ -119,6 +124,67 @@ function toWriteValue(
     }
   }
   return { kind: 'literal', value: slimToken(withType) };
+}
+
+/**
+ * Walk `value` and replace any `{ $ref: '<JSON Pointer>' }` object with the
+ * resolved target from `refLookup`. Terrazzo's resolver normalize pass
+ * doesn't substitute cross-document `$ref` references in modifier source
+ * values — they're only substituted at `resolver.apply()` time via
+ * `processTokens`, which our `extractWritesFromModifiers` bypasses by
+ * reading `resolver.source.modifiers` directly. This function fills that
+ * gap by performing the same JSON Pointer substitution against an already-
+ * resolved token snapshot (typically the resolver's baseline output).
+ *
+ * Unresolved pointers are left as-is — they then surface via #1014's
+ * `unresolvedRefDiagnostic` (load-time) or #1007's emit-wrap (runtime).
+ */
+function resolveRefsInValue(value: unknown, refLookup: TokenMap): unknown {
+  if (Array.isArray(value)) {
+    let changed = false;
+    const next: unknown[] = [];
+    for (const entry of value) {
+      const replaced = resolveRefsInValue(entry, refLookup);
+      if (replaced !== entry) changed = true;
+      next.push(replaced);
+    }
+    return changed ? next : value;
+  }
+  if (!isPlainObject(value)) return value;
+  const ref = value['$ref'];
+  if (typeof ref === 'string') {
+    const resolved = lookupJsonPointer(ref, refLookup);
+    if (resolved !== undefined) return resolved;
+    return value;
+  }
+  let changed = false;
+  const next: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(value)) {
+    const replaced = resolveRefsInValue(v, refLookup);
+    if (replaced !== v) changed = true;
+    next[k] = replaced;
+  }
+  return changed ? next : value;
+}
+
+function lookupJsonPointer(pointer: string, refLookup: TokenMap): unknown {
+  if (!pointer.startsWith('#/')) return undefined;
+  const parts = pointer
+    .slice(2)
+    .split('/')
+    .map((p) => p.replace(/~1/g, '/').replace(/~0/g, '~'));
+  for (let i = parts.length; i > 0; i--) {
+    const tokenID = parts.slice(0, i).join('.');
+    const token = refLookup[tokenID];
+    if (!token) continue;
+    let node: unknown = token;
+    for (const part of parts.slice(i)) {
+      if (node == null || typeof node !== 'object') return undefined;
+      node = (node as Record<string, unknown>)[part];
+    }
+    return node;
+  }
+  return undefined;
 }
 
 // Walks raw DTCG `$value` looking for `{path}`-shaped alias syntax. Used during modifier-source extraction.
@@ -157,6 +223,7 @@ export function buildTokenGraph(
   const writesByPath = extractWritesFromModifiers(
     parserInput.resolver.source?.modifiers ?? {},
     axes,
+    baseline,
   );
   // Singleton-apply sweep: each non-default (axis, ctx) tuple.
   // Records resolved values per singleton so writes-only paths

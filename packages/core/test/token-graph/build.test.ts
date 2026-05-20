@@ -159,6 +159,96 @@ describe('extractWritesFromModifiers', () => {
     expect(writes['a']?.brand).toBeUndefined();
   });
 
+  it('substitutes $ref objects in modifier values against the refLookup token map', () => {
+    // The consumer-reported failure mode: a modifier writes a color with
+    // `components: { $ref: '#/primitives/.../components' }`. Without
+    // substitution, the raw $ref object reaches the walker and crashes
+    // colorjs.io at emit. With refLookup, the substituted array is what
+    // gets stored as the write's value.
+    const refLookup = {
+      'primitives.color.gray.12': {
+        $type: 'color' as const,
+        $value: { colorSpace: 'srgb', components: [0.5, 0.5, 0.5], alpha: 1 },
+      },
+    };
+    const modifiers = {
+      'color-mode': {
+        contexts: {
+          dark: [
+            {
+              semantics: {
+                color: {
+                  emphasis: {
+                    accent: {
+                      base: {
+                        active: {
+                          $type: 'color',
+                          $value: {
+                            colorSpace: 'oklch',
+                            alpha: 0.6,
+                            components: { $ref: '#/primitives/color/gray/12/$value/components' },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
+        default: 'light',
+      },
+    };
+    const axes: Axis[] = [
+      {
+        name: 'color-mode',
+        contexts: ['light', 'dark'],
+        default: 'light',
+        source: 'resolver',
+      },
+    ];
+    const writes = extractWritesFromModifiers(modifiers, axes, refLookup);
+    const write = writes['semantics.color.emphasis.accent.base.active']?.['color-mode']?.dark;
+    expect(write?.kind).toBe('literal');
+    if (write?.kind === 'literal') {
+      const $value = write.value.$value as { components: unknown };
+      expect($value.components).toEqual([0.5, 0.5, 0.5]);
+    }
+  });
+
+  it('leaves $ref objects intact when the target is missing from refLookup', () => {
+    const modifiers = {
+      mode: {
+        contexts: {
+          Dark: [
+            {
+              c: {
+                $type: 'color',
+                $value: {
+                  colorSpace: 'srgb',
+                  alpha: 1,
+                  components: { $ref: '#/nonexistent/path' },
+                },
+              },
+            },
+          ],
+        },
+        default: 'Light',
+      },
+    };
+    const axes: Axis[] = [
+      { name: 'mode', contexts: ['Light', 'Dark'], default: 'Light', source: 'resolver' },
+    ];
+    const writes = extractWritesFromModifiers(modifiers, axes, {});
+    const write = writes['c']?.mode?.Dark;
+    expect(write?.kind).toBe('literal');
+    if (write?.kind === 'literal') {
+      const $value = write.value.$value as { components: unknown };
+      expect($value.components).toEqual({ $ref: '#/nonexistent/path' });
+    }
+  });
+
   it('inherits $type from a parent group node when the leaf lacks its own', () => {
     // Modifier source where `border` group declares $type, and child leaves
     // (`default`) carry only $value. Without inheritance, toWriteValue can't
