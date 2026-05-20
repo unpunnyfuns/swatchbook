@@ -546,7 +546,7 @@ function collectLines(
  * Primitive tokens yield one record; composite tokens yield one per
  * sub-field plus an optional shorthand.
  */
-function* collectTokenDeclarations(
+export function* collectTokenDeclarations(
   localID: string,
   token: TokenNormalized,
   tokensSet: RawTokenMap,
@@ -555,7 +555,21 @@ function* collectTokenDeclarations(
   transformAlias: (token: TokenNormalized) => string,
 ): Generator<{ varName: string; value: string }> {
   const varName = makeCSSVar(localID, varOpts);
-  const value = transformCSSValue(token, { tokensSet, permutation, transformAlias });
+  let value: ReturnType<typeof transformCSSValue>;
+  try {
+    value = transformCSSValue(token, { tokensSet, permutation, transformAlias });
+  } catch (error) {
+    const permutationStr = JSON.stringify(permutation);
+    const valueStr = safeStringify(token.$value);
+    const original = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `swatchbook: failed to transform token "${localID}" at permutation ${permutationStr}.\n` +
+        `  $type: ${token.$type}\n` +
+        `  $value: ${valueStr}\n` +
+        `  cause: ${original}`,
+      { cause: error },
+    );
+  }
   if (typeof value === 'string') {
     yield { varName, value };
     return;
@@ -565,6 +579,14 @@ function* collectTokenDeclarations(
   }
   const shorthand = generateShorthand({ token, localID });
   if (shorthand) yield { varName, value: shorthand };
+}
+
+function safeStringify(value: unknown): string {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
 }
 
 function* axisCombinations(axes: readonly Axis[], k: number): Generator<readonly Axis[]> {
