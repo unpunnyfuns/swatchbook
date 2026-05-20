@@ -3,7 +3,11 @@ import { permutationID } from '#/types.ts';
 import type { TokenGraph, TokenGraphNode, WriteValue } from '#/token-graph/types.ts';
 import { valueKey } from '#/value-key.ts';
 import { isPlainObject } from '#/token-graph/internal-utils.ts';
-import { aliasCycleDiagnostic, unresolvableAliasDiagnostic } from '#/token-graph/diagnostics.ts';
+import {
+  aliasCycleDiagnostic,
+  malformedColorShapeDiagnostic,
+  unresolvableAliasDiagnostic,
+} from '#/token-graph/diagnostics.ts';
 
 const COMPOSITE_TYPES = new Set(['border', 'typography', 'transition', 'gradient', 'shadow']);
 
@@ -217,6 +221,74 @@ function validateAliasTargets(nodes: Record<string, TokenGraphNode>): Diagnostic
   return diagnostics;
 }
 
+/**
+ * Walks every literal `$value` in the graph and reports DTCG color
+ * objects whose `components` field is missing or non-array — the
+ * shape that crashes `colorjs.io` inside `inGamut(...)` with the
+ * unactionable `coords.map is not a function` traceback. Covers
+ * top-level color tokens AND color sub-fields inside composites
+ * (border, gradient, shadow) uniformly: any object whose
+ * `colorSpace` is a string is treated as a color and validated.
+ */
+function validateColorShapes(nodes: Record<string, TokenGraphNode>): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  for (const [path, node] of Object.entries(nodes)) {
+    if (node.baselineKind === 'literal') {
+      scanValueForColorShape(path, node.baselineValue.$value, '', diagnostics);
+    } else if (node.baselineKind === 'partial-alias') {
+      scanValueForColorShape(path, node.baselineValue.$value, '', diagnostics);
+    }
+    for (const axisWrites of Object.values(node.writes)) {
+      for (const write of Object.values(axisWrites)) {
+        if (write.kind === 'literal') {
+          scanValueForColorShape(path, write.value.$value, '', diagnostics);
+        } else if (write.kind === 'partial-alias') {
+          scanValueForColorShape(path, write.baseValue.$value, '', diagnostics);
+        }
+      }
+    }
+  }
+  return diagnostics;
+}
+
+function scanValueForColorShape(
+  tokenPath: string,
+  value: unknown,
+  fieldPath: string,
+  out: Diagnostic[],
+): void {
+  if (Array.isArray(value)) {
+    value.forEach((entry, i) => {
+      const nextPath = fieldPath ? `${fieldPath}.${i}` : String(i);
+      scanValueForColorShape(tokenPath, entry, nextPath, out);
+    });
+    return;
+  }
+  if (!isPlainObject(value)) return;
+  if (typeof value['colorSpace'] === 'string') {
+    const components = value['components'];
+    if (components === undefined) {
+      out.push(
+        malformedColorShapeDiagnostic(tokenPath, fieldPath, '`components` field is missing'),
+      );
+    } else if (!Array.isArray(components)) {
+      out.push(
+        malformedColorShapeDiagnostic(
+          tokenPath,
+          fieldPath,
+          `\`components\` must be an array of numbers (got ${typeof components})`,
+        ),
+      );
+    }
+    return;
+  }
+  for (const [key, child] of Object.entries(value)) {
+    if (key.startsWith('$')) continue;
+    const nextPath = fieldPath ? `${fieldPath}.${key}` : key;
+    scanValueForColorShape(tokenPath, child, nextPath, out);
+  }
+}
+
 function detectAliasCycles(nodes: Record<string, TokenGraphNode>): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
   const reportedCycles = new Set<string>();
@@ -298,6 +370,7 @@ function assembleGraph(
 
   const aliasDiagnostics = validateAliasTargets(nodes);
   const cycleDiagnostics = detectAliasCycles(nodes);
+  const colorShapeDiagnostics = validateColorShapes(nodes);
 
   computeAffectedBy(
     nodes,
@@ -306,7 +379,7 @@ function assembleGraph(
 
   return {
     graph: { nodes, axes: axes.map((a) => a.name), axisDefaults, axisContexts },
-    diagnostics: [...aliasDiagnostics, ...cycleDiagnostics],
+    diagnostics: [...aliasDiagnostics, ...cycleDiagnostics, ...colorShapeDiagnostics],
   };
 }
 

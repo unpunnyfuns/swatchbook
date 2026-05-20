@@ -28,3 +28,16 @@ export function aliasCycleDiagnostic(path: string, chain: readonly string[]): Di
     message: `Alias cycle starting at \`${path}\` (chain: ${chain.join(' → ')} → ${path}). Walker returns baseline literal at cycle entry.`,
   };
 }
+
+export function malformedColorShapeDiagnostic(
+  path: string,
+  fieldPath: string,
+  reason: string,
+): Diagnostic {
+  const where = fieldPath ? `${path} (at \`${fieldPath}\`)` : path;
+  return {
+    severity: 'warn',
+    group: 'swatchbook/token-graph',
+    message: `Color value at \`${where}\` is structurally invalid: ${reason}. CSS emission will fail for any context that resolves to this token.`,
+  };
+}
