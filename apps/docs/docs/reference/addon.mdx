@@ -57,7 +57,7 @@ export default definePreview({
 - **Preview decorator** — reads the active axis tuple, writes one `data-<prefix>-<axis>="<context>"` attribute per axis on `<html>` + story wrapper, mounts the per-theme CSS, emits `INIT_EVENT` to the manager. The prefix follows `cssVarPrefix` (default `swatch`).
 - **Toolbar tool** — a single Swatchbook `IconButton`. Clicking opens a popover containing preset pills, one dropdown per axis, and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`). Escape and outside-click close it.
 
-For a browsable tree + diagnostics surface, compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` on an MDX page — see the [authoring guide](../guides/authoring-doc-stories.mdx)'s dashboard example.
+For a browsable tree + diagnostics surface, compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` on an MDX page — see the [authoring guide](../guides/authoring-doc-stories.mdx)'s dashboard example. The [Diagnostics reference](./diagnostics.mdx) catalogs every group and message that can appear in the Design Tokens panel.
 
 ## Globals
 
