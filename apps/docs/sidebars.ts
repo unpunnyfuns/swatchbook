@@ -54,7 +54,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Model',
       collapsed: false,
-      items: ['reference/axes', 'reference/token-pipeline'],
+      items: ['reference/axes', 'reference/token-pipeline', 'reference/diagnostics'],
     },
   ],
   developers: ['developers/developers', 'developers/architecture', 'developers/sharp-corners'],
