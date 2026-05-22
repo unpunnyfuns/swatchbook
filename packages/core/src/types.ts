@@ -234,6 +234,30 @@ interface CommonConfig {
    * output set, nothing else happens.
    */
   terrazzoPlugins?: readonly Plugin[];
+  /**
+   * Maximum arity of joint-divergence detection per token. Joint
+   * divergences are cases where the cartesian-correct value at a
+   * multi-axis tuple differs from cascade composition of all lower-arity
+   * blocks. Each such case emits a compound CSS selector
+   * (`[data-axis-a="…"][data-axis-b="…"]…`) at emission time.
+   *
+   * Default `4`. Covers the largest joint shapes real-world design
+   * systems tend to express (mode × brand × density × contrast).
+   *
+   * Bump if the design system has tokens with genuine 5+-axis joint
+   * divergences — those tuples will otherwise resolve to the
+   * cascade-composed value, which may be the wrong CSS variable
+   * binding for the specific multi-axis combination.
+   *
+   * Lower if load-time work is a concern in projects with many
+   * axes. Per-token probe work scales as
+   * `Σ_{k=2..arity} C(|affectedBy|, k) × Π non-default contexts in combo`;
+   * tokens affected by many axes including dense (large-context-count)
+   * ones dominate. `1` disables joint-block emission entirely.
+   *
+   * @default 4
+   */
+  maxJointArity?: number;
 }
 
 /**
