@@ -66,14 +66,16 @@ interface JointCase {
 }
 
 /**
- * Cap on joint-case arity probed per token. Per-token work scales as
- * `Σ C(|affectedBy|, k) × Π non_default_contexts` for k = 2..MAX_JOINT_ARITY.
+ * Default cap on joint-case arity probed per token. See `Config.maxJointArity`
+ * in the public types for the per-project override and the failure-mode
+ * tradeoffs. Per-token work scales as
+ * `Σ C(|affectedBy|, k) × Π non_default_contexts` for k = 2..arity.
  * 4 covers virtually all design-system shapes (mode × brand × density ×
  * contrast is the largest real-world joint anyone tends to express);
  * beyond that, joint blocks aren't emitted and the cascade resolves to
  * whatever lower-arity composition produces.
  */
-const MAX_JOINT_ARITY = 4;
+const DEFAULT_MAX_JOINT_ARITY = 4;
 
 /**
  * Classify every token in a project. Returns a Map keyed by token path.
@@ -104,6 +106,10 @@ function analyzeProjectVariance(project: Project): Map<string, VarianceInfo> {
 
   const axisByName = new Map<string, Axis>(axes.map((a) => [a.name, a]));
   const projectAxisOrder = new Map<string, number>(axes.map((a, i) => [a.name, i]));
+  const configuredMaxArity =
+    typeof project.config.maxJointArity === 'number' && project.config.maxJointArity > 0
+      ? project.config.maxJointArity
+      : DEFAULT_MAX_JOINT_ARITY;
 
   // The emitter uses `resolveAllAt(tokenGraph, defaultTuple)` for its
   // baseline; our cascade simulation matches that exactly.
@@ -152,7 +158,7 @@ function analyzeProjectVariance(project: Project): Map<string, VarianceInfo> {
       );
 
     const jointCases: JointCase[] = [];
-    const maxArity = Math.min(touchingAxes.length, MAX_JOINT_ARITY);
+    const maxArity = Math.min(touchingAxes.length, configuredMaxArity);
     const baselineKey = valueKey(baselineValues[path]);
 
     for (let arity = 2; arity <= maxArity; arity++) {
