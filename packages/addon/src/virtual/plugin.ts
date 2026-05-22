@@ -70,6 +70,28 @@ export function swatchbookTokensPlugin({
     name: 'swatchbook:virtual-tokens',
     enforce: 'pre',
 
+    /**
+     * Vite uses esbuild for `optimizeDeps` pre-bundling (development
+     * mode), and esbuild doesn't see Rollup-style `resolveId` hooks.
+     * Without this exclusion, a preview file that imports
+     * `virtual:swatchbook/tokens` (directly or via the addon's
+     * `useToken` hook) can get pulled into pre-bundling, hitting
+     * esbuild with no resolver registered and failing with
+     * `Could not resolve "virtual:swatchbook/tokens"`.
+     *
+     * Excluding the virtual IDs tells Vite to route them through the
+     * Rollup-style pipeline at request time — our `resolveId` / `load`
+     * hooks above handle the resolution. Build mode is unaffected
+     * (build uses Rollup throughout).
+     */
+    config() {
+      return {
+        optimizeDeps: {
+          exclude: [VIRTUAL_MODULE_ID, INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID],
+        },
+      };
+    },
+
     async buildStart() {
       // Skip the redundant load when preset.viteFinal already supplied
       // a freshly-loaded project via `initialProject`. The first HMR

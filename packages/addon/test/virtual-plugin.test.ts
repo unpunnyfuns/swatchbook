@@ -6,7 +6,7 @@
 // of the cost.
 import type { Config, Project } from '@unpunnyfuns/swatchbook-core';
 import { expect, it } from 'vitest';
-import { collectWatchPaths } from '#/virtual/plugin.ts';
+import { collectWatchPaths, swatchbookTokensPlugin } from '#/virtual/plugin.ts';
 
 const CWD = '/project';
 
@@ -64,4 +64,26 @@ it('handles absolute paths untouched', () => {
   const config: Config = { tokens: ['/abs/tokens/**/*.json'] };
   const paths = collectWatchPaths(config, undefined, CWD);
   expect(paths).toEqual(['/abs/tokens']);
+});
+
+it('excludes the addon virtual IDs from Vite optimizeDeps pre-bundling', () => {
+  // Vite uses esbuild for optimizeDeps, which doesn't see Rollup-style
+  // `resolveId` hooks. The config hook tells Vite to route the virtuals
+  // through the dev-time plugin pipeline instead of esbuild's bundler.
+  const plugin = swatchbookTokensPlugin({
+    config: { tokens: ['tokens/**/*.json'] },
+    cwd: '/project',
+  });
+  const configResult =
+    typeof plugin.config === 'function'
+      ? plugin.config({}, { command: 'serve', mode: 'development' })
+      : undefined;
+  const exclude =
+    configResult && 'optimizeDeps' in configResult ? configResult.optimizeDeps?.exclude : undefined;
+  expect(exclude).toEqual(
+    expect.arrayContaining([
+      'virtual:swatchbook/tokens',
+      'virtual:swatchbook/integration-side-effects',
+    ]),
+  );
 });
