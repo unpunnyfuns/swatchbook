@@ -1,5 +1,17 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.60.6
+
+### Patch Changes
+
+- 619b7b8: Expose `Config.maxJointArity` (default `4`) to override the cap on per-token joint-divergence arity probing. The default covers the largest joint shapes real-world design systems tend to express. Consumers with richer multi-axis systems can bump it for tokens that genuinely diverge across 5+ axes simultaneously; consumers with load-time concerns can lower it (1 disables joint-block emission entirely). Documented in `reference/config.mdx` with the per-token work formula and the failure-mode tradeoffs in both directions.
+- 95ddfa3: The addon's Vite plugin now excludes its virtual module IDs (`virtual:swatchbook/tokens`, `virtual:swatchbook/integration-side-effects`) from Vite's `optimizeDeps` pre-bundling. Vite uses esbuild for pre-bundling, and esbuild doesn't see Rollup-style `resolveId` hooks — a preview file that gets pulled into pre-bundling and imports one of our virtuals would fail with `Could not resolve "virtual:swatchbook/tokens"`. The exclusion routes the virtuals through the dev-time plugin pipeline where `resolveId` / `load` handle them. Build mode is unaffected (Rollup throughout).
+- Updated dependencies [619b7b8]
+- Updated dependencies [95ddfa3]
+  - @unpunnyfuns/swatchbook-core@0.60.6
+  - @unpunnyfuns/swatchbook-blocks@0.60.6
+  - @unpunnyfuns/swatchbook-switcher@0.60.6
+
 ## 0.60.5
 
 ### Patch Changes
