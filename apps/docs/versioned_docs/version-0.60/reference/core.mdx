@@ -277,6 +277,7 @@ interface Project {
    * Node-side tooling and the wire-payload snapshot draw from this.
    */
   listing: TokenListingByPath;
+  /** Load-time warnings and errors. See [Diagnostics reference](./diagnostics.mdx) for the catalog by group. */
   diagnostics: Diagnostic[];
 }
 ```

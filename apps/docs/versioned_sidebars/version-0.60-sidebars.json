@@ -52,8 +52,10 @@
       "label": "Model",
       "collapsed": false,
       "items": [
+        "reference/concepts",
         "reference/axes",
-        "reference/token-pipeline"
+        "reference/token-pipeline",
+        "reference/diagnostics"
       ]
     }
   ],

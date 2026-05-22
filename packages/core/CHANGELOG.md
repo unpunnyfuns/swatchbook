@@ -1,5 +1,13 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.60.4
+
+### Patch Changes
+
+- 79d6c68: Add `reference/concepts.mdx` — a single page consolidating Swatchbook's mental model in one place: the "preview host, not transformer" framing, the axes/contexts/tuples vocabulary, what the token graph conceptually represents (without walker internals), and the alignment story with a production Terrazzo build. Slots first in the Reference > Model sidebar so the reading order goes conceptual → operational (Concepts → Axes → Token pipeline → Diagnostics). Cross-linked from `intro.mdx`'s "How to read these docs". Doesn't replace any existing page; front-loads the model for new and returning readers.
+- 401b4de: Add `reference/diagnostics.mdx` — a catalog of every `swatchbook/<group>` diagnostic the core can emit, with severity, trigger condition, and what to check for each known message. Also documents the structured `swatchbook: failed to transform token "<path>" at permutation <tuple>…` runtime emit-error format. Cross-linked from `reference/core.mdx` (`Project.diagnostics`), `reference/addon.mdx` (Design Tokens panel), and `intro.mdx` (How to read these docs). No package source changes; the patch changeset is so the next release's snapshot rebuild picks up the new page.
+- aacc744: `loadProject` now emits phase-bounded timing to stdout when the `SWATCHBOOK_LOG_VERBOSE=1` environment variable is set. Lines look like `[swatchbook:load] graph build: 380ms`, with one entry per major phase (parse + normalize, preset apply sweep when presets are configured, token-listing build, graph build, total). When the env var is unset, behaviour is unchanged — no console output, only a few `performance.now()` calls per load (negligible overhead). Intended use: a consumer reports a hung or slow load and we need to know which phase is the offender before reaching for a full CPU profile.
+
 ## 0.60.3
 
 ### Patch Changes
