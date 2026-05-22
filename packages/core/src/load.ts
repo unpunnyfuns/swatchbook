@@ -30,13 +30,38 @@ import type { Axis, Config, Diagnostic, Permutation, Project, TokenMap } from '#
  * or set to `''` to opt out of namespacing. */
 export const DEFAULT_CSS_VAR_PREFIX = 'swatch';
 
+/**
+ * Opt-in phase timing for `loadProject`. Activate with the env var
+ * `SWATCHBOOK_LOG_VERBOSE=1`. Each major phase logs its duration to
+ * stdout as `[swatchbook:load] <phase>: <ms>ms`. When the env var is
+ * unset, the overhead is a few `performance.now()` calls per phase
+ * (negligible) and no console output.
+ *
+ * Primary use case: a consumer reports a hung or slow `loadProject` and
+ * we need to know which phase is the offender before reaching for a
+ * full CPU profile.
+ */
+function isVerbose(): boolean {
+  return process.env['SWATCHBOOK_LOG_VERBOSE'] === '1';
+}
+
+function logPhase(label: string, startedAt: number): void {
+  if (!isVerbose()) return;
+  const ms = performance.now() - startedAt;
+  // biome-ignore lint/suspicious/noConsole: opt-in debug output, gated behind env var
+  console.log(`[swatchbook:load] ${label}: ${ms.toFixed(0)}ms`);
+}
+
 export async function loadProject(config: Config, cwd: string = process.cwd()): Promise<Project> {
+  const loadStart = performance.now();
   const logger = new BufferedLogger({ level: 'warn' });
   const configWithDefaults: Config = {
     ...config,
     cssVarPrefix: config.cssVarPrefix ?? DEFAULT_CSS_VAR_PREFIX,
   };
+  const tParse = performance.now();
   const normalized = await normalizePermutations(configWithDefaults, cwd, logger);
+  logPhase('parse + normalize', tParse);
 
   const { names: disabledAxes, diagnostics: disabledDiagnostics } = validateDisabledAxes(
     config.disabledAxes,
@@ -78,6 +103,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
   // Resolver-backed projects only — layered presets without a
   // resolver can't apply() on demand.
   if (normalized.parserInput?.resolver && presets.length > 0) {
+    const tPresets = performance.now();
     for (const preset of presets) {
       const tuple = fillPresetTuple(preset.axes, filteredAxes);
       const id = permutationID(tuple);
@@ -85,10 +111,12 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
       filteredResolved[id] = normalized.parserInput.resolver.apply(tuple);
       filteredPermutations.push({ name: id, input: tuple, sources: [] });
     }
+    logPhase(`apply ${presets.length} preset tuple(s)`, tPresets);
   }
 
   const { diagnostics: cssOptionsDiagnostics } = validateCssOptions(config.cssOptions);
 
+  const tListing = performance.now();
   const { listing, diagnostics: listingDiagnostics } =
     normalized.parserInput !== undefined
       ? await computeTokenListing(
@@ -102,6 +130,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
           },
         )
       : { listing: {}, diagnostics: [] };
+  logPhase('token-listing build', tListing);
 
   // `defaultTuple` here is the post-disabledAxes-filter version.
   const projectDefaultTuple: Record<string, string> = {};
@@ -110,6 +139,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
   // Build the token graph. Resolver-backed projects build from the live
   // Resolver; layered / plain-parse projects infer writes by diffing
   // per-singleton resolved maps.
+  const tGraph = performance.now();
   let tokenGraphResult: BuildTokenGraphResult;
   try {
     if (normalized.parserInput?.resolver) {
@@ -126,6 +156,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
         projectDefaultTuple,
       );
     }
+    logPhase('graph build', tGraph);
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
     tokenGraphResult = {
@@ -168,6 +199,8 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     config.chrome,
     tokenIDs,
   );
+
+  logPhase('total', loadStart);
 
   return {
     config: configWithDefaults,
