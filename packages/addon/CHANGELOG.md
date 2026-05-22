@@ -1,5 +1,15 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.60.5
+
+### Patch Changes
+
+- 48725a8: `emitAxisProjectedCss`'s joint-block emission now scales per-token rather than as a cartesian over project axes. `analyzeProjectVariance` probes joint divergences for each token within that token's `affectedBy` set (capped at 4 axes per token), and `collectJointBlocks` consumes the resulting joint cases directly — no cartesian enumeration over the project's full axes. For a 12-axis project that previously needed ~243M outer iterations × O(tokens) inner work (consumer-reported >1h hang on 687-token projects), emission now completes in milliseconds. CSS output for the reference fixture is unchanged byte-for-byte. Joint divergences spanning 5+ axes simultaneously aren't emitted as compound blocks — the practical limit covers mode × brand × density × contrast joint shapes (the largest real-world combinations).
+- Updated dependencies [48725a8]
+  - @unpunnyfuns/swatchbook-core@0.60.5
+  - @unpunnyfuns/swatchbook-blocks@0.60.5
+  - @unpunnyfuns/swatchbook-switcher@0.60.5
+
 ## 0.60.4
 
 ### Patch Changes
