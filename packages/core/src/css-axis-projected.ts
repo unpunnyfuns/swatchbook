@@ -51,19 +51,45 @@ type VarianceInfo =
       jointCases: readonly JointCase[];
     };
 
-/** One concrete `(A=ctx_a, B=ctx_b)` combination where projection differs from cartesian. */
+/**
+ * One concrete partial tuple (2+ axes at non-default contexts) where
+ * cascade composition would NOT produce the cartesian-correct value
+ * for this token. Emitted as a compound `[data-axis="…"][…]` block.
+ *
+ * `tuple` carries only the non-default axes — its `Object.keys` length
+ * is the joint case's arity (2 for pairs, 3 for triples, etc.).
+ */
 interface JointCase {
-  axisA: string;
-  ctxA: string;
-  axisB: string;
-  ctxB: string;
+  tuple: Record<string, string>;
   cartesianValueKey: string;
   permutationName: string;
 }
 
 /**
+ * Cap on joint-case arity probed per token. Per-token work scales as
+ * `Σ C(|affectedBy|, k) × Π non_default_contexts` for k = 2..MAX_JOINT_ARITY.
+ * 4 covers virtually all design-system shapes (mode × brand × density ×
+ * contrast is the largest real-world joint anyone tends to express);
+ * beyond that, joint blocks aren't emitted and the cascade resolves to
+ * whatever lower-arity composition produces.
+ */
+const MAX_JOINT_ARITY = 4;
+
+/**
  * Classify every token in a project. Returns a Map keyed by token path.
  * Reads from `project.tokenGraph` — the sole resolution surface.
+ *
+ * For tokens affected by 2+ axes, probes joint divergences from arity 2
+ * up to `min(|affectedBy|, MAX_JOINT_ARITY)`. Each probe checks whether
+ * cascade composition (baseline + per-axis cell overlays in project axis
+ * order + lower-arity joint corrections recorded for this token) produces
+ * the cartesian-correct value at the candidate tuple. When it doesn't,
+ * an arity-k joint case is recorded — which will become an arity-k
+ * compound block at emission.
+ *
+ * The per-token bound on probing scope is what keeps this tractable for
+ * many-axis projects: a token affected by 3 axes only ever probes within
+ * those 3 axes, regardless of how many axes the project has overall.
  */
 function analyzeProjectVariance(project: Project): Map<string, VarianceInfo> {
   const result = new Map<string, VarianceInfo>();
@@ -74,6 +100,29 @@ function analyzeProjectVariance(project: Project): Map<string, VarianceInfo> {
       result.set(path, { kind: 'baseline-only' });
     }
     return result;
+  }
+
+  const axisByName = new Map<string, Axis>(axes.map((a) => [a.name, a]));
+  const projectAxisOrder = new Map<string, number>(axes.map((a, i) => [a.name, i]));
+
+  // The emitter uses `resolveAllAt(tokenGraph, defaultTuple)` for its
+  // baseline; our cascade simulation matches that exactly.
+  const baselineValues = resolveAllAt(tokenGraph, defaultTuple);
+
+  // Per-axis-context resolved snapshots, memoized — the simulation
+  // calls `resolveAllAt(graph, { default with axis=ctx })` many times
+  // across tokens, and the walker memoizes per-tuple but a Map lookup
+  // here cuts the per-cell call back to a single `resolveAllAt` per
+  // axis-context across all tokens.
+  const cellSnapshots = new Map<string, TokenMap>();
+  function cellAt(axisName: string, ctx: string): TokenMap {
+    const key = `${axisName}=${ctx}`;
+    let snap = cellSnapshots.get(key);
+    if (snap === undefined) {
+      snap = resolveAllAt(tokenGraph, { ...defaultTuple, [axisName]: ctx });
+      cellSnapshots.set(key, snap);
+    }
+    return snap;
   }
 
   for (const path of listPaths(tokenGraph)) {
@@ -93,39 +142,51 @@ function analyzeProjectVariance(project: Project): Map<string, VarianceInfo> {
       continue;
     }
 
-    const touchingAxes = [...touching];
+    // Order the touching axes by project axis position so cascade-composition
+    // matches CSS source order at emission time.
+    const touchingAxes: Axis[] = [...touching]
+      .map((name) => axisByName.get(name))
+      .filter((a): a is Axis => a !== undefined)
+      .toSorted(
+        (a, b) => (projectAxisOrder.get(a.name) ?? 0) - (projectAxisOrder.get(b.name) ?? 0),
+      );
+
     const jointCases: JointCase[] = [];
+    const maxArity = Math.min(touchingAxes.length, MAX_JOINT_ARITY);
+    const baselineKey = valueKey(baselineValues[path]);
 
-    for (let i = 0; i < touchingAxes.length; i++) {
-      for (let j = i + 1; j < touchingAxes.length; j++) {
-        const axisA = touchingAxes[i]!;
-        const axisB = touchingAxes[j]!;
-        const axisADef = tokenGraph.axisDefaults[axisA] ?? '';
-        const axisBDef = tokenGraph.axisDefaults[axisB] ?? '';
-        const axisACtxs = (tokenGraph.axisContexts[axisA] ?? []).filter((c) => c !== axisADef);
-        const axisBCtxs = (tokenGraph.axisContexts[axisB] ?? []).filter((c) => c !== axisBDef);
+    for (let arity = 2; arity <= maxArity; arity++) {
+      for (const combo of axisCombinations(touchingAxes, arity)) {
+        for (const partialTuple of contextProducts(combo)) {
+          const fullTuple = { ...defaultTuple, ...partialTuple };
+          const cartesianKey = valueKey(resolveAllAt(tokenGraph, fullTuple)[path]);
 
-        for (const ctxA of axisACtxs) {
-          for (const ctxB of axisBCtxs) {
-            const jointTuple = { ...defaultTuple, [axisA]: ctxA, [axisB]: ctxB };
-            const cartesianToken = resolveAllAt(tokenGraph, jointTuple)[path];
-            const cartKey = valueKey(cartesianToken);
-
-            const afterA = resolveAllAt(tokenGraph, { ...defaultTuple, [axisA]: ctxA })[path];
-            const afterB = resolveAllAt(tokenGraph, { ...defaultTuple, [axisB]: ctxB })[path];
-            const projKeyAB = valueKey(afterB);
-            const projKeyBA = valueKey(afterA);
-
-            if (cartKey !== projKeyAB && cartKey !== projKeyBA) {
-              jointCases.push({
-                axisA,
-                ctxA,
-                axisB,
-                ctxB,
-                cartesianValueKey: cartKey,
-                permutationName: permutationID(jointTuple),
-              });
+          // Compose cascade value: baseline → per-axis cells (project axis
+          // order, last wins, only when cell value differs from baseline —
+          // the emitter's delta-paths rule, mirrored here) → lower-arity
+          // joint corrections already recorded for this token (arity
+          // ascending, matching emission order).
+          let composedKey = baselineKey;
+          for (const axis of touchingAxes) {
+            const ctx = fullTuple[axis.name];
+            if (ctx === undefined || ctx === defaultTuple[axis.name]) continue;
+            const cellKey = valueKey(cellAt(axis.name, ctx)[path]);
+            if (cellKey !== baselineKey) {
+              composedKey = cellKey;
             }
+          }
+          for (const jc of jointCases) {
+            if (isPartialTupleSubset(jc.tuple, fullTuple)) {
+              composedKey = jc.cartesianValueKey;
+            }
+          }
+
+          if (cartesianKey !== composedKey) {
+            jointCases.push({
+              tuple: { ...partialTuple },
+              cartesianValueKey: cartesianKey,
+              permutationName: permutationID(fullTuple),
+            });
           }
         }
       }
@@ -139,6 +200,17 @@ function analyzeProjectVariance(project: Project): Map<string, VarianceInfo> {
   }
 
   return result;
+}
+
+/** True if every axis=ctx in `partial` appears the same way in `full`. */
+function isPartialTupleSubset(
+  partial: Record<string, string>,
+  full: Record<string, string>,
+): boolean {
+  for (const [axis, ctx] of Object.entries(partial)) {
+    if (full[axis] !== ctx) return false;
+  }
+  return true;
 }
 
 /** @internal Addon-internal smart-emitter options. Not part of the public API. */
@@ -290,19 +362,13 @@ export function emitAxisProjectedCss(
     }
   }
 
-  // 3. Compound joint cells — walk axis combos (arity 2..axes.length)
-  //    in the same order probeJointOverrides used, compare tokenGraph
-  //    cartesian truth against projection composition, and emit blocks
-  //    for divergent tuples. resolveAliasAllAt provides alias-preserving
-  //    token shapes for transformCSSValue.
-  for (const block of collectJointBlocks(
-    project,
-    baselineValues,
-    deltaPathsByAxis,
-    prefix,
-    varOpts,
-    transformAlias,
-  )) {
+  // 3. Compound joint cells — drive emission from the per-token joint
+  //    cases recorded in `analyzeProjectVariance`. Each joint case is a
+  //    partial tuple where cascade composition diverges from cartesian
+  //    truth for that specific token; group those cases by tuple to emit
+  //    one compound block per unique joint tuple containing every token
+  //    that diverges there.
+  for (const block of collectJointBlocks(project, variance, prefix, varOpts, transformAlias)) {
     blocks.push(block);
   }
 
@@ -355,23 +421,22 @@ interface Axis {
 }
 
 /**
- * Walk all axis combos of arity 2..axes.length in the same order
- * probeJointOverrides used. For each partial tuple, compare the
- * tokenGraph's cartesian truth against projection composition — which
- * mirrors what CSS cascade actually produces given the emitted blocks.
+ * Emit one compound `[data-axis="…"][…]` block per unique joint tuple
+ * that any token in the project diverges at. The set of joint tuples
+ * comes from `analyzeProjectVariance`'s per-token `jointCases` — no
+ * cartesian enumeration over project axes is performed. For a token
+ * with `affectedBy = [A, B]` the only joint tuples probed involve A
+ * and B; the rest of the project's axes are irrelevant for that token.
  *
- * CSS cascade at a triple selector applies after all pairs, so the
- * composition at arity N must include the already-accumulated arity-(N-1)
- * corrections. This matches what probeJointOverrides did by passing
- * accumulated overrides into its composer at each arity level.
- *
- * divergence detection uses valueKey comparisons on graph-walked values.
- * CSS generation uses resolveAliasAllAt for alias-preserving tokens.
+ * Blocks are emitted in arity-ascending order so cascade composition
+ * resolves correctly: higher-arity blocks override lower-arity blocks
+ * at the same specificity gradient (n-attribute selectors have
+ * specificity (0, n, 0); a 3-axis block beats both its constituent
+ * 2-axis blocks).
  */
 function collectJointBlocks(
   project: Project,
-  baselineValues: TokenMap,
-  deltaPathsByAxis: Record<string, Record<string, Set<string>>>,
+  variance: Map<string, VarianceInfo>,
   prefix: string,
   varOpts: VarOpts,
   transformAlias: (token: TokenNormalized) => string,
@@ -379,99 +444,89 @@ function collectJointBlocks(
   const { axes, tokenGraph, defaultTuple } = project;
   if (axes.length < 2) return [];
 
+  const projectAxisOrder = new Map<string, number>(axes.map((a, i) => [a.name, i]));
+
+  // Group joint cases across tokens by canonical tuple key so each
+  // unique joint tuple becomes one compound block holding every token
+  // that diverges at that tuple.
+  interface Grouped {
+    tuple: Record<string, string>;
+    paths: string[];
+  }
+  const grouped = new Map<string, Grouped>();
+  for (const [path, info] of variance) {
+    if (info.kind !== 'joint-variant') continue;
+    for (const jc of info.jointCases) {
+      const key = canonicalPartialKey(jc.tuple);
+      let entry = grouped.get(key);
+      if (!entry) {
+        entry = { tuple: jc.tuple, paths: [] };
+        grouped.set(key, entry);
+      }
+      entry.paths.push(path);
+    }
+  }
+
+  // Sort: arity ascending first (cascade requires lower-arity blocks before
+  // higher-arity). Within an arity, by project-axis order of the involved
+  // axes; within same axes, by context iteration order. Matches the
+  // emission order the old cartesian enumerator produced.
+  function emissionSortKey(tuple: Record<string, string>): string {
+    const sortedAxes = Object.keys(tuple).toSorted(
+      (a, b) => (projectAxisOrder.get(a) ?? 0) - (projectAxisOrder.get(b) ?? 0),
+    );
+    return sortedAxes
+      .map((axisName) => {
+        const axisPos = String(projectAxisOrder.get(axisName) ?? 0).padStart(4, '0');
+        const ctx = tuple[axisName] ?? '';
+        const axis = axes.find((a) => a.name === axisName);
+        const ctxPos = String(axis ? axis.contexts.indexOf(ctx) : 0).padStart(4, '0');
+        return `${axisPos}.${ctxPos}`;
+      })
+      .join('|');
+  }
+  const orderedKeys = [...grouped.keys()].toSorted((a, b) => {
+    const entryA = grouped.get(a);
+    const entryB = grouped.get(b);
+    if (!entryA || !entryB) return 0;
+    const aArity = Object.keys(entryA.tuple).length;
+    const bArity = Object.keys(entryB.tuple).length;
+    if (aArity !== bArity) return aArity - bArity;
+    return emissionSortKey(entryA.tuple).localeCompare(emissionSortKey(entryB.tuple));
+  });
+
   const blocks: string[] = [];
+  for (const key of orderedKeys) {
+    const entry = grouped.get(key);
+    if (!entry) continue;
+    const fullTuple = { ...defaultTuple, ...entry.tuple };
+    const fullTokens = asRawTokens(resolveAliasAllAt(tokenGraph, fullTuple));
 
-  // Accumulated lower-arity joint corrections, keyed by canonical partial
-  // tuple (sorted axis entries joined as "axis=ctx|axis=ctx"). Used by
-  // higher-arity composition to include corrections from pairs before
-  // computing triple divergences — same as probeJointOverrides' composer.
-  const accumulatedCorrections = new Map<string, Map<string, TokenMap>>();
+    // Selector order: project axis order, not the order the entry's
+    // tuple happens to be keyed in.
+    const sortedEntries = Object.entries(entry.tuple).toSorted(
+      ([a], [b]) => (projectAxisOrder.get(a) ?? 0) - (projectAxisOrder.get(b) ?? 0),
+    );
+    const selector = sortedEntries
+      .map(([axisName, ctx]) => `[${dataAttr(prefix, axisName)}="${cssEscape(ctx)}"]`)
+      .join('');
 
-  for (let arity = 2; arity <= axes.length; arity++) {
-    for (const axisCombo of axisCombinations(axes, arity)) {
-      for (const partialTuple of contextProducts(axisCombo)) {
-        const fullTuple = { ...defaultTuple, ...partialTuple };
-        const cartesian = resolveAllAt(tokenGraph, fullTuple);
-
-        // Build projection composition: baseline values + per-axis delta
-        // layers + all lower-arity joint corrections that apply to this
-        // fullTuple, in ascending arity order. This mirrors CSS cascade.
-        const composed: TokenMap = { ...baselineValues };
-        for (const axis of axes) {
-          const ctx = fullTuple[axis.name];
-          if (ctx === undefined || ctx === axis.default) continue;
-          const deltaPaths = deltaPathsByAxis[axis.name]?.[ctx];
-          if (!deltaPaths) continue;
-          const cellValues = resolveAllAt(tokenGraph, { ...defaultTuple, [axis.name]: ctx });
-          for (const path of deltaPaths) {
-            const tok = cellValues[path];
-            if (tok !== undefined) composed[path] = tok;
-          }
-        }
-        // Apply lower-arity accumulated corrections. Iterate arity 2..(arity-1)
-        // so higher-order corrections subsume lower ones in the right order.
-        for (let lowerArity = 2; lowerArity < arity; lowerArity++) {
-          const byArity = accumulatedCorrections.get(String(lowerArity));
-          if (!byArity) continue;
-          for (const [correctionKey, correctionValues] of byArity) {
-            // A lower-arity correction applies when every axis=ctx in its key
-            // matches the fullTuple. Parse the correction key back out.
-            if (!correctionKeyIsSubset(correctionKey, fullTuple)) continue;
-            for (const [path, tok] of Object.entries(correctionValues)) {
-              composed[path] = tok;
-            }
-          }
-        }
-
-        // Collect divergent paths (cartesian ≠ projection after corrections).
-        const divergentPaths: string[] = [];
-        const divergentValues: TokenMap = {};
-        for (const path of Object.keys(cartesian)) {
-          if (valueKey(cartesian[path]) !== valueKey(composed[path])) {
-            divergentPaths.push(path);
-            divergentValues[path] = cartesian[path]!;
-          }
-        }
-
-        // Record this arity's corrections for use by higher arities.
-        if (divergentPaths.length > 0) {
-          const corrKey = canonicalPartialKey(partialTuple);
-          let byArity = accumulatedCorrections.get(String(arity));
-          if (!byArity) {
-            byArity = new Map<string, TokenMap>();
-            accumulatedCorrections.set(String(arity), byArity);
-          }
-          byArity.set(corrKey, divergentValues);
-        }
-
-        if (divergentPaths.length === 0) continue;
-
-        // CSS generation — resolveAliasAllAt preserves alias token shapes
-        // that transformCSSValue requires.
-        const fullTokens = asRawTokens(resolveAliasAllAt(tokenGraph, fullTuple));
-        const axisEntries = Object.entries(partialTuple);
-        const selector = axisEntries
-          .map(([axisName, ctx]) => `[${dataAttr(prefix, axisName)}="${cssEscape(ctx)}"]`)
-          .join('');
-
-        const lines: string[] = [];
-        for (const path of divergentPaths) {
-          const token = fullTokens[path];
-          if (!token) continue;
-          for (const decl of collectTokenDeclarations(
-            path,
-            token,
-            fullTokens,
-            fullTuple,
-            varOpts,
-            transformAlias,
-          )) {
-            lines.push(`  ${decl.varName}: ${decl.value};`);
-          }
-        }
-        if (lines.length > 0) blocks.push(`${selector} {\n${lines.join('\n')}\n}`);
+    const lines: string[] = [];
+    for (const path of entry.paths) {
+      const token = fullTokens[path];
+      if (!token) continue;
+      for (const decl of collectTokenDeclarations(
+        path,
+        token,
+        fullTokens,
+        fullTuple,
+        varOpts,
+        transformAlias,
+      )) {
+        lines.push(`  ${decl.varName}: ${decl.value};`);
       }
     }
+    if (lines.length > 0) blocks.push(`${selector} {\n${lines.join('\n')}\n}`);
   }
 
   return blocks;
@@ -486,22 +541,6 @@ function canonicalPartialKey(partial: Record<string, string>): string {
     .toSorted(([a], [b]) => a.localeCompare(b))
     .map(([k, v]) => `${k}=${v}`)
     .join('|');
-}
-
-/**
- * Check whether a canonicalPartialKey string is a subset of a fullTuple.
- * `"mode=Dark|brand=Brand A"` is a subset of `{mode: 'Dark', brand: 'Brand A', contrast: 'High'}`.
- */
-function correctionKeyIsSubset(corrKey: string, fullTuple: Record<string, string>): boolean {
-  const parts = corrKey.split('|');
-  for (const part of parts) {
-    const eq = part.indexOf('=');
-    if (eq < 0) return false;
-    const axis = part.slice(0, eq);
-    const ctx = part.slice(eq + 1);
-    if (fullTuple[axis] !== ctx) return false;
-  }
-  return true;
 }
 
 /**
