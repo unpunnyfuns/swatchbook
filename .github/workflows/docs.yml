@@ -22,6 +22,12 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          # Don't write the GITHUB_TOKEN into .git/config of the checked-out
+          # tree. The deploy-pages step uses actions/upload-pages-artifact
+          # which would otherwise ship the token in the artifact
+          # (zizmor's `artipacked` finding). No git push from this job.
+          persist-credentials: false
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
         with:

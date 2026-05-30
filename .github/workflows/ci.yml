@@ -51,6 +51,13 @@ jobs:
         node: [24]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          # Don't write the GITHUB_TOKEN into .git/config of the checked-out
+          # tree. Downstream steps include actions/upload-artifact, which
+          # would otherwise ship the token in the artifact (zizmor's
+          # `artipacked` finding). No git push from this job, so we don't
+          # need credentials persisted.
+          persist-credentials: false
 
       - name: Trust workspace inside container
         # Runner UID differs from checkout owner inside containers, which
