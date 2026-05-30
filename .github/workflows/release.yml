@@ -25,6 +25,13 @@ jobs:
     # changesets/action handles its own re-entry via the Version Packages PR.
     if: github.repository == 'unpunnyfuns/swatchbook'
     runs-on: ubuntu-latest
+    # Gates `changeset publish` on a deployment environment that requires
+    # human approval (configured under repo Settings → Environments → release).
+    # Defends against the compromised-maintainer-account scenario: if a
+    # malicious commit lands on main and squeaks a changeset through, the
+    # publish step still pauses for a second human's review before the
+    # OIDC token is exchanged for an npm publish.
+    environment: release
     permissions:
       contents: write
       pull-requests: write
@@ -36,6 +43,14 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
+          # Don't write GITHUB_TOKEN into .git/config. changesets/action
+          # below authenticates via the GITHUB_TOKEN env var (not via
+          # .git/config), and `gh pr edit` / `gh pr close` use GH_TOKEN.
+          # `git fetch origin changeset-release/main` in the title-polish
+          # step works without auth on a public repo. So persisted
+          # credentials aren't actually needed by anything downstream —
+          # disabling closes zizmor's `artipacked` finding.
+          persist-credentials: false
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
         with:
