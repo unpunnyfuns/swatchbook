@@ -31,7 +31,16 @@ jobs:
     # malicious commit lands on main and squeaks a changeset through, the
     # publish step still pauses for a second human's review before the
     # OIDC token is exchanged for an npm publish.
-    environment: release
+    #
+    # Conditional so the gate only fires on the Version Packages PR's merge
+    # commit (the one that actually triggers `changeset publish`), not on
+    # every push to main. The Changesets release workflow runs in two
+    # modes: (1) open/update the Version Packages PR when changesets are
+    # pending — no publish, no gate; (2) publish when the VP PR was just
+    # merged — gated. The VP PR's squash-merge always starts with
+    # `chore(release):` (either the default `chore(release): version packages`
+    # or our customized `chore(release): vX.Y.Z`).
+    environment: ${{ startsWith(github.event.head_commit.message, 'chore(release):') && 'release' || '' }}
     permissions:
       contents: write
       pull-requests: write

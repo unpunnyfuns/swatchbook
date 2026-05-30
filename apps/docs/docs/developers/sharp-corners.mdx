@@ -152,9 +152,9 @@ See *MDX doc blocks cannot use Storybook preview hooks* above — same shape, di
 
 ### Release publishes through a deployment environment that requires human approval
 
-**Shape:** the release workflow (`.github/workflows/release.yml`) declares `environment: release`. Merging the Version Packages PR triggers a deployment that pauses for an approver before `changeset publish` runs. The approver list lives under repo Settings → Environments → release. Required reviewers ≥ 1.
+**Shape:** the release workflow (`.github/workflows/release.yml`) gates the `release` environment behind a conditional — `environment: ${{ startsWith(github.event.head_commit.message, 'chore(release):') && 'release' || '' }}`. The expression resolves to `release` only when the head commit's message starts with `chore(release):` — i.e., the Version Packages PR's squash-merge. Every other push to main (feature merges, changeset-only PR merges) runs without the gate, because those don't publish — they only open or update the Version Packages PR. The approver list lives under repo Settings → Environments → release. Required reviewers ≥ 1.
 
-**Rule:** when a release stalls after the Version Packages PR merges, check the Actions tab for a pending deployment review. A privileged org member needs to approve the deployment to release. This is intentional — the gate defends against the compromised-maintainer-account scenario where a malicious commit lands on main and a publish would otherwise proceed unattended.
+**Rule:** when a release stalls after the Version Packages PR merges, check the Actions tab for a pending deployment review. A privileged org member needs to approve the deployment to release. This is intentional — the gate defends against the compromised-maintainer-account scenario where a malicious commit lands on main and a publish would otherwise proceed unattended. Routine merges (anything that isn't a Version Packages PR) don't fire the gate.
 
 ## MCP
 
