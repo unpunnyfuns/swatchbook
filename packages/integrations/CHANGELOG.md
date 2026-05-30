@@ -1,5 +1,15 @@
 # @unpunnyfuns/swatchbook-integrations
 
+## 0.60.7
+
+### Patch Changes
+
+- fb5e8ae: The release workflow's `release` environment now gates only on publish runs (the Version Packages PR's squash-merge), not on every push to main. Previously every changeset-PR merge would pause for approval even though no publish was about to happen — the action would just open a VP PR. Now the gate fires only when `github.event.head_commit.message` starts with `chore(release):` — i.e., the VP PR was just merged and `changeset publish` is about to run. Routine pushes proceed unattended. Documented in `developers/sharp-corners.mdx`. No published-package behaviour change.
+- dd8608d: Internal release: ships the security-infrastructure documentation added in #1044 into the current minor's docs snapshot. No published-package behaviour change. The recent CI hardening landed across #1042 (pin GitHub Actions to commit SHAs + add zizmor workflow audit), #1043 (disable Actions cache during release for cache-poisoning defense), #1044 (gate release on deployment environment with required approval), and #1046 (fix template-injection findings in mirror-playwright). The release-approval gate is documented under `developers/sharp-corners.mdx`.
+- Updated dependencies [fb5e8ae]
+- Updated dependencies [dd8608d]
+  - @unpunnyfuns/swatchbook-core@0.60.7
+
 ## 0.60.6
 
 ### Patch Changes
