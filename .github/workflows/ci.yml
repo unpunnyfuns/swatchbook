@@ -50,7 +50,14 @@ jobs:
       matrix:
         node: [24]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          # Don't write the GITHUB_TOKEN into .git/config of the checked-out
+          # tree. Downstream steps include actions/upload-artifact, which
+          # would otherwise ship the token in the artifact (zizmor's
+          # `artipacked` finding). No git push from this job, so we don't
+          # need credentials persisted.
+          persist-credentials: false
 
       - name: Trust workspace inside container
         # Runner UID differs from checkout owner inside containers, which
@@ -60,17 +67,17 @@ jobs:
         # cache keys.
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
         with:
           run_install: false
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: ${{ matrix.node }}
           cache: pnpm
 
       - name: Cache Turbo
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: .turbo
           key: turbo-${{ matrix.node }}-${{ github.sha }}
@@ -152,7 +159,7 @@ jobs:
       - name: Build Storybook
         run: pnpm turbo run build:storybook
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: storybook-static
           path: apps/storybook/storybook-static
