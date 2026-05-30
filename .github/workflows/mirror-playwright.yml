@@ -20,6 +20,16 @@ permissions:
 jobs:
   mirror:
     runs-on: ubuntu-latest
+    # All `${{ inputs.tag }}` references go through the `TAG` env var so
+    # the shell never sees the raw substitution. Direct `${{ }}` in a
+    # `run:` block is template injection — Bash gets the substituted value
+    # as literal code, not as a quoted variable. Even though this workflow
+    # is `workflow_dispatch`-only (so only authorized users can trigger),
+    # zizmor flags this pattern unconditionally and the env-var indirection
+    # is the canonical fix.
+    env:
+      TAG: ${{ inputs.tag }}
+      DST: ghcr.io/${{ github.repository }}/playwright:${{ inputs.tag }}
     steps:
       - name: Log in to GHCR
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
@@ -29,23 +39,22 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull upstream image
-        run: docker pull mcr.microsoft.com/playwright:${{ inputs.tag }}
+        run: docker pull "mcr.microsoft.com/playwright:${TAG}"
 
       - name: Re-tag for GHCR
         run: |
-          src="mcr.microsoft.com/playwright:${{ inputs.tag }}"
-          dst="ghcr.io/${{ github.repository }}/playwright:${{ inputs.tag }}"
-          docker tag "$src" "$dst"
-          echo "dst=$dst" >> "$GITHUB_ENV"
+          docker tag "mcr.microsoft.com/playwright:${TAG}" "${DST}"
 
       - name: Push to GHCR
-        run: docker push "$dst"
+        run: docker push "${DST}"
 
       - name: Summary
         run: |
-          echo "### Mirrored" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Source: \`mcr.microsoft.com/playwright:${{ inputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Destination: \`$dst\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Update \`.github/workflows/ci.yml\`'s \`container.image\` to the destination tag, and \`CLAUDE.md\`'s CI Playwright image bullet to match." >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### Mirrored"
+            echo ""
+            echo "- Source: \`mcr.microsoft.com/playwright:${TAG}\`"
+            echo "- Destination: \`${DST}\`"
+            echo ""
+            echo "Update \`.github/workflows/ci.yml\`'s \`container.image\` to the destination tag, and \`CLAUDE.md\`'s CI Playwright image bullet to match."
+          } >> "$GITHUB_STEP_SUMMARY"
