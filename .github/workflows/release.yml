@@ -44,7 +44,13 @@ jobs:
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: 24
-          cache: pnpm
+          # Cache deliberately disabled during release: GitHub Actions
+          # cache poisoning is a documented release-time vector — a
+          # malicious PR populates the cache; a subsequent release run
+          # picks it up and the published artifact carries the payload.
+          # The few seconds saved on cold installs aren't worth the
+          # additional attack surface for a workflow that publishes to
+          # npm with the OIDC token.
           registry-url: https://registry.npmjs.org
 
       # Node 24 ships npm 10.x; trusted publishing needs >= 11.5.1.
