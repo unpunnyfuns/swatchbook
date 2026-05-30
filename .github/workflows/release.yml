@@ -25,6 +25,13 @@ jobs:
     # changesets/action handles its own re-entry via the Version Packages PR.
     if: github.repository == 'unpunnyfuns/swatchbook'
     runs-on: ubuntu-latest
+    # Gates `changeset publish` on a deployment environment that requires
+    # human approval (configured under repo Settings → Environments → release).
+    # Defends against the compromised-maintainer-account scenario: if a
+    # malicious commit lands on main and squeaks a changeset through, the
+    # publish step still pauses for a second human's review before the
+    # OIDC token is exchanged for an npm publish.
+    environment: release
     permissions:
       contents: write
       pull-requests: write

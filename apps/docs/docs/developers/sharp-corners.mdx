@@ -150,6 +150,12 @@ See *MDX doc blocks cannot use Storybook preview hooks* above — same shape, di
 
 **Rule:** don't prune those entries from the `build` inputs. If you add a new versioned docs artifact, include it too.
 
+### Release publishes through a deployment environment that requires human approval
+
+**Shape:** the release workflow (`.github/workflows/release.yml`) declares `environment: release`. Merging the Version Packages PR triggers a deployment that pauses for an approver before `changeset publish` runs. The approver list lives under repo Settings → Environments → release. Required reviewers ≥ 1.
+
+**Rule:** when a release stalls after the Version Packages PR merges, check the Actions tab for a pending deployment review. A privileged org member needs to approve the deployment to release. This is intentional — the gate defends against the compromised-maintainer-account scenario where a malicious commit lands on main and a publish would otherwise proceed unattended.
+
 ## MCP
 
 ### stderr for logs, stdout reserved for protocol frames
