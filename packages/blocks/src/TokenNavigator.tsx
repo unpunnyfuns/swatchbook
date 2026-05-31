@@ -225,9 +225,17 @@ export function TokenNavigator({
   }, [tree, initiallyExpanded]);
 
   const [expanded, setExpanded] = useState<Set<string>>(initialExpanded);
+  const initiallyExpandedRef = useRef(initiallyExpanded);
   useEffect(() => {
+    // Re-seed the expand/collapse state ONLY when the `initiallyExpanded`
+    // prop itself changes — not when `initialExpanded` merely gets a fresh
+    // identity because `resolved`/`tree` churned on an axis flip. `resolved`
+    // is recomputed per active tuple, so without this guard every mode switch
+    // would snap the user's expand/collapse state back to the default.
+    if (initiallyExpandedRef.current === initiallyExpanded) return;
+    initiallyExpandedRef.current = initiallyExpanded;
     setExpanded(initialExpanded);
-  }, [initialExpanded]);
+  }, [initiallyExpanded, initialExpanded]);
 
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [query, setQuery] = useState('');
