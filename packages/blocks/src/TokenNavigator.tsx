@@ -317,13 +317,29 @@ export function TokenNavigator({
     if (focusedPath === null) return;
     const node = treeItemRefs.current.get(focusedPath);
     if (node && document.activeElement !== node) {
-      // Only steal focus if it currently sits on a different treeitem
-      // inside our tree — don't yank it away from the search input or
-      // anything outside.
       const active = document.activeElement;
+      // Move focus to the repaired row in two cases:
+      // 1. Focus sits on a different treeitem inside our tree (e.g. after
+      //    Right-arrow expands a group and the queued child mounts).
+      // 2. The previously-focused row was removed (a toolbar axis flip
+      //    dropped a token, a search narrowed the tree, a live edit) and
+      //    the browser orphaned focus onto <body>. `focusedPath` has
+      //    repaired to the first visible row but `storedFocus` still names
+      //    the gone row — restore the live focus to match.
+      // Don't yank focus from the search input or anything else still
+      // legitimately focused, and don't grab it on mount (storedFocus null).
       const insideTree = active instanceof HTMLElement && active.closest('[role="tree"]');
-      if (insideTree) node.focus();
+      const orphaned = active === document.body || active === null;
+      const focusedRowRemoved = storedFocus !== null && storedFocus !== focusedPath;
+      if (insideTree || (orphaned && focusedRowRemoved)) node.focus();
     }
+    // Deps are intentionally just `focusedPath`. The repair fires when the
+    // focused row changes — including when a removed row forces the fall back
+    // to the first visible row — NOT on every `storedFocus` change (that would
+    // re-run while DOM focus sits on a descendant leaf and steal it to the
+    // group). Reading `storedFocus` from the triggering render is correct: on
+    // removal it still names the now-gone row, so `focusedRowRemoved` holds.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusedPath]);
 
   const handleTreeKeyDown = useCallback(
