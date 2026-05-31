@@ -98,6 +98,10 @@ function getSnapshot(): TokenSnapshot {
   return snapshot;
 }
 
+function getServerSnapshot(): TokenSnapshot {
+  return snapshot;
+}
+
 export function useTokenSnapshot(): TokenSnapshot {
-  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

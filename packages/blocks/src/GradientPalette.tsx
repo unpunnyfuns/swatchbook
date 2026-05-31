@@ -73,20 +73,21 @@ export function GradientPalette({
   sortDir = 'asc',
 }: GradientPaletteProps): ReactElement {
   const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
   const colorFormat = useColorFormat();
 
   const rows = useMemo<Row[]>(() => {
+    const projectFields = { listing, cssVarPrefix };
     const filtered = Object.entries(resolved).filter(([path, token]) => {
       if (token.$type !== 'gradient') return false;
       return matchPath(path, filter);
     });
     return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
       path,
-      cssVar: resolveCssVar(path, project),
+      cssVar: resolveCssVar(path, projectFields),
       stops: asStops(token.$value),
     }));
-  }, [resolved, filter, project, sortBy, sortDir]);
+  }, [resolved, listing, cssVarPrefix, filter, sortBy, sortDir]);
 
   const captionText =
     caption ??
