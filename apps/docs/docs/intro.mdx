@@ -28,6 +28,10 @@ Design-system authors with DTCG tokens, especially systems with more than one in
 
 Not a runtime theme-switcher for production apps, not a CSS-variable framework, not a token build tool. Swatchbook emits CSS variables and `data-<prefix>-*` attributes inside the Storybook preview so tokens repaint when an author flips an axis. For production theme switching, use your framework's theming tools. For production CSS / Swift / Android / etc. emission, run Terrazzo's CLI against the same DTCG sources — swatchbook is the preview side of that pipeline, not a replacement for it.
 
+## Was this coded with AI?
+
+Yes, nearly all of it, and deliberately so. Swatchbook is a large surface for one maintainer: six published packages, browser-mode test suites, visual-regression CI, this docs site, an MCP server. It's written by Claude, Anthropic's coding agent, under human direction, which is what makes a project this size sustainable solo. A person still sets the direction, reviews every change, and is the only one who merges pull requests or cuts releases; the agent does neither on its own. More effort goes into verifying the code than building features. [Built with AI](./developers/built-with-ai.mdx) lays out the checks every change clears.
+
 ## Installation
 
 Register `@unpunnyfuns/swatchbook-addon` in `.storybook/main.ts`. It pulls in `swatchbook-core`, `swatchbook-blocks`, and `swatchbook-switcher` transitively. `import { TokenTable, ThemeSwitcher, useToken } from '@unpunnyfuns/swatchbook-addon'` resolves from any consumer file. See the [Quickstart](./quickstart.mdx) for a complete setup.

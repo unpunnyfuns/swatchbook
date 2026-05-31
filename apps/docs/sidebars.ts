@@ -62,7 +62,12 @@ const sidebars: SidebarsConfig = {
       ],
     },
   ],
-  developers: ['developers/developers', 'developers/architecture', 'developers/sharp-corners'],
+  developers: [
+    'developers/developers',
+    'developers/architecture',
+    'developers/sharp-corners',
+    'developers/built-with-ai',
+  ],
 };
 
 export default sidebars;
