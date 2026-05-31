@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-switcher
 
+## 0.60.10
+
+### Patch Changes
+
+- deecf14: Tighten the "Built with AI" docs prose: drop the self-narrating opening ("This page says plainly…"), shorten "Claude, Anthropic's coding agent" to "Claude", and add one dry aside. Patch so the next release's snapshot rebuild carries it to the stable docs.
+
 ## 0.60.9
 
 ### Patch Changes
