@@ -62,6 +62,7 @@
   "developers": [
     "developers/developers",
     "developers/architecture",
-    "developers/sharp-corners"
+    "developers/sharp-corners",
+    "developers/built-with-ai"
   ]
 }
