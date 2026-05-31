@@ -69,6 +69,24 @@ describe('loadProject — layered axes', () => {
     expect(tokens['color.accent']?.$value).toMatchObject({ components: [0.9, 0.2, 0.2] });
   });
 
+  it('last-axis-in-declaration-order wins when two axes write the same path', () => {
+    // `color.text` is written by BOTH axes — mode=Dark → {color.white} and
+    // brand=Brand A → {color.red}. Axes are declared mode-then-brand, so the
+    // later axis (brand) wins at the joint tuple → red. The single-axis-write
+    // assertions above only exercise paths touched by one axis, so a
+    // regression in axis-order precedence on an overlapping write would be
+    // silent without this case.
+    const joint = project.resolveAt({ mode: 'Dark', brand: 'Brand A' });
+    expect(joint['color.text']?.$value).toMatchObject({ components: [0.9, 0.2, 0.2] });
+    // Each single-axis view still resolves to that axis's own write.
+    expect(
+      project.resolveAt({ mode: 'Dark', brand: 'Default' })['color.text']?.$value,
+    ).toMatchObject({ components: [1, 1, 1] });
+    expect(
+      project.resolveAt({ mode: 'Light', brand: 'Brand A' })['color.text']?.$value,
+    ).toMatchObject({ components: [0.9, 0.2, 0.2] });
+  });
+
   it('empty context arrays are legal (no-override case)', async () => {
     const config: Config = {
       tokens: ['base/*.json'],
