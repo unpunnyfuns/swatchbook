@@ -94,7 +94,8 @@ function renderTheme(project: Project): string {
 }
 
 function collectPaths(project: Project): string[] {
-  return [...listPaths(project.tokenGraph)].toSorted();
+  // listPaths already returns a sorted array; copy it to a mutable string[].
+  return [...listPaths(project.tokenGraph)];
 }
 
 interface TreeNode {

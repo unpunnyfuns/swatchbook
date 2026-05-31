@@ -55,9 +55,10 @@ function logPhase(label: string, startedAt: number): void {
 export async function loadProject(config: Config, cwd: string = process.cwd()): Promise<Project> {
   const loadStart = performance.now();
   const logger = new BufferedLogger({ level: 'warn' });
+  const cssVarPrefix = config.cssVarPrefix ?? DEFAULT_CSS_VAR_PREFIX;
   const configWithDefaults: Config = {
     ...config,
-    cssVarPrefix: config.cssVarPrefix ?? DEFAULT_CSS_VAR_PREFIX,
+    cssVarPrefix,
   };
   const tParse = performance.now();
   const normalized = await normalizePermutations(configWithDefaults, cwd, logger);
@@ -119,16 +120,11 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
   const tListing = performance.now();
   const { listing, diagnostics: listingDiagnostics } =
     normalized.parserInput !== undefined
-      ? await computeTokenListing(
-          normalized.parserInput,
-          cwd,
-          configWithDefaults.cssVarPrefix ?? '',
-          {
-            ...(config.cssOptions !== undefined && { cssOptions: config.cssOptions }),
-            ...(config.listingOptions !== undefined && { listingOptions: config.listingOptions }),
-            ...(config.terrazzoPlugins !== undefined && { extraPlugins: config.terrazzoPlugins }),
-          },
-        )
+      ? await computeTokenListing(normalized.parserInput, cwd, cssVarPrefix, {
+          ...(config.cssOptions !== undefined && { cssOptions: config.cssOptions }),
+          ...(config.listingOptions !== undefined && { listingOptions: config.listingOptions }),
+          ...(config.terrazzoPlugins !== undefined && { extraPlugins: config.terrazzoPlugins }),
+        })
       : { listing: {}, diagnostics: [] };
   logPhase('token-listing build', tListing);
 
