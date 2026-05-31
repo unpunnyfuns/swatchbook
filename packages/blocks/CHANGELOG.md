@@ -1,5 +1,14 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.60.8
+
+### Patch Changes
+
+- 2e8035d: `TokenNavigator` no longer resets its expand/collapse state when the active tuple changes. Previously, flipping a mode/brand/contrast in the toolbar gave `resolved` (and the derived tree) a fresh identity, which snapped the tree back to the `initiallyExpanded` default — collapsing whatever the user had opened. The expand/collapse state now persists across settings changes and is re-seeded only when the `initiallyExpanded` prop itself changes.
+- 6a57fbb: `TokenNavigator` now restores keyboard focus to the first visible row when the focused token disappears from the tree (e.g. a toolbar axis flip drops a theme-specific token, or a live token edit removes the focused row). Previously the browser orphaned focus onto `<body>`, breaking the roving-tabindex invariant until the user tabbed back in.
+- 141280a: `TokenUsageSnippet` now emits a CSS property matching the token's `$type` instead of always `color:`. Color tokens still show `color: var(--…)`; shadow/border/font tokens show their canonical property (`box-shadow`, `border`, `font-family`, …); and types with no single canonical property (`dimension`, `number`) show the var reference prefixed with a `/* <type> */` hint rather than a misleading property.
+  - @unpunnyfuns/swatchbook-core@0.60.8
+
 ## 0.60.7
 
 ### Patch Changes
