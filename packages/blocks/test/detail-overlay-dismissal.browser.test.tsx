@@ -8,7 +8,7 @@
  * `detail-overlay-focus-lifecycle.browser.test.tsx` and
  * `detail-overlay-focus-trap.browser.test.tsx`.
  */
-import { userEvent } from '@vitest/browser/context';
+import { page, userEvent } from '@vitest/browser/context';
 import { cleanup, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 import { renderOverlay } from './_detail-overlay-helpers.tsx';
@@ -21,16 +21,16 @@ it('calls onClose on Escape', async () => {
   expect(onClose).toHaveBeenCalledTimes(1);
 });
 
-it('calls onClose on backdrop click', () => {
-  // The backdrop sits behind the panel (right-aligned, 560px wide).
-  // `userEvent.click(backdrop)` aims at the element's bounding-box
-  // center, which the panel covers — Playwright then clicks the
-  // panel and `stopPropagation` swallows it. Click the top-left
-  // corner instead to hit the visible backdrop area, matching how a
-  // real user dismisses the overlay (anywhere outside the panel).
+it('calls onClose on backdrop click', async () => {
+  // The panel is a right-aligned slide-over (`min(560px, 100%)`), so a bare
+  // backdrop strip only exists at desktop widths — at narrow widths the panel
+  // fills the viewport and there is nothing outside it to click. Widen the
+  // viewport, then aim a real geometry click at the top-left (bare backdrop),
+  // the way a user dismisses the overlay by clicking outside the panel.
+  await page.viewport(1024, 768);
   const { onClose } = renderOverlay();
   const backdrop = screen.getByTestId('swatchbook-overlay');
-  backdrop.click();
+  await userEvent.click(backdrop, { position: { x: 8, y: 8 } });
   expect(onClose).toHaveBeenCalledTimes(1);
 });
 
