@@ -99,6 +99,12 @@ jobs:
         with:
           app-id: ${{ secrets.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          # Scope the minted token to least privilege rather than inheriting
+          # the App's full installation permissions: changesets/action only
+          # needs to push `changeset-release/main` (contents) and open/update
+          # the Version Packages PR (pull-requests).
+          permission-contents: write
+          permission-pull-requests: write
 
       - name: Create Version Packages PR or publish
         id: changesets
