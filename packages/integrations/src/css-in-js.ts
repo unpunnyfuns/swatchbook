@@ -13,17 +13,19 @@ export interface CssInJsIntegrationOptions {
 
 /**
  * Preview-only CSS-in-JS integration for swatchbook's Storybook addon.
- * Contributes a virtual JS module that exports a nested accessor
- * mirroring the project's token tree — every leaf is a `var(...)`
- * reference carrying the project's `cssVarPrefix`. Lets stories import
- * `{ theme }` the same way their production components do, but backed
- * by swatchbook's runtime-switchable cascade rather than a concrete
- * theme object. Not a replacement for the consumer's production
- * CSS-in-JS emit step.
+ * Contributes a virtual JS module exporting a nested accessor that mirrors
+ * the project's token tree, every leaf a `var(--<cssVarPrefix>-*)` reference.
+ * Stories import `{ theme }` the way their production components do, but
+ * backed by swatchbook's runtime-switchable cascade rather than a concrete
+ * theme object.
  *
- * Swatchbook's toolbar still does the flipping via compound `data-*`
- * attributes; the accessor's values don't change across tuples because
- * the cascade resolves the var.
+ * The accessor is stable across tuples: its values are `var(...)` refs, so
+ * the toolbar's `data-*` axis flips repaint through the cascade without
+ * rebuilding the object. Consumers wire it into a provider once.
+ *
+ * Not a transform step. Consumers needing resolved-value permutations
+ * (MUI `createTheme`, Vuetify factories) are out of scope — that's the
+ * production CSS-in-JS emit, not this preview shim.
  *
  * ```ts
  * // .storybook/main.ts
@@ -50,12 +52,6 @@ export interface CssInJsIntegrationOptions {
  * // direct ref
  * const bg = color.surface.default; // -> "var(--sb-color-surface-default)"
  * ```
- *
- * The theme object is stable across tuples — consumers wire it into a
- * provider *once*; runtime switching happens entirely through CSS cascade
- * when swatchbook's toolbar toggles `data-<prefix>-<axis>` on `<html>`.
- * Consumers who need resolved-value permutations (MUI `createTheme`, Vuetify
- * factories) are not covered — that's a different emission story.
  */
 export default function cssInJsIntegration(
   options: CssInJsIntegrationOptions = {},
@@ -70,6 +66,8 @@ export default function cssInJsIntegration(
   };
 }
 
+// Render the virtual module source: one accessor export per top-level group,
+// plus the aggregate `theme`.
 function renderTheme(project: Project): string {
   const prefix = project.config.cssVarPrefix ?? '';
   const varPrefix = prefix ? `${prefix}-` : '';
@@ -94,7 +92,7 @@ function renderTheme(project: Project): string {
 }
 
 function collectPaths(project: Project): string[] {
-  // listPaths already returns a sorted array; copy it to a mutable string[].
+  // Mutable copy; listPaths returns a readonly array.
   return [...listPaths(project.tokenGraph)];
 }
 
@@ -102,13 +100,10 @@ interface TreeNode {
   [key: string]: TreeNode | string;
 }
 
-/**
- * Build a nested object tree from a sorted path list. Leaves hold the
- * emitted value from `leafFor(path)`. Leaf/branch collisions (a shorter
- * path emits a leaf while a longer path wants to nest under the same
- * key) are resolved by keeping the leaf — realistic DTCG trees don't
- * hit this, but the explicit behaviour beats silent UB.
- */
+// Build a nested object tree from a sorted path list; leaves hold leafFor(path).
+// On a leaf/branch collision (a short path's leaf shares a key a longer path
+// wants to nest under) the leaf wins — real DTCG trees don't hit this, but
+// explicit beats silent UB.
 function buildTree(sortedPaths: readonly string[], leafFor: (path: string) => string): TreeNode {
   const root: TreeNode = {};
   for (const path of sortedPaths) {
@@ -142,18 +137,15 @@ function renderNode(node: TreeNode | string, depth: number): string {
   return `{\n${entries.join(',\n')},\n${closing}}`;
 }
 
-/**
- * Bare identifier (or canonical non-leading-zero integer literal) if
- * safe; quoted string otherwise. Leading-zero numerics like `"050"`
- * stay quoted because bare `050` is an octal under strict mode.
- */
+// Bare identifier or canonical integer literal when safe, quoted otherwise.
+// Leading-zero numerics like "050" stay quoted — bare 050 is octal in strict mode.
 function safeKey(key: string): string {
   if (/^[A-Za-z_$][\w$]*$/.test(key)) return key;
   if (/^(0|[1-9]\d*)$/.test(key)) return key;
   return JSON.stringify(key);
 }
 
-/** Top-level exports must be valid JS identifiers. */
+// Top-level exports must be valid JS identifiers.
 function safeIdent(key: string): string {
   return /^[A-Za-z_$][\w$]*$/.test(key) ? key : `_${key.replaceAll(/[^\w$]/g, '_')}`;
 }

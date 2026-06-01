@@ -111,24 +111,9 @@ function renderTailwindTheme(project: Project, roles: RoleMap): string {
   ].join('\n');
 }
 
-/**
- * Walk the project's default-theme token graph and classify each entry
- * into a Tailwind scale based on its `$type` + path. Returns a role map
- * shaped the same as a user-supplied `roles` option.
- *
- * Scale assignment:
- * - `$type: 'color'`     → `color`, role = path minus `color.` prefix
- * - `$type: 'dimension'` → `spacing` (default), `radius` (if path starts with
- *   `radius.`, `borderRadius.`, or `border-radius.`), or nothing (skipped)
- *   for dimensions that look like font sizes (`font.size.*`, `text.*`), since
- *   Tailwind's `--text-*` scale needs size + line-height pairs this preview
- *   integration doesn't synthesize
- * - `$type: 'shadow'`      → `shadow`, role = path minus `shadow.` prefix
- * - `$type: 'fontFamily'`  → `font`, role = path minus `font.` / `font.family.` / `fontFamily.` prefix
- *
- * Other `$type`s are skipped — they don't have a natural single-value
- * Tailwind utility and would produce broken output.
- */
+// Classify each default-theme token into a Tailwind scale, dropping empty
+// scales. Returns the same shape as the `roles` option; per-token rules and
+// skip reasons live in classify().
 function deriveRoles(project: Project): RoleMap {
   const scales: Record<string, [string, string][]> = {
     color: [],
@@ -159,6 +144,7 @@ const SPACING_ROOTS = ['space', 'spacing'] as const;
 const RADIUS_ROOTS = ['radius', 'borderRadius', 'border-radius'] as const;
 const FONT_PREFIXES = ['font.family.', 'fontFamily.', 'font.'] as const;
 
+// Map one token's $type + path to its Tailwind { scale, role }, or null to skip.
 function classify(path: string, type: string | undefined): { scale: string; role: string } | null {
   switch (type) {
     case 'color':
