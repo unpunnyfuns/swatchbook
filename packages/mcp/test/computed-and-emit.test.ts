@@ -65,7 +65,7 @@ interface ContrastResult {
   foreground: { path: string; value: string };
   background: { path: string; value: string };
   algorithm: 'wcag21' | 'apca';
-  ratio: number;
+  value: number;
   wcag?: { aa: { normal: boolean; large: boolean }; aaa: { normal: boolean; large: boolean } };
   apca?: { lc: number; body: boolean; largeText: boolean; nonText: boolean };
 }
@@ -76,7 +76,7 @@ it('get_color_contrast: defaults to WCAG and returns AA/AAA passes for high-cont
     background: NEUTRAL_BG,
   });
   expect(result.algorithm).toBe('wcag21');
-  expect(result.ratio).toBeGreaterThan(4.5);
+  expect(result.value).toBeGreaterThan(4.5);
   expect(result.wcag?.aa.normal).toBe(true);
   expect(result.apca).toBeUndefined();
 });

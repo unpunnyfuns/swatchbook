@@ -13,7 +13,6 @@ export {
   ADDON_ID,
   AXES_GLOBAL_KEY,
   COLOR_FORMAT_GLOBAL_KEY,
-  PARAM_KEY,
   TOOL_ID,
   VIRTUAL_MODULE_ID,
 } from '#/constants.ts';

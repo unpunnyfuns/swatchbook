@@ -315,7 +315,6 @@ export interface Diagnostic {
   message: string;
   filename?: string;
   line?: number;
-  column?: number;
 }
 
 /**

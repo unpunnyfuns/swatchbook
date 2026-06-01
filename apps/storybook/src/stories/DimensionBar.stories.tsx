@@ -6,7 +6,7 @@ const meta = preview.meta({
   component: DimensionBar,
   argTypes: {
     path: { control: 'text' },
-    kind: { control: { type: 'inline-radio' }, options: ['length', 'radius', 'size'] },
+    visual: { control: { type: 'inline-radio' }, options: ['length', 'radius', 'size'] },
   },
 });
 
@@ -14,4 +14,4 @@ export default meta;
 
 export const SpaceMd = meta.story({ args: { path: 'space.md' } });
 export const SpaceLg = meta.story({ args: { path: 'space.lg' } });
-export const RadiusLg = meta.story({ args: { path: 'radius.lg', kind: 'radius' } });
+export const RadiusLg = meta.story({ args: { path: 'radius.lg', visual: 'radius' } });

@@ -51,9 +51,9 @@ export interface ContrastResult {
    * WCAG 2.1 returns the contrast ratio (1–21). APCA returns a signed
    * Lc value (-108..+106); the sign marks polarity (negative = dark
    * text on light background; positive = light on dark). Consumers
-   * usually care about `Math.abs(ratio)` for threshold checks.
+   * usually care about `Math.abs(value)` for threshold checks.
    */
-  ratio: number;
+  value: number;
   wcag?: WcagPasses;
   apca?: ApcaPasses;
 }
@@ -71,7 +71,7 @@ export function computeContrast(
     const ratio = fg.contrast(bg, 'WCAG21');
     return {
       algorithm: 'wcag21',
-      ratio,
+      value: ratio,
       wcag: {
         aa: { normal: ratio >= 4.5, large: ratio >= 3 },
         aaa: { normal: ratio >= 7, large: ratio >= 4.5 },
@@ -88,7 +88,7 @@ export function computeContrast(
   const absLc = Math.abs(lc);
   return {
     algorithm: 'apca',
-    ratio: lc,
+    value: lc,
     apca: {
       lc,
       body: absLc >= 75,

@@ -15,8 +15,6 @@ import { makeResolveAt } from './_snapshot-helpers.ts';
 export function emptySnapshot(): ProjectSnapshot {
   const snap: ProjectSnapshot = {
     axes: [],
-    disabledAxes: [],
-    presets: [],
     defaultTuple: {},
     activeTheme: '',
     activeAxes: {},

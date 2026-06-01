@@ -34,8 +34,6 @@ export function makeColorTableSnapshot(
   const tokens = { ...BASE_TOKENS, ...extraTokens };
   const snap: ProjectSnapshot = {
     axes: [{ name: 'mode', contexts: ['light'], default: 'light', source: 'resolver' }],
-    disabledAxes: [],
-    presets: [],
     defaultTuple: { mode: 'light' },
     activeTheme: 'Light',
     activeAxes: { mode: 'light' },

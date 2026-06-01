@@ -105,17 +105,17 @@ One sample line per `typography` composite, rendered with the token's own `fontF
 ### DimensionScale
 
 ```tsx
-<DimensionScale kind="length" />
+<DimensionScale visual="length" />
 ```
 
 Width-driven bar (default), radius-sample square, or size-sample square per `dimension` token. Defaults to `sortBy: 'value'` — ordered numerically by the rendered pixel size.
 
-- `kind?: 'length' | 'radius' | 'size'` — visualization mode (default `'length'`).
+- `visual?: 'length' | 'radius' | 'size'` — visualization mode (default `'length'`).
 
-### FontFamilySample
+### FontFamilyPreview
 
 ```tsx
-<FontFamilySample />
+<FontFamilyPreview />
 ```
 
 Pangram rendered per `fontFamily` primitive. `sample?: string` overrides the text.
@@ -164,10 +164,10 @@ One `<ShadowSample>` surface per `shadow` composite token.
 
 One animated `<MotionSample>` per `transition` / `duration` / `cubicBezier` token. Respects `prefers-reduced-motion`.
 
-### StrokeStyleSample
+### StrokeStylePreview
 
 ```tsx
-<StrokeStyleSample />
+<StrokeStylePreview />
 ```
 
 Border rendered per `strokeStyle` primitive. Supports string forms (`solid`, `dashed`, `dotted`, `double`) natively; object forms (`dashArray` / `lineCap`) fall back to a textual summary.

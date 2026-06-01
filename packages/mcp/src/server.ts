@@ -326,7 +326,7 @@ export function createServer(initial: Project): McpServer & {
     'get_color_contrast',
     {
       description:
-        'Compute the contrast between two color tokens for a given theme. WCAG 2.1 returns the ratio (1–21) plus AA/AAA pass flags for normal + large text; APCA returns the signed Lc value plus body / large-text / non-text pass flags (absolute-value thresholds 75 / 60 / 45). Use this when reasoning about text legibility, focus-ring visibility, border contrast, etc., without having to reimplement the luminance math in the agent. Per-theme so the same pair can be checked against Light, Dark, High-contrast, etc.',
+        'Compute the contrast between two color tokens for a given theme. The score is returned under `value`: WCAG 2.1 returns the ratio (1–21) plus AA/AAA pass flags for normal + large text; APCA returns the signed Lc value plus body / large-text / non-text pass flags (absolute-value thresholds 75 / 60 / 45). Use this when reasoning about text legibility, focus-ring visibility, border contrast, etc., without having to reimplement the luminance math in the agent. Per-theme so the same pair can be checked against Light, Dark, High-contrast, etc.',
       inputSchema: {
         foreground: z
           .string()

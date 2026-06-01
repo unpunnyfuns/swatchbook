@@ -44,7 +44,6 @@ export function toDiagnostics(logger: BufferedLogger): Diagnostic[] {
     const loc = entry.node?.loc?.start;
     if (loc) {
       diagnostic.line = loc.line;
-      diagnostic.column = loc.column;
     }
     return diagnostic;
   });
