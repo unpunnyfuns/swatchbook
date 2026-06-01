@@ -1,7 +1,10 @@
+import { fileURLToPath } from 'node:url';
 import { resolverPath } from '@unpunnyfuns/swatchbook-tokens';
 import { describe, expect, it } from 'vitest';
 import { loadProject } from '#/load.ts';
 import { fixtureCwd, loadWithPrefix } from './_helpers.ts';
+
+const typographyAliasCwd = fileURLToPath(new URL('./fixtures/typography-alias', import.meta.url));
 
 describe('Token Listing integration', () => {
   it('populates project.listing for resolver-backed projects', async () => {
@@ -38,6 +41,17 @@ describe('Token Listing integration', () => {
     const preview = entry?.$extensions['app.terrazzo.listing'].previewValue;
     expect(typeof preview).toBe('string');
     expect(preview).toMatch(/^#[0-9a-fA-F]{6,8}$/);
+  });
+
+  it('survives a typography token aliasing another typography token', async () => {
+    // token-tools hands plugin-token-listing a mode-less `{ id }` stub for a
+    // typography→typography alias; an unpatched plugin derefs `.mode` on it and
+    // throws, zeroing the whole listing. Patched, the listing builds and the
+    // other tokens keep their previews.
+    const project = await loadProject({ tokens: ['tokens/**/*.json'] }, typographyAliasCwd);
+    expect(project.diagnostics.filter((d) => d.group === 'swatchbook/listing')).toHaveLength(0);
+    expect(project.listing['typography.body']).toBeDefined();
+    expect(project.listing['color.ink']?.$extensions['app.terrazzo.listing'].previewValue).toBe('#1a1a1a');
   });
 
   it('surfaces a swatchbook/listing warn diagnostic when a terrazzoPlugin throws', async () => {

@@ -25,3 +25,4 @@ overrides:
 
 patchedDependencies:
   '@terrazzo/plugin-css-in-js@2.0.3': patches/@terrazzo__plugin-css-in-js@2.0.3.patch
+  '@terrazzo/plugin-token-listing@0.1.0-alpha.1': patches/@terrazzo__plugin-token-listing@0.1.0-alpha.1.patch

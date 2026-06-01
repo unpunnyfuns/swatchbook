@@ -19,6 +19,7 @@ overrides:
 
 patchedDependencies:
   '@terrazzo/plugin-css-in-js@2.0.3': 9792500f4d6b47ecff171b57293cb888be2ff44580faa445fea7e77c1e21f63c
+  '@terrazzo/plugin-token-listing@0.1.0-alpha.1': a7b4e8e4b68164907d800eb10588124d1d41e1567e114c62ab19bdab56a61544
 
 importers:
 
@@ -330,7 +331,7 @@ importers:
         version: 2.0.3(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))(@terrazzo/parser@2.0.3(yaml-to-momoa@0.0.9))
       '@terrazzo/plugin-token-listing':
         specifier: 0.1.0-alpha.1
-        version: 0.1.0-alpha.1(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))
+        version: 0.1.0-alpha.1(patch_hash=a7b4e8e4b68164907d800eb10588124d1d41e1567e114c62ab19bdab56a61544)(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))
       '@terrazzo/token-tools':
         specifier: ^2.0.3
         version: 2.0.3
@@ -13357,7 +13358,7 @@ snapshots:
       '@terrazzo/token-tools': 2.1.0
       colorjs.io: 0.6.1
 
-  '@terrazzo/plugin-token-listing@0.1.0-alpha.1(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))':
+  '@terrazzo/plugin-token-listing@0.1.0-alpha.1(patch_hash=a7b4e8e4b68164907d800eb10588124d1d41e1567e114c62ab19bdab56a61544)(@terrazzo/cli@2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))':
     dependencies:
       '@terrazzo/cli': 2.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.6.0)(esbuild@0.27.7)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)
       '@terrazzo/token-tools': 2.0.3
