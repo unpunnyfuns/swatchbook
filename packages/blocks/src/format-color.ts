@@ -113,10 +113,8 @@ function hexToComponents(hex: string): number[] {
   return [r, g, b];
 }
 
-/**
- * Map Terrazzo's canonical CSS Color 4 space identifiers to the shorter
- * identifiers colorjs.io registers. Only the ones that differ need an entry.
- */
+// Map Terrazzo's canonical CSS Color 4 space identifiers to the shorter
+// identifiers colorjs.io registers. Only the ones that differ need an entry.
 const COLORJS_SPACE_ALIASES: Record<string, string> = {
   'display-p3': 'p3',
   'a98-rgb': 'a98rgb',

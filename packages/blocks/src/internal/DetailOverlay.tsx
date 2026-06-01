@@ -20,12 +20,10 @@ export interface DetailOverlayProps {
   testId?: string;
 }
 
-/**
- * Selector for elements the trap considers focus stops. Mirrors the
- * "tabbable" set most focus-trap libraries use; the `:not(...)` clauses
- * skip the panel wrapper itself (we focus it manually on mount via its
- * own ref) and any explicitly-detabbed descendants.
- */
+// Selector for elements the trap considers focus stops. Mirrors the
+// "tabbable" set most focus-trap libraries use; the `:not(...)` clauses
+// skip the panel wrapper itself (we focus it manually on mount via its
+// own ref) and any explicitly-detabbed descendants.
 const FOCUSABLE_SELECTOR = [
   'a[href]',
   'button:not([disabled])',
@@ -88,11 +86,9 @@ export function DetailOverlay({
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  /**
-   * Wrap Tab inside the panel: from the last focusable, jump to the first;
-   * from the first (or from the panel itself), Shift+Tab jumps to the last.
-   * Defers to the browser otherwise.
-   */
+  // Wrap Tab inside the panel: from the last focusable, jump to the first;
+  // from the first (or from the panel itself), Shift+Tab jumps to the last.
+  // Defers to the browser otherwise.
   const onPanelKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>): void => {
     if (e.key !== 'Tab') return;
     const panel = panelRef.current;
@@ -149,12 +145,10 @@ export function DetailOverlay({
   );
 }
 
-/**
- * Walk up from `node` to the direct child of `<body>` that contains it.
- * Returns `null` when the node isn't attached to the document (mid-mount,
- * post-unmount). Used to identify which top-level branch to *not* mark
- * inert when the overlay opens.
- */
+// Walk up from `node` to the direct child of `<body>` that contains it.
+// Returns `null` when the node isn't attached to the document (mid-mount,
+// post-unmount). Used to identify which top-level branch to *not* mark
+// inert when the overlay opens.
 function findBodyChildContaining(node: HTMLElement): HTMLElement | null {
   let cursor: HTMLElement | null = node;
   while (cursor && cursor.parentElement !== document.body) {

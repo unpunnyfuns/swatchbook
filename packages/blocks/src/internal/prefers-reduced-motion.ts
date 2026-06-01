@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
 
-/**
- * True when rendering inside Chromatic's snapshot runner. Chromatic's
- * browser ships a recognisable user-agent string; checked here so
- * motion-looping components can fall back to their static state for
- * deterministic snapshots. Per-component detection rather than the
- * global `chromatic.prefersReducedMotion: true` parameter — that
- * parameter is incompatible with Chromatic's verification parser.
- */
+// True when rendering inside Chromatic's snapshot runner. Chromatic's
+// browser ships a recognisable user-agent string; checked here so
+// motion-looping components can fall back to their static state for
+// deterministic snapshots. Per-component detection rather than the
+// global `chromatic.prefersReducedMotion: true` parameter — that
+// parameter is incompatible with Chromatic's verification parser.
 function isChromatic(): boolean {
   if (typeof navigator === 'undefined') return false;
   return navigator.userAgent.includes('Chromatic');

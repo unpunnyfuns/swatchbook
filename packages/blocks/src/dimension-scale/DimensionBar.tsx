@@ -39,12 +39,10 @@ const styles = {
   } satisfies CSSProperties,
 };
 
-/**
- * Convert a DTCG dimension `$value` (`{ value, unit }`) to pixels for the
- * purpose of deciding whether to cap the rendered bar. Returns `NaN` for
- * units we can't reasonably approximate (ex / ch / %), which the caller
- * treats as "render at cssVar but don't cap".
- */
+// Convert a DTCG dimension `$value` (`{ value, unit }`) to pixels for the
+// purpose of deciding whether to cap the rendered bar. Returns `NaN` for
+// units we can't reasonably approximate (ex / ch / %), which the caller
+// treats as "render at cssVar but don't cap".
 function toPixels(raw: unknown): number {
   if (raw == null || typeof raw !== 'object') return Number.NaN;
   const v = raw as { value?: unknown; unit?: unknown };

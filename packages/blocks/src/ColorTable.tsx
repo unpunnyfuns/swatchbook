@@ -63,7 +63,7 @@ export interface ColorTableProps {
    *
    * Single-member groups render as plain rows (no pill selector). Empty
    * map (default) disables grouping entirely; each token renders as its
-   * own row, identical to the pre-grouping behavior.
+   * own row.
    */
   variants?: Record<string, string>;
 }
@@ -72,10 +72,10 @@ interface Variant {
   label: string;
   path: string;
   cssVar: string;
-  /** The display value in the currently-active color format. */
+  // The display value in the currently-active color format.
   value: string;
   outOfGamut: boolean;
-  /** Hex / HSL / OKLCH breakdown — retained for the expanded sub-table. */
+  // Hex / HSL / OKLCH breakdown — retained for the expanded sub-table.
   hex: string;
   hsl: string;
   oklch: string;
@@ -464,13 +464,11 @@ function ValueCell({
 
 type FormatColorResult = ReturnType<typeof formatColor>;
 
-/**
- * Pick the value + gamut flag to display in the single Value column based
- * on the active color-format context. We pre-compute hex/hsl/oklch for the
- * expanded sub-table regardless; the extras (`rgb`, `raw`) take a fresh
- * `formatColor` pass. Keeps the hot path fast while staying honest about
- * out-of-gamut warnings per-format.
- */
+// Pick the value + gamut flag to display in the single Value column based
+// on the active color-format context. We pre-compute hex/hsl/oklch for the
+// expanded sub-table regardless; the extras (`rgb`, `raw`) take a fresh
+// `formatColor` pass. Keeps the hot path fast while staying honest about
+// out-of-gamut warnings per-format.
 function pickActiveFormat(
   raw: NormalizedColor,
   colorFormat: ColorFormat,
@@ -498,9 +496,9 @@ interface VariantEntry {
 }
 
 interface VariantDefs {
-  /** Match iteration order — longest suffix first. */
+  // Match iteration order — longest suffix first.
   matchOrder: readonly VariantEntry[];
-  /** Display iteration order — preserves the caller's declared order. */
+  // Display iteration order — preserves the caller's declared order.
   displayOrder: readonly string[];
 }
 
@@ -517,31 +515,27 @@ function buildVariantDefs(variants: Record<string, string> | undefined): Variant
   return { matchOrder, displayOrder };
 }
 
-/**
- * Position of a label within a group — the `base` entry always sorts first,
- * then declared labels in the order the caller wrote them in the `variants`
- * prop. Unknown labels (shouldn't happen in practice) fall to the end.
- */
+// Position of a label within a group — the `base` entry always sorts first,
+// then declared labels in the order the caller wrote them in the `variants`
+// prop. Unknown labels (shouldn't happen in practice) fall to the end.
 function orderIndex(label: string, defs: VariantDefs): number {
   if (label === BASE_LABEL) return -1;
   const idx = defs.displayOrder.indexOf(label);
   return idx >= 0 ? idx : Number.POSITIVE_INFINITY;
 }
 
-/**
- * Resolve the variant label + base path for a token, if any. The leaf
- * (last dot-segment) must either equal the suffix outright (dot-segment
- * form: `hi.disabled` matches suffix `disabled`) or end in `-<suffix>`
- * (hyphen-tail form: `hi-d` matches `d`). The leading hyphen is required
- * for the tail form so suffix `0` can't hit `neutral-900` by character.
- *
- * Returned `basePath` is what gets used as the grouping key:
- * - Dot-segment match → parent path (drop the last dot-segment)
- * - Hyphen-tail match → same dot-depth, leaf with `-<suffix>` stripped
- *
- * Entries in `matchOrder` are pre-sorted longest-first, so `h-dark` wins
- * over `dark` for a path ending in `-h-dark`.
- */
+// Resolve the variant label + base path for a token, if any. The leaf
+// (last dot-segment) must either equal the suffix outright (dot-segment
+// form: `hi.disabled` matches suffix `disabled`) or end in `-<suffix>`
+// (hyphen-tail form: `hi-d` matches `d`). The leading hyphen is required
+// for the tail form so suffix `0` can't hit `neutral-900` by character.
+//
+// Returned `basePath` is what gets used as the grouping key:
+// - Dot-segment match → parent path (drop the last dot-segment)
+// - Hyphen-tail match → same dot-depth, leaf with `-<suffix>` stripped
+//
+// Entries in `matchOrder` are pre-sorted longest-first, so `h-dark` wins
+// over `dark` for a path ending in `-h-dark`.
 function matchVariant(
   path: string,
   matchOrder: readonly VariantEntry[],
