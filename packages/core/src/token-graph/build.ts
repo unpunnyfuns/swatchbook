@@ -22,17 +22,15 @@ const SLIM_KEYS = [
   'aliasedBy',
 ] as const;
 
-/**
- * Strip a Terrazzo-shaped token to only the fields swatchbook consumers
- * read. Terrazzo's `TokenNormalized` carries `source.node`, `mode`,
- * `group`, `originalValue`, `jsonID`, `id`, `dependencies` — none of
- * which any swatchbook consumer reads, but which together account for
- * ~530 KB of the wire payload on the reference fixture (`source.node`
- * alone is 245 KB).
- *
- * Apply at graph-build time so the in-memory graph carries only the
- * slim shape; the wire payload then naturally serializes the slim shape.
- */
+// Strip a Terrazzo-shaped token to only the fields swatchbook consumers
+// read. Terrazzo's `TokenNormalized` carries `source.node`, `mode`,
+// `group`, `originalValue`, `jsonID`, `id`, `dependencies` — none of
+// which any swatchbook consumer reads, but which together account for
+// ~530 KB of the wire payload on the reference fixture (`source.node`
+// alone is 245 KB).
+//
+// Apply at graph-build time so the in-memory graph carries only the
+// slim shape; the wire payload then naturally serializes the slim shape.
 function slimToken(token: SwatchbookToken): SwatchbookToken {
   const result: Record<string, unknown> = {};
   for (const key of SLIM_KEYS) {
@@ -126,19 +124,17 @@ function toWriteValue(
   return { kind: 'literal', value: slimToken(withType) };
 }
 
-/**
- * Walk `value` and replace any `{ $ref: '<JSON Pointer>' }` object with the
- * resolved target from `refLookup`. Terrazzo's resolver normalize pass
- * doesn't substitute cross-document `$ref` references in modifier source
- * values — they're only substituted at `resolver.apply()` time via
- * `processTokens`, which our `extractWritesFromModifiers` bypasses by
- * reading `resolver.source.modifiers` directly. This function fills that
- * gap by performing the same JSON Pointer substitution against an already-
- * resolved token snapshot (typically the resolver's baseline output).
- *
- * Unresolved pointers are left as-is — they then surface via #1014's
- * `unresolvedRefDiagnostic` (load-time) or #1007's emit-wrap (runtime).
- */
+// Walk `value` and replace any `{ $ref: '<JSON Pointer>' }` object with the
+// resolved target from `refLookup`. Terrazzo's resolver normalize pass
+// doesn't substitute cross-document `$ref` references in modifier source
+// values — they're only substituted at `resolver.apply()` time via
+// `processTokens`, which our `extractWritesFromModifiers` bypasses by
+// reading `resolver.source.modifiers` directly. This function fills that
+// gap by performing the same JSON Pointer substitution against an already-
+// resolved token snapshot (typically the resolver's baseline output).
+//
+// Unresolved pointers are left as-is — they then surface via
+// `unresolvedRefDiagnostic` (load-time) or the emit-wrap (runtime).
 function resolveRefsInValue(value: unknown, refLookup: TokenMap): unknown {
   if (Array.isArray(value)) {
     let changed = false;
@@ -289,15 +285,13 @@ function validateAliasTargets(nodes: Record<string, TokenGraphNode>): Diagnostic
   return diagnostics;
 }
 
-/**
- * Walks every literal `$value` in the graph and reports DTCG color
- * objects whose `components` field is missing or non-array — the
- * shape that crashes `colorjs.io` inside `inGamut(...)` with the
- * unactionable `coords.map is not a function` traceback. Covers
- * top-level color tokens AND color sub-fields inside composites
- * (border, gradient, shadow) uniformly: any object whose
- * `colorSpace` is a string is treated as a color and validated.
- */
+// Walks every literal `$value` in the graph and reports DTCG color
+// objects whose `components` field is missing or non-array — the
+// shape that crashes `colorjs.io` inside `inGamut(...)` with the
+// unactionable `coords.map is not a function` traceback. Covers
+// top-level color tokens AND color sub-fields inside composites
+// (border, gradient, shadow) uniformly: any object whose
+// `colorSpace` is a string is treated as a color and validated.
 function validateColorShapes(nodes: Record<string, TokenGraphNode>): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
   for (const [path, node] of Object.entries(nodes)) {
@@ -363,13 +357,11 @@ function scanValueForColorShape(
   }
 }
 
-/**
- * Returns the JSON Pointer if `value` is an unresolved DTCG `$ref` object
- * (a plain object whose only non-`$`-prefixed shape is a string `$ref`
- * member). Returns `undefined` for anything else. Used to distinguish a
- * source-side malformation from an upstream parser failing to substitute
- * a `$ref` target.
- */
+// Returns the JSON Pointer if `value` is an unresolved DTCG `$ref` object
+// (a plain object whose only non-`$`-prefixed shape is a string `$ref`
+// member). Returns `undefined` for anything else. Used to distinguish a
+// source-side malformation from an upstream parser failing to substitute
+// a `$ref` target.
 function unresolvedRefTarget(value: unknown): string | undefined {
   if (!isPlainObject(value)) return undefined;
   const ref = value['$ref'];

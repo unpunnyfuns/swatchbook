@@ -30,17 +30,15 @@ import type { Axis, Config, Diagnostic, Permutation, Project, TokenMap } from '#
  * or set to `''` to opt out of namespacing. */
 export const DEFAULT_CSS_VAR_PREFIX = 'swatch';
 
-/**
- * Opt-in phase timing for `loadProject`. Activate with the env var
- * `SWATCHBOOK_LOG_VERBOSE=1`. Each major phase logs its duration to
- * stdout as `[swatchbook:load] <phase>: <ms>ms`. When the env var is
- * unset, the overhead is a few `performance.now()` calls per phase
- * (negligible) and no console output.
- *
- * Primary use case: a consumer reports a hung or slow `loadProject` and
- * we need to know which phase is the offender before reaching for a
- * full CPU profile.
- */
+// Opt-in phase timing for `loadProject`. Activate with the env var
+// `SWATCHBOOK_LOG_VERBOSE=1`. Each major phase logs its duration to
+// stdout as `[swatchbook:load] <phase>: <ms>ms`. When the env var is
+// unset, the overhead is a few `performance.now()` calls per phase
+// (negligible) and no console output.
+//
+// Primary use case: a consumer reports a hung or slow `loadProject` and
+// we need to know which phase is the offender before reaching for a
+// full CPU profile.
 function isVerbose(): boolean {
   return process.env['SWATCHBOOK_LOG_VERBOSE'] === '1';
 }
@@ -188,8 +186,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
   })();
 
   // `validateChrome` checks targets against the project's path universe.
-  // `listPaths` returns every path present in the graph — same set the
-  // prior `permutationsResolved`-scan produced.
+  // `listPaths` returns every path present in the graph.
   const tokenIDs = new Set<string>(listPaths(tokenGraphResult.graph));
   const { entries: chrome, diagnostics: chromeDiagnostics } = validateChrome(
     config.chrome,
@@ -225,13 +222,11 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
   };
 }
 
-/**
- * Project `disabledAxes` onto the loader output: drop disabled axes from
- * the axis list, keep only the permutations whose disabled-axis values
- * equal their axis defaults, and prune `resolved` to the surviving
- * permutation names. Returns the original triple unchanged when
- * `disabled` is empty.
- */
+// Project `disabledAxes` onto the loader output: drop disabled axes from
+// the axis list, keep only the permutations whose disabled-axis values
+// equal their axis defaults, and prune `resolved` to the surviving
+// permutation names. Returns the original triple unchanged when
+// `disabled` is empty.
 function applyDisabledAxes(
   axes: Axis[],
   permutations: Permutation[],

@@ -109,12 +109,10 @@ export function validateChrome(
   return { entries, diagnostics };
 }
 
-/**
- * A target resolves if it's either a direct token ID, or a composite
- * sub-field under one (`typography.body.font-family` under the composite
- * `typography.body`). Composite tokens emit one CSS var per sub-field,
- * so either form is a valid alias target.
- */
+// A target resolves if it's either a direct token ID, or a composite
+// sub-field under one (`typography.body.font-family` under the composite
+// `typography.body`). Composite tokens emit one CSS var per sub-field,
+// so either form is a valid alias target.
 function targetResolves(target: string, tokenIDs: ReadonlySet<string>): boolean {
   if (tokenIDs.has(target)) return true;
   const lastDot = target.lastIndexOf('.');

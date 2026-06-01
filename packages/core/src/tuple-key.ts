@@ -3,7 +3,7 @@
  * serialization / `Map` lookups behave identically at runtime; the
  * brand catches places that pass arbitrary strings (token paths, axis
  * names, theme display names) into a context expecting a canonical
- * tuple key, which used to all compile as plain `string`.
+ * tuple key.
  *
  * Produced by {@link canonicalKey}.
  */

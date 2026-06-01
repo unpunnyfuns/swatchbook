@@ -19,23 +19,21 @@ export interface ResolverLoadResult {
   diagnostics: Diagnostic[];
 }
 
-/**
- * Resolve a `config.resolver` value to an absolute file path.
- *
- * Resolution order:
- *
- * 1. Absolute paths pass through unchanged.
- * 2. Explicit relative paths (`./resolver.json`, `../config/resolver.json`)
- *    resolve against `cwd`.
- * 3. Anything else first tries `cwd`-relative on disk — preserves the
- *    legacy "`resolver.json` in the project root" form — and falls back
- *    to `node_modules` resolution when that file isn't present. Token
- *    packages can ship a resolver that consumers reference directly
- *    (`@scope/pkg/resolver.json`) without copying it into their tree.
- *
- * The `createRequire` anchor doesn't need to exist on disk — it only
- * fixes the starting point for the `node_modules` walk.
- */
+// Resolve a `config.resolver` value to an absolute file path.
+//
+// Resolution order:
+//
+// 1. Absolute paths pass through unchanged.
+// 2. Explicit relative paths (`./resolver.json`, `../config/resolver.json`)
+//    resolve against `cwd`.
+// 3. Anything else first tries `cwd`-relative on disk — so a bare
+//    `resolver.json` in the project root resolves — and falls back
+//    to `node_modules` resolution when that file isn't present. Token
+//    packages can ship a resolver that consumers reference directly
+//    (`@scope/pkg/resolver.json`) without copying it into their tree.
+//
+// The `createRequire` anchor doesn't need to exist on disk — it only
+// fixes the starting point for the `node_modules` walk.
 function resolveResolverInput(resolverPath: string, cwd: string): string {
   if (isAbsolute(resolverPath)) return resolverPath;
   if (resolverPath.startsWith('.')) return resolvePath(cwd, resolverPath);
