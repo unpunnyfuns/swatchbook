@@ -38,7 +38,7 @@ const COLOR_FORMAT_OPTIONS: readonly { id: ColorFormat; label: string }[] = [
 
 const h = React.createElement;
 
-export interface ColorFormatSelectorProps {
+interface ColorFormatSelectorProps {
   active: ColorFormat;
   onSelect(next: ColorFormat): void;
 }

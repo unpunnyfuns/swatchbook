@@ -117,7 +117,7 @@ export async function loadLayeredPermutations(
   const sourceSet = new Set<string>();
   for (const { input, allFiles, tokens } of perTuple) {
     const id = permutationID(input);
-    permutations.push({ name: id, input: { ...input }, sources: allFiles });
+    permutations.push({ name: id, input: { ...input } });
     resolved[id] = tokens;
     for (const f of allFiles) sourceSet.add(f);
   }

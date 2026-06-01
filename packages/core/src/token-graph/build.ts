@@ -514,9 +514,7 @@ function extractPartialAliasFields(partialAliasOf: unknown): Record<string, stri
 // (max alias-chain depth) iterations — 1000 covers any realistic project.
 const AFFECTED_BY_FIXPOINT_BOUND = 1000;
 
-export function computeAliasTargets(
-  nodes: Record<string, TokenGraphNode>,
-): Record<string, Set<string>> {
+function computeAliasTargets(nodes: Record<string, TokenGraphNode>): Record<string, Set<string>> {
   const out: Record<string, Set<string>> = {};
   for (const [path, node] of Object.entries(nodes)) {
     const targets = new Set<string>(node.aliases);

@@ -121,7 +121,7 @@ export async function loadResolverPermutations(
     const name = 'default';
     return {
       axes: [{ name: 'theme', contexts: [name], default: name, source: 'synthetic' }],
-      permutations: [{ name, input: { theme: name }, sources: tokenFiles }],
+      permutations: [{ name, input: { theme: name } }],
       resolved: { [name]: parsed.tokens },
       sourceFiles: tokenFiles,
       parserInput: {
@@ -177,7 +177,7 @@ export async function loadResolverPermutations(
   const defaultInput: Record<string, string> = {};
   for (const axis of axes) defaultInput[axis.name] = axis.default;
   const defaultId = permutationID(defaultInput);
-  permutations.push({ name: defaultId, input: defaultInput, sources: [] });
+  permutations.push({ name: defaultId, input: defaultInput });
   resolved[defaultId] = resolver.apply(defaultInput);
 
   for (const axis of axes) {
@@ -186,7 +186,7 @@ export async function loadResolverPermutations(
       const cellInput = { ...defaultInput, [axis.name]: ctx };
       const id = permutationID(cellInput);
       if (resolved[id] !== undefined) continue;
-      permutations.push({ name: id, input: cellInput, sources: [] });
+      permutations.push({ name: id, input: cellInput });
       resolved[id] = resolver.apply(cellInput);
     }
   }

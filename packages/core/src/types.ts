@@ -108,8 +108,6 @@ export interface Permutation {
   name: string;
   /** The resolver input tuple (e.g. `{ theme: 'Light' }` or `{ mode: 'Dark', brand: 'Brand A' }`). */
   input: Readonly<Record<string, string>>;
-  /** Source files this tuple was parsed from (layered loader populates; resolver mode leaves empty). */
-  sources: readonly string[];
 }
 
 /**

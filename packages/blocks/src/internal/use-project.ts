@@ -40,12 +40,6 @@ export interface ProjectData {
    */
   varianceByPath: VirtualVarianceByPathShape;
   /**
-   * Pre-built token graph. JSON-safe; nodes carry per-axis writes
-   * plus alias edges. The hook backs `resolveAt` and `varianceByPath`
-   * from this graph.
-   */
-  tokenGraph: VirtualTokenGraph;
-  /**
    * Compose the resolved `TokenMap` for any tuple of axis selections.
    * Backed browser-side by `resolveAllAt` over the `tokenGraph`.
    */
@@ -159,7 +153,6 @@ export function useProject(): ProjectData {
       cssVarPrefix: cssVarPrefix ?? '',
       listing: listing ?? {},
       varianceByPath: derivedVarianceByPath,
-      tokenGraph: tokenGraph ?? { nodes: {}, axes: [], axisDefaults: {}, axisContexts: {} },
       resolveAt,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -239,7 +232,6 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
       cssVarPrefix: tokens.cssVarPrefix,
       listing: tokens.listing,
       varianceByPath: fallbackVarianceByPath,
-      tokenGraph: tokens.tokenGraph,
       resolveAt,
     }),
     [
@@ -250,7 +242,6 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
       tokens.cssVarPrefix,
       tokens.listing,
       fallbackVarianceByPath,
-      tokens.tokenGraph,
       resolveAt,
     ],
   );

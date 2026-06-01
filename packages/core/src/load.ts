@@ -28,7 +28,7 @@ import type { Axis, Config, Diagnostic, Permutation, Project, TokenMap } from '#
  * swatchbook output doesn't collide with whatever else the consumer has
  * claimed in `:root`. Override in config to use a project-specific prefix
  * or set to `''` to opt out of namespacing. */
-export const DEFAULT_CSS_VAR_PREFIX = 'swatch';
+const DEFAULT_CSS_VAR_PREFIX = 'swatch';
 
 // Opt-in phase timing for `loadProject`. Activate with the env var
 // `SWATCHBOOK_LOG_VERBOSE=1`. Each major phase logs its duration to
@@ -108,7 +108,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
       const id = permutationID(tuple);
       if (filteredResolved[id]) continue;
       filteredResolved[id] = normalized.parserInput.resolver.apply(tuple);
-      filteredPermutations.push({ name: id, input: tuple, sources: [] });
+      filteredPermutations.push({ name: id, input: tuple });
     }
     logPhase(`apply ${presets.length} preset tuple(s)`, tPresets);
   }
