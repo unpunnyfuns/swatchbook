@@ -1,16 +1,14 @@
 import Color from 'colorjs.io';
 
-/**
- * Pair-wise contrast between two DTCG color `$value`s. Wraps
- * `colorjs.io`'s contrast primitives with pass/fail grids for the
- * thresholds agents typically reason against (WCAG 2.1 AA/AAA
- * normal/large; APCA body / large text / non-text).
- *
- * Kept separate from `format-color.ts` even though both build
- * `Color` instances from the same DTCG shape — the color-format
- * formatter stringifies, this one does arithmetic, and they're
- * called from different tool paths.
- */
+// Pair-wise contrast between two DTCG color `$value`s. Wraps
+// `colorjs.io`'s contrast primitives with pass/fail grids for the
+// thresholds agents typically reason against (WCAG 2.1 AA/AAA
+// normal/large; APCA body / large text / non-text).
+//
+// Kept separate from `format-color.ts` even though both build
+// `Color` instances from the same DTCG shape — the color-format
+// formatter stringifies, this one does arithmetic, and they're
+// called from different tool paths.
 
 interface ColorInput {
   colorSpace?: string;
@@ -81,13 +79,11 @@ export function computeContrast(
     };
   }
 
-  /**
-   * APCA thresholds from the Silver draft guidance. These are the
-   * "body text / large text / non-text" bronze tier thresholds most
-   * tooling settles on; the full table has more gradations but
-   * agents rarely need them. Non-text = icons, focus rings, UI
-   * borders.
-   */
+  // APCA thresholds from the Silver draft guidance. These are the
+  // "body text / large text / non-text" bronze tier thresholds most
+  // tooling settles on; the full table has more gradations but
+  // agents rarely need them. Non-text = icons, focus rings, UI
+  // borders.
   const lc = fg.contrast(bg, 'APCA');
   const absLc = Math.abs(lc);
   return {

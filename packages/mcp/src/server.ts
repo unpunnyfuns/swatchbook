@@ -44,22 +44,18 @@ export function createServer(initial: Project): McpServer & {
     defaultThemeName = tupleToName(next.axes, next.defaultTuple);
   };
 
-  /**
-   * Resolve tokens for a `theme` name parameter. Falls back to the
-   * project's default tuple when the name doesn't match any known
-   * theme (also covers the no-theme-provided path).
-   */
+  // Resolve tokens for a `theme` name parameter. Falls back to the
+  // project's default tuple when the name doesn't match any known
+  // theme (also covers the no-theme-provided path).
   const tokensForTheme = (themeName: string | undefined): TokenMap => {
     const tuple =
       (themeName !== undefined ? tupleByName.get(themeName) : undefined) ?? project.defaultTuple;
     return project.resolveAt(tuple);
   };
 
-  /**
-   * Iterate every `(themeName, tuple)` pair the project surfaces —
-   * default + singletons + presets. Order is insertion order of
-   * `tupleByName` (default first, then singletons per axis, then presets).
-   */
+  // Iterate every `(themeName, tuple)` pair the project surfaces —
+  // default + singletons + presets. Order is insertion order of
+  // `tupleByName` (default first, then singletons per axis, then presets).
   const eachTheme = function* (): Generator<{ name: string; tuple: Record<string, string> }> {
     for (const [name, tuple] of tupleByName) yield { name, tuple };
   };
@@ -569,13 +565,11 @@ export function createServer(initial: Project): McpServer & {
   return server;
 }
 
-/**
- * Build a `Map<themeName, axisTuple>` covering the same set the
- * resolver loader's singleton enumeration produces: default tuple +
- * one per non-default cell on each axis + each preset. Bounded by
- * `1 + Σ(axes × (contexts - 1)) + presets.length` — linear in axis
- * cardinality, independent of the cartesian product.
- */
+// Build a `Map<themeName, axisTuple>` covering the same set the
+// resolver loader's singleton enumeration produces: default tuple +
+// one per non-default cell on each axis + each preset. Bounded by
+// `1 + Σ(axes × (contexts - 1)) + presets.length` — linear in axis
+// cardinality, independent of the cartesian product.
 function buildTupleByName(project: Project): Map<string, Record<string, string>> {
   const out = new Map<string, Record<string, string>>();
   for (const { name, tuple } of enumerateThemes(project)) {
