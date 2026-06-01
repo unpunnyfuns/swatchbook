@@ -75,9 +75,6 @@ export type VirtualTokenGraph = TokenGraph;
  */
 export interface ProjectSnapshot {
   axes: readonly VirtualAxisShape[];
-  /** Axis names suppressed via `config.disabledAxes` — pinned to their defaults, hidden from the toolbar. */
-  disabledAxes: readonly string[];
-  presets: readonly VirtualPresetShape[];
   activeTheme: string;
   activeAxes: Readonly<Record<string, string>>;
   cssVarPrefix: string;

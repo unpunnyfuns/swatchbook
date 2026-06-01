@@ -1,13 +1,13 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
-import './FontFamilySample.css';
+import './FontFamilyPreview.css';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 
-export interface FontFamilySampleProps {
+export interface FontFamilyPreviewProps {
   /**
    * Token-path filter. Defaults to every `fontFamily` token. Use e.g.
    * `"font.family.*"` to scope to the ref layer.
@@ -39,13 +39,13 @@ function stackString(raw: unknown): string {
   return '';
 }
 
-export function FontFamilySample({
+export function FontFamilyPreview({
   filter,
   sample = 'The quick brown fox jumps over the lazy dog.',
   caption,
   sortBy = 'path',
   sortDir = 'asc',
-}: FontFamilySampleProps): ReactElement {
+}: FontFamilyPreviewProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
 

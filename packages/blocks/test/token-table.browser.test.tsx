@@ -31,8 +31,6 @@ function makeSnapshot(): ProjectSnapshot {
         source: 'resolver',
       },
     ],
-    disabledAxes: [],
-    presets: [],
     defaultTuple: { mode: 'light' },
     activeTheme: 'Light',
     activeAxes: { mode: 'light' },

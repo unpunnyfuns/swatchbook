@@ -23,7 +23,6 @@ interface Diagnostic {
   message: string;
   filename?: string;
   line?: number;
-  column?: number;
 }
 ```
 
@@ -31,7 +30,7 @@ interface Diagnostic {
 
 `group` is namespaced by feature area (`swatchbook/<area>`). It's stable across releases — consumers can filter on it.
 
-`filename` / `line` / `column` are present when the parser knows the authoring source location. Token-tree diagnostics usually carry them; configuration diagnostics generally don't.
+`filename` / `line` are present when the parser knows the authoring source location. Token-tree diagnostics usually carry them; configuration diagnostics generally don't.
 
 ## `swatchbook/token-graph`
 

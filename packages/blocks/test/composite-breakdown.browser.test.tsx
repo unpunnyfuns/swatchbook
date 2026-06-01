@@ -29,8 +29,6 @@ function makeSnapshot(): ProjectSnapshot {
   };
   const snap: ProjectSnapshot = {
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
-    disabledAxes: [],
-    presets: [],
     defaultTuple: { theme: 'Light' },
     activeTheme: 'Light',
     activeAxes: { theme: 'Light' },

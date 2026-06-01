@@ -2,7 +2,7 @@ import type { CSSProperties, ReactElement } from 'react';
 import { BORDER_STRONG } from '#/internal/styles.tsx';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 
-export type DimensionKind = 'length' | 'radius' | 'size';
+export type DimensionVisual = 'length' | 'radius' | 'size';
 
 export interface DimensionBarProps {
   /** Full dot-path of the dimension token to preview. */
@@ -13,7 +13,7 @@ export interface DimensionBarProps {
    * - `'radius'`: 56×56 square with the token applied as `border-radius`.
    * - `'size'`: a square sized to the token's dimension.
    */
-  kind?: DimensionKind;
+  visual?: DimensionVisual;
 }
 
 const MAX_RENDER_PX = 480;
@@ -58,7 +58,7 @@ function toPixels(raw: unknown): number {
   }
 }
 
-export function DimensionBar({ path, kind = 'length' }: DimensionBarProps): ReactElement {
+export function DimensionBar({ path, visual = 'length' }: DimensionBarProps): ReactElement {
   const project = useProject();
   const { resolved } = project;
   const cssVar = resolveCssVar(path, project);
@@ -67,7 +67,7 @@ export function DimensionBar({ path, kind = 'length' }: DimensionBarProps): Reac
   const capped = Number.isFinite(pxValue) && pxValue > MAX_RENDER_PX;
   const cappedValue = capped ? `${MAX_RENDER_PX}px` : cssVar;
 
-  switch (kind) {
+  switch (visual) {
     case 'radius':
       return <div style={{ ...styles.radiusSample, borderRadius: cssVar }} aria-hidden />;
     case 'size':

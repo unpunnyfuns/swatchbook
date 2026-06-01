@@ -14,9 +14,6 @@ import type { ColorFormat } from '@unpunnyfuns/swatchbook-blocks';
  * - `swatchbookAxes` — active axis tuple (axis name → context name).
  * - `swatchbookColorFormat` — display-side color format for blocks. Does
  *   not affect emitted CSS.
- * - `swatchbookTheme` — legacy composed theme name, written in
- *   lockstep with `swatchbookAxes` for back-compat with consumers that
- *   only read the composed string.
  *
  * The index signature retains Storybook's other globals — consumers who
  * stash unrelated globals on the same bag don't get type errors.
@@ -24,7 +21,6 @@ import type { ColorFormat } from '@unpunnyfuns/swatchbook-blocks';
 export interface SwatchbookGlobals {
   swatchbookAxes?: Record<string, string>;
   swatchbookColorFormat?: ColorFormat;
-  swatchbookTheme?: string;
   [key: string]: unknown;
 }
 
@@ -36,9 +32,7 @@ export interface SwatchbookParameters {
   /** Per-story tuple override. Highest priority input. */
   axes?: Record<string, string>;
   /** Per-story composed theme name. Second priority. */
-  permutation?: string;
-  /** Legacy alias for `permutation`. */
-  theme?: string;
+  themeName?: string;
 }
 
 /**

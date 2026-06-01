@@ -12,9 +12,13 @@ export { BorderSample, type BorderSampleProps } from '#/border-preview/BorderSam
 export { ColorPalette, type ColorPaletteProps } from '#/ColorPalette.tsx';
 export { ColorTable, type ColorTableProps } from '#/ColorTable.tsx';
 export { Diagnostics, type DiagnosticsProps } from '#/Diagnostics.tsx';
-export { DimensionScale, type DimensionKind, type DimensionScaleProps } from '#/DimensionScale.tsx';
+export {
+  DimensionScale,
+  type DimensionVisual,
+  type DimensionScaleProps,
+} from '#/DimensionScale.tsx';
 export { DimensionBar, type DimensionBarProps } from '#/dimension-scale/DimensionBar.tsx';
-export { FontFamilySample, type FontFamilySampleProps } from '#/FontFamilySample.tsx';
+export { FontFamilyPreview, type FontFamilyPreviewProps } from '#/FontFamilyPreview.tsx';
 export { FontWeightScale, type FontWeightScaleProps } from '#/FontWeightScale.tsx';
 export { GradientPalette, type GradientPaletteProps } from '#/GradientPalette.tsx';
 export { MotionPreview, type MotionPreviewProps, type MotionSpeed } from '#/MotionPreview.tsx';
@@ -50,7 +54,7 @@ export type {
 export { MotionSample, type MotionSampleProps } from '#/motion-preview/MotionSample.tsx';
 export { ShadowPreview, type ShadowPreviewProps } from '#/ShadowPreview.tsx';
 export { ShadowSample, type ShadowSampleProps } from '#/shadow-preview/ShadowSample.tsx';
-export { StrokeStyleSample, type StrokeStyleSampleProps } from '#/StrokeStyleSample.tsx';
+export { StrokeStylePreview, type StrokeStylePreviewProps } from '#/StrokeStylePreview.tsx';
 export { TokenDetail, type TokenDetailProps } from '#/TokenDetail.tsx';
 export { AliasChain, type AliasChainProps } from '#/token-detail/AliasChain.tsx';
 export { AliasedBy, type AliasedByProps } from '#/token-detail/AliasedBy.tsx';

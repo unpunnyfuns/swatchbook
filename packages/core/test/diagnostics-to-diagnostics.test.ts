@@ -48,7 +48,7 @@ it('attaches filename (pathname only) when present on the entry', () => {
   expect(toDiagnostics(logger)[0]?.filename).toBe('/path/to/tokens.json');
 });
 
-it('attaches line / column when the entry carries a node loc', () => {
+it('attaches line when the entry carries a node loc', () => {
   const logger = new BufferedLogger();
   logger.warn(
     entry({
@@ -59,16 +59,14 @@ it('attaches line / column when the entry carries a node loc', () => {
   );
   const diag = toDiagnostics(logger)[0];
   expect(diag?.line).toBe(42);
-  expect(diag?.column).toBe(7);
 });
 
-it('omits filename / line / column when absent', () => {
+it('omits filename / line when absent', () => {
   const logger = new BufferedLogger();
   logger.error(entry({ group: 'g', message: 'bare' }));
   const diag = toDiagnostics(logger)[0];
   expect(diag).not.toHaveProperty('filename');
   expect(diag).not.toHaveProperty('line');
-  expect(diag).not.toHaveProperty('column');
 });
 
 it('returns an empty array when the buffer is empty', () => {

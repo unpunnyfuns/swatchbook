@@ -38,8 +38,6 @@ const DARK: Record<string, VirtualTokenShape> = {
 function snapshotFor(activeTheme: 'Light' | 'Dark'): ProjectSnapshot {
   const snap: ProjectSnapshot = {
     axes: [{ name: 'theme', contexts: ['Light', 'Dark'], default: 'Light', source: 'synthetic' }],
-    disabledAxes: [],
-    presets: [],
     defaultTuple: { theme: 'Light' },
     activeTheme,
     activeAxes: { theme: activeTheme },

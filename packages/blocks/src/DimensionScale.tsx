@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './DimensionScale.css';
 import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
-import type { DimensionKind } from '#/dimension-scale/DimensionBar.tsx';
+import type { DimensionVisual } from '#/dimension-scale/DimensionBar.tsx';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
@@ -10,7 +10,7 @@ import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
-export type { DimensionKind };
+export type { DimensionVisual };
 
 export interface DimensionScaleProps {
   /**
@@ -24,7 +24,7 @@ export interface DimensionScaleProps {
    * - `'radius'`: 56×56 square with the token applied as `border-radius`.
    * - `'size'`: a square sized to the token's dimension.
    */
-  kind?: DimensionKind;
+  visual?: DimensionVisual;
   /** Override the caption. */
   caption?: string;
   /**
@@ -66,7 +66,7 @@ function toPixels(raw: unknown): number {
 
 export function DimensionScale({
   filter,
-  kind = 'length',
+  visual = 'length',
   caption,
   sortBy = 'value',
   sortDir = 'asc',
@@ -113,7 +113,7 @@ export function DimensionScale({
             <span className="sb-dimension-scale__specs">{row.displayValue}</span>
           </div>
           <div className="sb-dimension-scale__visual-cell">
-            <DimensionBar path={row.path} kind={kind} />
+            <DimensionBar path={row.path} visual={visual} />
             {row.capped && (
               <span className="sb-dimension-scale__cap">capped at {MAX_RENDER_PX}px</span>
             )}

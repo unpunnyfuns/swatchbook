@@ -10,8 +10,6 @@ function makeSnapshot(
   const tokens = { 'color.accent.bg': { $type: 'color', $value: { hex: '#3b82f6' } } };
   const snap: ProjectSnapshot = {
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
-    disabledAxes: [],
-    presets: [],
     defaultTuple: { theme: 'Light' },
     activeTheme: 'Light',
     activeAxes: { theme: 'Light' },

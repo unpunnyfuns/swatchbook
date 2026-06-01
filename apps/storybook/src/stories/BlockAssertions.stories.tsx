@@ -2,12 +2,12 @@ import {
   BorderPreview,
   ColorPalette,
   DimensionScale,
-  FontFamilySample,
+  FontFamilyPreview,
   FontWeightScale,
   GradientPalette,
   MotionPreview,
   ShadowPreview,
-  StrokeStyleSample,
+  StrokeStylePreview,
   TokenDetail,
   TokenTable,
   TypographyScale,
@@ -344,13 +344,13 @@ export const TokenDetailShadowComposite = meta.story({
 });
 
 /**
- * `StrokeStyleSample` must render one row per `strokeStyle` token. Rows
+ * `StrokeStylePreview` must render one row per `strokeStyle` token. Rows
  * with a string value (`solid`, `dashed`, `dotted`, `double`) must resolve
  * to a non-`none` `border-top-style`; object-form tokens render a textual
  * fallback, which is acceptable.
  */
-export const StrokeStyleSampleRenders = meta.story({
-  render: () => <StrokeStyleSample filter="stroke.style.**" />,
+export const StrokeStylePreviewRenders = meta.story({
+  render: () => <StrokeStylePreview filter="stroke.style.**" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'section, div');
     const lines = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
@@ -368,11 +368,11 @@ export const StrokeStyleSampleRenders = meta.story({
 });
 
 /**
- * `FontFamilySample` must render one row per fontFamily token, and each
+ * `FontFamilyPreview` must render one row per fontFamily token, and each
  * sample's computed `font-family` must resolve to a non-empty stack.
  */
-export const FontFamilySampleRenders = meta.story({
-  render: () => <FontFamilySample filter="font.family.**" />,
+export const FontFamilyPreviewRenders = meta.story({
+  render: () => <FontFamilyPreview filter="font.family.**" />,
   play: async ({ canvasElement }) => {
     await waitForContent(canvasElement, 'section, div');
     const paths = [...canvasElement.querySelectorAll('span')].filter((el) =>

@@ -15,7 +15,7 @@ import {
   VIRTUAL_MODULE_ID,
 } from '#/constants.ts';
 
-export interface SwatchbookPluginOptions {
+export interface SwatchbookTokensPluginOptions {
   config: Config;
   cwd: string;
   /** Display-side integrations — each may contribute a virtual module the preview imports. */
@@ -45,7 +45,7 @@ export function swatchbookTokensPlugin({
   cwd,
   integrations = [],
   initialProject,
-}: SwatchbookPluginOptions): Plugin {
+}: SwatchbookTokensPluginOptions): Plugin {
   let project: Project | undefined = initialProject;
   let css = project ? emitAxisProjectedCss(project) : '';
 

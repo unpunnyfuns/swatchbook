@@ -723,7 +723,7 @@ const LeafPreview = memo(function LeafPreview({ path, token }: LeafPreviewProps)
           {formatTokenValue(token.$value, type, colorFormat, project.listing[path])}
         </span>
         <span className="sb-token-navigator__preview-dimension">
-          <DimensionBar path={path} kind="length" />
+          <DimensionBar path={path} visual="length" />
         </span>
       </span>
     );

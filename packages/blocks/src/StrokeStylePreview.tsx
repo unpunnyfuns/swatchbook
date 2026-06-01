@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
-import './StrokeStyleSample.css';
+import './StrokeStylePreview.css';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
@@ -8,7 +8,7 @@ import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 
-export interface StrokeStyleSampleProps {
+export interface StrokeStylePreviewProps {
   /**
    * Token-path filter. Defaults to every `strokeStyle` token. Use e.g.
    * `"stroke.style.*"` to scope to the ref layer.
@@ -49,12 +49,12 @@ function extractCssStyle(value: unknown): string | null {
   return null;
 }
 
-export function StrokeStyleSample({
+export function StrokeStylePreview({
   filter,
   caption,
   sortBy = 'path',
   sortDir = 'asc',
-}: StrokeStyleSampleProps): ReactElement {
+}: StrokeStylePreviewProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
 

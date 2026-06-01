@@ -7,7 +7,7 @@ const meta = preview.meta({
   component: DimensionScale,
   argTypes: {
     filter: { control: 'text' },
-    kind: { control: 'select', options: ['length', 'radius', 'size'] },
+    visual: { control: 'select', options: ['length', 'radius', 'size'] },
   },
 });
 
@@ -24,9 +24,9 @@ export const SpaceSystem = meta.story({
   args: { filter: 'space.**' },
   play: async ({ canvasElement }) => assertScaleRenders(canvasElement),
 });
-export const RadiusSystem = meta.story({ args: { filter: 'radius.**', kind: 'radius' } });
+export const RadiusSystem = meta.story({ args: { filter: 'radius.**', visual: 'radius' } });
 export const SizeReferencePx = meta.story({
-  args: { filter: 'size.**', kind: 'size' },
+  args: { filter: 'size.**', visual: 'size' },
   play: async ({ canvasElement }) => assertScaleRenders(canvasElement),
 });
 export const All = meta.story();

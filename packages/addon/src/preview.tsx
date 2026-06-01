@@ -201,7 +201,7 @@ function normalizeTuple(partial: Readonly<Record<string, string>>): Record<strin
 
 // Resolve the active tuple from all input channels, in priority order:
 //   1. `parameters.swatchbook.axes` — per-story tuple.
-//   2. `parameters.swatchbook.permutation` — per-story composed theme name.
+//   2. `parameters.swatchbook.themeName` — per-story composed theme name.
 //   3. `globals.swatchbookAxes` — toolbar-set tuple.
 //   4. virtual module default.
 function resolveTuple(
@@ -212,8 +212,8 @@ function resolveTuple(
   if (paramAxes) {
     return normalizeTuple(paramAxes);
   }
-  if (paramSwatchbook?.permutation) {
-    const hit = tupleForName(paramSwatchbook.permutation);
+  if (paramSwatchbook?.themeName) {
+    const hit = tupleForName(paramSwatchbook.themeName);
     if (hit) return normalizeTuple(hit);
   }
   if (axesGlobal && typeof axesGlobal === 'object') {
@@ -289,8 +289,6 @@ const themedDecorator: Decorator = (Story, context) => {
   const snapshot = useMemo<ProjectSnapshot>(
     () => ({
       axes: virtualAxes,
-      disabledAxes: virtualDisabledAxes,
-      presets: virtualPresets,
       activeTheme: themeName,
       activeAxes: tuple,
       cssVarPrefix,
