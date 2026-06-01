@@ -1,14 +1,12 @@
 import Color from 'colorjs.io';
 
-/**
- * Convert a DTCG color `$value` into the same format menu the
- * addon's toolbar exposes — hex / rgb / hsl / oklch / raw JSON. Mirrors
- * the narrower version in `@unpunnyfuns/swatchbook-blocks/format-color.ts`
- * without pulling blocks (and React) into the MCP server.
- *
- * Out-of-gamut colours still stringify — the caller gets both the
- * rendered string and an `outOfGamut` flag so agents can warn.
- */
+// Convert a DTCG color `$value` into the same format menu the
+// addon's toolbar exposes — hex / rgb / hsl / oklch / raw JSON. Mirrors
+// the narrower version in `@unpunnyfuns/swatchbook-blocks/format-color.ts`
+// without pulling blocks (and React) into the MCP server.
+//
+// Out-of-gamut colours still stringify — the caller gets both the
+// rendered string and an `outOfGamut` flag so agents can warn.
 
 export type ColorFormat = 'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw';
 

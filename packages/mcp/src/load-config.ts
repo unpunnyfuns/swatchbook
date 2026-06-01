@@ -36,14 +36,12 @@ export async function loadFromConfig(
 }
 
 async function loadTsConfig(absolute: string): Promise<Config> {
-  /**
-   * jiti's first arg is a directory-shaped "from" URL it uses to resolve
-   * the target's relative imports. Passing a file URL leaves jiti
-   * unsure whether to treat the path as a dir, which on some Node
-   * versions falls through to a plain JSON read and surfaces as
-   * `Unexpected token 'i', "import { d"...`. A trailing slash on a
-   * directory URL avoids the ambiguity.
-   */
+  // jiti's first arg is a directory-shaped "from" URL it uses to resolve
+  // the target's relative imports. Passing a file URL leaves jiti
+  // unsure whether to treat the path as a dir, which on some Node
+  // versions falls through to a plain JSON read and surfaces as
+  // `Unexpected token 'i', "import { d"...`. A trailing slash on a
+  // directory URL avoids the ambiguity.
   const fromUrl = new URL('./', pathToFileURL(absolute));
   const jiti = createJiti(fromUrl.href, {
     interopDefault: true,

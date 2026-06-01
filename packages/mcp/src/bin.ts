@@ -1,13 +1,11 @@
 #!/usr/bin/env node
-/**
- * Stdio entry for `npx @unpunnyfuns/swatchbook-mcp --config <path>`.
- *
- * Parses `--config <path>`, optional `--cwd <path>`, loads the project, and
- * binds an MCP server to stdio. Watches the resolved source files + config
- * file so token edits land in subsequent tool calls without restarting the
- * transport. Pass `--no-watch` to opt out (e.g. CI). Loader / watcher errors
- * print to stderr — stdout is reserved for MCP protocol frames.
- */
+// Stdio entry for `npx @unpunnyfuns/swatchbook-mcp --config <path>`.
+//
+// Parses `--config <path>`, optional `--cwd <path>`, loads the project, and
+// binds an MCP server to stdio. Watches the resolved source files + config
+// file so token edits land in subsequent tool calls without restarting the
+// transport. Pass `--no-watch` to opt out (e.g. CI). Loader / watcher errors
+// print to stderr — stdout is reserved for MCP protocol frames.
 import { watch as fsWatch } from 'node:fs';
 import type { FSWatcher } from 'node:fs';
 import { basename, dirname, isAbsolute, resolve } from 'node:path';
@@ -66,17 +64,15 @@ Tools exposed:
   return out;
 }
 
-/**
- * Watch the project's source files + config path for edits. Debounces
- * filesystem events (editors fire 2-3 per save) into a single reload per
- * 100 ms burst; on each settle, calls `loadFromConfig` again and swaps the
- * fresh project into the already-connected MCP server.
- *
- * Watches parent directories rather than files themselves. Atomic-save
- * editors unlink + recreate the target inode, which kills file-level
- * watchers on the first save; a dir watcher with filename filtering
- * survives that dance. Mirrors the addon's plugin strategy.
- */
+// Watch the project's source files + config path for edits. Debounces
+// filesystem events (editors fire 2-3 per save) into a single reload per
+// 100 ms burst; on each settle, calls `loadFromConfig` again and swaps the
+// fresh project into the already-connected MCP server.
+//
+// Watches parent directories rather than files themselves. Atomic-save
+// editors unlink + recreate the target inode, which kills file-level
+// watchers on the first save; a dir watcher with filename filtering
+// survives that dance. Mirrors the addon's plugin strategy.
 function setupReload(
   initialSourceFiles: readonly string[],
   configPath: string,
