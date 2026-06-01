@@ -9,15 +9,13 @@ import type { Project, TokenMap } from '#/types.ts';
 import { permutationID } from '#/types.ts';
 import { valueKey } from '#/value-key.ts';
 
-/**
- * Internal alias: the raw Terrazzo-shape map this emitter passes into
- * `transformCSSValue` / `generateShorthand`. The graph stores slim
- * `SwatchbookToken` shapes (no `id`, `source`, `mode`, etc.). The CSS
- * emitter needs `token.id` (= the token path) for `transformAlias` and
- * `defaultAliasTransform`. `withSyntheticIds` injects `id: path` so
- * `transformCSSValue` can resolve alias var references correctly without
- * requiring the full Terrazzo shape in the graph.
- */
+// Internal alias: the raw Terrazzo-shape map this emitter passes into
+// `transformCSSValue` / `generateShorthand`. The graph stores slim
+// `SwatchbookToken` shapes (no `id`, `source`, `mode`, etc.). The CSS
+// emitter needs `token.id` (= the token path) for `transformAlias` and
+// `defaultAliasTransform`. `withSyntheticIds` injects `id: path` so
+// `transformCSSValue` can resolve alias var references correctly without
+// requiring the full Terrazzo shape in the graph.
 type RawTokenMap = Record<string, TokenNormalized>;
 
 function withSyntheticIds(map: TokenMap): RawTokenMap {
@@ -32,7 +30,7 @@ function asRawTokens(map: TokenMap): RawTokenMap {
   return withSyntheticIds(map);
 }
 
-/** Distinguishes a token's variance shape so the emitter can route it. */
+// Distinguishes a token's variance shape so the emitter can route it.
 type VarianceInfo =
   | {
       kind: 'baseline-only';
@@ -51,48 +49,42 @@ type VarianceInfo =
       jointCases: readonly JointCase[];
     };
 
-/**
- * One concrete partial tuple (2+ axes at non-default contexts) where
- * cascade composition would NOT produce the cartesian-correct value
- * for this token. Emitted as a compound `[data-axis="…"][…]` block.
- *
- * `tuple` carries only the non-default axes — its `Object.keys` length
- * is the joint case's arity (2 for pairs, 3 for triples, etc.).
- */
+// One concrete partial tuple (2+ axes at non-default contexts) where
+// cascade composition would NOT produce the cartesian-correct value
+// for this token. Emitted as a compound `[data-axis="…"][…]` block.
+//
+// `tuple` carries only the non-default axes — its `Object.keys` length
+// is the joint case's arity (2 for pairs, 3 for triples, etc.).
 interface JointCase {
   tuple: Record<string, string>;
   cartesianValueKey: string;
   permutationName: string;
 }
 
-/**
- * Default cap on joint-case arity probed per token. See `Config.maxJointArity`
- * in the public types for the per-project override and the failure-mode
- * tradeoffs. Per-token work scales as
- * `Σ C(|affectedBy|, k) × Π non_default_contexts` for k = 2..arity.
- * 4 covers virtually all design-system shapes (mode × brand × density ×
- * contrast is the largest real-world joint anyone tends to express);
- * beyond that, joint blocks aren't emitted and the cascade resolves to
- * whatever lower-arity composition produces.
- */
+// Default cap on joint-case arity probed per token. See `Config.maxJointArity`
+// in the public types for the per-project override and the failure-mode
+// tradeoffs. Per-token work scales as
+// `Σ C(|affectedBy|, k) × Π non_default_contexts` for k = 2..arity.
+// 4 covers virtually all design-system shapes (mode × brand × density ×
+// contrast is the largest real-world joint anyone tends to express);
+// beyond that, joint blocks aren't emitted and the cascade resolves to
+// whatever lower-arity composition produces.
 const DEFAULT_MAX_JOINT_ARITY = 4;
 
-/**
- * Classify every token in a project. Returns a Map keyed by token path.
- * Reads from `project.tokenGraph` — the sole resolution surface.
- *
- * For tokens affected by 2+ axes, probes joint divergences from arity 2
- * up to `min(|affectedBy|, MAX_JOINT_ARITY)`. Each probe checks whether
- * cascade composition (baseline + per-axis cell overlays in project axis
- * order + lower-arity joint corrections recorded for this token) produces
- * the cartesian-correct value at the candidate tuple. When it doesn't,
- * an arity-k joint case is recorded — which will become an arity-k
- * compound block at emission.
- *
- * The per-token bound on probing scope is what keeps this tractable for
- * many-axis projects: a token affected by 3 axes only ever probes within
- * those 3 axes, regardless of how many axes the project has overall.
- */
+// Classify every token in a project. Returns a Map keyed by token path.
+// Reads from `project.tokenGraph` — the sole resolution surface.
+//
+// For tokens affected by 2+ axes, probes joint divergences from arity 2
+// up to `min(|affectedBy|, MAX_JOINT_ARITY)`. Each probe checks whether
+// cascade composition (baseline + per-axis cell overlays in project axis
+// order + lower-arity joint corrections recorded for this token) produces
+// the cartesian-correct value at the candidate tuple. When it doesn't,
+// an arity-k joint case is recorded — which will become an arity-k
+// compound block at emission.
+//
+// The per-token bound on probing scope is what keeps this tractable for
+// many-axis projects: a token affected by 3 axes only ever probes within
+// those 3 axes, regardless of how many axes the project has overall.
 function analyzeProjectVariance(project: Project): Map<string, VarianceInfo> {
   const result = new Map<string, VarianceInfo>();
   const { axes, tokenGraph, defaultTuple } = project;
@@ -208,7 +200,7 @@ function analyzeProjectVariance(project: Project): Map<string, VarianceInfo> {
   return result;
 }
 
-/** True if every axis=ctx in `partial` appears the same way in `full`. */
+// True if every axis=ctx in `partial` appears the same way in `full`.
 function isPartialTupleSubset(
   partial: Record<string, string>,
   full: Record<string, string>,
@@ -323,7 +315,7 @@ export function emitAxisProjectedCss(
 
   // Pre-compute per-axis delta sets using tokenGraph walks. A path is
   // in a delta cell when its resolved value at that singleton tuple
-  // differs from the baseline — mirrors the shape buildCells produced.
+  // differs from the baseline.
   const deltaPathsByAxis: Record<string, Record<string, Set<string>>> = {};
   for (const axis of axes) {
     const axisDeltaPaths: Record<string, Set<string>> = {};
@@ -398,11 +390,9 @@ export function emitAxisProjectedCss(
 
 type VarOpts = Record<string, never> | { prefix: string };
 
-/**
- * Tells whether the given axis is in a token's touching set. Drives the
- * per-axis cell-block filter: only tokens this axis actually affects
- * appear in that axis's cell blocks.
- */
+// Tells whether the given axis is in a token's touching set. Drives the
+// per-axis cell-block filter: only tokens this axis actually affects
+// appear in that axis's cell blocks.
 function axisTouchesToken(axisName: string, info: VarianceInfo | undefined): boolean {
   if (!info) return false;
   switch (info.kind) {
@@ -426,20 +416,18 @@ interface Axis {
   default: string;
 }
 
-/**
- * Emit one compound `[data-axis="…"][…]` block per unique joint tuple
- * that any token in the project diverges at. The set of joint tuples
- * comes from `analyzeProjectVariance`'s per-token `jointCases` — no
- * cartesian enumeration over project axes is performed. For a token
- * with `affectedBy = [A, B]` the only joint tuples probed involve A
- * and B; the rest of the project's axes are irrelevant for that token.
- *
- * Blocks are emitted in arity-ascending order so cascade composition
- * resolves correctly: higher-arity blocks override lower-arity blocks
- * at the same specificity gradient (n-attribute selectors have
- * specificity (0, n, 0); a 3-axis block beats both its constituent
- * 2-axis blocks).
- */
+// Emit one compound `[data-axis="…"][…]` block per unique joint tuple
+// that any token in the project diverges at. The set of joint tuples
+// comes from `analyzeProjectVariance`'s per-token `jointCases` — no
+// cartesian enumeration over project axes is performed. For a token
+// with `affectedBy = [A, B]` the only joint tuples probed involve A
+// and B; the rest of the project's axes are irrelevant for that token.
+//
+// Blocks are emitted in arity-ascending order so cascade composition
+// resolves correctly: higher-arity blocks override lower-arity blocks
+// at the same specificity gradient (n-attribute selectors have
+// specificity (0, n, 0); a 3-axis block beats both its constituent
+// 2-axis blocks).
 function collectJointBlocks(
   project: Project,
   variance: Map<string, VarianceInfo>,
@@ -475,8 +463,8 @@ function collectJointBlocks(
 
   // Sort: arity ascending first (cascade requires lower-arity blocks before
   // higher-arity). Within an arity, by project-axis order of the involved
-  // axes; within same axes, by context iteration order. Matches the
-  // emission order the old cartesian enumerator produced.
+  // axes; within same axes, by context iteration order — a stable emission
+  // order keyed off project-axis and context declaration order.
   function emissionSortKey(tuple: Record<string, string>): string {
     const sortedAxes = Object.keys(tuple).toSorted(
       (a, b) => (projectAxisOrder.get(a) ?? 0) - (projectAxisOrder.get(b) ?? 0),
@@ -538,10 +526,8 @@ function collectJointBlocks(
   return blocks;
 }
 
-/**
- * Build a stable lookup key for a partial tuple — axis entries joined
- * in sorted key order so `{A: a, B: b}` and `{B: b, A: a}` match.
- */
+// Build a stable lookup key for a partial tuple — axis entries joined
+// in sorted key order so `{A: a, B: b}` and `{B: b, A: a}` match.
 function canonicalPartialKey(partial: Record<string, string>): string {
   return Object.entries(partial)
     .toSorted(([a], [b]) => a.localeCompare(b))
@@ -549,18 +535,16 @@ function canonicalPartialKey(partial: Record<string, string>): string {
     .join('|');
 }
 
-/**
- * Collect emitted declaration lines for a token map, filtering tokens
- * by `accept(path)`. Each line is `  --var: value;` (with leading
- * indent for embedding in a block). Composite tokens contribute one
- * line per sub-field plus an optional shorthand line; primitives
- * contribute one line.
- *
- * `tokensForAliasResolution` is the broader resolution context —
- * with delta cells, `tokens` itself only carries the delta paths,
- * so composite token sub-aliases need the full composed TokenMap
- * to resolve references to non-delta tokens.
- */
+// Collect emitted declaration lines for a token map, filtering tokens
+// by `accept(path)`. Each line is `  --var: value;` (with leading
+// indent for embedding in a block). Composite tokens contribute one
+// line per sub-field plus an optional shorthand line; primitives
+// contribute one line.
+//
+// `tokensForAliasResolution` is the broader resolution context —
+// with delta cells, `tokens` itself only carries the delta paths,
+// so composite token sub-aliases need the full composed TokenMap
+// to resolve references to non-delta tokens.
 function collectLines(
   tokens: RawTokenMap,
   tokensForAliasResolution: RawTokenMap,

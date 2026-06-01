@@ -11,12 +11,10 @@ export type StrippedCssOption = 'variableName' | 'permutations' | 'filename' | '
 
 export type ForwardedCssOptions = Omit<CSSPluginOptions, StrippedCssOption>;
 
-/**
- * Deprecated plugin-css knobs that are silently inert under swatchbook's
- * permutation-based emission. Calling them out as `warn` diagnostics beats
- * the alternative — authors wonder why their `modeSelectors` don't take
- * effect and blame swatchbook.
- */
+// Deprecated plugin-css knobs that are silently inert under swatchbook's
+// permutation-based emission. Calling them out as `warn` diagnostics beats
+// the alternative — authors wonder why their `modeSelectors` don't take
+// effect and blame swatchbook.
 const INERT_DEPRECATED_KEYS = ['baseSelector', 'baseScheme', 'modeSelectors'] as const;
 
 /**

@@ -64,7 +64,7 @@ export async function computeTokenListing(
 
     // User-supplied `platforms` overrides the default CSS entry when
     // present — otherwise the built-in `css` platform is the only one
-    // registered, matching the earlier default behavior.
+    // registered.
     const platforms = options.listingOptions?.platforms ?? {
       css: { name: '@terrazzo/plugin-css', description: 'CSS custom properties' },
     };

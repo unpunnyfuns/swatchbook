@@ -151,14 +151,12 @@ export interface AxisConfig {
   default: string;
 }
 
-/**
- * Fields shared across every swatchbook config variant. The three
- * discriminated subtypes (`ResolverConfig`, `LayeredConfig`,
- * `PlainConfig`) extend this with their own load-strategy fields plus
- * `?: never` rejections of the other variants' fields, so an invalid
- * combination (`resolver` + `axes`, `axes` without `tokens`) is a
- * compile error before it ever reaches the loader's runtime checks.
- */
+// Fields shared across every swatchbook config variant. The three
+// discriminated subtypes (`ResolverConfig`, `LayeredConfig`,
+// `PlainConfig`) extend this with their own load-strategy fields plus
+// `?: never` rejections of the other variants' fields, so an invalid
+// combination (`resolver` + `axes`, `axes` without `tokens`) is a
+// compile error before it ever reaches the loader's runtime checks.
 interface CommonConfig {
   /**
    * Initial active tuple (`{ axisName: contextName }`). Any axis the tuple
