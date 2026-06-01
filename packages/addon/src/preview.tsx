@@ -43,12 +43,10 @@ import {
 } from '#/constants.ts';
 import type { StoryParameters, SwatchbookGlobals } from '#/globals.ts';
 
-/**
- * Standard visually-hidden style for the theme-flip live region.
- * Keeps the announcement element discoverable by SR but out of visual
- * + pointer flow. The clip-path / `position: absolute` combination is
- * the canonical sr-only pattern.
- */
+// Standard visually-hidden style for the theme-flip live region.
+// Keeps the announcement element discoverable by SR but out of visual
+// + pointer flow. The clip-path / `position: absolute` combination is
+// the canonical sr-only pattern.
 const SR_ONLY_STYLE: CSSProperties = {
   position: 'absolute',
   width: 1,
@@ -61,12 +59,10 @@ const SR_ONLY_STYLE: CSSProperties = {
   border: 0,
 };
 
-/**
- * The `html, body { ... }` rules that paint the iframe's own chrome
- * (outside any decorator wrapper — Docs mode, autodocs, empty gutters)
- * with the active theme's surface + text vars. Composed alongside the
- * emitted token CSS so both load through the same `<style>` element.
- */
+// The `html, body { ... }` rules that paint the iframe's own chrome
+// (outside any decorator wrapper — Docs mode, autodocs, empty gutters)
+// with the active theme's surface + text vars. Composed alongside the
+// emitted token CSS so both load through the same `<style>` element.
 function iframeChromeRules(prefix: string): string {
   const surface = prefix ? `--${prefix}-color-surface-default` : '--color-surface-default';
   const text = prefix ? `--${prefix}-color-text-default` : '--color-text-default';
@@ -79,23 +75,18 @@ html, body {
 `;
 }
 
-/**
- * Inject the per-theme stylesheet plus the iframe-chrome block. Shared
- * with the HMR re-emit path below so a token refresh updates the
- * iframe's chrome rules from the same source.
- */
+// Inject the per-theme stylesheet plus the iframe-chrome block. Shared
+// with the HMR re-emit path below so a token refresh updates the
+// iframe's chrome rules from the same source.
 function ensureStylesheet(cssText: string, prefix: string): void {
   ensureStyleElement(STYLE_ELEMENT_ID, `${cssText}\n${iframeChromeRules(prefix)}`);
 }
 
-/**
- * Apply `cb(axisName, value)` for every pinned (disabled) axis whose
- * default-tuple value is set. `virtualDefaultTuple` carries the
- * post-filter axis defaults; disabled axes don't appear in
- * `virtualAxes` but their pinned context value still lives here, so
- * sampling it gives the same result the old "first permutation's
- * input" lookup did.
- */
+// Apply `cb(axisName, value)` for every pinned (disabled) axis whose
+// default-tuple value is set. `virtualDefaultTuple` carries the
+// post-filter axis defaults; disabled axes don't appear in
+// `virtualAxes` but their pinned context value still lives here, so
+// sampling it yields each pinned axis's active context.
 function forEachPinnedAxis(cb: (name: string, value: string) => void): void {
   for (const name of virtualDisabledAxes) {
     const value = virtualDefaultTuple[name];
@@ -103,24 +94,20 @@ function forEachPinnedAxis(cb: (name: string, value: string) => void): void {
   }
 }
 
-/**
- * Compose a stable theme name from a tuple — `axisValues.join(' · ')`
- * in axis order. Used for the `ThemeContext` value the blocks read and
- * the addon-channel signals downstream consumers subscribe to. Returns
- * empty string when there are no axes (no name to write).
- */
+// Compose a stable theme name from a tuple — `axisValues.join(' · ')`
+// in axis order. Used for the `ThemeContext` value the blocks read and
+// the addon-channel signals downstream consumers subscribe to. Returns
+// empty string when there are no axes (no name to write).
 function matchThemeName(tuple: Readonly<Record<string, string>>): string {
   if (virtualAxes.length === 0) return '';
   return tupleToName(virtualAxes, tuple);
 }
 
-/**
- * Write one `data-<prefix>-<axis>=<context>` per axis on `<html>`.
- * The smart CSS emitter targets these single-axis selectors (and
- * joint compounds across multiple) — that's the actual scoping
- * surface the cascade resolves through. Prefix follows `cssVarPrefix`
- * so attr namespace and emitted selectors stay in lockstep.
- */
+// Write one `data-<prefix>-<axis>=<context>` per axis on `<html>`.
+// The smart CSS emitter targets these single-axis selectors (and
+// joint compounds across multiple) — that's the actual scoping
+// surface the cascade resolves through. Prefix follows `cssVarPrefix`
+// so attr namespace and emitted selectors stay in lockstep.
 function setRootAxes(tuple: Readonly<Record<string, string>>): void {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
@@ -138,12 +125,10 @@ function setRootAxes(tuple: Readonly<Record<string, string>>): void {
   });
 }
 
-/**
- * Subset of an INIT_EVENT-shaped object the manager bundle needs. The
- * fields are the union of what the toolbar and panel read; named so
- * `broadcastInit` (module-level virtual exports) and the HMR re-emit
- * (`payload`-shaped) compose the same payload from the same shape.
- */
+// Subset of an INIT_EVENT-shaped object the manager bundle needs. The
+// fields are the union of what the toolbar and panel read; named so
+// `broadcastInit` (module-level virtual exports) and the HMR re-emit
+// (`payload`-shaped) compose the same payload from the same shape.
 interface InitFieldsSource {
   axes: typeof virtualAxes;
   disabledAxes: typeof virtualDisabledAxes;
@@ -164,11 +149,9 @@ function pickInitFields(source: InitFieldsSource): InitFieldsSource {
   };
 }
 
-/**
- * Emit the full virtual-module payload to the manager over Storybook's
- * channel so the toolbar + panel (which run in the manager bundle and
- * can't import our virtual module) can render from it.
- */
+// Emit the full virtual-module payload to the manager over Storybook's
+// channel so the toolbar + panel (which run in the manager bundle and
+// can't import our virtual module) can render from it.
 function broadcastInit(): void {
   const channel = addons.getChannel();
   channel.emit(
@@ -184,20 +167,18 @@ function broadcastInit(): void {
   );
 }
 
-/** Axis-default tuple, used as the baseline before overrides. */
+// Axis-default tuple, used as the baseline before overrides.
 function defaultTuple(): Record<string, string> {
   const out: Record<string, string> = {};
   for (const axis of virtualAxes) out[axis.name] = axis.default;
   return out;
 }
 
-/**
- * Reverse-engineer a tuple from a `Light · Brand A · Normal`-shape
- * theme name. Splits on ` · ` and zips with `virtualAxes` in declared
- * order — matches `matchThemeName`'s production direction so a
- * round-trip is lossless. Returns `undefined` when the segment count
- * doesn't match the axis count.
- */
+// Reverse-engineer a tuple from a `Light · Brand A · Normal`-shape
+// theme name. Splits on ` · ` and zips with `virtualAxes` in declared
+// order — matches `matchThemeName`'s production direction so a
+// round-trip is lossless. Returns `undefined` when the segment count
+// doesn't match the axis count.
 function tupleForName(name: string): Record<string, string> | undefined {
   if (!name) return undefined;
   const parts = name.split(' · ');
@@ -212,11 +193,9 @@ function tupleForName(name: string): Record<string, string> | undefined {
   return out;
 }
 
-/**
- * Merge a partial tuple onto the axis defaults, dropping keys for axes that
- * don't exist and silently falling back to the default for contexts that
- * aren't listed on the axis.
- */
+// Merge a partial tuple onto the axis defaults, dropping keys for axes that
+// don't exist and silently falling back to the default for contexts that
+// aren't listed on the axis.
 function normalizeTuple(partial: Readonly<Record<string, string>>): Record<string, string> {
   const out = defaultTuple();
   for (const axis of virtualAxes) {
@@ -228,13 +207,11 @@ function normalizeTuple(partial: Readonly<Record<string, string>>): Record<strin
   return out;
 }
 
-/**
- * Resolve the active tuple from all input channels, in priority order:
- *   1. `parameters.swatchbook.axes` — per-story tuple.
- *   2. `parameters.swatchbook.permutation` — per-story composed name.
- *   3. `globals.swatchbookAxes` — toolbar-set tuple.
- *   4. virtual module default.
- */
+// Resolve the active tuple from all input channels, in priority order:
+//   1. `parameters.swatchbook.axes` — per-story tuple.
+//   2. `parameters.swatchbook.permutation` — per-story composed name.
+//   3. `globals.swatchbookAxes` — toolbar-set tuple.
+//   4. virtual module default.
 function resolveTuple(
   axesGlobal: SwatchbookGlobals[typeof AXES_GLOBAL_KEY],
   paramSwatchbook: StoryParameters['swatchbook'],
@@ -260,14 +237,12 @@ function resolveColorFormat(raw: SwatchbookGlobals[typeof COLOR_FORMAT_GLOBAL_KE
   return 'hex';
 }
 
-/**
- * Single shared `resolveAt` instance for the lifetime of the preview
- * iframe. `virtualTokenGraph` is a module-level virtual-module export
- * with stable identity, so this closure never needs to rebuild;
- * downstream `ProjectSnapshot` consumers can key memos on the snapshot
- * wrapper without worrying about `resolveAt` churning when Storybook
- * recreates `context.globals`.
- */
+// Single shared `resolveAt` instance for the lifetime of the preview
+// iframe. `virtualTokenGraph` is a module-level virtual-module export
+// with stable identity, so this closure never needs to rebuild;
+// downstream `ProjectSnapshot` consumers can key memos on the snapshot
+// wrapper without worrying about `resolveAt` churning when Storybook
+// recreates `context.globals`.
 const previewResolveAt = (tuple: Record<string, string>): TokenMap =>
   resolveAllAt(virtualTokenGraph, tuple);
 
@@ -389,35 +364,29 @@ export const initialGlobals: NonNullable<Preview['initialGlobals']> = {
   [COLOR_FORMAT_GLOBAL_KEY]: 'hex',
 };
 
-/**
- * Module-level channel subscription: writes the active tuple's attributes
- * onto `<html>` regardless of whether a story decorator is rendering.
- *
- * The {@link themedDecorator} already sets these inside story renders, but
- * it never runs on MDX docs pages that embed blocks without `<Story />`.
- * Without attrs on an ancestor, the per-tuple CSS selectors
- * (`[data-mode="Dark"][data-brand="…"]`) don't match and everything falls
- * back to the `:root` default tuple — so colors stay defaults even after
- * the toolbar switches axes. Subscribing globally fixes MDX docs at the
- * cost of one idempotent redundant write per story render.
- */
+// Module-level channel subscription: writes the active tuple's attributes
+// onto `<html>` regardless of whether a story decorator is rendering.
+//
+// The themedDecorator already sets these inside story renders, but it
+// never runs on MDX docs pages that embed blocks without `<Story />`.
+// Without attrs on an ancestor, the per-tuple CSS selectors
+// (`[data-mode="Dark"][data-brand="…"]`) don't match and everything falls
+// back to the `:root` default tuple — so colors stay defaults even after
+// the toolbar switches axes. Subscribing globally fixes MDX docs at the
+// cost of one idempotent redundant write per story render.
 function installGlobalAxisApplier(): void {
   if (typeof document === 'undefined') return;
   const channel = addons.getChannel();
-  /**
-   * Inject the stylesheet and emit the init payload once on module load so
-   * the manager's toolbar populates and CSS vars are available even when no
-   * story/decorator ever runs (bare MDX docs pages). Without these, the
-   * toolbar sits in its disabled "loading…" state and nothing is styled.
-   */
+  // Inject the stylesheet and emit the init payload once on module load so
+  // the manager's toolbar populates and CSS vars are available even when no
+  // story/decorator ever runs (bare MDX docs pages). Without these, the
+  // toolbar sits in its disabled "loading…" state and nothing is styled.
   ensureStylesheet(css, cssVarPrefix);
   broadcastInit();
-  /**
-   * If the manager subscribes to INIT_EVENT after our initial broadcast,
-   * it misses the payload and the toolbar stays in its "loading…" state
-   * until something else re-fires it. Honor an explicit request event so
-   * a late-mounting manager can ask for the payload.
-   */
+  // If the manager subscribes to INIT_EVENT after our initial broadcast,
+  // it misses the payload and the toolbar stays in its "loading…" state
+  // until something else re-fires it. Honor an explicit request event so
+  // a late-mounting manager can ask for the payload.
   channel.on(INIT_REQUEST_EVENT, broadcastInit);
   const apply = (globals: SwatchbookGlobals): void => {
     ensureStylesheet(css, cssVarPrefix);
@@ -449,13 +418,11 @@ function installGlobalAxisApplier(): void {
 
 installGlobalAxisApplier();
 
-/**
- * Bridge `mousedown` inside the preview iframe to the manager via a
- * dedicated channel event. The toolbar popover's outside-click listener
- * runs on the manager's document, which can't observe mousedowns inside
- * the preview; without this bridge, clicking the canvas leaves the
- * popover open. Idempotent: fires at most once per real mousedown.
- */
+// Bridge `mousedown` inside the preview iframe to the manager via a
+// dedicated channel event. The toolbar popover's outside-click listener
+// runs on the manager's document, which can't observe mousedowns inside
+// the preview; without this bridge, clicking the canvas leaves the
+// popover open. Idempotent: fires at most once per real mousedown.
 function installPreviewMouseDownBridge(): void {
   if (typeof document === 'undefined') return;
   const channel = addons.getChannel();
@@ -466,15 +433,13 @@ function installPreviewMouseDownBridge(): void {
 
 installPreviewMouseDownBridge();
 
-/**
- * Wire the dev-time token-refresh HMR path. The plugin emits `HMR_EVENT`
- * with the fresh virtual-module payload whenever a watched source file
- * changes; we re-inject the stylesheet and forward to the Storybook
- * channel so the toolbar re-renders and blocks can re-subscribe with
- * the new snapshot — no full preview reload, so args / scroll / open
- * overlays survive the refresh. No-ops in production where
- * `import.meta.hot` is undefined.
- */
+// Wire the dev-time token-refresh HMR path. The plugin emits `HMR_EVENT`
+// with the fresh virtual-module payload whenever a watched source file
+// changes; we re-inject the stylesheet and forward to the Storybook
+// channel so the toolbar re-renders and blocks can re-subscribe with
+// the new snapshot — no full preview reload, so args / scroll / open
+// overlays survive the refresh. No-ops in production where
+// `import.meta.hot` is undefined.
 interface HmrSnapshot {
   axes: typeof virtualAxes;
   disabledAxes: typeof virtualDisabledAxes;

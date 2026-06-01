@@ -4,21 +4,19 @@ import type { ReactElement } from 'react';
 
 export type { ColorFormat };
 
-/**
- * Storybook-addon-specific pill row for picking how color sub-values
- * render in swatchbook blocks (hex / rgb / hsl / oklch / raw). Lives in
- * the addon rather than the shared switcher because color format is a
- * blocks-rendering concern, not a theming one — the docs-site navbar
- * switcher has no consumer for it.
- *
- * Reuses the `sb-switcher__*` class names so styling stays consistent
- * with the rest of the toolbar popover. The switcher's CSS is already
- * loaded on the page because this selector only renders inside
- * `<ThemeSwitcher>`'s `footer` prop.
- *
- * Uses `React.createElement` (via `h`) to survive embedding in Storybook's
- * manager bundle, which doesn't expose `react/jsx-runtime`.
- */
+// Storybook-addon-specific pill row for picking how color sub-values
+// render in swatchbook blocks (hex / rgb / hsl / oklch / raw). Lives in
+// the addon rather than the shared switcher because color format is a
+// blocks-rendering concern, not a theming one — the docs-site navbar
+// switcher has no consumer for it.
+//
+// Reuses the `sb-switcher__*` class names so styling stays consistent
+// with the rest of the toolbar popover. The switcher's CSS is already
+// loaded on the page because this selector only renders inside
+// `<ThemeSwitcher>`'s `footer` prop.
+//
+// Uses `React.createElement` (via `h`) to survive embedding in Storybook's
+// manager bundle, which doesn't expose `react/jsx-runtime`.
 
 /**
  * Runtime list of valid color formats. Declared here (alongside

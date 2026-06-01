@@ -20,28 +20,24 @@ import {
   TOOL_ID,
 } from '#/constants.ts';
 
-/**
- * Use explicit `React.createElement` rather than JSX so the manager bundle
- * doesn't take a hard dependency on `react/jsx-runtime`. Storybook's manager
- * page injects its own React as a runtime global; `react/jsx-runtime` isn't
- * always part of that exposure, which breaks JSX with
- * "Cannot read properties of undefined (reading 'recentlyCreatedOwnerStacks')".
- * Mirrors the pattern `@storybook/addon-a11y` uses in its manager.
- *
- * The imported `<ThemeSwitcher>` from `@unpunnyfuns/swatchbook-switcher`
- * compiles with classic JSX (`React.createElement`) specifically so it
- * survives embedding in the manager bundle the same way.
- */
+// Use explicit `React.createElement` rather than JSX so the manager bundle
+// doesn't take a hard dependency on `react/jsx-runtime`. Storybook's manager
+// page injects its own React as a runtime global; `react/jsx-runtime` isn't
+// always part of that exposure, which breaks JSX with
+// "Cannot read properties of undefined (reading 'recentlyCreatedOwnerStacks')".
+// Mirrors the pattern `@storybook/addon-a11y` uses in its manager.
+//
+// The imported `<ThemeSwitcher>` from `@unpunnyfuns/swatchbook-switcher`
+// compiles with classic JSX (`React.createElement`) specifically so it
+// survives embedding in the manager bundle the same way.
 const h = React.createElement;
 
 const EMPTY_AXES: readonly AxisEntry[] = [];
 const EMPTY_PRESETS: readonly PresetEntry[] = [];
 
-/**
- * Root toolbar glyph — a split-circle ("yinyang") mark: a faint filled
- * disc for the full-swatch silhouette, with a darker half-and-inset-disc
- * path reading as a pair of theme variants swapped in place.
- */
+// Root toolbar glyph — a split-circle ("yinyang") mark: a faint filled
+// disc for the full-swatch silhouette, with a darker half-and-inset-disc
+// path reading as a pair of theme variants swapped in place.
 function SwatchbookIcon(): ReactElement {
   return h(
     'svg',
@@ -71,12 +67,10 @@ function AxesToolbar(): ReactElement {
     const channel = addons.getChannel();
     const onInit = (next: InitPayload): void => setPayload(next);
     channel.on(INIT_EVENT, onInit);
-    /**
-     * Ask the preview to (re-)emit INIT_EVENT in case it already broadcast
-     * before this effect subscribed. Without this request, a late-mounting
-     * manager (story navigation, docs reload) can stay in "loading…" until
-     * the user triggers a globals change.
-     */
+    // Ask the preview to (re-)emit INIT_EVENT in case it already broadcast
+    // before this effect subscribed. Without this request, a late-mounting
+    // manager (story navigation, docs reload) can stay in "loading…" until
+    // the user triggers a globals change.
     channel.emit(INIT_REQUEST_EVENT);
     return () => {
       channel.off(INIT_EVENT, onInit);
@@ -154,11 +148,9 @@ function AxesToolbar(): ReactElement {
     }
   }, []);
 
-  /**
-   * Escape closes even when focus hasn't entered the popover yet (e.g. the
-   * user opened it via click and the mouse is still over the canvas). We
-   * attach a document-level listener when open.
-   */
+  // Escape closes even when focus hasn't entered the popover yet (e.g. the
+  // user opened it via click and the mouse is still over the canvas). We
+  // attach a document-level listener when open.
   useEffect(() => {
     if (!open) return;
     const onDocKey = (e: KeyboardEvent): void => {
@@ -168,12 +160,10 @@ function AxesToolbar(): ReactElement {
     return () => document.removeEventListener('keydown', onDocKey);
   }, [open]);
 
-  /**
-   * `WithTooltip`'s built-in `closeOnOutsideClick` misses some cases
-   * (portaled popover + manager iframe boundaries). Belt-and-suspenders:
-   * close when the user mouses down anywhere that isn't the trigger wrapper
-   * or the popover body.
-   */
+  // `WithTooltip`'s built-in `closeOnOutsideClick` misses some cases
+  // (portaled popover + manager iframe boundaries). Belt-and-suspenders:
+  // close when the user mouses down anywhere that isn't the trigger wrapper
+  // or the popover body.
   useEffect(() => {
     if (!open) return;
     const onDocMouseDown = (e: MouseEvent): void => {
@@ -183,12 +173,10 @@ function AxesToolbar(): ReactElement {
       if (target.closest('[data-testid="swatchbook-switcher"]')) return;
       setOpen(false);
     };
-    /**
-     * The manager's document-level listener above can't see mousedowns
-     * inside the preview iframe. Preview emits PREVIEW_MOUSEDOWN_EVENT on
-     * every mousedown over its own document; listen for it here so
-     * clicking the canvas / docs page also closes the popover.
-     */
+    // The manager's document-level listener above can't see mousedowns
+    // inside the preview iframe. Preview emits PREVIEW_MOUSEDOWN_EVENT on
+    // every mousedown over its own document; listen for it here so
+    // clicking the canvas / docs page also closes the popover.
     const channel = addons.getChannel();
     const onPreviewMouseDown = (): void => setOpen(false);
     document.addEventListener('mousedown', onDocMouseDown);
@@ -223,19 +211,17 @@ function AxesToolbar(): ReactElement {
       tooltip: label,
       pressed: open,
       onClick: () => setOpen((prev) => !prev),
-      /**
-       * Screen-reader disclosure semantics for the popover trigger. We
-       * don't set `aria-controls` because the popover is portaled by
-       * Storybook's `WithTooltip` with a dynamically-generated id we
-       * don't have a stable handle on; `aria-haspopup` + `aria-expanded`
-       * is the practical subset of the disclosure pattern.
-       *
-       * `aria-haspopup="true"` (generic) rather than `"dialog"`: the
-       * switcher body is `role="group"` (it's a settings panel of
-       * independent controls, not a modal dialog), so promising
-       * `"dialog"` would misalign the trigger with what AT finds when
-       * focus enters the popover.
-       */
+      // Screen-reader disclosure semantics for the popover trigger. We
+      // don't set `aria-controls` because the popover is portaled by
+      // Storybook's `WithTooltip` with a dynamically-generated id we
+      // don't have a stable handle on; `aria-haspopup` + `aria-expanded`
+      // is the practical subset of the disclosure pattern.
+      //
+      // `aria-haspopup="true"` (generic) rather than `"dialog"`: the
+      // switcher body is `role="group"` (it's a settings panel of
+      // independent controls, not a modal dialog), so promising
+      // `"dialog"` would misalign the trigger with what AT finds when
+      // focus enters the popover.
       'aria-haspopup': true as const,
       'aria-expanded': open,
     },
@@ -251,12 +237,10 @@ function AxesToolbar(): ReactElement {
     onAxisChange: setAxis,
     onPresetApply: applyPreset,
     onKeyDown: handleKeyDown,
-    /**
-     * Color format is addon-local chrome — drives how swatchbook blocks
-     * stringify colors inside stories and docs. Slotted through the
-     * switcher's `footer` escape hatch so shared theming UI stays free
-     * of this concern.
-     */
+    // Color format is addon-local chrome — drives how swatchbook blocks
+    // stringify colors inside stories and docs. Slotted through the
+    // switcher's `footer` escape hatch so shared theming UI stays free
+    // of this concern.
     footer: h(ColorFormatSelector, {
       active: activeColorFormat,
       onSelect: (next: ColorFormat) => updateGlobals({ [COLOR_FORMAT_GLOBAL_KEY]: next }),

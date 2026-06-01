@@ -22,15 +22,14 @@ export interface SwatchbookPluginOptions {
   integrations?: readonly SwatchbookIntegration[];
   /**
    * Pre-loaded project to use for the first `buildStart` instead of
-   * calling `loadProject` again. Lets `preset.viteFinal` share its
-   * single `loadProject` call (originally needed for codegen) with the
-   * plugin, eliminating a redundant parse pass at Storybook startup.
-   * HMR-triggered reloads still call `loadProject` directly.
+   * calling `loadProject` again. Shares `preset.viteFinal`'s single
+   * `loadProject` call with the plugin so Storybook startup doesn't parse
+   * twice. HMR-triggered reloads still call `loadProject` directly.
    */
   initialProject?: Project;
 }
 
-/** `\0<virtualId>` — Vite convention for resolved virtual module IDs. */
+// `\0<virtualId>` — Vite convention for resolved virtual module IDs.
 function resolvedId(virtualId: string): string {
   return `\0${virtualId}`;
 }
@@ -55,9 +54,9 @@ export function swatchbookTokensPlugin({
     css = emitAxisProjectedCss(project);
   }
 
-  /** Map of resolvedId → integration, indexed once. */
+  // Map of resolvedId → integration, indexed once.
   const integrationById = new Map<string, SwatchbookIntegration>();
-  /** Virtual IDs the preview auto-imports as side effects (global CSS). */
+  // Virtual IDs the preview auto-imports as side effects (global CSS).
   const autoInjectIds: string[] = [];
   for (const integration of integrations) {
     const vm = integration.virtualModule;
@@ -70,20 +69,18 @@ export function swatchbookTokensPlugin({
     name: 'swatchbook:virtual-tokens',
     enforce: 'pre',
 
-    /**
-     * Vite uses esbuild for `optimizeDeps` pre-bundling (development
-     * mode), and esbuild doesn't see Rollup-style `resolveId` hooks.
-     * Without this exclusion, a preview file that imports
-     * `virtual:swatchbook/tokens` (directly or via the addon's
-     * `useToken` hook) can get pulled into pre-bundling, hitting
-     * esbuild with no resolver registered and failing with
-     * `Could not resolve "virtual:swatchbook/tokens"`.
-     *
-     * Excluding the virtual IDs tells Vite to route them through the
-     * Rollup-style pipeline at request time — our `resolveId` / `load`
-     * hooks above handle the resolution. Build mode is unaffected
-     * (build uses Rollup throughout).
-     */
+    // Vite uses esbuild for `optimizeDeps` pre-bundling (development
+    // mode), and esbuild doesn't see Rollup-style `resolveId` hooks.
+    // Without this exclusion, a preview file that imports
+    // `virtual:swatchbook/tokens` (directly or via the addon's
+    // `useToken` hook) can get pulled into pre-bundling, hitting
+    // esbuild with no resolver registered and failing with
+    // `Could not resolve "virtual:swatchbook/tokens"`.
+    //
+    // Excluding the virtual IDs tells Vite to route them through the
+    // Rollup-style pipeline at request time — our `resolveId` / `load`
+    // hooks above handle the resolution. Build mode is unaffected
+    // (build uses Rollup throughout).
     config() {
       return {
         optimizeDeps: {
@@ -153,12 +150,10 @@ export function swatchbookTokensPlugin({
       // and saves to any `$ref` target silently drop.
       if (!project) await refresh();
 
-      /**
-       * Editors typically emit two or three filesystem events per save
-       * (atomic rename + rewrite + metadata). A 100 ms trailing debounce
-       * coalesces those into a single reload while staying well under
-       * user-perceptible latency.
-       */
+      // Editors typically emit two or three filesystem events per save
+      // (atomic rename + rewrite + metadata). A 100 ms trailing debounce
+      // coalesces those into a single reload while staying well under
+      // user-perceptible latency.
       let pending: ReturnType<typeof setTimeout> | null = null;
       const invalidate = (): void => {
         if (pending) clearTimeout(pending);
@@ -182,14 +177,12 @@ export function swatchbookTokensPlugin({
               const m = server.moduleGraph.getModuleById(resolvedIntegrationId);
               if (m) server.moduleGraph.invalidateModule(m);
             }
-            /**
-             * Send the fresh snapshot as a custom HMR event instead of a
-             * full-reload. The preview subscribes and re-broadcasts to
-             * blocks via the Storybook channel so the React tree
-             * re-renders in place without losing toolbar / args / scroll
-             * state. Field shape matches the INIT_EVENT payload so the
-             * preview can hand it straight through.
-             */
+            // Send the fresh snapshot as a custom HMR event instead of a
+            // full-reload. The preview subscribes and re-broadcasts to
+            // blocks via the Storybook channel so the React tree
+            // re-renders in place without losing toolbar / args / scroll
+            // state. Field shape matches the INIT_EVENT payload so the
+            // preview can hand it straight through.
             server.ws.send({
               type: 'custom',
               event: HMR_EVENT,
@@ -199,18 +192,16 @@ export function swatchbookTokensPlugin({
         }, 100);
       };
 
-      /**
-       * Watch each source file's *parent directory* rather than the file
-       * itself. File-level `fs.watch` is fragile: atomic-save editors
-       * unlink the old inode and write a new one, so the original
-       * watcher either fires a one-shot 'rename' and goes deaf, or on
-       * some platforms loops on ghost events for the old inode. Watching
-       * the dir sidesteps both — the dir inode is stable across the
-       * rename dance — and filename filtering keeps event volume low.
-       *
-       * Vite's `server.watcher` still wouldn't carry these events across
-       * pnpm symlink boundaries, so we keep running our own watchers.
-       */
+      // Watch each source file's *parent directory* rather than the file
+      // itself. File-level `fs.watch` is fragile: atomic-save editors
+      // unlink the old inode and write a new one, so the original
+      // watcher either fires a one-shot 'rename' and goes deaf, or on
+      // some platforms loops on ghost events for the old inode. Watching
+      // the dir sidesteps both — the dir inode is stable across the
+      // rename dance — and filename filtering keeps event volume low.
+      //
+      // Vite's `server.watcher` still wouldn't carry these events across
+      // pnpm symlink boundaries, so we keep running our own watchers.
       const byDir = new Map<string, Set<string>>();
       for (const file of project?.sourceFiles ?? []) {
         const dir = dirname(file);
@@ -246,8 +237,9 @@ export function swatchbookTokensPlugin({
  * absent, use the resolver file + every `$ref` target it pulled in, as
  * tracked on `project.sourceFiles` — which stays correct as the resolver
  * evolves without requiring a parallel `tokens` glob.
+ *
+ * @internal Exported for tests; not part of the public API.
  */
-/** @internal Exported for tests; not part of the public API. */
 export function collectWatchPaths(
   config: Config,
   project: Project | undefined,
