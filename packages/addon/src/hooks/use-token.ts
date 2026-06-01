@@ -7,13 +7,11 @@ import { resolveAllAt } from '@unpunnyfuns/swatchbook-core/graph';
 import { makeCssVar } from '@unpunnyfuns/swatchbook-core/css-var';
 import { useActiveAxes, useOptionalSwatchbookData } from '@unpunnyfuns/swatchbook-blocks';
 
-/**
- * Module-scope `resolveAt` for the no-provider fallback path. Built
- * once from the stable virtual-module exports — mirrors what the
- * preview decorator does for its `previewResolveAt` but lives in this
- * file so the hook can be called outside the addon's preview wrapper
- * (autodocs / MDX renders).
- */
+// Module-scope `resolveAt` for the no-provider fallback path. Built
+// once from the stable virtual-module exports — mirrors what the
+// preview decorator does for its `previewResolveAt` but lives in this
+// file so the hook can be called outside the addon's preview wrapper
+// (autodocs / MDX renders).
 const fallbackResolveAt = (tuple: Record<string, string>) => resolveAllAt(virtualTokenGraph, tuple);
 
 /**

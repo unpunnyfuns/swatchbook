@@ -11,7 +11,7 @@ import type { AddonOptions } from '#/options.ts';
 import { swatchbookTokensPlugin } from '#/virtual/plugin.ts';
 
 interface PresetOptions extends AddonOptions {
-  /** Storybook injects this — the `.storybook` directory absolute path. */
+  // Storybook injects this — the `.storybook` directory absolute path.
   configDir: string;
 }
 
