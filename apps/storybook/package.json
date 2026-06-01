@@ -45,14 +45,14 @@
     "@unpunnyfuns/swatchbook-integrations": "workspace:*",
     "@unpunnyfuns/swatchbook-tokens": "workspace:*",
     "@vitejs/plugin-react": "^6.0.1",
-    "@vitest/browser-playwright": "^4.1.4",
-    "@vitest/coverage-v8": "^4.1.4",
+    "@vitest/browser-playwright": "^4.1.7",
+    "@vitest/coverage-v8": "^4.1.7",
     "chromatic": "^16.6.0",
     "playwright": "^1.59.1",
     "storybook": "^10.3.5",
     "tailwindcss": "^4.2.4",
     "typescript": "^6.0.0",
     "vite": "^8.0.4",
-    "vitest": "^4.1.4"
+    "vitest": "^4.1.7"
   }
 }
