@@ -102,11 +102,9 @@ interface OptionPillProps {
   title?: string;
   onClick(): void;
   trailing?: ReactElement | null;
-  /**
-   * Optional accessible-label prefix — disambiguates pills that share a
-   * label across sections (e.g. `Default` appears on both `mode` and
-   * `brand`). The full accessible name becomes `"<label> <ariaLabelSuffix>"`.
-   */
+  // Optional accessible-label prefix — disambiguates pills that share a
+  // label across sections (e.g. `Default` appears on both `mode` and
+  // `brand`). The full accessible name becomes `"<label> <ariaLabelSuffix>"`.
   ariaLabelSuffix?: string;
 }
 
@@ -213,12 +211,10 @@ function AxisSection({ axis, active, onSelect }: AxisSectionProps): ReactElement
   );
 }
 
-/**
- * Treat the `{ name: 'theme', source: 'synthetic' }` axis — the one core
- * fabricates for single-theme projects with no resolver — as a special case
- * that reads as "Permutation". Authored single-axis resolvers keep their real
- * name (e.g. `mode`, `brand`).
- */
+// Treat the `{ name: 'theme', source: 'synthetic' }` axis — the one core
+// fabricates for single-theme projects with no resolver — as a special case
+// that reads as "Permutation". Authored single-axis resolvers keep their real
+// name (e.g. `mode`, `brand`).
 function displayLabelFor(axis: SwitcherAxis): string {
   if (axis.source === 'synthetic' && axis.name === 'theme') return 'Permutation';
   return axis.name;
