@@ -21,7 +21,6 @@ interface NormalizedColor {
   components?: readonly (number | null)[];
   channels?: readonly (number | null)[];
   alpha?: number;
-  hex?: string;
 }
 
 export function formatColor(raw: unknown, format: ColorFormat): FormatColorResult | null {

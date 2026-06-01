@@ -180,7 +180,7 @@ export function useProject(): ProjectData {
 }
 
 function useVirtualModuleFallback(enabled: boolean): ProjectData {
-  const contextPermutation = useActiveTheme();
+  const contextThemeName = useActiveTheme();
   const contextAxes = useActiveAxes();
   const channelGlobals = useChannelGlobals();
   // Subscribe to the live token snapshot rather than reading the virtual
@@ -206,7 +206,7 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
     return hasContextAxes ? { ...contextAxes } : (channelGlobals.axes ?? defaultTuple(tokens.axes));
   }, [contextAxes, channelGlobals.axes, tokens.axes]);
 
-  const activeTheme = contextPermutation || tupleToName(tokens.axes, activeAxes);
+  const activeTheme = contextThemeName || tupleToName(tokens.axes, activeAxes);
 
   // `resolveAllAt` is a pure function over the graph; the only memo
   // we need is for the outer closure so React's reference equality

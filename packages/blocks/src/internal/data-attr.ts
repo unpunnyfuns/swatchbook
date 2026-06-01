@@ -31,7 +31,7 @@ const WRAPPER_CLASSES = 'sb-unstyled sb-block';
  *   MDX docs house styles self-exclude the subtree, plus `sb-block`
  *   which carries the shared chrome from `internal/styles.css`.
  */
-export function themeAttrs(
+export function blockWrapperAttrs(
   prefix: string,
   tuple: Readonly<Record<string, string>>,
 ): Record<string, string> {

@@ -6,7 +6,6 @@ import { dataAttr } from '#/data-attr.ts';
 import { listPaths } from '#/token-graph/queries.ts';
 import { resolveAliasAllAt, resolveAllAt } from '#/token-graph/walk.ts';
 import type { Project, TokenMap } from '#/types.ts';
-import { permutationID } from '#/types.ts';
 import { valueKey } from '#/value-key.ts';
 
 // Internal alias: the raw Terrazzo-shape map this emitter passes into
@@ -24,10 +23,6 @@ function withSyntheticIds(map: TokenMap): RawTokenMap {
     out[path] = { ...token, id: path } as unknown as TokenNormalized;
   }
   return out;
-}
-
-function asRawTokens(map: TokenMap): RawTokenMap {
-  return withSyntheticIds(map);
 }
 
 // Distinguishes a token's variance shape so the emitter can route it.
@@ -58,7 +53,6 @@ type VarianceInfo =
 interface JointCase {
   tuple: Record<string, string>;
   cartesianValueKey: string;
-  permutationName: string;
 }
 
 // Default cap on joint-case arity probed per token. See `Config.maxJointArity`
@@ -183,7 +177,6 @@ function analyzeProjectVariance(project: Project): Map<string, VarianceInfo> {
             jointCases.push({
               tuple: { ...partialTuple },
               cartesianValueKey: cartesianKey,
-              permutationName: permutationID(fullTuple),
             });
           }
         }
@@ -301,7 +294,7 @@ export function emitAxisProjectedCss(
   //    Baseline-only tokens never appear elsewhere; all other variance
   //    kinds also need a baseline value to start the cascade from.
   {
-    const baselineRaw = asRawTokens(baselineTokens);
+    const baselineRaw = withSyntheticIds(baselineTokens);
     const lines = collectLines(
       baselineRaw,
       baselineRaw,
@@ -347,8 +340,8 @@ export function emitAxisProjectedCss(
       const deltaPaths = deltaPathsByAxis[axis.name]?.[ctx] ?? new Set<string>();
 
       const lines = collectLines(
-        asRawTokens(cellTokens),
-        asRawTokens(cellTokensForAliases),
+        withSyntheticIds(cellTokens),
+        withSyntheticIds(cellTokensForAliases),
         (path) => deltaPaths.has(path) && axisTouchesToken(axis.name, variance.get(path)),
         cellTuple,
         varOpts,
@@ -494,7 +487,7 @@ function collectJointBlocks(
     const entry = grouped.get(key);
     if (!entry) continue;
     const fullTuple = { ...defaultTuple, ...entry.tuple };
-    const fullTokens = asRawTokens(resolveAliasAllAt(tokenGraph, fullTuple));
+    const fullTokens = withSyntheticIds(resolveAliasAllAt(tokenGraph, fullTuple));
 
     // Selector order: project axis order, not the order the entry's
     // tuple happens to be keyed in.
@@ -576,14 +569,14 @@ function collectLines(
  * sub-field plus an optional shorthand.
  */
 export function* collectTokenDeclarations(
-  localID: string,
+  path: string,
   token: TokenNormalized,
   tokensSet: RawTokenMap,
   permutation: Record<string, string>,
   varOpts: VarOpts,
   transformAlias: (token: TokenNormalized) => string,
 ): Generator<{ varName: string; value: string }> {
-  const varName = makeCSSVar(localID, varOpts);
+  const varName = makeCSSVar(path, varOpts);
   let value: ReturnType<typeof transformCSSValue>;
   try {
     value = transformCSSValue(token, { tokensSet, permutation, transformAlias });
@@ -592,7 +585,7 @@ export function* collectTokenDeclarations(
     const valueStr = safeStringify(token.$value);
     const original = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `swatchbook: failed to transform token "${localID}" at permutation ${permutationStr}.\n` +
+      `swatchbook: failed to transform token "${path}" at permutation ${permutationStr}.\n` +
         `  $type: ${token.$type}\n` +
         `  $value: ${valueStr}\n` +
         `  cause: ${original}`,
@@ -604,9 +597,9 @@ export function* collectTokenDeclarations(
     return;
   }
   for (const [subKey, subVal] of Object.entries(value)) {
-    yield { varName: makeCSSVar(`${localID}.${subKey}`, varOpts), value: subVal };
+    yield { varName: makeCSSVar(`${path}.${subKey}`, varOpts), value: subVal };
   }
-  const shorthand = generateShorthand({ token, localID });
+  const shorthand = generateShorthand({ token, localID: path });
   if (shorthand) yield { varName, value: shorthand };
 }
 

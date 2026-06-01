@@ -51,8 +51,9 @@ export interface TokenInfo {
  * Storybook's preview-only hooks. Reads from the addon-provided
  * `SwatchbookContext` when present (preferred — uses the lifted
  * `resolveAt` accessor and the live active tuple); falls back to the
- * virtual module's eager `permutationsResolved` lookup keyed by the
- * default permutation name when no provider is mounted.
+ * module-scope `fallbackResolveAt` (`resolveAllAt(virtualTokenGraph,
+ * tuple)`) over the virtual module's default tuple when no provider is
+ * mounted.
  */
 export function useToken(path: TokenPath): TokenInfo {
   const snapshot = useOptionalSwatchbookData();

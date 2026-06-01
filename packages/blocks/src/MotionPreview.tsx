@@ -2,7 +2,7 @@ import cx from 'clsx';
 import type { ReactElement } from 'react';
 import { useMemo, useState } from 'react';
 import './MotionPreview.css';
-import { themeAttrs } from '#/internal/data-attr.ts';
+import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
@@ -81,14 +81,14 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+      <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
         <div className="sb-block__empty">No motion tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+    <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       <div className="sb-block__caption">{captionText}</div>
       <div className="sb-motion-preview__controls">
         <span className="sb-motion-preview__control-label">Speed</span>

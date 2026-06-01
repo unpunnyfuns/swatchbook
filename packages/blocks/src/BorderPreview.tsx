@@ -5,7 +5,7 @@ import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import type { ColorFormat } from '#/format-color.ts';
-import { themeAttrs } from '#/internal/data-attr.ts';
+import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
@@ -87,14 +87,14 @@ export function BorderPreview({
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+      <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
         <div className="sb-block__empty">No border tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+    <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} className="sb-border-preview__row">

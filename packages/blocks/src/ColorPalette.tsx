@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './ColorPalette.css';
 import { useColorFormat } from '#/contexts.ts';
-import { themeAttrs } from '#/internal/data-attr.ts';
+import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
@@ -114,14 +114,14 @@ export function ColorPalette({
 
   if (totalCount === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+      <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
         <div className="sb-block__empty">No color tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+    <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       <div className="sb-block__caption">{captionText}</div>
       {groups.map(([group, swatches]) => (
         <section key={group} className="sb-color-palette__group">
