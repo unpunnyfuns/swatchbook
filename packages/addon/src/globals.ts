@@ -14,7 +14,7 @@ import type { ColorFormat } from '@unpunnyfuns/swatchbook-blocks';
  * - `swatchbookAxes` — active axis tuple (axis name → context name).
  * - `swatchbookColorFormat` — display-side color format for blocks. Does
  *   not affect emitted CSS.
- * - `swatchbookTheme` — legacy composed permutation ID, written in
+ * - `swatchbookTheme` — legacy composed theme name, written in
  *   lockstep with `swatchbookAxes` for back-compat with consumers that
  *   only read the composed string.
  *
@@ -35,7 +35,7 @@ export interface SwatchbookGlobals {
 export interface SwatchbookParameters {
   /** Per-story tuple override. Highest priority input. */
   axes?: Record<string, string>;
-  /** Per-story composed permutation ID. Second priority. */
+  /** Per-story composed theme name. Second priority. */
   permutation?: string;
   /** Legacy alias for `permutation`. */
   theme?: string;

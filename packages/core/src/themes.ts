@@ -35,6 +35,11 @@ export interface ThemeEnumPreset {
  * by ` · ` in axis declaration order. Same form the
  * `data-<prefix>-theme` attribute holds. Falls back to each axis's
  * `default` when the tuple omits it.
+ *
+ * Not interchangeable with `permutationID` (types.ts): this is the
+ * axis-order display name that fills omitted axes from defaults, whereas
+ * `permutationID` is the insertion-order internal wire key with no default
+ * fallback.
  */
 export function tupleToName(
   axes: readonly { readonly name: string; readonly default: string }[],

@@ -420,6 +420,11 @@ export interface ParserInput {
  * tuples stringify to the context value alone (`{ theme: 'Light' }` →
  * `"Light"`); multi-axis tuples join context values with ` · ` in
  * insertion order (`{ mode: 'Dark', brand: 'Brand A' }` → `"Dark · Brand A"`).
+ *
+ * Not interchangeable with `tupleToName` (themes.ts): this is the
+ * insertion-order internal wire key with no default fallback, whereas
+ * `tupleToName` builds the axis-order display name and fills omitted axes
+ * from their defaults.
  */
 export function permutationID(input: Record<string, string>): string {
   const values = Object.values(input);

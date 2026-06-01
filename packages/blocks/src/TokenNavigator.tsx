@@ -5,7 +5,7 @@ import './TokenNavigator.css';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
 import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
-import { themeAttrs } from '#/internal/data-attr.ts';
+import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { EmptyState } from '#/internal/styles.tsx';
@@ -457,7 +457,7 @@ export function TokenNavigator({
 
   if (tree.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+      <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
         <EmptyState>
           {root
             ? `No tokens under "${root}"${typeFilter ? ` matching ${typeLabel.slice(3)}` : ''}.`
@@ -470,7 +470,7 @@ export function TokenNavigator({
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+    <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       {searchable && (
         <div className="sb-token-navigator__search">
           <input

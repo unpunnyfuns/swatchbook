@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
 import './OpacityScale.css';
-import { themeAttrs } from '#/internal/data-attr.ts';
+import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
@@ -99,7 +99,7 @@ export function OpacityScale({
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+      <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
         <div className="sb-block__empty">No opacity tokens match this filter.</div>
       </div>
     );
@@ -108,7 +108,7 @@ export function OpacityScale({
   const sampleColorVar = resolveCssVar(sampleColor, project);
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+    <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       <div className="sb-block__caption">{captionText}</div>
       <div className="sb-opacity-scale__grid">
         {rows.map((row) => (

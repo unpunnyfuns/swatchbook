@@ -3,7 +3,7 @@ import type { ReactElement } from 'react';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import { CopyButton } from '#/internal/CopyButton.tsx';
-import { themeAttrs } from '#/internal/data-attr.ts';
+import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { useProject } from '#/internal/use-project.ts';
 import { AliasChain } from '#/token-detail/AliasChain.tsx';
@@ -27,11 +27,11 @@ export interface TokenDetailProps {
 export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
   const { token, cssVar, activeTheme, activeAxes, cssVarPrefix } = useTokenDetailData(path);
   const colorFormat = useColorFormat();
-  const theme = themeAttrs(cssVarPrefix, activeAxes);
+  const wrapperAttrs = blockWrapperAttrs(cssVarPrefix, activeAxes);
 
   if (!token) {
     return (
-      <div {...theme} className={cx(theme['className'], 'sb-token-detail')}>
+      <div {...wrapperAttrs} className={cx(wrapperAttrs['className'], 'sb-token-detail')}>
         <div className="sb-token-detail__missing">
           Token <code>{path}</code> not found in theme <strong>{activeTheme}</strong>.
         </div>
@@ -46,7 +46,7 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
   const outOfGamut = gamut?.outOfGamut ?? false;
 
   return (
-    <div {...theme} className={cx(theme['className'], 'sb-token-detail')}>
+    <div {...wrapperAttrs} className={cx(wrapperAttrs['className'], 'sb-token-detail')}>
       <TokenHeader path={path} {...(heading !== undefined && { heading })} />
 
       <div className="sb-token-detail__section-header">Resolved value · {activeTheme}</div>

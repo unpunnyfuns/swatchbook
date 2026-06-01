@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './FontFamilySample.css';
-import { themeAttrs } from '#/internal/data-attr.ts';
+import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { sortTokens } from '#/internal/sort-tokens.ts';
@@ -67,14 +67,14 @@ export function FontFamilySample({
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+      <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
         <div className="sb-block__empty">No fontFamily tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+    <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} className="sb-font-family-sample__row">

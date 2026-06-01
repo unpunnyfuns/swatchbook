@@ -41,6 +41,7 @@ import {
   STYLE_ELEMENT_ID,
   TOKENS_UPDATED_EVENT,
 } from '#/constants.ts';
+import type { InitPayload } from '#/channel-types.ts';
 import type { StoryParameters, SwatchbookGlobals } from '#/globals.ts';
 
 // Standard visually-hidden style for the theme-flip live region.
@@ -98,7 +99,7 @@ function forEachPinnedAxis(cb: (name: string, value: string) => void): void {
 // in axis order. Used for the `ThemeContext` value the blocks read and
 // the addon-channel signals downstream consumers subscribe to. Returns
 // empty string when there are no axes (no name to write).
-function matchThemeName(tuple: Readonly<Record<string, string>>): string {
+function composeThemeName(tuple: Readonly<Record<string, string>>): string {
   if (virtualAxes.length === 0) return '';
   return tupleToName(virtualAxes, tuple);
 }
@@ -125,20 +126,11 @@ function setRootAxes(tuple: Readonly<Record<string, string>>): void {
   });
 }
 
-// Subset of an INIT_EVENT-shaped object the manager bundle needs. The
-// fields are the union of what the toolbar and panel read; named so
-// `broadcastInit` (module-level virtual exports) and the HMR re-emit
-// (`payload`-shaped) compose the same payload from the same shape.
-interface InitFieldsSource {
-  axes: typeof virtualAxes;
-  disabledAxes: typeof virtualDisabledAxes;
-  presets: typeof virtualPresets;
-  diagnostics: typeof diagnostics;
-  cssVarPrefix: string;
-  defaultTuple: typeof virtualDefaultTuple;
-}
-
-function pickInitFields(source: InitFieldsSource): InitFieldsSource {
+// Project the INIT_EVENT fields the manager bundle needs out of a wider
+// source object. Both `broadcastInit` (module-level virtual exports) and
+// the HMR re-emit (`payload`-shaped) feed it, so the two compose the same
+// `InitPayload` from the same field set.
+function toInitPayload(source: InitPayload): InitPayload {
   return {
     axes: source.axes,
     disabledAxes: source.disabledAxes,
@@ -156,7 +148,7 @@ function broadcastInit(): void {
   const channel = addons.getChannel();
   channel.emit(
     INIT_EVENT,
-    pickInitFields({
+    toInitPayload({
       axes: virtualAxes,
       disabledAxes: virtualDisabledAxes,
       presets: virtualPresets,
@@ -176,7 +168,7 @@ function defaultTuple(): Record<string, string> {
 
 // Reverse-engineer a tuple from a `Light · Brand A · Normal`-shape
 // theme name. Splits on ` · ` and zips with `virtualAxes` in declared
-// order — matches `matchThemeName`'s production direction so a
+// order — matches `composeThemeName`'s production direction so a
 // round-trip is lossless. Returns `undefined` when the segment count
 // doesn't match the axis count.
 function tupleForName(name: string): Record<string, string> | undefined {
@@ -209,7 +201,7 @@ function normalizeTuple(partial: Readonly<Record<string, string>>): Record<strin
 
 // Resolve the active tuple from all input channels, in priority order:
 //   1. `parameters.swatchbook.axes` — per-story tuple.
-//   2. `parameters.swatchbook.permutation` — per-story composed name.
+//   2. `parameters.swatchbook.permutation` — per-story composed theme name.
 //   3. `globals.swatchbookAxes` — toolbar-set tuple.
 //   4. virtual module default.
 function resolveTuple(
@@ -257,7 +249,7 @@ const themedDecorator: Decorator = (Story, context) => {
     [axesGlobal, paramSwatchbook],
   );
   const colorFormat = useMemo(() => resolveColorFormat(colorFormatGlobal), [colorFormatGlobal]);
-  const themeName = useMemo(() => matchThemeName(tuple), [tuple]);
+  const themeName = useMemo(() => composeThemeName(tuple), [tuple]);
 
   useEffect(() => {
     ensureStylesheet(css, cssVarPrefix);
@@ -345,7 +337,7 @@ export const decorators: NonNullable<Preview['decorators']> = [themedDecorator];
 export const globalTypes: NonNullable<Preview['globalTypes']> = {
   [AXES_GLOBAL_KEY]: {
     name: 'Axes',
-    description: 'Per-axis context selection — the active permutation tuple.',
+    description: 'Per-axis context selection — the active theme name tuple.',
   },
   [COLOR_FORMAT_GLOBAL_KEY]: {
     name: 'Color format',
@@ -406,9 +398,9 @@ function installGlobalAxisApplier(): void {
   const onGlobals = (payload: { globals?: SwatchbookGlobals }): void => {
     if (!payload.globals) return;
     const tuple = resolveTuple(payload.globals[AXES_GLOBAL_KEY], undefined);
-    const fingerprint = matchThemeName(tuple);
-    if (fingerprint === lastApplied) return;
-    lastApplied = fingerprint;
+    const themeKey = composeThemeName(tuple);
+    if (themeKey === lastApplied) return;
+    lastApplied = themeKey;
     apply(payload.globals);
   };
   channel.on('globalsUpdated', onGlobals);
@@ -455,7 +447,7 @@ if (import.meta.hot) {
   import.meta.hot.on(HMR_EVENT, (payload: HmrSnapshot) => {
     ensureStylesheet(payload.css, payload.cssVarPrefix);
     const channel = addons.getChannel();
-    channel.emit(INIT_EVENT, pickInitFields(payload));
+    channel.emit(INIT_EVENT, toInitPayload(payload));
     channel.emit(TOKENS_UPDATED_EVENT, payload);
   });
 }

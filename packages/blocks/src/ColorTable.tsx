@@ -7,7 +7,7 @@ import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import type { ColorFormat, NormalizedColor } from '#/format-color.ts';
 import { CopyButton } from '#/internal/CopyButton.tsx';
-import { themeAttrs } from '#/internal/data-attr.ts';
+import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
@@ -185,14 +185,14 @@ export function ColorTable({
 
   if (groups.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+      <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
         <div className="sb-block__empty">No color tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+    <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       {searchable && (
         <div className="sb-color-table__search">
           <input

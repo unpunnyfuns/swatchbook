@@ -5,7 +5,7 @@ import { useCallback, useDeferredValue, useMemo, useState } from 'react';
 import './TokenTable.css';
 import { useColorFormat } from '#/contexts.ts';
 import { CopyButton } from '#/internal/CopyButton.tsx';
-import { themeAttrs } from '#/internal/data-attr.ts';
+import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
@@ -115,14 +115,14 @@ export function TokenTable({
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+      <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
         <div className="sb-block__empty">No tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+    <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       {searchable && (
         <div className="sb-token-table__search">
           <input

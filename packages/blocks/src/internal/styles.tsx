@@ -33,7 +33,7 @@ export const typePillStyle = {
 
 /**
  * Inner content for a block's "nothing to render" state. Call sites wrap
- * it in their own block wrapper (which already carries `themeAttrs`), so
+ * it in their own block wrapper (which already carries `blockWrapperAttrs`), so
  * the message itself just needs the muted type.
  */
 export function EmptyState({ children }: { children: ReactNode }): ReactElement {

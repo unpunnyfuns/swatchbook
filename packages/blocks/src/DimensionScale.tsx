@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import './DimensionScale.css';
 import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
 import type { DimensionKind } from '#/dimension-scale/DimensionBar.tsx';
-import { themeAttrs } from '#/internal/data-attr.ts';
+import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
@@ -97,14 +97,14 @@ export function DimensionScale({
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+      <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
         <div className="sb-block__empty">No dimension tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+    <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} className="sb-dimension-scale__row">

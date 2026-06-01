@@ -2,7 +2,7 @@ import cx from 'clsx';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './Diagnostics.css';
-import { themeAttrs } from '#/internal/data-attr.ts';
+import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { useProject } from '#/internal/use-project.ts';
 import type { VirtualDiagnostic } from '#/types.ts';
 
@@ -69,7 +69,7 @@ export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
   const headingText = caption ?? `Diagnostics · ${summary.text}`;
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeAxes)} data-testid="diagnostics">
+    <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)} data-testid="diagnostics">
       <details open={summary.hasErrorsOrWarnings}>
         <summary
           className={cx(

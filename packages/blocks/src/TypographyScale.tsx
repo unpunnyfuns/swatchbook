@@ -2,7 +2,7 @@ import type { CSSProperties, ReactElement } from 'react';
 import { useMemo } from 'react';
 import './TypographyScale.css';
 import type { TypographyValue } from '#/internal/composite-types.ts';
-import { themeAttrs } from '#/internal/data-attr.ts';
+import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { useProject } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { sortTokens } from '#/internal/sort-tokens.ts';
@@ -112,14 +112,14 @@ export function TypographyScale({
 
   if (rows.length === 0) {
     return (
-      <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+      <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
         <div className="sb-block__empty">No typography tokens match this filter.</div>
       </div>
     );
   }
 
   return (
-    <div {...themeAttrs(cssVarPrefix, activeAxes)}>
+    <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} className="sb-typography-scale__row">

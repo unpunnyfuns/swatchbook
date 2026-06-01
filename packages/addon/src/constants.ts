@@ -23,7 +23,9 @@ export const RESOLVED_INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID = `\0${INTEGRATION_SID
 
 export const STYLE_ELEMENT_ID = 'swatchbook-tokens';
 
-/** Channel event: preview → manager, carries theme list + mode. */
+/** Channel event: preview → manager, carries the init payload:
+ * axes / presets / disabledAxes / diagnostics / cssVarPrefix /
+ * defaultTuple. */
 export const INIT_EVENT = 'swatchbook/init';
 /** Channel event: manager → preview, asks preview to re-emit INIT_EVENT.
  * Covers the race where the manager subscribes after the preview's
@@ -44,6 +46,6 @@ export const TOKENS_UPDATED_EVENT = 'swatchbook/tokens-updated';
 
 /** Custom Vite HMR event: plugin → preview. Preview forwards it to the
  * Storybook channel as {@link TOKENS_UPDATED_EVENT} so blocks can
- * update their snapshot. Kept distinct from the channel event so the
- * plugin doesn't need a Storybook-channel dependency. */
-export const HMR_EVENT = 'swatchbook/tokens-updated';
+ * update their snapshot. A distinct wire string from the channel event
+ * so the plugin doesn't need a Storybook-channel dependency. */
+export const HMR_EVENT = 'swatchbook/hmr-tokens';

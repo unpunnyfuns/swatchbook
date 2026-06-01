@@ -152,12 +152,12 @@ function formatHex(color: Color, alpha: number): FormatColorResult {
     const rgb = formatRgb(color, alpha);
     return { value: rgb.value, outOfGamut: true };
   }
-  const r = clamp255(coord(srgb, 0));
-  const g = clamp255(coord(srgb, 1));
-  const b = clamp255(coord(srgb, 2));
+  const r = unitToByte(coord(srgb, 0));
+  const g = unitToByte(coord(srgb, 1));
+  const b = unitToByte(coord(srgb, 2));
   const base = `#${toHexByte(r)}${toHexByte(g)}${toHexByte(b)}`;
   if (alpha >= 1) return { value: base, outOfGamut: false };
-  const a = clamp255(alpha);
+  const a = unitToByte(alpha);
   return { value: `${base}${toHexByte(a)}`, outOfGamut: false };
 }
 
@@ -194,7 +194,7 @@ function formatOklch(color: Color, alpha: number): FormatColorResult {
   return { value, outOfGamut: false };
 }
 
-function clamp255(n: number): number {
+function unitToByte(n: number): number {
   return Math.max(0, Math.min(255, Math.round(n * 255)));
 }
 

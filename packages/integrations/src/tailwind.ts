@@ -83,16 +83,15 @@ export default function tailwindIntegration(
 
 function renderTailwindTheme(project: Project, roles: RoleMap): string {
   const prefix = project.config.cssVarPrefix ?? '';
-  const sourcePrefix = prefix ? `${prefix}-` : '';
-  const scopePrefix = prefix ? `${prefix}-` : '';
+  const varPrefix = prefix ? `${prefix}-` : '';
 
   const entries: string[] = [];
   for (const [scale, names] of Object.entries(roles)) {
     if (names.length === 0) continue;
     entries.push(`  /* ${scale} */`);
     for (const [themeKey, sourcePath] of names) {
-      const sourceVar = `--${sourcePrefix}${sourcePath.replaceAll('.', '-')}`;
-      const themeVar = `--${scale}-${scopePrefix}${themeKey}`;
+      const sourceVar = `--${varPrefix}${sourcePath.replaceAll('.', '-')}`;
+      const themeVar = `--${scale}-${varPrefix}${themeKey}`;
       entries.push(`  ${themeVar}: var(${sourceVar});`);
     }
     entries.push('');

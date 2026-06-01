@@ -139,7 +139,7 @@ export function useActiveTheme(): string {
  * Active axis tuple for the current story/docs render — `Record<axisName,
  * contextName>`. Derived from the same input as {@link ThemeContext}; split
  * out so consumers needing per-axis info (toolbar, panel, tuple-aware
- * blocks) don't have to reparse the composed permutation ID.
+ * blocks) don't have to reparse the composed theme name.
  */
 export const AxesContext = createContext<Readonly<Record<string, string>>>({});
 
