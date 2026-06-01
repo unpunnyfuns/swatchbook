@@ -62,13 +62,11 @@ function defaultTuple(axes: readonly VirtualAxis[]): Record<string, string> {
   return out;
 }
 
-/**
- * Build a `resolveAt` accessor backed by the token graph. Returns an
- * empty resolver when no graph is present (test stubs, partial
- * snapshots). Stable identity when memoized on `tokenGraph` — the
- * graph is a module-level virtual-module export so its reference stays
- * constant for the lifetime of the iframe.
- */
+// Build a `resolveAt` accessor backed by the token graph. Returns an
+// empty resolver when no graph is present (test stubs, partial
+// snapshots). Stable identity when memoized on `tokenGraph` — the
+// graph is a module-level virtual-module export so its reference stays
+// constant for the lifetime of the iframe.
 function makeResolveAt(
   graph: VirtualTokenGraph | undefined,
 ): (tuple: Record<string, string>) => ResolvedTokens {
@@ -76,14 +74,12 @@ function makeResolveAt(
   return (tuple) => resolveAllAt(graph, tuple) as unknown as ResolvedTokens;
 }
 
-/**
- * Build the `resolveAt` accessor for a snapshot. Prefers the
- * snapshot's own `resolveAt` (the addon's preview decorator
- * pre-builds one at module load — see `previewResolveAt` in
- * `packages/addon/src/preview.tsx`), otherwise builds one from
- * `tokenGraph`. Hand-built snapshots can omit `resolveAt`;
- * the graph-backed fallback covers them.
- */
+// Build the `resolveAt` accessor for a snapshot. Prefers the
+// snapshot's own `resolveAt` (the addon's preview decorator
+// pre-builds one at module load — see `previewResolveAt` in
+// `packages/addon/src/preview.tsx`), otherwise builds one from
+// `tokenGraph`. Hand-built snapshots can omit `resolveAt`;
+// the graph-backed fallback covers them.
 function snapshotResolveAt(
   snapshot: ProjectSnapshot,
 ): (tuple: Record<string, string>) => ResolvedTokens {
@@ -187,13 +183,11 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
   const contextPermutation = useActiveTheme();
   const contextAxes = useActiveAxes();
   const channelGlobals = useChannelGlobals();
-  /**
-   * Subscribe to the live token snapshot rather than reading the virtual
-   * module's module-level exports directly. Initial values come from
-   * `virtual:swatchbook/tokens` at load time; subsequent dev-time edits
-   * flow through the addon's HMR channel and update this snapshot in
-   * place so blocks re-render without a full preview reload.
-   */
+  // Subscribe to the live token snapshot rather than reading the virtual
+  // module's module-level exports directly. Initial values come from
+  // `virtual:swatchbook/tokens` at load time; subsequent dev-time edits
+  // flow through the addon's HMR channel and update this snapshot in
+  // place so blocks re-render without a full preview reload.
   const tokens = useTokenSnapshot();
 
   useEffect(() => {

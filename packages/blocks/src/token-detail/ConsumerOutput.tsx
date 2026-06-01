@@ -21,8 +21,7 @@ export function ConsumerOutput({ path }: ConsumerOutputProps): ReactElement | nu
   // Platforms beyond `css`. Populated only when the consumer has loaded
   // extra plugins (`@terrazzo/plugin-swift`, `-android`, `-sass`, …) via
   // `config.terrazzoPlugins` + `config.listingOptions.platforms`. Always
-  // empty otherwise — the row set falls back to Path + CSS exactly like
-  // before listing adoption.
+  // empty otherwise — the row set falls back to Path + CSS.
   const names = listing[path]?.names ?? {};
   const extraPlatforms = Object.keys(names)
     .filter((platform) => platform !== 'css' && names[platform])

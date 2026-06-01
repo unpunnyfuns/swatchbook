@@ -11,31 +11,28 @@ export interface SortOptions {
 
 type Entry = readonly [string, VirtualToken];
 
-/**
- * Stable sort for a filtered `[path, token][]` list.
- *
- * `sortBy: 'path'` — lexicographic on the dot-path (locale-aware, numeric).
- * `sortBy: 'value'` — per-`$type` ordering:
- *   - `dimension` / `duration` → numeric pixels / ms (via `toMagnitude`).
- *   - `fontWeight` / `opacity` / `number` / `lineHeight` → numeric.
- *   - `color` → perceptual by oklch L → C → H.
- *   - `fontFamily` / `strokeStyle` (string form) → lexicographic.
- *   - Composites (`typography`, `shadow`, `border`, `gradient`, `transition`) →
- *     fall back to path-alpha. No useful single-axis order.
- * `sortBy: 'none'` — preserve input order (still respects `sortDir: 'desc'`
- *   as a reverse).
- */
-/**
- * Pre-computed per-token sort key — one of three shapes depending on
- * `$type`. The comparator looks the key up by token-reference once
- * per pair instead of recomputing on every comparison (Schwartzian
- * transform).
- *
- * For N tokens, sort does O(N log N) comparisons; per-call cost for
- * colors was an Oklch conversion (a `new Color()` + `to('oklch')`)
- * which dominates wall time on real fixtures. Pre-computing brings
- * that down to O(N) keys + O(N log N) cheap lookups.
- */
+// Stable sort for a filtered `[path, token][]` list.
+//
+// `sortBy: 'path'` — lexicographic on the dot-path (locale-aware, numeric).
+// `sortBy: 'value'` — per-`$type` ordering:
+//   - `dimension` / `duration` → numeric pixels / ms (via `toMagnitude`).
+//   - `fontWeight` / `opacity` / `number` / `lineHeight` → numeric.
+//   - `color` → perceptual by oklch L → C → H.
+//   - `fontFamily` / `strokeStyle` (string form) → lexicographic.
+//   - Composites (`typography`, `shadow`, `border`, `gradient`, `transition`) →
+//     fall back to path-alpha. No useful single-axis order.
+// `sortBy: 'none'` — preserve input order (still respects `sortDir: 'desc'`
+//   as a reverse).
+
+// Pre-computed per-token sort key — one of three shapes depending on
+// `$type`. The comparator looks the key up by token-reference once
+// per pair instead of recomputing on every comparison (Schwartzian
+// transform).
+//
+// For N tokens, sort does O(N log N) comparisons; per-call cost for
+// colors is an Oklch conversion (a `new Color()` + `to('oklch')`)
+// which dominates wall time on real fixtures. Pre-computing brings
+// that down to O(N) keys + O(N log N) cheap lookups.
 type SortKey =
   | { kind: 'numeric'; value: number; valid: boolean }
   | { kind: 'color'; key: { l: number; c: number; h: number } | null }
@@ -162,11 +159,9 @@ function toMagnitude(v: unknown): number {
   return Number.NaN;
 }
 
-/**
- * Coerce a possibly-null/undefined number to 0 — `coords` returns
- * `(number | null)[]` and `noUncheckedIndexedAccess` adds `undefined`
- * on top. `typeof` narrows the union for the comparator below.
- */
+// Coerce a possibly-null/undefined number to 0 — `coords` returns
+// `(number | null)[]` and `noUncheckedIndexedAccess` adds `undefined`
+// on top. `typeof` narrows the union for the comparator below.
 function safeNumber(v: number | null | undefined): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : 0;
 }

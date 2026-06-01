@@ -48,9 +48,8 @@ function ensureSubscribed(): void {
   // initial URL-persisted globals; `updateGlobals` is the toolbar
   // signal; `globalsUpdated` is the cross-frame echo. The handler runs
   // for each but content-deduplicates: we only update the shared
-  // snapshot when axes or format actually shifted (the previous
-  // identity-based spread guard fired three times per tick because each
-  // spread produced a new object identity even with unchanged content).
+  // snapshot when axes or format actually shifted, so the three events
+  // per tick don't each trigger a re-render.
   let lastFingerprint = '';
   const onGlobals = (payload: { globals?: SwatchbookGlobalsPayload }): void => {
     const globals = payload.globals;
@@ -71,11 +70,9 @@ function ensureSubscribed(): void {
   channel.on('setGlobals', onGlobals);
 }
 
-/**
- * Subscribe at module load so the `SET_GLOBALS` emission from preview init
- * lands in our snapshot before any block renders. Running `useSyncExternalStore`'s
- * `subscribe` lazily on first hook call would miss the event in most cases.
- */
+// Subscribe at module load so the `SET_GLOBALS` emission from preview init
+// lands in our snapshot before any block renders. Running `useSyncExternalStore`'s
+// `subscribe` lazily on first hook call would miss the event in most cases.
 ensureSubscribed();
 
 function subscribe(cb: () => void): () => void {

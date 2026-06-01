@@ -150,16 +150,14 @@ function collectLeafPaths(nodes: TreeNode[], out: string[]): void {
   }
 }
 
-/**
- * Flatten the currently-visible treeitems into the order screen-reader
- * users + arrow-key users navigate them: depth-first, only descending
- * into expanded groups. Each entry carries enough metadata for the
- * keyboard handler to compute parent / first-child / next / prev.
- */
+// Flatten the currently-visible treeitems into the order screen-reader
+// users + arrow-key users navigate them: depth-first, only descending
+// into expanded groups. Each entry carries enough metadata for the
+// keyboard handler to compute parent / first-child / next / prev.
 interface FlatTreeItem {
   path: string;
   kind: 'group' | 'leaf';
-  /** Dot-path of the parent group, or `null` for top-level entries. */
+  // Dot-path of the parent group, or `null` for top-level entries.
   parentPath: string | null;
 }
 
@@ -177,11 +175,9 @@ function flattenVisible(
   }
 }
 
-/**
- * Return a pruned copy of the tree keeping only leaves whose path is in
- * `matches`, plus the groups on the way to them. Every surviving group's
- * path is added to `expandOut` so callers can force those groups open.
- */
+// Return a pruned copy of the tree keeping only leaves whose path is in
+// `matches`, plus the groups on the way to them. Every surviving group's
+// path is added to `expandOut` so callers can force those groups open.
 function pruneTreeForMatches(
   nodes: TreeNode[],
   matches: ReadonlySet<string>,
@@ -544,11 +540,11 @@ interface TreeNodeRowProps {
   onToggle(path: string): void;
   onFocusPath(path: string): void;
   onLeafClick(path: string): void;
-  /** 1-indexed depth in the tree (top-level = 1). */
+  // 1-indexed depth in the tree (top-level = 1).
   level: number;
-  /** Number of siblings at this level (including self). */
+  // Number of siblings at this level (including self).
   setsize: number;
-  /** 1-indexed position among siblings. */
+  // 1-indexed position among siblings.
   posinset: number;
 }
 
@@ -643,11 +639,11 @@ interface LeafRowProps {
   registerTreeItem(path: string): (el: HTMLLIElement | null) => void;
   onFocusPath(path: string): void;
   onLeafClick(path: string): void;
-  /** 1-indexed depth in the tree (top-level = 1). */
+  // 1-indexed depth in the tree (top-level = 1).
   level: number;
-  /** Number of siblings at this level (including self). */
+  // Number of siblings at this level (including self).
   setsize: number;
-  /** 1-indexed position among siblings. */
+  // 1-indexed position among siblings.
   posinset: number;
 }
 

@@ -223,12 +223,10 @@ function formatDimensionValue(v: unknown): string | null {
   return JSON.stringify(v);
 }
 
-/**
- * Route sub-value colors through `formatColor` so they honor the active
- * color-format dropdown, just like the standalone `<ColorPalette />` and
- * `<TokenDetail />` top-line do. Returns `null` for a missing field so
- * the key/value row drops out entirely.
- */
+// Route sub-value colors through `formatColor` so they honor the active
+// color-format dropdown, just like the standalone `<ColorPalette />` and
+// `<TokenDetail />` top-line do. Returns `null` for a missing field so
+// the key/value row drops out entirely.
 function formatColorSubValue(v: unknown, format: ColorFormat): string | null {
   if (v == null) return null;
   return formatColor(v, format).value;
@@ -244,11 +242,9 @@ function pickArrayAliases(v: unknown): Record<string, string | undefined>[] | un
   return v as Record<string, string | undefined>[];
 }
 
-/**
- * Walk the alias chain starting from an immediate sub-value alias target.
- * `aliasTarget` is the path the sub-value directly references; the target
- * token's own `aliasChain` continues the walk to the primitive.
- */
+// Walk the alias chain starting from an immediate sub-value alias target.
+// `aliasTarget` is the path the sub-value directly references; the target
+// token's own `aliasChain` continues the walk to the primitive.
 function subValueChain(
   aliasTarget: string | undefined,
   resolved: Record<string, DetailToken> | undefined,

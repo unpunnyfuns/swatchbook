@@ -7,11 +7,9 @@ export interface TokenUsageSnippetProps {
   path: string;
 }
 
-/**
- * DTCG `$type`s with a single canonical CSS property. Types whose value is
- * applied across many properties (`dimension`, `number`, `strokeStyle`,
- * `typography`) are intentionally absent — they fall back to a commented hint.
- */
+// DTCG `$type`s with a single canonical CSS property. Types whose value is
+// applied across many properties (`dimension`, `number`, `strokeStyle`,
+// `typography`) are intentionally absent — they fall back to a commented hint.
 const CSS_PROPERTY_BY_TYPE: Record<string, string> = {
   color: 'color',
   shadow: 'box-shadow',

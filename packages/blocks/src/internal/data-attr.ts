@@ -7,14 +7,12 @@ import { dataAttr } from '@unpunnyfuns/swatchbook-core/data-attr';
  */
 export const BLOCK_ATTR = 'data-swatchbook-block';
 
-/**
- * Opt-out class that Storybook's `.sbdocs` stylesheet uses to self-exclude
- * on MDX docs pages — every `.sbdocs` house rule is wrapped in
- * `:not(.sb-unstyled, .sb-unstyled *)`, so any descendant of a `.sb-unstyled`
- * container is left alone. Stamped onto every block wrapper so blocks
- * render identically in MDX docs and regular stories without fighting
- * cascade specificity.
- */
+// Opt-out class that Storybook's `.sbdocs` stylesheet uses to self-exclude
+// on MDX docs pages — every `.sbdocs` house rule is wrapped in
+// `:not(.sb-unstyled, .sb-unstyled *)`, so any descendant of a `.sb-unstyled`
+// container is left alone. Stamped onto every block wrapper so blocks
+// render identically in MDX docs and regular stories without fighting
+// cascade specificity.
 const WRAPPER_CLASSES = 'sb-unstyled sb-block';
 
 /**

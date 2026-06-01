@@ -49,10 +49,8 @@ interface Swatch {
   outOfGamut: boolean;
 }
 
-/**
- * Count segments in the filter before the first glob (`*` / `**`).
- * `color.*` → 2; `color.surface.*` → 3; `color` → 1; undefined → 0.
- */
+// Count segments in the filter before the first glob (`*` / `**`).
+// `color.*` → 2; `color.surface.*` → 3; `color` → 1; undefined → 0.
 function fixedPrefixLength(filter: string | undefined): number {
   if (!filter) return 0;
   const segments = filter.split('.');

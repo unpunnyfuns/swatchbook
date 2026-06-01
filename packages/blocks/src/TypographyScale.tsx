@@ -8,11 +8,9 @@ import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 
-/**
- * Dimension sub-values in DTCG 2025.10 use a `{ value, unit }` envelope
- * — narrow once here so the local `asDimension` helper doesn't need
- * to re-validate keys at every read.
- */
+// Dimension sub-values in DTCG 2025.10 use a `{ value, unit }` envelope
+// — narrow once here so the local `asDimension` helper doesn't need
+// to re-validate keys at every read.
 interface DimensionLike {
   value?: unknown;
   unit?: unknown;
