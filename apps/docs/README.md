@@ -1,41 +1,19 @@
-# Website
+# swatchbook docs
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+The swatchbook documentation site, built on [Docusaurus](https://docusaurus.io/). It hosts the concepts, guides, and API reference published at [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/).
 
-## Installation
+Private workspace package. Not published.
 
-```bash
-yarn
+## Develop
+
+```sh
+pnpm start          # local dev server with live reload
+pnpm build          # static build into ./build
+pnpm serve          # serve the built site
 ```
 
-## Local Development
+`prestart` / `prebuild` regenerate the dogfood tokens via `pnpm build:tokens` first.
 
-```bash
-yarn start
-```
+## Documentation
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-## Build
-
-```bash
-yarn build
-```
-
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-## Deployment
-
-Using SSH:
-
-```bash
-USE_SSH=true yarn deploy
-```
-
-Not using SSH:
-
-```bash
-GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+[unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/) is the live site this package produces.

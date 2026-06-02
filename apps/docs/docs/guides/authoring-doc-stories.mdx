@@ -6,7 +6,7 @@ sidebar_position: 2
 
 # Authoring doc stories
 
-The doc blocks from `@unpunnyfuns/swatchbook-blocks` are React components that render against the active token graph. Use them in MDX stories to compose reference pages — a `ColorPalette`, a `TypographyScale`, a `TokenTable` filtered to a subpath — all of which update live as the toolbar changes axes.
+The doc blocks from `@unpunnyfuns/swatchbook-blocks` are React components that render against the active token graph. Use them in MDX stories to compose reference pages (a `ColorPalette`, a `TypographyScale`, a `TokenTable` filtered to a subpath), all of which update live as the toolbar changes axes.
 
 ## Prerequisite
 
@@ -41,11 +41,11 @@ import { ColorPalette, ColorTable, TokenTable } from '@unpunnyfuns/swatchbook-bl
 <TokenTable filter="color.**" type="color" />
 ```
 
-`ColorTable` groups variants under their base path — `color.accent.bg` + `color.accent.bg-hover` collapse to one `accent.bg` row with a `default` / `hover` pill selector, and each row expands inline to show all variants side-by-side. `<TokenTable>` is the flat view for comparison. Visit `Docs / Colors`; swatches and values update as you flip the toolbar.
+`ColorTable` groups variants under their base path: `color.accent.bg` + `color.accent.bg-hover` collapse to one `accent.bg` row with a `default` / `hover` pill selector, and each row expands inline to show all variants side-by-side. `<TokenTable>` is the flat view for comparison. Visit `Docs / Colors`; swatches and values update as you flip the toolbar.
 
 ## A dashboard composition
 
-One page with diagnostics, tree, and table gives a top-to-bottom view — project health, browsable hierarchy, searchable lookup:
+One page with diagnostics, tree, and table gives a top-to-bottom view: project health, browsable hierarchy, searchable lookup:
 
 ```tsx title="src/docs/tokens.mdx"
 import { Meta } from '@storybook/addon-docs/blocks';
@@ -70,7 +70,7 @@ import { Diagnostics, TokenNavigator, TokenTable } from '@unpunnyfuns/swatchbook
 
 | Block | What it renders |
 | --- | --- |
-| `TokenDetail` | A single token's full picture — alias chain, aliased-by tree, per-axis variance, composite preview. |
+| `TokenDetail` | A single token's full picture: alias chain, aliased-by tree, per-axis variance, composite preview. |
 | `TokenTable` | Filterable table of tokens. Supports path glob and `$type` filters. |
 | `TokenNavigator` | Expandable tree; scope to a subtree or `$type`. |
 | `ColorPalette` | Swatch grid grouped by sub-path. |
@@ -112,7 +112,7 @@ The toolbar still reflects the story's active tuple, so readers see what they're
 
 ## What MDX can't do
 
-Storybook's preview hooks (`useGlobals`, `useArgs`, `useChannel`) throw when called from an MDX doc block — the preview `HooksContext` only exists while a story is rendering. The blocks in this package subscribe to Storybook's channel directly instead. If you write a custom block for your project, same pattern:
+Storybook's preview hooks (`useGlobals`, `useArgs`, `useChannel`) throw when called from an MDX doc block; the preview `HooksContext` only exists while a story is rendering. The blocks in this package subscribe to Storybook's channel directly instead. If you write a custom block for your project, same pattern:
 
 ```ts
 import { addons } from 'storybook/preview-api';
@@ -125,6 +125,6 @@ channel.on('globalsUpdated', (payload) => {
 
 ## See also
 
-- [Reference: blocks](../reference/blocks/index.mdx) — every block's props.
-- [Reference: addon](../reference/addon.mdx) — the `useToken` hook and its types.
-- [Live Storybook](pathname:///storybook/) — doc stories you can steal from.
+- [Reference: blocks](../reference/blocks/index.mdx): every block's props.
+- [Reference: addon](../reference/addon.mdx): the `useToken` hook and its types.
+- [Live Storybook](pathname:///storybook/): doc stories you can steal from.

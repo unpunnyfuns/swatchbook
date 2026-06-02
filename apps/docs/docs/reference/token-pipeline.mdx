@@ -39,24 +39,24 @@ Nothing written to disk. Edit your config or a token file, Vite notices, the plu
 
 ## HMR
 
-The Vite plugin watches every file your config loaded (the resolver, every `$ref` target, every token file the globs matched) and triggers a reload on any change. Reload is cheap — one `loadProject` call and one module invalidation, not a full-page reload — so the preview re-renders in place without losing toolbar state, story args, or scroll position.
+The Vite plugin watches every file your config loaded (the resolver, every `$ref` target, every token file the globs matched) and triggers a reload on any change. Reload is cheap (one `loadProject` call and one module invalidation, not a full-page reload), so the preview re-renders in place without losing toolbar state, story args, or scroll position.
 
 A short-form HMR event rides Storybook's channel to push the fresh snapshot into running blocks. Token graph updates in under a second on a typical save; edit a token with the [live Storybook](pathname:///storybook/) open to see it.
 
-See [consuming the active theme](../guides/consuming-the-active-theme.mdx) for how stories react to axis flips — related but distinct plumbing.
+See [consuming the active theme](../guides/consuming-the-active-theme.mdx) for how stories react to axis flips: related but distinct plumbing.
 
 ## Not a production theming API
 
-The virtual module lives inside Vite's module graph — the Storybook preview resolves it, consumer apps (Next.js, a Vite SPA, Remix) don't. For production, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources; its plugin ecosystem (`plugin-css`, `plugin-js`, `plugin-tailwind`, `plugin-swift`, `plugin-sass`, …) covers downstream platforms. When both pipelines run, [align their options](../guides/sharing-terrazzo-options.mdx) so what swatchbook shows matches what your apps ship.
+The virtual module lives inside Vite's module graph: the Storybook preview resolves it, consumer apps (Next.js, a Vite SPA, Remix) don't. For production, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources; its plugin ecosystem (`plugin-css`, `plugin-js`, `plugin-tailwind`, `plugin-swift`, `plugin-sass`, …) covers downstream platforms. When both pipelines run, [align their options](../guides/sharing-terrazzo-options.mdx) so what swatchbook shows matches what your apps ship.
 
 ## Where the same property holds
 
-- **Storybook preview** — the primary case.
-- **Docs site blocks outside Storybook** — the blocks package works outside Storybook given a `ProjectSnapshot` through `SwatchbookProvider`. This docs site does that: a small build step computes the snapshot JSON once and ships it as a regular import.
-- **MCP server** — `@unpunnyfuns/swatchbook-mcp` loads the project directly via `loadProject` at startup, exposes its tools against the in-memory graph, watches the same source files for live reload. No intermediate build step.
+- **Storybook preview**: the primary case.
+- **Docs site blocks outside Storybook**: the blocks package works outside Storybook given a `ProjectSnapshot` through `SwatchbookProvider`. This docs site does that: a small build step computes the snapshot JSON once and ships it as a regular import.
+- **MCP server**: `@unpunnyfuns/swatchbook-mcp` loads the project directly via `loadProject` at startup, exposes its tools against the in-memory graph, watches the same source files for live reload. No intermediate build step.
 
 ## Sharp edges
 
-- The virtual module is **addon-internal plumbing**. Its shape, export set, and event names can change between minor versions without a changeset entry. Consumers shouldn't import from `virtual:swatchbook/tokens` directly — use `SwatchbookProvider` + the exported hooks.
-- **Vite is required.** The addon bundles the plugin for Storybook's Vite integration. Webpack-based Storybook setups don't get the virtual module materialized; they'd fall back to a pre-built snapshot or switch to the Vite builder. Storybook 10's default is Vite, so this only bites older setups.
+- The virtual module is **addon-internal plumbing**. Its shape, export set, and event names can change between minor versions without a changeset entry. Consumers shouldn't import from `virtual:swatchbook/tokens` directly; use `SwatchbookProvider` + the exported hooks.
+- **Vite is required.** The addon bundles the plugin for Storybook's Vite integration. Webpack-based Storybook setups don't get the virtual module materialized; they would fall back to a pre-built snapshot or switch to the Vite builder. Storybook 10's default is Vite, so this only bites older setups.
 - File-system edits flow through a **dir-level `fs.watch`** (not a file-level watcher) so atomic-save editors survive.

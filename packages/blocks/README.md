@@ -2,9 +2,9 @@
 
 React MDX doc blocks for [swatchbook](https://github.com/unpunnyfuns/swatchbook).
 
-Render your DTCG tokens in `.mdx` stories — swatch grids, type-specific previews, per-token inspectors. The blocks react to the toolbar's axis flips without any wiring in your story code.
+Render your DTCG tokens in `.mdx` stories: swatch grids, type-specific previews, per-token inspectors. The blocks react to the toolbar's axis flips without any wiring in your story code.
 
-Most consumers pick this up transitively via [`@unpunnyfuns/swatchbook-addon`](../addon); `import { TokenTable } from '@unpunnyfuns/swatchbook-addon'` works out of the box. Install this package directly when you want blocks *without* the Storybook addon — unit tests, a standalone React app wrapping tokens in a custom surface.
+Most consumers pick this up transitively via [`@unpunnyfuns/swatchbook-addon`](../addon); `import { TokenTable } from '@unpunnyfuns/swatchbook-addon'` works out of the box. Install this package directly when you want blocks *without* the Storybook addon, such as unit tests or a standalone React app wrapping tokens in a custom surface.
 
 ## Install
 
@@ -39,10 +39,10 @@ Block catalogue, props, and composition patterns live in the [blocks reference](
 
 ## Boundaries
 
-- ✅ Compose multiple blocks per page — each mounts independently.
+- ✅ Compose multiple blocks per page; each mounts independently.
 - ✅ Render outside Storybook with a hand-built or loaded `ProjectSnapshot`.
-- ❌ Don't import from `virtual:swatchbook/tokens` — it's the addon's internal wiring, not a public API. Use `SwatchbookProvider`.
-- ❌ Don't use `useGlobals` / `useArgs` from `storybook/preview-api` inside custom blocks — those hooks throw in docs context.
+- ❌ Don't import from `virtual:swatchbook/tokens`; it's the addon's internal wiring, not a public API. Use `SwatchbookProvider`.
+- ❌ Don't use `useGlobals` / `useArgs` from `storybook/preview-api` inside custom blocks; those hooks throw in docs context.
 
 ## Credits
 
@@ -50,4 +50,4 @@ Token parsing and resolver evaluation come from [Terrazzo](https://terrazzo.app/
 
 ## Documentation
 
-[unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/) — concepts, guides, and full API reference.
+[unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/): concepts, guides, and full API reference.

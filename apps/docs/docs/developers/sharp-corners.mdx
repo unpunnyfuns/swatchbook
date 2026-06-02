@@ -14,7 +14,7 @@ The "someone will bleed on this" list. Shapes that trip newcomers and sometimes 
 
 **Shape:** the Storybook manager bundle runs React 18 and doesn't expose `react/jsx-runtime`'s React-19 dispatcher. JSX in manager code crashes with `Cannot read properties of undefined (reading 'recentlyCreatedOwnerStacks')`.
 
-**Rule:** use `React.createElement` (or a local `h` alias) in every file under `packages/addon/src/manager/`. Preview code is fine with JSX — it runs on the consumer's React.
+**Rule:** use `React.createElement` (or a local `h` alias) in every file under `packages/addon/src/manager/`. Preview code is fine with JSX; it runs on the consumer's React.
 
 ### Register manager tools with `render: () => h(Component)`, not `render: Component`
 
@@ -32,7 +32,7 @@ The "someone will bleed on this" list. Shapes that trip newcomers and sometimes 
 
 **Shape:** the manager can't import preview-side Vite virtual modules. The preview can't import manager-side React either.
 
-**Rule:** `addons.getChannel()` + `emit`/`on`. Named events only — see `packages/addon/src/constants.ts` for the roster.
+**Rule:** `addons.getChannel()` + `emit`/`on`. Named events only; see `packages/addon/src/constants.ts` for the roster.
 
 ## HMR / file watching
 
@@ -46,7 +46,7 @@ The "someone will bleed on this" list. Shapes that trip newcomers and sometimes 
 
 **Shape:** `server.watcher.add(file)` works fine for files inside the Vite root, but tokens often live in a sibling workspace package reached through a pnpm symlink. Vite's watcher silently drops events across the symlink boundary.
 
-**Rule:** run your own `fs.watch` — don't try to bolt onto Vite's watcher for token files.
+**Rule:** run your own `fs.watch`; don't try to bolt onto Vite's watcher for token files.
 
 ### Debounce the reload
 
@@ -64,7 +64,7 @@ The "someone will bleed on this" list. Shapes that trip newcomers and sometimes 
 
 ### Hook the channel, not the Storybook `preview-api` hooks, from MDX
 
-See *MDX doc blocks cannot use Storybook preview hooks* above — same shape, different angle.
+See *MDX doc blocks cannot use Storybook preview hooks* above; same shape, different angle.
 
 ## Virtual module + provider
 
@@ -84,9 +84,9 @@ See *MDX doc blocks cannot use Storybook preview hooks* above — same shape, di
 
 ### Always carry the on-disk extension
 
-**Shape:** every import in this repo names the file extension — `.ts`, `.tsx`, `.css`, `.json`, `.svg`. No inference, no "fake `.js`".
+**Shape:** every import in this repo names the file extension: `.ts`, `.tsx`, `.css`, `.json`, `.svg`. No inference, no "fake `.js`".
 
-**Rule:** `import { loadProject } from '#/load.ts'` — not `'#/load'` or `'../load'`. Vite, Vitest, tsdown, and Node strip-types all resolve TS-extension specifiers natively.
+**Rule:** `import { loadProject } from '#/load.ts'`, not `'#/load'` or `'../load'`. Vite, Vitest, tsdown, and Node strip-types all resolve TS-extension specifiers natively.
 
 ### Use `#/*` for internal paths
 
@@ -146,15 +146,15 @@ See *MDX doc blocks cannot use Storybook preview hooks* above — same shape, di
 
 ### Turbo's `build` task inputs include versioned snapshots
 
-**Shape:** `turbo.json`'s `build` inputs list `versioned_docs/**`, `versioned_sidebars/**`, `versions.json`. This is load-bearing for the remote cache — a fresh minor snapshot invalidates cache entries for downstream builds that depend on it.
+**Shape:** `turbo.json`'s `build` inputs list `versioned_docs/**`, `versioned_sidebars/**`, `versions.json`. This is load-bearing for the remote cache: a fresh minor snapshot invalidates cache entries for downstream builds that depend on it.
 
 **Rule:** don't prune those entries from the `build` inputs. If you add a new versioned docs artifact, include it too.
 
 ### Release publishes through a deployment environment that requires human approval
 
-**Shape:** the release workflow (`.github/workflows/release.yml`) gates the `release` environment behind a conditional — `environment: ${{ startsWith(github.event.head_commit.message, 'chore(release):') && 'release' || '' }}`. The expression resolves to `release` only when the head commit's message starts with `chore(release):` — i.e., the Version Packages PR's squash-merge. Every other push to main (feature merges, changeset-only PR merges) runs without the gate, because those don't publish — they only open or update the Version Packages PR. The approver list lives under repo Settings → Environments → release. Required reviewers ≥ 1.
+**Shape:** the release workflow (`.github/workflows/release.yml`) gates the `release` environment behind a conditional: `environment: ${{ startsWith(github.event.head_commit.message, 'chore(release):') && 'release' || '' }}`. The expression resolves to `release` only when the head commit's message starts with `chore(release):`, i.e. the Version Packages PR's squash-merge. Every other push to main (feature merges, changeset-only PR merges) runs without the gate, because those don't publish; they only open or update the Version Packages PR. The approver list lives under repo Settings → Environments → release. Required reviewers ≥ 1.
 
-**Rule:** when a release stalls after the Version Packages PR merges, check the Actions tab for a pending deployment review. A privileged org member needs to approve the deployment to release. This is intentional — the gate defends against the compromised-maintainer-account scenario where a malicious commit lands on main and a publish would otherwise proceed unattended. Routine merges (anything that isn't a Version Packages PR) don't fire the gate.
+**Rule:** when a release stalls after the Version Packages PR merges, check the Actions tab for a pending deployment review. A privileged org member needs to approve the deployment to release. This is intentional: the gate defends against the compromised-maintainer-account scenario where a malicious commit lands on main and a publish would otherwise proceed unattended. Routine merges (anything that isn't a Version Packages PR) don't fire the gate.
 
 ## MCP
 
@@ -168,13 +168,13 @@ See *MDX doc blocks cannot use Storybook preview hooks* above — same shape, di
 
 **Shape:** MCP tools registered by a connected server don't have their schemas loaded into the agent's prompt by default. The agent sees tool names only and has to call `ToolSearch` to fetch schemas before invoking.
 
-**Rule:** design tool descriptions to be self-sufficient — the description is what makes the agent decide to fetch the schema. Be specific, list the shape of the return value in prose.
+**Rule:** design tool descriptions to be self-sufficient; the description is what makes the agent decide to fetch the schema. Be specific, list the shape of the return value in prose.
 
 ## Plan + issue governance
 
 ### Every PR links an issue
 
-**Shape:** project convention — every PR body has a `Closes: #N` line, milestone assignment, and `Plan impact` note.
+**Shape:** project convention; every PR body has a `Closes: #N` line, milestone assignment, and `Plan impact` note.
 
 **Rule:** file the issue first (`gh issue create --milestone "Maintenance" --title "…"`). Merging the PR auto-closes the issue.
 
@@ -182,4 +182,4 @@ See *MDX doc blocks cannot use Storybook preview hooks* above — same shape, di
 
 **Shape:** imperative verb as first word; lowercase even for proper nouns; scope matches a package slug.
 
-**Rule:** `fix(blocks): hoist navigator hooks above empty-state early return` — not `Fix(Blocks): TokenNavigator hooks run before empty-state early return`.
+**Rule:** `fix(blocks): hoist navigator hooks above empty-state early return`, not `Fix(Blocks): TokenNavigator hooks run before empty-state early return`.

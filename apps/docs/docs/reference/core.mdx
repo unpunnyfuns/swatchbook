@@ -19,7 +19,7 @@ npm install @unpunnyfuns/swatchbook-core
 
 ### `defineSwatchbookConfig(config)`
 
-Identity helper for a typed `swatchbook.config.ts`. No runtime effect — just TypeScript ergonomics. See the [Config reference](./config.mdx) for every field's semantics.
+Identity helper for a typed `swatchbook.config.ts`. No runtime effect, just TypeScript ergonomics. See the [Config reference](./config.mdx) for every field's semantics.
 
 ```ts
 import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
@@ -33,7 +33,7 @@ export default defineSwatchbookConfig({
 
 ### `loadProject(config, cwd?)`
 
-Parse + resolve a project. Returns a `Project` carrying the token graph and a `resolveAt(tuple)` accessor — no resolver calls happen at consumer-read time.
+Parse + resolve a project. Returns a `Project` carrying the token graph and a `resolveAt(tuple)` accessor; no resolver calls happen at consumer-read time.
 
 ```ts
 import { loadProject } from '@unpunnyfuns/swatchbook-core';
@@ -64,7 +64,7 @@ for (const [path, token] of Object.entries(project.defaultTokens)) {
 
 ### `emitAxisProjectedCss(project, options?)`
 
-Emit the project's resolved CSS as a string — the same output the addon publishes into `virtual:swatchbook/tokens` at preview time. The emitter walks the token graph: each per-axis non-default context gets its own `[data-<prefix>-<axis>="<context>"]` selector block; the default-tuple tokens go to `:root`; tokens whose value differs when more than one axis changes get compound `[data-…][data-…]` selectors. Total block count scales with axes × contexts, not every combination of axes.
+Emit the project's resolved CSS as a string: the same output the addon publishes into `virtual:swatchbook/tokens` at preview time. The emitter walks the token graph: each per-axis non-default context gets its own `[data-<prefix>-<axis>="<context>"]` selector block; the default-tuple tokens go to `:root`; tokens whose value differs when more than one axis changes get compound `[data-…][data-…]` selectors. Total block count scales with axes × contexts, not every combination of axes.
 
 ```ts
 import { loadProject, emitAxisProjectedCss } from '@unpunnyfuns/swatchbook-core';
@@ -75,22 +75,22 @@ const css = emitAxisProjectedCss(project);
 // [data-sb-mode="Dark"] { --sb-color-accent-bg: …; }
 ```
 
-For production builds, prefer Terrazzo's CLI — `emitAxisProjectedCss` exists primarily for tooling that wants the same emission the addon does.
+For production builds, prefer Terrazzo's CLI; `emitAxisProjectedCss` exists primarily for tooling that wants the same emission the addon does.
 
 ## Browser-safe subpaths
 
-Leaf utilities consumers need without the loader's Node deps live on dedicated subpaths. Each is tree-shake-clean, no `@terrazzo/parser`, no `node:*` imports — safe to import from preview-side bundles, the Storybook manager, or any browser consumer.
+Leaf utilities consumers need without the loader's Node deps live on dedicated subpaths. Each is tree-shake-clean, no `@terrazzo/parser`, no `node:*` imports, safe to import from preview-side bundles, the Storybook manager, or any browser consumer.
 
 | Subpath | Export | Purpose |
 | --- | --- | --- |
-| `/graph` | `resolveAt`, `resolveAllAt`, `resolveAliasAt`, `resolveAliasAllAt`, `getVariance`, `getAffectedBy`, `listPaths` + `TokenGraph` / `TokenGraphNode` / `WriteValue` types | Graph query helpers — browser-safe, no Terrazzo dependency at query time. See [Graph queries](#graph-queries) below. |
+| `/graph` | `resolveAt`, `resolveAllAt`, `resolveAliasAt`, `resolveAliasAllAt`, `getVariance`, `getAffectedBy`, `listPaths` + `TokenGraph` / `TokenGraphNode` / `WriteValue` types | Graph query helpers, browser-safe, no Terrazzo dependency at query time. See [Graph queries](#graph-queries) below. |
 | `/snapshot-for-wire` | `snapshotForWire(project, css)` + `SnapshotForWire` type | JSON-friendly subset of `Project` for cross-boundary transport. |
 | `/themes` | `enumerateThemes({axes, presets, defaultTuple})` + `tupleToName(axes, tuple)` + `ThemeEntry` / `ThemeEnumAxis` / `ThemeEnumPreset` types | Enumerate single-axis tuples + presets as a unified theme list; compose stable theme IDs from tuples. |
 | `/match-path` | `matchPath(path, filter)` | Glob-style path matcher (`*` single-segment, `**` multi-segment, bare prefix treated as descendants); shared by blocks' filter prop and the MCP `list_tokens` tool. |
 | `/fuzzy` | `fuzzyFilter` + `fuzzyMatches` | uFuzzy-backed token search; powers the MCP `search_tokens` tool. |
-| `/css-var` | `makeCssVar(path, prefix)` | Compose `var(--prefix-path)` strings — same shape Terrazzo's plugin-css emits. |
-| `/data-attr` | `dataAttr(prefix, key)` | Compose `data-prefix-key` attribute names — namespaced to `cssVarPrefix`. |
-| `/style-element` | `ensureStyleElement(elementId, text)` + `SWATCHBOOK_STYLE_ELEMENT_ID` | Idempotent `<style>` injector — shared between the addon's preview decorator and the blocks-side stylesheet path. |
+| `/css-var` | `makeCssVar(path, prefix)` | Compose `var(--prefix-path)` strings, same shape Terrazzo's plugin-css emits. |
+| `/data-attr` | `dataAttr(prefix, key)` | Compose `data-prefix-key` attribute names, namespaced to `cssVarPrefix`. |
+| `/style-element` | `ensureStyleElement(elementId, text)` + `SWATCHBOOK_STYLE_ELEMENT_ID` | Idempotent `<style>` injector, shared between the addon's preview decorator and the blocks-side stylesheet path. |
 
 ```ts
 import { resolveAt, getVariance } from '@unpunnyfuns/swatchbook-core/graph';
@@ -99,15 +99,15 @@ import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire'
 
 ## Graph queries
 
-`@unpunnyfuns/swatchbook-core/graph` exports the full set of graph query helpers. All are browser-safe — no `@terrazzo/parser`, no `node:*` imports. Import from this subpath whenever resolution or variance queries are needed outside the Node build context (the preview, the Storybook manager, integrations).
+`@unpunnyfuns/swatchbook-core/graph` exports the full set of graph query helpers. All are browser-safe: no `@terrazzo/parser`, no `node:*` imports. Import from this subpath whenever resolution or variance queries are needed outside the Node build context (the preview, the Storybook manager, integrations).
 
 | Export | Signature | Description |
 | --- | --- | --- |
 | `resolveAt` | `(graph, path, tuple) → SwatchbookToken \| undefined` | Resolved leaf value for one token at a given tuple. Memoizable across calls with the same shared `memo` map. |
 | `resolveAllAt` | `(graph, tuple) → TokenMap` | Resolved `TokenMap` for every path in the graph at a given tuple. |
-| `resolveAliasAt` | `(graph, path, tuple) → SwatchbookToken \| undefined` | Alias-preserving view — stops at the first alias/partial-alias write and returns a token with `aliasOf` populated rather than recursing to a leaf. |
+| `resolveAliasAt` | `(graph, path, tuple) → SwatchbookToken \| undefined` | Alias-preserving view; stops at the first alias/partial-alias write and returns a token with `aliasOf` populated rather than recursing to a leaf. |
 | `resolveAliasAllAt` | `(graph, tuple) → TokenMap` | Full `TokenMap` with alias-preserving view for every path. |
-| `getVariance` | `(graph, path) → AxisVarianceResult` | `AxisVarianceResult` (whether the token's value changes across axes, and which axes) for one token path — which axes affect it, and the stringified value per context per axis. |
+| `getVariance` | `(graph, path) → AxisVarianceResult` | `AxisVarianceResult` (whether the token's value changes across axes, and which axes) for one token path: which axes affect it, and the stringified value per context per axis. |
 | `getAffectedBy` | `(graph, path) → readonly string[]` | Set of axis names that can change this token's resolved value at any tuple. |
 | `listPaths` | `(graph) → readonly string[]` | Sorted array of every token path in the graph. |
 
@@ -134,7 +134,7 @@ const paths = listPaths(project.tokenGraph);
 
 ### `CHROME_ROLES`
 
-Frozen list of the ten role names that block chrome reads from. Independent of `config.cssVarPrefix` — these always live under the `--swatchbook-*` namespace so blocks remain stylable regardless of consumer prefix.
+Frozen list of the ten role names that block chrome reads from. Independent of `config.cssVarPrefix`: these always live under the `--swatchbook-*` namespace so blocks remain stylable regardless of consumer prefix.
 
 ```ts
 import { CHROME_ROLES } from '@unpunnyfuns/swatchbook-core';
@@ -187,7 +187,7 @@ interface ResolverConfig extends CommonConfig {
 
 ### `LayeredConfig`
 
-Authored layered axes — per-context overlay globs that layer onto the base `tokens`. The base `tokens` is required.
+Authored layered axes: per-context overlay globs that layer onto the base `tokens`. The base `tokens` is required.
 
 ```ts
 interface LayeredConfig extends CommonConfig {
@@ -293,7 +293,7 @@ interface TokenGraph {
 }
 ```
 
-Walkable graph keyed by token path. JSON-serializable — no Maps or Sets — so the same shape works on Node and in the browser. `axisDefaults` and `axisContexts` carry enough axis metadata for variance queries without needing the original `Axis[]` array.
+Walkable graph keyed by token path. JSON-serializable (no Maps or Sets) so the same shape works on Node and in the browser. `axisDefaults` and `axisContexts` carry enough axis metadata for variance queries without needing the original `Axis[]` array.
 
 ### `TokenGraphNode`
 
@@ -314,7 +314,7 @@ Per-token-path node. `baselineValue` is the resolved leaf at the default tuple. 
 
 ### `TokenListingByPath`
 
-Path-indexed alias over `@terrazzo/plugin-token-listing`'s `ListedToken` shape. Node-side code reads the raw `ListedToken` shape (`listing[path].$extensions['app.terrazzo.listing'].names.css`). Blocks receive the slimmed snapshot form where the access path is `listing[path].names.css` — block authors should call `resolveCssVar(path, project)` rather than indexing the path manually. The full entry carries `originalValue` (pre-resolution, aliases preserved) and `source.loc` (file + line range pointing at the authoring source).
+Path-indexed alias over `@terrazzo/plugin-token-listing`'s `ListedToken` shape. Node-side code reads the raw `ListedToken` shape (`listing[path].$extensions['app.terrazzo.listing'].names.css`). Blocks receive the slimmed snapshot form where the access path is `listing[path].names.css`; block authors should call `resolveCssVar(path, project)` rather than indexing the path manually. The full entry carries `originalValue` (pre-resolution, aliases preserved) and `source.loc` (file + line range pointing at the authoring source).
 
 ```ts
 type TokenListingByPath = Record<string, ListedToken>;
@@ -442,8 +442,8 @@ The shape of `project.resolveAt`.
 
 ## Do / don't
 
-- ✅ Use this package at build time — Node scripts, SSR, Storybook presets. It has no DOM dependency.
-- ✅ Ship `project.tokenGraph` to the browser via [`/snapshot-for-wire`](#browser-safe-subpaths) — `TokenGraph` is JSON-serializable. Query it on the browser side with the [`/graph`](#graph-queries) helpers.
+- ✅ Use this package at build time: Node scripts, SSR, Storybook presets. It has no DOM dependency.
+- ✅ Ship `project.tokenGraph` to the browser via [`/snapshot-for-wire`](#browser-safe-subpaths); `TokenGraph` is JSON-serializable. Query it on the browser side with the [`/graph`](#graph-queries) helpers.
 - ✅ Use `getVariance(graph, path)` from `/graph` for per-token variance classification.
 - ❌ Don't import from `@terrazzo/parser` directly unless you need features core doesn't expose.
-- ❌ Don't ship the full `Project` object to the browser — `resolveAt` is a function and `cwd` is a Node-side absolute path. Use `snapshotForWire(project, css)` to get a JSON-friendly subset.
+- ❌ Don't ship the full `Project` object to the browser: `resolveAt` is a function and `cwd` is a Node-side absolute path. Use `snapshotForWire(project, css)` to get a JSON-friendly subset.

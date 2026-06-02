@@ -25,7 +25,7 @@ Or wire it into an MCP client by adding an entry to its server config:
 }
 ```
 
-Live-reload is on by default — the server watches the config and resolved source files, swapping in fresh data on edits. Pass `--no-watch` to disable.
+Live-reload is on by default: the server watches the config and resolved source files, swapping in fresh data on edits. Pass `--no-watch` to disable.
 
 ## Programmatic use
 
@@ -50,4 +50,4 @@ Token parsing and resolver evaluation come from [Terrazzo](https://terrazzo.app/
 
 ## Documentation
 
-[unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/) — concepts, guides, and full API reference.
+[unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/): concepts, guides, and full API reference.
