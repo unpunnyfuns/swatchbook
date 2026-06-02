@@ -14,13 +14,13 @@ Published as `@unpunnyfuns/swatchbook-addon`. Storybook addon. Loads your config
 npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
 ```
 
-This gives you the toolbar, preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `Diagnostics`, `SwatchbookProvider`, block-side hooks) live in `@unpunnyfuns/swatchbook-blocks` — install it alongside if you want them. See the [authoring guide](../guides/authoring-doc-stories.mdx) for MDX composition patterns.
+This gives you the toolbar, preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `Diagnostics`, `SwatchbookProvider`, block-side hooks) live in `@unpunnyfuns/swatchbook-blocks`; install it alongside if you want them. See the [authoring guide](../guides/authoring-doc-stories.mdx) for MDX composition patterns.
 
 Peer requirements: Storybook 10.3+ on the Vite builder, React 18+.
 
 ## Registration
 
-Register the addon in `main.ts#addons` with your config (inline `config` preferred; `configPath` also works — see the [config reference](./config.mdx)):
+Register the addon in `main.ts#addons` with your config (inline `config` preferred; `configPath` also works, see the [config reference](./config.mdx)):
 
 ```ts title=".storybook/main.ts"
 import { defineMain } from '@storybook/react-vite/node';
@@ -54,10 +54,10 @@ export default definePreview({
 
 ## What it registers
 
-- **Preview decorator** — reads the active axis tuple, writes one `data-<prefix>-<axis>="<context>"` attribute per axis on `<html>` + story wrapper, mounts the per-theme CSS, emits `INIT_EVENT` to the manager. The prefix follows `cssVarPrefix` (default `swatch`).
-- **Toolbar tool** — a single Swatchbook `IconButton`. Clicking opens a popover containing preset pills, one dropdown per axis, and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`). Escape and outside-click close it.
+- **Preview decorator**: reads the active axis tuple, writes one `data-<prefix>-<axis>="<context>"` attribute per axis on `<html>` + story wrapper, mounts the per-theme CSS, emits `INIT_EVENT` to the manager. The prefix follows `cssVarPrefix` (default `swatch`).
+- **Toolbar tool**: a single Swatchbook `IconButton`. Clicking opens a popover containing preset pills, one dropdown per axis, and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`). Escape and outside-click close it.
 
-For a browsable tree + diagnostics surface, compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` on an MDX page — see the [authoring guide](../guides/authoring-doc-stories.mdx)'s dashboard example. The [Diagnostics reference](./diagnostics.mdx) catalogs every group and message that can appear in the Design Tokens panel.
+For a browsable tree + diagnostics surface, compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` on an MDX page. See the [authoring guide](../guides/authoring-doc-stories.mdx)'s dashboard example. The [Diagnostics reference](./diagnostics.mdx) catalogs every group and message that can appear in the Design Tokens panel.
 
 ## Globals
 
@@ -88,7 +88,7 @@ The addon exposes exactly one hook, under `@unpunnyfuns/swatchbook-addon/hooks`.
 
 ### `useToken(path)`
 
-Typed lookup. Returns `{ value, cssVar, type?, description? }` for the given path — the `value` is typed as `unknown`; `type` and `description` come from the token's `$type` / `$description` if present. Reactive to axis changes.
+Typed lookup. Returns `{ value, cssVar, type?, description? }` for the given path; the `value` is typed as `unknown`, `type` and `description` come from the token's `$type` / `$description` if present. Reactive to axis changes.
 
 ```tsx
 import { useToken } from '@unpunnyfuns/swatchbook-addon/hooks';
@@ -103,7 +103,7 @@ Paths autocomplete from the generated `.swatchbook/tokens.d.ts`. Add `"include":
 
 ### Block-side hooks live in `@unpunnyfuns/swatchbook-blocks`
 
-`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the contexts that back them (`SwatchbookContext`, `ThemeContext`, `AxesContext`, `ColorFormatContext`) live canonically in `@unpunnyfuns/swatchbook-blocks` — see the [blocks reference](./blocks/index.mdx). They're also re-exported from the addon's main entry (`import { useActiveTheme } from '@unpunnyfuns/swatchbook-addon'` works) so consumers picking up the addon don't need a separate blocks dependency for the common hook surface.
+`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the contexts that back them (`SwatchbookContext`, `ThemeContext`, `AxesContext`, `ColorFormatContext`) live canonically in `@unpunnyfuns/swatchbook-blocks`; see the [blocks reference](./blocks/index.mdx). They're also re-exported from the addon's main entry (`import { useActiveTheme } from '@unpunnyfuns/swatchbook-addon'` works) so consumers picking up the addon don't need a separate blocks dependency for the common hook surface.
 
 The preview decorator mounts a `SwatchbookProvider` (from blocks) that populates every context, so the hooks resolve wherever the addon is registered.
 
@@ -123,7 +123,7 @@ Useful when wiring the addon into custom tooling or writing interaction tests th
 
 ## `AddonOptions`
 
-Typed shape of the `options` object passed to the Storybook `addons` entry — what the preset reads at preview start.
+Typed shape of the `options` object passed to the Storybook `addons` entry: what the preset reads at preview start.
 
 ```ts
 import type { AddonOptions } from '@unpunnyfuns/swatchbook-addon';
@@ -150,4 +150,4 @@ interface AddonOptions {
 - ✅ Use `useToken` for typed lookups when you need the resolved value at runtime (aria labels, conditional rendering).
 - ✅ Prefer `var(--…)` in CSS; `useToken().cssVar` gives you the right string programmatically.
 - ❌ Don't import from `virtual:swatchbook/tokens` directly in consumer code. Go through `useToken` / the panel / the doc blocks so the API stays stable.
-- ❌ Don't combine `parameters.swatchbook.themeName` *and* the toolbar for the same story — the parameter wins and the toolbar change won't stick.
+- ❌ Don't combine `parameters.swatchbook.themeName` *and* the toolbar for the same story: the parameter wins and the toolbar change won't stick.

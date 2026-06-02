@@ -8,7 +8,7 @@ import { MotionPreview, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
 Three related DTCG types cover motion: **`duration`** (a time value),
 **`cubicBezier`** (a four-number easing array), and **`transition`** (a
 composite of duration + easing + optional delay). The addon respects
-`prefers-reduced-motion` — if the user has it set, the samples fall back
+`prefers-reduced-motion`: if the user has it set, the samples fall back
 to a textual placeholder.
 
 ## System transitions
@@ -24,7 +24,7 @@ speed control is global to this block.
 
 ## Easings
 
-<MotionPreview filter="easing.**" />
+<MotionPreview filter="cubicBezier.**" />
 
 ## Inspect a single token
 

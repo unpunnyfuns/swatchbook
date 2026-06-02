@@ -6,7 +6,7 @@ sidebar_position: 5
 
 # Axes
 
-An **axis** is one independent dimension of your theming model — `mode`, `brand`, `density`, `contrast`, whatever fits your system. Each axis has a set of named **contexts** (one of which is the default), and at any moment exactly one context is selected per axis.
+An **axis** is one independent dimension of your theming model: `mode`, `brand`, `density`, `contrast`, whatever fits your system. Each axis has a set of named **contexts** (one of which is the default), and at any moment exactly one context is selected per axis.
 
 The axis shape is the alternative to a flat string-ID model (`"light"`, `"dark"`, `"brand-a-dark-compact"`). One dimension becomes two; two become four. Modelling each dimension independently keeps the combination-counting out of your theme names and into composition at runtime. If your system has exactly one dimension and no plans for more, [`@storybook/addon-themes`](https://storybook.js.org/addons/@storybook/addon-themes)' single-string-ID model is simpler and a better fit.
 
@@ -28,7 +28,7 @@ When a tuple is active, the preview decorator writes one `data-<prefix>-<axisNam
 <html data-swatch-mode="Dark" data-swatch-brand="Brand A">
 ```
 
-CSS emission matches those attributes with compound selectors. Each non-default tuple gets its own flat block — every var redeclared — with `:root` carrying the default:
+CSS emission matches those attributes with compound selectors. Each non-default tuple gets its own flat block (every var redeclared) with `:root` carrying the default:
 
 ```css
 :root {
@@ -42,7 +42,7 @@ CSS emission matches those attributes with compound selectors. Each non-default 
 }
 ```
 
-Flat emission avoids collision-detection — DTCG allows multiple modifiers to write to the same token path, and flat blocks let the last-written tuple win cleanly.
+Flat emission avoids collision-detection: DTCG allows multiple modifiers to write to the same token path, and flat blocks let the last-written tuple win cleanly.
 
 These attributes and CSS vars are swatchbook's preview scaffolding, not a public styling API. Consumer components shouldn't key production theming off `data-swatch-*` selectors.
 
@@ -89,5 +89,5 @@ A resolver may declare more modifiers than a given Storybook wants to surface. L
 
 ## See also
 
-- [Config reference](./config.mdx) — the `resolver` / `axes` / `default` / `disabledAxes` / `presets` fields.
-- [Consuming the active theme](../guides/consuming-the-active-theme.mdx) — how stories pick up axis flips.
+- [Config reference](./config.mdx): the `resolver` / `axes` / `default` / `disabledAxes` / `presets` fields.
+- [Consuming the active theme](../guides/consuming-the-active-theme.mdx): how stories pick up axis flips.

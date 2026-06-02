@@ -16,7 +16,7 @@ Blocks that surface project-level state rather than tokens themselves.
 
 Project-load diagnostics (parser errors, resolver warnings, disabled-axis validation) as a collapsible list. Green **OK** badge when clean; auto-expands with a severity summary when warnings or errors are present.
 
-Props: `caption?: string` — overrides the summary heading.
+Props: `caption?: string` overrides the summary heading.
 
 ### The `Diagnostic` shape
 
@@ -29,28 +29,27 @@ interface Diagnostic {
   message: string;
   filename?: string;
   line?: number;
-  column?: number;
 }
 ```
 
 `group` identifies the subsystem that produced the diagnostic:
 
-- `parser` — Terrazzo's token-file parser (malformed JSON, invalid `$value`, wrong `$type`, …).
-- `resolver` — resolver-file issues (missing `$ref`, unknown modifier, context with no files).
-- `swatchbook/presets` — preset validation (unknown axis key, invalid context value).
-- Plugin-originated groups — depends on your setup.
+- `parser`: Terrazzo's token-file parser (malformed JSON, invalid `$value`, wrong `$type`, …).
+- `resolver`: resolver-file issues (missing `$ref`, unknown modifier, context with no files).
+- `swatchbook/presets`: preset validation (unknown axis key, invalid context value).
+- Plugin-originated groups: depends on your setup.
 
 ### Severities
 
-- **`error`** — something is structurally broken. A token may be missing from the graph, an alias may be unresolved. The block shows these with a red badge.
-- **`warn`** — something is unusual or probably-a-mistake but the project loaded. Example: a preset with an unknown axis key is dropped and produces a warn.
-- **`info`** — diagnostic for the curious. Rare.
+- **`error`**: something is structurally broken. A token may be missing from the graph, an alias may be unresolved. The block shows these with a red badge.
+- **`warn`**: something is unusual or probably-a-mistake but the project loaded. Example: a preset with an unknown axis key is dropped and produces a warn.
+- **`info`**: diagnostic for the curious. Rare.
 
 ### Reading common diagnostics
 
-- **`parser: Could not resolve alias "{color.palette.blue.500}"`** — the alias target doesn't exist in the merged graph. Check for a typo in the path, or a missing token file that wasn't included in `tokens` globs.
-- **`parser: Invalid token value for $type "color"`** — the `$value` doesn't parse as the declared `$type`. Usually a string missing a unit or a color in the wrong format.
-- **`swatchbook/presets: Preset "X" has unknown axis key "Y"`** — a preset references an axis that doesn't exist on the project. Either the axis name was renamed or the preset predates the resolver change.
+- **`parser: Could not resolve alias "{color.palette.blue.500}"`**: the alias target doesn't exist in the merged graph. Check for a typo in the path, or a missing token file that wasn't included in `tokens` globs.
+- **`parser: Invalid token value for $type "color"`**: the `$value` doesn't parse as the declared `$type`. Usually a string missing a unit or a color in the wrong format.
+- **`swatchbook/presets: Preset "X" has unknown axis key "Y"`**: a preset references an axis that doesn't exist on the project. Either the axis name was renamed or the preset predates the resolver change.
 
 ### Failing CI on errors
 
@@ -101,9 +100,9 @@ interface FormatColorResult {
 
 - `hex` falls back to space-separated `rgb()` for out-of-gamut colors and marks them `outOfGamut: true`; blocks render a ⚠ glyph beside the value.
 - `oklch` is wide-gamut and never marks `outOfGamut`.
-- `raw` returns a compact JSON of the normalized Terrazzo shape — useful for DTCG authors who want to see exactly what the parser stored.
+- `raw` returns a compact JSON of the normalized Terrazzo shape, useful for DTCG authors who want to see exactly what the parser stored.
 - `fallback` defaults to `'—'`; pass a custom string when integrating with surfaces that need a different placeholder.
 
-`COLOR_FORMATS` is the runtime list used to validate stored user choices — reach for it when you need to enumerate the formats (toolbar pills, validation) without duplicating the union.
+`COLOR_FORMATS` is the runtime list used to validate stored user choices; reach for it when you need to enumerate the formats (toolbar pills, validation) without duplicating the union.
 
-`NormalizedColor` is the shape `formatColor` accepts — a structural copy of Terrazzo's `ColorValueNormalized` (`colorSpace`, `components` / `channels`, `alpha`, optional `hex`). Use it when typing custom block code that produces or consumes the same payload.
+`NormalizedColor` is the shape `formatColor` accepts: a structural copy of Terrazzo's `ColorValueNormalized` (`colorSpace`, `components` / `channels`, `alpha`, optional `hex`). Use it when typing custom block code that produces or consumes the same payload.

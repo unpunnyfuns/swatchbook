@@ -6,7 +6,7 @@ sidebar_position: 3
 
 # CSS-in-JS
 
-`@unpunnyfuns/swatchbook-integrations/css-in-js` exposes a typed JS accessor whose leaves are `var(--<cssVarPrefix>-*)` string references. Drop-in for any `ThemeProvider` that passes its theme through as-is — emotion, styled-components, or a hand-rolled provider. The toolbar flips every value at once via CSS cascade.
+`@unpunnyfuns/swatchbook-integrations/css-in-js` exposes a typed JS accessor whose leaves are `var(--<cssVarPrefix>-*)` string references. Drop-in for any `ThemeProvider` that passes its theme through as-is (emotion, styled-components, or a hand-rolled provider). The toolbar flips every value at once via CSS cascade.
 
 ## Install
 
@@ -14,7 +14,7 @@ sidebar_position: 3
 npm install -D @unpunnyfuns/swatchbook-integrations
 ```
 
-No additional Vite plugins — the virtual module is plain JavaScript.
+No additional Vite plugins needed; the virtual module is plain JavaScript.
 
 ## Configure
 
@@ -64,7 +64,7 @@ export const space = {
 export const theme = { color, space, radius, shadow, typography };
 ```
 
-Values are stable across tuples. The toolbar flipping `data-sb-mode="Dark"` doesn't change any value in this module — it changes what `--sb-color-surface-default` resolves to at the CSS level. One theme object, any number of tuples, runtime switching via cascade.
+Values are stable across tuples. The toolbar flipping `data-sb-mode="Dark"` doesn't change any value in this module; it changes what `--sb-color-surface-default` resolves to at the CSS level. One theme object, any number of tuples, runtime switching via cascade.
 
 ## Usage
 
@@ -103,6 +103,6 @@ import { color, space } from 'virtual:swatchbook/theme';
 
 ## What this doesn't do
 
-- Doesn't produce a resolved-value theme. Leaves are `var()` references, not literal colours. For libraries that derive dependent slots at factory time (MUI's `createTheme` computing `palette.primary.light` / `contrastText`), you need literal values — run [Terrazzo](https://terrazzo.app/)'s CLI with `@terrazzo/plugin-js`.
+- Doesn't produce a resolved-value theme. Leaves are `var()` references, not literal colours. For libraries that derive dependent slots at factory time (MUI's `createTheme` computing `palette.primary.light` / `contrastText`), you need literal values: run [Terrazzo](https://terrazzo.app/)'s CLI with `@terrazzo/plugin-js`.
 - Doesn't handle composite tokens structurally. A DTCG `typography` composite lives as a single `var()` reference, not as `{ fontFamily, fontSize, … }`. If your library needs the sub-fields, same caveat.
 - Doesn't auto-inject a `ThemeProvider`. You wire it yourself.

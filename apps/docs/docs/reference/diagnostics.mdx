@@ -10,7 +10,7 @@ Swatchbook surfaces load-time and runtime problems as `Diagnostic` entries on `P
 
 - **The Design Tokens panel** in Storybook, live, while you author.
 - **`Project.diagnostics`** on the loaded project, for programmatic consumers (build scripts, tests, CI checks).
-- **The terminal** when `loadProject` runs outside Storybook — preset boot, MCP server start, the docs site's build.
+- **The terminal** when `loadProject` runs outside Storybook: preset boot, MCP server start, the docs site's build.
 
 This page catalogs every diagnostic group the core emits, what triggers each known message, and what to check when one fires.
 
@@ -26,9 +26,9 @@ interface Diagnostic {
 }
 ```
 
-`severity` follows the usual gradient. `error` means something downstream cannot be done correctly (e.g. an alias target that doesn't exist — the walker has nothing to resolve to). `warn` means the load completed but a piece of input was dropped, partial, or structurally suspect. `info` is informational and rarely fires.
+`severity` follows the usual gradient. `error` means something downstream cannot be done correctly (e.g. an alias target that doesn't exist, so the walker has nothing to resolve to). `warn` means the load completed but a piece of input was dropped, partial, or structurally suspect. `info` is informational and rarely fires.
 
-`group` is namespaced by feature area (`swatchbook/<area>`). It's stable across releases — consumers can filter on it.
+`group` is namespaced by feature area (`swatchbook/<area>`). It's stable across releases, so consumers can filter on it.
 
 `filename` / `line` are present when the parser knows the authoring source location. Token-tree diagnostics usually carry them; configuration diagnostics generally don't.
 
@@ -39,16 +39,16 @@ Graph construction and walker integrity. Fires during `loadProject` once the par
 | Severity | When it fires | What to check |
 |---|---|---|
 | `error` | A modifier writes a token as an alias to a target path that isn't defined in any baseline or modifier. Walker has no resolution to fall back to. | The alias target spelling. The set of files the resolver actually loads. |
-| `error` | Graph build itself threw. The graph is empty; `resolveAt()` returns baseline-only values. | The cause string in the message — usually a malformed token shape that escaped the parser's own validation. |
-| `warn` | An alias cycle was detected. The walker returns the baseline literal at the cycle entry. | The chain printed in the message — at least one link in it is the unintended loop. |
+| `error` | Graph build itself threw. The graph is empty; `resolveAt()` returns baseline-only values. | The cause string in the message, usually a malformed token shape that escaped the parser's own validation. |
+| `warn` | An alias cycle was detected. The walker returns the baseline literal at the cycle entry. | The chain printed in the message; at least one link in it is the unintended loop. |
 | `warn` | A color token's `$value` has a `components` field that isn't a numeric array (missing, or some other type). CSS emission will fail for any context that resolves to this token. | The token's `$value.components` field in its source. Color tokens in DTCG object form require `components: [number, ...]`. |
-| `warn` | A color token's `components` field carries an unresolved DTCG `$ref` object — a JSON Pointer the upstream parser did not substitute. | That the JSON Pointer resolves against the rest of the token tree. If yes, the parser version handles `$ref` into non-Object targets. |
+| `warn` | A color token's `components` field carries an unresolved DTCG `$ref` object, a JSON Pointer the upstream parser did not substitute. | That the JSON Pointer resolves against the rest of the token tree. If yes, the parser version handles `$ref` into non-Object targets. |
 
 The two warnings about color shape (`structurally invalid` and `Unresolved $ref`) are belt-and-braces for the same emit-time failure: colorjs.io's `coords.map is not a function`. Both fire at load time so the panel surfaces them before any block tries to render the offending token.
 
 ## `swatchbook/listing`
 
-Token Listing build problems. Fires when `loadProject` runs the in-memory `@terrazzo/plugin-token-listing` build to populate `listing[path]`. All severities are `warn` — when the listing build fails, blocks fall back to raw value display rather than aborting.
+Token Listing build problems. Fires when `loadProject` runs the in-memory `@terrazzo/plugin-token-listing` build to populate `listing[path]`. All severities are `warn`: when the listing build fails, blocks fall back to raw value display rather than aborting.
 
 | When it fires | What to check |
 |---|---|
@@ -56,7 +56,7 @@ Token Listing build problems. Fires when `loadProject` runs the in-memory `@terr
 | The listing build wrote no `tokens.listing.json` output file. | The plugin's configuration. The listing plugin needs to be installed and present in the internal plugin set. |
 | The listing JSON had no `data` array. | The plugin version. Format compatibility is `0.1.0-alpha.x`; a major version change in the plugin's output shape can produce this. |
 
-`<TokenTable>` and `<ColorTable>` previews fall back to raw values — they remain readable, but per-platform name columns are blank.
+`<TokenTable>` and `<ColorTable>` previews fall back to raw values; they remain readable, but per-platform name columns are blank.
 
 ## `swatchbook/css-options`
 
@@ -66,7 +66,7 @@ Token Listing build problems. Fires when `loadProject` runs the in-memory `@terr
 |---|---|---|
 | `warn` | Any of `cssOptions.baseSelector`, `cssOptions.baseScheme`, or `cssOptions.modeSelectors` is set. Swatchbook drives emission through its own permutations API and ignores these. | Whether the value is intentional. If the consumer's production CLI build needs these, set them on the production config and leave them off `cssOptions`. The [Aligning with your token build](../guides/sharing-terrazzo-options.mdx) guide describes the split. |
 
-A separate set of `cssOptions` fields (`variableName`, `permutations`, `filename`, `skipBuild`) is fully stripped before being passed to the internal `plugin-css` build — those don't emit a diagnostic.
+A separate set of `cssOptions` fields (`variableName`, `permutations`, `filename`, `skipBuild`) is fully stripped before being passed to the internal `plugin-css` build; those don't emit a diagnostic.
 
 ## `swatchbook/chrome`
 
@@ -96,7 +96,7 @@ A separate set of `cssOptions` fields (`variableName`, `permutations`, `filename
 
 ## `swatchbook/default`
 
-`config.default` validation. Same shape as preset validation — invalid entries are tolerant-dropped to the axis's own default rather than failing the load.
+`config.default` validation. Same shape as preset validation: invalid entries are tolerant-dropped to the axis's own default rather than failing the load.
 
 | Severity | When it fires | What to check |
 |---|---|---|
@@ -124,16 +124,16 @@ swatchbook: failed to transform token "<path>" at permutation <tuple>.
 
 The fields:
 
-- **`<path>`** — the token's path identifier, dot-separated.
-- **`<tuple>`** — the active axis-tuple as a JSON object. Every axis in the project appears with its context value.
-- **`$type`** — the token's DTCG `$type`.
-- **`$value`** — the serialized `$value` at this tuple, as it was when the failure happened.
-- **`cause`** — the original error message. The original error object is attached to `err.cause` for stack-walking.
+- **`<path>`**: the token's path identifier, dot-separated.
+- **`<tuple>`**: the active axis-tuple as a JSON object. Every axis in the project appears with its context value.
+- **`$type`**: the token's DTCG `$type`.
+- **`$value`**: the serialized `$value` at this tuple, as it was when the failure happened.
+- **`cause`**: the original error message. The original error object is attached to `err.cause` for stack-walking.
 
 This wrap turns colorjs.io-style tracebacks (`coords.map is not a function`, four frames deep in a third-party library) into a single actionable line of forensic detail. The `swatchbook/token-graph` load-time validators catch most malformed-shape causes before they reach emit; the wrap catches the rest.
 
 ## See also
 
-- [Project.diagnostics](./core.mdx) — programmatic access to the full diagnostic array.
-- [The token pipeline](./token-pipeline.mdx) — where in the load flow each diagnostic fires.
-- [Aligning with your token build](../guides/sharing-terrazzo-options.mdx) — the `swatchbook/css-options` warning in context.
+- [Project.diagnostics](./core.mdx): programmatic access to the full diagnostic array.
+- [The token pipeline](./token-pipeline.mdx): where in the load flow each diagnostic fires.
+- [Aligning with your token build](../guides/sharing-terrazzo-options.mdx): the `swatchbook/css-options` warning in context.

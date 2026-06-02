@@ -75,7 +75,7 @@ At runtime the toolbar flips `data-sb-mode` / `data-sb-brand` / `data-sb-contras
 
 ## The `sb-` prefix
 
-Every `@theme` entry is nested under your project's `cssVarPrefix`. Tailwind's default scales (`--color-red-500`, `--spacing-4`, `--container-md`) stay intact — `bg-red-500` works alongside `bg-sb-surface-default`, `p-4` alongside `p-sb-md`.
+Every `@theme` entry is nested under your project's `cssVarPrefix`. Tailwind's default scales (`--color-red-500`, `--spacing-4`, `--container-md`) stay intact: `bg-red-500` works alongside `bg-sb-surface-default`, `p-4` alongside `p-sb-md`.
 
 This matters because Tailwind v4's `max-w-<name>` / `w-<name>` / `size-<name>` utilities read from the `--spacing-*` namespace. Without the prefix, an entry named `--spacing-sm` would shadow Tailwind's default `--container-sm`, making `max-w-sm` tiny. The double-prefix sidesteps that.
 
@@ -92,7 +92,7 @@ Zero-config: the integration walks your project's default-theme token graph at r
 | `shadow` | any | `shadow` | path minus `shadow.` prefix |
 | `fontFamily` | any | `font` | path minus `font.` / `font.family.` / `fontFamily.` prefix |
 
-Font-size-ish dimensions (`font.size.*`, `text.*`) are skipped — Tailwind's `--text-*` entries want size+line-height pairs this integration doesn't synthesize.
+Font-size-ish dimensions (`font.size.*`, `text.*`) are skipped, because Tailwind's `--text-*` entries want size+line-height pairs this integration doesn't synthesize.
 
 Pass a `roles` map to replace the derivation outright when you want a curated subset, explicit names for non-standard paths, or scales the derivation doesn't cover (`--animate-*`, etc.):
 
@@ -113,4 +113,4 @@ Tailwind scale names are keys; each entry is `[tailwindEntryName, dtcgPath]`.
 
 - Doesn't produce production CSS. Run Tailwind's CLI / Vite plugin against your own `@theme` source for that.
 - Doesn't enable `@tailwindcss/vite` outside Storybook. Your app's own build is independent.
-- Doesn't proxy Tailwind's plugin system. Variants, plugins, `darkMode` config, arbitrary values — all pass through to Tailwind untouched.
+- Doesn't proxy Tailwind's plugin system. Variants, plugins, `darkMode` config, arbitrary values: all pass through to Tailwind untouched.

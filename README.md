@@ -15,7 +15,7 @@ If your stories already style with CSS variables, they pick up the toolbar's axi
 npm install -D @unpunnyfuns/swatchbook-addon
 ```
 
-One package pulls the whole React surface — toolbar, preview decorator, MDX doc blocks, `ThemeSwitcher`, `useToken()`. See the [Quickstart](https://unpunnyfuns.github.io/swatchbook/quickstart) for configuration.
+One package pulls the whole React surface: toolbar, preview decorator, MDX doc blocks, `ThemeSwitcher`, `useToken()`. See the [Quickstart](https://unpunnyfuns.github.io/swatchbook/quickstart) for configuration.
 
 ## Packages
 
@@ -28,7 +28,7 @@ One package pulls the whole React surface — toolbar, preview decorator, MDX do
 | [`@unpunnyfuns/swatchbook-integrations`](./packages/integrations) | Tailwind v4 and CSS-in-JS adapters for the addon. |
 | [`@unpunnyfuns/swatchbook-mcp`](./packages/mcp) | Model Context Protocol server for AI agents. |
 
-Most consumers only install the addon; the rest travel transitively. Each sub-package is publishable on its own for slice-only use (e.g. the switcher in a Docusaurus navbar).
+Most consumers only install the addon; the rest travel transitively. Each sub-package is publishable on its own for slice-only use (for example, the switcher in a Docusaurus navbar).
 
 ## Development
 
@@ -42,7 +42,7 @@ pnpm turbo run lint typecheck test build
 
 ## Credits
 
-Parses DTCG tokens through [Terrazzo](https://terrazzo.app/) by the [Terrazzo team](https://github.com/terrazzoapp) — its parser, resolver evaluation, and alias resolution are the foundation.
+Parses DTCG tokens through [Terrazzo](https://terrazzo.app/) by the [Terrazzo team](https://github.com/terrazzoapp). Its parser, resolver evaluation, and alias resolution are the foundation.
 
 ## License
 
