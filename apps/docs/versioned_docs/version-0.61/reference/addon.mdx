@@ -64,10 +64,9 @@ For a browsable tree + diagnostics surface, compose `<Diagnostics />` + `<TokenN
 | Key | Type | Purpose |
 | --- | --- | --- |
 | `swatchbookAxes` | `Record<string, string>` | Active tuple. Preferred input. |
-| `swatchbookTheme` | `string` | Composed theme ID. Back-compat companion. |
 | `swatchbookColorFormat` | `'hex' \| 'rgb' \| 'hsl' \| 'oklch' \| 'raw'` | Display-only color format consumed by the blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`). Does **not** affect emitted CSS. Default `hex`. |
 
-The toolbar writes `swatchbookAxes` and `swatchbookTheme` in lockstep so legacy consumers keep working. `swatchbookColorFormat` is toggled from the color-format picker in the popover; `hex` falls back to space-separated `rgb()` (flagged with a ⚠ warning marker) for colors outside sRGB gamut.
+The toolbar writes `swatchbookAxes`. `swatchbookColorFormat` is toggled from the color-format picker in the popover; `hex` falls back to space-separated `rgb()` (flagged with a ⚠ warning marker) for colors outside sRGB gamut.
 
 ## Per-story overrides
 
@@ -81,7 +80,7 @@ export const DarkBrandA = meta.story({
 });
 ```
 
-`axes` is a tuple; omitted keys fall back to axis defaults. The legacy `theme: 'Composed Name'` form still works for single-axis projects.
+`axes` is a tuple; omitted keys fall back to axis defaults. The `themeName: 'Composed Name'` form sets the active tuple by composed theme name.
 
 ## Hooks
 
@@ -115,7 +114,6 @@ import {
   ADDON_ID,
   AXES_GLOBAL_KEY,
   COLOR_FORMAT_GLOBAL_KEY,
-  PARAM_KEY,
   TOOL_ID,
   VIRTUAL_MODULE_ID,
 } from '@unpunnyfuns/swatchbook-addon';
@@ -152,4 +150,4 @@ interface AddonOptions {
 - ✅ Use `useToken` for typed lookups when you need the resolved value at runtime (aria labels, conditional rendering).
 - ✅ Prefer `var(--…)` in CSS; `useToken().cssVar` gives you the right string programmatically.
 - ❌ Don't import from `virtual:swatchbook/tokens` directly in consumer code. Go through `useToken` / the panel / the doc blocks so the API stays stable.
-- ❌ Don't combine `parameters.swatchbook.theme` *and* the toolbar for the same story — the parameter wins and the toolbar change won't stick.
+- ❌ Don't combine `parameters.swatchbook.themeName` *and* the toolbar for the same story — the parameter wins and the toolbar change won't stick.

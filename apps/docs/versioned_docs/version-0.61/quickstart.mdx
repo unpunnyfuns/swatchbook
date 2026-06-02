@@ -126,7 +126,7 @@ Each block takes filter/scoping props so you can pick what shows up:
 - **`<TokenNavigator root="…" type="…" initiallyExpanded={0..∞} />`** — expandable tree. Scope to a subtree (`root="color"`) and/or a `$type`; `initiallyExpanded={0}` opens fully collapsed.
 - **`<TokenDetail path="…" />`** — alias chain, per-theme values, CSS var reference, and `useToken` snippet for one token.
 - **`<Diagnostics />`** — collapsible list of parser / resolver / validation warnings. Auto-opens when anything's non-zero.
-- **`<TypographyScale>`, `<DimensionScale>`, `<FontFamilySample>`, `<FontWeightScale>`, `<BorderPreview>`, `<ShadowPreview>`, `<GradientPalette>`, `<MotionPreview>`, `<StrokeStyleSample>`** — type-specific blocks with built-in samples. Filter by path glob when you want a subset.
+- **`<TypographyScale>`, `<DimensionScale>`, `<FontFamilyPreview>`, `<FontWeightScale>`, `<BorderPreview>`, `<ShadowPreview>`, `<GradientPalette>`, `<MotionPreview>`, `<StrokeStylePreview>`** — type-specific blocks with built-in samples. Filter by path glob when you want a subset.
 
 The [blocks reference](./reference/blocks/index.mdx) has the full prop list for each. The [authoring guide](./guides/authoring-doc-stories.mdx) walks through composing them in real pages.
 
