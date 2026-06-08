@@ -4,30 +4,7 @@
 
 ### Minor Changes
 
-- 84b450c: Public API renames for clarity. Breaking, clean break (no deprecated aliases).
-
-  **blocks**
-
-  - `FontFamilySample` → `FontFamilyPreview`, `StrokeStyleSample` → `StrokeStylePreview`. Both render the whole matching collection, like the rest of the `*Preview` family; the `*Sample` names implied a single token.
-  - `DimensionKind` → `DimensionVisual`, and its `kind` prop → `visual` (it selects the visualization style, distinct from the type discriminators elsewhere called `kind`).
-  - Removed the unused `presets` / `disabledAxes` fields from `ProjectSnapshot`.
-
-  **addon**
-
-  - Per-story `parameters.swatchbook.permutation` → `themeName` (it holds a composed theme-name string, not a permutation).
-  - Removed the dead `parameters.swatchbook.theme` alias and the dead `swatchbookTheme` global — neither was read or written.
-  - `SwatchbookPluginOptions` → `SwatchbookTokensPluginOptions`.
-  - Removed the unused `PARAM_KEY` export.
-
-  **mcp**
-
-  - The `get_color_contrast` tool's output field `ratio` → `value` (in the APCA branch it carries a signed Lc score, not a ratio).
-
-  **core**
-
-  - Removed the unused `Diagnostic.column` field.
-
-  Migration: rename the imports, props, and parameters above. `switcher` and `integrations` have no API changes but version with the fixed group.
+- 84b450c: Public API renames (clean break, no aliases). blocks: `FontFamilySample`→`FontFamilyPreview`, `StrokeStyleSample`→`StrokeStylePreview`, `DimensionKind`→`DimensionVisual` (prop `kind`→`visual`), dropped `ProjectSnapshot.presets`/`disabledAxes`. addon: `parameters.swatchbook.permutation`→`themeName`, dropped `parameters.swatchbook.theme` + `swatchbookTheme` global + `PARAM_KEY`, `SwatchbookPluginOptions`→`SwatchbookTokensPluginOptions`. mcp: `get_color_contrast` output `ratio`→`value`. core: dropped `Diagnostic.column`. Migration: rename the imports, props, and parameters above.
 
 ### Patch Changes
 
@@ -38,7 +15,7 @@
 
 ### Patch Changes
 
-- deecf14: Tighten the "Built with AI" docs prose: drop the self-narrating opening ("This page says plainly…"), shorten "Claude, Anthropic's coding agent" to "Claude", and add one dry aside. Patch so the next release's snapshot rebuild carries it to the stable docs.
+- deecf14: Tighten the "Built with AI" docs prose.
 - Updated dependencies [deecf14]
   - @unpunnyfuns/swatchbook-core@0.60.10
 
@@ -46,7 +23,7 @@
 
 ### Patch Changes
 
-- a639114: Add a "Built with AI" disclosure to the docs. A short block on the Introduction page states plainly that nearly all of swatchbook's code is written by an AI coding agent under human direction, and a new `developers/built-with-ai.mdx` page lays out who does what, what a human gates (every merge, every release), the quality machinery, and where the effort goes. Patch so the next release's snapshot rebuild picks it up.
+- a639114: Add a "Built with AI" disclosure to the docs (Introduction block + `developers/built-with-ai.mdx`).
 - Updated dependencies [a639114]
   - @unpunnyfuns/swatchbook-core@0.60.9
 
@@ -60,8 +37,8 @@
 
 ### Patch Changes
 
-- fb5e8ae: The release workflow's `release` environment now gates only on publish runs (the Version Packages PR's squash-merge), not on every push to main. Previously every changeset-PR merge would pause for approval even though no publish was about to happen — the action would just open a VP PR. Now the gate fires only when `github.event.head_commit.message` starts with `chore(release):` — i.e., the VP PR was just merged and `changeset publish` is about to run. Routine pushes proceed unattended. Documented in `developers/sharp-corners.mdx`. No published-package behaviour change.
-- dd8608d: Internal release: ships the security-infrastructure documentation added in #1044 into the current minor's docs snapshot. No published-package behaviour change. The recent CI hardening landed across #1042 (pin GitHub Actions to commit SHAs + add zizmor workflow audit), #1043 (disable Actions cache during release for cache-poisoning defense), #1044 (gate release on deployment environment with required approval), and #1046 (fix template-injection findings in mirror-playwright). The release-approval gate is documented under `developers/sharp-corners.mdx`.
+- fb5e8ae: The release `environment` gate now fires only on publish runs (commit message starting `chore(release):`), not every push to main.
+- dd8608d: Internal release shipping the security-infrastructure docs from #1044 into the current snapshot.
 - Updated dependencies [fb5e8ae]
 - Updated dependencies [dd8608d]
   - @unpunnyfuns/swatchbook-core@0.60.7
@@ -70,8 +47,8 @@
 
 ### Patch Changes
 
-- 619b7b8: Expose `Config.maxJointArity` (default `4`) to override the cap on per-token joint-divergence arity probing. The default covers the largest joint shapes real-world design systems tend to express. Consumers with richer multi-axis systems can bump it for tokens that genuinely diverge across 5+ axes simultaneously; consumers with load-time concerns can lower it (1 disables joint-block emission entirely). Documented in `reference/config.mdx` with the per-token work formula and the failure-mode tradeoffs in both directions.
-- 95ddfa3: The addon's Vite plugin now excludes its virtual module IDs (`virtual:swatchbook/tokens`, `virtual:swatchbook/integration-side-effects`) from Vite's `optimizeDeps` pre-bundling. Vite uses esbuild for pre-bundling, and esbuild doesn't see Rollup-style `resolveId` hooks — a preview file that gets pulled into pre-bundling and imports one of our virtuals would fail with `Could not resolve "virtual:swatchbook/tokens"`. The exclusion routes the virtuals through the dev-time plugin pipeline where `resolveId` / `load` handle them. Build mode is unaffected (Rollup throughout).
+- 619b7b8: Expose `Config.maxJointArity` (default `4`) to override the per-token joint-divergence arity cap; `1` disables joint-block emission.
+- 95ddfa3: The addon's Vite plugin excludes its virtual module IDs from `optimizeDeps` pre-bundling so esbuild doesn't fail resolving them.
 - Updated dependencies [619b7b8]
 - Updated dependencies [95ddfa3]
   - @unpunnyfuns/swatchbook-core@0.60.6
@@ -80,7 +57,7 @@
 
 ### Patch Changes
 
-- 48725a8: `emitAxisProjectedCss`'s joint-block emission now scales per-token rather than as a cartesian over project axes. `analyzeProjectVariance` probes joint divergences for each token within that token's `affectedBy` set (capped at 4 axes per token), and `collectJointBlocks` consumes the resulting joint cases directly — no cartesian enumeration over the project's full axes. For a 12-axis project that previously needed ~243M outer iterations × O(tokens) inner work (consumer-reported >1h hang on 687-token projects), emission now completes in milliseconds. CSS output for the reference fixture is unchanged byte-for-byte. Joint divergences spanning 5+ axes simultaneously aren't emitted as compound blocks — the practical limit covers mode × brand × density × contrast joint shapes (the largest real-world combinations).
+- 48725a8: `emitAxisProjectedCss` joint-block emission now scales per-token instead of cartesian over project axes, taking 12-axis emission from >1h hangs to milliseconds; reference CSS unchanged.
 - Updated dependencies [48725a8]
   - @unpunnyfuns/swatchbook-core@0.60.5
 
@@ -88,9 +65,9 @@
 
 ### Patch Changes
 
-- 79d6c68: Add `reference/concepts.mdx` — a single page consolidating Swatchbook's mental model in one place: the "preview host, not transformer" framing, the axes/contexts/tuples vocabulary, what the token graph conceptually represents (without walker internals), and the alignment story with a production Terrazzo build. Slots first in the Reference > Model sidebar so the reading order goes conceptual → operational (Concepts → Axes → Token pipeline → Diagnostics). Cross-linked from `intro.mdx`'s "How to read these docs". Doesn't replace any existing page; front-loads the model for new and returning readers.
-- 401b4de: Add `reference/diagnostics.mdx` — a catalog of every `swatchbook/<group>` diagnostic the core can emit, with severity, trigger condition, and what to check for each known message. Also documents the structured `swatchbook: failed to transform token "<path>" at permutation <tuple>…` runtime emit-error format. Cross-linked from `reference/core.mdx` (`Project.diagnostics`), `reference/addon.mdx` (Design Tokens panel), and `intro.mdx` (How to read these docs). No package source changes; the patch changeset is so the next release's snapshot rebuild picks up the new page.
-- aacc744: `loadProject` now emits phase-bounded timing to stdout when the `SWATCHBOOK_LOG_VERBOSE=1` environment variable is set. Lines look like `[swatchbook:load] graph build: 380ms`, with one entry per major phase (parse + normalize, preset apply sweep when presets are configured, token-listing build, graph build, total). When the env var is unset, behaviour is unchanged — no console output, only a few `performance.now()` calls per load (negligible overhead). Intended use: a consumer reports a hung or slow load and we need to know which phase is the offender before reaching for a full CPU profile.
+- 79d6c68: Add `reference/concepts.mdx` consolidating Swatchbook's mental model.
+- 401b4de: Add `reference/diagnostics.mdx` cataloging every `swatchbook/<group>` diagnostic plus the runtime emit-error format.
+- aacc744: `loadProject` emits phase-bounded timing to stdout when `SWATCHBOOK_LOG_VERBOSE=1` is set.
 - Updated dependencies [79d6c68]
 - Updated dependencies [401b4de]
 - Updated dependencies [aacc744]
@@ -100,7 +77,7 @@
 
 ### Patch Changes
 
-- 65a7865: Substitute DTCG `$ref` objects in modifier values against the resolver's baseline output. The resolver-based loader's `extractWritesFromModifiers` was reading from `resolver.source.modifiers` directly — a pre-`processTokens` representation where cross-document `$ref` references in modifier source values (e.g. a semantic token's `components` referencing a primitive's `components` array via JSON Pointer) had not yet been resolved. The unresolved `{ $ref }` objects flowed through write values into the walker and reached emit time, where colorjs.io crashed on them. The fix performs the same JSON Pointer substitution at write-extraction time, using the already-resolved baseline as the lookup source. Unresolved pointers are left intact and continue to surface via the existing emit-time error wrap and load-time diagnostic.
+- 65a7865: Substitute DTCG `$ref` objects in modifier values against the resolver's baseline at write-extraction time, fixing a colorjs.io crash on unresolved `{ $ref }` objects.
 - Updated dependencies [65a7865]
   - @unpunnyfuns/swatchbook-core@0.60.3
 
@@ -108,7 +85,7 @@
 
 ### Patch Changes
 
-- d2c7cfb: When the color-shape validator encounters `components` carrying an unresolved DTCG `$ref` object (a plain object with a string `$ref` member), the emitted diagnostic now names the JSON Pointer and identifies the upstream parser's failure to substitute the target — rather than the generic "`components` must be an array of numbers" message, which sends consumers hunting for source-side errors when the source is usually correct. Non-`$ref` non-array components keep the existing generic message.
+- d2c7cfb: When `components` carries an unresolved `$ref` object, the diagnostic now names the JSON Pointer and the upstream substitution failure instead of the generic array-of-numbers message.
 - Updated dependencies [d2c7cfb]
   - @unpunnyfuns/swatchbook-core@0.60.2
 
@@ -116,9 +93,9 @@
 
 ### Patch Changes
 
-- c3ded5b: Patch release to ship the docs audit fixes from PR #1002 into the stable docs snapshot. The fixes (corrected import paths, removed broken anchors, jargon swapped for plain language, prose register tightened) only reached `/next/` after the original PR — this release rebuilds the `version-0.60/` snapshot so they reach `/` too. No package source changes.
-- 0868ed5: When the smart emitter's call to `transformCSSValue` throws on a malformed token `$value`, the thrown error now names the token path, the active axis permutation, and the offending `$value`, with the original error attached as `cause`. Previously a malformed token surfaced as a four-frames-deep colorjs.io traceback with no clue which token was at fault. Healthy tokens are unaffected.
-- 2e6352a: Validate color token `$value` shape at load time. The graph builder now walks every literal value and reports DTCG color objects whose `components` field is missing or non-array — the shape that crashes `colorjs.io` inside `inGamut(...)` with the unactionable `coords.map is not a function` traceback. Covers top-level color tokens and color sub-fields inside composites uniformly: any object whose `colorSpace` is a string is treated as a color and validated. Healthy fixtures see no new diagnostics; the validator finds problems, it doesn't create them.
+- c3ded5b: Patch release shipping the PR #1002 docs-audit fixes into the stable snapshot.
+- 0868ed5: When the smart emitter's `transformCSSValue` throws, the error now names the token path, axis permutation, and `$value`, with the original attached as `cause`.
+- 2e6352a: Validate color token `$value` shape at load time, reporting color objects whose `components` is missing or non-array before they crash colorjs.io.
 - Updated dependencies [c3ded5b]
 - Updated dependencies [0868ed5]
 - Updated dependencies [2e6352a]
@@ -128,27 +105,7 @@
 
 ### Minor Changes
 
-- 65adff6: Replace `Project.cells` + `Project.jointOverrides` + `Project.varianceByPath` with a single walkable `Project.tokenGraph`. Per-tuple resolution is now a pure graph walk; `resolver.apply` is called at most Σ(axes × non-default contexts) + 1 times at `loadProject` time, never per-tuple. On a real consumer workload that previously triggered 15M+ `resolver.apply` calls, this is the structural fix.
-
-  **Breaking (pre-1.0, minor bump per project semver):**
-
-  - `Project.cells`, `Project.jointOverrides`, `Project.varianceByPath` are removed. Use `Project.tokenGraph` + helpers from the new `@unpunnyfuns/swatchbook-core/graph` subpath:
-    - `resolveAt(graph, path, tuple)` — resolved leaf value
-    - `resolveAllAt(graph, tuple)` — full TokenMap
-    - `resolveAliasAt(graph, path, tuple)` — alias-preserving view (token with `aliasOf` populated)
-    - `resolveAliasAllAt(graph, tuple)` — full TokenMap with alias-preserving view
-    - `getVariance(graph, path)` — same `AxisVarianceResult` shape consumers had before
-    - `getAffectedBy(graph, path)` — set of axes that can change this path's value
-    - `listPaths(graph)` — sorted path universe
-  - `Project.resolveAt(tuple)` signature unchanged; backed by the graph walker internally.
-  - `@unpunnyfuns/swatchbook-core/resolve-at` subpath is removed. Use `@unpunnyfuns/swatchbook-core/graph` — same `resolveAt`-ish helpers, but parameterised over a `TokenGraph` instead of constructed against `cells + jointOverrides`.
-  - MCP `get_axis_variance` wire shape is unchanged.
-
-  **Internal:** `cells.ts`, `joint-overrides.ts`, `alias-graph.ts`, `resolve-at.ts`, `variance-by-path.ts`, `variance-analysis.ts` are deleted. Variance classification used by the smart CSS emitter is now an unexported helper inside `css-axis-projected.ts`.
-
-  **Performance:** synthetic baseline on the reference fixture shows `buildTokenGraph` at 0.39 ms vs `buildCells + probeJointOverrides + buildVarianceByPath` at 3.24 ms — 8.24× faster. Real-consumer workload not measured in this branch; baselines tracked in `packages/core/bench/token-graph.bench.ts` for future regression-tracking.
-
-  Wire payload reduction: graph stores slim `SwatchbookToken` shapes (only `$value`, `$type`, `$description`, `aliasOf`, `aliasChain`, `partialAliasOf`, `aliasedBy` — strips Terrazzo's `source.node`/`mode`/`group`/etc.). Reference-fixture payload: 607 KB → 45 KB un-gzipped (13×).
+- 65adff6: Replace `Project.cells` + `Project.jointOverrides` + `Project.varianceByPath` with a single walkable `Project.tokenGraph`; per-tuple resolution is now a graph walk. Migration: import `resolveAt`/`resolveAllAt`/`resolveAliasAt`/`resolveAliasAllAt`/`getVariance`/`getAffectedBy`/`listPaths` from the new `@unpunnyfuns/swatchbook-core/graph` subpath (replaces the removed `/resolve-at` subpath); `Project.resolveAt(tuple)` and MCP `get_axis_variance` wire shape unchanged. Reference payload 607 KB → 45 KB.
 
 ### Patch Changes
 
@@ -183,19 +140,7 @@
 
 ### Patch Changes
 
-- 1f65ada: Tighten weak / smoke-only test assertions across packages — sweep from the audit's test-invariant-quality lens. Each previously-weak assertion now pins a meaningful, falsifiable invariant.
-
-  - `variance-analysis-layered.test.ts` (closes #930) — was silently passing when the fixture's `color.accent` wasn't actually multi-touch. Extended the layered fixture (`brands/brand-a.json`) so `color.text` is overridden by both `mode` and `brand` axes; the test now asserts the actual classifier output (`orthogonal-after-probe` with `touching: {mode, brand}`). Surfaced a separate docstring-vs-implementation discrepancy filed as #942.
-  - `prefers-reduced-motion.browser.test.tsx` — admitted in a comment it couldn't tell apart "initial-render default" from "useEffect set false". Now captures the full `observed[]` sequence + asserts `matchMedia` was actually called.
-  - `variance-analysis-reference.test.ts` — joint-case loop was `toBeTruthy()` per field; now pins the known Dark+Brand A case end-to-end: `permutationName` shape, `cartesianValueKey` matches `JSON.stringify(jointOverrides[...].$value)`.
-  - `cells.test.ts` — "default cell on each axis is the shared baseline" was a length-check; now asserts reference identity (`.toBe(baseline)`), the contract that lets `resolveAt` skip copies.
-  - `config-terrazzo-options.test.ts` — `terrazzoPlugins` test ended with `expect(entry).toBeDefined()`; now also asserts the listing populated alongside the plugin invocations.
-  - `computed-and-emit.test.ts` `get_color_formats` — `raw` field only had `.toBeDefined()`; now asserts `JSON.parse(raw.value)` round-trips with `colorSpace` + `components|channels`.
-  - `computed-and-emit.test.ts` `resolve_theme` — partial-tuple test asserted `toBeTruthy()` on every axis; now asserts equality to each axis's declared `default`.
-  - `token-introspection.test.ts` `get_token` — per-theme entries asserted only `toBeTruthy()`; now asserts Light-themed vs. Dark-themed value sets actually differ (a resolver bug emitting the same value across modes would slip through `toBeTruthy`).
-
-  Plus the smaller nits: dropped a no-op `expect(resolverPath).toBeDefined()` in `resolver-edge-cases.test.ts`, added `group: 'swatchbook/presets'` / `'swatchbook/chrome'` literal pins to two diagnostic-assertion tests where prose was the only signal, swapped a tight diagnostic-prose regex for substring match.
-
+- 1f65ada: Tighten weak / smoke-only test assertions across packages, pinning falsifiable invariants (closes #930).
 - Updated dependencies [f73637a]
 - Updated dependencies [1f65ada]
   - @unpunnyfuns/swatchbook-core@0.58.0
@@ -211,62 +156,9 @@
 
 ### Patch Changes
 
-- 3302705: Enable a batch of oxlint quality rules and sweep the existing codebase via autofix.
-
-  Direct enforcement of project conventions (`CLAUDE.md`):
-
-  - `no-inline-comments` — "No inline end-of-line comments."
-  - `import/extensions` (with `ignorePackages`) — "Import specifiers: explicit extensions, always" for relative + `#/` imports; npm package imports stay extensionless.
-
-  Style + correctness (all autofixable, applied via `oxlint --fix`):
-
-  - `eqeqeq` (with `smart` so `== null` stays as the "null-or-undefined" idiom)
-  - `no-var`, `prefer-const`, `object-shorthand`, `no-else-return`
-  - `react/self-closing-comp`, `react/jsx-boolean-value`, `react/jsx-fragments`
-  - `typescript/array-type`
-  - `unicorn/throw-new-error`, `unicorn/catch-error-name`, `unicorn/prefer-includes`
-
-  CI catches future regressions; new contributors don't need to memorise the conventions.
-
-- 975944d: Consolidates the two divergent path-matchers onto a single `@unpunnyfuns/swatchbook-core/match-path` subpath:
-
-  - `packages/blocks/src/internal/use-project.ts:globMatch` (5-line prefix matcher; treated `color.*` as "any descendants")
-  - `packages/mcp/src/match.ts:matchPath` (full mid-string `*` / `**` matcher; treated `color.*` as strict single-segment per conventional glob spec)
-
-  The blocks version was a documented narrow subset; the audit (#887 worth-a-PR #8) flagged them as "diverged despite a comment claiming parity." On closer inspection they're genuinely divergent — different semantic for `color.*`. Going with the **conventional glob spec** as the unified semantics (mcp's version): `*` matches a single segment, `**` matches any number of segments. This is a pre-1.0 minor break for blocks' `filter` prop.
-
-  **Blocks-side migration:** any consumer passing `filter="color.*"` to a block (`<ColorPalette>`, `<ColorTable>`, `<TokenTable>`, `<TypographyScale>`, `<DimensionScale>`, etc.) expecting "all descendants of color" needs to update to `filter="color.**"`. The single `*` now means exactly one segment after the prefix. The doc-site MDX (`apps/storybook/src/docs/*`, `apps/docs/docs/quickstart.mdx`, `apps/docs/docs/guides/authoring-doc-stories.mdx`, `apps/docs/docs/reference/blocks/*.mdx`) and every blocks test fixture is migrated in this PR.
-
-  **Touched files:**
-
-  - New `packages/core/src/match-path.ts` + `./match-path` subpath in core's `package.json` exports + tsdown entry.
-  - `packages/mcp/src/server.ts` — imports `matchPath` from the core subpath; deleted `packages/mcp/src/match.ts`.
-  - `packages/blocks/src/internal/use-project.ts` — `globMatch` export removed; the 13 consuming blocks (`ColorTable`, `ColorPalette`, `TokenTable`, `TypographyScale`, `OpacityScale`, `FontWeightScale`, `FontFamilySample`, `DimensionScale`, `MotionPreview`, `ShadowPreview`, `BorderPreview`, `StrokeStyleSample`, `GradientPalette`) import `matchPath` from the core subpath directly.
-  - Test moved: `packages/mcp/test/match.test.ts` → `packages/core/test/match-path.test.ts`. 5 blocks-test files updated to use `**` for descendant matches; same for ~10 MDX files in apps/storybook + apps/docs.
-
-  The unified spec also gains mid-string globs (`color.**.500`) for blocks consumers that didn't have them before.
-
-- 062276b: Adds `@unpunnyfuns/swatchbook-core/themes` subpath consolidating the "themes-a-project-surfaces" enumeration + the `tupleToName` join. Eliminates duplicated `enumerateThemeNames` / `buildTupleByName` / inline `tupleToName` impls across 4 packages.
-
-  **New exports** (subpath: `/themes`):
-
-  - `tupleToName(axes, tuple)` — synthesizes the canonical theme name (`axisValues.join(' · ')` in declared axis order) for the `data-<prefix>-theme` attribute. Same form `Project.cells` keys against.
-  - `enumerateThemes({ axes, presets, defaultTuple })` — iterates default tuple + per-axis non-default singletons + presets, deduped by name. Same order the loader produces.
-  - `ThemeEntry`, `ThemeEnumAxis`, `ThemeEnumPreset` types.
-
-  Pure functions, structural input types — no `Project` import, no Terrazzo parser, no Node deps.
-
-  **Consumer migrations:**
-
-  - `packages/addon/src/preset.ts` — `enumerateThemeNames` (16-line local impl with its own inline `tupleToName`) replaced with `enumerateThemes(project).map(t => t.name)`.
-  - `packages/addon/src/preview.tsx` — `matchPermutationName` now wraps `tupleToName(virtualAxes, tuple)` instead of inlining the join.
-  - `packages/blocks/src/internal/use-project.ts` — local `tupleToName` helper deleted; consumers import from core subpath.
-  - `packages/mcp/src/server.ts` — local `buildTupleByName` (20-line preset-fill impl) and `tupleToName` (5-line) deleted; `buildTupleByName` now wraps `enumerateThemes(project)`.
-
-  The internal `permutationID` in `core/types.ts` stays (still used by the loader's per-tuple keys via `Object.values(input).join(…)`); it's a slightly different signature (joins `Object.values` not `axes.map`) and remains an internal detail. The new `tupleToName(axes, tuple)` is the consumer-facing replacement that's explicit about axis ordering.
-
-  Sixth core subpath (joining `/fuzzy`, `/resolve-at`, `/css-var`, `/data-attr`, `/snapshot-for-wire`, `/match-path`). Pre-1.0 minor bump on core (new public subpath); patch on consumer packages.
-
+- 3302705: Enable a batch of oxlint quality rules (`no-inline-comments`, `import/extensions`, `eqeqeq`, `no-var`, and more) and sweep the codebase via autofix.
+- 975944d: Consolidate the two divergent path-matchers onto a single `@unpunnyfuns/swatchbook-core/match-path` subpath using conventional glob semantics (`*` = one segment, `**` = any). Migration: blocks `filter="color.*"` expecting all descendants becomes `filter="color.**"`.
+- 062276b: Add `@unpunnyfuns/swatchbook-core/themes` subpath (`tupleToName`, `enumerateThemes`, types), eliminating duplicated theme-enumeration impls across 4 packages.
 - Updated dependencies [4bc19e8]
 - Updated dependencies [f82eb5c]
 - Updated dependencies [c69dec1]
@@ -285,89 +177,15 @@
 
 ### Minor Changes
 
-- 174d162: Closes #826. Renames `permutations` → `themes` and `defaultPermutation` → `defaultTheme` in MCP tool response shapes (`describe_project`, `list_axes`). Aligns the AI-tool wire surface with the rest of the public vocabulary post-cartesian-drop — internally the server already worked in terms of themes; only the response field names trailed. Tool descriptions and help-text prose updated to match.
-
-  Breaking for MCP clients that key off the old field names; the underlying values (default tuple name + singleton enumeration) are unchanged. The `theme` argument on tool inputs stays as-is — it's a string identifier (e.g. `"Dark · Brand A"`), not a tuple object, and the audit's `tuple` rename was rejected on that basis.
+- 174d162: Rename `permutations`→`themes` and `defaultPermutation`→`defaultTheme` in MCP response shapes (`describe_project`, `list_axes`); breaking for clients keying off the old names, values unchanged (closes #826).
 
 ### Patch Changes
 
-- d54dd78: Closes #827. Internal-only — strips remaining stale JSDoc / inline comments that referenced the cartesian-drop chain, "PR 6a" / "wire format change" phases, "see commit 893331f", and "Replaces the legacy …" patterns. The bulk of these were already cleaned up in #816 / #841 / #846 as those PRs deleted the code they pointed at; this PR catches the few that survived as stranded references.
-
-  No behavior changes.
-
-- b8372c1: Internal migration. Core's own consumers of `Project.permutations` / `permutationsResolved` now route through abstractions that are upstream of the singleton enumeration:
-
-  - **`buildCells`** takes a `resolveTuple: (tuple) => TokenMap` callback. Resolver-backed projects pass `resolver.apply` directly (no scan of the singleton enumeration); layered / plain-parse projects pass a lookup over the loader's per-tuple parse output. Drops the `findPermByTuple` helper and the dependence on `Permutation[]` + `Record<string, TokenMap>` inputs.
-  - **`validateChrome`** takes a `ReadonlySet<string>` of token IDs instead of iterating `permutationsResolved` itself. `loadProject` computes the set from `varianceByPath.keys()` (same union of every path that appears in any theme, by construction).
-  - **`load.ts`** wires both new signatures; `validateChrome` now runs after `varianceByPath` is built so the token-ID set is ready. Order-only change; chrome diagnostics still land in the same `Project.diagnostics` order.
-
-  Part 2 of 3 for #815. With this PR, the only remaining `permutationsResolved` reads in core live in `load.ts` itself (the legacy `Project.permutationsResolved` field is still populated for `Project.graph` and the snapshot fallback in `blocks/use-project.ts`). Field removals + public-API exits land in Part 3, blocked on #842 (migrating blocks test snapshots off the legacy fallback).
-
-- 158f2e1: `@unpunnyfuns/swatchbook-core`: legacy cartesian-era code paths deleted.
-
-  Removed (pre-1.0 minor bump):
-
-  - `analyzeAxisVariance()` function + its `@unpunnyfuns/swatchbook-core/variance` subpath export. Replaced by `Project.varianceByPath`, the load-time-built `ReadonlyMap<string, AxisVarianceResult>` consumed by the smart CSS emitter, the MCP `get_axis_variance` tool, and the `AxisVariance` doc block. Read `project.varianceByPath.get(path)` directly.
-  - `buildJointOverrides()` shim (deprecated wrapper around `probeJointOverrides`, no non-test callers).
-  - Internal `emitCss()` (the 200-line cartesian-fan-out CSS emitter) — replaced by `emitAxisProjectedCss()` in v0.54.
-  - Internal `composeProjectCss()` from `@unpunnyfuns/swatchbook-addon` (`@internal` test-only re-export of `emitAxisProjectedCss`).
-
-  Type-only kept on the barrel: `AxisVarianceResult` + `VarianceKind` (relocated from `variance.ts` into `types.ts` since they're load-bearing for `Project.varianceByPath` and the wire-format shape).
-
-  Migration: replace `analyzeAxisVariance(path, ...)` with `project.varianceByPath.get(path)`. Replace `buildJointOverrides(...)` with `probeJointOverrides(...).overrides`.
-
-  Docs site updated to document `project.varianceByPath` instead of the removed function.
-
-- de4cc3d: Closes #815. The cartesian-era `Project.permutations` / `Project.permutationsResolved` fields exit `@unpunnyfuns/swatchbook-core`'s public surface entirely, along with the `Permutation` type and the `permutationID()` function (both kept internal to the loader for now). `Project.graph` renamed to `Project.defaultTokens` for accuracy — it's the resolved TokenMap at the default tuple, not a reference graph.
-
-  ### Removed (pre-1.0 minor bump)
-
-  - `Project.permutations: Permutation[]`
-  - `Project.permutationsResolved: Record<string, TokenMap>`
-  - `Project.graph` (renamed to `Project.defaultTokens`)
-  - `Permutation` type export from the `core` barrel
-  - `permutationID()` function export from the `core` barrel
-  - `@unpunnyfuns/swatchbook-blocks`: `ProjectSnapshot.permutations` + `ProjectSnapshot.permutationsResolved` + `VirtualPermutation` / `VirtualPermutationShape` types
-
-  ### Added / changed
-
-  - `Project.disabledAxes` and `Project.presets` are now `readonly` arrays.
-  - `Project.defaultTokens: TokenMap` (replaces `Project.graph`).
-  - `@unpunnyfuns/swatchbook-blocks` test fixtures (`packages/blocks/test/*`) now declare the `cells` / `jointOverrides` / `defaultTuple` shape directly. The interim `withCellsShape` helper introduced in #844 is deleted; the legacy `snapshotResolveAt` fallback in `use-project.ts` (which already lost its `permutationsResolved` branch in #844) is unchanged.
-
-  ### Migration
-
-  ```ts
-  // before
-  project.permutations.find((p) => p.name === name);
-  project.permutationsResolved["Dark · Brand A"]?.["color.accent.bg"];
-  project.graph;
-
-  // after
-  project.resolveAt({ mode: "Dark", brand: "Brand A" })["color.accent.bg"];
-  project.defaultTokens;
-  // theme names synthesized when needed: `axisValues.join(' · ')`
-  ```
-
-  `emit-via-terrazzo`'s `selection: 'permutations'` (default) derives the singleton set from `axes + presets + defaultTuple` directly — same set the resolver loader produces, no `Project.permutations` dependency.
-
-  `@unpunnyfuns/swatchbook-mcp`: tool I/O unchanged. The CLI's reload log derives `themeCount` from axis cardinality.
-
-  `@unpunnyfuns/swatchbook-integrations`: `tailwind` reads `project.defaultTokens` (was `project.graph`).
-
-- 09d957f: Internal migration. Non-core read sites that iterated `Project.permutations` or indexed into `Project.permutationsResolved[name]` now route through `cells` / `resolveAt` / `varianceByPath` / `defaultTuple` instead. Theme name strings (e.g. `"Dark · Brand A"`) are synthesized from `axes + defaultTuple` at the call sites that need them, independent of the soon-to-be-removed `Project.permutations` array.
-
-  Touched consumers:
-
-  - `@unpunnyfuns/swatchbook-mcp` server tools (`describe_project`, `list_tokens`, `get_token`, `list_axes`, `get_alias_chain`, `get_aliased_by`, `get_color_formats`, `get_color_contrast`, `get_axis_variance`, `search_tokens`, `resolve_theme`, `get_consumer_output`) + the CLI's reload log line.
-  - `@unpunnyfuns/swatchbook-integrations` css-in-js `collectPaths` (now reads `varianceByPath.keys()`).
-  - `@unpunnyfuns/swatchbook-addon` preset `renderTokenTypes` (dropped the `permutationsResolved` fallback; enumerates singleton theme names from axes/presets/defaultTuple).
-  - `@unpunnyfuns/swatchbook-blocks` `use-project` (dropped the legacy `nameForTuple` / `tuplesEqual` helpers; narrowed the snapshot fallback to the active-permutation path only).
-
-  `Project.permutations` and `Project.permutationsResolved` are unchanged in this PR. Part 1 of 3 for #815 — the field removals and `Permutation`/`permutationID` exit from the public API land in subsequent PRs.
-
-  Three vestigial MCP tests dropped (asserted a "No permutations in project." error string from guards the migrated tools no longer need; the new default-theme-name path always resolves).
-
+- d54dd78: Strip remaining stale JSDoc / inline comments referencing the cartesian-drop chain (closes #827).
+- b8372c1: Route core's own `Project.permutations` consumers through callback abstractions: `buildCells` takes a `resolveTuple` callback, `validateChrome` takes a token-ID set (part 2 of 3 for #815).
+- 158f2e1: Delete legacy cartesian-era code paths: `analyzeAxisVariance()` + `/variance` subpath, `buildJointOverrides()`, internal `emitCss()`, `composeProjectCss()`. Migration: use `project.varianceByPath.get(path)` and `probeJointOverrides(...).overrides`.
+- de4cc3d: Remove `Project.permutations`/`permutationsResolved` + `Permutation`/`permutationID` from the public surface; rename `Project.graph`→`Project.defaultTokens` (closes #815). Migration: use `project.resolveAt(tuple)` and `project.defaultTokens`.
+- 09d957f: Route non-core read sites off `Project.permutations`/`permutationsResolved` onto `cells`/`resolveAt`/`varianceByPath`/`defaultTuple` (part 1 of 3 for #815).
 - Updated dependencies [d54dd78]
 - Updated dependencies [afaebb8]
 - Updated dependencies [b8372c1]
@@ -397,82 +215,22 @@
 
 ### Minor Changes
 
-- 674944b: `@unpunnyfuns/swatchbook-core`: expose `buildResolveAt` via the new `./resolve-at` subpath — a small, dep-free entry point browser-side consumers can import without dragging the loader / Terrazzo runtime through their bundles.
-
-  `@unpunnyfuns/swatchbook-blocks`: blocks now consume `resolveAt(activeTuple)` instead of indexing `permutationsResolved[activePermutation]` for the current `resolved` token map. `ProjectData` exposes `resolveAt` so per-tuple consumers (the `AxisVariance` block's grid cells) can read any tuple's values without `permutations.find` + tuple-name scans. Snapshots that pre-date the cells wire format fall back to `permutationsResolved` indexing — covers hand-built test snapshots and the docs-site path.
-
-- 905161d: `@unpunnyfuns/swatchbook-core`: drop `projectCss` and the supporting `packages/core/src/emit.ts` module. The smart `emitAxisProjectedCss` (default since v0.54) becomes the single emitter. Also drops the unused `emitTypes` helper (the addon's `preset.ts` has its own `renderTokenTypes`).
-
-  `@unpunnyfuns/swatchbook-addon`: drop the `AddonOptions.emitMode` option and the `composeProjectCss` dispatch helper. With only one emitter there's no dispatch to do; the addon's plugin calls `emitAxisProjectedCss` directly.
-
-  `@unpunnyfuns/swatchbook-mcp`: `emit_css` tool calls `emitAxisProjectedCss(project)` directly. Tool description updated to describe the smart-emit shape (`:root` baseline + per-axis singleton cells + compound joint-override blocks + chrome alias trailer).
-
-  `apps/docs/scripts/build-tokens.mts`: switches to `emitAxisProjectedCss`.
-
-  Pre-1.0 breaking change for consumers who explicitly imported `projectCss` from core or set `emitMode: 'cartesian'` on the addon. Production consumers were on the smart-emit default already.
-
-- af73dc4: `@unpunnyfuns/swatchbook-addon`, `@unpunnyfuns/swatchbook-blocks`: lift `resolveAt` to the preview decorator (built once per iframe at module load over the stable virtual exports) and ship it through `SwatchbookContext`. Blocks read `snapshot.resolveAt` directly — no more memo gymnastics. Closes #793.
-
-  Drops the wire-shipped `permutations`, `permutationsResolved`, and `defaultPermutation` from the virtual module + HMR snapshot + `InitPayload` + per-package `virtual.d.ts`. The block-side `ProjectSnapshot` keeps them as optional fields for hand-built test snapshots and legacy MDX consumers (the `snapshotResolveAt` fallback path still indexes them when `cells` is absent).
-
-  Migrates the three remaining addon-side consumers that previously read `Project.permutationsResolved` directly:
-
-  - `preset.ts` (codegen): iterates `project.varianceByPath.keys()` for token paths.
-  - `virtual/plugin.ts` (HMR reload log): counts from `project.varianceByPath.size`.
-  - `useToken` hook: reads the snapshot's `resolveAt` (or a module-level `fallbackResolveAt` built from the virtual exports when no provider is mounted).
-
-  `Project.permutations` and `Project.permutationsResolved` still exist on the core type — the loadProject rewrite that drops them follows in the next PR.
-
-- f09066f: `@unpunnyfuns/swatchbook-mcp`, `@unpunnyfuns/swatchbook-integrations`: server-side consumers switch from indexing `Project.permutationsResolved[name]` to calling `project.resolveAt(tuple)`. MCP builds a small `tupleByName: Map<permutationName, axisTuple>` once per project (refreshed on `setProject`) so tools that accept a `theme` name parameter map it to a tuple in O(1) before calling `resolveAt`. `get_axis_variance` drops its redundant `permutations.some` existence scan — `varianceByPath.has(path)` covers it. MCP tool inputs / outputs are unchanged. The `css-in-js` integration's `collectPaths` switches to `resolveAt(theme.input)` for the same iteration. After this PR only `loadProject` itself materializes the cartesian permutation map; the next PR drops that.
-- f1cf2db: `@unpunnyfuns/swatchbook-core`: add `Project.cells`, `Project.jointOverrides`, `Project.defaultTuple`, and `Project.resolveAt(tuple)` alongside the existing cartesian shape. `cells[axisName][contextName]` holds the resolved `TokenMap` for `{ ...defaultTuple, [axisName]: contextName }` — bounded by `Σ(axes × contexts)` regardless of cartesian product size. `jointOverrides` carries the divergent partial-tuple values that cell composition cannot reconstruct on its own, populated by an exhaustive arity-ascending probe so `resolveAt(tuple)` is exactly equivalent to `permutationsResolved[permutationID(tuple)]` for every fixture tuple (covers joint variance at any order, not just pairs). Additive — no consumer migration required; foundation for the subsequent PRs that move blocks / MCP / virtual module off the cartesian map.
-- d29813e: `@unpunnyfuns/swatchbook-core`: add `Project.varianceByPath` — per-token `AxisVarianceResult` cached at load time so consumers can look up which axes affect a token in O(1) instead of re-running the bucket analysis on every read. Same shape `analyzeAxisVariance` returns; populated with the existing cartesian-bucket algorithm for now (a later PR replaces the implementation with an analytical probe over `cells` when the cartesian materialization goes away). Smart-emitter Phase 2 and MCP `get_axis_variance` switch to read from the cache.
-- 5178532: `@unpunnyfuns/swatchbook-addon`, `@unpunnyfuns/swatchbook-blocks`: ship `cells`, `jointOverrides`, `varianceByPath`, and `defaultTuple` over the virtual module and HMR snapshot, alongside the existing `permutationsResolved` (additive). Blocks-side `ProjectSnapshot` / `ProjectData` expose the new fields. The `AxisVariance` block drops its `analyzeAxisVariance(...)` call in favor of an O(1) `varianceByPath[path]` lookup. Other block migrations (TokenTable / TokenDetail / ColorTable reading via `resolveAt`) ship in a later PR.
+- 674944b: Expose `buildResolveAt` via the new dep-free `./resolve-at` subpath; blocks consume `resolveAt(activeTuple)` instead of indexing `permutationsResolved`.
+- 905161d: Drop `projectCss` + `emit.ts`, making smart `emitAxisProjectedCss` the single emitter; drop the addon's `emitMode` option and `emit_css`/MCP dispatch. Breaking for consumers importing `projectCss` or setting `emitMode: 'cartesian'`.
+- af73dc4: Lift `resolveAt` to the preview decorator and ship it through `SwatchbookContext`; drop wire-shipped `permutations`/`permutationsResolved`/`defaultPermutation` (closes #793).
+- f09066f: Server-side consumers switch from `Project.permutationsResolved[name]` indexing to `project.resolveAt(tuple)`; MCP builds a `tupleByName` map per project. Tool I/O unchanged.
+- f1cf2db: Add `Project.cells`/`jointOverrides`/`defaultTuple`/`resolveAt(tuple)` alongside the cartesian shape (additive); foundation for moving consumers off the cartesian map.
+- d29813e: Add `Project.varianceByPath` caching per-token `AxisVarianceResult` at load time for O(1) axis lookups.
+- 5178532: Ship `cells`/`jointOverrides`/`varianceByPath`/`defaultTuple` over the virtual module + HMR snapshot (additive); `AxisVariance` block uses the O(1) `varianceByPath` lookup.
 
 ### Patch Changes
 
-- e161fdb: `@unpunnyfuns/swatchbook-blocks`: index permutations by canonical tuple key once per snapshot, exposed as `permutationNameForTuple(tuple)` on `ProjectData`. `AxisVariance`'s grid drops its per-cell `permutations.find` scans for `O(1)` `Map.get` lookups. Bounded by the permutation count regardless of how many cells render.
-- 0932217: `@unpunnyfuns/swatchbook-core`: rewrite the joint-overrides build to probe via `resolver.apply` directly instead of iterating `permutationsResolved`. New `probeJointOverrides` returns two derived signals from one probe pass:
-
-  - `overrides` — partial-tuple divergences (fed into `resolveAt` so cell composition reproduces the cartesian-correct value).
-  - `jointTouching` — per-path axes that genuinely contribute to a joint divergence (separated from cell-composition artifacts; drives variance display).
-
-  `buildVarianceByPath` now consumes `jointTouching` directly instead of deriving from `jointOverrides`, fixing the false-positive class where a non-touching axis's cell value overwrote another axis's delta and the override looked like the axis "touched" the token.
-
-  Algorithm probes every axis-arity from 2 to N (all-orders), so joint variance at any arity is caught — bounded by `Σ_n C(axes, n) × Π contexts^n`, which is small at typical axis counts but unbounded for pathological fixtures; an arity cap is a future optimization.
-
-  Internal-only — `loadProject` still materializes the full cartesian shape into `Project.permutations` + `Project.permutationsResolved`. The cartesian materialization drop is the next PR.
-
-- 9de9db9: `@unpunnyfuns/swatchbook-core`: the **layered loader** now enumerates `Σ(axes × contexts)` singleton tuples — the default tuple plus one per `(axis, non-default-context)` — instead of `Π(contexts)` cartesian tuples. Symmetric with the resolver path after #810. Joint divergences are unrecoverable without a resolver, so the truth model for layered is projection composition over delta cells; `composeAt` at any multi-non-default tuple applies each axis's delta on top of the baseline in axis order.
-
-  The `Config.maxPermutations` guard is **removed**. With singleton enumeration, the loader is intrinsically bounded by axis cardinality regardless of cartesian size — there's nothing left to guard against.
-
-  Public API removed (pre-1.0 minor bump):
-
-  - `Config.maxPermutations` field.
-  - `cartesianSize()` export.
-  - `permutationGuardDiagnostic()` export.
-  - `DEFAULT_MAX_PERMUTATIONS` export.
-  - The `swatchbook/permutations` warn diagnostic group.
-
-  Migration: drop `maxPermutations` from your swatchbook config. The reference `axes.mdx` / `config.mdx` docs reflect the new scoping levers (`presets`, `disabledAxes`).
-
-- a2f776e: `@unpunnyfuns/swatchbook-core`: `loadProject` no longer calls `resolver.listPermutations()`. The resolver-backed loader now enumerates only **singletons** — the axes-defaults tuple plus one per `(axis, non-default-context)` — so total `resolver.apply` calls are bounded by `Σ(axes × contexts)` instead of the cartesian product. Pathological resolvers (terrazzo#752: 15M tuples) load in milliseconds instead of OOMing.
-
-  `Project.cells` now stores **delta cells** for non-default contexts: each non-default `(axis, context)` cell holds only the tokens whose value differs from the default-cell baseline. Default cells stay as full TokenMaps. Delta cells make `composeAt` correct under sparse composition — a later axis's cell can't accidentally overwrite an earlier axis's overlay on a token the later axis doesn't touch.
-
-  `probeJointOverrides` now falls back to the baseline TokenMap when a delta cell omits a path, so the "axis A's cell alone would produce" comparison stays accurate. The CSS axis-projected emitter passes the full composed TokenMap separately for alias resolution while emitting per-axis cell deltas, so smart-dedup re-emit (the previous cascade trick) is no longer needed — joint compound `[data-axis-A][data-axis-B]` blocks handle the joint-variance cases.
-
-  Public API removed (pre-1.0 minor bump):
-
-  - `resolvePermutation()` export.
-  - `ResolvedPermutation` type.
-
-  `Project.permutations` and `Project.permutationsResolved` are retained for now (still keyed against the singleton enumeration); the layered loader continues to use cartesian enumeration unchanged.
-
-  `Config.maxPermutations` is documented as **layered-only** — the resolver path is intrinsically bounded.
-
-- e170124: `@unpunnyfuns/swatchbook-core`: smart emitter (`emitAxisProjectedCss`) and `analyzeProjectVariance` switch their Phase 1 cell construction from `findPermByTuple(permutations, …) → permutationsResolved[name]` to reading `project.cells` directly. Internal refactor only — same output for every fixture, just sourced from the bounded per-axis surface instead of the cartesian map. Phase 3 (joint case probing + lookup) still uses the resolver + `permutationsResolved`; that moves in the next PR alongside the loadProject rewrite. No public API changes.
-- 83224fb: `@unpunnyfuns/swatchbook-core`: smart emitter (`emitAxisProjectedCss`) compound-block emission and `analyzeProjectVariance` Phase 3 read from `project.jointOverrides` directly. The smart emitter iterates overrides for N-arity compound selectors (pairs / triples / etc. uniformly); the variance analysis derives the legacy pair-shape `JointCase` array from the same overrides for back-compat. No more `findPermByTuple` + `permutationsResolved[jointCase.permutationName]` lookup in either path. Internal refactor; same output for every fixture. `loadProject` still materializes the cartesian map; that goes in the next PR.
+- e161fdb: Index permutations by canonical tuple key once per snapshot (`permutationNameForTuple`), dropping `AxisVariance`'s per-cell `permutations.find` scans.
+- 0932217: Rewrite the joint-overrides build to probe via `resolver.apply` directly, returning `overrides` + `jointTouching`; fixes a false-positive where a non-touching axis looked like it touched a token.
+- 9de9db9: The layered loader now enumerates `Σ(axes × contexts)` singleton tuples instead of cartesian. `Config.maxPermutations`, `cartesianSize()`, `permutationGuardDiagnostic()`, `DEFAULT_MAX_PERMUTATIONS`, and the `swatchbook/permutations` diagnostic are removed. Migration: drop `maxPermutations` from config.
+- a2f776e: `loadProject` no longer calls `resolver.listPermutations()`; enumerates only singletons, bounding `resolver.apply` calls and loading 15M-tuple resolvers in ms. `Project.cells` now stores delta cells. Removed `resolvePermutation()` + `ResolvedPermutation`.
+- e170124: Smart emitter + `analyzeProjectVariance` Phase 1 read `project.cells` directly instead of `findPermByTuple`. Internal; same output.
+- 83224fb: Smart emitter compound-block emission + `analyzeProjectVariance` Phase 3 read `project.jointOverrides` directly. Internal; same output.
 - Updated dependencies [674944b]
 - Updated dependencies [e161fdb]
 - Updated dependencies [905161d]
@@ -492,15 +250,15 @@
 
 ### Minor Changes
 
-- 8fb128c: `@unpunnyfuns/swatchbook-addon`: add `emitMode: 'cartesian' | 'projected'` option, defaulting to `'projected'`. The smart axis-projected emitter (`emitAxisProjectedCss`) now backs the addon's virtual-module `css` export — one `:root` baseline + per-cell deltas + compound `[data-A][data-B]` blocks for joint-variant tokens. Output is dramatically smaller than cartesian for typical fixtures while remaining spec-faithful for non-orthogonal DTCG resolvers. Pass `emitMode: 'cartesian'` to fall back to the explicit per-tuple fan-out (`projectCss`) — keep this in mind only for pathological cardinality where the projection analysis pass is too costly.
-- 31999ef: `@unpunnyfuns/swatchbook-switcher`: remove the unused `permutations` prop from `<ThemeSwitcher>` and the `SwitcherPermutation` type from the public exports. The prop was declared but never read inside the component; the addon's manager and the storybook example are updated to drop the dead pass-through.
-- 7b4225a: `@unpunnyfuns/swatchbook-core`: add `emitAxisProjectedCss(permutations, permutationsResolved, options?)` as an opt-in alternative to `emitCss` / `projectCss`. Emits one `:root` baseline block plus one `[data-<prefix>-<axis>="<context>"] { … }` block per non-default axis cell, carrying only the declarations that differ from baseline at that cell. Output composes via CSS cascade at runtime instead of fanning out across the cartesian tuple space. Axes must be orthogonal — see the function's doc-comment for the joint-variance limitation. Purely additive: existing `emitCss` / `projectCss` behavior unchanged.
-- 5ed6b04: `@unpunnyfuns/swatchbook-core`: rewrite `emitAxisProjectedCss` to route per-token between projection (single-attribute selectors) and compound selectors based on `analyzeProjectVariance`. Spec-faithful for any DTCG-compliant resolver — orthogonal projects still get the size win; joint-variant projects get compound `[data-A][data-B]` blocks that preserve the cartesian-correct value at exactly the divergent joint tuples. Smart dedup: cells re-emit a token's value when ANY axis touches it (not just when this cell differs from baseline), so cascade-order resolves orthogonal-after-probe tokens correctly. Signature changed to `(project, options)` — function is `@internal`, only consumed in-package; no public API broken.
-- 812676f: `@unpunnyfuns/swatchbook-core`: add internal `analyzeProjectVariance(project)` that classifies every token by how it varies across axes — baseline-only, single-axis, orthogonal-after-probe, or joint-variant. First step of a planned smart-emitter rewrite that routes per-token between projection (orthogonal) and compound-selector emit (joint-variant). Analysis only; no emit behaviour changes in this release. Not exported from the public API yet.
+- 8fb128c: Add `emitMode: 'cartesian' | 'projected'` (default `'projected'`); the smart axis-projected emitter backs the addon's virtual-module `css` export.
+- 31999ef: Remove the unused `permutations` prop from `<ThemeSwitcher>` and the `SwitcherPermutation` type.
+- 7b4225a: Add `emitAxisProjectedCss(permutations, permutationsResolved, options?)` emitting a `:root` baseline plus per-axis cell deltas (orthogonal axes only). Additive.
+- 5ed6b04: Rewrite `emitAxisProjectedCss` to route per-token between projection and compound selectors via `analyzeProjectVariance`; spec-faithful for any DTCG resolver. Signature → `(project, options)`; `@internal`.
+- 812676f: Add internal `analyzeProjectVariance(project)` classifying each token's axis variance. Analysis only; no emit change.
 
 ### Patch Changes
 
-- ded154d: `@unpunnyfuns/swatchbook-core`: honest the orthogonality framing on `emitAxisProjectedCss`. JSDoc + test descriptions previously called the orthogonality requirement a "usage constraint," implying the consumer was responsible for authoring orthogonal modifiers. The DTCG Resolver Module 2025.10 spec explicitly permits non-orthogonal modifiers (Primer's "Pirate" light-only theme is the rationale doc's own example); projection is a lossy size optimization for them, not a contract. Cartesian (`emitCss`) is the spec-faithful default. Docs only — no behavior change.
+- ded154d: Correct the orthogonality framing on `emitAxisProjectedCss`: projection is a lossy size optimization for non-orthogonal modifiers, cartesian is the spec-faithful default. Docs only.
 - Updated dependencies [8fb128c]
 - Updated dependencies [31999ef]
 - Updated dependencies [7b4225a]
@@ -519,11 +277,11 @@
 
 ### Patch Changes
 
-- 39dd274: Add unit coverage for the computed + emit MCP tools (`get_color_formats`, `get_color_contrast`, `get_axis_variance`, `resolve_theme`, `emit_css`, `get_consumer_output`). Fourth of the test splits under #695 — closes the `server.ts` handler coverage gap. No behavior changes.
-- d6ceac1: Add unit coverage for `load-config.ts` — bare-JSON resolver path, jiti-imported `.ts` / `.mts` / `.js` config modules, `cwdOverride` semantics, missing-file failure. Fifth of the test splits under #695. No behavior changes.
-- b72ebdf: Add unit coverage for project-metadata MCP tools (`describe_project`, `list_axes`, `list_tokens`, `get_diagnostics`) plus the in-memory test harness used to drive them through the real MCP protocol. Second of the test splits under #695. No behavior changes.
-- 20fcb3b: Add unit coverage for `contrast.ts` and `format-color.ts` (DTCG color conversion + WCAG 2.1 / APCA contrast math). First of the test splits under #695. No behavior changes.
-- c0ec405: Add unit coverage for token-introspection MCP tools (`get_token`, `get_alias_chain`, `get_aliased_by`, `search_tokens`). Third of the test splits under #695. No behavior changes.
+- 39dd274: Add unit coverage for the computed + emit MCP tools (#695).
+- d6ceac1: Add unit coverage for `load-config.ts` (#695).
+- b72ebdf: Add unit coverage for project-metadata MCP tools plus the in-memory test harness (#695).
+- 20fcb3b: Add unit coverage for `contrast.ts` and `format-color.ts` (#695).
+- c0ec405: Add unit coverage for token-introspection MCP tools (#695).
 - Updated dependencies [9e9f635]
 - Updated dependencies [00a1bf7]
   - @unpunnyfuns/swatchbook-core@0.52.0
@@ -545,42 +303,7 @@
 
 ### Minor Changes
 
-- 0b14715: Rename the cartesian-product surface from `themes` to `permutations`. A _theme_ is a curated presentational choice (Light, Dark, Brand A — what `presets` already captures); a _permutation_ is the raw cartesian product the DTCG resolver enumerates. The old vocabulary muddled the two, and the muddle made terrazzo#752 ("is 15M permutations a bug?") harder than it needed to be.
-
-  **Renamed across the public API:**
-
-  - `Project.themes` → `Project.permutations`
-  - `Project.themesResolved` → `Project.permutationsResolved`
-  - `resolveTheme()` → `resolvePermutation()`
-  - `Theme` → `Permutation`
-  - `ResolvedTheme` → `ResolvedPermutation`
-  - `ProjectSnapshot.activeTheme` → `activePermutation`
-  - `useActiveTheme()` → `useActivePermutation()`
-  - `SwitcherTheme` → `SwitcherPermutation`
-  - `ThemeContext` → `PermutationContext`
-  - virtual `themes` / `defaultTheme` exports → `permutations` / `defaultPermutation`
-  - `ThemeName` typegen → `PermutationName`
-  - `emitViaTerrazzo` selection `'themes'` → `'permutations'`
-  - `packages/core/src/themes/` → `packages/core/src/permutations/`
-  - `normalizeThemes()` / `loadResolverThemes()` / `loadLayeredThemes()` → `normalizePermutations()` / `loadResolverPermutations()` / `loadLayeredPermutations()`
-
-  **Dropped legacy single-name channels** (no deprecation; pre-1.0 minor bump):
-
-  - `parameters.swatchbook.theme` reader removed.
-  - `globals.swatchbookTheme` removed: the `GLOBAL_KEY` constant, the globalType registration, the initialGlobals entry, toolbar writes via `setAxis` / `applyPreset`, the `composedNameFor` / `tupleMatchesInput` / `tupleForName` helpers, the `channel-globals.ts` subscription, and the `use-project.ts` `channelTheme` fallback cascade. `AXES_GLOBAL_KEY` is now the only active-permutation channel.
-
-  **Unchanged** (external conventions):
-
-  - `data-<prefix>-theme="…"` CSS attribute (Storybook/CSS ecosystem).
-  - `ThemeSwitcher` component + `@unpunnyfuns/swatchbook-switcher` package name.
-  - `theme-switcher` Storybook TOOL_ID.
-  - `virtual:swatchbook/theme` css-in-js integration export.
-  - Storybook's own `themes` import in `apps/storybook/.storybook/manager.ts`.
-
-  **New: `Config.maxPermutations` guard** (default 1024). Defends against terrazzo#752 — the resolver's cartesian-product enumerator OOMs on pathological state-space modifier products. When the cap is exceeded, `loadProject` loads only the default-tuple permutation + materializes any declared presets on demand via `resolver.apply()`, and surfaces a `swatchbook/permutations` warn diagnostic. The upstream `listPermutations()` call is bypassed entirely under the guard. Set `0` to disable. New docs in `config.mdx` (`maxPermutations` reference entry) + `axes.mdx` ("Scoping large modifier spaces" section).
-
-### Patch Changes
-
+- 0b14715: Rename the cartesian-product surface from `themes` to `permutations` across the public API (`Project.themes`→`permutations`, `resolveTheme()`→`resolvePermutation()`, `Theme`→`Permutation`, virtual exports, typegen, and more). Drop the legacy `parameters.swatchbook.theme` reader and `globals.swatchbookTheme` channel. Add `Config.maxPermutations` guard (default 1024) defending against pathological resolver cartesian-product OOMs; CSS attribute and `ThemeSwitcher` naming unchanged.
 - Updated dependencies [c9b31ed]
 - Updated dependencies [0b14715]
   - @unpunnyfuns/swatchbook-core@0.50.0
@@ -615,7 +338,7 @@
 
 ### Patch Changes
 
-- 5324d0c: Make the MCP-client wiring instructions client-agnostic across the README and the docs site (`reference/mcp`, `intro`, `developers/architecture`). Previous wording singled out one client by name and embedded a single platform-specific config path; the `mcpServers` JSON shape is the same across MCP hosts, so the wording now lets each host's own docs cover where its server-config file lives.
+- 5324d0c: Make the MCP-client wiring instructions client-agnostic across the README and docs site.
   - @unpunnyfuns/swatchbook-core@0.20.2
 
 ## 0.20.1
@@ -634,7 +357,7 @@
 
 ### Patch Changes
 
-- 2444c4e: Rework every package README to match the docs intro's register: human-register opening sentence, line breaks for pacing, detail-dense reference material (API tables, config fields, block catalogues, CLI flag tables, MCP tool tables) pushed out to the docs site where it belongs. Each README now answers "what is this and how do I install it" in ~50 lines instead of ~120, with clear links for readers who want more. Total README line count across all packages dropped from ~700 to ~370.
+- 2444c4e: Rework every package README to the docs-intro register, pushing detail-dense reference material to the docs site (~700 → ~370 total lines).
 - Updated dependencies [2444c4e]
   - @unpunnyfuns/swatchbook-core@0.19.9
 
@@ -642,7 +365,7 @@
 
 ### Patch Changes
 
-- a753766: Rework every package README to match the docs intro's register: human-register opening sentence, line breaks for pacing, detail-dense reference material (API tables, config fields, block catalogues, CLI flag tables, MCP tool tables) pushed out to the docs site where it belongs. Each README now answers "what is this and how do I install it" in ~50 lines instead of ~120, with clear links for readers who want more. Total README line count across all packages dropped from ~700 to ~370.
+- a753766: Rework every package README to the docs-intro register, pushing detail-dense reference material to the docs site (~700 → ~370 total lines).
 - Updated dependencies [a753766]
   - @unpunnyfuns/swatchbook-core@0.19.8
 
@@ -734,9 +457,7 @@
 
 ### Minor Changes
 
-- e702b29: Fuzzy search across `TokenNavigator`, `TokenTable`, and the MCP `search_tokens` tool. Case-insensitive, tolerates a single-character typo per term, and accepts out-of-order terms — `"blue palette"` matches `color.palette.blue.500`, `"surf def"` matches `color.surface.default`. Replaces the previous case-insensitive substring match.
-
-  Core now exports `fuzzyFilter(items, query, key, options?)` and `fuzzyMatches(haystack, query)` so downstream integrations can reuse the same ranking primitive. Backed by [`@leeoniya/ufuzzy`](https://github.com/leeoniya/uFuzzy).
+- e702b29: Fuzzy search across `TokenNavigator`, `TokenTable`, and MCP `search_tokens` (case-insensitive, single-typo tolerant, out-of-order terms); core exports `fuzzyFilter` / `fuzzyMatches`, backed by `@leeoniya/ufuzzy`.
 
 ### Patch Changes
 
@@ -767,7 +488,7 @@
 
 ### Minor Changes
 
-- 018f518: Add `get_axis_variance` MCP tool + extract the variance algorithm into `@unpunnyfuns/swatchbook-core` (`analyzeAxisVariance`). The algorithm now lives in one place and drives both the `AxisVariance` doc block and the new MCP tool, which classifies a token's axis dependence (`constant` / `single` / `multi`) and returns the per-axis breakdown of values seen in each context.
+- 018f518: Add `get_axis_variance` MCP tool + extract the variance algorithm into core as `analyzeAxisVariance`, classifying a token's axis dependence (`constant` / `single` / `multi`).
 
 ### Patch Changes
 
@@ -780,16 +501,7 @@
 
 ### Minor Changes
 
-- 197b856: feat(mcp): `get_color_contrast` tool for pair-wise contrast queries
-
-  New tool that computes the contrast between two color tokens against a given theme. Two algorithms:
-
-  - **`wcag21`** (default) — classic 1–21 ratio plus boolean pass flags for WCAG 2.1 AA (normal + large text) and AAA (normal + large text).
-  - **`apca`** — signed Lc value (polarity-preserving; negative = dark foreground on light background, positive = light on dark) plus body / large-text / non-text pass flags against the Silver-draft bronze thresholds (`|Lc| ≥ 75 / 60 / 45`).
-
-  Closes the loop on the accessibility work — the same computation axe runs against rendered HTML becomes queryable from an agent _about the tokens themselves_, per-theme. Useful for reasoning about link legibility, focus-ring visibility, border contrast, muted-text readability, without having to re-implement luminance math in the agent or pick between three competing algorithms.
-
-  Built on `colorjs.io`'s contrast primitives, which the MCP package already depended on for `get_color_formats`. No new dependencies.
+- 197b856: Add the `get_color_contrast` MCP tool computing contrast between two color tokens per theme via `wcag21` (1–21 ratio + AA/AAA pass flags) or `apca` (signed Lc + pass flags). Built on colorjs.io; no new deps.
 
 ### Patch Changes
 
@@ -829,10 +541,7 @@
 
 ### Patch Changes
 
-- a294673: docs: restore `swatchbook-*` in each package README's title header
-
-  Every package README was headed with a one-word title (`# Addon`, `# Blocks`, `# Core`, `# MCP`). On npm's package page that renders as a standalone word stripped of context — a reader who lands on the tarball's own page via a search, deep link, or alert sees "# Addon" and has to hunt for what it's an addon _of_. Restored the `swatchbook-*` prefix so each README's title matches its published package name and re-establishes context on first scroll.
-
+- a294673: Restore the `swatchbook-*` prefix in each package README's title header so it matches the published package name.
 - Updated dependencies [a294673]
   - @unpunnyfuns/swatchbook-core@0.11.1
 
@@ -840,13 +549,7 @@
 
 ### Minor Changes
 
-- da22d9e: feat(switcher, mcp): first npm publish
-
-  Earlier releases listed these packages in the repo and docs, but they never reached the npm registry — `npm install @unpunnyfuns/swatchbook-switcher` and `npm install @unpunnyfuns/swatchbook-mcp` both 404'd because trusted publishing was configured for `core` / `addon` / `blocks` only, and the partial-publish failure caused `changesets/action` to skip the subsequent tag push too (which is why git tags stopped at 0.6.2).
-
-  Bootstrapped via npm's pending-trusted-publisher flow on both package names. Subsequent releases publish alongside `core` / `addon` / `blocks` via the standard OIDC path, and the tag / GitHub-release step runs normally.
-
-  This changeset also tips the fixed-version group to 0.11.0 — the arrival of these two packages on the registry is the right anchor for a minor bump.
+- da22d9e: First npm publish of `@unpunnyfuns/swatchbook-switcher` and `@unpunnyfuns/swatchbook-mcp` (previously 404'd; trusted publishing covered only core/addon/blocks). Tips the fixed group to 0.11.0.
 
 ### Patch Changes
 
@@ -868,34 +571,7 @@
 
 ### Minor Changes
 
-- 23fb25d: feat(mcp): new `@unpunnyfuns/swatchbook-mcp` Model Context Protocol server
-
-  Exposes a swatchbook DTCG project to AI agents — `describe_project`,
-  `list_tokens` (filter by path glob + `$type`), `search_tokens`
-  (case-insensitive substring across paths / descriptions / values),
-  `resolve_theme` (resolved token map for an axis tuple), `get_token`,
-  `get_alias_chain`, `get_aliased_by`, `get_consumer_output` (CSS var +
-  compound `[data-…]` selector + HTML attrs), `get_color_formats` (hex
-  / rgb / hsl / oklch / raw, each with an out-of-gamut flag),
-  `list_axes`, `get_diagnostics`, `emit_css`. Runs without Storybook,
-  parses the project via `@unpunnyfuns/swatchbook-core`, and watches
-  resolved source files + the config so token edits flow into subsequent
-  tool calls without restarting the transport (opt out with
-  `--no-watch`).
-
-  Consume as a CLI:
-
-  ```sh
-  npx @unpunnyfuns/swatchbook-mcp --config swatchbook.config.ts
-  # or point straight at a DTCG resolver — no wrapper config needed:
-  npx @unpunnyfuns/swatchbook-mcp --config tokens/resolver.json
-  ```
-
-  Or wire into an MCP client (Claude Desktop, etc.) via the same
-  command. Ships with `createServer` + `loadFromConfig` exports for
-  programmatic embedding in larger toolchains; `createServer(project)`
-  returns the server augmented with a `setProject(next)` method for
-  callers that want to orchestrate their own reload policy.
+- 23fb25d: New `@unpunnyfuns/swatchbook-mcp` MCP server exposing a swatchbook DTCG project to AI agents (`describe_project`, `list_tokens`, `search_tokens`, `resolve_theme`, `get_token`, `get_alias_chain`, `get_aliased_by`, `get_consumer_output`, `get_color_formats`, `list_axes`, `get_diagnostics`, `emit_css`). Runs without Storybook, watches source + config (opt out with `--no-watch`); usable as a CLI or MCP client, with `createServer` / `loadFromConfig` exports for embedding.
 
 ### Patch Changes
 
