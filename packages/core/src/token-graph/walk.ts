@@ -144,11 +144,17 @@ export function resolveAliasAt(
     };
   }
 
-  if (directWrite.kind === 'literal') return { ...node.baselineValue, ...directWrite.value };
+  // A direct write replaces the token's structure at this tuple, so the
+  // baseline's alias metadata must not survive the spread: Terrazzo's
+  // transforms route on aliasChain/partialAliasOf before $value, and a
+  // leaked field emits var() references to the baseline's old target.
+  const { aliasOf: _a, aliasChain: _c, partialAliasOf: _p, ...baseline } = node.baselineValue;
+
+  if (directWrite.kind === 'literal') return { ...baseline, ...directWrite.value };
   if (directWrite.kind === 'alias') {
     const targetLeaf = resolveAt(graph, directWrite.target, tuple);
     return {
-      ...node.baselineValue,
+      ...baseline,
       aliasOf: directWrite.target,
       aliasChain: [directWrite.target],
       $value: targetLeaf?.$value,
@@ -156,7 +162,7 @@ export function resolveAliasAt(
   }
   const composed = resolveAt(graph, path, tuple);
   return {
-    ...node.baselineValue,
+    ...baseline,
     ...directWrite.baseValue,
     partialAliasOf: directWrite.aliasFields,
     $value: composed?.$value,
