@@ -6,7 +6,7 @@ import { watch as fsWatch } from 'node:fs';
 import type { FSWatcher } from 'node:fs';
 import { basename, dirname, isAbsolute, resolve as resolvePath } from 'node:path';
 import picomatch from 'picomatch';
-import type { Plugin } from 'vite';
+import type { Plugin, ViteDevServer } from 'vite';
 import {
   HMR_EVENT,
   INTEGRATION_SIDE_EFFECTS_VIRTUAL_ID,
@@ -54,6 +54,48 @@ export function swatchbookTokensPlugin({
     css = emitAxisProjectedCss(project);
   }
 
+  // One reload pass: refresh the project, invalidate the virtual modules,
+  // broadcast the fresh snapshot. Never rejects — a rejection escaping the
+  // watcher's fire-and-forget call is an unhandled rejection that kills
+  // the dev-server process on a transient bad save. Failures log and the
+  // previous project keeps serving (`refresh` only reassigns on success).
+  async function reload(server: ViteDevServer): Promise<void> {
+    try {
+      await refresh();
+    } catch (error) {
+      server.config.logger.error(
+        `\x1b[36m[swatchbook]\x1b[0m token reload failed — keeping previous tokens: ${error instanceof Error ? error.message : String(error)}`,
+        { clear: false, timestamp: true },
+      );
+      return;
+    }
+    if (!project) return;
+    const tokenCount = [...listPaths(project.tokenGraph)].length;
+    const diagCount = project.diagnostics.length;
+    server.config.logger.info(
+      `\x1b[36m[swatchbook]\x1b[0m tokens reloaded — ${tokenCount} tokens, ${diagCount} diagnostic${diagCount === 1 ? '' : 's'}`,
+      { clear: false, timestamp: true },
+    );
+    const mod = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_MODULE_ID);
+    if (mod) server.moduleGraph.invalidateModule(mod);
+    // Invalidate every integration-contributed virtual module so its body
+    // re-renders against the fresh project on the next request.
+    for (const resolvedIntegrationId of integrationById.keys()) {
+      const m = server.moduleGraph.getModuleById(resolvedIntegrationId);
+      if (m) server.moduleGraph.invalidateModule(m);
+    }
+    // Send the fresh snapshot as a custom HMR event instead of a
+    // full-reload. The preview subscribes and re-broadcasts to blocks via
+    // the Storybook channel so the React tree re-renders in place without
+    // losing toolbar / args / scroll state. Field shape matches the
+    // INIT_EVENT payload so the preview can hand it straight through.
+    server.ws.send({
+      type: 'custom',
+      event: HMR_EVENT,
+      data: snapshotForWire(project, css),
+    });
+  }
+
   // Map of resolvedId → integration, indexed once.
   const integrationById = new Map<string, SwatchbookIntegration>();
   // Virtual IDs the preview auto-imports as side effects (global CSS).
@@ -68,6 +110,11 @@ export function swatchbookTokensPlugin({
   return {
     name: 'swatchbook:virtual-tokens',
     enforce: 'pre',
+
+    // Vite's plugin-to-plugin/testing escape hatch. `reload` is the same
+    // pass the debounced fs watcher fires; exposed so tests can exercise
+    // the failure contract without real watcher events.
+    api: { reload },
 
     // Vite uses esbuild for `optimizeDeps` pre-bundling (development
     // mode), and esbuild doesn't see Rollup-style `resolveId` hooks.
@@ -159,36 +206,7 @@ export function swatchbookTokensPlugin({
         if (pending) clearTimeout(pending);
         pending = setTimeout(() => {
           pending = null;
-          void (async () => {
-            await refresh();
-            if (!project) return;
-            const tokenCount = [...listPaths(project.tokenGraph)].length;
-            const diagCount = project.diagnostics.length;
-            server.config.logger.info(
-              `\x1b[36m[swatchbook]\x1b[0m tokens reloaded — ${tokenCount} tokens, ${diagCount} diagnostic${diagCount === 1 ? '' : 's'}`,
-              { clear: false, timestamp: true },
-            );
-            const mod = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_MODULE_ID);
-            if (mod) server.moduleGraph.invalidateModule(mod);
-            // Invalidate every integration-contributed virtual module so
-            // its body re-renders against the fresh project on the next
-            // request.
-            for (const resolvedIntegrationId of integrationById.keys()) {
-              const m = server.moduleGraph.getModuleById(resolvedIntegrationId);
-              if (m) server.moduleGraph.invalidateModule(m);
-            }
-            // Send the fresh snapshot as a custom HMR event instead of a
-            // full-reload. The preview subscribes and re-broadcasts to
-            // blocks via the Storybook channel so the React tree
-            // re-renders in place without losing toolbar / args / scroll
-            // state. Field shape matches the INIT_EVENT payload so the
-            // preview can hand it straight through.
-            server.ws.send({
-              type: 'custom',
-              event: HMR_EVENT,
-              data: snapshotForWire(project, css),
-            });
-          })();
+          void reload(server);
         }, 100);
       };
 
