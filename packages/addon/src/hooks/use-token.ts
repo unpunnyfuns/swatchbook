@@ -5,7 +5,11 @@ import {
 } from 'virtual:swatchbook/tokens';
 import { resolveAllAt } from '@unpunnyfuns/swatchbook-core/graph';
 import { makeCssVar } from '@unpunnyfuns/swatchbook-core/css-var';
-import { useActiveAxes, useOptionalSwatchbookData } from '@unpunnyfuns/swatchbook-blocks';
+import {
+  useActiveAxes,
+  useChannelGlobals,
+  useOptionalSwatchbookData,
+} from '@unpunnyfuns/swatchbook-blocks';
 
 // Module-scope `resolveAt` for the no-provider fallback path. Built
 // once from the stable virtual-module exports — mirrors what the
@@ -58,13 +62,20 @@ export interface TokenInfo {
 export function useToken(path: TokenPath): TokenInfo {
   const snapshot = useOptionalSwatchbookData();
   const contextAxes = useActiveAxes();
+  const channelGlobals = useChannelGlobals();
   const hasContextAxes = Object.keys(contextAxes).length > 0;
 
   const prefix = snapshot?.cssVarPrefix ?? virtualCssVarPrefix;
   const resolver = snapshot?.resolveAt ?? fallbackResolveAt;
+  // Match the active-tuple resolution blocks use (see use-project's
+  // virtual-module fallback): decorator context first, then the live
+  // toolbar globals over the channel (the only signal in MDX / autodocs
+  // where no decorator runs), then the static default tuple. Without the
+  // channel-globals step, useToken stayed pinned to the default in MDX and
+  // disagreed with the rendered CSS after a toolbar axis flip.
   const tuple = hasContextAxes
     ? (contextAxes as Record<string, string>)
-    : (snapshot?.defaultTuple ?? virtualDefaultTuple);
+    : (channelGlobals.axes ?? snapshot?.defaultTuple ?? virtualDefaultTuple);
   const token = resolver(tuple)[path] as
     | { $value?: unknown; $type?: string; $description?: string }
     | undefined;

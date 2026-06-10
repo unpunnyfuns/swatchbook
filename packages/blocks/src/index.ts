@@ -39,6 +39,7 @@ export {
   type VirtualTokenListingShape,
   type VirtualTokenShape,
 } from '#/contexts.ts';
+export { type ChannelGlobals, useChannelGlobals } from '#/internal/channel-globals.ts';
 export {
   SwatchbookProvider,
   type SwatchbookProviderProps,
