@@ -72,6 +72,16 @@ describe('formatColor', () => {
     expect(result?.value).toMatch(/\/ 0\.5/);
   });
 
+  it('accepts the DTCG wide-gamut space ids colorjs.io names differently', () => {
+    // DTCG tokens carry the CSS Color 4 ids; colorjs.io registers the
+    // short forms (p3, a98rgb, prophoto). All three must format.
+    for (const colorSpace of ['display-p3', 'a98-rgb', 'prophoto-rgb']) {
+      const result = formatColor({ colorSpace, components: [1, 0, 0] }, 'oklch');
+      expect(result, colorSpace).not.toBeNull();
+      expect(formatColor({ colorSpace, components: [1, 0, 0] }, 'hex'), colorSpace).not.toBeNull();
+    }
+  });
+
   it('returns null when colorjs.io rejects the color space', () => {
     const bogus = { colorSpace: 'not-a-real-space', components: [0, 0, 0] };
     expect(formatColor(bogus, 'hex')).toBeNull();

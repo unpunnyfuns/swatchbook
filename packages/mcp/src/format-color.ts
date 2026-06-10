@@ -23,6 +23,15 @@ interface NormalizedColor {
   alpha?: number;
 }
 
+// Map DTCG / CSS Color 4 space identifiers to the shorter identifiers
+// colorjs.io registers. Only the ones that differ need an entry. Same
+// table as blocks' format-color (consolidation tracked in issue 1116).
+const COLORJS_SPACE_ALIASES: Record<string, string> = {
+  'display-p3': 'p3',
+  'a98-rgb': 'a98rgb',
+  'prophoto-rgb': 'prophoto',
+};
+
 export function formatColor(raw: unknown, format: ColorFormat): FormatColorResult | null {
   if (!raw || typeof raw !== 'object') return null;
   const normalized = raw as NormalizedColor;
@@ -38,7 +47,8 @@ export function formatColor(raw: unknown, format: ColorFormat): FormatColorResul
   try {
     const coords = components.map((c) => (c == null ? 0 : c));
     const [r = 0, g = 0, b = 0] = coords;
-    color = new Color(normalized.colorSpace, [r, g, b], normalized.alpha ?? 1);
+    const space = COLORJS_SPACE_ALIASES[normalized.colorSpace] ?? normalized.colorSpace;
+    color = new Color(space, [r, g, b], normalized.alpha ?? 1);
   } catch {
     return null;
   }
