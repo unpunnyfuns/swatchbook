@@ -84,17 +84,16 @@
   "dependencies": {
     "@leeoniya/ufuzzy": "1.0.19",
     "@terrazzo/json-schema-tools": "^0.2.1",
-    "@terrazzo/parser": "^2.0.3",
-    "@terrazzo/plugin-css": "^2.0.3",
-    "@terrazzo/plugin-token-listing": "0.1.0-alpha.1",
-    "@terrazzo/token-tools": "^2.0.3"
+    "@terrazzo/parser": "^2.3.0",
+    "@terrazzo/plugin-css": "^2.3.0",
+    "@terrazzo/plugin-token-listing": "0.1.1",
+    "@terrazzo/token-tools": "^2.3.0"
   },
   "peerDependencies": {
-    "@terrazzo/parser": "^2.0.3",
-    "@terrazzo/plugin-css": "^2.0.3"
+    "@terrazzo/parser": "^2.3.0",
+    "@terrazzo/plugin-css": "^2.3.0"
   },
   "devDependencies": {
-    "@terrazzo/plugin-css-in-js": "^2.0.3",
     "@types/node": "^25.6.0",
     "@unpunnyfuns/swatchbook-tokens": "workspace:*",
     "@vitest/ui": "^4.1.7",
