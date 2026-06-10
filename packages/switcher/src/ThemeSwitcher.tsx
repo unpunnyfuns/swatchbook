@@ -164,6 +164,7 @@ function PresetsSection({
               active={matches}
               title={title}
               onClick={() => onApply(preset)}
+              {...(modified && { ariaLabelSuffix: 'modified' })}
               trailing={
                 modified ? <span aria-hidden className="sb-switcher__pill-modified" /> : null
               }
