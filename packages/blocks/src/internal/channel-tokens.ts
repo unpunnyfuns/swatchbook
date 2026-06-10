@@ -19,7 +19,9 @@ import type { VirtualAxis, VirtualDiagnostic } from '#/types.ts';
  * `useSyncExternalStore`, so hooks re-render in place on each token save.
  */
 
-const TOKENS_UPDATED_EVENT = 'swatchbook/tokens-updated';
+// The dev-time HMR wire event. Single source of truth: the addon preview
+// emits it, this module listens — exported so the two can't drift.
+export const TOKENS_UPDATED_EVENT = 'swatchbook/tokens-updated';
 
 export interface TokenSnapshot {
   readonly axes: readonly VirtualAxis[];

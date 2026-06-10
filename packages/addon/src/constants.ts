@@ -37,14 +37,10 @@ export const INIT_REQUEST_EVENT = 'swatchbook/init-request';
  * listener on the manager can't see iframe events. */
 export const PREVIEW_MOUSEDOWN_EVENT = 'swatchbook/preview-mousedown';
 
-/** Channel event: preview → blocks, carries the fresh virtual-module
- * payload after a dev-time token refresh so blocks can re-render in
- * place without a full iframe reload. Fired by the preview in response
- * to the `HMR_EVENT` below. */
-export const TOKENS_UPDATED_EVENT = 'swatchbook/tokens-updated';
-
 /** Custom Vite HMR event: plugin → preview. Preview forwards it to the
- * Storybook channel as {@link TOKENS_UPDATED_EVENT} so blocks can
- * update their snapshot. A distinct wire string from the channel event
- * so the plugin doesn't need a Storybook-channel dependency. */
+ * Storybook channel as `TOKENS_UPDATED_EVENT` (exported from
+ * `@unpunnyfuns/swatchbook-blocks`, the single source of truth for that
+ * wire string, which blocks also listen on) so blocks can update their
+ * snapshot. A distinct wire string from the channel event so the plugin
+ * doesn't need a Storybook-channel dependency. */
 export const HMR_EVENT = 'swatchbook/hmr-tokens';

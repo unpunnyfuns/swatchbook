@@ -30,6 +30,7 @@ import {
   registerTokenSource,
   SwatchbookContext,
   ThemeContext,
+  TOKENS_UPDATED_EVENT,
   useTokenSnapshot,
 } from '@unpunnyfuns/swatchbook-blocks';
 import type { ColorFormat, ProjectSnapshot } from '@unpunnyfuns/swatchbook-blocks';
@@ -41,7 +42,6 @@ import {
   INIT_REQUEST_EVENT,
   PREVIEW_MOUSEDOWN_EVENT,
   STYLE_ELEMENT_ID,
-  TOKENS_UPDATED_EVENT,
 } from '#/constants.ts';
 import type { InitPayload } from '#/channel-types.ts';
 import type { StoryParameters, SwatchbookGlobals } from '#/globals.ts';
