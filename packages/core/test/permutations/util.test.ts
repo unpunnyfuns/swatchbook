@@ -29,3 +29,11 @@ it('returns an empty array when nothing matches', () => {
   const dir = fixtureDir();
   expect(collectGlobbedFiles(['*.css'], dir)).toEqual([]);
 });
+
+it('keeps already-absolute matches without re-resolving against cwd', () => {
+  const dir = fixtureDir();
+  // An absolute glob makes globSync yield absolute matches, exercising the
+  // isAbsolute branch that skips the resolve(cwd, match) step.
+  const result = collectGlobbedFiles([join(dir, '*.json')], dir);
+  expect(result).toEqual([join(dir, 'a.json'), join(dir, 'b.json')]);
+});
