@@ -335,6 +335,9 @@ importers:
       '@terrazzo/token-tools':
         specifier: ^2.3.0
         version: 2.3.0
+      colorjs.io:
+        specifier: ^0.6.1
+        version: 0.6.1
     devDependencies:
       '@types/node':
         specifier: ^25.6.0

@@ -1,14 +1,14 @@
-import Color from 'colorjs.io';
+import { COLOR_FORMATS } from '@unpunnyfuns/swatchbook-core/color-formats';
+import type { ColorFormat } from '@unpunnyfuns/swatchbook-core/color-formats';
+import { formatColor as coreFormatColor } from '@unpunnyfuns/swatchbook-core/format-color';
 
-// Convert a DTCG color `$value` into the same format menu the
-// addon's toolbar exposes — hex / rgb / hsl / oklch / raw JSON. Mirrors
-// the narrower version in `@unpunnyfuns/swatchbook-blocks/format-color.ts`
-// without pulling blocks (and React) into the MCP server.
-//
-// Out-of-gamut colours still stringify — the caller gets both the
-// rendered string and an `outOfGamut` flag so agents can warn.
+// Agent-facing color formatting. The rendering kernel lives in core (shared
+// with the blocks display surface); this wrapper adds the `format` field
+// agents key on, keeps `raw` as the full normalized payload (more useful to
+// an agent than the compact display form), and preserves the null-on-invalid
+// contract MCP tools rely on.
 
-export type ColorFormat = 'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw';
+export type { ColorFormat };
 
 export interface FormatColorResult {
   format: ColorFormat;
@@ -16,95 +16,28 @@ export interface FormatColorResult {
   outOfGamut: boolean;
 }
 
-interface NormalizedColor {
-  colorSpace?: string;
-  components?: readonly (number | null)[];
-  channels?: readonly (number | null)[];
-  alpha?: number;
-}
-
-// Map DTCG / CSS Color 4 space identifiers to the shorter identifiers
-// colorjs.io registers. Only the ones that differ need an entry. Same
-// table as blocks' format-color (consolidation tracked in issue 1116).
-const COLORJS_SPACE_ALIASES: Record<string, string> = {
-  'display-p3': 'p3',
-  'a98-rgb': 'a98rgb',
-  'prophoto-rgb': 'prophoto',
-};
+// Unique sentinel: core returns this as the value only when it could not
+// build a color (unknown space, malformed input), letting us map that back
+// to null without re-implementing the validity checks.
+const FORMAT_FAILED = '\0swatchbook-format-failed';
 
 export function formatColor(raw: unknown, format: ColorFormat): FormatColorResult | null {
   if (!raw || typeof raw !== 'object') return null;
-  const normalized = raw as NormalizedColor;
 
   if (format === 'raw') {
     return { format, value: JSON.stringify(raw), outOfGamut: false };
   }
 
-  const components = normalized.components ?? normalized.channels;
-  if (!components || !normalized.colorSpace) return null;
+  const v = raw as { colorSpace?: unknown; components?: unknown; channels?: unknown };
+  const components = v.components ?? v.channels;
+  if (!components || typeof v.colorSpace !== 'string') return null;
 
-  let color: Color;
-  try {
-    const coords = components.map((c) => (c == null ? 0 : c));
-    const [r = 0, g = 0, b = 0] = coords;
-    const space = COLORJS_SPACE_ALIASES[normalized.colorSpace] ?? normalized.colorSpace;
-    color = new Color(space, [r, g, b], normalized.alpha ?? 1);
-  } catch {
-    return null;
-  }
-
-  if (format === 'hex') {
-    try {
-      const inSrgb = color.to('srgb');
-      const outOfGamut = !inSrgb.inGamut();
-      if (outOfGamut) {
-        return { format, value: inSrgb.toString({ format: 'rgb' }), outOfGamut: true };
-      }
-      return { format, value: inSrgb.toString({ format: 'hex' }), outOfGamut: false };
-    } catch {
-      return null;
-    }
-  }
-
-  if (format === 'rgb') {
-    try {
-      const inSrgb = color.to('srgb');
-      return {
-        format,
-        value: inSrgb.toString({ format: 'rgb' }),
-        outOfGamut: !inSrgb.inGamut(),
-      };
-    } catch {
-      return null;
-    }
-  }
-
-  if (format === 'hsl') {
-    try {
-      const inHsl = color.to('hsl');
-      return {
-        format,
-        value: inHsl.toString(),
-        outOfGamut: !color.to('srgb').inGamut(),
-      };
-    } catch {
-      return null;
-    }
-  }
-
-  if (format === 'oklch') {
-    try {
-      const inOklch = color.to('oklch');
-      return { format, value: inOklch.toString(), outOfGamut: false };
-    } catch {
-      return null;
-    }
-  }
-
-  return null;
+  const result = coreFormatColor(raw, format, FORMAT_FAILED);
+  if (result.value === FORMAT_FAILED) return null;
+  return { format, value: result.value, outOfGamut: result.outOfGamut };
 }
 
-export const ALL_COLOR_FORMATS: readonly ColorFormat[] = ['hex', 'rgb', 'hsl', 'oklch', 'raw'];
+export const ALL_COLOR_FORMATS: readonly ColorFormat[] = COLOR_FORMATS;
 
 export function formatColorEveryWay(raw: unknown): Partial<Record<ColorFormat, FormatColorResult>> {
   const out: Partial<Record<ColorFormat, FormatColorResult>> = {};
