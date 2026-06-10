@@ -5,6 +5,7 @@ import { cssEscape } from '#/css-escape.ts';
 import { dataAttr } from '#/data-attr.ts';
 import { listPaths } from '#/token-graph/queries.ts';
 import { resolveAliasAllAt, resolveAllAt } from '#/token-graph/walk.ts';
+import { canonicalKey } from '#/tuple-key.ts';
 import type { Project, TokenMap } from '#/types.ts';
 import { valueKey } from '#/value-key.ts';
 
@@ -466,7 +467,7 @@ function collectJointBlocks(
   for (const [path, info] of variance) {
     if (info.kind !== 'joint-variant') continue;
     for (const jc of info.jointCases) {
-      const key = canonicalPartialKey(jc.tuple);
+      const key = canonicalKey(jc.tuple);
       let entry = grouped.get(key);
       if (!entry) {
         entry = { tuple: jc.tuple, paths: [] };
@@ -539,15 +540,6 @@ function collectJointBlocks(
   }
 
   return blocks;
-}
-
-// Build a stable lookup key for a partial tuple — axis entries joined
-// in sorted key order so `{A: a, B: b}` and `{B: b, A: a}` match.
-function canonicalPartialKey(partial: Record<string, string>): string {
-  return Object.entries(partial)
-    .toSorted(([a], [b]) => a.localeCompare(b))
-    .map(([k, v]) => `${k}=${v}`)
-    .join('|');
 }
 
 // Collect emitted declaration lines for a token map, filtering tokens
