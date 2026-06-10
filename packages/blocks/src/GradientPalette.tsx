@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import './GradientPalette.css';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
+import { parseColor } from '@unpunnyfuns/swatchbook-core/format-color';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
@@ -47,19 +48,14 @@ function asStops(raw: unknown): GradientStop[] {
   return raw as GradientStop[];
 }
 
-const pct = (n: number): string => `${(n * 100).toFixed(3)}%`;
-
 function stopCssColor(stop: GradientStop): string {
-  const color = stop.color;
-  if (!color || !Array.isArray(color.components) || color.components.length < 3) {
-    return 'transparent';
-  }
-  const [r, g, b] = color.components;
-  if (r === undefined || g === undefined || b === undefined) return 'transparent';
-  const alpha = color.alpha ?? 1;
-  return alpha === 1
-    ? `rgb(${pct(r)} ${pct(g)} ${pct(b)})`
-    : `rgb(${pct(r)} ${pct(g)} ${pct(b)} / ${alpha})`;
+  // parseColor respects the stop's colorSpace (via the colorjs space-alias
+  // map) and emits a gamut-correct CSS string — e.g. `color(display-p3 …)`
+  // for a P3 stop — rather than the old code's raw sRGB-percentage rendering
+  // that mislabeled every non-sRGB stop.
+  const color = parseColor(stop.color);
+  if (!color) return 'transparent';
+  return color.toString();
 }
 
 function stopKey(path: string, stop: GradientStop, fallback: number): string {

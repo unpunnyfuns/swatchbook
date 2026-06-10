@@ -83,4 +83,17 @@ describe('sortTokens', () => {
     const out = sortTokens(input, { by: 'value' });
     expect(out.map(([p]) => p)).toEqual(['shadow.lg', 'shadow.md', 'shadow.sm']);
   });
+
+  it('sorts wide-gamut colors into perceptual position via the colorjs space-alias map', () => {
+    // a98-rgb needs the space-alias map (a98-rgb -> a98rgb) to construct in
+    // colorjs at all; without it the perceptual key is null and the color
+    // sinks to the end instead of sorting by oklch lightness.
+    const input = [
+      entry('c.white', 'color', { colorSpace: 'srgb', components: [1, 1, 1] }),
+      entry('c.mid', 'color', { colorSpace: 'a98-rgb', components: [0.5, 0.5, 0.5] }),
+      entry('c.black', 'color', { colorSpace: 'srgb', components: [0, 0, 0] }),
+    ];
+    const out = sortTokens(input, { by: 'value' });
+    expect(out.map(([p]) => p)).toEqual(['c.black', 'c.mid', 'c.white']);
+  });
 });

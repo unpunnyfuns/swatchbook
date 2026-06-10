@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatColor } from '#/format-color.ts';
+import { formatColor, parseColor } from '#/format-color.ts';
 
 describe('formatColor', () => {
   it('renders sRGB hex by default for in-gamut colors', () => {
@@ -97,5 +97,27 @@ describe('formatColor', () => {
 
   it('respects a custom fallback', () => {
     expect(formatColor(null, 'hex', 'N/A').value).toBe('N/A');
+  });
+});
+
+describe('parseColor', () => {
+  it('constructs wide-gamut colors via the space-alias map', () => {
+    for (const colorSpace of ['display-p3', 'a98-rgb', 'prophoto-rgb']) {
+      expect(parseColor({ colorSpace, components: [1, 0, 0] }), colorSpace).not.toBeNull();
+    }
+  });
+
+  it('returns null for unrecognized input', () => {
+    expect(parseColor(null)).toBeNull();
+    expect(parseColor({})).toBeNull();
+    expect(parseColor('nope')).toBeNull();
+    expect(parseColor({ colorSpace: 'not-a-space', components: [0, 0, 0] })).toBeNull();
+  });
+
+  it('yields oklch coords usable for perceptual sorting', () => {
+    const color = parseColor({ colorSpace: 'srgb', components: [1, 1, 1] });
+    if (!color) throw new Error('expected a color');
+    const [l] = color.to('oklch').coords;
+    expect(l ?? 0).toBeGreaterThan(0.9);
   });
 });
