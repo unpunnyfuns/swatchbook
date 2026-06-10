@@ -1,4 +1,5 @@
 import type { Project, SwatchbookIntegration } from '@unpunnyfuns/swatchbook-core';
+import { cssVarName } from '@unpunnyfuns/swatchbook-core/css-var';
 
 export interface TailwindIntegrationOptions {
   /**
@@ -90,7 +91,7 @@ function renderTailwindTheme(project: Project, roles: RoleMap): string {
     if (names.length === 0) continue;
     entries.push(`  /* ${scale} */`);
     for (const [themeKey, sourcePath] of names) {
-      const sourceVar = `--${varPrefix}${sourcePath.replaceAll('.', '-')}`;
+      const sourceVar = cssVarName(sourcePath, project);
       const themeVar = `--${scale}-${varPrefix}${themeKey}`;
       entries.push(`  ${themeVar}: var(${sourceVar});`);
     }

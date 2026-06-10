@@ -1,4 +1,5 @@
 import type { Project, SwatchbookIntegration } from '@unpunnyfuns/swatchbook-core';
+import { cssVarName } from '@unpunnyfuns/swatchbook-core/css-var';
 import { listPaths } from '@unpunnyfuns/swatchbook-core/graph';
 
 export interface CssInJsIntegrationOptions {
@@ -69,10 +70,8 @@ export default function cssInJsIntegration(
 // Render the virtual module source: one accessor export per top-level group,
 // plus the aggregate `theme`.
 function renderTheme(project: Project): string {
-  const prefix = project.config.cssVarPrefix ?? '';
-  const varPrefix = prefix ? `${prefix}-` : '';
   const paths = collectPaths(project);
-  const tree = buildTree(paths, (path) => `var(--${varPrefix}${path.replaceAll('.', '-')})`);
+  const tree = buildTree(paths, (path) => `var(${cssVarName(path, project)})`);
 
   const groupNames = Object.keys(tree).toSorted();
   const groupExports = groupNames.map(

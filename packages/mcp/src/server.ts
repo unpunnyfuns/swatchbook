@@ -1,5 +1,6 @@
 import type { Project, TokenMap } from '@unpunnyfuns/swatchbook-core';
 import { emitAxisProjectedCss } from '@unpunnyfuns/swatchbook-core';
+import { cssVarName } from '@unpunnyfuns/swatchbook-core/css-var';
 import { getVariance } from '@unpunnyfuns/swatchbook-core/graph';
 import { fuzzyFilter, fuzzyMatches } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import { enumerateThemes, tupleToName } from '@unpunnyfuns/swatchbook-core/themes';
@@ -180,8 +181,7 @@ export function createServer(initial: Project): McpServer & {
 
       if (!found) return textResult(`Token not found: ${path}`);
 
-      const prefix = project.config.cssVarPrefix ?? '';
-      const cssVar = `var(--${prefix ? `${prefix}-` : ''}${path.replaceAll('.', '-')})`;
+      const cssVar = `var(${cssVarName(path, project)})`;
 
       return jsonResult({
         path,
@@ -515,7 +515,7 @@ export function createServer(initial: Project): McpServer & {
       const token = project.resolveAt(activeTuple)[path];
       if (!token) return textResult(`Token not found: ${path}`);
 
-      const cssVar = `var(--${prefix ? `${prefix}-` : ''}${path.replaceAll('.', '-')})`;
+      const cssVar = `var(${cssVarName(path, project)})`;
       const attrName = (axis: string): string =>
         prefix ? `data-${prefix}-${axis}` : `data-${axis}`;
       const attrs: Record<string, string> = {};
