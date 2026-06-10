@@ -45,11 +45,14 @@ describe('formatColor', () => {
     expect(out.outOfGamut).toBe(false);
   });
 
-  it('falls back to rgb() and flags outOfGamut when a wide-gamut color is rendered as hex', () => {
-    const p3Red = { colorSpace: 'display-p3', components: [1, 0, 0] };
-    const out = formatColor(p3Red, 'hex');
-    expect(out.value.startsWith('rgb(')).toBe(true);
-    expect(out.outOfGamut).toBe(true);
+  it('maps wide-gamut space ids to colorjs and flags hex out-of-gamut via the alias table', () => {
+    // display-p3 / a98-rgb / prophoto-rgb need the colorjs space-alias map to
+    // construct at all; rendered as hex they fall back to rgb() + outOfGamut.
+    for (const colorSpace of ['display-p3', 'a98-rgb', 'prophoto-rgb']) {
+      const out = formatColor({ colorSpace, components: [1, 0, 0] }, 'hex');
+      expect(out.value.startsWith('rgb('), colorSpace).toBe(true);
+      expect(out.outOfGamut, colorSpace).toBe(true);
+    }
   });
 
   it('does not mark sRGB in-gamut colors as outOfGamut for hex', () => {

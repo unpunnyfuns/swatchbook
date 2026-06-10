@@ -43,6 +43,14 @@
       "types": "./dist/css-var.d.mts",
       "import": "./dist/css-var.mjs"
     },
+    "./color-formats": {
+      "types": "./dist/color-formats.d.mts",
+      "import": "./dist/color-formats.mjs"
+    },
+    "./format-color": {
+      "types": "./dist/format-color.d.mts",
+      "import": "./dist/format-color.mjs"
+    },
     "./data-attr": {
       "types": "./dist/data-attr.d.mts",
       "import": "./dist/data-attr.mjs"
@@ -72,7 +80,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsdown src/index.ts src/fuzzy.ts src/token-graph/index.ts src/css-var.ts src/data-attr.ts src/snapshot-for-wire.ts src/match-path.ts src/style-element.ts src/themes.ts --format esm --dts --clean --sourcemap",
+    "build": "tsdown src/index.ts src/fuzzy.ts src/token-graph/index.ts src/css-var.ts src/color-formats.ts src/format-color.ts src/data-attr.ts src/snapshot-for-wire.ts src/match-path.ts src/style-element.ts src/themes.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:bench": "vitest bench --run",
@@ -87,7 +95,8 @@
     "@terrazzo/parser": "^2.3.0",
     "@terrazzo/plugin-css": "^2.3.0",
     "@terrazzo/plugin-token-listing": "0.1.1",
-    "@terrazzo/token-tools": "^2.3.0"
+    "@terrazzo/token-tools": "^2.3.0",
+    "colorjs.io": "^0.6.1"
   },
   "peerDependencies": {
     "@terrazzo/parser": "^2.3.0",

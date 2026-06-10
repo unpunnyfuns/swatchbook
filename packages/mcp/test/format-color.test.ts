@@ -25,7 +25,7 @@ describe('formatColor', () => {
   it('"hex" emits the canonical hex for in-gamut sRGB colors', () => {
     const result = formatColor(red, 'hex');
     expect(result?.format).toBe('hex');
-    expect(result?.value).toBe('#f00');
+    expect(result?.value).toBe('#ff0000');
     expect(result?.outOfGamut).toBe(false);
   });
 
@@ -63,7 +63,7 @@ describe('formatColor', () => {
 
   it('accepts the `channels` alias for `components`', () => {
     const result = formatColor({ colorSpace: 'srgb', channels: [1, 0, 0] }, 'hex');
-    expect(result?.value).toBe('#f00');
+    expect(result?.value).toBe('#ff0000');
   });
 
   it('honors `alpha` when constructing the color', () => {
@@ -95,7 +95,7 @@ describe('formatColorEveryWay', () => {
   it('returns an entry per format the input renders cleanly in', () => {
     const result = formatColorEveryWay(red);
     expect(Object.keys(result).toSorted()).toEqual([...ALL_COLOR_FORMATS].toSorted());
-    expect(result.hex?.value).toBe('#f00');
+    expect(result.hex?.value).toBe('#ff0000');
     expect(result.raw?.value).toBe(JSON.stringify(red));
   });
 

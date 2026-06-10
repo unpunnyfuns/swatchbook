@@ -1,7 +1,9 @@
-import type { ColorFormat } from '@unpunnyfuns/swatchbook-blocks';
+import { COLOR_FORMATS } from '@unpunnyfuns/swatchbook-core/color-formats';
+import type { ColorFormat } from '@unpunnyfuns/swatchbook-core/color-formats';
 import React from 'react';
 import type { ReactElement } from 'react';
 
+export { COLOR_FORMATS };
 export type { ColorFormat };
 
 // Storybook-addon-specific pill row for picking how color sub-values
@@ -18,16 +20,10 @@ export type { ColorFormat };
 // Uses `React.createElement` (via `h`) to survive embedding in Storybook's
 // manager bundle, which doesn't expose `react/jsx-runtime`.
 
-/**
- * Runtime list of valid color formats. Declared here (alongside
- * `COLOR_FORMAT_OPTIONS`) rather than imported from blocks because the
- * manager bundle can't pull from `@unpunnyfuns/swatchbook-blocks` — that
- * package's barrel has a top-level `import 'virtual:swatchbook/tokens'`
- * which the manager has no resolver for. The `ColorFormat` type above
- * stays imported (type-only erases at compile time).
- */
-export const COLOR_FORMATS: readonly ColorFormat[] = ['hex', 'rgb', 'hsl', 'oklch', 'raw'];
-
+// COLOR_FORMATS comes from core's colorjs-free `color-formats` leaf, not
+// from blocks: the manager bundle can't pull `@unpunnyfuns/swatchbook-blocks`
+// (its barrel has a top-level `import 'virtual:swatchbook/tokens'` the
+// manager has no resolver for), and core's leaf carries no colorjs weight.
 const COLOR_FORMAT_OPTIONS: readonly { id: ColorFormat; label: string }[] = [
   { id: 'hex', label: 'Hex' },
   { id: 'rgb', label: 'RGB' },
