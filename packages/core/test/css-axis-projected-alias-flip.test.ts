@@ -47,14 +47,17 @@ it('an alias write over an alias baseline emits the new target, not the baseline
   );
 });
 
-it('a composite literal write over a partial-alias baseline emits no stale sub-field var()', () => {
-  // Pins only the metadata leak (no var() to the baseline's alias target).
-  // The width sub-field currently emits garbage because literal composite
-  // writes carry raw (un-normalized) sub-values into the transform — a
-  // separate pre-existing bug, tracked independently.
+it('a composite literal write over a partial-alias baseline emits the written sub-values, no stale alias var()', () => {
+  // Baseline border.input aliases its color sub-field to color.a; the Dark
+  // write replaces the whole composite with literals (width 2px, white). The
+  // result must carry the written width and color, not a var() back to the
+  // baseline's partial-alias target.
   const line = grep(darkCell, '--t-border-input:');
   expect(line).toBeDefined();
   expect(line).not.toContain('var(');
+  expect(line).toContain('2px');
+  expect(line).toContain('solid');
+  expect(line).toMatch(/#ffffff|#fff\b|rgb\(100% 100% 100%\)/i);
 });
 
 it('the baseline cell still aliases through', () => {
