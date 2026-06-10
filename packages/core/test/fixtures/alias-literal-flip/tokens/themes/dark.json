@@ -11,7 +11,7 @@
     "input": {
       "$value": {
         "color": "#ffffff",
-        "width": "1px",
+        "width": { "value": 2, "unit": "px" },
         "style": "solid"
       }
     }
