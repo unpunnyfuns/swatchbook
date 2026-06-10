@@ -6,8 +6,17 @@
  * triggered it.
  */
 import type { TokenNormalized } from '@terrazzo/parser';
+import { transformCSSValue } from '@terrazzo/token-tools/css';
 import { expect, it } from 'vitest';
 import { collectTokenDeclarations } from '#/css-axis-projected.ts';
+
+// The real value transform — collectTokenDeclarations wraps whatever this
+// throws with token context, so the malformed token must reach transformCSSValue.
+const transformValue = (
+  token: TokenNormalized,
+  tokensSet: Record<string, TokenNormalized>,
+  permutation: Record<string, string>,
+) => transformCSSValue(token, { tokensSet, permutation });
 
 it('rethrows with token path, permutation, and $value when transformCSSValue fails', () => {
   // A color token whose `components` field is missing — exactly the
@@ -31,7 +40,7 @@ it('rethrows with token path, permutation, and $value when transformCSSValue fai
       { 'color.broken': malformed },
       { mode: 'Dark', brand: 'Brand A' },
       { prefix: 'sb' },
-      () => '',
+      transformValue,
     )) {
       // exhaust the generator
     }
@@ -63,7 +72,7 @@ it('preserves the underlying error as cause', () => {
       { 'color.broken': malformed },
       {},
       { prefix: 'sb' },
-      () => '',
+      transformValue,
     )) {
       // exhaust the generator
     }

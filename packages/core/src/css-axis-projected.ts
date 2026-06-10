@@ -25,6 +25,16 @@ function withSyntheticIds(map: TokenMap): RawTokenMap {
   return out;
 }
 
+// Produces a token's emitted CSS value, applying the same cssOptions the
+// listing build (plugin-css) applies — `legacyHex` color output and a user
+// `transform` hook — so preview CSS and the listing previewValue come from
+// one option set and never diverge.
+type TransformValue = (
+  token: TokenNormalized,
+  tokensSet: RawTokenMap,
+  permutation: Record<string, string>,
+) => ReturnType<typeof transformCSSValue>;
+
 // Distinguishes a token's variance shape so the emitter can route it.
 type VarianceInfo =
   | {
@@ -278,6 +288,18 @@ export function emitAxisProjectedCss(
   const transformAlias = (token: TokenNormalized): string =>
     makeCSSVar(token.id, { ...varOpts, wrapVar: true });
 
+  // Mirror plugin-css's value pipeline (see token-listing's build) so the
+  // emitted CSS matches the listing previewValue: same legacyHex color
+  // output, same user `transform` fallback before transformCSSValue.
+  const cssOptions = project.config.cssOptions;
+  const customTransform = cssOptions?.transform;
+  const color =
+    cssOptions?.legacyHex !== undefined ? { legacyHex: cssOptions.legacyHex } : undefined;
+  const transformValue: TransformValue = (token, tokensSet, permutation) => {
+    const opts = { tokensSet, permutation, transformAlias, ...(color && { color }) };
+    return customTransform?.(token, opts) ?? transformCSSValue(token, opts);
+  };
+
   const { axes, tokenGraph } = project;
   const variance = options.variance ?? analyzeProjectVariance(project);
 
@@ -301,7 +323,7 @@ export function emitAxisProjectedCss(
       () => true,
       defaultTuple,
       varOpts,
-      transformAlias,
+      transformValue,
     );
     if (lines.length > 0) blocks.push(`:root {\n${lines.join('\n')}\n}`);
   }
@@ -345,7 +367,7 @@ export function emitAxisProjectedCss(
         (path) => deltaPaths.has(path) && axisTouchesToken(axis.name, variance.get(path)),
         cellTuple,
         varOpts,
-        transformAlias,
+        transformValue,
       );
       if (lines.length === 0) continue;
       const selector = `[${dataAttr(prefix, axis.name)}="${cssEscape(ctx)}"]`;
@@ -359,7 +381,7 @@ export function emitAxisProjectedCss(
   //    truth for that specific token; group those cases by tuple to emit
   //    one compound block per unique joint tuple containing every token
   //    that diverges there.
-  for (const block of collectJointBlocks(project, variance, prefix, varOpts, transformAlias)) {
+  for (const block of collectJointBlocks(project, variance, prefix, varOpts, transformValue)) {
     blocks.push(block);
   }
 
@@ -426,7 +448,7 @@ function collectJointBlocks(
   variance: Map<string, VarianceInfo>,
   prefix: string,
   varOpts: VarOpts,
-  transformAlias: (token: TokenNormalized) => string,
+  transformValue: TransformValue,
 ): string[] {
   const { axes, tokenGraph, defaultTuple } = project;
   if (axes.length < 2) return [];
@@ -508,7 +530,7 @@ function collectJointBlocks(
         fullTokens,
         fullTuple,
         varOpts,
-        transformAlias,
+        transformValue,
       )) {
         lines.push(`  ${decl.varName}: ${decl.value};`);
       }
@@ -544,7 +566,7 @@ function collectLines(
   accept: (path: string) => boolean,
   permutation: Record<string, string>,
   varOpts: VarOpts,
-  transformAlias: (token: TokenNormalized) => string,
+  transformValue: TransformValue,
 ): string[] {
   const lines: string[] = [];
   for (const [path, token] of Object.entries(tokens)) {
@@ -555,7 +577,7 @@ function collectLines(
       tokensForAliasResolution,
       permutation,
       varOpts,
-      transformAlias,
+      transformValue,
     )) {
       lines.push(`  ${decl.varName}: ${decl.value};`);
     }
@@ -574,12 +596,12 @@ export function* collectTokenDeclarations(
   tokensSet: RawTokenMap,
   permutation: Record<string, string>,
   varOpts: VarOpts,
-  transformAlias: (token: TokenNormalized) => string,
+  transformValue: TransformValue,
 ): Generator<{ varName: string; value: string }> {
   const varName = makeCSSVar(path, varOpts);
   let value: ReturnType<typeof transformCSSValue>;
   try {
-    value = transformCSSValue(token, { tokensSet, permutation, transformAlias });
+    value = transformValue(token, tokensSet, permutation);
   } catch (error) {
     const permutationStr = JSON.stringify(permutation);
     const valueStr = safeStringify(token.$value);
