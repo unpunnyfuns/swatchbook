@@ -1,8 +1,9 @@
 import { validateChrome } from '#/chrome.ts';
 import { BufferedLogger, toDiagnostics } from '#/diagnostics.ts';
 import { validateDisabledAxes } from '#/disabled-axes.ts';
-import { fillPresetTuple, validatePresets } from '#/presets.ts';
+import { validatePresets } from '#/presets.ts';
 import { validateCssOptions } from '#/terrazzo-options.ts';
+import { canonicalKey } from '#/tuple-key.ts';
 import { resolveDefaultTuple } from '#/permutations/default.ts';
 import { normalizePermutations } from '#/permutations/normalize.ts';
 import { computeTokenListing } from '#/token-listing.ts';
@@ -95,24 +96,6 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
 
   const { presets, diagnostics: presetDiagnostics } = validatePresets(config.presets, filteredAxes);
 
-  // Materialize any preset tuples the singleton enumeration didn't
-  // cover. Singletons only vary one axis at a time, so any preset
-  // pointing at a multi-non-default tuple needs an extra
-  // `resolver.apply` call to ship the toolbar pill's resolved data.
-  // Resolver-backed projects only — layered presets without a
-  // resolver can't apply() on demand.
-  if (normalized.parserInput?.resolver && presets.length > 0) {
-    const tPresets = performance.now();
-    for (const preset of presets) {
-      const tuple = fillPresetTuple(preset.axes, filteredAxes);
-      const id = permutationID(tuple);
-      if (filteredResolved[id]) continue;
-      filteredResolved[id] = normalized.parserInput.resolver.apply(tuple);
-      filteredPermutations.push({ name: id, input: tuple });
-    }
-    logPhase(`apply ${presets.length} preset tuple(s)`, tPresets);
-  }
-
   const { diagnostics: cssOptionsDiagnostics } = validateCssOptions(config.cssOptions);
 
   const tListing = performance.now();
@@ -176,7 +159,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
         const val = tuple[axis.name];
         if (val !== undefined) full[axis.name] = val;
       }
-      const key = filteredAxes.map((a) => `${a.name}=${full[a.name]}`).join('|');
+      const key = canonicalKey(full);
       const cached = memo.get(key);
       if (cached) return cached;
       const result = resolveAllAt(tokenGraphResult.graph, full);
