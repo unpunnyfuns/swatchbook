@@ -27,6 +27,7 @@ import {
   AxesContext,
   COLOR_FORMATS,
   ColorFormatContext,
+  registerTokenSource,
   SwatchbookContext,
   ThemeContext,
 } from '@unpunnyfuns/swatchbook-blocks';
@@ -43,6 +44,22 @@ import {
 } from '#/constants.ts';
 import type { InitPayload } from '#/channel-types.ts';
 import type { StoryParameters, SwatchbookGlobals } from '#/globals.ts';
+
+// Seed blocks' token store with the build-time snapshot from the addon's
+// virtual module. Blocks no longer import `virtual:swatchbook/tokens`
+// directly (keeping them standalone-importable); the addon, which owns that
+// module, pushes the initial snapshot in at preview init. Dev-time updates
+// continue over TOKENS_UPDATED_EVENT.
+registerTokenSource({
+  axes: virtualAxes,
+  presets: virtualPresets,
+  diagnostics,
+  css,
+  cssVarPrefix,
+  listing: virtualListing,
+  tokenGraph: virtualTokenGraph,
+  defaultTuple: virtualDefaultTuple,
+});
 
 // Standard visually-hidden style for the theme-flip live region.
 // Keeps the announcement element discoverable by SR but out of visual
