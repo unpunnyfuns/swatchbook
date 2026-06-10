@@ -98,3 +98,22 @@ it('derives source vars with Terrazzo naming for camelCase paths', async () => {
   expect(css).toContain('var(--t-color-brand-primary)');
   expect(css).not.toContain('var(--t-color-brandPrimary)');
 });
+
+it('skips camelCase font-size dimensions instead of mis-bucketing them as spacing', async () => {
+  const cwd = mkdtempSync(join(tmpdir(), 'sb-tw-fontsize-'));
+  mkdirSync(join(cwd, 'tokens'));
+  writeFileSync(
+    join(cwd, 'tokens', 't.json'),
+    JSON.stringify({
+      fontSize: { $type: 'dimension', md: { $value: { value: 16, unit: 'px' } } },
+      space: { $type: 'dimension', md: { $value: { value: 8, unit: 'px' } } },
+    }),
+  );
+  const p = await loadProject({ tokens: ['tokens/**/*.json'], cssVarPrefix: 't' }, cwd);
+  const css = render(p);
+  // space.md buckets into the spacing scale; fontSize.md is skipped (Tailwind
+  // --text-* wants a size+line-height pair we don't build) rather than landing
+  // in spacing under a camelCase role.
+  expect(css).toContain('--spacing-t-md');
+  expect(css).not.toContain('fontSize');
+});

@@ -87,14 +87,15 @@ export function createServer(initial: Project): McpServer & {
       inputSchema: {},
     },
     () => {
-      const typeCounts: Record<string, number> = {};
       const tokensPerTheme: Record<string, number> = {};
       for (const { name, tuple } of eachTheme()) {
-        const tokens = project.resolveAt(tuple);
-        tokensPerTheme[name] = Object.keys(tokens).length;
-        for (const token of Object.values(tokens)) {
-          if (token.$type) typeCounts[token.$type] = (typeCounts[token.$type] ?? 0) + 1;
-        }
+        tokensPerTheme[name] = Object.keys(project.resolveAt(tuple)).length;
+      }
+      // `$type` is theme-invariant, so count each token once from the default
+      // theme — counting per theme inflated every type by the theme count.
+      const typeCounts: Record<string, number> = {};
+      for (const token of Object.values(project.resolveAt(project.defaultTuple))) {
+        if (token.$type) typeCounts[token.$type] = (typeCounts[token.$type] ?? 0) + 1;
       }
       const diagBySeverity = { error: 0, warn: 0, info: 0 } as Record<string, number>;
       for (const d of project.diagnostics) {

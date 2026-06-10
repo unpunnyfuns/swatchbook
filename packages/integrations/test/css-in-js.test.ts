@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { loadProject } from '@unpunnyfuns/swatchbook-core';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { beforeAll, expect, it } from 'vitest';
-import cssInJsIntegration from '#/css-in-js.ts';
+import cssInJsIntegration, { buildTree } from '#/css-in-js.ts';
 import type { Project } from '@unpunnyfuns/swatchbook-core';
 
 let project: Project;
@@ -76,4 +76,23 @@ it('derives accessor var() names with Terrazzo naming for camelCase paths', asyn
   // the var that actually gets emitted, not a dot-to-dash respelling.
   expect(js).toContain('"var(--t-color-brand-primary)"');
   expect(js).not.toContain('var(--t-color-brandPrimary)');
+});
+
+it('buildTree drops a deeper path colliding with a leaf instead of misfiling it', () => {
+  // 'color' is a token (leaf) and 'color.brand' a deeper token — a key can't
+  // be both string and object, so the deeper path is dropped, not misfiled
+  // under root.brand (the truncated key the loop used to stop on).
+  expect(buildTree(['color', 'color.brand'], (p) => `<${p}>`)).toEqual({ color: '<color>' });
+});
+
+it('buildTree nests normal branch paths', () => {
+  expect(buildTree(['color.brand.primary', 'space.md'], (p) => `<${p}>`)).toEqual({
+    color: { brand: { primary: '<color.brand.primary>' } },
+    space: { md: '<space.md>' },
+  });
+});
+
+it('buildTree does not pollute Object.prototype via a __proto__ path segment', () => {
+  buildTree(['__proto__.polluted', 'color.brand'], (p) => `<${p}>`);
+  expect(({} as Record<string, unknown>)['polluted']).toBeUndefined();
 });
