@@ -91,3 +91,8 @@ it('buildTree nests normal branch paths', () => {
     space: { md: '<space.md>' },
   });
 });
+
+it('buildTree does not pollute Object.prototype via a __proto__ path segment', () => {
+  buildTree(['__proto__.polluted', 'color.brand'], (p) => `<${p}>`);
+  expect(({} as Record<string, unknown>)['polluted']).toBeUndefined();
+});

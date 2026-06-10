@@ -107,7 +107,10 @@ export function buildTree(
   sortedPaths: readonly string[],
   leafFor: (path: string) => string,
 ): TreeNode {
-  const root: TreeNode = {};
+  // Null-prototype nodes: token path segments become object keys, so a
+  // `__proto__` segment from untrusted token input would otherwise mutate
+  // Object.prototype. With no prototype, such a key is just an own property.
+  const root: TreeNode = Object.create(null);
   for (const path of sortedPaths) {
     const segments = path.split('.');
     let node = root;
@@ -124,7 +127,7 @@ export function buildTree(
         break;
       }
       if (existing === undefined) {
-        const next: TreeNode = {};
+        const next: TreeNode = Object.create(null);
         node[seg] = next;
         node = next;
       } else {
