@@ -2,7 +2,7 @@
 
 The framework-agnostic theme-switcher UI for [swatchbook](https://github.com/unpunnyfuns/swatchbook).
 
-A React component: axis dropdowns, preset pills, color-format selector. The Storybook addon's toolbar uses it; so does the docs-site navbar. Reach for this package directly when you want the switcher on a non-Storybook site, such as a docs navbar or a standalone React app consuming swatchbook tokens.
+A React component: axis dropdowns and preset pills, with an optional `footer` slot for host-supplied controls. The Storybook addon's toolbar uses it; so does the docs-site navbar. Reach for this package directly when you want the switcher on a non-Storybook site, such as a docs navbar or a standalone React app consuming swatchbook tokens.
 
 Most consumers pick it up transitively via [`@unpunnyfuns/swatchbook-addon`](../addon); `import { ThemeSwitcher } from '@unpunnyfuns/swatchbook-addon'` works out of the box.
 
@@ -29,7 +29,7 @@ import '@unpunnyfuns/swatchbook-switcher/style.css';
   }}
   onPresetApply={(preset: SwitcherPreset) => {
     for (const [axis, value] of Object.entries(preset.axes)) {
-      document.documentElement.setAttribute(`data-sb-${axis}`, value);
+      if (value !== undefined) document.documentElement.setAttribute(`data-sb-${axis}`, value);
     }
   }}
 />;

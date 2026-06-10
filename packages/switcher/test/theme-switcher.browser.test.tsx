@@ -82,6 +82,22 @@ it('marks a preset active when the tuple matches and shows a modified dot when i
   expect(modifiedBtn.querySelector('.sb-switcher__pill-modified')).not.toBeNull();
 });
 
+it('exposes the modified state in the accessible name, not just the visual dot', () => {
+  const props = baseProps();
+  const preset = { name: 'Brand A Light', axes: { mode: 'Light' } };
+  render(
+    <ThemeSwitcher
+      {...props}
+      presets={[preset]}
+      activeTuple={{ mode: 'Dark' }}
+      lastApplied={preset.name}
+    />,
+  );
+  // The dot itself is aria-hidden; without a textual cue a screen-reader
+  // user has no signal the preset diverged from its saved state.
+  expect(screen.getByRole('button', { name: 'Brand A Light (modified)' })).not.toBeNull();
+});
+
 it('renders an externally-supplied footer (for host-specific UI) when passed', () => {
   const props = baseProps();
   render(<ThemeSwitcher {...props} footer={<div data-testid="extra">host extra</div>} />);
