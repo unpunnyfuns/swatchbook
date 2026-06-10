@@ -4,7 +4,7 @@ import { listPaths } from '@unpunnyfuns/swatchbook-core/graph';
 import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
 import { watch as fsWatch } from 'node:fs';
 import type { FSWatcher } from 'node:fs';
-import { basename, dirname, isAbsolute, resolve as resolvePath } from 'node:path';
+import { dirname, extname, isAbsolute, resolve as resolvePath } from 'node:path';
 import picomatch from 'picomatch';
 import type { Plugin, ViteDevServer } from 'vite';
 import {
@@ -33,6 +33,12 @@ export interface SwatchbookTokensPluginOptions {
 function resolvedId(virtualId: string): string {
   return `\0${virtualId}`;
 }
+
+// File extensions the dir watcher treats as token sources. Watching a
+// directory surfaces every change in it; this filter keeps editor temp
+// files, `.DS_Store`, etc. from triggering reloads while still catching
+// newly-added token files (the frozen-basename filter previously missed).
+const TOKEN_FILE_EXTENSIONS = new Set(['.json', '.jsonc', '.json5', '.yaml', '.yml']);
 
 /**
  * Vite plugin that serves the virtual `virtual:swatchbook/tokens` module —
@@ -206,41 +212,46 @@ export function swatchbookTokensPlugin({
         if (pending) clearTimeout(pending);
         pending = setTimeout(() => {
           pending = null;
-          void reload(server);
+          // Re-arm after each reload: a token edit can add a `$ref` to a
+          // file in a directory we weren't watching, and the refreshed
+          // `project.sourceFiles` surfaces it.
+          void reload(server).then(armWatchers);
         }, 100);
       };
 
-      // Watch each source file's *parent directory* rather than the file
-      // itself. File-level `fs.watch` is fragile: atomic-save editors
-      // unlink the old inode and write a new one, so the original
-      // watcher either fires a one-shot 'rename' and goes deaf, or on
-      // some platforms loops on ghost events for the old inode. Watching
-      // the dir sidesteps both — the dir inode is stable across the
-      // rename dance — and filename filtering keeps event volume low.
+      // Watch the token *directories* rather than individual files. File-
+      // level `fs.watch` is fragile: atomic-save editors unlink the old
+      // inode and write a new one, so a file watcher fires a one-shot
+      // 'rename' and goes deaf. Watching the dir (inode stable across the
+      // rename) sidesteps that; an extension filter keeps event volume low.
       //
-      // Vite's `server.watcher` still wouldn't carry these events across
-      // pnpm symlink boundaries, so we keep running our own watchers.
-      const byDir = new Map<string, Set<string>>();
-      for (const file of project?.sourceFiles ?? []) {
-        const dir = dirname(file);
-        const set = byDir.get(dir) ?? new Set<string>();
-        set.add(basename(file));
-        byDir.set(dir, set);
-      }
-
-      const fileWatchers: FSWatcher[] = [];
-      for (const [dir, names] of byDir) {
-        try {
-          const w = fsWatch(dir, { persistent: false }, (eventType, filename) => {
-            if (!filename) return;
-            if (!names.has(filename)) return;
-            if (eventType === 'change' || eventType === 'rename') invalidate();
-          });
-          fileWatchers.push(w);
-        } catch {
-          // unwatchable dir — skip. Next loadProject pass will report it.
+      // Re-derived on every call (not a basename set frozen at server
+      // start) so a newly-added token file in a watched dir triggers a
+      // reload. `fs.watch` recursive mode isn't portable to Linux/CI, so we
+      // re-arm after reloads to pick up new directories instead.
+      //
+      // Vite's `server.watcher` wouldn't carry these events across pnpm
+      // symlink boundaries, so we run our own watchers.
+      let fileWatchers: FSWatcher[] = [];
+      function armWatchers(): void {
+        for (const w of fileWatchers) w.close();
+        fileWatchers = [];
+        const dirs = new Set<string>(collectWatchPaths(config, project, cwd));
+        for (const file of project?.sourceFiles ?? []) dirs.add(dirname(file));
+        for (const dir of dirs) {
+          try {
+            const w = fsWatch(dir, { persistent: false }, (eventType, filename) => {
+              if (!filename) return;
+              if (!TOKEN_FILE_EXTENSIONS.has(extname(filename))) return;
+              if (eventType === 'change' || eventType === 'rename') invalidate();
+            });
+            fileWatchers.push(w);
+          } catch {
+            // unwatchable dir — skip. Next loadProject pass will report it.
+          }
         }
       }
+      armWatchers();
       server.httpServer?.once('close', () => {
         for (const w of fileWatchers) w.close();
       });
