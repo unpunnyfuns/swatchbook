@@ -44,7 +44,11 @@ export {
   type SwatchbookProviderProps,
   useSwatchbookData,
 } from '#/provider.tsx';
-export { registerTokenSource, type TokenSnapshot } from '#/internal/channel-tokens.ts';
+export {
+  registerTokenSource,
+  type TokenSnapshot,
+  useTokenSnapshot,
+} from '#/internal/channel-tokens.ts';
 export type {
   ProjectSnapshot,
   VirtualAxis,
