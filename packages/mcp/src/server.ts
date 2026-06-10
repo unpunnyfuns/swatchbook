@@ -54,6 +54,24 @@ export function createServer(initial: Project): McpServer & {
     return project.resolveAt(tuple);
   };
 
+  // Validate a tool's `theme` argument. `undefined` means "use the default
+  // theme"; an unrecognized name returns an error result naming the valid
+  // themes rather than silently resolving the default tuple under the wrong
+  // label (which made responses claim data for a theme that doesn't exist).
+  const resolveThemeName = (
+    theme: string | undefined,
+  ): { themeName: string } | { error: ReturnType<typeof textResult> } => {
+    if (theme === undefined) return { themeName: defaultThemeName };
+    if (!tupleByName.has(theme)) {
+      return {
+        error: textResult(
+          `Unknown theme "${theme}". Valid themes: ${[...tupleByName.keys()].join(', ')}`,
+        ),
+      };
+    }
+    return { themeName: theme };
+  };
+
   // Iterate every `(themeName, tuple)` pair the project surfaces —
   // default + singletons + presets. Order is insertion order of
   // `tupleByName` (default first, then singletons per axis, then presets).
@@ -129,7 +147,9 @@ export function createServer(initial: Project): McpServer & {
       },
     },
     ({ filter, type, theme }) => {
-      const themeName = theme ?? defaultThemeName;
+      const resolved = resolveThemeName(theme);
+      if ('error' in resolved) return resolved.error;
+      const themeName = resolved.themeName;
       const tokens = tokensForTheme(themeName);
       const rows: { path: string; type?: string; value: string }[] = [];
       for (const [path, token] of Object.entries(tokens)) {
@@ -308,7 +328,9 @@ export function createServer(initial: Project): McpServer & {
       },
     },
     ({ path, theme }) => {
-      const themeName = theme ?? defaultThemeName;
+      const resolved = resolveThemeName(theme);
+      if ('error' in resolved) return resolved.error;
+      const themeName = resolved.themeName;
       const token = tokensForTheme(themeName)[path];
       if (!token) return textResult(`Token not found: ${path}`);
       if (token.$type !== 'color') {
@@ -344,7 +366,9 @@ export function createServer(initial: Project): McpServer & {
       },
     },
     ({ foreground, background, theme, algorithm }) => {
-      const themeName = theme ?? defaultThemeName;
+      const resolved = resolveThemeName(theme);
+      if ('error' in resolved) return resolved.error;
+      const themeName = resolved.themeName;
       const tokens = tokensForTheme(themeName);
       const fgTok = tokens[foreground];
       const bgTok = tokens[background];
@@ -406,7 +430,9 @@ export function createServer(initial: Project): McpServer & {
       },
     },
     ({ query, theme, limit }) => {
-      const themeName = theme ?? defaultThemeName;
+      const resolved = resolveThemeName(theme);
+      if ('error' in resolved) return resolved.error;
+      const themeName = resolved.themeName;
       const tokens = tokensForTheme(themeName);
       const max = limit ?? 50;
 
