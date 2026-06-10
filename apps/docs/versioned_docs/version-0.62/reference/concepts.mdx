@@ -1,0 +1,98 @@
+---
+id: concepts
+title: Concepts
+sidebar_position: 4
+---
+
+# Concepts
+
+The mental model in one place. Vocabulary, framing, and the relationship between Swatchbook and the rest of a typical DTCG token pipeline.
+
+Reference and guide pages assume this vocabulary; new readers and returning readers can start here.
+
+## Preview host, not transformer
+
+Swatchbook is the **preview side** of a DTCG pipeline. It parses tokens, displays them inside Storybook, and reacts to axis flips from a toolbar. It does **not** transform tokens for production platforms; that is what a consumer's `@terrazzo/cli` (or Style Dictionary, or comparable) build is for.
+
+The boundary line cuts cleanly:
+
+- **Terrazzo CLI** runs at build time, takes DTCG sources, and emits CSS / Swift / Android / JS / Sass for production consumption.
+- **Swatchbook** runs at Storybook preview time, reads the same DTCG sources, and renders interactive previews of what the production build produces.
+
+A consumer maintains **one DTCG source of truth**. Both tools read from it. The [Aligning with your token build](../guides/sharing-terrazzo-options.mdx) guide describes how the two coordinate through shared `terrazzo.config.ts` fields.
+
+When a feature request frames Swatchbook as owning transform logic, custom naming schemes, or a competing plugin protocol, the right answer is usually "point Terrazzo CLI at the same sources and read its output via the token listing."
+
+## Axes and contexts
+
+An **axis** is one independent dimension of a theming model: `mode`, `brand`, `density`, `contrast`, whatever fits. Each axis has a set of named **contexts**, one of which is the default.
+
+A consumer with a `mode × brand × contrast` system declares three axes:
+
+```
+mode:     contexts = [Light, Dark]                   default = Light
+brand:    contexts = [Default, Brand A, Brand B]     default = Default
+contrast: contexts = [Normal, High]                  default = Normal
+```
+
+This is the alternative to a flat string-ID model (`light-brand-a-high`). One dimension becomes two; two become six. Modelling each dimension independently keeps the combination-counting out of theme names and into composition at runtime.
+
+Axes come from one of three sources, in priority order:
+
+- **Resolver-driven**: `config.resolver` points at a DTCG 2025.10 resolver file. Each modifier in the resolver becomes one axis.
+- **Layered config**: `config.axes` declares them inline.
+- **Synthetic fallback**: neither input supplied. A single axis named `theme` is created so the project still loads.
+
+## Tuples
+
+A **tuple** is one context selected per axis. The canonical representation of "what theme is active right now":
+
+```ts
+{ mode: 'Dark', brand: 'Brand A', contrast: 'Normal' }
+```
+
+Every resolved value, every CSS selector, every panel readout keys on a tuple. Partial tuples (omitting one or more axes) implicitly fill missing axes with their defaults.
+
+Tuples are the **only** way the system addresses theming state. Composed names like `"Dark · Brand A"` exist for display, not for resolution.
+
+## The token graph
+
+After parse and resolve, Swatchbook builds a **token graph**, the in-memory structure every read goes through.
+
+Conceptually:
+
+- **One node per token path** (`color.surface.default`, `space.md`, `typography.heading.font-size`).
+- **A baseline value** at the project's default tuple.
+- **Per-axis writes**: for each non-default `(axis, context)`, what value this token takes when that axis is in that context.
+- **Alias edges**: when a token references another token (`{color.brand.accent}` or DTCG 2025.10 `$ref`), the graph records the edge so the walker can compose values at any tuple.
+
+The walker is the API surface: `resolveAt(tuple)` for a single token at a tuple, `resolveAllAt(tuple)` for every token at a tuple, `getVariance(path)` for which axes affect a given token. Walker calls are memoized, so repeating a query at the same tuple is cheap.
+
+The graph replaced an earlier cartesian-product model where every combination of axes was materialised at load. The graph approach scales linearly in axes × contexts, not exponentially in their combination, so a 12-axis project loads in reasonable time. See the [token pipeline reference](./token-pipeline.mdx) for the load mechanism and [Core reference](./core.mdx) for the walker API.
+
+## Alignment with Terrazzo's pipeline
+
+Swatchbook's preview-time loader reuses Terrazzo's parser end-to-end. The same `parserInput.resolver` that Terrazzo's CLI works against is what Swatchbook reads. Some implications:
+
+- The `$value` shapes, the `$type` semantics, the alias forms (`{token.path}` legacy and `$ref` JSON Pointer), the resolver schema: all of these come from Terrazzo. Swatchbook does not introduce its own DTCG dialect.
+- A consumer's existing `terrazzo.config.ts` carries fields Swatchbook can re-use directly (`cssOptions`, `listingOptions`, `terrazzoPlugins`). The [Aligning with your token build](../guides/sharing-terrazzo-options.mdx) guide describes which fields cross the boundary and which are preview-only.
+- When Terrazzo's parser or resolver changes behaviour, Swatchbook inherits the change. When something doesn't render correctly in preview but builds correctly through Terrazzo CLI, the issue is usually on Swatchbook's side rather than upstream. Swatchbook reads a subset of the parser's output and the gap is usually how Swatchbook is choosing to read it.
+
+## What's loaded, in order
+
+A complete load (`loadProject` → graph + CSS + diagnostics) proceeds roughly:
+
+1. **Parse the resolver** (if `config.resolver` is set), or the token globs, or both.
+2. **Build the token graph** from the parsed output: baseline values, per-axis writes, alias edges.
+3. **Validate** alias targets, alias cycles, color shape, unresolved `$ref`. Each finding emits a diagnostic.
+4. **Run the Token Listing build**: an in-memory `@terrazzo/plugin-token-listing` pass populates per-token `previewValue`, `names.<platform>`, and source location data on `Project.listing`.
+5. **Emit the CSS**: one `:root` block for the default tuple, plus per-axis-context blocks for non-default tuples, plus compound blocks for joint-variance tokens.
+
+Every step's output lives on the returned `Project` object: `tokenGraph`, `axes`, `defaultTuple`, `listing`, `diagnostics`. CSS is produced separately by `emitAxisProjectedCss(project)` rather than stored on `Project`. See the [Core reference](./core.mdx) for the full shape and the [Diagnostics reference](./diagnostics.mdx) for what fires when.
+
+## See also
+
+- [Axes reference](./axes.mdx): full vocabulary and per-story override mechanics.
+- [The token pipeline](./token-pipeline.mdx): how the virtual module ships graph + CSS to the preview.
+- [Aligning with your token build](../guides/sharing-terrazzo-options.mdx): the boundary between Swatchbook's preview pipeline and a production Terrazzo build.
+- [Diagnostics](./diagnostics.mdx): every `swatchbook/<group>` warning and error the loader can emit.

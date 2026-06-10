@@ -1,5 +1,34 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.62.0
+
+### Minor Changes
+
+- 8c90cbdad4b162fee9eaacd68b26cc8a86ff7317: upgrade Terrazzo to 2.3.0 and raise the @terrazzo/parser and @terrazzo/plugin-css peer floors to ^2.3.0
+
+### Patch Changes
+
+- 404d6d55a828c4e748332a1e3e7fcd9aa4401cf2: remove the unused @terrazzo/token-tools dependency and export TOKENS_UPDATED_EVENT (the dev-time HMR wire event, now the single source shared with the addon)
+- 9b5e9af5eda4ccc4d13b7df10b6197116ba99b76: Condense the changelogs and switch to a one-line-per-change changelog format.
+- 53ddc4be3beef24901f537cb49df7b7e09c3f639: Documentation review follow-ups.
+- 68921f889d051cb0de99c237eb6bc906b008680e: fix addon live-update staleness: useToken now tracks the live toolbar axis tuple over the channel in provider-less (MDX/autodocs) renders, and a per-story axis override no longer sticks to the <html> attributes after navigating to an MDX docs page (blocks now expose useChannelGlobals)
+- 004ba35e96d32621cec0611afc1d3215b7e4e5a1: fix blocks failing to import standalone (outside Storybook) due to a hard dependency on the addon's virtual:swatchbook/tokens module; blocks now read an injected snapshot via the new registerTokenSource, which the addon preview calls at init
+- 2fac127f5238c7e9fe31f14225273ffbaa54b55c: fix blocks sortTokens and GradientPalette ignoring colorSpace on wide-gamut tokens; both now route through the shared colorjs construction (new core parseColor) so perceptual sort and gradient swatches respect display-p3 / a98-rgb / prophoto-rgb
+- c74f6e3e454ea25716fc7858d1f97104139dcfd1: fix blocks rendered inside stories staying stale after a dev-time token save: the addon decorator now builds its ProjectSnapshot and resolveAt from the live token store (updated on HMR) instead of the static virtual-module exports (blocks now expose useTokenSnapshot)
+- f2ec59040b4a5d93cbffa1959bc8a874d533ece5: fix four more low-severity bugs: AliasedBy hiding shared descendants in diamond alias graphs, the switcher preset active-match against a sparse tuple, the MCP server version reporting the css-var prefix, and css-in-js emitting duplicate exports when group names collide
+- 61416a9ed722073e7472ebc7a2feb339e86a291e: fix TokenDetail crashing when a token appears or disappears between renders (useProject was called after a conditional early return)
+- Updated dependencies [ed9d942]
+- Updated dependencies [9b5e9af]
+- Updated dependencies [53ddc4b]
+- Updated dependencies [7b8a851]
+- Updated dependencies [2fac127]
+- Updated dependencies [8e918b1]
+- Updated dependencies [c5ace24]
+- Updated dependencies [4ddd679]
+- Updated dependencies [86a42fe]
+- Updated dependencies [8c90cbd]
+  - @unpunnyfuns/swatchbook-core@0.62.0
+
 ## 0.61.0
 
 ### Minor Changes
