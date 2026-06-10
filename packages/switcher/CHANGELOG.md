@@ -1,5 +1,18 @@
 # @unpunnyfuns/swatchbook-switcher
 
+## 0.62.0
+
+### Minor Changes
+
+- 8c90cbdad4b162fee9eaacd68b26cc8a86ff7317: upgrade Terrazzo to 2.3.0 and raise the @terrazzo/parser and @terrazzo/plugin-css peer floors to ^2.3.0
+
+### Patch Changes
+
+- 9b5e9af5eda4ccc4d13b7df10b6197116ba99b76: Condense the changelogs and switch to a one-line-per-change changelog format.
+- 53ddc4be3beef24901f537cb49df7b7e09c3f639: Documentation review follow-ups.
+- f2ec59040b4a5d93cbffa1959bc8a874d533ece5: fix four more low-severity bugs: AliasedBy hiding shared descendants in diamond alias graphs, the switcher preset active-match against a sparse tuple, the MCP server version reporting the css-var prefix, and css-in-js emitting duplicate exports when group names collide
+- f8b3e15a6602c06c4b6410c40afb497b62238db3: Expose a preset's "modified" state in its accessible name, not just the aria-hidden visual dot
+
 ## 0.61.0
 
 ### Minor Changes

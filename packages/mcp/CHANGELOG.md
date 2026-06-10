@@ -1,5 +1,33 @@
 # @unpunnyfuns/swatchbook-mcp
 
+## 0.62.0
+
+### Minor Changes
+
+- 8c90cbdad4b162fee9eaacd68b26cc8a86ff7317: upgrade Terrazzo to 2.3.0 and raise the @terrazzo/parser and @terrazzo/plugin-css peer floors to ^2.3.0
+
+### Patch Changes
+
+- ed9d9420a829de74fe41fc33cc9a3bb964e83399: consolidate color formatting into core (new color-formats and format-color modules shared by blocks/mcp/addon); MCP color output now uses the shared canonical rendering (integer rgb, 6-digit hex)
+- 9b5e9af5eda4ccc4d13b7df10b6197116ba99b76: Condense the changelogs and switch to a one-line-per-change changelog format.
+- 53ddc4be3beef24901f537cb49df7b7e09c3f639: Documentation review follow-ups.
+- 8e918b18d1e9d0c390b257a8d927e3ee787d10c5: fix tailwind/css-in-js integrations and MCP get_token/get_consumer_output reporting CSS var names that diverge from plugin-css output on camelCase paths; names now come from the listing via the new core cssVarName helper
+- 86a42fe94aed4d6d5cf94ec0d7b3c0fac70ff2c9: fix four low-severity correctness bugs: core hex fallback dropping the alpha byte of #rrggbbaa/#rgba, css-in-js buildTree misfiling a path that collides with a leaf, tailwind mis-bucketing camelCase font-size tokens into spacing, and MCP describe_project counting each token type once per theme
+- f2ec59040b4a5d93cbffa1959bc8a874d533ece5: fix four more low-severity bugs: AliasedBy hiding shared descendants in diamond alias graphs, the switcher preset active-match against a sparse tuple, the MCP server version reporting the css-var prefix, and css-in-js emitting duplicate exports when group names collide
+- dd7fcf3eb006500fb2cca7665f55ad0d92fdad5a: fix get_color_formats and get_color_contrast rejecting DTCG wide-gamut color-space ids (display-p3, a98-rgb, prophoto-rgb)
+- 369d86d3bb6c02bed79e2157a37d8f1095ccb95f: fix MCP tools silently falling back to the default theme for an unknown theme name while labeling the response with the requested name; they now return an error listing the valid theme names
+- Updated dependencies [ed9d942]
+- Updated dependencies [9b5e9af]
+- Updated dependencies [53ddc4b]
+- Updated dependencies [7b8a851]
+- Updated dependencies [2fac127]
+- Updated dependencies [8e918b1]
+- Updated dependencies [c5ace24]
+- Updated dependencies [4ddd679]
+- Updated dependencies [86a42fe]
+- Updated dependencies [8c90cbd]
+  - @unpunnyfuns/swatchbook-core@0.62.0
+
 ## 0.61.0
 
 ### Minor Changes

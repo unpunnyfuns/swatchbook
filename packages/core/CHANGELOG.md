@@ -1,5 +1,23 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.62.0
+
+### Minor Changes
+
+- 8c90cbdad4b162fee9eaacd68b26cc8a86ff7317: upgrade Terrazzo to 2.3.0 and raise the @terrazzo/parser and @terrazzo/plugin-css peer floors to ^2.3.0
+
+### Patch Changes
+
+- ed9d9420a829de74fe41fc33cc9a3bb964e83399: consolidate color formatting into core (new color-formats and format-color modules shared by blocks/mcp/addon); MCP color output now uses the shared canonical rendering (integer rgb, 6-digit hex)
+- 9b5e9af5eda4ccc4d13b7df10b6197116ba99b76: Condense the changelogs and switch to a one-line-per-change changelog format.
+- 53ddc4be3beef24901f537cb49df7b7e09c3f639: Documentation review follow-ups.
+- 7b8a8518f3c7681d6d04f33e7aac7bec1f4db69e: fix resolveAliasAt leaking baseline alias metadata into literal and partial-alias write results, which emitted var() references to the old alias target
+- 2fac127f5238c7e9fe31f14225273ffbaa54b55c: fix blocks sortTokens and GradientPalette ignoring colorSpace on wide-gamut tokens; both now route through the shared colorjs construction (new core parseColor) so perceptual sort and gradient swatches respect display-p3 / a98-rgb / prophoto-rgb
+- 8e918b18d1e9d0c390b257a8d927e3ee787d10c5: fix tailwind/css-in-js integrations and MCP get_token/get_consumer_output reporting CSS var names that diverge from plugin-css output on camelCase paths; names now come from the listing via the new core cssVarName helper
+- c5ace2417f217fc64ea539cb38904b6f9efbd3a8: fix cssOptions (legacyHex, transform) only reaching the listing build and not the axis-projected emitter, so preview CSS now matches the listing previewValue instead of diverging
+- 4ddd67907693fe43d35d60b299942e8f25575e20: fix a failed token resolution (dangling alias) leaving a cycle marker in the shared memo, which made resolveAllAt return iteration-order-dependent values that disagreed with resolveAt
+- 86a42fe94aed4d6d5cf94ec0d7b3c0fac70ff2c9: fix four low-severity correctness bugs: core hex fallback dropping the alpha byte of #rrggbbaa/#rgba, css-in-js buildTree misfiling a path that collides with a leaf, tailwind mis-bucketing camelCase font-size tokens into spacing, and MCP describe_project counting each token type once per theme
+
 ## 0.61.0
 
 ### Minor Changes
