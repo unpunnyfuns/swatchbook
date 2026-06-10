@@ -47,6 +47,7 @@ export {
 } from '#/provider.tsx';
 export {
   registerTokenSource,
+  TOKENS_UPDATED_EVENT,
   type TokenSnapshot,
   useTokenSnapshot,
 } from '#/internal/channel-tokens.ts';

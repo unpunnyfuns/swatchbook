@@ -46,7 +46,7 @@ function isVerbose(): boolean {
 function logPhase(label: string, startedAt: number): void {
   if (!isVerbose()) return;
   const ms = performance.now() - startedAt;
-  // biome-ignore lint/suspicious/noConsole: opt-in debug output, gated behind env var
+  // Opt-in debug output, gated behind the verbose env var.
   console.log(`[swatchbook:load] ${label}: ${ms.toFixed(0)}ms`);
 }
 

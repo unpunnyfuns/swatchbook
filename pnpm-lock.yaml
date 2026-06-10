@@ -262,9 +262,6 @@ importers:
 
   packages/blocks:
     dependencies:
-      '@terrazzo/token-tools':
-        specifier: ^2.3.0
-        version: 2.3.0
       '@unpunnyfuns/swatchbook-core':
         specifier: workspace:*
         version: link:../core
