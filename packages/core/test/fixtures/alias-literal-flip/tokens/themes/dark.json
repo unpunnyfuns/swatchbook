@@ -1,0 +1,19 @@
+{
+  "color": {
+    "$type": "color",
+    "text": { "$value": "#ffffff" },
+    "border": {
+      "focus": { "$value": "{color.text}" }
+    }
+  },
+  "border": {
+    "$type": "border",
+    "input": {
+      "$value": {
+        "color": "#ffffff",
+        "width": "1px",
+        "style": "solid"
+      }
+    }
+  }
+}

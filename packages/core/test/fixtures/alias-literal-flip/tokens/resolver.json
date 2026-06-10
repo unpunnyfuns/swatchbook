@@ -1,0 +1,21 @@
+{
+  "$schema": "https://www.designtokens.org/TR/2025.10/resolver/",
+  "version": "2025.10",
+  "name": "alias-literal-flip",
+  "description": "Minimal fixture where mode=Dark replaces alias baselines with literals (and one literal with a new alias). Pins the emitter against leaking baseline alias metadata into written cells.",
+  "sets": {
+    "tokens": {
+      "sources": [{ "$ref": "./tokens.json" }]
+    }
+  },
+  "modifiers": {
+    "mode": {
+      "contexts": {
+        "Light": [],
+        "Dark": [{ "$ref": "./themes/dark.json" }]
+      },
+      "default": "Light"
+    }
+  },
+  "resolutionOrder": [{ "$ref": "#/sets/tokens" }, { "$ref": "#/modifiers/mode" }]
+}
