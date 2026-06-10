@@ -95,7 +95,7 @@ function collectPaths(project: Project): string[] {
   return [...listPaths(project.tokenGraph)];
 }
 
-interface TreeNode {
+export interface TreeNode {
   [key: string]: TreeNode | string;
 }
 
@@ -103,15 +103,26 @@ interface TreeNode {
 // On a leaf/branch collision (a short path's leaf shares a key a longer path
 // wants to nest under) the leaf wins — real DTCG trees don't hit this, but
 // explicit beats silent UB.
-function buildTree(sortedPaths: readonly string[], leafFor: (path: string) => string): TreeNode {
+export function buildTree(
+  sortedPaths: readonly string[],
+  leafFor: (path: string) => string,
+): TreeNode {
   const root: TreeNode = {};
   for (const path of sortedPaths) {
     const segments = path.split('.');
     let node = root;
+    let collided = false;
     for (let i = 0; i < segments.length - 1; i++) {
       const seg = segments[i]!;
       const existing = node[seg];
-      if (typeof existing === 'string') break;
+      // A token already occupies this segment as a leaf, so the deeper path
+      // can't nest under it (a key can't be both a string and an object).
+      // Drop the deeper path rather than misfiling it under the truncated
+      // key the loop happened to stop on.
+      if (typeof existing === 'string') {
+        collided = true;
+        break;
+      }
       if (existing === undefined) {
         const next: TreeNode = {};
         node[seg] = next;
@@ -120,6 +131,7 @@ function buildTree(sortedPaths: readonly string[], leafFor: (path: string) => st
         node = existing;
       }
     }
+    if (collided) continue;
     const leafKey = segments.at(-1)!;
     if (node[leafKey] === undefined) node[leafKey] = leafFor(path);
   }

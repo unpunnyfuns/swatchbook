@@ -142,6 +142,9 @@ function deriveRoles(project: Project): RoleMap {
 
 const SPACING_ROOTS = ['space', 'spacing'] as const;
 const RADIUS_ROOTS = ['radius', 'borderRadius', 'border-radius'] as const;
+// Single-segment font-size roots — camelCase/dashed forms the dotted
+// `font.size.*` check below misses, which otherwise bucket into spacing.
+const FONT_SIZE_ROOTS = ['fontSize', 'font-size', 'textSize', 'text-size'] as const;
 const FONT_PREFIXES = ['font.family.', 'fontFamily.', 'font.'] as const;
 
 // Map one token's $type + path to its Tailwind { scale, role }, or null to skip.
@@ -169,6 +172,7 @@ function classify(path: string, type: string | undefined): { scale: string; role
       }
       // Font-size-ish dimensions are skipped — Tailwind's `--text-*` entries
       // expect a size+line-height pair that this integration doesn't build.
+      if ((FONT_SIZE_ROOTS as readonly string[]).includes(head)) return null;
       if (head === 'font' && /size|text/i.test(path)) return null;
       if (head === 'text') return null;
       // Default-bucket any other dimension under spacing — safer than guessing.

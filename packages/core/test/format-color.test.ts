@@ -84,6 +84,13 @@ describe('formatColor', () => {
     expect(out.value).toBe('rgb(59 130 246)');
   });
 
+  it('preserves the alpha byte of #rrggbbaa / #rgba hex payloads', () => {
+    // 0x80 / 255 ≈ 0.502 — previously dropped, rendering fully opaque.
+    expect(formatColor({ hex: '#ff000080' }, 'rgb').value).toBe('rgb(255 0 0 / 0.502)');
+    // 4-digit shorthand expands the alpha nibble too (#f008 → alpha 0x88).
+    expect(formatColor({ hex: '#f008' }, 'rgb').value).toContain('/');
+  });
+
   it('returns the fallback "—" for non-color input', () => {
     expect(formatColor(null, 'hex').value).toBe('—');
     expect(formatColor(undefined, 'hex').value).toBe('—');

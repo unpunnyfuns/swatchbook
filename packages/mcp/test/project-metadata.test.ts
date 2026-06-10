@@ -44,14 +44,17 @@ it('describe_project: returns axis summary, theme list, token counts, and diagno
   expect(result.diagnostics.total).toBeGreaterThanOrEqual(0);
 });
 
-it('describe_project: types histogram covers every DTCG type present', async () => {
+it('describe_project: types histogram counts each token once, not once per theme', async () => {
   const result = await mcp.callJson<DescribeProjectResult>('describe_project');
-  // Sum across types should equal the total token count across themes —
-  // sanity that the histogram came from the same walk as tokensPerTheme.
   const totalFromTypes = Object.values(result.types).reduce((a, b) => a + b, 0);
-  const totalFromThemes = Object.values(result.tokensPerTheme).reduce((a, b) => a + b, 0);
+  const defaultThemeTokens = result.tokensPerTheme[result.defaultTheme!];
+  const totalAcrossThemes = Object.values(result.tokensPerTheme).reduce((a, b) => a + b, 0);
   expect(totalFromTypes).toBeGreaterThan(0);
-  expect(totalFromThemes).toBeGreaterThan(0);
+  // `$type` is theme-invariant: the histogram counts each token once (from the
+  // default theme), so it matches a single theme's token count — not the sum
+  // across every theme, which the per-theme loop previously inflated it to.
+  expect(totalFromTypes).toBe(defaultThemeTokens);
+  expect(totalAcrossThemes).toBeGreaterThan(totalFromTypes);
 });
 
 interface ListAxesResult {

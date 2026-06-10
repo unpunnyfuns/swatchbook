@@ -80,7 +80,12 @@ function coerce(value: unknown): NormalizedColor | null {
       : undefined;
   if (!colorSpace || !components) {
     if (typeof v['hex'] === 'string') {
-      return { colorSpace: 'srgb', components: hexToComponents(v['hex']) };
+      const { components: hexComponents, alpha: hexAlpha } = hexToColor(v['hex']);
+      return {
+        colorSpace: 'srgb',
+        components: hexComponents,
+        ...(hexAlpha !== undefined && { alpha: hexAlpha }),
+      };
     }
     return null;
   }
@@ -95,7 +100,7 @@ function coerce(value: unknown): NormalizedColor | null {
   };
 }
 
-function hexToComponents(hex: string): number[] {
+function hexToColor(hex: string): { components: number[]; alpha?: number } {
   const h = hex.replace('#', '');
   const expanded =
     h.length === 3 || h.length === 4
@@ -107,7 +112,12 @@ function hexToComponents(hex: string): number[] {
   const r = parseInt(expanded.slice(0, 2), 16) / 255;
   const g = parseInt(expanded.slice(2, 4), 16) / 255;
   const b = parseInt(expanded.slice(4, 6), 16) / 255;
-  return [r, g, b];
+  // Preserve the alpha byte of #rgba / #rrggbbaa values instead of dropping it.
+  if (expanded.length >= 8) {
+    const a = parseInt(expanded.slice(6, 8), 16) / 255;
+    if (!Number.isNaN(a)) return { components: [r, g, b], alpha: a };
+  }
+  return { components: [r, g, b] };
 }
 
 // Map Terrazzo's canonical CSS Color 4 space identifiers to the shorter
