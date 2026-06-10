@@ -25,13 +25,6 @@ import { defineConfig } from 'vitest/config';
  */
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      'virtual:swatchbook/tokens': fileURLToPath(
-        new URL('./test/virtual-stub.ts', import.meta.url),
-      ),
-    },
-  },
   test: {
     reporters: ['default'],
     projects: [
