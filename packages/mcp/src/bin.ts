@@ -10,30 +10,11 @@ import { watch as fsWatch } from 'node:fs';
 import type { FSWatcher } from 'node:fs';
 import { basename, dirname, isAbsolute, resolve } from 'node:path';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { parseArgs } from '#/cli-args.ts';
 import { loadFromConfig } from '#/load-config.ts';
 import { createServer } from '#/server.ts';
 
-interface CliArgs {
-  config?: string;
-  cwd?: string;
-  watch: boolean;
-}
-
-function parseArgs(argv: readonly string[]): CliArgs {
-  const out: CliArgs = { watch: true };
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i];
-    const next = argv[i + 1];
-    if ((arg === '--config' || arg === '-c') && next) {
-      out.config = next;
-      i++;
-    } else if (arg === '--cwd' && next) {
-      out.cwd = next;
-      i++;
-    } else if (arg === '--no-watch') {
-      out.watch = false;
-    } else if (arg === '--help' || arg === '-h') {
-      console.log(`swatchbook-mcp — Model Context Protocol server for swatchbook projects
+const HELP_TEXT = `swatchbook-mcp — Model Context Protocol server for swatchbook projects
 
 Usage:
   swatchbook-mcp --config <path>              Point at a swatchbook.config.{ts,mts,js,mjs}
@@ -57,12 +38,7 @@ Tools exposed:
   get_axis_variance   Classify token variance (constant / single / multi) per axis.
   list_axes           Axes + contexts + themes + presets.
   get_diagnostics     Project diagnostics (optional severity filter).
-  emit_css            Full project stylesheet.`);
-      process.exit(0);
-    }
-  }
-  return out;
-}
+  emit_css            Full project stylesheet.`;
 
 // Watch the project's source files + config path for edits. Debounces
 // filesystem events (editors fire 2-3 per save) into a single reload per
@@ -121,6 +97,10 @@ function setupReload(
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
+  if (args.help) {
+    console.log(HELP_TEXT);
+    process.exit(0);
+  }
   if (!args.config) {
     console.error('swatchbook-mcp: --config <path> is required. Use --help for usage.');
     process.exit(1);
