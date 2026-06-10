@@ -4,8 +4,14 @@ import { canonicalKey } from '#/tuple-key.ts';
 import { isPlainObject } from '#/token-graph/internal-utils.ts';
 
 const CYCLE_SENTINEL: unique symbol = Symbol('cycle');
+// Distinct from CYCLE_SENTINEL: marks a path that resolved to undefined
+// (dangling alias, missing node). Without it, a failed resolution would leave
+// the in-progress CYCLE_SENTINEL in the shared memo, and a later lookup would
+// misread that as a cycle and return the failed node's baseline — making
+// resolveAllAt order-dependent and inconsistent with resolveAt.
+const FAILED: unique symbol = Symbol('failed');
 
-type CycleMemo = Map<string, SwatchbookToken | typeof CYCLE_SENTINEL>;
+type CycleMemo = Map<string, SwatchbookToken | typeof CYCLE_SENTINEL | typeof FAILED>;
 
 function resolveAtInternal(
   graph: TokenGraph,
@@ -34,6 +40,7 @@ function resolveAtInternal(
   const cached = memo.get(cacheKey);
   if (cached !== undefined) {
     if (cached === CYCLE_SENTINEL) return node.baselineValue;
+    if (cached === FAILED) return undefined;
     return cached;
   }
 
@@ -72,7 +79,10 @@ function resolveAtInternal(
     }
   }
 
-  if (result !== undefined) memo.set(cacheKey, result);
+  // Always overwrite the CYCLE_SENTINEL placed above — with the resolved value,
+  // or FAILED when resolution came back undefined — so the sentinel never
+  // outlives this call in the shared memo.
+  memo.set(cacheKey, result ?? FAILED);
   return result;
 }
 
