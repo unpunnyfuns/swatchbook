@@ -30,6 +30,7 @@ import {
   registerTokenSource,
   SwatchbookContext,
   ThemeContext,
+  useTokenSnapshot,
 } from '@unpunnyfuns/swatchbook-blocks';
 import type { ColorFormat, ProjectSnapshot } from '@unpunnyfuns/swatchbook-blocks';
 import {
@@ -264,9 +265,6 @@ function resolveColorFormat(raw: SwatchbookGlobals[typeof COLOR_FORMAT_GLOBAL_KE
 // downstream `ProjectSnapshot` consumers can key memos on the snapshot
 // wrapper without worrying about `resolveAt` churning when Storybook
 // recreates `context.globals`.
-const previewResolveAt = (tuple: Record<string, string>): TokenMap =>
-  resolveAllAt(virtualTokenGraph, tuple);
-
 const themedDecorator: Decorator = (Story, context) => {
   const globals = context.globals as SwatchbookGlobals;
   const parameters = context.parameters as StoryParameters;
@@ -321,20 +319,32 @@ const themedDecorator: Decorator = (Story, context) => {
     wrapperAttrs[dataAttr(cssVarPrefix, name)] = value;
   });
 
+  // Read token data from the live snapshot store (seeded from the virtual
+  // module at init, updated in place on each dev-time HMR token save) rather
+  // than the static virtual-module exports — so blocks rendered inside
+  // stories pick up edited values without a full preview reload. The tuple /
+  // theme still come from the toolbar globals + per-story params above.
+  const live = useTokenSnapshot();
+  const resolveAt = useMemo(
+    () =>
+      (t: Record<string, string>): TokenMap =>
+        resolveAllAt(live.tokenGraph, t),
+    [live.tokenGraph],
+  );
   const snapshot = useMemo<ProjectSnapshot>(
     () => ({
-      axes: virtualAxes,
+      axes: live.axes,
       activeTheme: themeName,
       activeAxes: tuple,
-      cssVarPrefix,
-      diagnostics,
-      css,
-      listing: virtualListing,
-      tokenGraph: virtualTokenGraph,
-      defaultTuple: virtualDefaultTuple,
-      resolveAt: previewResolveAt,
+      cssVarPrefix: live.cssVarPrefix,
+      diagnostics: live.diagnostics,
+      css: live.css,
+      listing: live.listing,
+      tokenGraph: live.tokenGraph,
+      defaultTuple: live.defaultTuple,
+      resolveAt,
     }),
-    [themeName, tuple],
+    [themeName, tuple, live, resolveAt],
   );
 
   return (
