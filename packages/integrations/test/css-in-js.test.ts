@@ -1,4 +1,6 @@
-import { dirname } from 'node:path';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
 import { loadProject } from '@unpunnyfuns/swatchbook-core';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { beforeAll, expect, it } from 'vitest';
@@ -59,4 +61,19 @@ it('output opens with a preview-framed banner pointing at the package', () => {
   expect(js).toMatch(
     /^\/\* Synthesized by @unpunnyfuns\/swatchbook-integrations\/css-in-js for preview\./,
   );
+});
+
+it('derives accessor var() names with Terrazzo naming for camelCase paths', async () => {
+  const cwd = mkdtempSync(join(tmpdir(), 'sb-cssinjs-camel-'));
+  mkdirSync(join(cwd, 'tokens'));
+  writeFileSync(
+    join(cwd, 'tokens', 't.json'),
+    JSON.stringify({ color: { $type: 'color', brandPrimary: { $value: '#3b82f6' } } }),
+  );
+  const p = await loadProject({ tokens: ['tokens/**/*.json'], cssVarPrefix: 't' }, cwd);
+  const js = render(p);
+  // plugin-css kebab-cases camelCase segments; the accessor must reference
+  // the var that actually gets emitted, not a dot-to-dash respelling.
+  expect(js).toContain('"var(--t-color-brand-primary)"');
+  expect(js).not.toContain('var(--t-color-brandPrimary)');
 });

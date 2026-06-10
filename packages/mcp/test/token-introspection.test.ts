@@ -79,7 +79,14 @@ it('get_token: returns the alias chain and resolved value per theme', async () =
 });
 
 it('get_token: returns the cssVar without a prefix segment when cssVarPrefix is empty', async () => {
-  const unprefixed: Project = { ...project, config: { ...project.config, cssVarPrefix: '' } };
+  // Listing cleared along with the prefix: a real load rebuilds the listing
+  // under the new prefix, so keeping the sb-prefixed one would be a state
+  // loadProject can't produce. This pins the listing-less fallback derivation.
+  const unprefixed: Project = {
+    ...project,
+    config: { ...project.config, cssVarPrefix: '' },
+    listing: {},
+  };
   mcp.setProject(unprefixed);
   try {
     const result = await mcp.callJson<GetTokenResult>('get_token', { path: ALIAS_TOKEN });

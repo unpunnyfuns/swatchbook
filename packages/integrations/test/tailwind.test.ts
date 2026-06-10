@@ -1,4 +1,6 @@
-import { dirname } from 'node:path';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
 import { loadProject } from '@unpunnyfuns/swatchbook-core';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { beforeAll, expect, it } from 'vitest';
@@ -80,4 +82,19 @@ it('derived scales are sorted deterministically', () => {
   const spacingMatches = [...css.matchAll(/--spacing-sb-([\w-]+): /g)].map((m) => m[1]!);
   const sorted = spacingMatches.toSorted((a, b) => a.localeCompare(b, 'en'));
   expect(spacingMatches).toEqual(sorted);
+});
+
+it('derives source vars with Terrazzo naming for camelCase paths', async () => {
+  const cwd = mkdtempSync(join(tmpdir(), 'sb-tw-camel-'));
+  mkdirSync(join(cwd, 'tokens'));
+  writeFileSync(
+    join(cwd, 'tokens', 't.json'),
+    JSON.stringify({ color: { $type: 'color', brandPrimary: { $value: '#3b82f6' } } }),
+  );
+  const p = await loadProject({ tokens: ['tokens/**/*.json'], cssVarPrefix: 't' }, cwd);
+  const css = render(p);
+  // plugin-css kebab-cases camelCase segments; the @theme alias must point
+  // at the var that actually gets emitted, not a dot-to-dash respelling.
+  expect(css).toContain('var(--t-color-brand-primary)');
+  expect(css).not.toContain('var(--t-color-brandPrimary)');
 });
