@@ -27,6 +27,7 @@ export interface TokenDetailProps {
 export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
   const { token, cssVar, activeTheme, activeAxes, cssVarPrefix } = useTokenDetailData(path);
   const colorFormat = useColorFormat();
+  const { listing } = useProject();
   const wrapperAttrs = blockWrapperAttrs(cssVarPrefix, activeAxes);
 
   if (!token) {
@@ -39,7 +40,6 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
     );
   }
 
-  const { listing } = useProject();
   const isColor = token.$type === 'color';
   const gamut = isColor ? formatColor(token.$value, colorFormat) : null;
   const value = formatTokenValue(token.$value, token.$type, colorFormat, listing[path]);
