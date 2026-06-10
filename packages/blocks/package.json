@@ -51,6 +51,7 @@
     "build": "tsdown",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "coverage": "vitest run --coverage --coverage.provider=v8 --coverage.reporter=text --coverage.include='src/**' --coverage.all",
     "test:watch": "vitest",
     "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src test",
     "format": "oxfmt -c ../../.oxfmtrc.json src test",
