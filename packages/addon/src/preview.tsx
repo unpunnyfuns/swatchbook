@@ -126,8 +126,20 @@ function composeThemeName(tuple: Readonly<Record<string, string>>): string {
 // joint compounds across multiple) — that's the actual scoping
 // surface the cascade resolves through. Prefix follows `cssVarPrefix`
 // so attr namespace and emitted selectors stay in lockstep.
+//
+// Dedupes against the *actual* last-applied root state (module-level, not
+// per-caller): both the decorator (per-story tuple) and the global axis
+// applier (toolbar tuple) write `<html>` through here. Keying the guard on
+// the real last write lets the global applier — or the decorator's unmount
+// cleanup — correct `<html>` back to the toolbar tuple after a per-story
+// override. Previously the global applier's private guard skipped that,
+// leaving MDX docs pages stuck on the prior story's override.
+let lastRootKey: string | null = null;
 function setRootAxes(tuple: Readonly<Record<string, string>>): void {
   if (typeof document === 'undefined') return;
+  const key = composeThemeName(tuple);
+  if (key === lastRootKey) return;
+  lastRootKey = key;
   const root = document.documentElement;
   for (const axis of virtualAxes) {
     const attr = dataAttr(cssVarPrefix, axis.name);
@@ -275,7 +287,13 @@ const themedDecorator: Decorator = (Story, context) => {
 
   useEffect(() => {
     setRootAxes(tuple);
-  }, [tuple]);
+    return () => {
+      // On unmount — navigating away from this story, e.g. to an MDX docs
+      // page that renders no decorator — revert <html> to the toolbar tuple
+      // so a per-story axis override doesn't persist onto the next page.
+      setRootAxes(resolveTuple(axesGlobal, undefined));
+    };
+  }, [tuple, axesGlobal]);
 
   // Page-level live region announces theme/axis flips to SR users.
   // Initial mount stays silent (no spurious announcement on every story
@@ -409,13 +427,12 @@ function installGlobalAxisApplier(): void {
   // downstream `setRootAxes` + `useSyncExternalStore` consumers
   // re-render at most once per real change instead of three times per
   // tick.
-  let lastApplied = '';
+  // No per-caller dedupe here: setRootAxes self-dedupes against the real
+  // last-applied root state, so the global applier always re-applies the
+  // toolbar tuple and can correct <html> after a story's per-story override
+  // (the three events per tick collapse to one DOM write via that guard).
   const onGlobals = (payload: { globals?: SwatchbookGlobals }): void => {
     if (!payload.globals) return;
-    const tuple = resolveTuple(payload.globals[AXES_GLOBAL_KEY], undefined);
-    const themeKey = composeThemeName(tuple);
-    if (themeKey === lastApplied) return;
-    lastApplied = themeKey;
     apply(payload.globals);
   };
   channel.on('globalsUpdated', onGlobals);

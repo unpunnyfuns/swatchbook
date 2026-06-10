@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
+import { addons } from 'storybook/preview-api';
 import { describe, expect, it } from 'vitest';
 import { AxesContext, ThemeContext } from '@unpunnyfuns/swatchbook-blocks';
 import { useToken } from '#/hooks/use-token.ts';
@@ -75,5 +76,24 @@ describe('useToken', () => {
       wrapper: withPermutation('Light', { mode: 'Light' }),
     });
     expect(result.current.description).toBeUndefined();
+  });
+
+  it('tracks the live toolbar axis tuple over the channel in provider-less (MDX) renders', () => {
+    // No provider/decorator context — the MDX / autodocs case. The active
+    // tuple then comes only from the toolbar globals over the channel; the
+    // hook used to ignore those and stay pinned to the default tuple.
+    const channel = addons.getChannel();
+    const { result } = renderHook(() => useToken('color.accent.bg'));
+    expect(result.current.value).toEqual({ colorSpace: 'srgb', components: [0, 0.4, 1] });
+
+    act(() => {
+      channel.emit('setGlobals', { globals: { swatchbookAxes: { mode: 'Dark' } } });
+    });
+    expect(result.current.value).toEqual({ colorSpace: 'srgb', components: [0, 0.2, 0.8] });
+
+    // Restore the shared channel-globals store so other tests aren't affected.
+    act(() => {
+      channel.emit('setGlobals', { globals: { swatchbookAxes: { mode: 'Light' } } });
+    });
   });
 });
