@@ -1,4 +1,4 @@
-import Color from 'colorjs.io';
+import { parseColor } from '@unpunnyfuns/swatchbook-core/format-color';
 import type { VirtualToken } from '#/types.ts';
 
 export type SortBy = 'path' | 'value' | 'none';
@@ -167,29 +167,12 @@ function safeNumber(v: number | null | undefined): number {
 }
 
 function colorKey(v: unknown): { l: number; c: number; h: number } | null {
-  if (!v || typeof v !== 'object') return null;
+  // parseColor applies the colorjs space-alias map, so wide-gamut spaces
+  // (display-p3, a98-rgb, prophoto-rgb) yield a perceptual key instead of
+  // throwing and sinking the token to the end of a value sort.
+  const color = parseColor(v);
+  if (!color) return null;
   try {
-    const c = v as {
-      colorSpace?: unknown;
-      components?: unknown;
-      channels?: unknown;
-      hex?: unknown;
-    };
-    let source: unknown;
-    if (typeof c.hex === 'string') source = c.hex;
-    else if (typeof c.colorSpace === 'string') {
-      const channels = Array.isArray(c.components)
-        ? c.components
-        : Array.isArray(c.channels)
-          ? c.channels
-          : undefined;
-      if (!channels) return null;
-      source = { space: c.colorSpace, coords: channels };
-    } else return null;
-    // Color.js's constructor signature is a string or PlainColorObject —
-    // we've already narrowed `source` to one of those shapes above, but
-    // the union ends up broader than Color.js's typed surface.
-    const color = new Color(source as string);
     const [l, chroma, h] = color.to('oklch').coords;
     return { l: safeNumber(l), c: safeNumber(chroma), h: safeNumber(h) };
   } catch {

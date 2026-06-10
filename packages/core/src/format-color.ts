@@ -51,6 +51,22 @@ export function formatColor(
   return formatOklch(color, alpha);
 }
 
+/**
+ * Construct a colorjs.io `Color` from a normalized DTCG color payload,
+ * applying the space-alias map so wide-gamut spaces (`display-p3`,
+ * `a98-rgb`, `prophoto-rgb`) resolve. Returns null for unrecognized input.
+ *
+ * The shared primitive for consumers that need the color object itself —
+ * perceptual sorting (oklch coords) or a gamut-correct CSS string — rather
+ * than a pre-rendered display string. Replaces the hand-rolled, alias-map-
+ * less colorjs construction that previously lived in each consumer.
+ */
+export function parseColor(value: unknown): Color | null {
+  const normalized = coerce(value);
+  if (!normalized) return null;
+  return toColor(normalized);
+}
+
 // Structural read of Terrazzo's normalized color shape (or a legacy
 // `channels`/`hex` payload) without a hard dep on @terrazzo/token-tools.
 function coerce(value: unknown): NormalizedColor | null {
