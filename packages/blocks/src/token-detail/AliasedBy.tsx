@@ -59,32 +59,36 @@ function AliasedByRow({ node, depth }: { node: AliasedByNode; depth: number }): 
   );
 }
 
-function buildAliasedByTree(
+export function buildAliasedByTree(
   rootPath: string,
   resolved: Record<string, DetailToken>,
 ): AliasedByNode[] {
   const root = resolved[rootPath];
   const direct = root?.aliasedBy;
   if (!direct || direct.length === 0) return [];
-  const visited = new Set<string>([rootPath]);
-  return sortPaths(direct).map((p) => walk(p, resolved, visited, 1));
+  return sortPaths(direct).map((p) => walk(p, resolved, new Set<string>([rootPath]), 1));
 }
 
+// `ancestors` is the current root-to-here path only (copied per descent),
+// not a tree-wide visited set: that guards genuine cycles without hiding a
+// node that legitimately appears under two sibling branches of a diamond
+// alias graph (a shared set let the first branch claim the node and
+// truncate every later one).
 function walk(
   path: string,
   resolved: Record<string, DetailToken>,
-  visited: Set<string>,
+  ancestors: ReadonlySet<string>,
   depth: number,
 ): AliasedByNode {
-  if (visited.has(path)) return { path, children: [] };
-  visited.add(path);
+  if (ancestors.has(path)) return { path, children: [] };
   const token = resolved[path];
   const parents = token?.aliasedBy;
   if (!parents || parents.length === 0) return { path, children: [] };
   if (depth >= ALIASED_BY_DEPTH_CAP) {
     return { path, children: [], truncated: true };
   }
-  const children = sortPaths(parents).map((p) => walk(p, resolved, visited, depth + 1));
+  const childAncestors = new Set(ancestors).add(path);
+  const children = sortPaths(parents).map((p) => walk(p, resolved, childAncestors, depth + 1));
   return { path, children };
 }
 

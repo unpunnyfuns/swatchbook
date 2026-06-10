@@ -220,13 +220,17 @@ function displayLabelFor(axis: SwitcherAxis): string {
   return axis.name;
 }
 
-function tuplesEqual(
+export function tuplesEqual(
   a: Readonly<Record<string, string>>,
   b: Readonly<Record<string, string>>,
   axes: readonly SwitcherAxis[],
 ): boolean {
+  // Fall back to the axis default on both sides: `activeTuple` is sparse
+  // (the axis pills apply `?? axis.default` for omitted axes), while a preset
+  // tuple is fully defaulted — without this, an active preset whose omitted
+  // axes sit at default reads as inactive.
   for (const axis of axes) {
-    if (a[axis.name] !== b[axis.name]) return false;
+    if ((a[axis.name] ?? axis.default) !== (b[axis.name] ?? axis.default)) return false;
   }
   return true;
 }

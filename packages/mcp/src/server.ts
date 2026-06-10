@@ -6,6 +6,7 @@ import { fuzzyFilter, fuzzyMatches } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import { enumerateThemes, tupleToName } from '@unpunnyfuns/swatchbook-core/themes';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import pkg from '../package.json';
 import { computeContrast } from '#/contrast.ts';
 import { formatColorEveryWay } from '#/format-color.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
@@ -32,7 +33,7 @@ export function createServer(initial: Project): McpServer & {
   const server = new McpServer(
     {
       name: '@unpunnyfuns/swatchbook-mcp',
-      version: project.config.cssVarPrefix ? `project:${project.config.cssVarPrefix}` : 'project',
+      version: pkg.version,
     },
     {
       instructions:

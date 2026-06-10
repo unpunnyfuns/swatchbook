@@ -74,10 +74,14 @@ function renderTheme(project: Project): string {
   const tree = buildTree(paths, (path) => `var(${cssVarName(path, project)})`);
 
   const groupNames = Object.keys(tree).toSorted();
+  // Distinct group names can sanitize to the same identifier (e.g. `a-b` and
+  // `a.b` both → `a_b`), which would emit duplicate top-level exports — a
+  // SyntaxError in the virtual module. Suffix collisions to keep each unique.
+  const idents = uniqueIdents(groupNames);
   const groupExports = groupNames.map(
-    (name) => `export const ${safeIdent(name)} = ${renderNode(tree[name]!, 1)};`,
+    (name) => `export const ${idents.get(name)!} = ${renderNode(tree[name]!, 1)};`,
   );
-  const aggregate = `export const theme = { ${groupNames.map(safeIdent).join(', ')} };`;
+  const aggregate = `export const theme = { ${groupNames.map((n) => idents.get(n)!).join(', ')} };`;
 
   return [
     '/* Synthesized by @unpunnyfuns/swatchbook-integrations/css-in-js for preview.',
@@ -162,4 +166,20 @@ function safeKey(key: string): string {
 // Top-level exports must be valid JS identifiers.
 function safeIdent(key: string): string {
   return /^[A-Za-z_$][\w$]*$/.test(key) ? key : `_${key.replaceAll(/[^\w$]/g, '_')}`;
+}
+
+// Map each name to a unique JS identifier, suffixing on collision so two
+// names that sanitize to the same ident don't produce duplicate exports.
+export function uniqueIdents(names: readonly string[]): Map<string, string> {
+  const used = new Set<string>();
+  const out = new Map<string, string>();
+  for (const name of names) {
+    const base = safeIdent(name);
+    let ident = base;
+    let n = 2;
+    while (used.has(ident)) ident = `${base}_${n++}`;
+    used.add(ident);
+    out.set(name, ident);
+  }
+  return out;
 }

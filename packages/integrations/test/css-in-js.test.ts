@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { loadProject } from '@unpunnyfuns/swatchbook-core';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { beforeAll, expect, it } from 'vitest';
-import cssInJsIntegration, { buildTree } from '#/css-in-js.ts';
+import cssInJsIntegration, { buildTree, uniqueIdents } from '#/css-in-js.ts';
 import type { Project } from '@unpunnyfuns/swatchbook-core';
 
 let project: Project;
@@ -95,4 +95,14 @@ it('buildTree nests normal branch paths', () => {
 it('buildTree does not pollute Object.prototype via a __proto__ path segment', () => {
   buildTree(['__proto__.polluted', 'color.brand'], (p) => `<${p}>`);
   expect(({} as Record<string, unknown>)['polluted']).toBeUndefined();
+});
+
+it('uniqueIdents suffixes names that sanitize to the same identifier', () => {
+  // 'a-b' and 'a.b' both sanitize to '_a_b' — they must not collide into
+  // duplicate top-level exports.
+  const m = uniqueIdents(['a-b', 'a.b', 'plain']);
+  expect(m.get('a-b')).toBe('_a_b');
+  expect(m.get('a.b')).toBe('_a_b_2');
+  expect(m.get('plain')).toBe('plain');
+  expect(new Set(m.values()).size).toBe(3);
 });
