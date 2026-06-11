@@ -165,3 +165,79 @@ jobs:
           path: apps/storybook/storybook-static
           if-no-files-found: ignore
           retention-days: 7
+
+  storybook-compat:
+    # Guard the *floor* of the supported Storybook range. The `build` job
+    # above exercises the lockfile's latest; this re-pins the lockstep
+    # `@storybook/*` core packages to the lowest supported 10.x minor and
+    # re-runs the version-sensitive surface (addon + blocks browser tests,
+    # the reference Storybook's interaction tests, a full Storybook build)
+    # so a consumer trailing a few minors isn't silently broken. The floor
+    # matches the `^10.1.0` peer range on `addon` / `blocks` — 10.1 is the
+    # lowest where our own Storybook devDeps agree (@chromatic-com/storybook
+    # needs >=10.1). When Storybook 11 ships, add its prerelease to the
+    # matrix here for early warning.
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository }}/playwright:v1.59.1-noble
+      options: --ipc=host
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      HOME: /root
+    permissions:
+      contents: read
+      actions: write
+    strategy:
+      fail-fast: false
+      matrix:
+        # Override spec (not a fixed patch): `~10.1.0` tracks the latest
+        # 10.1.x so the floor guard follows patch releases of that minor.
+        storybook: ['~10.1.0']
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Trust workspace inside container
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Pin core Storybook packages to ${{ matrix.storybook }}
+        # Append exact overrides so every lockstep `@storybook/*` core
+        # package resolves to the matrix spec together. `overrides:` is the
+        # final block in pnpm-workspace.yaml, so appending 2-space-indented
+        # entries extends that map.
+        shell: bash
+        run: |
+          {
+            echo "  storybook: '${{ matrix.storybook }}'"
+            echo "  '@storybook/react-vite': '${{ matrix.storybook }}'"
+            echo "  '@storybook/addon-a11y': '${{ matrix.storybook }}'"
+            echo "  '@storybook/addon-docs': '${{ matrix.storybook }}'"
+            echo "  '@storybook/addon-vitest': '${{ matrix.storybook }}'"
+          } >> pnpm-workspace.yaml
+
+      - run: pnpm install --no-frozen-lockfile
+
+      - name: Bridge image's Playwright binaries to vitest-browser default path
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.cache/ms-playwright"
+          cp -RL --update=none /ms-playwright/. "$HOME/.cache/ms-playwright/" || true
+
+      - name: Build + version-sensitive tests against the floor
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm turbo run build
+          pnpm turbo run test --filter='@unpunnyfuns/swatchbook-addon' --filter='@unpunnyfuns/swatchbook-blocks'
+          pnpm turbo run test:storybook
+          pnpm turbo run build:storybook
