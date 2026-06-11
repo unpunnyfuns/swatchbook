@@ -214,15 +214,19 @@ jobs:
         # Append exact overrides so every lockstep `@storybook/*` core
         # package resolves to the matrix spec together. `overrides:` is the
         # final block in pnpm-workspace.yaml, so appending 2-space-indented
-        # entries extends that map.
+        # entries extends that map. The matrix spec is passed via `env`
+        # rather than inlined as `${{ }}` in the script — GitHub's
+        # recommended pattern for referencing contexts in `run:` blocks.
+        env:
+          SB_VERSION: ${{ matrix.storybook }}
         shell: bash
         run: |
           {
-            echo "  storybook: '${{ matrix.storybook }}'"
-            echo "  '@storybook/react-vite': '${{ matrix.storybook }}'"
-            echo "  '@storybook/addon-a11y': '${{ matrix.storybook }}'"
-            echo "  '@storybook/addon-docs': '${{ matrix.storybook }}'"
-            echo "  '@storybook/addon-vitest': '${{ matrix.storybook }}'"
+            echo "  storybook: '$SB_VERSION'"
+            echo "  '@storybook/react-vite': '$SB_VERSION'"
+            echo "  '@storybook/addon-a11y': '$SB_VERSION'"
+            echo "  '@storybook/addon-docs': '$SB_VERSION'"
+            echo "  '@storybook/addon-vitest': '$SB_VERSION'"
           } >> pnpm-workspace.yaml
 
       - run: pnpm install --no-frozen-lockfile
