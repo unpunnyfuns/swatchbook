@@ -106,3 +106,8 @@ it('uniqueIdents suffixes names that sanitize to the same identifier', () => {
   expect(m.get('plain')).toBe('plain');
   expect(new Set(m.values()).size).toBe(3);
 });
+
+it('honors a custom virtualId', () => {
+  const integration = cssInJsIntegration({ virtualId: 'virtual:custom/theme' });
+  expect(integration.virtualModule?.virtualId).toBe('virtual:custom/theme');
+});

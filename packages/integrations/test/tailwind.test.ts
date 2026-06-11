@@ -117,3 +117,18 @@ it('skips camelCase font-size dimensions instead of mis-bucketing them as spacin
   expect(css).toContain('--spacing-t-md');
   expect(css).not.toContain('fontSize');
 });
+
+it('honors a custom virtualId', () => {
+  const integration = tailwindIntegration({ virtualId: 'virtual:custom/tw.css' });
+  expect(integration.virtualModule?.virtualId).toBe('virtual:custom/tw.css');
+});
+
+it('marks the @theme stylesheet for auto-injection into the preview', () => {
+  expect(tailwindIntegration().virtualModule?.autoInject).toBe(true);
+});
+
+it('emits a font scale from fontFamily tokens', () => {
+  const css = render(project);
+  expect(css).toContain('/* font */');
+  expect(css).toMatch(/--font-sb-[\w-]+: var\(--sb-/);
+});
