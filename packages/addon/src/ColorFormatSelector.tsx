@@ -24,7 +24,9 @@ export type { ColorFormat };
 // from blocks: the manager bundle can't pull `@unpunnyfuns/swatchbook-blocks`
 // (its barrel has a top-level `import 'virtual:swatchbook/tokens'` the
 // manager has no resolver for), and core's leaf carries no colorjs weight.
-const COLOR_FORMAT_OPTIONS: readonly { id: ColorFormat; label: string }[] = [
+// Exported for the parity test that guards this hand-listed label set
+// against drifting from core's canonical `COLOR_FORMATS`.
+export const COLOR_FORMAT_OPTIONS: readonly { id: ColorFormat; label: string }[] = [
   { id: 'hex', label: 'Hex' },
   { id: 'rgb', label: 'RGB' },
   { id: 'hsl', label: 'HSL' },
