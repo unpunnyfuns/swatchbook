@@ -10,6 +10,18 @@ import { useEffect, useMemo } from 'react';
 import type { VirtualTokenGraph, VirtualTokenListingShape } from '#/contexts.ts';
 
 type VirtualVarianceByPathShape = Record<string, AxisVarianceResult>;
+
+// Pre-compute variance for every path in the graph. `getVariance` is cheap
+// (O(paths × axes)); callers wrap this in `useMemo` keyed on the graph so it
+// recomputes only on an HMR refresh. Shared by the provider and fallback paths.
+function computeVarianceByPath(graph: VirtualTokenGraph | undefined): VirtualVarianceByPathShape {
+  if (!graph) return {};
+  const out: VirtualVarianceByPathShape = {};
+  for (const path of listPaths(graph)) {
+    out[path] = getVariance(graph, path);
+  }
+  return out;
+}
 import { useActiveAxes, useActiveTheme, useOptionalSwatchbookData } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import type { ColorFormat, FormatColorResult } from '#/format-color.ts';
@@ -126,17 +138,7 @@ export function useProject(): ProjectData {
     // it returns) referentially stable across renders.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokenGraph, activeTheme]);
-  // Pre-compute variance for every path in the graph. `getVariance` is
-  // cheap (O(paths × axes)); wrapping in `useMemo` keyed on `tokenGraph`
-  // ensures it only recomputes when the graph itself changes.
-  const derivedVarianceByPath = useMemo<VirtualVarianceByPathShape>(() => {
-    if (!tokenGraph) return {};
-    const out: Record<string, AxisVarianceResult> = {};
-    for (const path of listPaths(tokenGraph)) {
-      out[path] = getVariance(tokenGraph, path);
-    }
-    return out;
-  }, [tokenGraph]);
+  const derivedVarianceByPath = useMemo(() => computeVarianceByPath(tokenGraph), [tokenGraph]);
   // Memoize the returned ProjectData against the same stable inner
   // fields — without this, blocks `useMemo([project, …])` calls
   // invalidate every render (the function returns a fresh object
@@ -207,17 +209,10 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
   // module-level virtual-module export — changes only on HMR refresh.
   const resolveAt = useMemo(() => makeResolveAt(tokens.tokenGraph), [tokens.tokenGraph]);
 
-  // Pre-compute variance for every path in the graph, matching the
-  // provider path's approach for consistent O(1) block lookups.
-  const fallbackVarianceByPath = useMemo<VirtualVarianceByPathShape>(() => {
-    const graph = tokens.tokenGraph;
-    if (!graph) return {};
-    const out: Record<string, AxisVarianceResult> = {};
-    for (const path of listPaths(graph)) {
-      out[path] = getVariance(graph, path);
-    }
-    return out;
-  }, [tokens.tokenGraph]);
+  const fallbackVarianceByPath = useMemo(
+    () => computeVarianceByPath(tokens.tokenGraph),
+    [tokens.tokenGraph],
+  );
 
   // Memoize the returned ProjectData against the stable inner fields
   // for the same reason the provider path does — fresh object identity
