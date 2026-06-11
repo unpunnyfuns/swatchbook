@@ -15,15 +15,6 @@ import { resolveAllAt } from '#/token-graph/walk.ts';
 import { permutationID } from '#/types.ts';
 import type { Axis, Config, Diagnostic, Permutation, Project, TokenMap } from '#/types.ts';
 
-/**
- * Load a swatchbook project from a config. Read tokens at any axis
- * tuple via `project.resolveAt(tuple)`; read the default-tuple
- * snapshot directly via `project.defaultTokens`.
- *
- * The `cwd` defaults to `process.cwd()`. All relative paths in
- * `config` (token globs, `resolver`, layered axis overlay globs)
- * resolve against this directory.
- */
 /** Default `cssVarPrefix` applied when the config omits one. Namespaces
  * emitted vars (`--swatch-…`) and data attributes (`data-swatch-…`) so
  * swatchbook output doesn't collide with whatever else the consumer has
@@ -51,6 +42,15 @@ function logPhase(label: string, startedAt: number): void {
   console.log(`[swatchbook:load] ${label}: ${ms.toFixed(0)}ms`);
 }
 
+/**
+ * Load a swatchbook project from a config. Read tokens at any axis
+ * tuple via `project.resolveAt(tuple)`; read the default-tuple
+ * snapshot directly via `project.defaultTokens`.
+ *
+ * The `cwd` defaults to `process.cwd()`. All relative paths in
+ * `config` (token globs, `resolver`, layered axis overlay globs)
+ * resolve against this directory.
+ */
 export async function loadProject(config: Config, cwd: string = process.cwd()): Promise<Project> {
   const loadStart = performance.now();
   const logger = new BufferedLogger({ level: 'warn' });

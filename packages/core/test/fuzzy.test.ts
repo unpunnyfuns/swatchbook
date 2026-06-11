@@ -48,6 +48,20 @@ it('respects the limit option', () => {
   expect(hits).toHaveLength(2);
 });
 
+it('requires authored term order when outOfOrder is false', () => {
+  // `surface` precedes `default` in the path: in-order matches, reversed does not.
+  expect(fuzzyFilter(paths, 'surface default', (p) => p, { outOfOrder: false })).toContain(
+    'color.surface.default',
+  );
+  expect(fuzzyFilter(paths, 'default surface', (p) => p, { outOfOrder: false })).not.toContain(
+    'color.surface.default',
+  );
+});
+
+it('returns an empty list when the item set is empty', () => {
+  expect(fuzzyFilter([], 'color', (p) => p)).toEqual([]);
+});
+
 it('fuzzyMatches mirrors fuzzyFilter for single haystacks', () => {
   expect(fuzzyMatches('color.surface.default', 'surf def')).toBe(true);
   expect(fuzzyMatches('color.surface.default', 'zzzz')).toBe(false);
