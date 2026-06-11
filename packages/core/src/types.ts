@@ -90,10 +90,10 @@ export type AxisVarianceResult =
     };
 
 /**
- * Compute the resolved `TokenMap` for any tuple of axis selections
- * without touching the resolver. Pure function over `cells +
- * jointOverrides + axes + defaultTuple`; accepts partial tuples
- * (missing axes fall back to their defaults).
+ * Compose the resolved `TokenMap` for any tuple of axis selections.
+ * Graph-backed: walks `Project.tokenGraph` rather than re-running the
+ * resolver. Accepts partial tuples (missing axes fall back to their
+ * defaults) and memoizes on the canonical tuple key.
  */
 export type ResolveAt = (tuple: Record<string, string>) => TokenMap;
 

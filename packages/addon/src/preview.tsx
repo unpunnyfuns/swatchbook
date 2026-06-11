@@ -46,6 +46,7 @@ import {
 import type { InitPayload } from '#/channel-types.ts';
 import type { StoryParameters, SwatchbookGlobals } from '#/globals.ts';
 import { useThemeAnnouncement } from '#/hooks/use-theme-announcement.ts';
+import { resolveTuple } from '#/tuple-resolve.ts';
 
 // Seed blocks' token store with the build-time snapshot from the addon's
 // virtual module. Blocks no longer import `virtual:swatchbook/tokens`
@@ -190,69 +191,6 @@ function broadcastInit(): void {
   );
 }
 
-// Axis-default tuple, used as the baseline before overrides.
-function defaultTuple(): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const axis of virtualAxes) out[axis.name] = axis.default;
-  return out;
-}
-
-// Reverse-engineer a tuple from a `Light · Brand A · Normal`-shape
-// theme name. Splits on ` · ` and zips with `virtualAxes` in declared
-// order — matches `composeThemeName`'s production direction so a
-// round-trip is lossless. Returns `undefined` when the segment count
-// doesn't match the axis count.
-function tupleForName(name: string): Record<string, string> | undefined {
-  if (!name) return undefined;
-  const parts = name.split(' · ');
-  if (parts.length !== virtualAxes.length) return undefined;
-  const out: Record<string, string> = {};
-  for (let i = 0; i < virtualAxes.length; i++) {
-    const axis = virtualAxes[i] as (typeof virtualAxes)[number];
-    const value = parts[i];
-    if (value === undefined) return undefined;
-    out[axis.name] = value;
-  }
-  return out;
-}
-
-// Merge a partial tuple onto the axis defaults, dropping keys for axes that
-// don't exist and silently falling back to the default for contexts that
-// aren't listed on the axis.
-function normalizeTuple(partial: Readonly<Record<string, string>>): Record<string, string> {
-  const out = defaultTuple();
-  for (const axis of virtualAxes) {
-    const candidate = partial[axis.name];
-    if (candidate !== undefined && axis.contexts.includes(candidate)) {
-      out[axis.name] = candidate;
-    }
-  }
-  return out;
-}
-
-// Resolve the active tuple from all input channels, in priority order:
-//   1. `parameters.swatchbook.axes` — per-story tuple.
-//   2. `parameters.swatchbook.themeName` — per-story composed theme name.
-//   3. `globals.swatchbookAxes` — toolbar-set tuple.
-//   4. virtual module default.
-function resolveTuple(
-  axesGlobal: SwatchbookGlobals[typeof AXES_GLOBAL_KEY],
-  paramSwatchbook: StoryParameters['swatchbook'],
-): Record<string, string> {
-  const paramAxes = paramSwatchbook?.axes;
-  if (paramAxes) {
-    return normalizeTuple(paramAxes);
-  }
-  if (paramSwatchbook?.themeName) {
-    const hit = tupleForName(paramSwatchbook.themeName);
-    if (hit) return normalizeTuple(hit);
-  }
-  if (axesGlobal && typeof axesGlobal === 'object') {
-    return normalizeTuple(axesGlobal as Record<string, string>);
-  }
-  return defaultTuple();
-}
-
 function resolveColorFormat(raw: SwatchbookGlobals[typeof COLOR_FORMAT_GLOBAL_KEY]): ColorFormat {
   if (typeof raw === 'string' && (COLOR_FORMATS as readonly string[]).includes(raw)) {
     return raw as ColorFormat;
@@ -273,7 +211,7 @@ const themedDecorator: Decorator = (Story, context) => {
   const colorFormatGlobal = globals[COLOR_FORMAT_GLOBAL_KEY];
   const paramSwatchbook = parameters.swatchbook;
   const tuple = useMemo(
-    () => resolveTuple(axesGlobal, paramSwatchbook),
+    () => resolveTuple(axesGlobal, paramSwatchbook, virtualAxes),
     [axesGlobal, paramSwatchbook],
   );
   const colorFormat = useMemo(() => resolveColorFormat(colorFormatGlobal), [colorFormatGlobal]);
@@ -290,7 +228,7 @@ const themedDecorator: Decorator = (Story, context) => {
       // On unmount — navigating away from this story, e.g. to an MDX docs
       // page that renders no decorator — revert <html> to the toolbar tuple
       // so a per-story axis override doesn't persist onto the next page.
-      setRootAxes(resolveTuple(axesGlobal, undefined));
+      setRootAxes(resolveTuple(axesGlobal, undefined, virtualAxes));
     };
   }, [tuple, axesGlobal]);
 
@@ -415,7 +353,7 @@ function installGlobalAxisApplier(): void {
   channel.on(INIT_REQUEST_EVENT, broadcastInit);
   const apply = (globals: SwatchbookGlobals): void => {
     ensureStylesheet(css, cssVarPrefix);
-    const tuple = resolveTuple(globals[AXES_GLOBAL_KEY], undefined);
+    const tuple = resolveTuple(globals[AXES_GLOBAL_KEY], undefined, virtualAxes);
     setRootAxes(tuple);
   };
   // Storybook fires `globalsUpdated`, `setGlobals`, and `updateGlobals`
