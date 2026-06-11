@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { cssVarAsNumber } from '#/internal/css-var-style.ts';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { useTokenDetailData } from '#/token-detail/internal.ts';
+import { transitionDurationMs } from '#/token-detail/transition-duration.ts';
 
 export interface CompositePreviewProps {
   /** Full dot-path of the token to preview. */
@@ -65,7 +66,9 @@ export function CompositePreviewContent({
     );
   }
   if (type === 'transition') {
-    return <TransitionSample transition={cssVar} />;
+    return (
+      <TransitionSample transition={cssVar} durationMs={transitionDurationMs(type, rawValue)} />
+    );
   }
   if (type === 'dimension') {
     return (
@@ -75,7 +78,12 @@ export function CompositePreviewContent({
     );
   }
   if (type === 'duration') {
-    return <TransitionSample transition={`left ${cssVar} ease`} />;
+    return (
+      <TransitionSample
+        transition={`left ${cssVar} ease`}
+        durationMs={transitionDurationMs(type, rawValue)}
+      />
+    );
   }
   if (type === 'fontFamily') {
     return (
@@ -95,7 +103,12 @@ export function CompositePreviewContent({
     );
   }
   if (type === 'cubicBezier') {
-    return <TransitionSample transition={`left 800ms ${cssVar}`} />;
+    return (
+      <TransitionSample
+        transition={`left 800ms ${cssVar}`}
+        durationMs={transitionDurationMs(type, rawValue)}
+      />
+    );
   }
   if (type === 'gradient') {
     return (
@@ -187,21 +200,36 @@ function asDashLengths(raw: unknown): number[] {
   return out;
 }
 
-function TransitionSample({ transition }: { transition: string }): ReactElement {
+// Toggle cadence when the token carries no readable duration.
+const DEFAULT_LOOP_MS = 1200;
+// Rest at each end so the eye registers the position before the ball returns;
+// added on top of the move duration so each leg fully completes first.
+const MOTION_HOLD_MS = 400;
+
+function TransitionSample({
+  transition,
+  durationMs,
+}: {
+  transition: string;
+  durationMs?: number | undefined;
+}): ReactElement {
   const reduced = usePrefersReducedMotion();
   const [phase, setPhase] = useState<0 | 1>(0);
 
   useEffect(() => {
     if (reduced) return;
+    // Match the loop to the token's real duration; a long token otherwise
+    // reversed mid-move under the old fixed 1200ms interval.
+    const loopMs = durationMs === undefined ? DEFAULT_LOOP_MS : durationMs + MOTION_HOLD_MS;
     const id = requestAnimationFrame(() => setPhase(1));
     const loop = window.setInterval(() => {
       setPhase((p) => (p === 0 ? 1 : 0));
-    }, 1200);
+    }, loopMs);
     return () => {
       cancelAnimationFrame(id);
       window.clearInterval(loop);
     };
-  }, [reduced]);
+  }, [reduced, durationMs]);
 
   if (reduced) {
     return (
