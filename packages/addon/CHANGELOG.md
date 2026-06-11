@@ -1,5 +1,18 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.62.1
+
+### Patch Changes
+
+- 5b89075ba2a5f008e34d56534f23e844525804ac: Announce a return to the mount-time theme in the live region (it previously went silent on the way back)
+- d34f06cf17c47381ff17be04d7e30489d0bcf4d6: Widen the Storybook peer range to ^10.1.0 (support all of Storybook 10.x), validated by a CI floor guard
+- Updated dependencies [1e2edb4]
+- Updated dependencies [e864728]
+- Updated dependencies [d34f06c]
+  - @unpunnyfuns/swatchbook-blocks@0.62.1
+  - @unpunnyfuns/swatchbook-core@0.62.1
+  - @unpunnyfuns/swatchbook-switcher@0.62.1
+
 ## 0.62.0
 
 ### Minor Changes
