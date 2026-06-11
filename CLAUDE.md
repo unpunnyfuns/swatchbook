@@ -10,7 +10,7 @@ When a proposal frames swatchbook as owning transform logic, custom naming schem
 
 ## Current state
 
-`v0.60.8 shipped`. Six published packages in a fixed-version Changesets group — `core`, `addon`, `blocks`, `switcher`, `integrations`, `mcp` — plus private workspaces (`tokens`, `apps/docs`, `apps/storybook`). Documentation site at https://unpunnyfuns.github.io/swatchbook/ with Docusaurus 3.10 + Faster (Rspack); pre-1.0 the site keeps **one stable snapshot under `apps/docs/versioned_docs/version-<minor>/` plus current `docs/` at `/next/`** — every release wipes the previous snapshot rather than archiving it, because per-minor breaking changes make older snapshots actively misleading. Pre-1.0; routine breaking changes take a **minor** bump.
+`v0.62.0 shipped`. Six published packages in a fixed-version Changesets group — `core`, `addon`, `blocks`, `switcher`, `integrations`, `mcp` — plus private workspaces (`tokens`, `apps/docs`, `apps/storybook`). Documentation site at https://unpunnyfuns.github.io/swatchbook/ with Docusaurus 3.10 + Faster (Rspack); pre-1.0 the site keeps **one stable snapshot under `apps/docs/versioned_docs/version-<minor>/` plus current `docs/` at `/next/`** — every release wipes the previous snapshot rather than archiving it, because per-minor breaking changes make older snapshots actively misleading. Pre-1.0; routine breaking changes take a **minor** bump.
 
 Architectural pillars settled this era:
 
@@ -30,6 +30,7 @@ Update this section when state genuinely shifts. See GitHub milestones for per-i
 ## Project conventions
 
 - **Latest deps policy:** always pin the latest stable major/minor of every third-party dep unless a concrete blocker is documented. `npm view <pkg> version` when adding. Eager upgrades; we'd rather hit new-version friction early than accumulate a drift debt.
+- **Storybook version support:** dev deps track latest (per the deps policy above); the `addon` / `blocks` **peer** range declares the supported window, currently `^10.1.0` (all of Storybook 10.x). One swatchbook major per Storybook major: don't multiplex majors on `main`; when Storybook 11 ships, cut a swatchbook major that moves the peer to `^11` and drops 10. The floor is guarded by the `storybook-compat` CI job (re-pins the lockstep `@storybook/*` to the floor and re-runs the version-sensitive surface); the `build` job covers latest. Keep `storybook/internal/*` imports minimal and centralized so the next-major break surface stays small.
 - **ESM only.** Every package is `"type": "module"`. No CJS, no dual-format outputs, no `require()` fallbacks. tsdown emits ESM only (`--format esm`).
 - **Bundler:** `tsdown` (rolldown-powered). Never add `tsup` — deprecated.
 - **Source layout:** code under `./src/`. Package root holds config only. Build output to `./dist/`.
