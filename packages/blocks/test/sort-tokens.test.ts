@@ -96,4 +96,26 @@ describe('sortTokens', () => {
     const out = sortTokens(input, { by: 'value' });
     expect(out.map(([p]) => p)).toEqual(['c.black', 'c.mid', 'c.white']);
   });
+
+  it('sorts durations numerically, converting seconds to milliseconds', () => {
+    const input = [
+      entry('d.slow', 'duration', { value: 1, unit: 's' }),
+      entry('d.fast', 'duration', { value: 150, unit: 'ms' }),
+      entry('d.med', 'duration', { value: 500, unit: 'ms' }),
+    ];
+    const out = sortTokens(input, { by: 'value' });
+    expect(out.map(([p]) => p)).toEqual(['d.fast', 'd.med', 'd.slow']);
+  });
+
+  it('clusters a mixed-$type value sort by type, then within each type', () => {
+    // Cross-$type comparison falls back to type-alpha (color < dimension);
+    // within a type the normal value order applies.
+    const input = [
+      entry('z.dim', 'dimension', { value: 4, unit: 'px' }),
+      entry('a.col', 'color', { hex: '#ffffff' }),
+      entry('y.dim', 'dimension', { value: 2, unit: 'px' }),
+    ];
+    const out = sortTokens(input, { by: 'value' });
+    expect(out.map(([p]) => p)).toEqual(['a.col', 'y.dim', 'z.dim']);
+  });
 });
