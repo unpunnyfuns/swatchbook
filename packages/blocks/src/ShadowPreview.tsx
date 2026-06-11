@@ -3,8 +3,9 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './ShadowPreview.css';
 import { useColorFormat } from '#/contexts.ts';
-import { formatColor } from '#/format-color.ts';
 import type { ColorFormat } from '#/format-color.ts';
+import { formatDimension, formatSubColor } from '#/internal/composite-sample-format.ts';
+import type { ShadowLayer } from '#/internal/composite-types.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
@@ -30,37 +31,10 @@ export interface ShadowPreviewProps {
   sortDir?: SortDir;
 }
 
-interface ShadowLayer {
-  color?: unknown;
-  offsetX?: unknown;
-  offsetY?: unknown;
-  blur?: unknown;
-  spread?: unknown;
-  inset?: unknown;
-}
-
 interface Row {
   path: string;
   cssVar: string;
   layers: ShadowLayer[];
-}
-
-function formatDimension(raw: unknown): string {
-  if (raw == null) return '—';
-  if (typeof raw === 'number') return String(raw);
-  if (typeof raw === 'string') return raw;
-  if (typeof raw === 'object') {
-    const v = raw as { value?: unknown; unit?: unknown };
-    if (typeof v.value === 'number' && typeof v.unit === 'string') {
-      return `${v.value}${v.unit}`;
-    }
-  }
-  return JSON.stringify(raw);
-}
-
-function formatSubColor(raw: unknown, format: ColorFormat): string {
-  if (raw == null) return '—';
-  return formatColor(raw, format).value;
 }
 
 function asLayers(raw: unknown): ShadowLayer[] {

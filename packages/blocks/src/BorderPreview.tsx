@@ -3,8 +3,8 @@ import { useMemo } from 'react';
 import './BorderPreview.css';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
-import { formatColor } from '#/format-color.ts';
-import type { ColorFormat } from '#/format-color.ts';
+import { formatDimension, formatSubColor } from '#/internal/composite-sample-format.ts';
+import type { BorderValue } from '#/internal/composite-types.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
@@ -29,34 +29,10 @@ export interface BorderPreviewProps {
   sortDir?: SortDir;
 }
 
-interface BorderValue {
-  color?: unknown;
-  width?: unknown;
-  style?: unknown;
-}
-
 interface Row {
   path: string;
   cssVar: string;
   value: BorderValue;
-}
-
-function formatDimension(raw: unknown): string {
-  if (raw == null) return '—';
-  if (typeof raw === 'number') return String(raw);
-  if (typeof raw === 'string') return raw;
-  if (typeof raw === 'object') {
-    const v = raw as { value?: unknown; unit?: unknown };
-    if (typeof v.value === 'number' && typeof v.unit === 'string') {
-      return `${v.value}${v.unit}`;
-    }
-  }
-  return JSON.stringify(raw);
-}
-
-function formatSubColor(raw: unknown, format: ColorFormat): string {
-  if (raw == null) return '—';
-  return formatColor(raw, format).value;
 }
 
 export function BorderPreview({
