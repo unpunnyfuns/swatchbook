@@ -83,16 +83,6 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     config.default,
     filteredAxes,
   );
-  // `project.defaultTokens` is the resolved TokenMap at the
-  // user-specified default tuple. Singleton enumeration always
-  // materializes the axes-defaults tuple; if `config.default` points
-  // somewhere else, resolve it on the side.
-  const computedDefault = permutationID(defaultTuple);
-  const defaultTokens: TokenMap =
-    filteredResolved[computedDefault] ??
-    (normalized.parserInput?.resolver
-      ? normalized.parserInput.resolver.apply(defaultTuple)
-      : (filteredResolved[filteredPermutations[0]?.name ?? ''] ?? {}));
 
   const { presets, diagnostics: presetDiagnostics } = validatePresets(config.presets, filteredAxes);
 
@@ -167,6 +157,12 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
       return result;
     };
   })();
+
+  // `project.defaultTokens` is the resolved snapshot at the user's default
+  // tuple, served through the same graph-backed `resolveAt` as every other
+  // tuple — so it carries the slim `SwatchbookToken` shape the type promises
+  // rather than the raw `TokenNormalized` the resolver emits.
+  const defaultTokens = resolveAt(defaultTuple);
 
   // `validateChrome` checks targets against the project's path universe.
   // `listPaths` returns every path present in the graph.

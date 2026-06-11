@@ -37,6 +37,17 @@ describe('loadProject — resolver mode', () => {
     expect(Object.keys(project.defaultTokens).length).toBeGreaterThan(100);
   });
 
+  it('serves defaultTokens in the slim SwatchbookToken shape, not raw TokenNormalized', () => {
+    // defaultTokens flows through the graph-backed resolveAt, so it must not
+    // leak the resolver's internal fields the SwatchbookToken contract omits.
+    const leaked = ['id', 'source', 'originalValue', 'mode', 'group', '$extensions'];
+    for (const [path, token] of Object.entries(project.defaultTokens)) {
+      for (const field of leaked) {
+        expect(token, `${path} leaked ${field}`).not.toHaveProperty(field);
+      }
+    }
+  });
+
   it('surfaces resolver modifiers as independent axes', () => {
     expect(project.axes).toEqual([
       {
