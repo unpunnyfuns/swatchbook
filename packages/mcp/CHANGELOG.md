@@ -1,5 +1,12 @@
 # @unpunnyfuns/swatchbook-mcp
 
+## 0.62.1
+
+### Patch Changes
+
+- Updated dependencies [e864728]
+  - @unpunnyfuns/swatchbook-core@0.62.1
+
 ## 0.62.0
 
 ### Minor Changes

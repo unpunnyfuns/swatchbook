@@ -1,5 +1,14 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.62.1
+
+### Patch Changes
+
+- 1e2edb4ffd4031c3a04a7b18f06aac11d2b8a84d: Size the composite motion preview's loop to the token's real duration instead of a fixed 1200ms
+- d34f06cf17c47381ff17be04d7e30489d0bcf4d6: Widen the Storybook peer range to ^10.1.0 (support all of Storybook 10.x), validated by a CI floor guard
+- Updated dependencies [e864728]
+  - @unpunnyfuns/swatchbook-core@0.62.1
+
 ## 0.62.0
 
 ### Minor Changes

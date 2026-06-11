@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.62.1
+
+### Patch Changes
+
+- e86472885601ba38643dd8d152e984f9d7de419c: `Project.defaultTokens` now carries the documented slim `SwatchbookToken` shape (served through `resolveAt`), no longer leaking the resolver's internal Terrazzo fields
+
 ## 0.62.0
 
 ### Minor Changes
