@@ -19,7 +19,7 @@ export default defineMain({
     pkg('@storybook/addon-docs'),
     pkg('@storybook/addon-mcp'),
     {
-      name: '@unpunnyfuns/swatchbook-addon',
+      name: pkg('@unpunnyfuns/swatchbook-addon'),
       options: {
         configPath: '../swatchbook.config.ts',
         // Dogfood both integrations side by side: the Tailwind
