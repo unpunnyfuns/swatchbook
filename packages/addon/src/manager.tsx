@@ -3,6 +3,9 @@ import { COLOR_FORMATS, ColorFormatSelector } from '#/ColorFormatSelector.tsx';
 import type { ColorFormat } from '#/ColorFormatSelector.tsx';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
+// Storybook-internal surface (fragile across Storybook MAJORS). See the
+// major-bump checklist in CLAUDE.md; the import set is pinned by
+// storybook-internal-surface.test.ts.
 import { Button, ToggleButton, WithTooltip } from 'storybook/internal/components';
 import { addons, types, useGlobals, useStorybookApi } from 'storybook/manager-api';
 import type {

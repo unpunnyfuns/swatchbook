@@ -1,3 +1,6 @@
+// Storybook-internal surface (fragile across Storybook MAJORS). See the
+// major-bump checklist in CLAUDE.md; the import set is pinned by
+// storybook-internal-surface.test.ts.
 import { definePreviewAddon } from 'storybook/internal/csf';
 import * as previewExports from '#/preview.tsx';
 
