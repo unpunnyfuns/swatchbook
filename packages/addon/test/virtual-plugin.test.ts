@@ -52,12 +52,12 @@ it('adds the resolver path when set', () => {
 
 it('deduplicates overlapping paths', () => {
   const config: Config = {
-    tokens: ['tokens/**/*.json'],
-    resolver: 'tokens/resolver.json',
+    // Two globs that scan to the same base dir (`tokens/`); without dedup
+    // collectWatchPaths would list `/project/tokens` twice.
+    tokens: ['tokens/**/*.json', 'tokens/**/*.dtcg.json'],
   };
   const paths = collectWatchPaths(config, undefined, CWD);
-  const unique = new Set(paths);
-  expect(paths.length).toBe(unique.size);
+  expect(paths).toEqual(['/project/tokens']);
 });
 
 it('handles absolute paths untouched', () => {

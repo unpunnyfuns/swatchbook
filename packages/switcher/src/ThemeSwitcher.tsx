@@ -102,9 +102,9 @@ interface OptionPillProps {
   title?: string;
   onClick(): void;
   trailing?: ReactElement | null;
-  // Optional accessible-label prefix — disambiguates pills that share a
+  // Optional accessible-label suffix — disambiguates pills that share a
   // label across sections (e.g. `Default` appears on both `mode` and
-  // `brand`). The full accessible name becomes `"<label> <ariaLabelSuffix>"`.
+  // `brand`). The full accessible name becomes `"<label> (<ariaLabelSuffix>)"`.
   ariaLabelSuffix?: string;
 }
 
