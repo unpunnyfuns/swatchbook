@@ -3,7 +3,7 @@ import { resolveAllAt } from '@unpunnyfuns/swatchbook-core/graph';
 import type { TokenMap } from '@unpunnyfuns/swatchbook-core';
 import type { Decorator, Preview } from '@storybook/react-vite';
 import type { CSSProperties } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { addons } from 'storybook/preview-api';
 import { dataAttr } from '@unpunnyfuns/swatchbook-core/data-attr';
 import { ensureStyleElement } from '@unpunnyfuns/swatchbook-core/style-element';
@@ -45,6 +45,7 @@ import {
 } from '#/constants.ts';
 import type { InitPayload } from '#/channel-types.ts';
 import type { StoryParameters, SwatchbookGlobals } from '#/globals.ts';
+import { useThemeAnnouncement } from '#/hooks/use-theme-announcement.ts';
 
 // Seed blocks' token store with the build-time snapshot from the addon's
 // virtual module. Blocks no longer import `virtual:swatchbook/tokens`
@@ -294,21 +295,10 @@ const themedDecorator: Decorator = (Story, context) => {
   }, [tuple, axesGlobal]);
 
   // Page-level live region announces theme/axis flips to SR users.
-  // Initial mount stays silent (no spurious announcement on every story
-  // load); subsequent `themeName` changes schedule a debounced update so
-  // rapid axis flips (or per-story tuple overrides while paging through
-  // a Storybook docs index) collapse into one announcement.
-  const [announcement, setAnnouncement] = useState('');
-  const initialThemeRef = useRef(themeName);
-  useEffect(() => {
-    if (themeName === initialThemeRef.current) return;
-    const timer = setTimeout(() => {
-      setAnnouncement(themeName ? `Theme: ${themeName}` : '');
-    }, 250);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [themeName]);
+  // Silent on mount; debounced so rapid axis flips collapse into one
+  // announcement; fires on every change including a return to the
+  // mount-time theme.
+  const announcement = useThemeAnnouncement(themeName);
 
   const wrapperAttrs: Record<string, string> = {};
   for (const axis of virtualAxes) {
