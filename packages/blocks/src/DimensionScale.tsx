@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import './DimensionScale.css';
 import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
 import type { DimensionVisual } from '#/dimension-scale/DimensionBar.tsx';
+import { MAX_RENDER_PX, toPixels } from '#/dimension-scale/dimension-px.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
@@ -39,29 +40,12 @@ export interface DimensionScaleProps {
   sortDir?: SortDir;
 }
 
-const MAX_RENDER_PX = 480;
-
 interface Row {
   path: string;
   cssVar: string;
   displayValue: string;
   pxValue: number;
   capped: boolean;
-}
-
-function toPixels(raw: unknown): number {
-  if (raw == null || typeof raw !== 'object') return Number.NaN;
-  const v = raw as { value?: unknown; unit?: unknown };
-  if (typeof v.value !== 'number' || typeof v.unit !== 'string') return Number.NaN;
-  switch (v.unit) {
-    case 'px':
-      return v.value;
-    case 'rem':
-    case 'em':
-      return v.value * 16;
-    default:
-      return Number.NaN;
-  }
 }
 
 export function DimensionScale({
