@@ -91,6 +91,7 @@ Three navbar pills: Guides / Reference / Developers. Reference sidebar groups th
 - **Preview ↔ manager comms**: Storybook's channel (`addons.getChannel()` + `emit`/`on`). Manager can't import preview-side Vite virtual modules.
 - **CSF Next addons**: default-export a factory that returns `definePreviewAddon(previewExports)` (from `storybook/internal/csf`). Consumers opt in via `definePreview({ addons: [swatchbookAddon()] })`.
 - **MDX doc blocks can't use story hooks**: `useGlobals` / `useArgs` / `useChannel` / `useParameter` from `storybook/preview-api` require the preview HooksContext, which only exists while a story is rendering. From an MDX doc block they throw. Subscribe to `addons.getChannel()` directly and manage state with plain React hooks.
+- **Major-bump checklist** (per the policy in `docs/decisions.md` — one swatchbook major per Storybook major): the version-fragile surface is small and pinned. `storybook/internal/*` imports (unstable across majors) are exactly two — `internal/components` in `manager.tsx` and `internal/csf` in `index.ts` — guarded by `addon/test/storybook-internal-surface.test.ts` (adding one fails the test). The public-but-still-checkable surface is `storybook/manager-api` (manager) and `storybook/preview-api` (preview + blocks). On a Storybook major: update the peer ranges to `^<new-major>`, add the new major to the `storybook-compat` matrix in `ci.yml`, and re-verify those import sites. The floor of the supported range is exercised by the `storybook-compat` CI job.
 
 ## Storybook MCP
 
