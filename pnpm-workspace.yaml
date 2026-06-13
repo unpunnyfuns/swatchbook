@@ -23,3 +23,5 @@ overrides:
   'brace-expansion@>=5': ^5.0.6
   qs: ^6.15.2
   shell-quote: ^1.8.4
+  esbuild: ^0.28.1
+  joi: ^17.13.4
