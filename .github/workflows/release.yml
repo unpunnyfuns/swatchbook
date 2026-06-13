@@ -184,7 +184,11 @@ jobs:
     # before the OIDC token is exchanged for an npm publish.
     environment: release
     permissions:
-      contents: read
+      # `write` so the post-publish step can create the per-package git tags
+      # + GitHub releases via the API. `changeset publish` (the CLI) only tags
+      # locally and never pushes; the changesets *action* used to do that for
+      # us before the prepare/publish split (#1065), which is why tags froze.
+      contents: write
       # npm trusted publishing: the OIDC token is exchanged for a short-lived
       # publish token — no NPM_TOKEN secret. Also covers provenance.
       id-token: write
@@ -274,3 +278,40 @@ jobs:
           fi
 
           echo "All six fixed-group packages confirmed at v$version."
+
+      # Tag + release the fixed group. `changeset publish` tags only locally on
+      # the runner; before the #1065 prepare/publish split the changesets action
+      # pushed those tags and cut releases for us, and that side-effect was lost
+      # when publish moved to a bare `pnpm run release` step, so npm kept
+      # getting versions while git/GitHub got no tags. `gh release create`
+      # creates the tag through the API (no `git push`, so the job's
+      # `persist-credentials: false` checkout stands), and is idempotent via the
+      # pre-check below so a re-run after a partial failure is safe.
+      - name: Create git tags + GitHub releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          version=$(jq -r .version packages/core/package.json)
+          for pkg in core addon blocks switcher integrations mcp; do
+            tag="@unpunnyfuns/swatchbook-${pkg}@${version}"
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "  • $tag already released — skipping."
+              continue
+            fi
+            # Pull this version's section out of the package CHANGELOG (changesets
+            # writes `## <version>` headings); fall back to a stub if absent.
+            notes=$(awk -v ver="## ${version}" '
+              $0 == ver { grab = 1; next }
+              /^## / && grab { exit }
+              grab { print }
+            ' "packages/${pkg}/CHANGELOG.md")
+            if [ -z "$notes" ]; then
+              notes="Published to npm. See packages/${pkg}/CHANGELOG.md."
+            fi
+            gh release create "$tag" \
+              --target "$GITHUB_SHA" \
+              --title "$tag" \
+              --notes "$notes"
+            echo "  ✓ released $tag"
+          done
