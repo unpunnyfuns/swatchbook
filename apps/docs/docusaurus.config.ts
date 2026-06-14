@@ -98,6 +98,7 @@ const config: Config = {
         // logo/title; every other section gets a navbar pill.
         { type: 'docSidebar', sidebarId: 'guides', position: 'left', label: 'Guides' },
         { type: 'docSidebar', sidebarId: 'reference', position: 'left', label: 'Reference' },
+        { type: 'docSidebar', sidebarId: 'concepts', position: 'left', label: 'Concepts' },
         { type: 'docSidebar', sidebarId: 'developers', position: 'left', label: 'Developers' },
         { href: 'pathname:///storybook/', label: 'Live Storybook', position: 'left' },
         ...(hasReleasedVersion

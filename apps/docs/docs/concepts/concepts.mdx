@@ -68,7 +68,7 @@ Conceptually:
 
 The read surface has two layers. `project.resolveAt(tuple)` resolves every token at a tuple and is memoized on the canonical tuple key, so repeating a query at the same tuple is cheap. For graph-level queries the `@unpunnyfuns/swatchbook-core/graph` subpath exposes helpers that take `project.tokenGraph`: `resolveAllAt(graph, tuple)` for every token at a tuple, `getVariance(graph, path)` for which axes affect a given token, and `listPaths(graph)` for the token paths.
 
-The graph replaced an earlier cartesian-product model where every combination of axes was materialised at load. The graph approach scales linearly in axes × contexts, not exponentially in their combination, so a 12-axis project loads in reasonable time. See the [token pipeline reference](./token-pipeline.mdx) for the load mechanism and [Core reference](./core.mdx) for the walker API.
+The graph replaced an earlier cartesian-product model where every combination of axes was materialised at load. The graph approach scales linearly in axes × contexts, not exponentially in their combination, so a 12-axis project loads in reasonable time. See the [token pipeline reference](./token-pipeline.mdx) for the load mechanism and [Core reference](../reference/core.mdx) for the walker API.
 
 ## Alignment with Terrazzo's pipeline
 
@@ -88,11 +88,11 @@ A complete load (`loadProject` → graph + CSS + diagnostics) proceeds roughly:
 4. **Run the Token Listing build**: an in-memory `@terrazzo/plugin-token-listing` pass populates per-token `previewValue`, `names.<platform>`, and source location data on `Project.listing`.
 5. **Emit the CSS**: one `:root` block for the default tuple, plus per-axis-context blocks for non-default tuples, plus compound blocks for joint-variance tokens.
 
-Every step's output lives on the returned `Project` object: `tokenGraph`, `axes`, `defaultTuple`, `listing`, `diagnostics`. CSS is produced separately by `emitAxisProjectedCss(project)` rather than stored on `Project`. See the [Core reference](./core.mdx) for the full shape and the [Diagnostics reference](./diagnostics.mdx) for what fires when.
+Every step's output lives on the returned `Project` object: `tokenGraph`, `axes`, `defaultTuple`, `listing`, `diagnostics`. CSS is produced separately by `emitAxisProjectedCss(project)` rather than stored on `Project`. See the [Core reference](../reference/core.mdx) for the full shape and the [Diagnostics reference](../reference/diagnostics.mdx) for what fires when.
 
 ## See also
 
 - [Axes reference](./axes.mdx): full vocabulary and per-story override mechanics.
 - [The token pipeline](./token-pipeline.mdx): how the virtual module ships graph + CSS to the preview.
 - [Aligning with your token build](../guides/sharing-terrazzo-options.mdx): the boundary between Swatchbook's preview pipeline and a production Terrazzo build.
-- [Diagnostics](./diagnostics.mdx): every `swatchbook/<group>` warning and error the loader can emit.
+- [Diagnostics](../reference/diagnostics.mdx): every `swatchbook/<group>` warning and error the loader can emit.

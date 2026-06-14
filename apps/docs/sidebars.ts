@@ -7,7 +7,7 @@ import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
  *
  * `home` covers just the landing — Introduction + Quickstart — reachable
  * from the navbar logo. Every other section gets its own navbar pill.
- * Reference groups its pages by kind (Packages / Blocks / Model) so the
+ * Reference groups its pages by kind (Packages / Blocks) so the
  * sidebar reads as an index, not a flat list of everything at once.
  */
 const sidebars: SidebarsConfig = {
@@ -35,6 +35,7 @@ const sidebars: SidebarsConfig = {
         'reference/config',
         'reference/switcher',
         'reference/mcp',
+        'reference/integrations',
       ],
     },
     {
@@ -50,17 +51,13 @@ const sidebars: SidebarsConfig = {
         'reference/blocks/hooks',
       ],
     },
-    {
-      type: 'category',
-      label: 'Model',
-      collapsed: false,
-      items: [
-        'reference/concepts',
-        'reference/axes',
-        'reference/token-pipeline',
-        'reference/diagnostics',
-      ],
-    },
+    'reference/diagnostics',
+  ],
+  concepts: [
+    'concepts/overview',
+    'concepts/concepts',
+    'concepts/axes',
+    'concepts/token-pipeline',
   ],
   developers: [
     'developers/developers',
