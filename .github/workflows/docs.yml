@@ -17,6 +17,16 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # Run in the pinned Playwright image (Chromium + system deps preinstalled)
+    # so the media-capture step needs no `playwright install` and the browser
+    # launches reliably — same container the test suite uses in ci.yml. The
+    # Pages deploy actions below run fine inside it.
+    container:
+      image: ghcr.io/${{ github.repository }}/playwright:v1.59.1-noble
+      options: --ipc=host
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      HOME: /root
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
@@ -52,9 +62,7 @@ jobs:
         run: pnpm turbo run build:storybook --filter=@unpunnyfuns/swatchbook-storybook
 
       - name: Capture frontpage media
-        run: |
-          pnpm --filter @unpunnyfuns/swatchbook-docs exec playwright install --with-deps chromium
-          pnpm --filter @unpunnyfuns/swatchbook-docs capture
+        run: pnpm --filter @unpunnyfuns/swatchbook-docs capture
 
       - name: Build Docusaurus
         run: pnpm turbo run build --filter=@unpunnyfuns/swatchbook-docs

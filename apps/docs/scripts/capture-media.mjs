@@ -1,6 +1,7 @@
-import { spawn } from 'node:child_process';
+import { readFile } from 'node:fs/promises';
+import { createServer } from 'node:http';
 import { mkdirSync, readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, extname, join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 
@@ -23,11 +24,42 @@ const STILLS = [
   { match: 'Blocks/TokenNavigator Default', file: 'navigator.png' },
 ];
 
+const MIME = {
+  '.html': 'text/html',
+  '.js': 'text/javascript',
+  '.mjs': 'text/javascript',
+  '.json': 'application/json',
+  '.css': 'text/css',
+  '.map': 'application/json',
+  '.png': 'image/png',
+  '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.ttf': 'font/ttf',
+  '.ico': 'image/x-icon',
+  '.txt': 'text/plain',
+};
+
+// Minimal static server for storybook-static. Dependency-free on purpose: the
+// previous `npx sirv` could block on an install prompt in CI. Manager routes
+// (`/?path=…`) strip the query to `/` → index.html; everything else is a real
+// file (iframe.html, index.json, assets).
 function serve() {
-  return spawn('npx', ['sirv', sbStatic, '--port', String(PORT), '--quiet'], {
-    cwd: docsRoot,
-    stdio: 'inherit',
+  const server = createServer(async (req, res) => {
+    try {
+      let urlPath = decodeURIComponent((req.url ?? '/').split('?')[0]);
+      if (urlPath.endsWith('/')) urlPath += 'index.html';
+      const safe = normalize(urlPath).replace(/^(\.\.[/\\])+/, '');
+      const data = await readFile(join(sbStatic, safe));
+      res.writeHead(200, { 'content-type': MIME[extname(safe)] ?? 'application/octet-stream' });
+      res.end(data);
+    } catch {
+      res.writeHead(404);
+      res.end('not found');
+    }
   });
+  server.listen(PORT, '127.0.0.1');
+  return server;
 }
 
 async function waitForServer() {
@@ -99,7 +131,7 @@ async function main() {
     await mgr.close();
   } finally {
     if (browser) await browser.close();
-    server.kill();
+    server.close();
   }
 }
 
