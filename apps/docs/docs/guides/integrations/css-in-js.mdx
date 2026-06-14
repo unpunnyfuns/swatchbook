@@ -19,6 +19,7 @@ No additional Vite plugins needed; the virtual module is plain JavaScript.
 ## Configure
 
 ```ts title=".storybook/main.ts"
+import { defineMain } from '@storybook/react-vite/node';
 import cssInJsIntegration from '@unpunnyfuns/swatchbook-integrations/css-in-js';
 
 export default defineMain({

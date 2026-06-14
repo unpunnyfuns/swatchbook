@@ -21,6 +21,7 @@ Tailwind v4's Vite plugin is required to process the `@theme` block the integrat
 Add `tailwindcss()` to Storybook's Vite plugins alongside the integration:
 
 ```ts title=".storybook/main.ts"
+import { defineMain } from '@storybook/react-vite/node';
 import tailwindcss from '@tailwindcss/vite';
 import tailwindIntegration from '@unpunnyfuns/swatchbook-integrations/tailwind';
 

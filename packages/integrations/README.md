@@ -19,6 +19,7 @@ npm install -D tailwindcss @tailwindcss/vite
 ## Usage
 
 ```ts title=".storybook/main.ts"
+import { defineMain } from '@storybook/react-vite/node';
 import tailwindIntegration from '@unpunnyfuns/swatchbook-integrations/tailwind';
 import cssInJsIntegration from '@unpunnyfuns/swatchbook-integrations/css-in-js';
 

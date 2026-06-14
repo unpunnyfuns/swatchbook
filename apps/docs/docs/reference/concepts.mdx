@@ -66,7 +66,7 @@ Conceptually:
 - **Per-axis writes**: for each non-default `(axis, context)`, what value this token takes when that axis is in that context.
 - **Alias edges**: when a token references another token (`{color.brand.accent}` or DTCG 2025.10 `$ref`), the graph records the edge so the walker can compose values at any tuple.
 
-The walker is the API surface: `resolveAt(tuple)` for a single token at a tuple, `resolveAllAt(tuple)` for every token at a tuple, `getVariance(path)` for which axes affect a given token. Walker calls are memoized, so repeating a query at the same tuple is cheap.
+The read surface has two layers. `project.resolveAt(tuple)` resolves every token at a tuple and is memoized on the canonical tuple key, so repeating a query at the same tuple is cheap. For graph-level queries the `@unpunnyfuns/swatchbook-core/graph` subpath exposes helpers that take `project.tokenGraph`: `resolveAllAt(graph, tuple)` for every token at a tuple, `getVariance(graph, path)` for which axes affect a given token, and `listPaths(graph)` for the token paths.
 
 The graph replaced an earlier cartesian-product model where every combination of axes was materialised at load. The graph approach scales linearly in axes × contexts, not exponentially in their combination, so a 12-axis project loads in reasonable time. See the [token pipeline reference](./token-pipeline.mdx) for the load mechanism and [Core reference](./core.mdx) for the walker API.
 
