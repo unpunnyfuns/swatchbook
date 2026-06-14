@@ -53,10 +53,11 @@ function findStoryId(index, matcher) {
 async function main() {
   mkdirSync(outDir, { recursive: true });
   const server = serve();
+  let browser;
   try {
     await waitForServer();
     const index = JSON.parse(readFileSync(resolve(sbStatic, 'index.json'), 'utf8'));
-    const browser = await chromium.launch();
+    browser = await chromium.launch();
     const page = await browser.newPage({ viewport: VIEWPORT, deviceScaleFactor: SCALE });
     for (const s of STILLS) {
       const id = findStoryId(index, s.match);
@@ -96,9 +97,8 @@ async function main() {
     await mgr.screenshot({ path: join(outDir, 'switcher.png') });
     console.log('captured switcher.png');
     await mgr.close();
-
-    await browser.close();
   } finally {
+    if (browser) await browser.close();
     server.kill();
   }
 }

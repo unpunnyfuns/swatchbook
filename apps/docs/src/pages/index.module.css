@@ -97,41 +97,6 @@
   flex-wrap: wrap;
 }
 
-.ctaPrimary,
-.ctaSecondary {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.7rem 1.4rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
-}
-
-.ctaPrimary {
-  background: var(--ifm-color-primary);
-  color: var(--ifm-background-color);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
-}
-
-.ctaPrimary:hover {
-  text-decoration: none;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
-  color: var(--ifm-background-color);
-}
-
-.ctaSecondary {
-  border: 1px solid var(--ifm-color-emphasis-300);
-  color: var(--ifm-color-content);
-}
-
-.ctaSecondary:hover {
-  text-decoration: none;
-  border-color: var(--ifm-color-primary);
-  color: var(--ifm-color-primary);
-}
-
 /* Swatch deck — the hero visual. Ramps of real palette tokens, fanned with a
    slight tactile offset so it reads as a physical swatch book. */
 .deck {

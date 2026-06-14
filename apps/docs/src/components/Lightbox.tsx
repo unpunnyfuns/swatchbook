@@ -18,11 +18,14 @@ interface LightboxProps {
 
 /**
  * Accessible image lightbox with carousel navigation. Esc / backdrop close it,
- * arrow keys (and prev/next controls) cycle. Restores focus to the trigger on
- * close and locks body scroll while open.
+ * arrow keys (and prev/next controls) cycle, Tab is trapped within the dialog,
+ * focus moves in on open and restores to the trigger on close, and body scroll
+ * locks while open.
  */
 export default function Lightbox({ images, index, onClose, onNavigate }: LightboxProps): ReactNode {
+  const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
   const open = index !== null;
 
   const go = useCallback(
@@ -33,13 +36,34 @@ export default function Lightbox({ images, index, onClose, onNavigate }: Lightbo
     [index, images.length, onNavigate],
   );
 
+  // Capture the triggering element once, on the closed→open transition, so
+  // carousel navigation (which re-runs the effect below) doesn't overwrite it.
+  useEffect(() => {
+    if (open) triggerRef.current = document.activeElement as HTMLElement | null;
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
-    const restoreTo = document.activeElement as HTMLElement | null;
     const onKey = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') onClose();
-      else if (e.key === 'ArrowRight') go(1);
-      else if (e.key === 'ArrowLeft') go(-1);
+      if (e.key === 'Escape') {
+        onClose();
+      } else if (e.key === 'ArrowRight') {
+        go(1);
+      } else if (e.key === 'ArrowLeft') {
+        go(-1);
+      } else if (e.key === 'Tab') {
+        const focusable = dialogRef.current?.querySelectorAll<HTMLElement>('button');
+        if (!focusable || focusable.length === 0) return;
+        const first = focusable[0]!;
+        const last = focusable[focusable.length - 1]!;
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     document.addEventListener('keydown', onKey);
     const prevOverflow = document.body.style.overflow;
@@ -48,7 +72,7 @@ export default function Lightbox({ images, index, onClose, onNavigate }: Lightbo
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = prevOverflow;
-      restoreTo?.focus?.();
+      triggerRef.current?.focus?.();
     };
   }, [open, go, onClose]);
 
@@ -57,9 +81,11 @@ export default function Lightbox({ images, index, onClose, onNavigate }: Lightbo
   const many = images.length > 1;
   return (
     <div
+      ref={dialogRef}
       className={styles.backdrop}
       onClick={onClose}
-      role="presentation"
+      role="dialog"
+      aria-modal="true"
       aria-label="Screenshot viewer"
     >
       <button ref={closeRef} className={styles.close} onClick={onClose} aria-label="Close">

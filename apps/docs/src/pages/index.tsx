@@ -117,10 +117,10 @@ export default function Home(): ReactNode {
               re-render as you switch themes from the toolbar.
             </p>
             <div className={styles.ctas}>
-              <Link className={styles.ctaPrimary} to="/quickstart">
+              <Link className="button button--primary button--lg" to="/quickstart">
                 Get started
               </Link>
-              <Link className={styles.ctaSecondary} to="pathname:///storybook/">
+              <Link className="button button--secondary button--lg" to="pathname:///storybook/">
                 Live Storybook
               </Link>
             </div>
@@ -139,7 +139,7 @@ export default function Home(): ReactNode {
                   onClick={() => setLightboxIndex(i)}
                   aria-label={`Enlarge: ${shot.alt}`}
                 >
-                  <img className={styles.shot} src={shot.src} alt={shot.alt} loading="lazy" />
+                  <img className={styles.shot} src={shot.src} alt="" loading="lazy" />
                 </button>
                 <figcaption className={styles.shotCaption}>{shot.caption}</figcaption>
               </figure>
