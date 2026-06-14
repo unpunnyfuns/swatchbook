@@ -34,7 +34,7 @@ Yes, nearly all of it, and deliberately so. Swatchbook is a large surface for on
 
 ## Installation
 
-Register `@unpunnyfuns/swatchbook-addon` in `.storybook/main.ts`. It pulls in `swatchbook-core`, `swatchbook-blocks`, and `swatchbook-switcher` transitively. `import { TokenTable, ThemeSwitcher } from '@unpunnyfuns/swatchbook-addon'` resolves from any consumer file, and `import { useToken } from '@unpunnyfuns/swatchbook-addon/hooks'` exposes the token-lookup hook. See the [Quickstart](./quickstart.mdx) for a complete setup.
+Register `@unpunnyfuns/swatchbook-addon` in `.storybook/main.ts`. It pulls in `swatchbook-core`, `swatchbook-blocks`, and `swatchbook-switcher` transitively. `import { TokenTable, ThemeSwitcher } from '@unpunnyfuns/swatchbook-addon'` resolves from any consumer file, and `import { useToken } from '@unpunnyfuns/swatchbook-addon/hooks'` exposes the token-lookup hook. See the [Quickstart](./guides/quickstart.mdx) for a complete setup.
 
 Each sub-package is also publishable on its own: the switcher in a Docusaurus navbar, the core loader in a build script without React.
 
@@ -52,7 +52,7 @@ The [live Storybook](pathname:///storybook/) runs the addon against this repo's 
 
 ## How to read these docs
 
-- **[Quickstart](./quickstart.mdx)**: install, configure, run.
+- **[Quickstart](./guides/quickstart.mdx)**: install, configure, run.
 - **[Guides](./guides/authoring-doc-stories.mdx)**: MDX doc-story composition, consuming the active theme from stories, third-party library integrations, aligning with a production Terrazzo build.
 - **[Reference](./reference/addon.mdx)**: API surface for each published package, [concepts](./reference/concepts.mdx) and the axis model, the token-pipeline mechanism, the config shape, and the [diagnostics catalog](./reference/diagnostics.mdx) when an error fires.
 - **[Developers](./developers/index.mdx)**: contributing to swatchbook itself, architecture and sharp corners.

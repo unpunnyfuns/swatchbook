@@ -11,8 +11,9 @@ import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
  * sidebar reads as an index, not a flat list of everything at once.
  */
 const sidebars: SidebarsConfig = {
-  home: ['intro', 'quickstart'],
+  home: ['intro'],
   guides: [
+    'guides/quickstart',
     'guides/authoring-doc-stories',
     'guides/consuming-the-active-theme',
     {
