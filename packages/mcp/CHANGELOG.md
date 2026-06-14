@@ -1,5 +1,13 @@
 # @unpunnyfuns/swatchbook-mcp
 
+## 0.62.3
+
+### Patch Changes
+
+- ad9b1efc315f854d783606c77b653e1d372c364f: Restructure the docs site: a product-showcase frontpage, a Concepts section, Quickstart in Guides, and an integrations reference entry.
+- Updated dependencies [ad9b1ef]
+  - @unpunnyfuns/swatchbook-core@0.62.3
+
 ## 0.62.2
 
 ### Patch Changes
