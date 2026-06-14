@@ -31,7 +31,7 @@ import { SwatchbookProvider, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 import snapshot from './tokens-snapshot.json';
 
 <SwatchbookProvider value={snapshot}>
-  <TokenTable filter='color.*' />
+  <TokenTable filter="color.**" />
 </SwatchbookProvider>
 ```
 

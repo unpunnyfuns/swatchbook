@@ -283,7 +283,7 @@ The default of `4` covers the largest joint shapes real-world design systems ten
 
 **When to bump (5+):** the design system has tokens with genuine 5+-axis joint divergences: concretely, tokens where the value at some 5-axis combination differs from what CSS cascade composes from all the 2-axis, 3-axis, and 4-axis blocks. Without the bump, those tuples will resolve to the cascade-composed value rather than the cartesian-correct one. The visual symptom is a wrong color (or other token value) at that specific 5+-axis combination.
 
-**When to lower (≤3):** load-time work is a concern. Per-token probe work scales as `Σ_{k=2..arity} C(|affectedBy|, k) × Π non-default contexts in combo`. Tokens affected by many axes including dense (large-context-count) ones dominate. Setting `maxJointArity: 1` disables joint-block emission entirely, useful when joint divergences aren't relevant for your pipeline, or as a debugging step.
+**When to lower (≤3):** load-time work is a concern. Per-token probe work scales as `Σ_{k=2..arity} C(|affectedBy|, k) × Π non-default contexts in combo`. Tokens affected by many axes including dense (large-context-count) ones dominate. Setting `maxJointArity: 1` caps below the arity-2 probe floor, so no joint blocks are emitted, useful when joint divergences aren't relevant for your pipeline, or as a debugging step.
 
 ```ts
 import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';

@@ -32,12 +32,15 @@ interface Diagnostic {
 }
 ```
 
-`group` identifies the subsystem that produced the diagnostic:
+`group` is namespaced by feature area (`swatchbook/<area>`) and is stable across releases, so consumers can filter on it:
 
-- `parser`: Terrazzo's token-file parser (malformed JSON, invalid `$value`, wrong `$type`, …).
-- `resolver`: resolver-file issues (missing `$ref`, unknown modifier, context with no files).
+- `swatchbook/token-graph`: graph construction and walker integrity, including malformed token shapes the parser surfaced (unresolved alias targets, cycles, invalid color components).
+- `swatchbook/resolver`: resolver-file issues (missing `$ref`, unknown modifier, context with no files).
 - `swatchbook/presets`: preset validation (unknown axis key, invalid context value).
+- `swatchbook/css-options`, `swatchbook/chrome`, `swatchbook/disabled-axes`, `swatchbook/default`, `swatchbook/listing`: configuration and feature-area checks.
 - Plugin-originated groups: depends on your setup.
+
+The [Diagnostics reference](../diagnostics.mdx) catalogs what fires under each group.
 
 ### Severities
 

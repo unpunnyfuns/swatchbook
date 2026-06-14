@@ -12,7 +12,7 @@ Bundles MDX doc blocks (`<TokenTable />`, `<ColorPalette />`, `<TokenDetail />`,
 npm install -D @unpunnyfuns/swatchbook-addon
 ```
 
-Peer requirements: `storybook@^10.3`, `react` / `react-dom` 18+.
+Peer requirements: `storybook@^10.1`, `@storybook/react-vite@^10.1`, `react` / `react-dom` 18+, `vite@>=5`.
 
 ## Usage
 
@@ -33,6 +33,7 @@ addons: [
 ```
 
 ```ts title=".storybook/preview.ts"
+import { definePreview } from '@storybook/react-vite';
 import swatchbookAddon from '@unpunnyfuns/swatchbook-addon';
 export default definePreview({ addons: [swatchbookAddon()] });
 ```

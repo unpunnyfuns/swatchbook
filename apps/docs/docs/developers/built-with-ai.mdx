@@ -7,8 +7,8 @@ sidebar_position: 3
 # Built with AI
 
 Nearly all of swatchbook's code, tests, and documentation are written by Claude,
-under human direction. Here's how that works: what a human controls, and what
-every change has to clear before it ships.
+under human direction. A human controls scope and direction; every change clears
+the same gates before it ships.
 
 The repo doesn't hide it. [`CLAUDE.md`](https://github.com/unpunnyfuns/swatchbook/blob/main/CLAUDE.md),
 the orientation file the agent reads at the start of every session, is committed
@@ -66,7 +66,7 @@ tests that check meaning, not just output, before they land.
 The real back-and-forth between the human and the agent is about correctness, not
 scope. Less "build this," more "this is wrong, here is the case that breaks it."
 
-So the bottom line is plain. An AI wrote nearly all of it. A human is accountable
+An AI wrote nearly all of it. A human is accountable
 for all of it, and the evidence is public: the tests, the CI runs, the gated
 releases, the commit history. Hold swatchbook to the same standard as any
 dependency you take on. This page exists so you know exactly what you're looking
