@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.62.2
+
+### Patch Changes
+
+- 4fbeb8638206991ddfc87ece7f76079195ff2c0b: Documentation accuracy sweep across the docs site and READMEs.
+
 ## 0.62.1
 
 ### Patch Changes

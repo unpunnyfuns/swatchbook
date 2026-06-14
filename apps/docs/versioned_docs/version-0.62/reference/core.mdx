@@ -91,6 +91,8 @@ Leaf utilities consumers need without the loader's Node deps live on dedicated s
 | `/css-var` | `makeCssVar(path, prefix)` | Compose `var(--prefix-path)` strings, same shape Terrazzo's plugin-css emits. |
 | `/data-attr` | `dataAttr(prefix, key)` | Compose `data-prefix-key` attribute names, namespaced to `cssVarPrefix`. |
 | `/style-element` | `ensureStyleElement(elementId, text)` + `SWATCHBOOK_STYLE_ELEMENT_ID` | Idempotent `<style>` injector, shared between the addon's preview decorator and the blocks-side stylesheet path. |
+| `/color-formats` | `COLOR_FORMATS` + `ColorFormat` type | The canonical color-format set (`hex`, `rgb`, `hsl`, `oklch`, `raw`) the toolbar and blocks switch between. |
+| `/format-color` | `formatColor`, `parseColor` + `NormalizedColor` / `FormatColorResult` types | Canonical color rendering, shared by blocks, MCP, and the addon so every surface stringifies a color the same way. |
 
 ```ts
 import { resolveAt, getVariance } from '@unpunnyfuns/swatchbook-core/graph';

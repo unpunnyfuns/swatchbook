@@ -1,5 +1,15 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.62.2
+
+### Patch Changes
+
+- 4fbeb8638206991ddfc87ece7f76079195ff2c0b: Documentation accuracy sweep across the docs site and READMEs.
+- Updated dependencies [4fbeb86]
+  - @unpunnyfuns/swatchbook-core@0.62.2
+  - @unpunnyfuns/swatchbook-blocks@0.62.2
+  - @unpunnyfuns/swatchbook-switcher@0.62.2
+
 ## 0.62.1
 
 ### Patch Changes
