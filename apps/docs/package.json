@@ -12,7 +12,8 @@
     "swizzle": "docusaurus swizzle",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "capture": "node scripts/capture-media.mjs"
   },
   "dependencies": {
     "@docusaurus/core": "3.10.0",
@@ -33,6 +34,8 @@
     "@docusaurus/types": "3.10.0",
     "@types/react": "^19.0.0",
     "@unpunnyfuns/swatchbook-core": "workspace:*",
+    "playwright": "^1.59.1",
+    "sirv-cli": "^3.0.1",
     "typescript": "~6.0.2"
   },
   "browserslist": {
