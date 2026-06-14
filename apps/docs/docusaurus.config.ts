@@ -82,6 +82,19 @@ const config: Config = {
     ],
   ],
 
+  plugins: [
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        redirects: [
+          { from: '/reference/concepts', to: '/concepts/' },
+          { from: '/reference/axes', to: '/concepts/axes' },
+          { from: '/reference/token-pipeline', to: '/concepts/token-pipeline' },
+        ],
+      },
+    ],
+  ],
+
   themeConfig: {
     colorMode: {
       respectPrefersColorScheme: true,
@@ -94,10 +107,9 @@ const config: Config = {
         href: '/',
       },
       items: [
-        // Quickstart lives in the `home` sidebar reachable via the
-        // logo/title; every other section gets a navbar pill.
         { type: 'docSidebar', sidebarId: 'guides', position: 'left', label: 'Guides' },
         { type: 'docSidebar', sidebarId: 'reference', position: 'left', label: 'Reference' },
+        { type: 'docSidebar', sidebarId: 'concepts', position: 'left', label: 'Concepts' },
         { type: 'docSidebar', sidebarId: 'developers', position: 'left', label: 'Developers' },
         { href: 'pathname:///storybook/', label: 'Live Storybook', position: 'left' },
         ...(hasReleasedVersion
@@ -116,7 +128,7 @@ const config: Config = {
         {
           title: 'Docs',
           items: [
-            { label: 'Introduction', to: '/' },
+            { label: 'Overview', to: '/concepts/overview' },
             { label: 'Quickstart', to: '/quickstart' },
           ],
         },

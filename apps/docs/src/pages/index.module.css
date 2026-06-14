@@ -1,0 +1,313 @@
+/* Frontpage. Refined, swatch-native: the hero pairs the wordmark with a deck
+   of live token ramps (the product's own subject matter), which flips with the
+   docs theme. Everything pulls from the token CSS variables so it tracks
+   light/dark and brand automatically. */
+
+/* Hint nudging visitors toward the theme switcher in the top-right navbar slot
+   (it replaces Docusaurus's color-mode toggle). Right-aligned, arrow points up. */
+.switcherHint {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  /* Right padding lands the arrow under the navbar switcher icon: the icon
+     sits navbar-padding + half its width from the edge, so offset the arrow by
+     roughly its own half-width past the navbar padding. */
+  padding: 0.75rem calc(var(--ifm-navbar-padding-horizontal, 1rem) + 0.7rem) 0;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.8rem;
+  color: var(--ifm-color-content-secondary);
+}
+
+.switcherArrow {
+  font-size: 1rem;
+  color: var(--ifm-color-primary);
+  animation: nudge 1.8s ease-in-out infinite;
+}
+
+@keyframes nudge {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(2px, -2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switcherArrow {
+    animation: none;
+  }
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 3rem;
+  align-items: center;
+  max-width: min(1120px, calc(100% - 2rem));
+  margin: clamp(1.5rem, 4vw, 2.5rem) auto 0;
+  padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.5rem, 5vw, 4rem);
+  /* Subtle highlighted panel: a faint primary tint over the raised surface,
+     mode-aware via the token vars. The swatch deck floats on it as a card. */
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--ifm-color-primary) 7%, var(--ifm-background-surface-color)),
+    var(--ifm-background-surface-color) 62%
+  );
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 20px;
+  box-shadow: 0 24px 64px -40px rgba(0, 0, 0, 0.45);
+}
+
+.heroCopy {
+  min-width: 0;
+}
+
+.eyebrow {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--ifm-color-content-secondary);
+  margin: 0 0 1rem;
+}
+
+.title {
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+  color: var(--ifm-heading-color);
+  margin: 0 0 1.25rem;
+  text-wrap: balance;
+}
+
+.lead {
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  line-height: 1.6;
+  color: var(--ifm-color-content-secondary);
+  max-width: 38ch;
+  margin: 0 0 2rem;
+}
+
+.ctas {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Swatch deck — the hero visual. Ramps of real palette tokens, fanned with a
+   slight tactile offset so it reads as a physical swatch book. */
+.deck {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.75rem;
+  border-radius: 16px;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  box-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.45);
+}
+
+.ramp {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.rampLabel {
+  flex: 0 0 4.5rem;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.75rem;
+  color: var(--ifm-color-content-secondary);
+  text-align: right;
+}
+
+.chips {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+  flex: 1;
+}
+
+/* Shared swatch behavior (color chips + font tiles): load reveal, hover lift,
+   and a tooltip showing the token CSS variable. */
+.swatch {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 7px;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: chipIn 0.5s ease forwards;
+  transition: transform 0.14s ease;
+}
+
+.swatch:hover {
+  transform: translateY(-3px) scale(1.04);
+  z-index: 2;
+}
+
+.swatch::after {
+  content: attr(data-var);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  background: var(--ifm-color-emphasis-900);
+  color: var(--ifm-color-emphasis-0);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.7rem;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 3;
+}
+
+.swatch:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.chip {
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.fontChip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ifm-background-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  color: var(--ifm-color-content);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+@keyframes chipIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swatch {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Screenshot showcase — large, framed previews. */
+.previews {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 3.5rem) 1.5rem clamp(1rem, 3vw, 2rem);
+}
+
+.previewsTitle {
+  margin: 0 0 1.75rem;
+  text-align: center;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  letter-spacing: -0.01em;
+  color: var(--ifm-heading-color);
+}
+
+.previewsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .previewsGrid {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}
+
+.shotFigure {
+  margin: 0;
+}
+
+.shotButton {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ifm-background-surface-color);
+  box-shadow: 0 18px 48px -24px rgba(0, 0, 0, 0.4);
+  cursor: zoom-in;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+}
+
+.shotButton:hover {
+  transform: translateY(-3px);
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 24px 56px -22px rgba(0, 0, 0, 0.5);
+}
+
+.shot {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.shotCaption {
+  margin-top: 0.9rem;
+  font-size: 0.95rem;
+  color: var(--ifm-color-content-secondary);
+}
+
+/* Section cards. */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: clamp(1rem, 4vw, 3rem) 1.5rem clamp(3rem, 6vw, 5rem);
+}
+
+.card {
+  display: block;
+  padding: 1.4rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 12px;
+  color: inherit;
+  background: var(--ifm-background-surface-color);
+  transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.card h3 {
+  margin: 0 0 0.4rem;
+}
+
+.card p {
+  margin: 0;
+  color: var(--ifm-color-content-secondary);
+  font-size: 0.95rem;
+}
+
+.card:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 10px 28px -18px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    text-align: left;
+  }
+}

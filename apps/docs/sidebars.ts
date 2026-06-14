@@ -5,14 +5,13 @@ import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
  * entries bound by `sidebarId`, which auto-link to each sidebar's first
  * doc and keep the nav pill active across all docs in that sidebar.
  *
- * `home` covers just the landing — Introduction + Quickstart — reachable
- * from the navbar logo. Every other section gets its own navbar pill.
- * Reference groups its pages by kind (Packages / Blocks / Model) so the
+ * The navbar logo links to `/` (the React frontpage), not a sidebar doc.
+ * Reference groups its pages by kind (Packages / Blocks) so the
  * sidebar reads as an index, not a flat list of everything at once.
  */
 const sidebars: SidebarsConfig = {
-  home: ['intro', 'quickstart'],
   guides: [
+    'guides/quickstart',
     'guides/authoring-doc-stories',
     'guides/consuming-the-active-theme',
     {
@@ -35,6 +34,7 @@ const sidebars: SidebarsConfig = {
         'reference/config',
         'reference/switcher',
         'reference/mcp',
+        'reference/integrations',
       ],
     },
     {
@@ -50,17 +50,13 @@ const sidebars: SidebarsConfig = {
         'reference/blocks/hooks',
       ],
     },
-    {
-      type: 'category',
-      label: 'Model',
-      collapsed: false,
-      items: [
-        'reference/concepts',
-        'reference/axes',
-        'reference/token-pipeline',
-        'reference/diagnostics',
-      ],
-    },
+    'reference/diagnostics',
+  ],
+  concepts: [
+    'concepts/overview',
+    'concepts/concepts',
+    'concepts/axes',
+    'concepts/token-pipeline',
   ],
   developers: [
     'developers/developers',
