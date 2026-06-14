@@ -1,9 +1,6 @@
 {
-  "home": [
-    "intro",
-    "quickstart"
-  ],
   "guides": [
+    "guides/quickstart",
     "guides/authoring-doc-stories",
     "guides/consuming-the-active-theme",
     {
@@ -31,7 +28,8 @@
         "reference/core",
         "reference/config",
         "reference/switcher",
-        "reference/mcp"
+        "reference/mcp",
+        "reference/integrations"
       ]
     },
     {
@@ -47,17 +45,13 @@
         "reference/blocks/hooks"
       ]
     },
-    {
-      "type": "category",
-      "label": "Model",
-      "collapsed": false,
-      "items": [
-        "reference/concepts",
-        "reference/axes",
-        "reference/token-pipeline",
-        "reference/diagnostics"
-      ]
-    }
+    "reference/diagnostics"
+  ],
+  "concepts": [
+    "concepts/overview",
+    "concepts/concepts",
+    "concepts/axes",
+    "concepts/token-pipeline"
   ],
   "developers": [
     "developers/developers",
