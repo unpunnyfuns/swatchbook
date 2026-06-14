@@ -82,6 +82,19 @@ const config: Config = {
     ],
   ],
 
+  plugins: [
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        redirects: [
+          { from: '/reference/concepts', to: '/concepts/concepts' },
+          { from: '/reference/axes', to: '/concepts/axes' },
+          { from: '/reference/token-pipeline', to: '/concepts/token-pipeline' },
+        ],
+      },
+    ],
+  ],
+
   themeConfig: {
     colorMode: {
       respectPrefersColorScheme: true,
