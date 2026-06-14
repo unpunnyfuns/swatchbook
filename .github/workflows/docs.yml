@@ -48,8 +48,16 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Build Docusaurus + Storybook
-        run: pnpm turbo run build build:storybook --filter=@unpunnyfuns/swatchbook-docs --filter=@unpunnyfuns/swatchbook-storybook
+      - name: Build Storybook
+        run: pnpm turbo run build:storybook --filter=@unpunnyfuns/swatchbook-storybook
+
+      - name: Capture frontpage media
+        run: |
+          pnpm --filter @unpunnyfuns/swatchbook-docs exec playwright install --with-deps chromium
+          pnpm --filter @unpunnyfuns/swatchbook-docs capture
+
+      - name: Build Docusaurus
+        run: pnpm turbo run build --filter=@unpunnyfuns/swatchbook-docs
 
       - name: Merge Storybook into docs build
         run: |
