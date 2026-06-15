@@ -71,6 +71,6 @@
     "@unpunnyfuns/swatchbook-tokens": "workspace:*",
     "tsdown": "^0.21.9",
     "typescript": "^6.0.0",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.8"
   }
 }
