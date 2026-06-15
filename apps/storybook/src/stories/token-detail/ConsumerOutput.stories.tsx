@@ -4,6 +4,7 @@ import preview from '../../../.storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Internals/TokenDetail/ConsumerOutput',
+  tags: ['!manifest'],
   component: ConsumerOutput,
   argTypes: {
     path: { control: 'text' },

@@ -30,6 +30,7 @@ function DiagnosticsProbe() {
 
 const meta = preview.meta({
   title: 'Tests/BlockAssertions',
+  tags: ['!manifest'],
   component: DiagnosticsProbe,
   // Test harness: each story renders a block purely to assert it produces
   // concrete output. axe (a11y) for these blocks is covered by their real

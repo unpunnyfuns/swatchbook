@@ -3,6 +3,7 @@ import preview from '../../.storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Internals/Samples/BorderSample',
+  tags: ['!manifest'],
   component: BorderSample,
   argTypes: {
     path: { control: 'text' },

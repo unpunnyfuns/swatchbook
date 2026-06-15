@@ -4,6 +4,7 @@ import preview from '../../../.storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Internals/TokenDetail/CompositePreview',
+  tags: ['!manifest'],
   component: CompositePreview,
   argTypes: {
     path: { control: 'text' },

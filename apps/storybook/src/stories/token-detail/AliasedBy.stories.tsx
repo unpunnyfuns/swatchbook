@@ -4,6 +4,7 @@ import preview from '../../../.storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Internals/TokenDetail/AliasedBy',
+  tags: ['!manifest'],
   component: AliasedBy,
   argTypes: {
     path: { control: 'text' },

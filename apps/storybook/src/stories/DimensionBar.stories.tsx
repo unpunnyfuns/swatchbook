@@ -3,6 +3,7 @@ import preview from '../../.storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Internals/Samples/DimensionBar',
+  tags: ['!manifest'],
   component: DimensionBar,
   argTypes: {
     path: { control: 'text' },

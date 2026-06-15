@@ -57,7 +57,7 @@ function ProbeGrid() {
 const meta = preview.meta({
   title: 'Hooks/useToken',
   component: ProbeGrid,
-  tags: ['autodocs'],
+  tags: ['autodocs', '!manifest'],
 });
 
 export default meta;
