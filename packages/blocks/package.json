@@ -74,12 +74,12 @@
     "react-dom": "^19.2.4",
     "storybook": "^10.4.4",
     "tsdown": "^0.21.9",
-    "typescript": "^6.0.0",
+    "typescript": "^6.0.3",
     "vitest": "^4.1.8"
   },
   "dependencies": {
     "@unpunnyfuns/swatchbook-core": "workspace:*",
     "clsx": "^2.1.1",
-    "colorjs.io": "0.6.1"
+    "colorjs.io": "^0.6.1"
   }
 }

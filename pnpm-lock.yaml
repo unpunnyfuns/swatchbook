@@ -67,16 +67,16 @@ importers:
         specifier: workspace:*
         version: link:../../packages/switcher
       clsx:
-        specifier: ^2.0.0
+        specifier: ^2.1.1
         version: 2.1.1
       prism-react-renderer:
         specifier: ^2.3.0
         version: 2.4.1(react@19.2.5)
       react:
-        specifier: ^19.0.0
+        specifier: ^19.2.4
         version: 19.2.5
       react-dom:
-        specifier: ^19.0.0
+        specifier: ^19.2.4
         version: 19.2.5(react@19.2.5)
     devDependencies:
       '@docusaurus/module-type-aliases':
@@ -92,7 +92,7 @@ importers:
         specifier: 3.10.0
         version: 3.10.0(@swc/core@1.15.26)(esbuild@0.28.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@types/react':
-        specifier: ^19.0.0
+        specifier: ^19.2.14
         version: 19.2.14
       '@unpunnyfuns/swatchbook-core':
         specifier: workspace:*
@@ -101,7 +101,7 @@ importers:
         specifier: ^1.59.1
         version: 1.59.1
       typescript:
-        specifier: ~6.0.2
+        specifier: ^6.0.3
         version: 6.0.3
 
   apps/storybook:
@@ -189,7 +189,7 @@ importers:
         specifier: ^4.2.4
         version: 4.2.4
       typescript:
-        specifier: ^6.0.0
+        specifier: ^6.0.3
         version: 6.0.3
       vite:
         specifier: ^8.0.4
@@ -259,7 +259,7 @@ importers:
         specifier: ^0.21.9
         version: 0.21.9(@tsdown/css@0.21.9)(oxc-resolver@11.20.0)(typescript@6.0.3)
       typescript:
-        specifier: ^6.0.0
+        specifier: ^6.0.3
         version: 6.0.3
       vite:
         specifier: ^8.0.4
@@ -277,7 +277,7 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       colorjs.io:
-        specifier: 0.6.1
+        specifier: ^0.6.1
         version: 0.6.1
     devDependencies:
       '@testing-library/react':
@@ -314,7 +314,7 @@ importers:
         specifier: ^0.21.9
         version: 0.21.9(@tsdown/css@0.21.9)(oxc-resolver@11.20.0)(typescript@6.0.3)
       typescript:
-        specifier: ^6.0.0
+        specifier: ^6.0.3
         version: 6.0.3
       vitest:
         specifier: ^4.1.8
@@ -357,7 +357,7 @@ importers:
         specifier: ^0.21.9
         version: 0.21.9(@tsdown/css@0.21.9)(oxc-resolver@11.20.0)(typescript@6.0.3)
       typescript:
-        specifier: ^6.0.0
+        specifier: ^6.0.3
         version: 6.0.3
       vitest:
         specifier: ^4.1.8
@@ -379,7 +379,7 @@ importers:
         specifier: ^0.21.9
         version: 0.21.9(@tsdown/css@0.21.9)(oxc-resolver@11.20.0)(typescript@6.0.3)
       typescript:
-        specifier: ^6.0.0
+        specifier: ^6.0.3
         version: 6.0.3
       vitest:
         specifier: ^4.1.8
@@ -394,7 +394,7 @@ importers:
         specifier: workspace:*
         version: link:../core
       colorjs.io:
-        specifier: 0.6.1
+        specifier: ^0.6.1
         version: 0.6.1
       jiti:
         specifier: ^2.4.0
@@ -416,7 +416,7 @@ importers:
         specifier: ^0.21.9
         version: 0.21.9(@tsdown/css@0.21.9)(oxc-resolver@11.20.0)(typescript@6.0.3)
       typescript:
-        specifier: ^6.0.0
+        specifier: ^6.0.3
         version: 6.0.3
       vitest:
         specifier: ^4.1.8
@@ -459,7 +459,7 @@ importers:
         specifier: ^0.21.9
         version: 0.21.9(@tsdown/css@0.21.9)(oxc-resolver@11.20.0)(typescript@6.0.3)
       typescript:
-        specifier: ^6.0.0
+        specifier: ^6.0.3
         version: 6.0.3
       vitest:
         specifier: ^4.1.8
@@ -471,7 +471,7 @@ importers:
         specifier: ^25.6.0
         version: 25.6.0
       typescript:
-        specifier: ^6.0.0
+        specifier: ^6.0.3
         version: 6.0.3
 
 packages:
