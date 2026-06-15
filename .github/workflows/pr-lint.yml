@@ -7,6 +7,10 @@ on:
 permissions:
   pull-requests: read
 
+concurrency:
+  group: pr-lint-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   conventional-title:
     name: Conventional Commits title
@@ -14,7 +18,7 @@ jobs:
     # Skip for Changesets' auto-generated release PRs — their title
     # (`chore(release): vX.Y.Z`) is produced by the Changesets action,
     # not authored by a human, and rejecting it serves no purpose.
-    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
+    if: ${{ !startsWith(github.head_ref, 'changeset-release/') && github.actor != 'dependabot[bot]' }}
     permissions:
       pull-requests: read
     steps:
@@ -58,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     # Same rationale as conventional-title: Changesets' release PRs
     # bundle queued changesets and don't correspond to a single issue.
-    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
+    if: ${{ !startsWith(github.head_ref, 'changeset-release/') && github.actor != 'dependabot[bot]' }}
     permissions:
       pull-requests: read
     steps:

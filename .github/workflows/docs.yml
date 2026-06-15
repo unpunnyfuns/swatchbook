@@ -17,6 +17,7 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     # Run in the pinned Playwright image (Chromium + system deps preinstalled)
     # so the media-capture step needs no `playwright install` and the browser
     # launches reliably — same container the test suite uses in ci.yml. The

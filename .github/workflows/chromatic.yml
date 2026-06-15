@@ -6,12 +6,20 @@ on:
   pull_request:
     branches: [main]
 
+# Cancel superseded PR runs — Chromatic is billed per snapshot, so stacking
+# runs on rapid pushes wastes quota. Main runs complete so the baseline is
+# always captured.
+concurrency:
+  group: chromatic-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 # Chromatic reviews depend on commit history to deduplicate snapshots.
 # Full depth fetch lets it baseline against the merge target rather than
 # replaying every snapshot from scratch.
 jobs:
   chromatic:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     # Don't block on a missing secret — forks and draft PRs without
     # access to CHROMATIC_PROJECT_TOKEN should skip cleanly.
     if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}

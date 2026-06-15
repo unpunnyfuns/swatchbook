@@ -1,0 +1,29 @@
+version: 2
+updates:
+  # GitHub Actions only. The actions are SHA-pinned (integrity), which also
+  # freezes them — Dependabot understands the `@<sha> # vX.Y.Z` pattern and
+  # bumps the SHA + the trailing version comment together, so the pins keep
+  # getting upstream security patches. npm is managed by hand under the repo
+  # deps policy (minimumReleaseAge, lockstep @storybook/*, fixed Changesets
+  # group), so it is intentionally not configured here.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    # Age-gate bumps the way pnpm `minimumReleaseAge` gates npm: wait after
+    # an action release before opening the PR, so a bad release has time to
+    # surface and be yanked. (github-actions supports only `default-days` —
+    # the per-semver-tier keys are rejected for this ecosystem.)
+    cooldown:
+      default-days: 7
+    groups:
+      # One batched PR for all action bumps instead of one per action.
+      actions:
+        patterns: ['*']
+    commit-message:
+      # `ci: …` so the PR title satisfies pr-lint's Conventional Commits check.
+      # pr-lint also exempts `dependabot[bot]` from the linked-issue gate
+      # (a bot PR can't author `Closes #N`).
+      prefix: ci
+    labels:
+      - dependencies
