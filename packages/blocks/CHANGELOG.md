@@ -1,5 +1,12 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.62.4
+
+### Patch Changes
+
+- aa504a1d4494d2842c1e2ebae091c8fdf07265bc: TokenNavigator, TokenTable, and ColorTable now keep their expand, selection, and search state when you flip a theme axis on an MDX docs page (Storybook remounts docs blocks on a globals change, which previously reset that state).
+  - @unpunnyfuns/swatchbook-core@0.62.4
+
 ## 0.62.3
 
 ### Patch Changes
