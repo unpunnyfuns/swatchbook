@@ -11,11 +11,31 @@ allowBuilds:
   core-js: false
 
 overrides:
+  # Each pin forces a patched version to clear a Dependabot/GHSA advisory
+  # (ref = the PR that added it). All verified load-bearing; removing any
+  # regresses to a vulnerable/older version (#1224).
+  #
+  # webpackbar is the exception: a #734 transitive-cleanup pin with no
+  # specific advisory recorded. Verify before removing.
   webpackbar: 7.0.0
+  # GHSA-w5hq-g745-h8pq (#656), via webpack-dev-server -> sockjs
   uuid: ^14.0.0
+  # GHSA-v2v4-37r5-5v8g (#691)
   ip-address: ^10.1.1
+  # GHSA-5c6j-r48x-rmvq + GHSA-qj8w-gfj5-8c6v (#711), via copy-webpack-plugin
   serialize-javascript: ^7.0.5
+  # GHSA-58qx-3vcg-4xpx (#1012)
   ws: ^8.20.1
+  # GHSA-q8mj-m7cp-5q26 (#1037)
   qs: ^6.15.2
+  # critical quote() newline-escaping advisory (#1131), via @docusaurus/core
   shell-quote: ^1.8.4
+  # GHSA-gv7w-rqvm-qjhr + GHSA-g7r4-m6w7-qqqr (#1194), Storybook / Vite
   esbuild: ^0.28.1
+  # GHSA-v6wh-96g9-6wx3 (#1223)
+  launch-editor: ^2.14.1
+  # GHSA-h67p-54hq-rp68 (#1223). Scoped to 4.x: Docusaurus's front-matter
+  # parser needs js-yaml 3.x; a blanket override breaks `docs#build`.
+  'js-yaml@>=4': ^4.2.0
+  # GHSA-4x5r-pxfx-6jf8 (#1223)
+  '@babel/core': ^7.29.6

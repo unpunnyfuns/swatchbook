@@ -10,9 +10,16 @@ permissions:
   contents: read
   actions: write
 
+# Cancel superseded PR runs (saves runner minutes); let every push to main
+# run to completion so each commit stays individually validated.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     # Pin to match apps/storybook/node_modules/playwright version. Bump in
     # the same PR as a Playwright upgrade — ships chromium + all system
     # deps pre-installed, so we skip `apt-get install` entirely.
@@ -178,6 +185,7 @@ jobs:
     # needs >=10.1). When Storybook 11 ships, add its prerelease to the
     # matrix here for early warning.
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     container:
       image: ghcr.io/${{ github.repository }}/playwright:v1.59.1-noble
       options: --ipc=host
