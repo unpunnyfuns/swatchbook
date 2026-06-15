@@ -4,6 +4,7 @@ import preview from '../../.storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Tests/ColorFormat',
+  tags: ['!manifest', '!dev'],
   component: TokenTable,
   // Test harness for the color-format pipeline: every story renders the
   // full color.** TokenTable purely to assert the value-cell output. axe

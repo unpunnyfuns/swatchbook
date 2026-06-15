@@ -23,6 +23,7 @@ function Probe() {
 
 const meta = preview.meta({
   title: 'Tests/UseTokenUpdates',
+  tags: ['!manifest', '!dev'],
   component: Probe,
 });
 
