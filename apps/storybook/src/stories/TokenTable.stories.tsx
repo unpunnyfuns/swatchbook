@@ -10,7 +10,11 @@ const meta = preview.meta({
   // otherwise snapshot mid-settle and flag the story as unstable. A
   // short delay lets the render land before capture — capture-phase
   // only, doesn't touch local dev or vitest.
-  parameters: { chromatic: { delay: 400 } },
+  // axe (a11y) runs once on the small SysColors story. The full-table
+  // variants re-check identical row patterns at 7-14s of axe each; that
+  // load is what trips the addon-vitest manager UI server timeout
+  // (#1212). Interaction tests still run on every story.
+  parameters: { chromatic: { delay: 400 }, a11y: { test: 'off' } },
   argTypes: {
     filter: { control: 'text' },
     type: {
@@ -48,7 +52,10 @@ export const ColorsOnly = meta.story({
   args: { type: 'color' },
   play: async ({ canvasElement }) => assertTableRenders(canvasElement),
 });
-export const SysColors = meta.story({ args: { filter: 'color.**' } });
+export const SysColors = meta.story({
+  args: { filter: 'color.**' },
+  parameters: { a11y: { test: 'error' } },
+});
 export const SysTypography = meta.story({ args: { filter: 'typography.**' } });
 export const DimensionsOnly = meta.story({
   args: { type: 'dimension' },

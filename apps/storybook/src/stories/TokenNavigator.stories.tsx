@@ -10,7 +10,11 @@ const meta = preview.meta({
   // per-type previews in the tree rows). Chromatic would otherwise
   // snapshot mid-settle and flag the story as unstable. A short delay
   // lets the render land before capture — capture-phase only.
-  parameters: { chromatic: { delay: 400 } },
+  // axe (a11y) runs once on the small ColorSubtree story. The full-tree
+  // variants re-check identical row patterns at 8-13s of axe each; that
+  // load is what trips the addon-vitest manager UI server timeout
+  // (#1212). Interaction tests still run on every story.
+  parameters: { chromatic: { delay: 400 }, a11y: { test: 'off' } },
   argTypes: {
     root: { control: 'text' },
     type: { control: 'text' },
@@ -22,7 +26,10 @@ export default meta;
 
 export const Default = meta.story();
 
-export const ColorSubtree = meta.story({ args: { root: 'color' } });
+export const ColorSubtree = meta.story({
+  args: { root: 'color' },
+  parameters: { a11y: { test: 'error' } },
+});
 
 export const FullyCollapsed = meta.story({ args: { initiallyExpanded: 0 } });
 

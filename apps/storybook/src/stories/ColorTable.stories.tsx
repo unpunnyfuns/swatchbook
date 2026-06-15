@@ -5,6 +5,11 @@ import preview from '../../.storybook/preview.tsx';
 const meta = preview.meta({
   title: 'Blocks/ColorTable',
   component: ColorTable,
+  // axe (a11y) runs once on the small RefBlue story. The full-table
+  // variants re-check identical row patterns at 6-13s of axe each; that
+  // load is what trips the addon-vitest manager UI server timeout
+  // (#1212). Interaction tests still run on every story.
+  parameters: { a11y: { test: 'off' } },
   argTypes: {
     filter: { control: 'text' },
     sortBy: {
@@ -37,6 +42,7 @@ export const SysOnly = meta.story({
 });
 export const RefBlue = meta.story({
   args: { filter: 'color.palette.blue.**' },
+  parameters: { a11y: { test: 'error' } },
   play: async ({ canvasElement }) => assertTableRenders(canvasElement),
 });
 export const SortedPerceptually = meta.story({

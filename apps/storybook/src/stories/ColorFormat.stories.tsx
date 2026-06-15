@@ -5,8 +5,13 @@ import preview from '../../.storybook/preview.tsx';
 const meta = preview.meta({
   title: 'Tests/ColorFormat',
   component: TokenTable,
+  // Test harness for the color-format pipeline: every story renders the
+  // full color.** TokenTable purely to assert the value-cell output. axe
+  // (a11y) on that table is already covered by Blocks/TokenTable's
+  // SysColors story; skip the redundant seconds-long pass here (#1212).
   parameters: {
     swatchbook: { axes: { mode: 'Light', brand: 'Default' } },
+    a11y: { test: 'off' },
   },
 });
 

@@ -31,6 +31,12 @@ function DiagnosticsProbe() {
 const meta = preview.meta({
   title: 'Tests/BlockAssertions',
   component: DiagnosticsProbe,
+  // Test harness: each story renders a block purely to assert it produces
+  // concrete output. axe (a11y) for these blocks is covered by their real
+  // Blocks/* stories; skip the redundant pass here, which on the heavy
+  // table/palette renders costs seconds and feeds the manager UI server
+  // timeout (#1212). Interaction assertions still run.
+  parameters: { a11y: { test: 'off' } },
 });
 
 export default meta;
