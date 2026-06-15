@@ -12,10 +12,10 @@ updates:
       interval: weekly
     # Age-gate bumps the way pnpm `minimumReleaseAge` gates npm: wait after
     # an action release before opening the PR, so a bad release has time to
-    # surface and be yanked. Longer for major bumps (bigger blast radius).
+    # surface and be yanked. (github-actions supports only `default-days` —
+    # the per-semver-tier keys are rejected for this ecosystem.)
     cooldown:
       default-days: 7
-      semver-major-days: 14
     groups:
       # One batched PR for all action bumps instead of one per action.
       actions:
