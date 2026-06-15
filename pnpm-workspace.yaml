@@ -25,3 +25,9 @@ overrides:
   shell-quote: ^1.8.4
   esbuild: ^0.28.1
   joi: ^17.13.4
+  launch-editor: ^2.14.1
+  # Scoped to the 4.x line: the flagged instance is js-yaml 4.1.x (dev
+  # tooling); Docusaurus's front-matter parser needs 3.x, and a blanket
+  # override force-upgrades it and breaks `docs#build`.
+  'js-yaml@>=4': ^4.2.0
+  '@babel/core': ^7.29.6
