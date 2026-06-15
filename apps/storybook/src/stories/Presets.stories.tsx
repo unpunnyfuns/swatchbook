@@ -18,7 +18,7 @@ function PresetProbe() {
 
 const meta = preview.meta({
   title: 'Tests/Presets',
-  tags: ['!manifest'],
+  tags: ['!manifest', '!dev'],
   component: PresetProbe,
 });
 

@@ -4,7 +4,6 @@ import preview from '../../../.storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Internals/TokenDetail/AxisVariance',
-  tags: ['!manifest'],
   component: AxisVariance,
   argTypes: {
     path: { control: 'text' },

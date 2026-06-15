@@ -4,7 +4,6 @@ import preview from '../../../.storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Internals/TokenDetail/AliasChain',
-  tags: ['!manifest'],
   component: AliasChain,
   argTypes: {
     path: { control: 'text' },

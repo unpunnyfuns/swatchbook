@@ -36,6 +36,7 @@ export default definePreview({
             'Motion',
             'StrokeStyles',
           ],
+          'Blocks',
           '*',
         ],
       },

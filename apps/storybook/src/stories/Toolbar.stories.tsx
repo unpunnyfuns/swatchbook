@@ -119,7 +119,7 @@ function ToolbarHarness(): ReactElement {
 
 const meta = preview.meta({
   title: 'Tests/Toolbar',
-  tags: ['!manifest'],
+  tags: ['!manifest', '!dev'],
   component: ToolbarHarness,
   // Stateful harness — its rendered output stays still after each
   // interaction settles. Chromatic snapshot the default Light/Default

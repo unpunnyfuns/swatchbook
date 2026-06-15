@@ -3,7 +3,6 @@ import preview from '../../.storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Internals/Samples/MotionSample',
-  tags: ['!manifest'],
   component: MotionSample,
   argTypes: {
     path: { control: 'text' },

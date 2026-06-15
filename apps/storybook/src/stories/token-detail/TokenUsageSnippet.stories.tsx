@@ -4,7 +4,6 @@ import preview from '../../../.storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Internals/TokenDetail/TokenUsageSnippet',
-  tags: ['!manifest'],
   component: TokenUsageSnippet,
   argTypes: {
     path: { control: 'text' },

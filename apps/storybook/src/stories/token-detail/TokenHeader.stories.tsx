@@ -4,7 +4,6 @@ import preview from '../../../.storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Internals/TokenDetail/TokenHeader',
-  tags: ['!manifest'],
   component: TokenHeader,
   argTypes: {
     path: { control: 'text' },

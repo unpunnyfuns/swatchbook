@@ -18,7 +18,7 @@ function ThemeProbe() {
 
 const meta = preview.meta({
   title: 'Tests/ThemeSwitch',
-  tags: ['!manifest'],
+  tags: ['!manifest', '!dev'],
   component: ThemeProbe,
 });
 
