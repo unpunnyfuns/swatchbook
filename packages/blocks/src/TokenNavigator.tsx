@@ -8,6 +8,7 @@ import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
+import { useBlockKey, usePersistedState } from '#/internal/persistent-state.ts';
 import { EmptyState } from '#/internal/styles.tsx';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
@@ -46,6 +47,13 @@ export interface TokenNavigatorProps {
    * the follow-up UI.
    */
   onSelect?(path: string): void;
+  /**
+   * Disambiguates persisted UI state (expand/collapse, selection, search)
+   * when two navigators with otherwise-identical props sit on the same docs
+   * page. Only needed in that case; the state key is derived from the other
+   * props otherwise.
+   */
+  id?: string;
 }
 
 interface LeafNode {
@@ -204,8 +212,16 @@ export function TokenNavigator({
   initiallyExpanded = 1,
   searchable = true,
   onSelect,
+  id,
 }: TokenNavigatorProps): ReactElement {
   const { resolved, activeTheme, activeAxes, cssVarPrefix } = useProject();
+
+  // Persist UI state (expand/collapse, selection, search) across docs-mode
+  // remounts. Keyed on the props that distinguish one navigator from another
+  // (plus the optional `id`); excludes `initiallyExpanded`/`searchable`, whose
+  // changes are handled by the re-seed effect below rather than a fresh key.
+  const typeKey = type === undefined ? '' : typeof type === 'string' ? type : type.join(',');
+  const blockKey = useBlockKey('TokenNavigator', [root, typeKey, id]);
 
   const typeFilter = useMemo<ReadonlySet<string> | undefined>(() => {
     if (type === undefined) return undefined;
@@ -220,7 +236,10 @@ export function TokenNavigator({
     return out;
   }, [tree, initiallyExpanded]);
 
-  const [expanded, setExpanded] = useState<Set<string>>(initialExpanded);
+  const [expanded, setExpanded] = usePersistedState<Set<string>>(
+    `${blockKey}::expanded`,
+    initialExpanded,
+  );
   const initiallyExpandedRef = useRef(initiallyExpanded);
   useEffect(() => {
     // Re-seed the expand/collapse state ONLY when the `initiallyExpanded`
@@ -231,10 +250,13 @@ export function TokenNavigator({
     if (initiallyExpandedRef.current === initiallyExpanded) return;
     initiallyExpandedRef.current = initiallyExpanded;
     setExpanded(initialExpanded);
-  }, [initiallyExpanded, initialExpanded]);
+  }, [initiallyExpanded, initialExpanded, setExpanded]);
 
-  const [selectedPath, setSelectedPath] = useState<string | null>(null);
-  const [query, setQuery] = useState('');
+  const [selectedPath, setSelectedPath] = usePersistedState<string | null>(
+    `${blockKey}::selected`,
+    null,
+  );
+  const [query, setQuery] = usePersistedState(`${blockKey}::query`, '');
   const deferredQuery = useDeferredValue(query);
 
   const { visibleTree, searchExpanded } = useMemo(() => {
@@ -256,21 +278,24 @@ export function TokenNavigator({
     return merged;
   }, [expanded, searchExpanded]);
 
-  const toggle = useCallback((path: string): void => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(path)) next.delete(path);
-      else next.add(path);
-      return next;
-    });
-  }, []);
+  const toggle = useCallback(
+    (path: string): void => {
+      setExpanded((prev) => {
+        const next = new Set(prev);
+        if (next.has(path)) next.delete(path);
+        else next.add(path);
+        return next;
+      });
+    },
+    [setExpanded],
+  );
 
   const handleLeafClick = useCallback(
     (path: string) => {
       if (onSelect) onSelect(path);
       else setSelectedPath(path);
     },
-    [onSelect],
+    [onSelect, setSelectedPath],
   );
 
   // WAI-ARIA tree pattern's roving tabindex — exactly one treeitem at a

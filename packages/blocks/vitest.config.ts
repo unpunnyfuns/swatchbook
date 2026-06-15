@@ -41,6 +41,9 @@ export default defineConfig({
         test: {
           name: 'browser',
           include: ['test/**/*.browser.test.{ts,tsx}'],
+          // Reset the module-level block-state store between tests (see the
+          // setup file); component UI state intentionally outlives React.
+          setupFiles: ['./test/_setup-persistent-state.ts'],
           browser: {
             enabled: true,
             provider: playwright(),

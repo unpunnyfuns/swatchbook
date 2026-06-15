@@ -1,13 +1,14 @@
 import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import cx from 'clsx';
 import type { ReactElement } from 'react';
-import { memo, useCallback, useDeferredValue, useMemo, useState } from 'react';
+import { memo, useCallback, useDeferredValue, useMemo } from 'react';
 import './ColorTable.css';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import type { ColorFormat, NormalizedColor } from '#/format-color.ts';
 import { CopyButton } from '#/internal/CopyButton.tsx';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
+import { useBlockKey, usePersistedState } from '#/internal/persistent-state.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
@@ -66,6 +67,8 @@ export interface ColorTableProps {
    * own row.
    */
   variants?: Record<string, string>;
+  /** Disambiguates persisted UI state for two identical-prop tables on a page. */
+  id?: string;
 }
 
 interface Variant {
@@ -98,14 +101,23 @@ export function ColorTable({
   searchable = true,
   onSelect,
   variants,
+  id,
 }: ColorTableProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
   const colorFormat = useColorFormat();
-  const [query, setQuery] = useState('');
+  // Persist search + variant selection + expansion across docs-mode remounts.
+  const blockKey = useBlockKey('ColorTable', [filter, caption, id]);
+  const [query, setQuery] = usePersistedState(`${blockKey}::query`, '');
   const deferredQuery = useDeferredValue(query);
-  const [selectedByBase, setSelectedByBase] = useState<Record<string, string>>({});
-  const [expandedByBase, setExpandedByBase] = useState<ReadonlySet<string>>(() => new Set());
+  const [selectedByBase, setSelectedByBase] = usePersistedState<Record<string, string>>(
+    `${blockKey}::selected`,
+    {},
+  );
+  const [expandedByBase, setExpandedByBase] = usePersistedState<ReadonlySet<string>>(
+    `${blockKey}::expanded`,
+    () => new Set(),
+  );
 
   const defs = useMemo(() => buildVariantDefs(variants), [variants]);
 
@@ -160,18 +172,24 @@ export function ColorTable({
 
   const totalTokens = useMemo(() => groups.reduce((n, g) => n + g.variants.length, 0), [groups]);
 
-  const toggleExpand = useCallback((base: string) => {
-    setExpandedByBase((prev) => {
-      const next = new Set(prev);
-      if (next.has(base)) next.delete(base);
-      else next.add(base);
-      return next;
-    });
-  }, []);
+  const toggleExpand = useCallback(
+    (base: string) => {
+      setExpandedByBase((prev) => {
+        const next = new Set(prev);
+        if (next.has(base)) next.delete(base);
+        else next.add(base);
+        return next;
+      });
+    },
+    [setExpandedByBase],
+  );
 
-  const selectVariant = useCallback((base: string, label: string) => {
-    setSelectedByBase((prev) => ({ ...prev, [base]: label }));
-  }, []);
+  const selectVariant = useCallback(
+    (base: string, label: string) => {
+      setSelectedByBase((prev) => ({ ...prev, [base]: label }));
+    },
+    [setSelectedByBase],
+  );
 
   const matchSuffix =
     searchable && query.trim() !== ''
