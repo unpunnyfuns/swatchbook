@@ -111,7 +111,7 @@
     "react-dom": "^19.2.4",
     "storybook": "^10.4.4",
     "tsdown": "^0.21.9",
-    "typescript": "^6.0.0",
+    "typescript": "^6.0.3",
     "vite": "^8.0.4",
     "vitest": "^4.1.8"
   }
