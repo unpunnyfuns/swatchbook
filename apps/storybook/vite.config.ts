@@ -26,7 +26,13 @@ export default defineConfig({
         browser: {
           enabled: true,
           headless: true,
-          provider: playwright({}),
+          // Emulate reduced motion so animated stories (MotionSample /
+          // MotionPreview / CompositePreview transition) render their static
+          // fallback during tests. Without it the setInterval loops keep
+          // mutating the DOM and the a11y (axe) pass never reaches a stable
+          // state — the story test runner hangs. The components already honor
+          // prefers-reduced-motion via usePrefersReducedMotion.
+          provider: playwright({ contextOptions: { reducedMotion: 'reduce' } }),
           instances: [{
             browser: 'chromium'
           }]

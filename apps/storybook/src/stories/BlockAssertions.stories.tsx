@@ -166,21 +166,19 @@ export const BorderPreviewRenders = meta.story({
 export const MotionPreviewRenders = meta.story({
   render: () => <MotionPreview filter="transition.**" />,
   play: async ({ canvasElement }) => {
-    await waitForContent(canvasElement, 'div[aria-hidden="true"]');
-    const balls = [...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]')];
-    // Find the one inside a track (has transition-duration set). Skip empty
-    // cases from reduced-motion mode.
-    const animated = balls.find((el) => {
+    // Wait for the block's token rows, not the animated ball: under reduced
+    // motion (which the test runner emulates) no ball is rendered at all.
+    await waitForContent(canvasElement, '.sb-motion-preview__row');
+    expect(canvasElement.textContent ?? '').toMatch(/motion token/i);
+    // Only assert animation timing when a ball actually animates (full motion).
+    const animated = [
+      ...canvasElement.querySelectorAll<HTMLElement>('div[aria-hidden="true"]'),
+    ].find((el) => {
       const td = getComputedStyle(el).transitionDuration;
-      return td && td !== '0s';
+      return td !== '' && td !== '0s';
     });
-    // Under reduced-motion, no ball animates. That's still valid; assert
-    // the block rendered at all.
-    const captionText = canvasElement.textContent ?? '';
-    expect(captionText).toMatch(/motion token/i);
     if (animated) {
-      const duration = getComputedStyle(animated).transitionDuration;
-      expect(duration).not.toBe('0s');
+      expect(getComputedStyle(animated).transitionDuration).not.toBe('0s');
     }
   },
 });
