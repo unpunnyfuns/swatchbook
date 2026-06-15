@@ -35,4 +35,8 @@ addons.setConfig({
     brandUrl: './',
     brandTarget: '_self',
   }),
+  // Collapse the secondary roots on load so Docs + Blocks (the primary
+  // surface) lead and the rest stay one click away. Initial state only —
+  // Storybook persists per-user expansion in localStorage thereafter.
+  sidebar: { collapsedRoots: ['integrations', 'internals', 'hooks'] },
 });
