@@ -3,18 +3,24 @@ name: Security
 on:
   push:
     branches: [main]
+  # All PRs (not just workflow-touching ones): the dependency jobs below
+  # need to run whenever a PR could change the dependency set, and zizmor
+  # riding along on every PR is a cheap, arguably-better-coverage side effect.
   pull_request:
     branches: [main]
-    paths:
-      - '.github/workflows/**'
 
 permissions:
   contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   zizmor:
     name: zizmor (workflow static analysis)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       # Required for zizmor to read the GitHub API for cross-repo
@@ -25,3 +31,61 @@ jobs:
         with:
           persist-credentials: false
       - uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
+
+  firewall:
+    name: Socket Firewall (known-malware / typosquat block)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # Install the whole dependency graph (top-level + transitive) through
+      # Socket Firewall Free's ephemeral proxy: any confirmed-malicious package
+      # fails the job before its tarball is extracted. Free, anonymous, no
+      # account. Complements pnpm `minimumReleaseAge` — the age-gate is a
+      # time-delay heuristic with no package knowledge; the firewall is a
+      # reputation/intel check with no time awareness. Kept on a clean ubuntu
+      # runner (NOT the Playwright container) because the proxy needs
+      # unrestricted egress to the registry + Socket API.
+      - uses: SocketDev/action@ba6de6cc0565af1f42295590380973573297e31f # v1.3.2
+        with:
+          mode: firewall-free
+
+      - run: sfw pnpm install --frozen-lockfile
+
+  dependency-review:
+    name: Dependency review (known-CVE gate)
+    # PR-only: the action diffs the base -> head dependency graph; a push to
+    # main has no base to compare against.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      # Post the advisory summary as a PR comment on failure.
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      # Blocks PRs that introduce dependencies with a known CVE. `high` keeps
+      # the gate from firing on the long tail of low/moderate transitive
+      # advisories; tighten to `moderate` if the noise is acceptable.
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: on-failure
