@@ -1,13 +1,14 @@
 import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
 import cx from 'clsx';
 import type { ReactElement } from 'react';
-import { useCallback, useDeferredValue, useMemo, useState } from 'react';
+import { useCallback, useDeferredValue, useMemo } from 'react';
 import './TokenTable.css';
 import { useColorFormat } from '#/contexts.ts';
 import { CopyButton } from '#/internal/CopyButton.tsx';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
+import { useBlockKey, usePersistedState } from '#/internal/persistent-state.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
@@ -50,6 +51,8 @@ export interface TokenTableProps {
    * follow-up UI (inline panel, drill-down route, …).
    */
   onSelect?(path: string): void;
+  /** Disambiguates persisted UI state for two identical-prop tables on a page. */
+  id?: string;
 }
 
 export function TokenTable({
@@ -60,12 +63,18 @@ export function TokenTable({
   sortDir = 'asc',
   searchable = true,
   onSelect,
+  id,
 }: TokenTableProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
   const colorFormat = useColorFormat();
-  const [selectedPath, setSelectedPath] = useState<string | null>(null);
-  const [query, setQuery] = useState('');
+  // Persist selection + search across docs-mode remounts (see persistent-state).
+  const blockKey = useBlockKey('TokenTable', [filter, type, caption, id]);
+  const [selectedPath, setSelectedPath] = usePersistedState<string | null>(
+    `${blockKey}::selected`,
+    null,
+  );
+  const [query, setQuery] = usePersistedState(`${blockKey}::query`, '');
   const deferredQuery = useDeferredValue(query);
 
   const rows = useMemo(() => {
@@ -102,7 +111,7 @@ export function TokenTable({
       if (onSelect) onSelect(path);
       else setSelectedPath(path);
     },
-    [onSelect],
+    [onSelect, setSelectedPath],
   );
 
   const matchSuffix =
