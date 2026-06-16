@@ -16,6 +16,7 @@ const SLIM_KEYS = [
   '$value',
   '$type',
   '$description',
+  '$deprecated',
   'aliasOf',
   'aliasChain',
   'partialAliasOf',
