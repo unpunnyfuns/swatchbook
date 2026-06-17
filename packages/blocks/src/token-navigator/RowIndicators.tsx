@@ -97,22 +97,46 @@ function ForwardChain({ chain, root, resolveInView, onNavigate }: ForwardChainPr
   );
 }
 
+interface ReverseCountProps {
+  count: number;
+}
+
+function ReverseCount({ count }: ReverseCountProps): ReactElement {
+  return (
+    <span
+      className="sb-token-navigator__alias-reverse"
+      data-testid="row-indicator-alias-reverse"
+      aria-label={`referenced by ${count} ${count === 1 ? 'token' : 'tokens'}`}
+    >
+      <span className="sb-token-navigator__alias-arrow" aria-hidden>
+        ←
+      </span>
+      {count}
+    </span>
+  );
+}
+
 /** Per-row indicator strip: alias references, variance, gamut, deprecation. */
 export function RowIndicators(props: RowIndicatorsProps): ReactElement | null {
   const { token, root, resolveInView, onNavigate } = props;
   const aliasChain =
     Array.isArray(token.aliasChain) && token.aliasChain.length > 0 ? token.aliasChain : undefined;
+  const reverseCount =
+    Array.isArray(token.aliasedBy) && token.aliasedBy.length > 0 ? token.aliasedBy.length : 0;
 
-  if (!aliasChain) return null;
+  if (!aliasChain && reverseCount === 0) return null;
 
   return (
     <span className="sb-token-navigator__indicators">
-      <ForwardChain
-        chain={aliasChain}
-        root={root}
-        resolveInView={resolveInView}
-        onNavigate={onNavigate}
-      />
+      {aliasChain && (
+        <ForwardChain
+          chain={aliasChain}
+          root={root}
+          resolveInView={resolveInView}
+          onNavigate={onNavigate}
+        />
+      )}
+      {reverseCount > 0 && <ReverseCount count={reverseCount} />}
     </span>
   );
 }
