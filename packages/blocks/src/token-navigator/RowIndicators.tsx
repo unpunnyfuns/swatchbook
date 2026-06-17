@@ -97,6 +97,28 @@ function ForwardChain({ chain, root, resolveInView, onNavigate }: ForwardChainPr
   );
 }
 
+interface VarianceBadgeProps {
+  variance: AxisVarianceResult;
+}
+
+function VarianceBadge({ variance }: VarianceBadgeProps): ReactElement | null {
+  if (variance.kind === 'constant') return null;
+  const axes = variance.varyingAxes;
+  const label = variance.kind === 'single' ? variance.axis : `${axes.length} axes`;
+  return (
+    <span
+      className="sb-token-navigator__variance"
+      data-testid="row-indicator-variance"
+      aria-label={`varies by ${axes.join(', ')}`}
+    >
+      <span className="sb-token-navigator__variance-glyph" aria-hidden>
+        ⊹
+      </span>
+      {label}
+    </span>
+  );
+}
+
 interface ReverseCountProps {
   count: number;
 }
@@ -118,13 +140,14 @@ function ReverseCount({ count }: ReverseCountProps): ReactElement {
 
 /** Per-row indicator strip: alias references, variance, gamut, deprecation. */
 export function RowIndicators(props: RowIndicatorsProps): ReactElement | null {
-  const { token, root, resolveInView, onNavigate } = props;
+  const { token, root, variance, resolveInView, onNavigate } = props;
   const aliasChain =
     Array.isArray(token.aliasChain) && token.aliasChain.length > 0 ? token.aliasChain : undefined;
   const reverseCount =
     Array.isArray(token.aliasedBy) && token.aliasedBy.length > 0 ? token.aliasedBy.length : 0;
+  const isVarying = variance !== undefined && variance.kind !== 'constant';
 
-  if (!aliasChain && reverseCount === 0) return null;
+  if (!aliasChain && reverseCount === 0 && !isVarying) return null;
 
   return (
     <span className="sb-token-navigator__indicators">
@@ -137,6 +160,7 @@ export function RowIndicators(props: RowIndicatorsProps): ReactElement | null {
         />
       )}
       {reverseCount > 0 && <ReverseCount count={reverseCount} />}
+      {variance && <VarianceBadge variance={variance} />}
     </span>
   );
 }

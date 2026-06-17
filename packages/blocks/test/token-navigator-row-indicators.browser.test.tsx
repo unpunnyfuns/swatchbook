@@ -1,5 +1,6 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
+import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
 import type { VirtualTokenShape } from '#/contexts.ts';
 import { RowIndicators } from '#/token-navigator/RowIndicators.tsx';
 
@@ -77,4 +78,56 @@ it('renders both indicators for a mid-chain token', () => {
 it('renders no reverse count when nothing references the token', () => {
   renderRow('color.blue', { $type: 'color', $value: { hex: '#00f' } });
   expect(screen.queryByTestId('row-indicator-alias-reverse')).toBeNull();
+});
+
+function renderVariance(variance: AxisVarianceResult) {
+  return render(
+    <RowIndicators
+      path="t"
+      token={{ $type: 'color', $value: { hex: '#00f' } }}
+      root={undefined}
+      variance={variance}
+      colorFormat="hex"
+      resolveInView={inView}
+      onNavigate={noop}
+    />,
+  );
+}
+
+it('single-axis variance shows the axis name', () => {
+  renderVariance({
+    path: 't',
+    kind: 'single',
+    axis: 'mode',
+    varyingAxes: ['mode'],
+    constantAcrossAxes: [],
+    perAxis: {},
+  });
+  const badge = screen.getByTestId('row-indicator-variance');
+  expect(badge.textContent).toContain('mode');
+});
+
+it('multi-axis variance shows the count with axes in aria-label', () => {
+  renderVariance({
+    path: 't',
+    kind: 'multi',
+    varyingAxes: ['mode', 'contrast'],
+    constantAcrossAxes: [],
+    perAxis: {},
+  });
+  const badge = screen.getByTestId('row-indicator-variance');
+  expect(badge.textContent).toContain('2');
+  expect(badge).toHaveAttribute('aria-label', expect.stringContaining('mode'));
+  expect(badge).toHaveAttribute('aria-label', expect.stringContaining('contrast'));
+});
+
+it('constant variance shows no badge', () => {
+  renderVariance({
+    path: 't',
+    kind: 'constant',
+    varyingAxes: [],
+    constantAcrossAxes: ['mode'],
+    perAxis: {},
+  });
+  expect(screen.queryByTestId('row-indicator-variance')).toBeNull();
 });
