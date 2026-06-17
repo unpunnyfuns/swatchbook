@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from '@vitest/browser/context';
 import { afterEach, expect, it, vi } from 'vitest';
 import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
@@ -253,4 +253,87 @@ it('reverse count > 1 opens a popover whose items navigate', async () => {
   const item = await screen.findByRole('menuitem', { name: 'color.text.primary' });
   await userEvent.click(item);
   expect(onNavigate).toHaveBeenCalledWith('color.text.primary');
+});
+
+it('renders an off-view forward node as plain non-clickable text', async () => {
+  const onNavigate = vi.fn();
+  render(
+    <RowIndicators
+      path="t"
+      token={{ $type: 'color', $value: { hex: '#00f' }, aliasChain: ['color.hidden'] }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      resolveInView={() => false}
+      onNavigate={onNavigate}
+    />,
+  );
+  const node = screen.getByTestId('alias-node');
+  expect(node.tagName.toLowerCase()).not.toBe('button');
+  expect(node).toHaveAttribute('title', 'outside current view');
+  await userEvent.click(node);
+  expect(onNavigate).not.toHaveBeenCalled();
+});
+
+it('closes the reverse popover on Escape from within the menu', async () => {
+  render(
+    <RowIndicators
+      path="t"
+      token={{ $type: 'color', $value: { hex: '#00f' }, aliasedBy: ['color.a', 'color.b'] }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      resolveInView={() => true}
+      onNavigate={() => {}}
+    />,
+  );
+  await userEvent.click(screen.getByTestId('row-indicator-alias-reverse'));
+  const menuItem = await screen.findByRole('menuitem', { name: 'color.a' });
+  expect(menuItem).toBeTruthy();
+  await userEvent.keyboard('{Escape}');
+  await waitFor(() => {
+    expect(screen.queryByRole('menuitem', { name: 'color.a' })).toBeNull();
+  });
+});
+
+it('moves focus into the menu on open (first enabled item)', async () => {
+  render(
+    <RowIndicators
+      path="t"
+      token={{ $type: 'color', $value: { hex: '#00f' }, aliasedBy: ['color.a', 'color.b'] }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      resolveInView={() => true}
+      onNavigate={() => {}}
+    />,
+  );
+  await userEvent.click(screen.getByTestId('row-indicator-alias-reverse'));
+  const menuItem = await screen.findByRole('menuitem', { name: 'color.a' });
+  await waitFor(() => expect(document.activeElement).toBe(menuItem));
+});
+
+it('closes the reverse popover on outside pointerdown', async () => {
+  render(
+    <div>
+      <button type="button" data-testid="outside">
+        outside
+      </button>
+      <RowIndicators
+        path="t"
+        token={{ $type: 'color', $value: { hex: '#00f' }, aliasedBy: ['color.a', 'color.b'] }}
+        root={undefined}
+        variance={undefined}
+        colorFormat="hex"
+        resolveInView={() => true}
+        onNavigate={() => {}}
+      />
+    </div>,
+  );
+  await userEvent.click(screen.getByTestId('row-indicator-alias-reverse'));
+  await screen.findByRole('menuitem', { name: 'color.a' });
+  await userEvent.click(screen.getByTestId('outside'));
+  await waitFor(() => {
+    expect(screen.queryByRole('menuitem', { name: 'color.a' })).toBeNull();
+  });
 });

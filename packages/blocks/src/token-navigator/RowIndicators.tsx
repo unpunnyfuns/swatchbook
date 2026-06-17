@@ -1,5 +1,5 @@
 import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { ColorFormat } from '#/format-color.ts';
 import { formatColor } from '#/format-color.ts';
@@ -147,11 +147,37 @@ interface ReverseCountProps {
 
 function ReverseCount({ referents, resolveInView, onNavigate }: ReverseCountProps): ReactElement {
   const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLSpanElement>(null);
   const count = referents.length;
   const single = count === 1;
 
+  // Move focus to the first enabled menu item on open; close on outside pointerdown.
+  useEffect(() => {
+    if (single || !open) return;
+    const first = wrapRef.current?.querySelector<HTMLElement>(
+      'button[role="menuitem"]:not(:disabled)',
+    );
+    first?.focus();
+
+    const handlePointerDown = (e: PointerEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [open, single]);
+
   return (
-    <span className="sb-token-navigator__reverse-wrap">
+    <span
+      ref={wrapRef}
+      className="sb-token-navigator__reverse-wrap"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') setOpen(false);
+      }}
+    >
       <button
         type="button"
         className="sb-token-navigator__alias-reverse"
@@ -163,9 +189,6 @@ function ReverseCount({ referents, resolveInView, onNavigate }: ReverseCountProp
           e.stopPropagation();
           if (single) onNavigate(referents[0] as string);
           else setOpen((v) => !v);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') setOpen(false);
         }}
       >
         <span className="sb-token-navigator__alias-arrow" aria-hidden>
