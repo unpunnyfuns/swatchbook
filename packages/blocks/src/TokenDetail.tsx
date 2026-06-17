@@ -44,10 +44,22 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
   const gamut = isColor ? formatColor(token.$value, colorFormat) : null;
   const value = formatTokenValue(token.$value, token.$type, colorFormat, listing[path]);
   const outOfGamut = gamut?.outOfGamut ?? false;
+  const dep = token.$deprecated;
+  const isDeprecated = dep === true || (typeof dep === 'string' && dep.length > 0);
 
   return (
     <div {...wrapperAttrs} className={cx(wrapperAttrs['className'], 'sb-token-detail')}>
       <TokenHeader path={path} {...(heading !== undefined && { heading })} />
+      {isDeprecated && (
+        <div
+          className="sb-token-detail__deprecated"
+          data-testid="token-detail-deprecated"
+          role="note"
+        >
+          <span aria-hidden>⚠ </span>
+          Deprecated{typeof dep === 'string' ? `: ${dep}` : ''}
+        </div>
+      )}
 
       <div className="sb-token-detail__section-header">Resolved value · {activeTheme}</div>
       <CompositePreview path={path} />

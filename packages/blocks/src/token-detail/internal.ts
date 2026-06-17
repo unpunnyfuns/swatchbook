@@ -7,6 +7,7 @@ export interface DetailToken {
   $type?: string;
   $value?: unknown;
   $description?: string;
+  $deprecated?: string | boolean;
   aliasOf?: string;
   aliasChain?: readonly string[];
   aliasedBy?: readonly string[];
