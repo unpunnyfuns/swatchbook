@@ -29,6 +29,12 @@ export interface VirtualTokenShape {
   $type?: string | undefined;
   $value?: unknown;
   $description?: string | undefined;
+  /**
+   * DTCG `$deprecated` — `true` or a message string. Mirrors core's
+   * `SwatchbookToken.$deprecated`; reaches blocks via the resolved token
+   * map reconstructed from the wire `tokenGraph`.
+   */
+  $deprecated?: string | boolean | undefined;
   aliasOf?: string | undefined;
   aliasChain?: readonly string[] | undefined;
   aliasedBy?: readonly string[] | undefined;
