@@ -131,3 +131,36 @@ it('constant variance shows no badge', () => {
   });
   expect(screen.queryByTestId('row-indicator-variance')).toBeNull();
 });
+
+it('flags an out-of-gamut color for the active format', () => {
+  render(
+    <RowIndicators
+      path="c"
+      token={{
+        $type: 'color',
+        $value: { colorSpace: 'display-p3', components: [1, 0, 0], alpha: 1 },
+      }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      resolveInView={inView}
+      onNavigate={noop}
+    />,
+  );
+  expect(screen.getByLabelText('out of gamut')).toBeTruthy();
+});
+
+it('shows no gamut warning for an in-gamut color', () => {
+  render(
+    <RowIndicators
+      path="c"
+      token={{ $type: 'color', $value: { hex: '#00ff00' } }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      resolveInView={inView}
+      onNavigate={noop}
+    />,
+  );
+  expect(screen.queryByLabelText('out of gamut')).toBeNull();
+});

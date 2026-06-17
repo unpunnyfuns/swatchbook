@@ -1,6 +1,7 @@
 import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
 import type { ReactElement } from 'react';
 import type { ColorFormat } from '#/format-color.ts';
+import { formatColor } from '#/format-color.ts';
 import type { VirtualTokenShape } from '#/contexts.ts';
 
 export interface RowIndicatorsProps {
@@ -140,14 +141,16 @@ function ReverseCount({ count }: ReverseCountProps): ReactElement {
 
 /** Per-row indicator strip: alias references, variance, gamut, deprecation. */
 export function RowIndicators(props: RowIndicatorsProps): ReactElement | null {
-  const { token, root, variance, resolveInView, onNavigate } = props;
+  const { token, root, variance, colorFormat, resolveInView, onNavigate } = props;
   const aliasChain =
     Array.isArray(token.aliasChain) && token.aliasChain.length > 0 ? token.aliasChain : undefined;
   const reverseCount =
     Array.isArray(token.aliasedBy) && token.aliasedBy.length > 0 ? token.aliasedBy.length : 0;
   const isVarying = variance !== undefined && variance.kind !== 'constant';
+  const outOfGamut =
+    token.$type === 'color' && (formatColor(token.$value, colorFormat)?.outOfGamut ?? false);
 
-  if (!aliasChain && reverseCount === 0 && !isVarying) return null;
+  if (!aliasChain && reverseCount === 0 && !isVarying && !outOfGamut) return null;
 
   return (
     <span className="sb-token-navigator__indicators">
@@ -161,6 +164,15 @@ export function RowIndicators(props: RowIndicatorsProps): ReactElement | null {
       )}
       {reverseCount > 0 && <ReverseCount count={reverseCount} />}
       {variance && <VarianceBadge variance={variance} />}
+      {outOfGamut && (
+        <span
+          className="sb-token-navigator__gamut"
+          title="Out of sRGB gamut for this format"
+          aria-label="out of gamut"
+        >
+          ⚠
+        </span>
+      )}
     </span>
   );
 }
