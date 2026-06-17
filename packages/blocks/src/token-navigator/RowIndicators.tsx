@@ -98,6 +98,24 @@ function ForwardChain({ chain, root, resolveInView, onNavigate }: ForwardChainPr
   );
 }
 
+interface DeprecatedBadgeProps {
+  deprecated: string | boolean;
+}
+
+function DeprecatedBadge({ deprecated }: DeprecatedBadgeProps): ReactElement {
+  const label = typeof deprecated === 'string' ? `deprecated: ${deprecated}` : 'deprecated';
+  return (
+    <span
+      className="sb-token-navigator__deprecated"
+      data-testid="row-indicator-deprecated"
+      title={label}
+      aria-label={label}
+    >
+      deprecated
+    </span>
+  );
+}
+
 interface VarianceBadgeProps {
   variance: AxisVarianceResult;
 }
@@ -149,11 +167,15 @@ export function RowIndicators(props: RowIndicatorsProps): ReactElement | null {
   const isVarying = variance !== undefined && variance.kind !== 'constant';
   const outOfGamut =
     token.$type === 'color' && (formatColor(token.$value, colorFormat)?.outOfGamut ?? false);
+  const deprecated = token.$deprecated;
+  const isDeprecated =
+    deprecated === true || (typeof deprecated === 'string' && deprecated.length > 0);
 
-  if (!aliasChain && reverseCount === 0 && !isVarying && !outOfGamut) return null;
+  if (!aliasChain && reverseCount === 0 && !isVarying && !outOfGamut && !isDeprecated) return null;
 
   return (
     <span className="sb-token-navigator__indicators">
+      {isDeprecated && deprecated !== undefined && <DeprecatedBadge deprecated={deprecated} />}
       {aliasChain && (
         <ForwardChain
           chain={aliasChain}

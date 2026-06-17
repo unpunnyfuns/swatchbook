@@ -164,3 +164,52 @@ it('shows no gamut warning for an in-gamut color', () => {
   );
   expect(screen.queryByLabelText('out of gamut')).toBeNull();
 });
+
+it('shows a deprecation badge with the message in aria-label', () => {
+  render(
+    <RowIndicators
+      path="d"
+      token={{ $type: 'color', $value: { hex: '#000' }, $deprecated: 'use color.new' }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      resolveInView={inView}
+      onNavigate={noop}
+    />,
+  );
+  const badge = screen.getByTestId('row-indicator-deprecated');
+  expect(badge).toHaveAttribute('aria-label', expect.stringContaining('use color.new'));
+});
+
+it('shows a deprecation badge for the boolean flag form', () => {
+  render(
+    <RowIndicators
+      path="d"
+      token={{ $type: 'color', $value: { hex: '#000' }, $deprecated: true }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      resolveInView={inView}
+      onNavigate={noop}
+    />,
+  );
+  expect(screen.getByTestId('row-indicator-deprecated')).toHaveAttribute(
+    'aria-label',
+    'deprecated',
+  );
+});
+
+it('shows no deprecation badge when not deprecated', () => {
+  render(
+    <RowIndicators
+      path="d"
+      token={{ $type: 'color', $value: { hex: '#000' } }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      resolveInView={inView}
+      onNavigate={noop}
+    />,
+  );
+  expect(screen.queryByTestId('row-indicator-deprecated')).toBeNull();
+});
