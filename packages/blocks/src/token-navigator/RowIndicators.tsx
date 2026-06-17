@@ -1,4 +1,5 @@
 import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
+import { useState } from 'react';
 import type { ReactElement } from 'react';
 import type { ColorFormat } from '#/format-color.ts';
 import { formatColor } from '#/format-color.ts';
@@ -139,20 +140,61 @@ function VarianceBadge({ variance }: VarianceBadgeProps): ReactElement | null {
 }
 
 interface ReverseCountProps {
-  count: number;
+  referents: readonly string[];
+  resolveInView: (path: string) => boolean;
+  onNavigate: (path: string) => void;
 }
 
-function ReverseCount({ count }: ReverseCountProps): ReactElement {
+function ReverseCount({ referents, resolveInView, onNavigate }: ReverseCountProps): ReactElement {
+  const [open, setOpen] = useState(false);
+  const count = referents.length;
+  const single = count === 1;
+
   return (
-    <span
-      className="sb-token-navigator__alias-reverse"
-      data-testid="row-indicator-alias-reverse"
-      aria-label={`referenced by ${count} ${count === 1 ? 'token' : 'tokens'}`}
-    >
-      <span className="sb-token-navigator__alias-arrow" aria-hidden>
-        ←
-      </span>
-      {count}
+    <span className="sb-token-navigator__reverse-wrap">
+      <button
+        type="button"
+        className="sb-token-navigator__alias-reverse"
+        data-testid="row-indicator-alias-reverse"
+        aria-label={`referenced by ${count} ${count === 1 ? 'token' : 'tokens'}`}
+        aria-haspopup={single ? undefined : 'menu'}
+        aria-expanded={single ? undefined : open}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (single) onNavigate(referents[0] as string);
+          else setOpen((v) => !v);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') setOpen(false);
+        }}
+      >
+        <span className="sb-token-navigator__alias-arrow" aria-hidden>
+          ←
+        </span>
+        {count}
+      </button>
+      {!single && open && (
+        <ul className="sb-token-navigator__reverse-menu" role="menu">
+          {referents.map((ref) => (
+            <li key={ref} role="none">
+              <button
+                type="button"
+                role="menuitem"
+                className="sb-token-navigator__reverse-item"
+                disabled={!resolveInView(ref)}
+                title={resolveInView(ref) ? undefined : 'outside current view'}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpen(false);
+                  onNavigate(ref);
+                }}
+              >
+                {ref}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </span>
   );
 }
@@ -184,7 +226,13 @@ export function RowIndicators(props: RowIndicatorsProps): ReactElement | null {
           onNavigate={onNavigate}
         />
       )}
-      {reverseCount > 0 && <ReverseCount count={reverseCount} />}
+      {reverseCount > 0 && token.aliasedBy && (
+        <ReverseCount
+          referents={token.aliasedBy}
+          resolveInView={resolveInView}
+          onNavigate={onNavigate}
+        />
+      )}
       {variance && <VarianceBadge variance={variance} />}
       {outOfGamut && (
         <span

@@ -1,5 +1,6 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
-import { afterEach, expect, it } from 'vitest';
+import { userEvent } from '@vitest/browser/context';
+import { afterEach, expect, it, vi } from 'vitest';
 import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
 import type { VirtualTokenShape } from '#/contexts.ts';
 import { RowIndicators } from '#/token-navigator/RowIndicators.tsx';
@@ -212,4 +213,44 @@ it('shows no deprecation badge when not deprecated', () => {
     />,
   );
   expect(screen.queryByTestId('row-indicator-deprecated')).toBeNull();
+});
+
+it('reverse count of 1 navigates directly on click', async () => {
+  const onNavigate = vi.fn();
+  render(
+    <RowIndicators
+      path="t"
+      token={{ $type: 'color', $value: { hex: '#00f' }, aliasedBy: ['color.brand'] }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      resolveInView={inView}
+      onNavigate={onNavigate}
+    />,
+  );
+  await userEvent.click(screen.getByTestId('row-indicator-alias-reverse'));
+  expect(onNavigate).toHaveBeenCalledWith('color.brand');
+});
+
+it('reverse count > 1 opens a popover whose items navigate', async () => {
+  const onNavigate = vi.fn();
+  render(
+    <RowIndicators
+      path="t"
+      token={{
+        $type: 'color',
+        $value: { hex: '#00f' },
+        aliasedBy: ['color.brand', 'color.text.primary'],
+      }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      resolveInView={inView}
+      onNavigate={onNavigate}
+    />,
+  );
+  await userEvent.click(screen.getByTestId('row-indicator-alias-reverse'));
+  const item = await screen.findByRole('menuitem', { name: 'color.text.primary' });
+  await userEvent.click(item);
+  expect(onNavigate).toHaveBeenCalledWith('color.text.primary');
 });
