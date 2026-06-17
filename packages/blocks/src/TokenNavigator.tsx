@@ -13,6 +13,8 @@ import { EmptyState } from '#/internal/styles.tsx';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
+import { ancestorGroupPaths, isInView } from '#/token-navigator/navigate.ts';
+import { RowIndicators } from '#/token-navigator/RowIndicators.tsx';
 import type { VirtualToken } from '#/types.ts';
 
 export interface TokenNavigatorProps {
@@ -306,6 +308,31 @@ export function TokenNavigator({
   // points at a now-hidden row (e.g. after a search narrows the tree).
   const [storedFocus, setStoredFocus] = useState<string | null>(null);
   const treeItemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
+
+  const resolveInView = useCallback(
+    (path: string): boolean => isInView(path, { resolved, root, typeFilter }),
+    [resolved, root, typeFilter],
+  );
+
+  const navigateTo = useCallback(
+    (target: string): void => {
+      setQuery('');
+      setExpanded((prev) => {
+        const next = new Set(prev);
+        for (const p of ancestorGroupPaths(target, root)) next.add(p);
+        return next;
+      });
+      if (onSelect) onSelect(target);
+      else setSelectedPath(target);
+      setStoredFocus(target);
+      requestAnimationFrame(() => {
+        const el = treeItemRefs.current.get(target);
+        el?.scrollIntoView({ block: 'nearest' });
+        el?.focus();
+      });
+    },
+    [root, onSelect, setQuery, setExpanded, setSelectedPath],
+  );
   const registerTreeItem = useCallback(
     (path: string) =>
       (el: HTMLLIElement | null): void => {
@@ -538,6 +565,9 @@ export function TokenNavigator({
               onToggle={toggle}
               onFocusPath={setStoredFocus}
               onLeafClick={handleLeafClick}
+              root={root}
+              resolveInView={resolveInView}
+              onNavigate={navigateTo}
               level={1}
               setsize={visibleTree.length}
               posinset={i + 1}
@@ -565,6 +595,9 @@ interface TreeNodeRowProps {
   onToggle(path: string): void;
   onFocusPath(path: string): void;
   onLeafClick(path: string): void;
+  root: string | undefined;
+  resolveInView(path: string): boolean;
+  onNavigate(path: string): void;
   // 1-indexed depth in the tree (top-level = 1).
   level: number;
   // Number of siblings at this level (including self).
@@ -581,6 +614,9 @@ function TreeNodeRow({
   onToggle,
   onFocusPath,
   onLeafClick,
+  root,
+  resolveInView,
+  onNavigate,
   level,
   setsize,
   posinset,
@@ -593,6 +629,9 @@ function TreeNodeRow({
         registerTreeItem={registerTreeItem}
         onFocusPath={onFocusPath}
         onLeafClick={onLeafClick}
+        root={root}
+        resolveInView={resolveInView}
+        onNavigate={onNavigate}
         level={level}
         setsize={setsize}
         posinset={posinset}
@@ -647,6 +686,9 @@ function TreeNodeRow({
               onToggle={onToggle}
               onFocusPath={onFocusPath}
               onLeafClick={onLeafClick}
+              root={root}
+              resolveInView={resolveInView}
+              onNavigate={onNavigate}
               level={level + 1}
               setsize={node.children.length}
               posinset={i + 1}
@@ -664,6 +706,9 @@ interface LeafRowProps {
   registerTreeItem(path: string): (el: HTMLLIElement | null) => void;
   onFocusPath(path: string): void;
   onLeafClick(path: string): void;
+  root: string | undefined;
+  resolveInView(path: string): boolean;
+  onNavigate(path: string): void;
   // 1-indexed depth in the tree (top-level = 1).
   level: number;
   // Number of siblings at this level (including self).
@@ -678,11 +723,19 @@ const LeafRow = memo(function LeafRow({
   registerTreeItem,
   onFocusPath,
   onLeafClick,
+  root,
+  resolveInView,
+  onNavigate,
   level,
   setsize,
   posinset,
 }: LeafRowProps): ReactElement {
   const type = node.token.$type ?? '';
+  const project = useProject();
+  const colorFormat = useColorFormat();
+  const variance = project.varianceByPath[node.path];
+  const dep = node.token.$deprecated;
+  const isDeprecated = dep === true || (typeof dep === 'string' && dep.length > 0);
   return (
     <li
       ref={registerTreeItem(node.path)}
@@ -700,6 +753,7 @@ const LeafRow = memo(function LeafRow({
       <div
         className="sb-token-navigator__leaf-row"
         data-testid="token-navigator-leaf-row"
+        data-deprecated={isDeprecated ? 'true' : undefined}
         onClick={() => {
           onFocusPath(node.path);
           onLeafClick(node.path);
@@ -711,6 +765,15 @@ const LeafRow = memo(function LeafRow({
         <span className="sb-token-navigator__tail">{node.segment}</span>
         {type && <span className="sb-token-navigator__type-pill">{type}</span>}
         <LeafPreview path={node.path} token={node.token} />
+        <RowIndicators
+          path={node.path}
+          token={node.token}
+          root={root}
+          variance={variance}
+          colorFormat={colorFormat}
+          resolveInView={resolveInView}
+          onNavigate={onNavigate}
+        />
       </div>
     </li>
   );
