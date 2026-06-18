@@ -4,6 +4,8 @@ import type { ReactElement } from 'react';
 import type { ColorFormat } from '#/format-color.ts';
 import { formatColor } from '#/format-color.ts';
 import type { VirtualTokenShape } from '#/contexts.ts';
+import { resolveIndicators } from '#/indicators/resolve.ts';
+import type { IndicatorName } from '#/indicators/resolve.ts';
 import './indicators.css';
 
 export interface RowIndicatorsProps {
@@ -19,6 +21,8 @@ export interface RowIndicatorsProps {
   canReference: (path: string) => boolean;
   /** Act on a referenced path — the host decides what that means: the navigator moves the tree, the table opens detail. */
   onReferenceClick: (path: string) => void;
+  /** Resolved enabled-map (from `resolveIndicators`). Defaults to the established four-on set. */
+  enabled?: Record<IndicatorName, boolean>;
 }
 
 // Strip the navigator's `root` prefix from a path for a compact chain label.
@@ -235,6 +239,8 @@ function ReverseCount({
 /** Per-row indicator strip: alias references, variance, gamut, deprecation. */
 export function RowIndicators(props: RowIndicatorsProps): ReactElement | null {
   const { token, root, variance, colorFormat, canReference, onReferenceClick } = props;
+  const en = props.enabled ?? resolveIndicators(undefined);
+
   const aliasChain =
     Array.isArray(token.aliasChain) && token.aliasChain.length > 0 ? token.aliasChain : undefined;
   const reverseCount =
@@ -245,13 +251,33 @@ export function RowIndicators(props: RowIndicatorsProps): ReactElement | null {
   const deprecated = token.$deprecated;
   const isDeprecated =
     deprecated === true || (typeof deprecated === 'string' && deprecated.length > 0);
+  const description =
+    typeof token.$description === 'string' && token.$description.length > 0
+      ? token.$description
+      : undefined;
 
-  if (!aliasChain && reverseCount === 0 && !isVarying && !outOfGamut && !isDeprecated) return null;
+  const showDeprecated = en.deprecation && isDeprecated;
+  const showForward = en.alias && aliasChain !== undefined;
+  const showReverse = en.alias && reverseCount > 0;
+  const showVariance = en.variance && isVarying;
+  const showGamut = en.gamut && outOfGamut;
+  const showDescription = en.description && description !== undefined;
+
+  if (
+    !showDeprecated &&
+    !showForward &&
+    !showReverse &&
+    !showVariance &&
+    !showGamut &&
+    !showDescription
+  ) {
+    return null;
+  }
 
   return (
     <span className="sb-indicator__indicators">
-      {isDeprecated && deprecated !== undefined && <DeprecatedBadge deprecated={deprecated} />}
-      {aliasChain && (
+      {showDeprecated && deprecated !== undefined && <DeprecatedBadge deprecated={deprecated} />}
+      {showForward && aliasChain && (
         <ForwardChain
           chain={aliasChain}
           root={root}
@@ -259,21 +285,31 @@ export function RowIndicators(props: RowIndicatorsProps): ReactElement | null {
           onReferenceClick={onReferenceClick}
         />
       )}
-      {reverseCount > 0 && token.aliasedBy && (
+      {showReverse && token.aliasedBy && (
         <ReverseCount
           referents={token.aliasedBy}
           canReference={canReference}
           onReferenceClick={onReferenceClick}
         />
       )}
-      {variance && <VarianceBadge variance={variance} />}
-      {outOfGamut && (
+      {showVariance && variance && <VarianceBadge variance={variance} />}
+      {showGamut && (
         <span
           className="sb-indicator__gamut"
           title="Out of sRGB gamut for this format"
           aria-label="out of gamut"
         >
           ⚠
+        </span>
+      )}
+      {showDescription && description !== undefined && (
+        <span
+          className="sb-indicator__description"
+          data-testid="row-indicator-description"
+          title={description}
+          aria-label={`description: ${description}`}
+        >
+          ⓘ
         </span>
       )}
     </span>
