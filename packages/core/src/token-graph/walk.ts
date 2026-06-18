@@ -179,6 +179,32 @@ export function resolveAliasAt(
   };
 }
 
+/**
+ * The full forward alias chain for `path` at `tuple` — the target paths it
+ * resolves through, hop by hop, to the final literal, e.g.
+ * `['color.brand', 'color.palette.blue.500']`. Each hop's immediate target is
+ * whatever `resolveAliasAt` resolves at this tuple (per-tuple alias write,
+ * else baseline alias), so the chain is correct in every axis context, not
+ * just the default. Empty for a literal. Visited-set bounds cycles.
+ */
+export function aliasChainAt(
+  graph: TokenGraph,
+  path: string,
+  tuple: Record<string, string>,
+): string[] {
+  const chain: string[] = [];
+  const visited = new Set<string>([path]);
+  let current = path;
+  for (;;) {
+    const target = resolveAliasAt(graph, current, tuple)?.aliasOf;
+    if (target === undefined || visited.has(target)) break;
+    chain.push(target);
+    visited.add(target);
+    current = target;
+  }
+  return chain;
+}
+
 export function resolveAliasAllAt(graph: TokenGraph, tuple: Record<string, string>): TokenMap {
   const result: TokenMap = {};
   for (const path of Object.keys(graph.nodes)) {
