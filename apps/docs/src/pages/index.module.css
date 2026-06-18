@@ -1,7 +1,8 @@
-/* Frontpage. Refined, swatch-native: the hero pairs the wordmark with a deck
-   of live token ramps (the product's own subject matter), which flips with the
-   docs theme. Everything pulls from the token CSS variables so it tracks
-   light/dark and brand automatically. */
+/* Frontpage. The hero pairs the wordmark with a live "resolution pipeline":
+   real DTCG tokens travelling from source through the alias graph to the
+   actionable `var(--sb-*)` you ship. Everything pulls from the token CSS
+   variables, so the band re-resolves with the in-hero modifier chips (which
+   drive the same global switcher state the navbar control does). */
 
 /* Hint nudging visitors toward the theme switcher in the top-right navbar slot
    (it replaces Docusaurus's color-mode toggle). Right-aligned, arrow points up. */
@@ -42,15 +43,11 @@
 }
 
 .hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: 3rem;
-  align-items: center;
   max-width: min(1120px, calc(100% - 2rem));
   margin: clamp(1.5rem, 4vw, 2.5rem) auto 0;
   padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.5rem, 5vw, 4rem);
   /* Subtle highlighted panel: a faint primary tint over the raised surface,
-     mode-aware via the token vars. The swatch deck floats on it as a card. */
+     mode-aware via the token vars. The pipeline band floats on it. */
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--ifm-color-primary) 7%, var(--ifm-background-surface-color)),
@@ -59,10 +56,6 @@
   border: 1px solid var(--ifm-color-emphasis-200);
   border-radius: 20px;
   box-shadow: 0 24px 64px -40px rgba(0, 0, 0, 0.45);
-}
-
-.heroCopy {
-  min-width: 0;
 }
 
 .eyebrow {
@@ -80,6 +73,7 @@
   font-weight: 800;
   color: var(--ifm-heading-color);
   margin: 0 0 1.25rem;
+  max-width: 20ch;
   text-wrap: balance;
 }
 
@@ -87,7 +81,7 @@
   font-size: clamp(1.05rem, 1.6vw, 1.25rem);
   line-height: 1.6;
   color: var(--ifm-color-content-secondary);
-  max-width: 38ch;
+  max-width: 48ch;
   margin: 0 0 2rem;
 }
 
@@ -97,109 +91,212 @@
   flex-wrap: wrap;
 }
 
-/* Swatch deck — the hero visual. Ramps of real palette tokens, fanned with a
-   slight tactile offset so it reads as a physical swatch book. */
-.deck {
+/* In-hero "ez access" modifier chips: flip an axis right where the demo lives.
+   They drive the real switcher (mode + non-mode axes), so the whole page tracks. */
+.heroMods {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin: 1.75rem 0 1.25rem;
+}
+
+.modHint {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ifm-color-content-secondary);
+}
+
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--ifm-background-surface-color);
+}
+
+.seg button {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 5px 13px;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--ifm-color-content-secondary);
+  cursor: pointer;
+}
+
+.seg button[aria-pressed='true'] {
+  background: var(--sb-color-primary-default);
+  color: #fff;
+}
+
+/* Resolution-pipeline band: two stacked token journeys (colour, typography).
+   surface-raised lifts it off the hero panel (surface-default); the inset
+   top-highlight gives it an edge in dark where drop-shadow does nothing. */
+.band {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
-  padding: 1.75rem;
+  padding: 6px clamp(14px, 2vw, 26px);
   border-radius: 16px;
-  background: var(--ifm-background-surface-color);
-  border: 1px solid var(--ifm-color-emphasis-200);
-  box-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.45);
+  background: var(--sb-color-surface-raised);
+  border: 1px solid color-mix(in srgb, var(--sb-color-text-default) 14%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 7%, transparent),
+    0 20px 50px -34px rgba(0, 0, 0, 0.5);
 }
 
-.ramp {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-}
-
-.rampLabel {
-  flex: 0 0 4.5rem;
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 0.75rem;
-  color: var(--ifm-color-content-secondary);
-  text-align: right;
-}
-
-.chips {
+/* Each token journey is its own grid row; source and variable columns wide,
+   the short "resolves" middle narrow, so no column overflows. A hairline
+   separates the colour journey from the typography one. */
+.pipeRow {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 0.5rem;
-  flex: 1;
+  grid-template-columns: minmax(0, 1.3fr) auto minmax(0, 0.8fr) auto minmax(0, 1.2fr);
+  align-items: center;
+  gap: 20px;
+  padding: 16px 0;
 }
 
-/* Shared swatch behavior (color chips + font tiles): load reveal, hover lift,
-   and a tooltip showing the token CSS variable. */
-.swatch {
-  position: relative;
-  aspect-ratio: 1;
-  border-radius: 7px;
-  opacity: 0;
-  transform: translateY(6px);
-  animation: chipIn 0.5s ease forwards;
-  transition: transform 0.14s ease;
+.pipeRow + .pipeRow {
+  border-top: 1px solid color-mix(in srgb, var(--sb-color-text-default) 10%, transparent);
 }
 
-.swatch:hover {
-  transform: translateY(-3px) scale(1.04);
-  z-index: 2;
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
 }
 
-.swatch::after {
-  content: attr(data-var);
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%) translateY(4px);
-  padding: 0.3rem 0.5rem;
-  border-radius: 6px;
-  background: var(--ifm-color-emphasis-900);
-  color: var(--ifm-color-emphasis-0);
+.lab {
   font-family: var(--ifm-font-family-monospace);
-  font-size: 0.7rem;
-  line-height: 1;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.12s ease, transform 0.12s ease;
-  z-index: 3;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--sb-color-text-muted);
 }
 
-.swatch:hover::after {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+.src {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  /* surface-muted reads as an inset code-well, a step below the band. */
+  background: var(--sb-color-surface-muted);
+  border: 1px solid color-mix(in srgb, var(--sb-color-text-default) 12%, transparent);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--sb-color-text-default);
+  white-space: pre;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
-.chip {
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+.k {
+  color: var(--sb-color-text-muted);
 }
 
-.fontChip {
+.ref {
+  color: var(--sb-color-primary-default);
+  font-weight: 600;
+}
+
+.arrow {
+  font-size: 1.4rem;
+  color: var(--sb-color-text-muted);
+}
+
+.node {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: var(--ifm-background-color);
-  border: 1px solid var(--ifm-color-emphasis-200);
-  color: var(--ifm-color-content);
-  font-size: 1.15rem;
-  line-height: 1;
+  gap: 10px;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.82rem;
+  color: var(--sb-color-text-default);
 }
 
-@keyframes chipIn {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.sw {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  flex: 0 0 auto;
+  transition: background 0.6s ease;
+}
+
+.hex {
+  font-weight: 700;
+}
+
+.varName {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--sb-color-primary-default);
+  word-break: break-all;
+}
+
+.usage {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px dashed var(--sb-color-primary-default);
+  background: color-mix(in srgb, var(--sb-color-primary-default) 8%, transparent);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--sb-color-text-default);
+  white-space: pre-wrap;
+}
+
+.typeSample {
+  font-family: var(--sb-font-family-base);
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--sb-color-text-default);
+}
+
+/* Slow, legible crossfade as tokens re-resolve on a modifier flip. Gated: when
+   motion is suppressed, the swap is instant. */
+.band,
+.src,
+.usage,
+.varName,
+.ref,
+.typeSample,
+.seg button {
+  transition:
+    background 0.6s ease,
+    color 0.6s ease,
+    border-color 0.6s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .swatch {
-    animation: none;
-    opacity: 1;
-    transform: none;
+  .band,
+  .src,
+  .usage,
+  .varName,
+  .ref,
+  .typeSample,
+  .seg button,
+  .sw {
+    transition: none;
+  }
+}
+
+/* Under ~720px the three pipeline stages stack top-to-bottom; arrows point down. */
+@media (max-width: 720px) {
+  .pipeRow {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .pipeRow .arrow {
+    transform: rotate(90deg);
+    justify-self: start;
   }
 }
 
@@ -246,7 +343,10 @@
   background: var(--ifm-background-surface-color);
   box-shadow: 0 18px 48px -24px rgba(0, 0, 0, 0.4);
   cursor: zoom-in;
-  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease,
+    border-color 0.14s ease;
 }
 
 .shotButton:hover {
@@ -284,7 +384,10 @@
   border-radius: 12px;
   color: inherit;
   background: var(--ifm-background-surface-color);
-  transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+  transition:
+    transform 0.12s ease,
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
 }
 
 .card h3 {
@@ -302,12 +405,4 @@
   transform: translateY(-2px);
   border-color: var(--ifm-color-primary);
   box-shadow: 0 10px 28px -18px rgba(0, 0, 0, 0.4);
-}
-
-@media (max-width: 900px) {
-  .hero {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-    text-align: left;
-  }
 }
