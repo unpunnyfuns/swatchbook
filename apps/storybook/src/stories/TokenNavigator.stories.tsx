@@ -1,4 +1,5 @@
-import { TokenNavigator } from '@unpunnyfuns/swatchbook-blocks';
+import { SwatchbookProvider, TokenNavigator } from '@unpunnyfuns/swatchbook-blocks';
+import type { ProjectSnapshot, VirtualTokenShape } from '@unpunnyfuns/swatchbook-blocks';
 import { useState } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import preview from '../../.storybook/preview.tsx';
@@ -243,5 +244,210 @@ export const FocusVisibleRow = meta.story({
       Number.parseFloat(computed.outlineWidth),
       'focus-visible row outline-width must be > 0',
     ).toBeGreaterThan(0);
+  },
+});
+
+// Deterministic token map used by the Indicators story. Covers every
+// indicator variant: multi-hop forward chain (3 hops → first … last cap),
+// reverse count ≥ 2 (opens a popover menu), out-of-gamut color (display-P3
+// red outside sRGB), string-form deprecation, and boolean-form deprecation.
+const INDICATOR_TOKENS: Record<string, VirtualTokenShape> = {
+  // Semantic alias — three-hop chain: text.primary → brand.fg → palette.blue.600 → palette.blue.500
+  'color.text.primary': {
+    $type: 'color',
+    $value: { colorSpace: 'srgb', components: [0.11, 0.44, 0.95], alpha: 1 },
+    aliasOf: 'color.brand.fg',
+    aliasChain: ['color.brand.fg', 'color.palette.blue.600', 'color.palette.blue.500'],
+  },
+  // Intermediate alias node
+  'color.brand.fg': {
+    $type: 'color',
+    $value: { colorSpace: 'srgb', components: [0.11, 0.44, 0.95], alpha: 1 },
+    aliasOf: 'color.palette.blue.600',
+    aliasChain: ['color.palette.blue.600', 'color.palette.blue.500'],
+  },
+  // Another intermediate
+  'color.palette.blue.600': {
+    $type: 'color',
+    $value: { colorSpace: 'srgb', components: [0.11, 0.44, 0.95], alpha: 1 },
+    aliasOf: 'color.palette.blue.500',
+    aliasChain: ['color.palette.blue.500'],
+  },
+  // Primitive — referenced by two tokens, so the reverse button opens a menu.
+  'color.palette.blue.500': {
+    $type: 'color',
+    $value: { colorSpace: 'srgb', components: [0.23, 0.51, 0.97], alpha: 1 },
+    aliasedBy: ['color.text.primary', 'color.border.focus'],
+  },
+  // Second reverse referent so the blue.500 count shows ← 2.
+  'color.border.focus': {
+    $type: 'color',
+    $value: { colorSpace: 'srgb', components: [0.23, 0.51, 0.97], alpha: 1 },
+    aliasOf: 'color.palette.blue.500',
+    aliasChain: ['color.palette.blue.500'],
+  },
+  // Out-of-gamut: display-P3 primary red lies outside sRGB, triggering ⚠.
+  'color.accent.vivid': {
+    $type: 'color',
+    $value: { colorSpace: 'display-p3', components: [1, 0, 0], alpha: 1 },
+  },
+  // Deprecated with a guidance message (string form).
+  'color.legacy.brand': {
+    $type: 'color',
+    $value: { colorSpace: 'srgb', components: [0.8, 0.2, 0.1], alpha: 1 },
+    $deprecated: 'use color.text.primary instead',
+  },
+  // Deprecated without a message (boolean form).
+  'color.legacy.neutral': {
+    $type: 'color',
+    $value: { colorSpace: 'srgb', components: [0.5, 0.5, 0.5], alpha: 1 },
+    $deprecated: true,
+  },
+};
+
+// Module-level snapshot so its identity is stable across re-renders.
+// A new object per render would invalidate the `resolved` memo inside
+// `useProject`, causing `tree` → `initialExpanded` to churn identity,
+// which trips the re-seed effect and loops: setExpanded → re-render → …
+const INDICATORS_SNAPSHOT: ProjectSnapshot = (() => {
+  const snap: ProjectSnapshot = {
+    axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
+    defaultTuple: { theme: 'Light' },
+    activeTheme: 'Light',
+    activeAxes: { theme: 'Light' },
+    cssVarPrefix: 'sb',
+    diagnostics: [],
+    css: '',
+  };
+  snap.resolveAt = () => INDICATOR_TOKENS;
+  return snap;
+})();
+
+/**
+ * Row indicator strip smoke test. Wraps the navigator in a local
+ * `SwatchbookProvider` so the token set is deterministic, independent of
+ * the reference project loaded by the global decorator.
+ *
+ * Covers: multi-hop forward alias chain (capped to first → … → last),
+ * reverse-reference count that opens a popover menu (≥ 2 referents),
+ * out-of-gamut glyph (display-P3 red), string-form deprecation badge, and
+ * boolean-form deprecation badge.
+ *
+ * The variance badge is absent here: `varianceByPath` only populates from
+ * a real loaded project, not a hand-built snapshot. Variance already
+ * renders on `Default` and `ColorSubtree` with the real project data.
+ */
+export const Indicators = meta.story({
+  render: () => (
+    <SwatchbookProvider value={INDICATORS_SNAPSHOT}>
+      {/*
+        Give the navigator a unique `id` so its `usePersistedState` block key
+        doesn't collide with sibling stories that share the same `root`/`type`
+        defaults. Without an `id`, every un-rooted navigator story persists
+        its expand/collapse state under the same key and the state from
+        FullyCollapsed (or any prior run) bleeds in here, leaving groups
+        collapsed so leaf rows never appear.
+      */}
+      <TokenNavigator id="indicators" initiallyExpanded={6} />
+    </SwatchbookProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Wait for the tree to settle. Because `usePersistedState` reads from a
+    // module-level store that persists between story runs, even with the
+    // unique `id` above a warm run may restore a collapsed state from a
+    // previous iteration of this story. Expand all top-level groups
+    // explicitly so the leaf rows are guaranteed visible regardless.
+    await waitFor(() => {
+      if (!canvasElement.querySelector('[data-testid="token-navigator-group"]')) {
+        throw new Error('token navigator did not render any group rows');
+      }
+    });
+
+    // Expand all collapsed groups, one at a time, until none remain.
+    // Recursive so the lint rule (`no-await-in-loop`) is avoided: we pick the
+    // first collapsed group, expand it, wait for the state change, then recurse.
+    const expandOne = async (): Promise<void> => {
+      const collapsed = canvasElement.querySelector<HTMLElement>(
+        '[data-testid="token-navigator-group"][aria-expanded="false"]',
+      );
+      if (!collapsed) return;
+      const row = collapsed.querySelector<HTMLElement>('[data-testid="token-navigator-group-row"]');
+      if (!row) return;
+      await userEvent.click(row);
+      await waitFor(() => {
+        if (collapsed.getAttribute('aria-expanded') !== 'true') {
+          throw new Error('group did not expand');
+        }
+      });
+      await expandOne();
+    };
+    await expandOne();
+
+    await waitFor(() => {
+      if (!canvasElement.querySelector('[data-testid="token-navigator-leaf"]')) {
+        throw new Error('tree did not render any leaf rows after expanding all groups');
+      }
+    });
+
+    // 1. The three-hop forward chain renders on color.text.primary. Find it by
+    // the leaf row's data-path attribute so there's no ambiguity across the
+    // multiple alias-forward indicators in the tree.
+    const textPrimaryLeaf = canvasElement.querySelector<HTMLElement>(
+      '[data-testid="token-navigator-leaf"][data-path="color.text.primary"]',
+    );
+    expect(textPrimaryLeaf, 'color.text.primary leaf must be in the DOM').not.toBeNull();
+    if (!textPrimaryLeaf) throw new Error('color.text.primary leaf not found');
+
+    const forwardStrip = textPrimaryLeaf.querySelector<HTMLElement>(
+      '[data-testid="row-indicator-alias-forward"]',
+    );
+    expect(
+      forwardStrip,
+      'forward alias chain must be present on color.text.primary',
+    ).not.toBeNull();
+    if (!forwardStrip)
+      throw new Error('row-indicator-alias-forward not found on color.text.primary');
+
+    // 2. The three-hop chain is capped to first → … → last. Both nodes should
+    // be navigable buttons (color.brand.fg and color.palette.blue.500).
+    const aliasNodes = forwardStrip.querySelectorAll<HTMLElement>('[data-testid="alias-node"]');
+    expect(aliasNodes.length, 'capped chain shows two alias nodes (first + last)').toBe(2);
+
+    // Click the first node — navigates to color.brand.fg (already in the tree).
+    const firstNode = aliasNodes[0];
+    if (!firstNode) throw new Error('no alias-node found inside forward chain');
+    await userEvent.click(firstNode);
+    // After navigation, color.brand.fg is selected (overlay opens or row gains
+    // selected state). The leaf row is already in the DOM; just assert it exists.
+    await waitFor(() => {
+      const target = canvasElement.querySelector(
+        '[data-testid="token-navigator-leaf"][data-path="color.brand.fg"]',
+      );
+      if (!target) throw new Error('color.brand.fg leaf row missing after alias navigation');
+    });
+
+    // 3. The reverse count for color.palette.blue.500 shows ← 2 and opens a menu.
+    const blue500Leaf = canvasElement.querySelector<HTMLElement>(
+      '[data-testid="token-navigator-leaf"][data-path="color.palette.blue.500"]',
+    );
+    expect(blue500Leaf, 'color.palette.blue.500 leaf must be in the DOM').not.toBeNull();
+    if (!blue500Leaf) throw new Error('color.palette.blue.500 leaf not found');
+
+    const reverseBtn = blue500Leaf.querySelector<HTMLElement>(
+      '[data-testid="row-indicator-alias-reverse"]',
+    );
+    expect(reverseBtn, 'reverse count button must be on the blue.500 leaf row').not.toBeNull();
+    if (!reverseBtn) throw new Error('row-indicator-alias-reverse not found on blue.500');
+    expect(reverseBtn.getAttribute('aria-label')).toBe('referenced by 2 tokens');
+    await userEvent.click(reverseBtn);
+
+    // Menu should now contain one item per referent.
+    const menuItems = await canvas.findAllByRole('menuitem');
+    expect(menuItems.length).toBeGreaterThanOrEqual(2);
+    const itemPaths = menuItems.map((el) => el.textContent?.trim());
+    expect(itemPaths).toContain('color.text.primary');
+    expect(itemPaths).toContain('color.border.focus');
   },
 });

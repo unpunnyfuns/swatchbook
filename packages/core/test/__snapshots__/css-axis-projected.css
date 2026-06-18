@@ -56,6 +56,7 @@
   --sb-color-text-danger: var(--sb-color-palette-red-700);
   --sb-color-text-default: var(--sb-color-palette-neutral-900);
   --sb-color-text-inverse: var(--sb-color-palette-neutral-0);
+  --sb-color-text-link: var(--sb-color-palette-blue-700);
   --sb-color-text-muted: var(--sb-color-palette-neutral-600);
   --sb-color-text-subtle: var(--sb-color-palette-neutral-500);
   --sb-color-text-success: var(--sb-color-palette-green-700);

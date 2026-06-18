@@ -179,11 +179,67 @@ export function resolveAliasAt(
   };
 }
 
+/**
+ * The full forward alias chain for `path` at `tuple` — the target paths it
+ * resolves through, hop by hop, to the final literal, e.g.
+ * `['color.brand', 'color.palette.blue.500']`. Each hop's immediate target is
+ * whatever `resolveAliasAt` resolves at this tuple (per-tuple alias write,
+ * else baseline alias), so the chain is correct in every axis context, not
+ * just the default. Empty for a literal. Visited-set bounds cycles.
+ */
+export function aliasChainAt(
+  graph: TokenGraph,
+  path: string,
+  tuple: Record<string, string>,
+): string[] {
+  const chain: string[] = [];
+  const visited = new Set<string>([path]);
+  let current = path;
+  for (;;) {
+    const target = resolveAliasAt(graph, current, tuple)?.aliasOf;
+    if (target === undefined || visited.has(target)) break;
+    chain.push(target);
+    visited.add(target);
+    current = target;
+  }
+  return chain;
+}
+
 export function resolveAliasAllAt(graph: TokenGraph, tuple: Record<string, string>): TokenMap {
   const result: TokenMap = {};
   for (const path of Object.keys(graph.nodes)) {
     const value = resolveAliasAt(graph, path, tuple);
     if (value !== undefined) result[path] = value;
+  }
+  return result;
+}
+
+/**
+ * Browser display resolver: every token's resolved leaf `$value` (same as
+ * `resolveAllAt`) plus correct, tuple-aware alias provenance — the full
+ * forward `aliasChain` / immediate `aliasOf` (from `aliasChainAt`) and the
+ * graph node's structural-union `aliasedBy` (project-scoped reverse edges,
+ * stable across tuples). This is the source of truth for alias indicators;
+ * `resolveAllAt` stays the pure-leaf resolver the CSS emitter and `load.ts`
+ * use. Aliases keep their OWN provenance even when their target varies by
+ * axis (the defect this fixes: `resolveAllAt` substitutes the target's).
+ */
+export function resolveAllWithProvenanceAt(
+  graph: TokenGraph,
+  tuple: Record<string, string>,
+): TokenMap {
+  const result: TokenMap = {};
+  for (const path of Object.keys(graph.nodes)) {
+    const view = resolveAliasAt(graph, path, tuple);
+    if (view === undefined) continue;
+    const chain = aliasChainAt(graph, path, tuple);
+    const aliasedBy = graph.nodes[path]?.aliasedBy ?? [];
+    const { aliasOf: _aliasOf, aliasChain: _aliasChain, ...rest } = view;
+    result[path] = {
+      ...rest,
+      ...(chain.length > 0 ? { aliasOf: chain[0], aliasChain: chain } : {}),
+      aliasedBy,
+    };
   }
   return result;
 }

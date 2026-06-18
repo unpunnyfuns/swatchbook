@@ -4,9 +4,15 @@ import { SwatchbookProvider, TokenDetail } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
-function makeSnapshot(): ProjectSnapshot {
+function makeSnapshot(
+  extraTokens: Record<
+    string,
+    { $type: string; $value: unknown; $deprecated?: string | boolean }
+  > = {},
+): ProjectSnapshot {
   const tokens = {
     'color.brand.primary': { $type: 'color', $value: { hex: '#3b82f6' } },
+    ...extraTokens,
   };
   const snap: ProjectSnapshot = {
     axes: [{ name: 'theme', contexts: ['Light'], default: 'Light', source: 'synthetic' }],
@@ -62,5 +68,23 @@ describe('TokenDetail', () => {
       ),
     ).not.toThrow();
     expect(screen.getByText(/not found in theme/)).toBeDefined();
+  });
+
+  it('renders a deprecation notice with the message', async () => {
+    render(
+      <SwatchbookProvider
+        value={makeSnapshot({
+          'color.old': {
+            $type: 'color',
+            $value: { hex: '#f00' },
+            $deprecated: 'use color.new instead',
+          },
+        })}
+      >
+        <TokenDetail path="color.old" />
+      </SwatchbookProvider>,
+    );
+    const notice = await screen.findByTestId('token-detail-deprecated');
+    expect(notice.textContent).toContain('use color.new instead');
   });
 });

@@ -1,4 +1,8 @@
-import { resolveAllAt, getVariance, listPaths } from '@unpunnyfuns/swatchbook-core/graph';
+import {
+  resolveAllWithProvenanceAt,
+  getVariance,
+  listPaths,
+} from '@unpunnyfuns/swatchbook-core/graph';
 import { makeCssVar } from '@unpunnyfuns/swatchbook-core/css-var';
 import {
   ensureStyleElement,
@@ -53,7 +57,7 @@ export interface ProjectData {
   varianceByPath: VirtualVarianceByPathShape;
   /**
    * Compose the resolved `TokenMap` for any tuple of axis selections.
-   * Backed browser-side by `resolveAllAt` over the `tokenGraph`.
+   * Backed browser-side by `resolveAllWithProvenanceAt` over the `tokenGraph`.
    */
   resolveAt: (tuple: Record<string, string>) => ResolvedTokens;
 }
@@ -77,7 +81,7 @@ function makeResolveAt(
   graph: VirtualTokenGraph | undefined,
 ): (tuple: Record<string, string>) => ResolvedTokens {
   if (!graph) return () => ({});
-  return (tuple) => resolveAllAt(graph, tuple) as unknown as ResolvedTokens;
+  return (tuple) => resolveAllWithProvenanceAt(graph, tuple) as unknown as ResolvedTokens;
 }
 
 // Build the `resolveAt` accessor for a snapshot. Prefers the
@@ -203,7 +207,7 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
 
   const activeTheme = contextThemeName || tupleToName(tokens.axes, activeAxes);
 
-  // `resolveAllAt` is a pure function over the graph; the only memo
+  // `resolveAllWithProvenanceAt` is a pure function over the graph; the only memo
   // we need is for the outer closure so React's reference equality
   // stays stable between renders. `tokens.tokenGraph` is the stable
   // module-level virtual-module export — changes only on HMR refresh.

@@ -9,10 +9,10 @@ import type { TokenGraph } from '#/token-graph/types.ts';
 /**
  * Swatchbook's public token shape — the contract surfaced on
  * `Project.defaultTokens` and `Project.resolveAt()` output. A strict
- * subset of `@terrazzo/parser`'s `TokenNormalized`: the seven fields
+ * subset of `@terrazzo/parser`'s `TokenNormalized`: the fields
  * downstream blocks actually read, no internals (`id`, `source`,
- * `originalValue`, `group`, `dependencies`, `$extensions`, `$extends`,
- * `$deprecated`) leaked through.
+ * `originalValue`, `group`, `dependencies`, `$extensions`, `$extends`)
+ * leaked through.
  *
  * Insulates swatchbook consumers from Terrazzo type churn: a future
  * `TokenNormalized` field rename or restructure won't ripple into the
@@ -24,6 +24,14 @@ export interface SwatchbookToken {
   $type?: string | undefined;
   $value?: unknown;
   $description?: string | undefined;
+  /**
+   * DTCG `$deprecated`, already group-inheritance-normalized per token by
+   * the parser. `true` (deprecated, no message) or a string (deprecated,
+   * with a message that typically points at the replacement). Surfaced as
+   * a row indicator + strikethrough in TokenNavigator and a notice in
+   * TokenDetail.
+   */
+  $deprecated?: string | boolean | undefined;
   aliasOf?: string | undefined;
   aliasChain?: readonly string[] | undefined;
   aliasedBy?: readonly string[] | undefined;
