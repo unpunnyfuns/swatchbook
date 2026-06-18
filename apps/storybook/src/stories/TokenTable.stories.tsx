@@ -114,20 +114,45 @@ export const SearchFilters = meta.story({
   },
 });
 
+/**
+ * Alias-forward indicators are interactive: clicking an alias node opens the
+ * detail overlay for the referenced token. This story finds the first forward
+ * indicator in the live dogfood table, clicks its alias node, and confirms the
+ * detail dialog appears.
+ */
+export const Indicators = meta.story({
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async ({ canvasElement }) => {
+    await assertTableRenders(canvasElement);
+    const forwardIndicator = await waitFor(() => {
+      const el = canvasElement.querySelector<HTMLElement>(
+        '[data-testid="row-indicator-alias-forward"]',
+      );
+      if (!el) throw new Error('no alias-forward indicator found in the table');
+      return el;
+    });
+    const aliasNode = forwardIndicator.querySelector<HTMLElement>('[data-testid="alias-node"]');
+    if (!aliasNode) throw new Error('no alias-node button inside the forward indicator');
+    await userEvent.click(aliasNode);
+    await waitFor(() => {
+      const dialog = canvasElement.ownerDocument.querySelector('[role="dialog"]');
+      expect(dialog, 'detail overlay dialog must open after clicking alias node').toBeTruthy();
+    });
+  },
+});
+
 export const FocusVisibleRow = meta.story({
   parameters: { chromatic: { disableSnapshot: true } },
   play: async ({ canvasElement }) => {
     await assertTableRenders(canvasElement);
-    const isFocusedRow = (): boolean => {
-      const el = document.activeElement;
-      return el?.tagName === 'TR' && el !== null && canvasElement.contains(el);
-    };
-    const tabUntilRow = async (remaining: number): Promise<void> => {
-      if (isFocusedRow() || remaining <= 0) return;
-      await userEvent.tab();
-      await tabUntilRow(remaining - 1);
-    };
-    await tabUntilRow(20);
+    // Focus the first row directly — alias-node buttons inside rows now
+    // consume additional tab stops, making blind tab-counting fragile.
+    // Programmatic focus still triggers :focus-visible when userEvent has
+    // primed keyboard mode via a preceding tab.
+    const firstRow = canvasElement.querySelector<HTMLElement>('[data-testid="token-table-row"]');
+    if (!firstRow) throw new Error('no token-table-row found');
+    await userEvent.tab();
+    firstRow.focus();
     const focused = document.activeElement;
     if (!(focused instanceof HTMLElement) || focused.tagName !== 'TR') {
       throw new Error(`expected a tbody row to receive keyboard focus; got ${focused?.tagName}`);

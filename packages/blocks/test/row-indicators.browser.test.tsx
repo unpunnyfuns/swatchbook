@@ -3,7 +3,7 @@ import { userEvent } from '@vitest/browser/context';
 import { afterEach, expect, it, vi } from 'vitest';
 import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
 import type { VirtualTokenShape } from '#/contexts.ts';
-import { RowIndicators } from '#/token-navigator/RowIndicators.tsx';
+import { RowIndicators } from '#/indicators/RowIndicators.tsx';
 
 afterEach(cleanup);
 
@@ -18,8 +18,8 @@ function renderRow(path: string, token: VirtualTokenShape, root?: string) {
       root={root}
       variance={undefined}
       colorFormat="hex"
-      resolveInView={inView}
-      onNavigate={noop}
+      canReference={inView}
+      onReferenceClick={noop}
     />,
   );
 }
@@ -89,8 +89,8 @@ function renderVariance(variance: AxisVarianceResult) {
       root={undefined}
       variance={variance}
       colorFormat="hex"
-      resolveInView={inView}
-      onNavigate={noop}
+      canReference={inView}
+      onReferenceClick={noop}
     />,
   );
 }
@@ -144,8 +144,8 @@ it('flags an out-of-gamut color for the active format', () => {
       root={undefined}
       variance={undefined}
       colorFormat="hex"
-      resolveInView={inView}
-      onNavigate={noop}
+      canReference={inView}
+      onReferenceClick={noop}
     />,
   );
   expect(screen.getByLabelText('out of gamut')).toBeTruthy();
@@ -159,8 +159,8 @@ it('shows no gamut warning for an in-gamut color', () => {
       root={undefined}
       variance={undefined}
       colorFormat="hex"
-      resolveInView={inView}
-      onNavigate={noop}
+      canReference={inView}
+      onReferenceClick={noop}
     />,
   );
   expect(screen.queryByLabelText('out of gamut')).toBeNull();
@@ -174,8 +174,8 @@ it('shows a deprecation badge with the message in aria-label', () => {
       root={undefined}
       variance={undefined}
       colorFormat="hex"
-      resolveInView={inView}
-      onNavigate={noop}
+      canReference={inView}
+      onReferenceClick={noop}
     />,
   );
   const badge = screen.getByTestId('row-indicator-deprecated');
@@ -190,8 +190,8 @@ it('shows a deprecation badge for the boolean flag form', () => {
       root={undefined}
       variance={undefined}
       colorFormat="hex"
-      resolveInView={inView}
-      onNavigate={noop}
+      canReference={inView}
+      onReferenceClick={noop}
     />,
   );
   expect(screen.getByTestId('row-indicator-deprecated')).toHaveAttribute(
@@ -208,15 +208,15 @@ it('shows no deprecation badge when not deprecated', () => {
       root={undefined}
       variance={undefined}
       colorFormat="hex"
-      resolveInView={inView}
-      onNavigate={noop}
+      canReference={inView}
+      onReferenceClick={noop}
     />,
   );
   expect(screen.queryByTestId('row-indicator-deprecated')).toBeNull();
 });
 
 it('reverse count of 1 navigates directly on click', async () => {
-  const onNavigate = vi.fn();
+  const onReferenceClick = vi.fn();
   render(
     <RowIndicators
       path="t"
@@ -224,16 +224,16 @@ it('reverse count of 1 navigates directly on click', async () => {
       root={undefined}
       variance={undefined}
       colorFormat="hex"
-      resolveInView={inView}
-      onNavigate={onNavigate}
+      canReference={inView}
+      onReferenceClick={onReferenceClick}
     />,
   );
   await userEvent.click(screen.getByTestId('row-indicator-alias-reverse'));
-  expect(onNavigate).toHaveBeenCalledWith('color.brand');
+  expect(onReferenceClick).toHaveBeenCalledWith('color.brand');
 });
 
 it('reverse count > 1 opens a popover whose items navigate', async () => {
-  const onNavigate = vi.fn();
+  const onReferenceClick = vi.fn();
   render(
     <RowIndicators
       path="t"
@@ -245,18 +245,18 @@ it('reverse count > 1 opens a popover whose items navigate', async () => {
       root={undefined}
       variance={undefined}
       colorFormat="hex"
-      resolveInView={inView}
-      onNavigate={onNavigate}
+      canReference={inView}
+      onReferenceClick={onReferenceClick}
     />,
   );
   await userEvent.click(screen.getByTestId('row-indicator-alias-reverse'));
   const item = await screen.findByRole('menuitem', { name: 'color.text.primary' });
   await userEvent.click(item);
-  expect(onNavigate).toHaveBeenCalledWith('color.text.primary');
+  expect(onReferenceClick).toHaveBeenCalledWith('color.text.primary');
 });
 
 it('renders an off-view forward node as plain non-clickable text', async () => {
-  const onNavigate = vi.fn();
+  const onReferenceClick = vi.fn();
   render(
     <RowIndicators
       path="t"
@@ -264,15 +264,15 @@ it('renders an off-view forward node as plain non-clickable text', async () => {
       root={undefined}
       variance={undefined}
       colorFormat="hex"
-      resolveInView={() => false}
-      onNavigate={onNavigate}
+      canReference={() => false}
+      onReferenceClick={onReferenceClick}
     />,
   );
   const node = screen.getByTestId('alias-node');
   expect(node.tagName.toLowerCase()).not.toBe('button');
   expect(node).toHaveAttribute('title', 'outside current view');
   await userEvent.click(node);
-  expect(onNavigate).not.toHaveBeenCalled();
+  expect(onReferenceClick).not.toHaveBeenCalled();
 });
 
 it('closes the reverse popover on Escape from within the menu', async () => {
@@ -283,8 +283,8 @@ it('closes the reverse popover on Escape from within the menu', async () => {
       root={undefined}
       variance={undefined}
       colorFormat="hex"
-      resolveInView={() => true}
-      onNavigate={() => {}}
+      canReference={() => true}
+      onReferenceClick={() => {}}
     />,
   );
   await userEvent.click(screen.getByTestId('row-indicator-alias-reverse'));
@@ -304,8 +304,8 @@ it('moves focus into the menu on open (first enabled item)', async () => {
       root={undefined}
       variance={undefined}
       colorFormat="hex"
-      resolveInView={() => true}
-      onNavigate={() => {}}
+      canReference={() => true}
+      onReferenceClick={() => {}}
     />,
   );
   await userEvent.click(screen.getByTestId('row-indicator-alias-reverse'));
@@ -325,8 +325,8 @@ it('closes the reverse popover on outside pointerdown', async () => {
         root={undefined}
         variance={undefined}
         colorFormat="hex"
-        resolveInView={() => true}
-        onNavigate={() => {}}
+        canReference={() => true}
+        onReferenceClick={() => {}}
       />
     </div>,
   );

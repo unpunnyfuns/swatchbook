@@ -51,11 +51,11 @@
 }
 
 .sb-token-table__th--path {
-  min-width: 180px;
+  min-width: 220px;
 }
 
 .sb-token-table__th--value {
-  min-width: 160px;
+  min-width: 200px;
 }
 
 .sb-token-table__row {
@@ -76,6 +76,7 @@
 .sb-token-table__path {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
+  overflow-wrap: break-word;
 }
 
 .sb-token-table__value-cell {
@@ -111,9 +112,7 @@
 
 .sb-token-table__value-text {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 
 .sb-token-table__gamut-warn {
@@ -132,6 +131,16 @@
 .sb-token-table__row:hover .sb-token-table__copy-wrap,
 .sb-token-table__row:focus-within .sb-token-table__copy-wrap {
   opacity: 1;
+}
+
+.sb-token-table__path[data-deprecated='true'] {
+  text-decoration: line-through;
+  text-decoration-color: light-dark(#92400e, #fbbf24);
+  opacity: 0.75;
+}
+
+.sb-token-table__refs {
+  white-space: nowrap;
 }
 
 /* Screen-reader-only live region for search match-count announcements. */

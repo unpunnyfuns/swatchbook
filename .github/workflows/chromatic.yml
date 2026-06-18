@@ -69,6 +69,17 @@ jobs:
           # Chromatic uses to compute the dependency graph; without it,
           # Chromatic falls back to capturing every story every run.
           onlyChanged: true
+          # TurboSnap traces the Storybook module graph, which resolves
+          # workspace packages to their built `dist/` (gitignored). So a
+          # change in a package's `src/` (component or CSS), or in the
+          # dogfood token data, never maps to a story and would be
+          # silently skipped, freezing a stale baseline. List those paths
+          # as externals so any change there forces a full re-snapshot;
+          # TurboSnap's savings still apply to docs / story / config-only
+          # diffs.
+          externals: |
+            packages/*/src/**
+            packages/tokens/tokens/**
           # Return as soon as the upload is done; Chromatic's GitHub
           # integration reports the visual-diff status asynchronously via
           # a check, so blocking on server-side comparison just makes the

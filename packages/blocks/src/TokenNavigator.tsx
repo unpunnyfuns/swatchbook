@@ -14,7 +14,7 @@ import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
 import { ancestorGroupPaths, isInView } from '#/token-navigator/navigate.ts';
-import { RowIndicators } from '#/token-navigator/RowIndicators.tsx';
+import { RowIndicators } from '#/indicators/RowIndicators.tsx';
 import type { VirtualToken } from '#/types.ts';
 
 export interface TokenNavigatorProps {
@@ -770,8 +770,8 @@ const LeafRow = memo(function LeafRow({
           root={root}
           variance={variance}
           colorFormat={colorFormat}
-          resolveInView={resolveInView}
-          onNavigate={onNavigate}
+          canReference={resolveInView}
+          onReferenceClick={onNavigate}
         />
         <LeafPreview path={node.path} token={node.token} />
       </div>
