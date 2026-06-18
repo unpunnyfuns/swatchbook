@@ -6,6 +6,7 @@ export {
   resolveAliasAt,
   resolveAliasAllAt,
   aliasChainAt,
+  resolveAllWithProvenanceAt,
 } from '#/token-graph/walk.ts';
 
 export { getAffectedBy, getVariance, listPaths } from '#/token-graph/queries.ts';

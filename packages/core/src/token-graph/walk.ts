@@ -214,6 +214,36 @@ export function resolveAliasAllAt(graph: TokenGraph, tuple: Record<string, strin
   return result;
 }
 
+/**
+ * Browser display resolver: every token's resolved leaf `$value` (same as
+ * `resolveAllAt`) plus correct, tuple-aware alias provenance — the full
+ * forward `aliasChain` / immediate `aliasOf` (from `aliasChainAt`) and the
+ * graph node's structural-union `aliasedBy` (project-scoped reverse edges,
+ * stable across tuples). This is the source of truth for alias indicators;
+ * `resolveAllAt` stays the pure-leaf resolver the CSS emitter and `load.ts`
+ * use. Aliases keep their OWN provenance even when their target varies by
+ * axis (the defect this fixes: `resolveAllAt` substitutes the target's).
+ */
+export function resolveAllWithProvenanceAt(
+  graph: TokenGraph,
+  tuple: Record<string, string>,
+): TokenMap {
+  const result: TokenMap = {};
+  for (const path of Object.keys(graph.nodes)) {
+    const view = resolveAliasAt(graph, path, tuple);
+    if (view === undefined) continue;
+    const chain = aliasChainAt(graph, path, tuple);
+    const aliasedBy = graph.nodes[path]?.aliasedBy ?? [];
+    const { aliasOf: _aliasOf, aliasChain: _aliasChain, ...rest } = view;
+    result[path] = {
+      ...rest,
+      ...(chain.length > 0 ? { aliasOf: chain[0], aliasChain: chain } : {}),
+      aliasedBy,
+    };
+  }
+  return result;
+}
+
 function composePartial(
   graph: TokenGraph,
   base: SwatchbookToken,
