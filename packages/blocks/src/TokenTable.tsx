@@ -12,6 +12,7 @@ import { useBlockKey, usePersistedState } from '#/internal/persistent-state.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { RowIndicators } from '#/indicators/RowIndicators.tsx';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface TokenTableProps {
@@ -66,7 +67,7 @@ export function TokenTable({
   id,
 }: TokenTableProps): ReactElement {
   const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
+  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing, varianceByPath } = project;
   const colorFormat = useColorFormat();
   // Persist selection + search across docs-mode remounts (see persistent-state).
   const blockKey = useBlockKey('TokenTable', [filter, type, caption, id]);
@@ -157,77 +158,104 @@ export function TokenTable({
         <thead>
           <tr>
             <th className={cx('sb-token-table__th', 'sb-token-table__th--path')}>Path</th>
+            <th
+              className="sb-token-table__th sb-token-table__th--refs"
+              aria-label="References and status"
+            />
             <th className={cx('sb-token-table__th', 'sb-token-table__th--value')}>Value</th>
           </tr>
         </thead>
         <tbody>
           {visibleRows.length === 0 && (
             <tr>
-              <td colSpan={2} className="sb-token-table__td sb-token-table__empty-row">
+              <td colSpan={3} className="sb-token-table__td sb-token-table__empty-row">
                 No tokens match "{query.trim()}".
               </td>
             </tr>
           )}
-          {visibleRows.map((row) => (
-            <tr
-              key={row.path}
-              className="sb-token-table__row"
-              onClick={() => handleRowClick(row.path)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleRowClick(row.path);
-                }
-              }}
-              tabIndex={0}
-              aria-haspopup="dialog"
-              aria-label={`Inspect ${row.path}`}
-              data-testid="token-table-row"
-              data-path={row.path}
-            >
-              <td className={cx('sb-token-table__td', 'sb-token-table__path')}>{row.path}</td>
-              <td className="sb-token-table__td">
-                <span className="sb-token-table__value-cell">
-                  {row.type && <span className="sb-token-table__type-pill">{row.type}</span>}
-                  {row.isColor && (
-                    <span
-                      className="sb-token-table__swatch"
-                      style={{ background: row.cssVar }}
-                      aria-hidden
+          {visibleRows.map((row) => {
+            const token = resolved[row.path];
+            const dep = token?.$deprecated;
+            const isDeprecated = dep === true || (typeof dep === 'string' && dep.length > 0);
+            return (
+              <tr
+                key={row.path}
+                className="sb-token-table__row"
+                onClick={() => handleRowClick(row.path)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleRowClick(row.path);
+                  }
+                }}
+                tabIndex={0}
+                aria-haspopup="dialog"
+                aria-label={`Inspect ${row.path}`}
+                data-testid="token-table-row"
+                data-path={row.path}
+              >
+                <td
+                  className={cx('sb-token-table__td', 'sb-token-table__path')}
+                  data-deprecated={isDeprecated ? 'true' : undefined}
+                >
+                  {row.path}
+                </td>
+                <td className="sb-token-table__td sb-token-table__refs">
+                  {token && (
+                    <RowIndicators
+                      path={row.path}
+                      token={token}
+                      root={undefined}
+                      variance={varianceByPath[row.path]}
+                      colorFormat={colorFormat}
+                      canReference={(p) => p in resolved}
+                      onReferenceClick={(p) => setSelectedPath(p)}
                     />
                   )}
-                  <span
-                    className="sb-token-table__value-text"
-                    title={row.value}
-                    data-testid="token-table-value"
-                  >
-                    {row.value}
-                  </span>
-                  {row.outOfGamut && (
+                </td>
+                <td className="sb-token-table__td">
+                  <span className="sb-token-table__value-cell">
+                    {row.type && <span className="sb-token-table__type-pill">{row.type}</span>}
+                    {row.isColor && (
+                      <span
+                        className="sb-token-table__swatch"
+                        style={{ background: row.cssVar }}
+                        aria-hidden
+                      />
+                    )}
                     <span
-                      title="Out of sRGB gamut for this format"
-                      aria-label="out of gamut"
-                      className="sb-token-table__gamut-warn"
+                      className="sb-token-table__value-text"
+                      title={row.value}
+                      data-testid="token-table-value"
                     >
-                      ⚠
+                      {row.value}
                     </span>
-                  )}
-                  <span
-                    className="sb-token-table__copy-wrap"
-                    onClick={(e) => e.stopPropagation()}
-                    onKeyDown={(e) => e.stopPropagation()}
-                    role="presentation"
-                  >
-                    <CopyButton
-                      value={row.value}
-                      label={`Copy value ${row.value}`}
-                      className="sb-token-table__copy"
-                    />
+                    {row.outOfGamut && (
+                      <span
+                        title="Out of sRGB gamut for this format"
+                        aria-label="out of gamut"
+                        className="sb-token-table__gamut-warn"
+                      >
+                        ⚠
+                      </span>
+                    )}
+                    <span
+                      className="sb-token-table__copy-wrap"
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      role="presentation"
+                    >
+                      <CopyButton
+                        value={row.value}
+                        label={`Copy value ${row.value}`}
+                        className="sb-token-table__copy"
+                      />
+                    </span>
                   </span>
-                </span>
-              </td>
-            </tr>
-          ))}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 

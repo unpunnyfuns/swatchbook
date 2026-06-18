@@ -134,6 +134,16 @@
   opacity: 1;
 }
 
+.sb-token-table__path[data-deprecated='true'] {
+  text-decoration: line-through;
+  text-decoration-color: light-dark(#92400e, #fbbf24);
+  opacity: 0.75;
+}
+
+.sb-token-table__refs {
+  white-space: nowrap;
+}
+
 /* Screen-reader-only live region for search match-count announcements. */
 .sb-token-table__sr-status {
   position: absolute;
