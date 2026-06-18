@@ -1,5 +1,17 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.65.0
+
+### Minor Changes
+
+- 45bfa73ef9776f502b8d6659a10feaf45300ee39: TokenNavigator and TokenTable accept an `indicators` prop to configure the per-row indicator strip: turn it off, drop individual indicators, or opt into a new `ⓘ` `$description` glyph
+
+### Patch Changes
+
+- 77dd2996b254eec76a3876fba486c97becf12c5b: Docs: describe the axis-variance indicator and toolbar behavior generically over the project's own axes, rather than presenting the dogfood's `mode`/`brand`/`contrast` as the canonical set
+- Updated dependencies [d2d24f9]
+  - @unpunnyfuns/swatchbook-core@0.65.0
+
 ## 0.64.0
 
 ### Minor Changes

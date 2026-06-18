@@ -72,7 +72,7 @@ Tailwind's compiler sees the block and emits utilities:
 .p-sb-md { padding: var(--spacing-sb-md); }
 ```
 
-At runtime the toolbar flips `data-sb-mode` / `data-sb-brand` / `data-sb-contrast` on `<html>`, the per-tuple stylesheet redefines `--sb-*` vars, and every Tailwind utility re-paints via cascade.
+At runtime the toolbar flips one `data-sb-<axis>` attribute per axis on `<html>` (e.g. `data-sb-mode`), the per-tuple stylesheet redefines `--sb-*` vars, and every Tailwind utility re-paints via cascade.
 
 ## The `sb-` prefix
 

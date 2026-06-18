@@ -1,5 +1,17 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.65.0
+
+### Patch Changes
+
+- d2d24f92a1d05e5f3a2dfcffede64fdd7fcde455: The addon's preview decorator and useToken resolver now preserve alias provenance, so an axis-varying alias keeps its own chain, reverse references, description, and deprecation in the real Storybook; previously the addon's raw resolver shadowed use-project's provenance resolver, silently undoing that fix outside of tests
+- Updated dependencies [45bfa73]
+- Updated dependencies [d2d24f9]
+- Updated dependencies [77dd299]
+  - @unpunnyfuns/swatchbook-blocks@0.65.0
+  - @unpunnyfuns/swatchbook-core@0.65.0
+  - @unpunnyfuns/swatchbook-switcher@0.65.0
+
 ## 0.64.0
 
 ### Patch Changes
