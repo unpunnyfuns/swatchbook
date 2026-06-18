@@ -41,7 +41,9 @@ Props:
 <TokenTable type="color" />
 ```
 
-Compact two-column table: **Path** and **Value** (with inline type pill + color swatch). A fuzzy-search input at the top narrows rows by path, type, or value: case-insensitive, out-of-order terms, single-character typo tolerance. Each value cell has a hover-revealed copy-to-clipboard button. Clicking a row opens the same slide-over `<TokenDetail>` the tree uses; pass `onSelect` to own the follow-up. Columns follow content with per-column `min-width` floors, so the table breathes in narrow containers.
+Compact table: **Path**, an indicators column, and **Value** (with inline type pill + color swatch). A fuzzy-search input at the top narrows rows by path, type, or value: case-insensitive, out-of-order terms, single-character typo tolerance. Each value cell has a hover-revealed copy-to-clipboard button. Clicking a row opens the same slide-over `<TokenDetail>` the tree uses; pass `onSelect` to own the follow-up. Columns follow content with per-column `min-width` floors, so the table breathes in narrow containers.
+
+The middle column carries the same indicator strip as the navigator: the forward alias chain, a reverse `← N` count of tokens that reference the row, an axis-variance badge, an out-of-gamut marker, and a deprecation badge. A deprecated row's path is struck through. Alias references are navigable here too, but the table has no tree to expand: clicking a chain node or a reverse referent opens that token's detail overlay (a chooser when several tokens reference it). The column does not participate in sorting.
 
 Props:
 
