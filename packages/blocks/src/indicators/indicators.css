@@ -29,7 +29,7 @@
   border-radius: 3px;
   background: none;
   font: inherit;
-  color: var(--swatchbook-accent-default, light-dark(#1d4ed8, #93c5fd));
+  color: var(--swatchbook-accent-default, LinkText);
   cursor: pointer;
 }
 
@@ -98,7 +98,7 @@
   font: inherit;
   text-align: left;
   white-space: nowrap;
-  color: var(--swatchbook-accent-default, light-dark(#1d4ed8, #93c5fd));
+  color: var(--swatchbook-accent-default, LinkText);
   cursor: pointer;
 }
 
