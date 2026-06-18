@@ -2,7 +2,7 @@
 
 Storybook 10 addon for documenting DTCG design tokens.
 
-Loads your token files, resolves the alias graph, and adds a toolbar that flips the active theme tuple (`mode × brand × contrast × …`). Every story and MDX doc block re-renders against the new tuple without per-story wiring, so component stories and the token reference share one source of truth.
+Loads your token files, resolves the alias graph, and adds a toolbar that flips the active theme tuple (e.g. `mode × brand × contrast`, or whatever axes your resolver declares). Every story and MDX doc block re-renders against the new tuple without per-story wiring, so component stories and the token reference share one source of truth.
 
 Bundles MDX doc blocks (`<TokenTable />`, `<ColorPalette />`, `<TokenDetail />`, …), a standalone `<ThemeSwitcher>` for non-Storybook surfaces, and a typed `useToken()` hook for stories that need a resolved value at runtime. Re-exports [`@unpunnyfuns/swatchbook-blocks`](../blocks) and [`@unpunnyfuns/swatchbook-switcher`](../switcher), so a single install covers the whole React surface.
 
