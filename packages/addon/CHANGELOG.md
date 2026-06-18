@@ -1,5 +1,14 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.64.0
+
+### Patch Changes
+
+- Updated dependencies [5f41705]
+  - @unpunnyfuns/swatchbook-blocks@0.64.0
+  - @unpunnyfuns/swatchbook-core@0.64.0
+  - @unpunnyfuns/swatchbook-switcher@0.64.0
+
 ## 0.63.0
 
 ### Patch Changes

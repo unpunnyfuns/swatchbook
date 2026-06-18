@@ -1,5 +1,15 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.64.0
+
+### Minor Changes
+
+- 5f4170589b1d17359a453af69ca65258fd1e8a68: TokenTable rows carry the same alias chain, reverse-reference count, axis-variance, out-of-gamut, and deprecation indicators as the navigator, in a dedicated column, with alias references that open the referenced token's detail
+
+### Patch Changes
+
+- @unpunnyfuns/swatchbook-core@0.64.0
+
 ## 0.63.0
 
 ### Minor Changes
