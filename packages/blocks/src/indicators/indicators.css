@@ -5,6 +5,7 @@
   align-items: center;
   gap: 8px;
   min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
   color: var(--swatchbook-text-muted, rgba(128, 128, 128, 0.9));
 }
