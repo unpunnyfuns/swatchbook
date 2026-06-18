@@ -158,10 +158,9 @@ export function TokenTable({
         <thead>
           <tr>
             <th className={cx('sb-token-table__th', 'sb-token-table__th--path')}>Path</th>
-            <th
-              className="sb-token-table__th sb-token-table__th--refs"
-              aria-label="References and status"
-            />
+            <th className="sb-token-table__th sb-token-table__th--refs">
+              <span className="sb-token-table__sr-status">References and status</span>
+            </th>
             <th className={cx('sb-token-table__th', 'sb-token-table__th--value')}>Value</th>
           </tr>
         </thead>
