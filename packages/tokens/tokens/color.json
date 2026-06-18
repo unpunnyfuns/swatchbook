@@ -349,7 +349,8 @@
       "inverse":   { "$value": "{color.palette.neutral.0}" },
       "accent":    { "$value": "{color.palette.blue.700}" },
       "danger":    { "$value": "{color.palette.red.700}" },
-      "success":   { "$value": "{color.palette.green.700}" }
+      "success":   { "$value": "{color.palette.green.700}" },
+      "link":      { "$value": "{color.palette.blue.700}", "$deprecated": "Use color.text.accent instead." }
     },
     "border": {
       "default":   { "$value": "{color.palette.neutral.200}" },
