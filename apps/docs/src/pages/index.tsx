@@ -1,30 +1,12 @@
 import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import { useColorMode } from '@docusaurus/theme-common';
 import Layout from '@theme/Layout';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import Lightbox from '../components/Lightbox';
+import { MODE_AXIS, useSwatchbookSwitcher } from '../components/SwatchbookSwitcherContext';
 import styles from './index.module.css';
-
-// Hero swatch deck — built from swatchbook's own palette tokens (defined in
-// tokens.generated.css at :root, flipped per mode/brand by the docs theme).
-// The hero is literally what the product documents: ramps of design tokens.
-const RAMPS: readonly { label: string; base: string; stops: readonly number[] }[] = [
-  { label: 'brand', base: '--sb-color-palette-brand', stops: [300, 400, 500, 600, 700, 800] },
-  { label: 'amber', base: '--sb-color-palette-amber', stops: [300, 400, 500, 600, 700, 800] },
-  { label: 'neutral', base: '--sb-color-palette-neutral', stops: [100, 200, 300, 500, 700, 800] },
-];
-
-const FONTS: readonly string[] = [
-  '--sb-font-family-base',
-  '--sb-font-family-mono',
-  '--sb-font-family-system',
-  '--sb-font-family-comic',
-  '--sb-font-family-comic-mono',
-  '--sb-font-family-base-accessible',
-];
-
-const COLOR_CHIP_COUNT = RAMPS.reduce((n, r) => n + r.stops.length, 0);
 
 const SHOTS: readonly { src: string; alt: string; caption: string }[] = [
   {
@@ -44,46 +26,136 @@ const SHOTS: readonly { src: string; alt: string; caption: string }[] = [
   },
 ];
 
-function SwatchDeck(): ReactNode {
+// Read a swatch's live computed colour back to a #hex string for the readout.
+function readHex(el: HTMLElement | null): string | null {
+  if (!el) return null;
+  const rgb = getComputedStyle(el).backgroundColor.match(/\d+(\.\d+)?/g);
+  if (!rgb) return null;
+  return `#${rgb
+    .slice(0, 3)
+    .map((n) => Math.round(Number(n)).toString(16).padStart(2, '0'))
+    .join('')}`;
+}
+
+function toDocusaurusMode(context: string): 'light' | 'dark' {
+  return context.toLowerCase() === 'dark' ? 'dark' : 'light';
+}
+
+// In-hero quick-access axis chips. They drive the *real* switcher state — mode
+// via Docusaurus's colour-mode, the rest via the switcher context — so the whole
+// page and the navbar switcher stay in lockstep when a chip is flipped.
+function HeroModifiers(): ReactNode {
+  const { axes, nonModeTuple, setNonModeAxis } = useSwatchbookSwitcher();
+  const { colorMode, setColorMode } = useColorMode();
   return (
-    <div className={styles.deck} aria-hidden="true">
-      {RAMPS.map((ramp, r) => (
-        <div key={ramp.label} className={styles.ramp}>
-          <span className={styles.rampLabel}>{ramp.label}</span>
-          <div className={styles.chips}>
-            {ramp.stops.map((stop, c) => {
-              const varName = `${ramp.base}-${stop}`;
-              return (
-                <span
-                  key={stop}
-                  className={`${styles.swatch} ${styles.chip}`}
-                  data-var={varName}
-                  style={{
-                    background: `var(${varName})`,
-                    animationDelay: `${(r * ramp.stops.length + c) * 40}ms`,
-                  }}
-                />
-              );
-            })}
+    <div className={styles.heroMods}>
+      <span className={styles.modHint}>flip a modifier ↓</span>
+      {axes.map((axis) => {
+        const isMode = axis.name === MODE_AXIS;
+        const active = isMode
+          ? (axis.contexts.find((c) => c.toLowerCase() === colorMode) ?? axis.contexts[0])
+          : (nonModeTuple[axis.name] ?? axis.default);
+        return (
+          <span key={axis.name} className={styles.seg}>
+            {axis.contexts.map((ctx) => (
+              <button
+                key={ctx}
+                type="button"
+                aria-pressed={ctx === active}
+                onClick={() =>
+                  isMode ? setColorMode(toDocusaurusMode(ctx)) : setNonModeAxis(axis.name, ctx)
+                }
+              >
+                {ctx}
+              </button>
+            ))}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+// The hero showpiece. Two token journeys — a colour token and a typography
+// token — each from DTCG `$value` through the alias graph to the actionable
+// `var(--sb-*)` you ship. Built on real reactive tokens (`--sb-color-primary-
+// default`, `--sb-font-family-base`), so the band re-resolves live when the
+// modifiers flip: mode/contrast move the colour row, typeface/contrast the type
+// row. The swatch repaints via `var()`; the hex text is read back on each flip.
+function ResolutionPipeline(): ReactNode {
+  const swatchRef = useRef<HTMLSpanElement>(null);
+  const { colorMode } = useColorMode();
+  const { nonModeTuple } = useSwatchbookSwitcher();
+  const [hex, setHex] = useState('#2563eb');
+
+  useEffect(() => {
+    const next = readHex(swatchRef.current);
+    if (next) setHex(next);
+  }, [colorMode, nonModeTuple]);
+
+  return (
+    <div className={styles.band}>
+      <div className={styles.pipeRow}>
+        <div className={styles.stage}>
+          <span className={styles.lab}>DTCG source</span>
+          <pre className={styles.src}>
+            {'"primary": {\n  "$type": "color",\n  "$value": '}
+            <span className={styles.ref}>{'"{palette.brand.600}"'}</span>
+            {'\n}'}
+          </pre>
+        </div>
+        <div className={styles.arrow} aria-hidden="true">
+          →
+        </div>
+        <div className={styles.stage}>
+          <span className={styles.lab}>resolves</span>
+          <div className={styles.node}>
+            <span className={styles.ref}>palette.brand.600</span>
+          </div>
+          <div className={styles.node}>
+            <span
+              ref={swatchRef}
+              className={styles.sw}
+              style={{ background: 'var(--sb-color-primary-default)' }}
+            />
+            <span className={styles.hex}>{hex}</span>
           </div>
         </div>
-      ))}
-      <div className={styles.ramp}>
-        <span className={styles.rampLabel}>type</span>
-        <div className={styles.chips}>
-          {FONTS.map((font, i) => (
-            <span
-              key={font}
-              className={`${styles.swatch} ${styles.fontChip}`}
-              data-var={font}
-              style={{
-                fontFamily: `var(${font})`,
-                animationDelay: `${(COLOR_CHIP_COUNT + i) * 40}ms`,
-              }}
-            >
-              Aa
-            </span>
-          ))}
+        <div className={styles.arrow} aria-hidden="true">
+          →
+        </div>
+        <div className={styles.stage}>
+          <span className={styles.lab}>actionable variable</span>
+          <span className={styles.varName}>--sb-color-primary-default</span>
+          <pre className={styles.usage}>background: var(--sb-color-primary-default);</pre>
+        </div>
+      </div>
+
+      <div className={styles.pipeRow}>
+        <div className={styles.stage}>
+          <pre className={styles.src}>
+            {'"body": {\n  "$type": "fontFamily",\n  "$value": '}
+            <span className={styles.ref}>{'"{font.family.system}"'}</span>
+            {'\n}'}
+          </pre>
+        </div>
+        <div className={styles.arrow} aria-hidden="true">
+          →
+        </div>
+        <div className={styles.stage}>
+          <div className={styles.node}>
+            <span className={styles.ref}>font.family.system</span>
+          </div>
+          <div className={styles.node}>
+            <span className={styles.typeSample}>Aa</span>
+          </div>
+        </div>
+        <div className={styles.arrow} aria-hidden="true">
+          →
+        </div>
+        <div className={styles.stage}>
+          <span className={styles.varName}>--sb-font-family-base</span>
+          <pre className={styles.usage}>font-family: var(--sb-font-family-base);</pre>
         </div>
       </div>
     </div>
@@ -109,23 +181,22 @@ export default function Home(): ReactNode {
         </div>
 
         <section className={styles.hero}>
-          <div className={styles.heroCopy}>
-            <p className={styles.eyebrow}>@unpunnyfuns/swatchbook</p>
-            <h1 className={styles.title}>Design tokens, documented in Storybook.</h1>
-            <p className={styles.lead}>
-              Parse your DTCG sources, preview every token in doc blocks, and watch them
-              re-render as you switch themes from the toolbar.
-            </p>
-            <div className={styles.ctas}>
-              <Link className="button button--primary button--lg" to="/quickstart">
-                Get started
-              </Link>
-              <Link className="button button--secondary button--lg" to="pathname:///storybook/">
-                Live Storybook
-              </Link>
-            </div>
+          <p className={styles.eyebrow}>@unpunnyfuns/swatchbook</p>
+          <h1 className={styles.title}>Design tokens, documented in Storybook.</h1>
+          <p className={styles.lead}>
+            Parse your DTCG sources, preview every token in doc blocks, and watch them re-render as
+            you switch themes from the toolbar.
+          </p>
+          <div className={styles.ctas}>
+            <Link className="button button--primary button--lg" to="/quickstart">
+              Get started
+            </Link>
+            <Link className="button button--secondary button--lg" to="pathname:///storybook/">
+              Live Storybook
+            </Link>
           </div>
-          <SwatchDeck />
+          <HeroModifiers />
+          <ResolutionPipeline />
         </section>
 
         <section className={styles.previews}>
