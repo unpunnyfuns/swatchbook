@@ -55,13 +55,14 @@ it('get_token: returns the alias chain and resolved value per theme', async () =
   // cssVar uses the project prefix and dot→dash substitution.
   expect(result.cssVar).toBe(`var(--sb-${ALIAS_TOKEN.replaceAll('.', '-')})`);
   expect(Object.keys(result.perTheme).length).toBe(singletonCount(project));
-  // Every theme entry carries a non-empty value string + (when aliased)
-  // a target that points into the color subtree.
-  for (const entry of Object.values(result.perTheme)) {
+  // `color.surface.default` aliases the palette in EVERY theme (the target
+  // varies per mode: neutral.0 in Light, neutral.900 in Dark). The raw leaf
+  // resolver dropped alias provenance in non-default tuples, leaving aliasOf
+  // undefined for Dark; assert every theme keeps its palette target so a
+  // regression off the provenance resolver is caught.
+  for (const [name, entry] of Object.entries(result.perTheme)) {
     expect(entry.value.length).toBeGreaterThan(0);
-    if (entry.aliasOf) {
-      expect(entry.aliasOf).toMatch(/^color\./);
-    }
+    expect(entry.aliasOf, `${name} should keep its alias target`).toMatch(/^color\.palette\./);
   }
   // The alias target's value varies per mode (Light vs Dark): a
   // resolver bug that emitted the same string across modes would slip
@@ -76,6 +77,11 @@ it('get_token: returns the alias chain and resolved value per theme', async () =
   // the fixture's `color.accent.fg` alias chain flips under mode=Dark.
   const overlap = [...lightValues].filter((v) => darkValues.has(v));
   expect(overlap.length).toBeLessThan(lightValues.size + darkValues.size);
+  // Provenance is tuple-correct: the alias TARGET differs between Light and
+  // Dark, not just the resolved value (a leaf resolver loses this entirely).
+  const lightAlias = new Set(lightThemes.map(([, v]) => v.aliasOf));
+  const darkAlias = new Set(darkThemes.map(([, v]) => v.aliasOf));
+  expect([...lightAlias].some((a) => a !== undefined && !darkAlias.has(a))).toBe(true);
 });
 
 it('get_token: returns the cssVar without a prefix segment when cssVarPrefix is empty', async () => {
