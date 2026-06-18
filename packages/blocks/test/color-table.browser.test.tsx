@@ -41,15 +41,14 @@ describe('ColorTable — base rendering', () => {
     expect(within(row).queryByLabelText(/Copy OKLCH/)).toBeNull();
   });
 
-  it('renders an em-dash in the alias column for non-aliased tokens', () => {
+  it('renders no indicator strip for tokens with no alias, variance, or deprecation', () => {
     render(
       <SwatchbookProvider value={makeColorTableSnapshot()}>
         <ColorTable filter="color.surface.**" />
       </SwatchbookProvider>,
     );
     const row = screen.getByTestId('color-table-row');
-    const alias = row.querySelector('.sb-color-table__alias');
-    expect(alias?.textContent?.trim()).toBe('—');
+    expect(row.querySelector('.sb-indicator__indicators')).toBeNull();
   });
 
   it('fuzzy search narrows rows with out-of-order terms', async () => {

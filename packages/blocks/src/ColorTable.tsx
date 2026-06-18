@@ -1,11 +1,16 @@
 import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
+import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
 import cx from 'clsx';
 import type { ReactElement } from 'react';
 import { memo, useCallback, useDeferredValue, useMemo } from 'react';
 import './ColorTable.css';
 import { useColorFormat } from '#/contexts.ts';
+import type { VirtualTokenShape } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import type { ColorFormat, NormalizedColor } from '#/format-color.ts';
+import { RowIndicators } from '#/indicators/RowIndicators.tsx';
+import { resolveIndicators } from '#/indicators/resolve.ts';
+import type { IndicatorName, IndicatorsProp } from '#/indicators/resolve.ts';
 import { CopyButton } from '#/internal/CopyButton.tsx';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { useBlockKey, usePersistedState } from '#/internal/persistent-state.ts';
@@ -13,6 +18,8 @@ import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
+
+const NOOP_REFERENCE = (): void => {};
 
 const BASE_LABEL = 'base';
 const COLUMN_COUNT = 6;
@@ -69,12 +76,16 @@ export interface ColorTableProps {
   variants?: Record<string, string>;
   /** Disambiguates persisted UI state for two identical-prop tables on a page. */
   id?: string;
+  /** Configure the per-row indicator strip. See `IndicatorsProp`. Gamut stays in the Value cell, so it is not part of this strip. */
+  indicators?: IndicatorsProp;
 }
 
 interface Variant {
   label: string;
   path: string;
   cssVar: string;
+  token: VirtualTokenShape;
+  variance: AxisVarianceResult | undefined;
   // The display value in the currently-active color format.
   value: string;
   outOfGamut: boolean;
@@ -102,10 +113,15 @@ export function ColorTable({
   onSelect,
   variants,
   id,
+  indicators,
 }: ColorTableProps): ReactElement {
   const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
+  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing, varianceByPath } = project;
   const colorFormat = useColorFormat();
+  const enabledIndicators = useMemo(
+    () => ({ ...resolveIndicators(indicators), gamut: false }),
+    [indicators],
+  );
   // Persist search + variant selection + expansion across docs-mode remounts.
   const blockKey = useBlockKey('ColorTable', [filter, caption, id]);
   const [query, setQuery] = usePersistedState(`${blockKey}::query`, '');
@@ -140,6 +156,8 @@ export function ColorTable({
       const variant: Variant = {
         label: match?.label ?? BASE_LABEL,
         path,
+        token,
+        variance: varianceByPath[path],
         cssVar: resolveCssVar(path, projectFields),
         value: active.value,
         outOfGamut: active.outOfGamut,
@@ -163,7 +181,7 @@ export function ColorTable({
       out.push({ base, variants: vs, searchText });
     }
     return out;
-  }, [resolved, listing, cssVarPrefix, filter, sortBy, sortDir, defs, colorFormat]);
+  }, [resolved, listing, cssVarPrefix, varianceByPath, filter, sortBy, sortDir, defs, colorFormat]);
 
   const visibleGroups = useMemo(() => {
     if (!searchable || deferredQuery.trim() === '') return groups;
@@ -235,7 +253,9 @@ export function ColorTable({
               <th className="sb-color-table__th sb-color-table__th--path">Name</th>
               <th className="sb-color-table__th">Value</th>
               <th className="sb-color-table__th">CSS var</th>
-              <th className="sb-color-table__th">Alias</th>
+              <th className="sb-color-table__th sb-color-table__th--refs">
+                <span className="sb-color-table__sr-only">References and status</span>
+              </th>
               <th className="sb-color-table__th sb-color-table__th--expand">
                 <span className="sb-color-table__sr-only">Expand</span>
               </th>
@@ -257,6 +277,8 @@ export function ColorTable({
                 expanded={expandedByBase.has(group.base)}
                 onToggleExpand={toggleExpand}
                 onSelectVariant={selectVariant}
+                enabled={enabledIndicators}
+                colorFormat={colorFormat}
                 {...(onSelect !== undefined && { onSelect })}
               />
             ))}
@@ -274,6 +296,8 @@ interface GroupRowProps {
   onToggleExpand(base: string): void;
   onSelectVariant(base: string, label: string): void;
   onSelect?(path: string): void;
+  enabled: Record<IndicatorName, boolean>;
+  colorFormat: ColorFormat;
 }
 
 const GroupRow = memo(function GroupRow({
@@ -283,6 +307,8 @@ const GroupRow = memo(function GroupRow({
   onToggleExpand,
   onSelectVariant,
   onSelect,
+  enabled,
+  colorFormat,
 }: GroupRowProps): ReactElement {
   const multi = group.variants.length > 1;
   const active =
@@ -366,14 +392,17 @@ const GroupRow = memo(function GroupRow({
           )}
         </ValueCell>
         <ValueCell value={active.cssVar} label={`Copy CSS var ${active.cssVar}`} />
-        <td className="sb-color-table__td sb-color-table__alias">
-          {active.aliasOf ? (
-            <span className="sb-color-table__alias-text">{active.aliasOf}</span>
-          ) : (
-            <span className="sb-color-table__alias-empty" aria-hidden>
-              —
-            </span>
-          )}
+        <td className="sb-color-table__td sb-color-table__refs">
+          <RowIndicators
+            path={active.path}
+            token={active.token}
+            root={undefined}
+            variance={active.variance}
+            colorFormat={colorFormat}
+            canReference={() => false}
+            onReferenceClick={NOOP_REFERENCE}
+            enabled={enabled}
+          />
         </td>
         <td className="sb-color-table__td sb-color-table__expand-cell">
           {!onSelect && (
