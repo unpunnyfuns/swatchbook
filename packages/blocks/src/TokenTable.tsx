@@ -13,6 +13,8 @@ import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { RowIndicators } from '#/indicators/RowIndicators.tsx';
+import { resolveIndicators } from '#/indicators/resolve.ts';
+import type { IndicatorsProp } from '#/indicators/resolve.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface TokenTableProps {
@@ -54,6 +56,8 @@ export interface TokenTableProps {
   onSelect?(path: string): void;
   /** Disambiguates persisted UI state for two identical-prop tables on a page. */
   id?: string;
+  /** Configure the per-row indicator strip. See `IndicatorsProp`. */
+  indicators?: IndicatorsProp;
 }
 
 export function TokenTable({
@@ -65,12 +69,14 @@ export function TokenTable({
   searchable = true,
   onSelect,
   id,
+  indicators,
 }: TokenTableProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix, listing, varianceByPath } = project;
   const colorFormat = useColorFormat();
   // Persist selection + search across docs-mode remounts (see persistent-state).
   const blockKey = useBlockKey('TokenTable', [filter, type, caption, id]);
+  const enabledIndicators = useMemo(() => resolveIndicators(indicators), [indicators]);
   const [selectedPath, setSelectedPath] = usePersistedState<string | null>(
     `${blockKey}::selected`,
     null,
@@ -195,7 +201,9 @@ export function TokenTable({
               >
                 <td
                   className={cx('sb-token-table__td', 'sb-token-table__path')}
-                  data-deprecated={isDeprecated ? 'true' : undefined}
+                  data-deprecated={
+                    enabledIndicators.deprecation && isDeprecated ? 'true' : undefined
+                  }
                 >
                   {row.path}
                 </td>
@@ -249,6 +257,7 @@ export function TokenTable({
                       colorFormat={colorFormat}
                       canReference={(p) => p in resolved}
                       onReferenceClick={(p) => setSelectedPath(p)}
+                      enabled={enabledIndicators}
                     />
                   )}
                 </td>

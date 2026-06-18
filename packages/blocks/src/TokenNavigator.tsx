@@ -15,6 +15,8 @@ import { MotionSample } from '#/motion-preview/MotionSample.tsx';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
 import { ancestorGroupPaths, isInView } from '#/token-navigator/navigate.ts';
 import { RowIndicators } from '#/indicators/RowIndicators.tsx';
+import { resolveIndicators } from '#/indicators/resolve.ts';
+import type { IndicatorName, IndicatorsProp } from '#/indicators/resolve.ts';
 import type { VirtualToken } from '#/types.ts';
 
 export interface TokenNavigatorProps {
@@ -56,6 +58,8 @@ export interface TokenNavigatorProps {
    * props otherwise.
    */
   id?: string;
+  /** Configure the per-row indicator strip. See `IndicatorsProp`. */
+  indicators?: IndicatorsProp;
 }
 
 interface LeafNode {
@@ -215,6 +219,7 @@ export function TokenNavigator({
   searchable = true,
   onSelect,
   id,
+  indicators,
 }: TokenNavigatorProps): ReactElement {
   const { resolved, activeTheme, activeAxes, cssVarPrefix } = useProject();
 
@@ -229,6 +234,8 @@ export function TokenNavigator({
     if (type === undefined) return undefined;
     return new Set(Array.isArray(type) ? type : [type]);
   }, [type]);
+
+  const enabledIndicators = useMemo(() => resolveIndicators(indicators), [indicators]);
 
   const tree = useMemo(() => buildTree(resolved, root, typeFilter), [resolved, root, typeFilter]);
 
@@ -568,6 +575,7 @@ export function TokenNavigator({
               root={root}
               resolveInView={resolveInView}
               onNavigate={navigateTo}
+              enabled={enabledIndicators}
               level={1}
               setsize={visibleTree.length}
               posinset={i + 1}
@@ -598,6 +606,7 @@ interface TreeNodeRowProps {
   root: string | undefined;
   resolveInView(path: string): boolean;
   onNavigate(path: string): void;
+  enabled: Record<IndicatorName, boolean>;
   // 1-indexed depth in the tree (top-level = 1).
   level: number;
   // Number of siblings at this level (including self).
@@ -617,6 +626,7 @@ function TreeNodeRow({
   root,
   resolveInView,
   onNavigate,
+  enabled,
   level,
   setsize,
   posinset,
@@ -632,6 +642,7 @@ function TreeNodeRow({
         root={root}
         resolveInView={resolveInView}
         onNavigate={onNavigate}
+        enabled={enabled}
         level={level}
         setsize={setsize}
         posinset={posinset}
@@ -689,6 +700,7 @@ function TreeNodeRow({
               root={root}
               resolveInView={resolveInView}
               onNavigate={onNavigate}
+              enabled={enabled}
               level={level + 1}
               setsize={node.children.length}
               posinset={i + 1}
@@ -709,6 +721,7 @@ interface LeafRowProps {
   root: string | undefined;
   resolveInView(path: string): boolean;
   onNavigate(path: string): void;
+  enabled: Record<IndicatorName, boolean>;
   // 1-indexed depth in the tree (top-level = 1).
   level: number;
   // Number of siblings at this level (including self).
@@ -726,6 +739,7 @@ const LeafRow = memo(function LeafRow({
   root,
   resolveInView,
   onNavigate,
+  enabled,
   level,
   setsize,
   posinset,
@@ -753,7 +767,7 @@ const LeafRow = memo(function LeafRow({
       <div
         className="sb-token-navigator__leaf-row"
         data-testid="token-navigator-leaf-row"
-        data-deprecated={isDeprecated ? 'true' : undefined}
+        data-deprecated={enabled.deprecation && isDeprecated ? 'true' : undefined}
         onClick={() => {
           onFocusPath(node.path);
           onLeafClick(node.path);
@@ -772,6 +786,7 @@ const LeafRow = memo(function LeafRow({
           colorFormat={colorFormat}
           canReference={resolveInView}
           onReferenceClick={onNavigate}
+          enabled={enabled}
         />
         <LeafPreview path={node.path} token={node.token} />
       </div>
