@@ -315,6 +315,9 @@ const GroupRow = memo(function GroupRow({
     group.variants.find((v) => v.label === selectedLabel) ?? (group.variants[0] as Variant);
   const nameText = multi ? group.base : active.path;
 
+  const dep = active.token.$deprecated;
+  const isDeprecated = dep === true || (typeof dep === 'string' && dep.length > 0);
+
   const handleRowActivate = (): void => {
     if (onSelect) onSelect(active.path);
     else onToggleExpand(group.base);
@@ -353,7 +356,10 @@ const GroupRow = memo(function GroupRow({
             aria-hidden
           />
         </td>
-        <td className={cx('sb-color-table__td', 'sb-color-table__path')}>
+        <td
+          className={cx('sb-color-table__td', 'sb-color-table__path')}
+          data-deprecated={enabled.deprecation && isDeprecated ? 'true' : undefined}
+        >
           <span className="sb-color-table__path-text">{nameText}</span>
           {multi && (
             <span

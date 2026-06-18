@@ -87,3 +87,23 @@ it('hides the strip when indicators={false}', () => {
   expect(screen.queryByTestId('row-indicator-deprecated')).toBeNull();
   expect(screen.queryByTestId('row-indicator-alias-forward')).toBeNull();
 });
+
+it("strikes through a deprecated color row's name cell", () => {
+  render(
+    <SwatchbookProvider value={snapshot()}>
+      <ColorTable />
+    </SwatchbookProvider>,
+  );
+  const nameCell = within(rowFor('color.legacy')).getByText('color.legacy').closest('td')!;
+  expect(nameCell.getAttribute('data-deprecated')).toBe('true');
+});
+
+it('drops the name strikethrough when deprecation is disabled', () => {
+  render(
+    <SwatchbookProvider value={snapshot()}>
+      <ColorTable indicators={{ deprecation: false }} />
+    </SwatchbookProvider>,
+  );
+  const nameCell = within(rowFor('color.legacy')).getByText('color.legacy').closest('td')!;
+  expect(nameCell.getAttribute('data-deprecated')).toBeNull();
+});

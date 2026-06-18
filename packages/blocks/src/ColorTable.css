@@ -320,3 +320,9 @@
   text-align: center;
   padding: 16px 12px;
 }
+
+.sb-color-table__path[data-deprecated='true'] .sb-color-table__path-text {
+  text-decoration: line-through;
+  text-decoration-color: light-dark(#92400e, #fbbf24);
+  opacity: 0.75;
+}
