@@ -3,7 +3,7 @@ import {
   defaultTuple as virtualDefaultTuple,
   tokenGraph as virtualTokenGraph,
 } from 'virtual:swatchbook/tokens';
-import { resolveAllAt } from '@unpunnyfuns/swatchbook-core/graph';
+import { resolveAllWithProvenanceAt } from '@unpunnyfuns/swatchbook-core/graph';
 import { makeCssVar } from '@unpunnyfuns/swatchbook-core/css-var';
 import {
   useActiveAxes,
@@ -16,7 +16,8 @@ import {
 // preview decorator does for its `previewResolveAt` but lives in this
 // file so the hook can be called outside the addon's preview wrapper
 // (autodocs / MDX renders).
-const fallbackResolveAt = (tuple: Record<string, string>) => resolveAllAt(virtualTokenGraph, tuple);
+const fallbackResolveAt = (tuple: Record<string, string>) =>
+  resolveAllWithProvenanceAt(virtualTokenGraph, tuple);
 
 /**
  * Consumers augment this interface (via the addon's generated
@@ -55,7 +56,7 @@ export interface TokenInfo {
  * Storybook's preview-only hooks. Reads from the addon-provided
  * `SwatchbookContext` when present (preferred — uses the lifted
  * `resolveAt` accessor and the live active tuple); falls back to the
- * module-scope `fallbackResolveAt` (`resolveAllAt(virtualTokenGraph,
+ * module-scope `fallbackResolveAt` (`resolveAllWithProvenanceAt(virtualTokenGraph,
  * tuple)`) over the virtual module's default tuple when no provider is
  * mounted.
  */

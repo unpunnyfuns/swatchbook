@@ -78,6 +78,19 @@ describe('useToken', () => {
     expect(result.current.description).toBeUndefined();
   });
 
+  it("returns an axis-varying alias's own $description, not the resolved target's", () => {
+    // In Dark, `color.surface` aliases `color.palette.ink` ('Palette ink'),
+    // but its own description is 'Semantic surface'. The raw leaf resolver
+    // returned the target's; the provenance resolver keeps the source's. This
+    // is the regression guard for the addon bypassing the provenance resolver.
+    const { result } = renderHook(() => useToken('color.surface'), {
+      wrapper: withPermutation('Dark', { mode: 'Dark' }),
+    });
+    expect(result.current.description).toBe('Semantic surface');
+    // Value is still the resolved leaf (palette.ink in Dark).
+    expect(result.current.value).toEqual({ colorSpace: 'srgb', components: [0, 0, 0] });
+  });
+
   it('tracks the live toolbar axis tuple over the channel in provider-less (MDX) renders', () => {
     // No provider/decorator context — the MDX / autodocs case. The active
     // tuple then comes only from the toolbar globals over the channel; the
