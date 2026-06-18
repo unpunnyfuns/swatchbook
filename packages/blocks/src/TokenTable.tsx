@@ -158,10 +158,10 @@ export function TokenTable({
         <thead>
           <tr>
             <th className={cx('sb-token-table__th', 'sb-token-table__th--path')}>Path</th>
+            <th className={cx('sb-token-table__th', 'sb-token-table__th--value')}>Value</th>
             <th className="sb-token-table__th sb-token-table__th--refs">
               <span className="sb-token-table__sr-status">References and status</span>
             </th>
-            <th className={cx('sb-token-table__th', 'sb-token-table__th--value')}>Value</th>
           </tr>
         </thead>
         <tbody>
@@ -198,19 +198,6 @@ export function TokenTable({
                   data-deprecated={isDeprecated ? 'true' : undefined}
                 >
                   {row.path}
-                </td>
-                <td className="sb-token-table__td sb-token-table__refs">
-                  {token && (
-                    <RowIndicators
-                      path={row.path}
-                      token={token}
-                      root={undefined}
-                      variance={varianceByPath[row.path]}
-                      colorFormat={colorFormat}
-                      canReference={(p) => p in resolved}
-                      onReferenceClick={(p) => setSelectedPath(p)}
-                    />
-                  )}
                 </td>
                 <td className="sb-token-table__td">
                   <span className="sb-token-table__value-cell">
@@ -251,6 +238,19 @@ export function TokenTable({
                       />
                     </span>
                   </span>
+                </td>
+                <td className="sb-token-table__td sb-token-table__refs">
+                  {token && (
+                    <RowIndicators
+                      path={row.path}
+                      token={token}
+                      root={undefined}
+                      variance={varianceByPath[row.path]}
+                      colorFormat={colorFormat}
+                      canReference={(p) => p in resolved}
+                      onReferenceClick={(p) => setSelectedPath(p)}
+                    />
+                  )}
                 </td>
               </tr>
             );

@@ -5,7 +5,7 @@
   align-items: center;
   gap: 8px;
   min-width: 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--swatchbook-text-muted, rgba(128, 128, 128, 0.9));
 }
 

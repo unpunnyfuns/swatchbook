@@ -51,7 +51,8 @@
 }
 
 .sb-token-table__th--path {
-  min-width: 180px;
+  width: 45%;
+  min-width: 240px;
 }
 
 .sb-token-table__th--value {
@@ -76,6 +77,7 @@
 .sb-token-table__path {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
+  overflow-wrap: break-word;
 }
 
 .sb-token-table__value-cell {
