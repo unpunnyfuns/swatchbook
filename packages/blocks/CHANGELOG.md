@@ -1,5 +1,16 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.63.0
+
+### Minor Changes
+
+- 0d23825d44d3a9454201637a7d08dadc3505be85: TokenNavigator rows show alias chain, reverse-reference count, axis-variance, out-of-gamut, and deprecation indicators, with click-to-navigate on alias references
+
+### Patch Changes
+
+- Updated dependencies [0d23825]
+  - @unpunnyfuns/swatchbook-core@0.63.0
+
 ## 0.62.4
 
 ### Patch Changes
