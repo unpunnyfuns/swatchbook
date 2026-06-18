@@ -103,11 +103,14 @@ export interface ProjectSnapshot {
   /** The default tuple — `{ axis: axis.default }` for every axis. */
   defaultTuple: Record<string, string>;
   /**
-   * Pre-built `resolveAt(tuple)` accessor. The addon's preview
-   * decorator instantiates this once per iframe lifetime, backed by
-   * `resolveAllAt` over the stable `tokenGraph` export. Hand-built
-   * snapshots (tests, MDX) can omit this; blocks fall back to
-   * building a graph-backed resolver from `tokenGraph`.
+   * Pre-built `resolveAt(tuple)` accessor. The addon's preview decorator
+   * instantiates this once per iframe lifetime. When present, use-project
+   * prefers it over building its own from `tokenGraph`, so it MUST preserve
+   * alias provenance — back it with `resolveAllWithProvenanceAt`, not the raw
+   * leaf `resolveAllAt`, or axis-varying aliases silently lose their chain /
+   * reverse refs / description at non-default tuples. Hand-built snapshots
+   * (tests, MDX) can omit this; blocks then fall back to a provenance-aware
+   * graph-backed resolver built from `tokenGraph`.
    */
   resolveAt?: (tuple: Record<string, string>) => Record<string, VirtualTokenShape>;
 }

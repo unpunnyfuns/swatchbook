@@ -60,6 +60,53 @@ export const tokenGraph: TokenGraph = {
       aliasedBy: [],
       affectedBy: [],
     },
+    'color.palette.blue': {
+      baselineValue: {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', components: [0, 0, 1] },
+        $description: 'Palette blue',
+      },
+      baselineKind: 'literal',
+      writes: {},
+      aliases: [],
+      aliasedBy: ['color.surface'],
+      affectedBy: [],
+    },
+    'color.palette.ink': {
+      baselineValue: {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', components: [0, 0, 0] },
+        $description: 'Palette ink',
+      },
+      baselineKind: 'literal',
+      writes: {},
+      aliases: [],
+      aliasedBy: ['color.surface'],
+      affectedBy: [],
+    },
+    // Axis-varying alias: aliases palette.blue at baseline (Light), re-points
+    // to palette.ink in Dark. Carries its OWN $description; the raw leaf
+    // resolver would substitute the target's, the provenance resolver keeps
+    // the source's. Regression fixture for the addon provenance bypass.
+    'color.surface': {
+      baselineValue: {
+        $type: 'color',
+        $value: { colorSpace: 'srgb', components: [0, 0, 1] },
+        $description: 'Semantic surface',
+        aliasOf: 'color.palette.blue',
+        aliasChain: ['color.palette.blue'],
+      },
+      baselineKind: 'alias',
+      baselineAliasTarget: 'color.palette.blue',
+      writes: {
+        mode: {
+          Dark: { kind: 'alias', target: 'color.palette.ink' },
+        },
+      },
+      aliases: ['color.palette.blue'],
+      aliasedBy: [],
+      affectedBy: ['mode'],
+    },
   },
   axes: ['mode'],
   axisDefaults: { mode: 'Light' },

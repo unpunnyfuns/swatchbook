@@ -11,7 +11,7 @@ import { buildTokenGraph, buildTokenGraphFromLayered } from '#/token-graph/build
 import type { BuildTokenGraphResult } from '#/token-graph/build.ts';
 import { buildFailedDiagnostic } from '#/token-graph/diagnostics.ts';
 import { listPaths } from '#/token-graph/queries.ts';
-import { resolveAllAt } from '#/token-graph/walk.ts';
+import { resolveAllWithProvenanceAt } from '#/token-graph/walk.ts';
 import { permutationID } from '#/types.ts';
 import type { Axis, Config, Diagnostic, Permutation, Project, TokenMap } from '#/types.ts';
 
@@ -152,7 +152,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
       const key = canonicalKey(full);
       const cached = memo.get(key);
       if (cached) return cached;
-      const result = resolveAllAt(tokenGraphResult.graph, full);
+      const result = resolveAllWithProvenanceAt(tokenGraphResult.graph, full);
       memo.set(key, result);
       return result;
     };

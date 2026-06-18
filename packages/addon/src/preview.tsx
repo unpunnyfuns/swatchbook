@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { resolveAllAt } from '@unpunnyfuns/swatchbook-core/graph';
+import { resolveAllWithProvenanceAt } from '@unpunnyfuns/swatchbook-core/graph';
 import type { TokenMap } from '@unpunnyfuns/swatchbook-core';
 import type { Decorator, Preview } from '@storybook/react-vite';
 import type { CSSProperties } from 'react';
@@ -256,7 +256,7 @@ const themedDecorator: Decorator = (Story, context) => {
   const resolveAt = useMemo(
     () =>
       (t: Record<string, string>): TokenMap =>
-        resolveAllAt(live.tokenGraph, t),
+        resolveAllWithProvenanceAt(live.tokenGraph, t),
     [live.tokenGraph],
   );
   const snapshot = useMemo<ProjectSnapshot>(
