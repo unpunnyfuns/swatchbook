@@ -113,9 +113,7 @@
 
 .sb-token-table__value-text {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 
 .sb-token-table__gamut-warn {
