@@ -764,7 +764,6 @@ const LeafRow = memo(function LeafRow({
         </span>
         <span className="sb-token-navigator__tail">{node.segment}</span>
         {type && <span className="sb-token-navigator__type-pill">{type}</span>}
-        <LeafPreview path={node.path} token={node.token} />
         <RowIndicators
           path={node.path}
           token={node.token}
@@ -774,6 +773,7 @@ const LeafRow = memo(function LeafRow({
           resolveInView={resolveInView}
           onNavigate={onNavigate}
         />
+        <LeafPreview path={node.path} token={node.token} />
       </div>
     </li>
   );
