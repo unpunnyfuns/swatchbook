@@ -51,12 +51,11 @@
 }
 
 .sb-token-table__th--path {
-  width: 45%;
-  min-width: 240px;
+  min-width: 220px;
 }
 
 .sb-token-table__th--value {
-  min-width: 160px;
+  min-width: 200px;
 }
 
 .sb-token-table__row {
