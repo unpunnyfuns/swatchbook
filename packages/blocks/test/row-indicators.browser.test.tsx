@@ -4,6 +4,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
 import type { VirtualTokenShape } from '#/contexts.ts';
 import { RowIndicators } from '#/indicators/RowIndicators.tsx';
+import { resolveIndicators } from '#/indicators/resolve.ts';
 
 afterEach(cleanup);
 
@@ -336,4 +337,85 @@ it('closes the reverse popover on outside pointerdown', async () => {
   await waitFor(() => {
     expect(screen.queryByRole('menuitem', { name: 'color.a' })).toBeNull();
   });
+});
+
+it('renders a description glyph when description is enabled and present', () => {
+  render(
+    <RowIndicators
+      path="d"
+      token={{ $type: 'color', $value: { hex: '#000' }, $description: 'Brand primary' }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      canReference={inView}
+      onReferenceClick={noop}
+      enabled={resolveIndicators({ description: true })}
+    />,
+  );
+  const badge = screen.getByTestId('row-indicator-description');
+  expect(badge).toHaveAttribute('aria-label', expect.stringContaining('Brand primary'));
+});
+
+it('omits the description glyph when description is not enabled (default)', () => {
+  render(
+    <RowIndicators
+      path="d"
+      token={{ $type: 'color', $value: { hex: '#000' }, $description: 'Brand primary' }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      canReference={inView}
+      onReferenceClick={noop}
+    />,
+  );
+  expect(screen.queryByTestId('row-indicator-description')).toBeNull();
+});
+
+it('omits the description glyph when enabled but the token has no description', () => {
+  render(
+    <RowIndicators
+      path="d"
+      token={{ $type: 'color', $value: { hex: '#000' } }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      canReference={inView}
+      onReferenceClick={noop}
+      enabled={resolveIndicators({ description: true })}
+    />,
+  );
+  expect(screen.queryByTestId('row-indicator-description')).toBeNull();
+});
+
+it('hides an indicator when disabled via enabled', () => {
+  render(
+    <RowIndicators
+      path="d"
+      token={{ $type: 'color', $value: { hex: '#000' }, $deprecated: 'old' }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      canReference={inView}
+      onReferenceClick={noop}
+      enabled={resolveIndicators({ deprecation: false })}
+    />,
+  );
+  expect(screen.queryByTestId('row-indicator-deprecated')).toBeNull();
+});
+
+it('renders nothing when every present indicator is disabled', () => {
+  render(
+    <RowIndicators
+      path="d"
+      token={{ $type: 'color', $value: { hex: '#000' }, aliasChain: ['x'], $deprecated: true }}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      canReference={inView}
+      onReferenceClick={noop}
+      enabled={resolveIndicators(false)}
+    />,
+  );
+  expect(screen.queryByTestId('row-indicator-alias-forward')).toBeNull();
+  expect(screen.queryByTestId('row-indicator-deprecated')).toBeNull();
 });

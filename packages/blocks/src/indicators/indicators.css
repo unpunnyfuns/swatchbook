@@ -111,3 +111,8 @@
   color: var(--swatchbook-text-muted, rgba(128, 128, 128, 0.6));
   cursor: default;
 }
+
+.sb-indicator__description {
+  color: var(--swatchbook-text-muted, rgba(128, 128, 128, 0.8));
+  cursor: help;
+}
