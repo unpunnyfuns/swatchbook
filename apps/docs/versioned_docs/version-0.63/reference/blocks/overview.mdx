@@ -25,6 +25,8 @@ Most blocks in this group take:
 
 Expandable tree of the token graph. Each interior group shows its child count; each leaf shows its `$type` pill plus an inline preview (color swatch, dimension bar, shadow / border / motion sample, or a formatted value). A fuzzy-search input at the top filters leaves by path: case-insensitive, out-of-order terms, single-character typo tolerance. Matching leaves survive, groups on the way to them auto-expand. Clicking a leaf opens a slide-over with the full `<TokenDetail>`; pass `onSelect` to own the click follow-up instead.
 
+Between the type pill and the preview, a leaf carries an indicator strip when there is something to show: a forward alias chain (`→ target`, capped past two hops with the full chain on the accessible label), a reverse `← N` count of tokens that reference this one, an axis-variance badge when the resolved value flips across mode / brand / contrast, an out-of-gamut marker on colors outside sRGB for the active format, and a deprecation badge with a struck-through name for tokens carrying DTCG `$deprecated`. Alias references are navigable: clicking a chain node, or a single reverse referrer, moves the tree to that token; several referrers open a chooser. The chain reflects the active theme, so a token that aliases different palette entries per mode shows the path true in the current context.
+
 Props:
 
 - `root?: string`: mount at this subtree (e.g. `"color"`, `"typography"`). Omit to show everything.
