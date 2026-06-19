@@ -66,7 +66,7 @@ Exactly three shapes are legal:
 - **Layered** (`LayeredConfig`): `axes: [...]` + `tokens: [...]`. For projects without a resolver document. You declare axes inline; each context names overlay files that layer onto the base `tokens`.
 - **Plain parse** (`PlainConfig`): `tokens: [...]` alone. Single synthetic `theme` axis; every token loaded as one tuple. Useful for smoke-testing a token set before adopting a resolver.
 
-All three variants extend a shared base (`cssVarPrefix`, `presets`, `disabledAxes`, `chrome`, `cssOptions`, `listingOptions`, `terrazzoPlugins`, `maxJointArity`, `default`, `outDir`).
+All three variants extend a shared base (`cssVarPrefix`, `presets`, `disabledAxes`, `chrome`, `indicators`, `cssOptions`, `listingOptions`, `terrazzoPlugins`, `maxJointArity`, `default`, `outDir`).
 
 ## Fields
 
@@ -211,6 +211,23 @@ Produces a single `:root` chrome block with all ten roles declared: overrides be
 **Composite sub-field targets are accepted.** `typography.body` is a composite token that emits one sub-variable per field; the chrome map can target those directly (`bodyFontSize: 'typography.body.font-size'`) even though the sub-field isn't a standalone token ID.
 
 Unknown role keys (outside the ten above) and target paths that don't resolve to any token or composite sub-field in any theme produce `warn` diagnostics (group `swatchbook/chrome`) and are dropped; the corresponding chrome slot falls back to its hard-coded literal default. The validated entries land on `Project.chrome` for downstream tooling.
+
+### `indicators`
+
+Type: `Record<string, boolean>`, optional.
+
+Project-wide baseline for the row-indicator strip on `<TokenNavigator>` and `<TokenTable>` (the per-row alias / variance / gamut / deprecation / description glyphs). Each key toggles one indicator: `alias`, `variance`, `gamut`, `deprecation`, `description`, `composes`. Unlike `chrome`, which travels as CSS variables, this baseline reaches blocks as runtime data over the same path `cssVarPrefix` follows.
+
+```ts
+defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  indicators: {
+    description: true,
+  },
+});
+```
+
+Precedence runs lowest to highest: the hard-coded indicator defaults (`alias`, `variance`, `gamut`, `deprecation` on; `description` off), then this `config.indicators` baseline, then a block's own `indicators` prop. A block that sets `indicators={{ description: false }}` overrides the baseline above for that block; a block with no prop inherits the baseline.
 
 ### `cssOptions`
 

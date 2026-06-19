@@ -202,6 +202,18 @@ interface CommonConfig {
    */
   chrome?: Partial<Record<ChromeRole, string>>;
   /**
+   * Project-wide baseline for the block row-indicator strip (the
+   * `<TokenNavigator>` / `<TokenTable>` per-row alias / variance / gamut /
+   * deprecation / description glyphs). Known keys are `alias`, `variance`,
+   * `gamut`, `deprecation`, `description`, `composes`; each maps to a
+   * boolean. Sits between the hard-coded indicator defaults and a block's
+   * own `indicators` prop — a per-block prop overrides this baseline.
+   *
+   * Typed loosely as `Record<string, boolean>` so core stays free of a
+   * blocks dependency; blocks narrows the keys at the use-site.
+   */
+  indicators?: Readonly<Record<string, boolean>>;
+  /**
    * Options forwarded to the `@terrazzo/plugin-css` instance swatchbook
    * runs internally (for the stylesheet it emits and for the Token
    * Listing's `names.css` derivation). Line this up with the consumer's

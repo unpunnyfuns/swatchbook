@@ -45,3 +45,45 @@ it('partial object leaves unspecified keys at their default', () => {
     description: true,
   });
 });
+
+it('baseline overlays the defaults when no prop is passed', () => {
+  expect(resolveIndicators(undefined, { description: true })).toEqual({
+    ...DEFAULTS,
+    description: true,
+  });
+});
+
+it('object prop overrides the baseline', () => {
+  expect(resolveIndicators({ description: false }, { description: true })).toEqual({
+    ...DEFAULTS,
+    description: false,
+  });
+});
+
+it('prop===false beats a baseline that turned something on', () => {
+  expect(resolveIndicators(false, { description: true })).toEqual({
+    alias: false,
+    variance: false,
+    gamut: false,
+    deprecation: false,
+    description: false,
+  });
+});
+
+it('prop===true beats a baseline that turned something off', () => {
+  expect(resolveIndicators(true, { gamut: false })).toEqual({
+    alias: true,
+    variance: true,
+    gamut: true,
+    deprecation: true,
+    description: true,
+  });
+});
+
+it('undefined prop with baseline equals defaults overlaid with baseline', () => {
+  expect(resolveIndicators(undefined, { alias: false, description: true })).toEqual({
+    ...DEFAULTS,
+    alias: false,
+    description: true,
+  });
+});

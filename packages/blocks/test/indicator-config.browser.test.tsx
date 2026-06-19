@@ -12,7 +12,7 @@ const TOKENS: Record<string, VirtualTokenShape> = {
   },
 };
 
-function snapshot(): ProjectSnapshot {
+function snapshot(indicators?: Record<string, boolean>): ProjectSnapshot {
   const snap: ProjectSnapshot = {
     axes: [],
     defaultTuple: {},
@@ -22,6 +22,7 @@ function snapshot(): ProjectSnapshot {
     diagnostics: [],
     css: '',
   };
+  if (indicators) snap.indicators = indicators;
   snap.resolveAt = () => TOKENS;
   return snap;
 }
@@ -55,4 +56,22 @@ it('TokenTable indicators={{ deprecation: false }} drops the badge and the path 
   expect(screen.queryByTestId('row-indicator-deprecated')).toBeNull();
   const pathCell = screen.getByText('color.brand').closest('td')!;
   expect(pathCell.getAttribute('data-deprecated')).toBeNull();
+});
+
+it('config.indicators baseline shows the description glyph with no per-block prop', () => {
+  render(
+    <SwatchbookProvider value={snapshot({ description: true })}>
+      <TokenTable type="color" />
+    </SwatchbookProvider>,
+  );
+  expect(screen.getByTestId('row-indicator-description')).toBeTruthy();
+});
+
+it('per-block indicators prop overrides a config.indicators baseline back off', () => {
+  render(
+    <SwatchbookProvider value={snapshot({ description: true })}>
+      <TokenTable type="color" indicators={{ description: false }} />
+    </SwatchbookProvider>,
+  );
+  expect(screen.queryByTestId('row-indicator-description')).toBeNull();
 });

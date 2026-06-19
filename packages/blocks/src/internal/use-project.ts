@@ -43,6 +43,13 @@ export interface ProjectData {
   diagnostics: readonly VirtualDiagnostic[];
   cssVarPrefix: string;
   /**
+   * Project-wide baseline for the row-indicator strip from
+   * `config.indicators`. `{}` when absent. Strip-hosting blocks pass it as
+   * the baseline arg to `resolveIndicators` so a per-block `indicators`
+   * prop overrides it.
+   */
+  indicators: Readonly<Record<string, boolean>>;
+  /**
    * Path-indexed Token Listing data. Empty when absent (non-resolver
    * projects, hand-built snapshots that don't populate it). Blocks read
    * authoritative CSS var names from `listing[path].names.css` and
@@ -130,6 +137,7 @@ export function useProject(): ProjectData {
   const activeTheme = snapshot?.activeTheme;
   const diagnostics = snapshot?.diagnostics;
   const cssVarPrefix = snapshot?.cssVarPrefix;
+  const indicators = snapshot?.indicators;
   const listing = snapshot?.listing;
   const tokenGraph = snapshot?.tokenGraph;
   const resolveAt = useMemo(() => {
@@ -157,6 +165,7 @@ export function useProject(): ProjectData {
       resolved: resolveAt(activeAxes as Record<string, string>),
       diagnostics: diagnostics ?? [],
       cssVarPrefix: cssVarPrefix ?? '',
+      indicators: indicators ?? {},
       listing: listing ?? {},
       varianceByPath: derivedVarianceByPath,
       resolveAt,
@@ -170,6 +179,7 @@ export function useProject(): ProjectData {
     activeAxes,
     diagnostics,
     cssVarPrefix,
+    indicators,
     listing,
     derivedVarianceByPath,
     tokenGraph,
@@ -229,6 +239,7 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
       resolved: resolveAt(activeAxes),
       diagnostics: tokens.diagnostics,
       cssVarPrefix: tokens.cssVarPrefix,
+      indicators: tokens.indicators,
       listing: tokens.listing,
       varianceByPath: fallbackVarianceByPath,
       resolveAt,
@@ -239,6 +250,7 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
       tokens.axes,
       tokens.diagnostics,
       tokens.cssVarPrefix,
+      tokens.indicators,
       tokens.listing,
       fallbackVarianceByPath,
       resolveAt,

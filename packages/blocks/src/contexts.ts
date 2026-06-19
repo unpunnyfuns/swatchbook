@@ -84,6 +84,13 @@ export interface ProjectSnapshot {
   activeTheme: string;
   activeAxes: Readonly<Record<string, string>>;
   cssVarPrefix: string;
+  /**
+   * Project-wide baseline for the row-indicator strip from
+   * `config.indicators`. Sits between the hard-coded indicator defaults
+   * and a block's `indicators` prop. Optional — hand-built snapshots
+   * (tests, MDX) omit it and blocks fall back to the bare defaults.
+   */
+  indicators?: Readonly<Record<string, boolean>>;
   diagnostics: readonly VirtualDiagnosticShape[];
   css: string;
   /**
