@@ -173,7 +173,7 @@ export function createServer(initial: Project): McpServer & {
     'get_token',
     {
       description:
-        'Get full details for a single token: resolved value in every theme, DTCG `$type`, `$description`, alias chain, aliased-by list, and CSS var reference. Use after `list_tokens` to inspect a specific path.',
+        'Get full details for a single token: resolved value in every theme, DTCG `$type`, `$description`, `$deprecated` (message or `true` when the token is deprecated), an axis-variance summary (`kind` + the axes it flips across, present only when it varies — see `get_axis_variance` for the per-axis breakdown), alias chain, aliased-by list, and CSS var reference. Use after `list_tokens` to inspect a specific path.',
       inputSchema: {
         path: z.string().describe('Dot-path of the token, e.g. `color.accent.bg`.'),
       },
@@ -185,6 +185,7 @@ export function createServer(initial: Project): McpServer & {
       > = {};
       let type: string | undefined;
       let description: string | undefined;
+      let deprecated: string | boolean | undefined;
       let aliasedBy: readonly string[] | undefined;
       let found = false;
 
@@ -194,6 +195,7 @@ export function createServer(initial: Project): McpServer & {
         found = true;
         type ??= token.$type;
         description ??= token.$description;
+        deprecated ??= token.$deprecated;
         aliasedBy ??= token.aliasedBy;
         perTheme[name] = {
           value: stringifyValue(token.$value),
@@ -206,10 +208,24 @@ export function createServer(initial: Project): McpServer & {
 
       const cssVar = `var(${cssVarName(path, project)})`;
 
+      // Compact at-a-glance variance summary (kind + the axes it flips across),
+      // present only when the token actually varies — full per-axis detail stays
+      // in `get_axis_variance`. Mirrors the UI's "show only when there's
+      // something to show" variance badge.
+      const variance = project.tokenGraph.nodes[path]
+        ? getVariance(project.tokenGraph, path)
+        : undefined;
+      const varianceSummary =
+        variance && variance.kind !== 'constant'
+          ? { kind: variance.kind, axes: variance.varyingAxes }
+          : undefined;
+
       return jsonResult({
         path,
         type,
         description,
+        deprecated,
+        variance: varianceSummary,
         cssVar,
         aliasedBy,
         perTheme,

@@ -43,10 +43,17 @@ interface GetTokenResult {
   path: string;
   type?: string;
   description?: string;
+  deprecated?: string | boolean;
+  variance?: { kind: 'single' | 'multi'; axes: readonly string[] };
   cssVar: string;
   aliasedBy?: readonly string[];
   perTheme: Record<string, { value: string; aliasOf?: string; aliasChain?: readonly string[] }>;
 }
+
+// Fixture invariants: color.text.link carries DTCG `$deprecated` with a message;
+// color.surface.default varies with mode (Light vs Dark); palette primitives are
+// axis-constant.
+const DEPRECATED_TOKEN = 'color.text.link';
 
 it('get_token: returns the alias chain and resolved value per theme', async () => {
   const result = await mcp.callJson<GetTokenResult>('get_token', { path: ALIAS_TOKEN });
@@ -105,6 +112,27 @@ it('get_token: returns the cssVar without a prefix segment when cssVarPrefix is 
 it('get_token: returns a text "not found" response for unknown paths', async () => {
   const text = await mcp.callText('get_token', { path: 'does.not.exist' });
   expect(text).toBe('Token not found: does.not.exist');
+});
+
+it('get_token: surfaces DTCG $deprecated with its message', async () => {
+  const result = await mcp.callJson<GetTokenResult>('get_token', { path: DEPRECATED_TOKEN });
+  expect(result.deprecated).toBe('Use color.text.accent instead.');
+});
+
+it('get_token: omits deprecated for a token without $deprecated', async () => {
+  const result = await mcp.callJson<GetTokenResult>('get_token', { path: PRIMITIVE_TOKEN });
+  expect(result.deprecated).toBeUndefined();
+});
+
+it('get_token: summarises axis variance for a mode-varying token', async () => {
+  const result = await mcp.callJson<GetTokenResult>('get_token', { path: ALIAS_TOKEN });
+  expect(result.variance?.kind).toMatch(/single|multi/);
+  expect(result.variance?.axes).toContain('mode');
+});
+
+it('get_token: omits the variance summary for an axis-constant primitive', async () => {
+  const result = await mcp.callJson<GetTokenResult>('get_token', { path: PRIMITIVE_TOKEN });
+  expect(result.variance).toBeUndefined();
 });
 
 interface GetAliasChainResult {
