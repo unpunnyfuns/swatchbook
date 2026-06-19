@@ -7,6 +7,7 @@ const DEFAULTS = {
   gamut: true,
   deprecation: true,
   description: false,
+  composes: false,
 };
 
 it('undefined → the established defaults', () => {
@@ -20,6 +21,7 @@ it('false → every indicator off', () => {
     gamut: false,
     deprecation: false,
     description: false,
+    composes: false,
   });
 });
 
@@ -30,7 +32,13 @@ it('true → every indicator on, including description', () => {
     gamut: true,
     deprecation: true,
     description: true,
+    composes: true,
   });
+});
+
+it('composes is opt-in: off by default, settable via object', () => {
+  expect(resolveIndicators(undefined).composes).toBe(false);
+  expect(resolveIndicators({ composes: true })).toEqual({ ...DEFAULTS, composes: true });
 });
 
 it('object → per-key override layered over defaults', () => {
