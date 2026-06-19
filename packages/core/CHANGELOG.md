@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.65.0
+
+### Patch Changes
+
+- d2d24f92a1d05e5f3a2dfcffede64fdd7fcde455: `project.resolveAt` now preserves alias provenance, so an axis-varying alias keeps its own chain, target, and description at non-default tuples; the MCP's per-theme token introspection was returning the resolved leaf target's metadata instead of the alias's own
+
 ## 0.64.0
 
 ## 0.63.0

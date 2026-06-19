@@ -1,6 +1,6 @@
 {
   "name": "@unpunnyfuns/swatchbook-mcp",
-  "version": "0.64.0",
+  "version": "0.65.0",
   "description": "Model Context Protocol server for swatchbook — exposes a DTCG project's tokens, axes, and diagnostics to AI agents without running Storybook.",
   "license": "MIT",
   "author": "unpunnyfuns <unpunnyfuns@gmail.com>",
