@@ -39,3 +39,11 @@ overrides:
   'js-yaml@>=4': ^4.2.0
   # GHSA-4x5r-pxfx-6jf8 (#1223)
   '@babel/core': ^7.29.6
+  # GHSA-mx8g-39q3-5c79 (#1255), via @docusaurus/core dev server
+  webpack-dev-server: 5.2.5
+  # GHSA-64mm-vxmg-q3vj (#1255), forced major: webpack-dev-server@5.2.5 still
+  # declares ^2.0.9 and calls the v2 two-arg createProxyMiddleware(context,
+  # config) form that v3 dropped, but that path runs only with a configured
+  # dev-server proxy, and no workspace sets one — so it is dead here. Pinned to
+  # the minimum patched major (not v4) to stay closest to wds's expected API.
+  http-proxy-middleware: ^3.0.6
