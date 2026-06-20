@@ -20,9 +20,14 @@ jobs:
   chromatic:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    # Don't block on a missing secret — forks and draft PRs without
-    # access to CHROMATIC_PROJECT_TOKEN should skip cleanly.
-    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
+    # Don't block on a missing secret — runs without access to
+    # CHROMATIC_PROJECT_TOKEN should skip cleanly. Forks fail the
+    # same-repo check; Dependabot branches live in-repo but GitHub runs
+    # their pull_request event in a restricted context that withholds
+    # Actions secrets, so the token is empty and the job would fail. A
+    # job skipped via `if:` reports a neutral result, so neither case
+    # blocks the PR.
+    if: ${{ github.actor != 'dependabot[bot]' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) }}
     permissions:
       contents: read
       pull-requests: write
