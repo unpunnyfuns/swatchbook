@@ -1,5 +1,18 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.66.0
+
+### Minor Changes
+
+- 7d59091a0d2af06a3bd112eaa9e91b06e79215fc: ColorTable renders the shared per-row indicator strip (alias chain, reverse referents, axis-variance, deprecation, opt-in `$description`) in place of the old Alias column, strikes through deprecated names, and accepts the same `indicators` prop to configure it
+- 9a0bc02ae579381e2e427a7292fd8f99178da541: Add an opt-in `composes` row indicator: composite-typed tokens (typography, border, transition, gradient, shadow) show a `⊞ N` count of the parts they bundle. Off by default; enable via `indicators={{ composes: true }}` on TokenNavigator / TokenTable
+- d97f56587a31ad2134b4b189d2c8f545e3c8649a: Add a project-wide config.indicators baseline for the block row-indicator strip; per-block indicators props override it
+
+### Patch Changes
+
+- Updated dependencies [d97f565]
+  - @unpunnyfuns/swatchbook-core@0.66.0
+
 ## 0.65.0
 
 ### Minor Changes

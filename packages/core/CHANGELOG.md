@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.66.0
+
+### Minor Changes
+
+- d97f56587a31ad2134b4b189d2c8f545e3c8649a: Add a project-wide config.indicators baseline for the block row-indicator strip; per-block indicators props override it
+
 ## 0.65.0
 
 ### Patch Changes

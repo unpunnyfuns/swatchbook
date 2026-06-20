@@ -25,7 +25,7 @@ Most blocks in this group take:
 
 Expandable tree of the token graph. Each interior group shows its child count; each leaf shows its `$type` pill plus an inline preview (color swatch, dimension bar, shadow / border / motion sample, or a formatted value). A fuzzy-search input at the top filters leaves by path: case-insensitive, out-of-order terms, single-character typo tolerance. Matching leaves survive, groups on the way to them auto-expand. Clicking a leaf opens a slide-over with the full `<TokenDetail>`; pass `onSelect` to own the click follow-up instead.
 
-Between the type pill and the preview, a leaf carries an indicator strip when there is something to show: a forward alias chain (`→ target`, capped past two hops with the full chain on the accessible label), a reverse `← N` count of tokens that reference this one, an axis-variance badge when the resolved value differs across the project's axes (naming the axis, or a count when several), an out-of-gamut marker on colors outside sRGB for the active format, a deprecation badge with a struck-through name for tokens carrying DTCG `$deprecated`, and an opt-in `ⓘ` glyph carrying the token's `$description`. Alias references are navigable: clicking a chain node, or a single reverse referrer, moves the tree to that token; several referrers open a chooser. The chain reflects the active theme, so a token that aliases different palette entries per axis context shows the path true in the current context.
+Between the type pill and the preview, a leaf carries an indicator strip when there is something to show: a forward alias chain (`→ target`, capped past two hops with the full chain on the accessible label), a reverse `← N` count of tokens that reference this one, an axis-variance badge when the resolved value differs across the project's axes (naming the axis, or a count when several), an out-of-gamut marker on colors outside sRGB for the active format, a deprecation badge with a struck-through name for tokens carrying DTCG `$deprecated`, an opt-in `ⓘ` glyph carrying the token's `$description`, and an opt-in `⊞ N` count of the parts a composite token bundles (object fields for typography / border / transition, stops or layers for gradient / shadow). Alias references are navigable: clicking a chain node, or a single reverse referrer, moves the tree to that token; several referrers open a chooser. The chain reflects the active theme, so a token that aliases different palette entries per axis context shows the path true in the current context.
 
 Props:
 
@@ -34,7 +34,7 @@ Props:
 - `initiallyExpanded?: number`: depth open on first render. `0` all collapsed, `1` top-level groups open (default), `2` one deeper, etc.
 - `searchable?: boolean`: render a runtime search input above the tree. Defaults to `true`. Pass `false` to hide the input (the `root` / `type` props still apply at authoring time).
 - `onSelect?(path: string): void`: receives a leaf's full dot-path on click; suppresses the built-in overlay.
-- `indicators?: boolean | Partial<Record<IndicatorName, boolean>>`: configure the per-row indicator strip. Omit for the defaults (`alias`, `variance`, `gamut`, `deprecation` on; `description` off). `false` hides the strip; `true` enables all (including `description`); an object overrides individual keys (e.g. `{ description: true }`, `{ deprecation: false }`). Indicators still render only when their data is present.
+- `indicators?: boolean | Partial<Record<IndicatorName, boolean>>`: configure the per-row indicator strip. Omit for the defaults (`alias`, `variance`, `gamut`, `deprecation` on; `description`, `composes` off). `false` hides the strip; `true` enables all (including `description` and `composes`); an object overrides individual keys (e.g. `{ composes: true }`, `{ deprecation: false }`). Indicators still render only when their data is present; `composes` shows only on composite-typed rows. A project-wide default for the strip can be set via [`config.indicators`](../config.mdx#indicators); this per-block prop overrides it.
 
 ### TokenTable
 
@@ -44,7 +44,7 @@ Props:
 
 Compact table: **Path**, an indicators column, and **Value** (with inline type pill + color swatch). A fuzzy-search input at the top narrows rows by path, type, or value: case-insensitive, out-of-order terms, single-character typo tolerance. Each value cell has a hover-revealed copy-to-clipboard button. Clicking a row opens the same slide-over `<TokenDetail>` the tree uses; pass `onSelect` to own the follow-up. Columns follow content with per-column `min-width` floors, so the table breathes in narrow containers.
 
-The middle column carries the same indicator strip as the navigator: the forward alias chain, a reverse `← N` count of tokens that reference the row, an axis-variance badge, an out-of-gamut marker, a deprecation badge, and an opt-in `ⓘ` description glyph. A deprecated row's path is struck through. Alias references are navigable here too, but the table has no tree to expand: clicking a chain node or a reverse referent opens that token's detail overlay (a chooser when several tokens reference it). The column does not participate in sorting.
+The middle column carries the same indicator strip as the navigator: the forward alias chain, a reverse `← N` count of tokens that reference the row, an axis-variance badge, an out-of-gamut marker, a deprecation badge, an opt-in `ⓘ` description glyph, and an opt-in `⊞ N` composite-parts count. A deprecated row's path is struck through. Alias references are navigable here too, but the table has no tree to expand: clicking a chain node or a reverse referent opens that token's detail overlay (a chooser when several tokens reference it). The column does not participate in sorting.
 
 Props:
 
@@ -55,7 +55,7 @@ Props:
 - `sortDir?: 'asc' | 'desc'`: default `'asc'`.
 - `searchable?: boolean`: render a runtime search input above the table. Defaults to `true`.
 - `onSelect?(path: string): void`: suppress the built-in drawer.
-- `indicators?: boolean | Partial<Record<IndicatorName, boolean>>`: configure the per-row indicator strip. Omit for the defaults (`alias`, `variance`, `gamut`, `deprecation` on; `description` off). `false` hides the strip; `true` enables all (including `description`); an object overrides individual keys (e.g. `{ description: true }`, `{ deprecation: false }`). Indicators still render only when their data is present.
+- `indicators?: boolean | Partial<Record<IndicatorName, boolean>>`: configure the per-row indicator strip. Omit for the defaults (`alias`, `variance`, `gamut`, `deprecation` on; `description`, `composes` off). `false` hides the strip; `true` enables all (including `description` and `composes`); an object overrides individual keys (e.g. `{ composes: true }`, `{ deprecation: false }`). Indicators still render only when their data is present; `composes` shows only on composite-typed rows. A project-wide default for the strip can be set via [`config.indicators`](../config.mdx#indicators); this per-block prop overrides it.
 
 ## Per-type
 
@@ -75,7 +75,9 @@ Swatch grid grouped by dot-path prefix. `groupBy` is auto-derived from the filte
 <ColorTable filter="color.**" />
 ```
 
-Tabular, color-only companion to `TokenTable`. One row per `$type: color` token with swatch, name, value (in the active color format from the toolbar toggle), CSS var, and alias-target columns. Each value cell has a hover-revealed copy-to-clipboard button. Fuzzy search across path + value.
+Tabular, color-only companion to `TokenTable`. One row per `$type: color` token with swatch, name, value (in the active color format from the toolbar toggle), CSS var, and an indicators column. Each value cell has a hover-revealed copy-to-clipboard button. Fuzzy search across path + value.
+
+The indicators column carries the same strip as `TokenTable` and the navigator: the forward alias chain (replacing the old standalone Alias column), a reverse `← N` referent count, an axis-variance badge, a deprecation badge, and an opt-in `ⓘ` description glyph. The out-of-gamut marker is the one exception: it stays in the Value cell beside the colour it qualifies, so it is not part of this strip. A deprecated row's name is struck through. Alias references are navigable: clicking a chain node or reverse referent opens that token's row.
 
 Clicking a row expands it inline: the detail panel surfaces `$description`, the token's alias chain, and (for grouped variants) a sub-table comparing every variant's HEX / HSL / OKLCH at once. That side-by-side comparison is the one place per-format density earns its weight; the collapsed row only shows the format the user already picked.
 
@@ -99,6 +101,7 @@ Props:
 - `searchable?: boolean`: render a fuzzy-search input above the table. Defaults to `true`.
 - `onSelect?(path: string): void`: replaces the expand-in-place default with a consumer-driven callback, invoked with the currently-selected variant's path.
 - `variants?: Record<string, string>`: label-to-suffix map for grouping. Accepts both DTCG dot-segment (`hi.disabled`) and Backmarket hyphen-tail (`hi-d`) conventions. Single-member groups render as plain rows; empty / omitted map disables grouping entirely.
+- `indicators?: boolean | Partial<Record<IndicatorName, boolean>>`: configure the per-row indicator strip. Omit for the defaults (`alias`, `variance`, `deprecation` on; `description` off). `false` hides the strip; `true` enables all (including `description`); an object overrides individual keys. Gamut is not part of this strip — it renders in the Value cell — so toggling it here has no effect. Indicators still render only when their data is present.
 
 ### TypographyScale
 
