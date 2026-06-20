@@ -45,6 +45,7 @@
 }
 
 .sb-indicator__variance,
+.sb-indicator__composes,
 .sb-indicator__deprecated {
   display: inline-flex;
   align-items: center;
@@ -54,8 +55,13 @@
   white-space: nowrap;
 }
 
-.sb-indicator__variance-glyph {
+.sb-indicator__variance-glyph,
+.sb-indicator__composes-glyph {
   color: var(--swatchbook-text-muted, rgba(128, 128, 128, 0.7));
+}
+
+.sb-indicator__composes {
+  color: var(--swatchbook-text-muted, rgba(128, 128, 128, 0.8));
 }
 
 .sb-indicator__gamut {

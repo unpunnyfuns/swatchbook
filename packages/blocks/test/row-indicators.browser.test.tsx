@@ -419,3 +419,75 @@ it('renders nothing when every present indicator is disabled', () => {
   expect(screen.queryByTestId('row-indicator-alias-forward')).toBeNull();
   expect(screen.queryByTestId('row-indicator-deprecated')).toBeNull();
 });
+
+function renderEnabled(
+  path: string,
+  token: VirtualTokenShape,
+  enabled: ReturnType<typeof resolveIndicators>,
+) {
+  return render(
+    <RowIndicators
+      path={path}
+      token={token}
+      root={undefined}
+      variance={undefined}
+      colorFormat="hex"
+      canReference={inView}
+      onReferenceClick={noop}
+      enabled={enabled}
+    />,
+  );
+}
+
+it('shows a composes count for a composite object value when enabled', () => {
+  renderEnabled(
+    'typography.body',
+    {
+      $type: 'typography',
+      $value: {
+        fontFamily: 'Inter',
+        fontSize: '1rem',
+        fontWeight: 400,
+        lineHeight: 1.5,
+        letterSpacing: '0',
+      },
+    },
+    resolveIndicators({ composes: true }),
+  );
+  expect(screen.getByTestId('row-indicator-composes').textContent).toContain('5');
+});
+
+it('counts gradient stops as the composes total', () => {
+  renderEnabled(
+    'gradient.brand',
+    { $type: 'gradient', $value: [{ color: '#000' }, { color: '#fff' }, { color: '#f00' }] },
+    resolveIndicators({ composes: true }),
+  );
+  expect(screen.getByTestId('row-indicator-composes').textContent).toContain('3');
+});
+
+it('off by default: no composes badge even for a composite token', () => {
+  renderRow('typography.body', {
+    $type: 'typography',
+    $value: { fontFamily: 'Inter', fontSize: '1rem' },
+  });
+  expect(screen.queryByTestId('row-indicator-composes')).toBeNull();
+});
+
+it('never badges a non-composite object value such as a color', () => {
+  renderEnabled(
+    'color.brand',
+    { $type: 'color', $value: { hex: '#00f' } },
+    resolveIndicators({ composes: true }),
+  );
+  expect(screen.queryByTestId('row-indicator-composes')).toBeNull();
+});
+
+it('no composes badge for an aliased composite whose value is a string', () => {
+  renderEnabled(
+    'typography.alias',
+    { $type: 'typography', $value: '{typography.body}' },
+    resolveIndicators({ composes: true }),
+  );
+  expect(screen.queryByTestId('row-indicator-composes')).toBeNull();
+});
