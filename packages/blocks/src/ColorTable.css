@@ -191,19 +191,8 @@
   margin-left: 6px;
 }
 
-.sb-color-table__alias {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
-  color: var(--swatchbook-text-muted, CanvasText);
+.sb-color-table__refs {
   white-space: nowrap;
-}
-
-.sb-color-table__alias-text {
-  font-style: italic;
-}
-
-.sb-color-table__alias-empty {
-  opacity: 0.4;
 }
 
 .sb-color-table__expand-cell {
@@ -330,4 +319,10 @@
   font-style: italic;
   text-align: center;
   padding: 16px 12px;
+}
+
+.sb-color-table__path[data-deprecated='true'] .sb-color-table__path-text {
+  text-decoration: line-through;
+  text-decoration-color: light-dark(#92400e, #fbbf24);
+  opacity: 0.75;
 }

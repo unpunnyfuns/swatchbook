@@ -75,7 +75,9 @@ Swatch grid grouped by dot-path prefix. `groupBy` is auto-derived from the filte
 <ColorTable filter="color.**" />
 ```
 
-Tabular, color-only companion to `TokenTable`. One row per `$type: color` token with swatch, name, value (in the active color format from the toolbar toggle), CSS var, and alias-target columns. Each value cell has a hover-revealed copy-to-clipboard button. Fuzzy search across path + value.
+Tabular, color-only companion to `TokenTable`. One row per `$type: color` token with swatch, name, value (in the active color format from the toolbar toggle), CSS var, and an indicators column. Each value cell has a hover-revealed copy-to-clipboard button. Fuzzy search across path + value.
+
+The indicators column carries the same strip as `TokenTable` and the navigator: the forward alias chain (replacing the old standalone Alias column), a reverse `← N` referent count, an axis-variance badge, a deprecation badge, and an opt-in `ⓘ` description glyph. The out-of-gamut marker is the one exception: it stays in the Value cell beside the colour it qualifies, so it is not part of this strip. A deprecated row's name is struck through. Alias references are navigable: clicking a chain node or reverse referent opens that token's row.
 
 Clicking a row expands it inline: the detail panel surfaces `$description`, the token's alias chain, and (for grouped variants) a sub-table comparing every variant's HEX / HSL / OKLCH at once. That side-by-side comparison is the one place per-format density earns its weight; the collapsed row only shows the format the user already picked.
 
@@ -99,6 +101,7 @@ Props:
 - `searchable?: boolean`: render a fuzzy-search input above the table. Defaults to `true`.
 - `onSelect?(path: string): void`: replaces the expand-in-place default with a consumer-driven callback, invoked with the currently-selected variant's path.
 - `variants?: Record<string, string>`: label-to-suffix map for grouping. Accepts both DTCG dot-segment (`hi.disabled`) and Backmarket hyphen-tail (`hi-d`) conventions. Single-member groups render as plain rows; empty / omitted map disables grouping entirely.
+- `indicators?: boolean | Partial<Record<IndicatorName, boolean>>`: configure the per-row indicator strip. Omit for the defaults (`alias`, `variance`, `deprecation` on; `description` off). `false` hides the strip; `true` enables all (including `description`); an object overrides individual keys. Gamut is not part of this strip — it renders in the Value cell — so toggling it here has no effect. Indicators still render only when their data is present.
 
 ### TypographyScale
 
