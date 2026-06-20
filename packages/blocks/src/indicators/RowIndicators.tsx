@@ -31,6 +31,26 @@ function relativeLabel(path: string, root: string | undefined): string {
   return path;
 }
 
+// DTCG composite `$type`s — the same set core's token-graph build keys on
+// (build.ts COMPOSITE_TYPES). Only these carry a meaningful sub-part count;
+// other object-valued tokens (a 2025-spec color, say) must not be badged.
+const COMPOSITE_TYPES = new Set(['border', 'typography', 'transition', 'gradient', 'shadow']);
+
+// Number of constituent parts a composite token bundles: object fields for
+// typography / border / transition / object-form shadow, stops/layers for an
+// array-form gradient or shadow. `undefined` for non-composites and for an
+// aliased composite (string `$value`), which compose nothing locally.
+function compositeFieldCount(token: VirtualTokenShape): number | undefined {
+  if (!token.$type || !COMPOSITE_TYPES.has(token.$type)) return undefined;
+  const v = token.$value;
+  if (Array.isArray(v)) return v.length > 0 ? v.length : undefined;
+  if (v !== null && typeof v === 'object') {
+    const n = Object.keys(v).length;
+    return n > 0 ? n : undefined;
+  }
+  return undefined;
+}
+
 interface ForwardChainProps {
   chain: readonly string[];
   root: string | undefined;
@@ -255,6 +275,7 @@ export function RowIndicators(props: RowIndicatorsProps): ReactElement | null {
     typeof token.$description === 'string' && token.$description.length > 0
       ? token.$description
       : undefined;
+  const composesCount = en.composes ? compositeFieldCount(token) : undefined;
 
   const showDeprecated = en.deprecation && isDeprecated;
   const showForward = en.alias && aliasChain !== undefined;
@@ -262,6 +283,7 @@ export function RowIndicators(props: RowIndicatorsProps): ReactElement | null {
   const showVariance = en.variance && isVarying;
   const showGamut = en.gamut && outOfGamut;
   const showDescription = en.description && description !== undefined;
+  const showComposes = composesCount !== undefined;
 
   if (
     !showDeprecated &&
@@ -269,7 +291,8 @@ export function RowIndicators(props: RowIndicatorsProps): ReactElement | null {
     !showReverse &&
     !showVariance &&
     !showGamut &&
-    !showDescription
+    !showDescription &&
+    !showComposes
   ) {
     return null;
   }
@@ -291,6 +314,19 @@ export function RowIndicators(props: RowIndicatorsProps): ReactElement | null {
           canReference={canReference}
           onReferenceClick={onReferenceClick}
         />
+      )}
+      {showComposes && composesCount !== undefined && (
+        <span
+          className="sb-indicator__composes"
+          data-testid="row-indicator-composes"
+          title={`composes ${composesCount} parts`}
+          aria-label={`composes ${composesCount} parts`}
+        >
+          <span className="sb-indicator__composes-glyph" aria-hidden>
+            ⊞
+          </span>
+          {composesCount}
+        </span>
       )}
       {showVariance && variance && <VarianceBadge variance={variance} />}
       {showGamut && (
