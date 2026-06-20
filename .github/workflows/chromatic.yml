@@ -41,7 +41,7 @@ jobs:
           # rule stays clean for this workflow too.
           persist-credentials: false
 
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+      - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
         with:
           run_install: false
 
@@ -62,7 +62,7 @@ jobs:
         run: pnpm turbo run build:storybook --filter=@unpunnyfuns/swatchbook-storybook
 
       - name: Publish to Chromatic
-        uses: chromaui/action@8ad69a40dea06755a3c6db290f300a39e011433b # v17.1.0
+        uses: chromaui/action@1db61b73b7919508ee8e62336f04bd0aed6da756 # v17.4.1
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           workingDir: apps/storybook
