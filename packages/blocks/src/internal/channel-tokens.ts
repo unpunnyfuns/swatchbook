@@ -33,6 +33,8 @@ export interface TokenSnapshot {
   readonly diagnostics: readonly VirtualDiagnostic[];
   readonly css: string;
   readonly cssVarPrefix: string;
+  /** Project-wide baseline for the row-indicator strip from `config.indicators`. */
+  readonly indicators: Readonly<Record<string, boolean>>;
   readonly listing: Readonly<Record<string, VirtualTokenListingShape>>;
   readonly tokenGraph: VirtualTokenGraph;
   readonly defaultTuple: Record<string, string>;
@@ -53,6 +55,7 @@ const EMPTY_SNAPSHOT: TokenSnapshot = {
   diagnostics: [],
   css: '',
   cssVarPrefix: '',
+  indicators: {},
   listing: {},
   tokenGraph: EMPTY_TOKEN_GRAPH,
   defaultTuple: {},
@@ -74,6 +77,7 @@ function applyPatch(patch: Partial<TokenSnapshot>): void {
     diagnostics: patch.diagnostics ?? snapshot.diagnostics,
     css: patch.css ?? snapshot.css,
     cssVarPrefix: patch.cssVarPrefix ?? snapshot.cssVarPrefix,
+    indicators: patch.indicators ?? snapshot.indicators,
     listing: patch.listing ?? snapshot.listing,
     tokenGraph: patch.tokenGraph ?? snapshot.tokenGraph,
     defaultTuple: patch.defaultTuple ?? snapshot.defaultTuple,

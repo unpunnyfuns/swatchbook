@@ -221,7 +221,13 @@ export function TokenNavigator({
   id,
   indicators,
 }: TokenNavigatorProps): ReactElement {
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = useProject();
+  const {
+    resolved,
+    activeTheme,
+    activeAxes,
+    cssVarPrefix,
+    indicators: indicatorBaseline,
+  } = useProject();
 
   // Persist UI state (expand/collapse, selection, search) across docs-mode
   // remounts. Keyed on the props that distinguish one navigator from another
@@ -235,7 +241,10 @@ export function TokenNavigator({
     return new Set(Array.isArray(type) ? type : [type]);
   }, [type]);
 
-  const enabledIndicators = useMemo(() => resolveIndicators(indicators), [indicators]);
+  const enabledIndicators = useMemo(
+    () => resolveIndicators(indicators, indicatorBaseline),
+    [indicators, indicatorBaseline],
+  );
 
   const tree = useMemo(() => buildTree(resolved, root, typeFilter), [resolved, root, typeFilter]);
 

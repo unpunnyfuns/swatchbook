@@ -26,9 +26,18 @@ const DEFAULT_INDICATORS: Record<IndicatorName, boolean> = {
   composes: false,
 };
 
-/** Normalize an `IndicatorsProp` into a full enabled-map by layering over the defaults. */
-export function resolveIndicators(prop?: IndicatorsProp): Record<IndicatorName, boolean> {
-  if (prop === undefined) return { ...DEFAULT_INDICATORS };
+/**
+ * Normalize an `IndicatorsProp` into a full enabled-map. Precedence
+ * (lowest→highest): `DEFAULT_INDICATORS` → `baseline` (the project-wide
+ * `config.indicators` default) → per-block `prop`. An explicit boolean
+ * `prop` (`true`/`false`) forces every key on/off and wins over the
+ * baseline; an object `prop` overlays on top of defaults+baseline; an
+ * absent `prop` leaves the result at defaults overlaid with baseline.
+ */
+export function resolveIndicators(
+  prop?: IndicatorsProp,
+  baseline?: Partial<Record<IndicatorName, boolean>>,
+): Record<IndicatorName, boolean> {
   if (prop === true) {
     return {
       alias: true,
@@ -49,5 +58,5 @@ export function resolveIndicators(prop?: IndicatorsProp): Record<IndicatorName, 
       composes: false,
     };
   }
-  return { ...DEFAULT_INDICATORS, ...prop };
+  return { ...DEFAULT_INDICATORS, ...baseline, ...prop };
 }

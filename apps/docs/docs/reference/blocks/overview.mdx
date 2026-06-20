@@ -34,7 +34,7 @@ Props:
 - `initiallyExpanded?: number`: depth open on first render. `0` all collapsed, `1` top-level groups open (default), `2` one deeper, etc.
 - `searchable?: boolean`: render a runtime search input above the tree. Defaults to `true`. Pass `false` to hide the input (the `root` / `type` props still apply at authoring time).
 - `onSelect?(path: string): void`: receives a leaf's full dot-path on click; suppresses the built-in overlay.
-- `indicators?: boolean | Partial<Record<IndicatorName, boolean>>`: configure the per-row indicator strip. Omit for the defaults (`alias`, `variance`, `gamut`, `deprecation` on; `description`, `composes` off). `false` hides the strip; `true` enables all (including `description` and `composes`); an object overrides individual keys (e.g. `{ composes: true }`, `{ deprecation: false }`). Indicators still render only when their data is present; `composes` shows only on composite-typed rows.
+- `indicators?: boolean | Partial<Record<IndicatorName, boolean>>`: configure the per-row indicator strip. Omit for the defaults (`alias`, `variance`, `gamut`, `deprecation` on; `description`, `composes` off). `false` hides the strip; `true` enables all (including `description` and `composes`); an object overrides individual keys (e.g. `{ composes: true }`, `{ deprecation: false }`). Indicators still render only when their data is present; `composes` shows only on composite-typed rows. A project-wide default for the strip can be set via [`config.indicators`](../config.mdx#indicators); this per-block prop overrides it.
 
 ### TokenTable
 
@@ -55,7 +55,7 @@ Props:
 - `sortDir?: 'asc' | 'desc'`: default `'asc'`.
 - `searchable?: boolean`: render a runtime search input above the table. Defaults to `true`.
 - `onSelect?(path: string): void`: suppress the built-in drawer.
-- `indicators?: boolean | Partial<Record<IndicatorName, boolean>>`: configure the per-row indicator strip. Omit for the defaults (`alias`, `variance`, `gamut`, `deprecation` on; `description`, `composes` off). `false` hides the strip; `true` enables all (including `description` and `composes`); an object overrides individual keys (e.g. `{ composes: true }`, `{ deprecation: false }`). Indicators still render only when their data is present; `composes` shows only on composite-typed rows.
+- `indicators?: boolean | Partial<Record<IndicatorName, boolean>>`: configure the per-row indicator strip. Omit for the defaults (`alias`, `variance`, `gamut`, `deprecation` on; `description`, `composes` off). `false` hides the strip; `true` enables all (including `description` and `composes`); an object overrides individual keys (e.g. `{ composes: true }`, `{ deprecation: false }`). Indicators still render only when their data is present; `composes` shows only on composite-typed rows. A project-wide default for the strip can be set via [`config.indicators`](../config.mdx#indicators); this per-block prop overrides it.
 
 ## Per-type
 

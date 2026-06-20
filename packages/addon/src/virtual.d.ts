@@ -21,6 +21,7 @@ declare module 'virtual:swatchbook/tokens' {
   export const diagnostics: readonly VirtualDiagnostic[];
   export const css: string;
   export const cssVarPrefix: string;
+  export const indicators: Readonly<Record<string, boolean>>;
   export const listing: Readonly<Record<string, VirtualListingEntry>>;
   export const defaultTuple: Record<string, string>;
   export const tokenGraph: TokenGraph;

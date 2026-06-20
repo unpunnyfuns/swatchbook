@@ -50,6 +50,8 @@ export interface SnapshotForWire {
   presets: Project['presets'];
   diagnostics: Project['diagnostics'];
   cssVarPrefix: string;
+  /** Project-wide baseline for the block row-indicator strip; `config.indicators` passed through verbatim. */
+  indicators: Readonly<Record<string, boolean>>;
   css: string;
   listing: Readonly<Record<string, SlimListedToken>>;
   defaultTuple: Project['defaultTuple'];
@@ -69,6 +71,7 @@ export function snapshotForWire(project: Project, css: string): SnapshotForWire 
     presets: project.presets,
     diagnostics: project.diagnostics,
     cssVarPrefix: project.config.cssVarPrefix ?? '',
+    indicators: project.config.indicators ?? {},
     css,
     listing: slimListing(project.listing),
     defaultTuple: project.defaultTuple,

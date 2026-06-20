@@ -72,11 +72,22 @@ export function TokenTable({
   indicators,
 }: TokenTableProps): ReactElement {
   const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing, varianceByPath } = project;
+  const {
+    resolved,
+    activeTheme,
+    activeAxes,
+    cssVarPrefix,
+    listing,
+    varianceByPath,
+    indicators: indicatorBaseline,
+  } = project;
   const colorFormat = useColorFormat();
   // Persist selection + search across docs-mode remounts (see persistent-state).
   const blockKey = useBlockKey('TokenTable', [filter, type, caption, id]);
-  const enabledIndicators = useMemo(() => resolveIndicators(indicators), [indicators]);
+  const enabledIndicators = useMemo(
+    () => resolveIndicators(indicators, indicatorBaseline),
+    [indicators, indicatorBaseline],
+  );
   const [selectedPath, setSelectedPath] = usePersistedState<string | null>(
     `${blockKey}::selected`,
     null,

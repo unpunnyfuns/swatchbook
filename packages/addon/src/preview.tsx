@@ -19,6 +19,7 @@ import {
   defaultTuple as virtualDefaultTuple,
   diagnostics,
   disabledAxes as virtualDisabledAxes,
+  indicators as virtualIndicators,
   listing as virtualListing,
   presets as virtualPresets,
   tokenGraph as virtualTokenGraph,
@@ -59,6 +60,7 @@ registerTokenSource({
   diagnostics,
   css,
   cssVarPrefix,
+  indicators: virtualIndicators,
   listing: virtualListing,
   tokenGraph: virtualTokenGraph,
   defaultTuple: virtualDefaultTuple,
@@ -409,6 +411,7 @@ interface HmrSnapshot {
   diagnostics: typeof diagnostics;
   css: string;
   cssVarPrefix: string;
+  indicators: typeof virtualIndicators;
   listing: typeof virtualListing;
   tokenGraph: typeof virtualTokenGraph;
   defaultTuple: typeof virtualDefaultTuple;

@@ -188,6 +188,7 @@ export function swatchbookTokensPlugin({
         `export const diagnostics = ${JSON.stringify(snap.diagnostics)};`,
         `export const css = ${JSON.stringify(snap.css)};`,
         `export const cssVarPrefix = ${JSON.stringify(snap.cssVarPrefix)};`,
+        `export const indicators = ${JSON.stringify(snap.indicators)};`,
         `export const listing = ${JSON.stringify(snap.listing)};`,
         `export const defaultTuple = ${JSON.stringify(snap.defaultTuple)};`,
         `export const tokenGraph = ${JSON.stringify(snap.tokenGraph)};`,
