@@ -1,5 +1,16 @@
 # @unpunnyfuns/swatchbook-mcp
 
+## 0.66.0
+
+### Minor Changes
+
+- 379946857035dd905d26b71c10638856c2cae0e7: `get_token` now reports DTCG `$deprecated` and a compact axis-variance summary (`kind` plus the axes the value flips across), so an agent sees the same at-a-glance facts the UI's row indicators surface
+
+### Patch Changes
+
+- Updated dependencies [d97f565]
+  - @unpunnyfuns/swatchbook-core@0.66.0
+
 ## 0.65.0
 
 ### Patch Changes
