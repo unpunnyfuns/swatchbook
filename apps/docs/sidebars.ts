@@ -22,6 +22,7 @@ const sidebars: SidebarsConfig = {
       collapsed: false,
       items: ['guides/integrations/tailwind', 'guides/integrations/css-in-js'],
     },
+    'guides/terrazzo-dependencies',
     'guides/sharing-terrazzo-options',
   ],
   reference: [
