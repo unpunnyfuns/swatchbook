@@ -12,24 +12,20 @@ semantic roles at `color.<role>.*`, plus `mode × brand × contrast`
 modifier axes via a DTCG resolver), through the addon and dogfoods every
 block in the library.
 
-## Pages
+## Sections
 
-- **[Dashboard](?path=/docs/docs-dashboard--docs)**: the recommended
-  composition: `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />`
-  on one page. This is the pattern that replaces the old in-manager
-  Design Tokens panel.
-- **[Colors](?path=/docs/docs-colors--docs)**: `ColorPalette` grids.
-- **[Typography](?path=/docs/docs-typography--docs)**: `TypographyScale`
-  rendering composites with real sub-values.
-- **[Fonts](?path=/docs/docs-fonts--docs)**: `FontFamilyPreview` and
-  `FontWeightScale` for the primitives that back typography composites.
-- **[Dimensions](?path=/docs/docs-dimensions--docs)**: `DimensionScale`
-  for spacing and radius scales.
-- **[Borders](?path=/docs/docs-borders--docs)**,
-  **[Shadows](?path=/docs/docs-shadows--docs)**,
-  **[StrokeStyles](?path=/docs/docs-strokestyles--docs)**,
-  **[Gradients](?path=/docs/docs-gradients--docs)**,
-  **[Motion](?path=/docs/docs-motion--docs)**: per-type preview blocks.
+The sidebar holds three views of the same token set and the same blocks:
+
+- **[Docs](?path=/docs/docs-dashboard--docs)**: the blocks composed inside
+  prose, a narrative reference with rationale and usage around the tokens.
+  The [Dashboard](?path=/docs/docs-dashboard--docs) is the recommended
+  composition (`<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />`);
+  the rest drill into one `$type` each.
+- **[Tokens](?path=/docs/tokens-introduction--docs)**: a story catalog of the
+  project's tokens, one browsable and testable view per `$type`, each rendered
+  through its matching block.
+- **[Blocks](?path=/docs/blocks-introduction--docs)**: each block component on
+  its own, with its variants, Controls, and interaction and a11y tests.
 
 ## Live theme switching
 
@@ -39,23 +35,8 @@ preset pills, one dropdown per modifier declared in the resolver
 `oklch` / `raw`). Every block on every page re-renders against the
 active tuple, and color-display formats flip live too.
 
-## Blocks
+## Blocks reference
 
-Every block ships from `@unpunnyfuns/swatchbook-blocks`. Highlights:
-
-- **`TokenTable`** / **`TokenNavigator`**: searchable tabular and tree
-  views of the active theme's graph. Both carry `filter` and `sortBy`
-  props for scoping and ordering.
-- **`TokenDetail`**: single-token inspector: composite preview, alias
-  chain, aliased-by tree, per-axis variance matrix, CSS-var snippet.
-- **`ColorPalette`**: swatch grid, auto-groups by path depth.
-- **`TypographyScale`** / **`FontFamilyPreview`** / **`FontWeightScale`**:
-  type primitives and composites rendered at their own values.
-- **`Diagnostics`**: collapsible list of parser/resolver warnings. Green
-  OK when clean; auto-expands on errors.
-- **`DimensionScale`** / **`BorderPreview`** / **`ShadowPreview`** /
-  **`StrokeStylePreview`** / **`GradientPalette`** / **`MotionPreview`**:
-  per-type visual previews.
-
-See the [blocks reference](https://unpunnyfuns.github.io/swatchbook/reference/blocks)
-for the full list and every prop.
+Every block ships from `@unpunnyfuns/swatchbook-blocks`. The
+[blocks reference](https://unpunnyfuns.github.io/swatchbook/reference/blocks)
+has the full list and every prop.
