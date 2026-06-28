@@ -1,5 +1,12 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.66.4
+
+### Patch Changes
+
+- 38f1cd6ee6f6a4d90a225ced7b531648f25f6b1d: Fix dimension previews to scale `rem` by the rendering context's actual root font-size (tracked across responsive breakpoints) instead of a hardcoded 16px, for both the DimensionScale render cap and the `sortBy: 'value'` order; drop the non-DTCG `em` unit
+  - @unpunnyfuns/swatchbook-core@0.66.4
+
 ## 0.66.3
 
 ### Patch Changes
