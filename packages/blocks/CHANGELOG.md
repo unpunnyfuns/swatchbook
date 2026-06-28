@@ -1,5 +1,12 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.66.2
+
+### Patch Changes
+
+- 0dd1996326a07e9b02f7e030380ab2d20620a75e: Docs: refocus the quickstart on install and configure, routing to the MDX and stories guides for presentation; move the surface comparison to the quickstart fork
+  - @unpunnyfuns/swatchbook-core@0.66.2
+
 ## 0.66.1
 
 ### Patch Changes
