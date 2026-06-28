@@ -12,6 +12,7 @@ import { useBlockKey, usePersistedState } from '#/internal/persistent-state.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { useRootFontSize } from '#/internal/use-root-font-size.ts';
 import { RowIndicators } from '#/indicators/RowIndicators.tsx';
 import { resolveIndicators } from '#/indicators/resolve.ts';
 import type { IndicatorsProp } from '#/indicators/resolve.ts';
@@ -82,6 +83,7 @@ export function TokenTable({
     indicators: indicatorBaseline,
   } = project;
   const colorFormat = useColorFormat();
+  const rootFontSize = useRootFontSize();
   // Persist selection + search across docs-mode remounts (see persistent-state).
   const blockKey = useBlockKey('TokenTable', [filter, type, caption, id]);
   const enabledIndicators = useMemo(
@@ -102,7 +104,11 @@ export function TokenTable({
       if (type && token.$type !== type) return false;
       return true;
     });
-    const entries = sortTokens(filtered, { by: sortBy, dir: sortDir });
+    const entries = sortTokens(filtered, {
+      by: sortBy,
+      dir: sortDir,
+      rootFontSizePx: rootFontSize,
+    });
     return entries.map(([path, token]) => {
       const isColor = token.$type === 'color';
       const color = isColor
@@ -117,7 +123,7 @@ export function TokenTable({
         isColor,
       };
     });
-  }, [resolved, listing, cssVarPrefix, filter, type, colorFormat, sortBy, sortDir]);
+  }, [resolved, listing, cssVarPrefix, filter, type, colorFormat, sortBy, sortDir, rootFontSize]);
 
   const visibleRows = useMemo(() => {
     if (!searchable || deferredQuery.trim() === '') return rows;

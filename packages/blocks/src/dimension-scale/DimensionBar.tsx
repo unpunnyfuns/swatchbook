@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { MAX_RENDER_PX, toPixels } from '#/dimension-scale/dimension-px.ts';
+import { useRootFontSize } from '#/internal/use-root-font-size.ts';
 import { BORDER_STRONG } from '#/internal/styles.tsx';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 
@@ -41,9 +42,10 @@ const styles = {
 export function DimensionBar({ path, visual = 'length' }: DimensionBarProps): ReactElement {
   const project = useProject();
   const { resolved } = project;
+  const rootFontSize = useRootFontSize();
   const cssVar = resolveCssVar(path, project);
   const token = resolved[path];
-  const pxValue = toPixels(token?.$value);
+  const pxValue = toPixels(token?.$value, rootFontSize);
   const capped = Number.isFinite(pxValue) && pxValue > MAX_RENDER_PX;
   const cappedValue = capped ? `${MAX_RENDER_PX}px` : cssVar;
 

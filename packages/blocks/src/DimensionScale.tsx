@@ -4,6 +4,7 @@ import './DimensionScale.css';
 import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
 import type { DimensionVisual } from '#/dimension-scale/DimensionBar.tsx';
 import { MAX_RENDER_PX, toPixels } from '#/dimension-scale/dimension-px.ts';
+import { useRootFontSize } from '#/internal/use-root-font-size.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
@@ -57,23 +58,26 @@ export function DimensionScale({
 }: DimensionScaleProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+  const rootFontSize = useRootFontSize();
 
   const rows = useMemo<Row[]>(() => {
     const filtered = Object.entries(resolved).filter(([path, token]) => {
       if (token.$type !== 'dimension') return false;
       return matchPath(path, filter);
     });
-    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => {
-      const pxValue = toPixels(token.$value);
-      return {
-        path,
-        cssVar: resolveCssVar(path, project),
-        displayValue: formatTokenValue(token.$value, token.$type, 'raw', project.listing[path]),
-        pxValue,
-        capped: Number.isFinite(pxValue) && pxValue > MAX_RENDER_PX,
-      };
-    });
-  }, [resolved, filter, project, sortBy, sortDir]);
+    return sortTokens(filtered, { by: sortBy, dir: sortDir, rootFontSizePx: rootFontSize }).map(
+      ([path, token]) => {
+        const pxValue = toPixels(token.$value, rootFontSize);
+        return {
+          path,
+          cssVar: resolveCssVar(path, project),
+          displayValue: formatTokenValue(token.$value, token.$type, 'raw', project.listing[path]),
+          pxValue,
+          capped: Number.isFinite(pxValue) && pxValue > MAX_RENDER_PX,
+        };
+      },
+    );
+  }, [resolved, filter, project, sortBy, sortDir, rootFontSize]);
 
   const captionText =
     caption ??
