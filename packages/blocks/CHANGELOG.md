@@ -1,5 +1,12 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.66.1
+
+### Patch Changes
+
+- d769fa8317949bcecbfb68ed85841befe1e890b7: Docs: add a guide for displaying tokens as stories (mounting the blocks as CSF stories for a sidebar token catalog)
+  - @unpunnyfuns/swatchbook-core@0.66.1
+
 ## 0.66.0
 
 ### Minor Changes
