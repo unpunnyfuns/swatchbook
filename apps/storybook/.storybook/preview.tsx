@@ -51,6 +51,7 @@ export default definePreview({
             'StrokeStyles',
           ],
           'Blocks',
+          ['Introduction', '*'],
           '*',
         ],
       },
