@@ -7,6 +7,14 @@ export type SortDir = 'asc' | 'desc';
 export interface SortOptions {
   by?: SortBy;
   dir?: SortDir;
+  /**
+   * Root font-size (px) used to convert `rem` dimension values to a pixel
+   * magnitude for `by: 'value'`. Defaults to 16. Dimension-bearing blocks
+   * pass the measured rendering-context root so a value sort matches the
+   * rendered sizes; the same `rem` resolves differently under a different
+   * root (a Storybook Docs page vs the canvas).
+   */
+  rootFontSizePx?: number;
 }
 
 type Entry = readonly [string, VirtualToken];
@@ -50,11 +58,11 @@ const NUMERIC_TYPES = new Set([
 
 const STRING_TYPES = new Set(['fontFamily', 'strokeStyle']);
 
-function computeSortKey(token: VirtualToken): SortKey {
+function computeSortKey(token: VirtualToken, rootFontSizePx: number): SortKey {
   const type = token.$type;
   if (!type) return { kind: 'none' };
   if (NUMERIC_TYPES.has(type)) {
-    const value = toMagnitude(token.$value);
+    const value = toMagnitude(token.$value, rootFontSizePx);
     return { kind: 'numeric', value, valid: Number.isFinite(value) };
   }
   if (type === 'color') {
@@ -84,9 +92,10 @@ export function sortTokens(entries: readonly Entry[], options: SortOptions = {})
   }
 
   // by === 'value' — pre-compute per-token sort keys once.
+  const rootFontSizePx = options.rootFontSizePx ?? 16;
   const keys = new Map<VirtualToken, SortKey>();
   for (const [, token] of entries) {
-    keys.set(token, computeSortKey(token));
+    keys.set(token, computeSortKey(token, rootFontSizePx));
   }
 
   return [...entries].toSorted(([aPath, aTok], [bPath, bTok]) => {
@@ -137,7 +146,7 @@ function compareValue(
   return 0;
 }
 
-function toMagnitude(v: unknown): number {
+function toMagnitude(v: unknown, rootFontSizePx: number): number {
   if (typeof v === 'number') return v;
   if (v && typeof v === 'object') {
     const d = v as { value?: unknown; unit?: unknown };
@@ -150,8 +159,9 @@ function toMagnitude(v: unknown): number {
       case 's':
         return d.value * 1000;
       case 'rem':
-      case 'em':
-        return d.value * 16;
+        return d.value * rootFontSizePx;
+      // `em` is not a DTCG dimension unit (px | rem); it falls through to its
+      // raw value rather than being scaled.
       default:
         return d.value;
     }

@@ -118,4 +118,28 @@ describe('sortTokens', () => {
     const out = sortTokens(input, { by: 'value' });
     expect(out.map(([p]) => p)).toEqual(['a.col', 'y.dim', 'z.dim']);
   });
+
+  it('scales rem against rootFontSizePx in a value sort; defaults to 16', () => {
+    const input = [
+      entry('a.px', 'dimension', { value: 20, unit: 'px' }),
+      entry('b.rem', 'dimension', { value: 1, unit: 'rem' }),
+    ];
+    // Default 16px root: 1rem = 16px < 20px, so the rem token sorts first.
+    expect(sortTokens(input, { by: 'value' }).map(([p]) => p)).toEqual(['b.rem', 'a.px']);
+    // 24px root: 1rem = 24px > 20px, so the order flips.
+    expect(sortTokens(input, { by: 'value', rootFontSizePx: 24 }).map(([p]) => p)).toEqual([
+      'a.px',
+      'b.rem',
+    ]);
+  });
+
+  it('treats the non-DTCG em unit as a raw magnitude, not 16x', () => {
+    const input = [
+      entry('a.em', 'dimension', { value: 2, unit: 'em' }),
+      entry('b.px', 'dimension', { value: 5, unit: 'px' }),
+    ];
+    // em is not a DTCG dimension unit: it falls through to its raw value (2),
+    // so it sorts below 5px rather than being multiplied to 32px.
+    expect(sortTokens(input, { by: 'value' }).map(([p]) => p)).toEqual(['a.em', 'b.px']);
+  });
 });
