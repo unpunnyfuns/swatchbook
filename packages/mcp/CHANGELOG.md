@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-mcp
 
+## 0.66.3
+
+### Patch Changes
+
+- @unpunnyfuns/swatchbook-core@0.66.3
+
 ## 0.66.2
 
 ### Patch Changes

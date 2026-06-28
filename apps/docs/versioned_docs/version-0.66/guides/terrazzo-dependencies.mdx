@@ -1,0 +1,42 @@
+---
+id: terrazzo-dependencies
+title: Terrazzo dependencies
+sidebar_position: 6
+---
+
+# Terrazzo dependencies
+
+Swatchbook is the preview side of a [Terrazzo](https://terrazzo.app/) pipeline: it parses DTCG with Terrazzo's parser and renders what Terrazzo's plugins emit. The zero-config install needs no direct Terrazzo dependency. This page covers the cases where a project adds Terrazzo packages of its own, and why the ones it adds have to share a single parser instance.
+
+## What ships with the addon
+
+`@terrazzo/parser`, `@terrazzo/plugin-css`, and `@terrazzo/plugin-token-listing` come along with `swatchbook-core` transitively. The default install already parses tokens, emits the preview stylesheet, and derives the token listing without any Terrazzo entry in your `package.json`.
+
+`swatchbook-core` also declares `@terrazzo/parser` and `@terrazzo/plugin-css` as **peer** dependencies. pnpm hoists them to one shared instance, so swatchbook's internal build and any Terrazzo plugin you add later resolve the same parser. The failure this avoids is a second, duplicate parser: a plugin built against one instance cannot read a graph produced by another, and the symptom is plugin output that silently goes missing from the listing.
+
+## Per-platform names in doc blocks
+
+Out of the box the blocks show one identifier per token: its CSS variable name. To surface names for other platforms (Swift, Android, Sass, JS), install the matching Terrazzo plugin and register it in two places:
+
+```ts title="swatchbook.config.ts"
+import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
+import swiftPlugin from '@terrazzo/plugin-swift';
+
+export default defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  cssVarPrefix: 'ds',
+  listingOptions: {
+    platforms: {
+      css:   { name: '@terrazzo/plugin-css' },
+      swift: { name: '@terrazzo/plugin-swift', description: 'UIColor' },
+    },
+  },
+  terrazzoPlugins: [swiftPlugin({ /* plugin options */ })],
+});
+```
+
+`listingOptions.platforms` names which plugins derive identifiers for the listing; `terrazzoPlugins` loads those plugins into the build so the names actually resolve. Register a platform without loading its plugin and the reference stays unresolved. `<TokenDetail>`'s Consumer Output reads the resolved names per platform. Install plugins at a version compatible with swatchbook's peer range. The field-level reference for both options is in the [config reference](../reference/config.mdx#listingoptions).
+
+## Aligning with a production Terrazzo build
+
+When `@terrazzo/cli` already builds your tokens for production, pin matching versions of `@terrazzo/cli`, `@terrazzo/plugin-css`, and any shared plugins in your own `package.json` so the production build and the preview build agree on options. The shared-options module pattern, one options file consumed by both `terrazzo.config.ts` and `swatchbook.config.ts`, is in [Aligning with your token build](./sharing-terrazzo-options.mdx).
