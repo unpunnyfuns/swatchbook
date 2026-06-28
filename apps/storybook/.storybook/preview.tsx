@@ -38,6 +38,7 @@ export default definePreview({
           ],
           'Tokens',
           [
+            'Introduction',
             'Overview',
             'Colors',
             'Typography',
