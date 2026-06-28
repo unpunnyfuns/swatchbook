@@ -45,11 +45,6 @@ The pin takes priority over the toolbar for that story and reverts when you navi
 
 Primitive types (`color`, `fontFamily`, `fontWeight`, `dimension`, `strokeStyle`) hold a single value. Composite types (`typography`, `shadow`, `border`, `gradient`, `transition`) bundle several values: a `typography` token, for instance, composes a `fontFamily`, `fontSize`, `fontWeight`, `lineHeight`, and `letterSpacing`. Composite rows carry the `composes` indicator (a `⊞ N` parts count) in the table and tree blocks, so the bundling is visible at a glance.
 
-## Stories or MDX doc pages?
+## MDX or stories?
 
-Both surfaces render the same blocks; pick by what you want around them:
-
-- **Stories** put the catalog in the sidebar, add Controls, and make each view testable. Reach for them when the token reference should sit alongside your component stories and be covered by the same test runs.
-- **[MDX doc pages](./authoring-doc-stories.mdx)** put blocks inside prose. Reach for them when the tokens need narrative around them: a usage guide, a rationale, a migration note.
-
-They coexist; many projects keep a story catalog for browsing and testing and an MDX page or two for the narrative reference.
+The same blocks render in both surfaces. The [quickstart's "Where to next"](./quickstart.mdx#where-to-next) covers when to reach for each: in short, stories for a browsable, testable catalog, [MDX doc pages](./authoring-doc-stories.mdx) for blocks wrapped in narrative. A project can run both.

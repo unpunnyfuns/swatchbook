@@ -87,82 +87,6 @@ pnpm storybook
 
 **Toolbar**: a single Swatchbook icon button in the top bar. Click it to open a popover containing preset pills, one dropdown per modifier in your resolver, and a color-format picker. If you've written a single `theme` modifier with `Light`/`Dark` contexts, you get one dropdown inside the popover; if you have `mode × brand`, you get two. Escape or outside-click closes it.
 
-## Your first doc page
-
-Tokens can be presented two ways, both rendering the same blocks: an MDX doc page (blocks inside prose, for a narrative reference) or stories (a browsable, testable catalog in the sidebar). They coexist. This quickstart builds an MDX page; [Displaying tokens as stories](./displaying-tokens-as-stories.mdx) covers the story catalog, and [Authoring MDX doc pages](./authoring-doc-stories.mdx) has the full MDX patterns.
-
-Create an MDX file under your stories glob. The addon's blocks render against whichever tuple the toolbar has active, so everything below re-renders live as you flip modifiers:
-
-```tsx title="src/docs/Tokens.mdx"
-import { Meta } from '@storybook/addon-docs/blocks';
-import {
-  ColorPalette,
-  Diagnostics,
-  TokenDetail,
-  TokenNavigator,
-  TokenTable,
-} from '@unpunnyfuns/swatchbook-addon';
-
-<Meta title="Docs/Tokens" />
-
-# Tokens
-
-<Diagnostics />
-
-## Palette
-<ColorPalette filter="color.palette.**" />
-
-## Semantic roles
-<ColorPalette filter="color.**" />
-
-## Everything
-<TokenNavigator initiallyExpanded={0} />
-
-## Inspect a single token
-<TokenDetail path="color.accent.bg" />
-```
-
-Each block takes filter/scoping props so you can pick what shows up:
-
-- **`<ColorPalette filter="…" />`**: swatch grid grouped by sub-path. Filter by a glob (`"color.palette.*"`, `"color.brand.*"`).
-- **`<TokenTable filter="…" type="…" />`**: searchable two-column table (path + value). Filter by path glob, scope by DTCG `$type`.
-- **`<TokenNavigator root="…" type="…" initiallyExpanded={0..∞} />`**: expandable tree. Scope to a subtree (`root="color"`) and/or a `$type`; `initiallyExpanded={0}` opens fully collapsed.
-- **`<TokenDetail path="…" />`**: alias chain, per-theme values, CSS var reference, and `useToken` snippet for one token.
-- **`<Diagnostics />`**: collapsible list of parser / resolver / validation warnings. Auto-opens when anything's non-zero.
-- **`<TypographyScale>`, `<DimensionScale>`, `<FontFamilyPreview>`, `<FontWeightScale>`, `<BorderPreview>`, `<ShadowPreview>`, `<GradientPalette>`, `<MotionPreview>`, `<StrokeStylePreview>`**: type-specific blocks with built-in samples. Filter by path glob when you want a subset.
-
-The [blocks reference](../reference/blocks/index.mdx) has the full prop list for each. The [MDX authoring guide](./authoring-doc-stories.mdx) walks through composing them in real pages.
-
-## Theme the block chrome against your tokens
-
-The MDX doc blocks read their surfaces, text, and accent colours from a fixed `--swatchbook-*` CSS-variable namespace. By default, those variables fall back to light/dark literals that flip with the active `color-scheme`, which means the blocks render legibly before you wire anything up. To have them reflect your own tokens, supply a `chrome` map with one entry per role, each pointing at a token path in your project:
-
-```ts title=".storybook/main.ts"
-{
-  name: '@unpunnyfuns/swatchbook-addon',
-  options: {
-    config: {
-      resolver: 'tokens/resolver.json',
-      cssVarPrefix: 'ds',
-      chrome: {
-        surfaceDefault: 'color.surface.default',
-        surfaceMuted:   'color.surface.muted',
-        surfaceRaised:  'color.surface.raised',
-        textDefault:    'color.text.default',
-        textMuted:      'color.text.muted',
-        borderDefault:  'color.border.default',
-        accentBg:       'color.accent.bg',
-        accentFg:       'color.accent.fg',
-        bodyFontFamily: 'typography.body.font-family',
-        bodyFontSize:   'typography.body.font-size',
-      },
-    },
-  },
-},
-```
-
-With a `chrome` map in place the blocks track every toolbar flip: switch any axis (e.g. brand or contrast) and the block chrome repaints alongside your stories. The closed set of roles (and what each maps to internally) is in the [`chrome` config reference](../reference/config.mdx#chrome).
-
 ## No resolver yet?
 
 If you haven't written a DTCG 2025.10 resolver, you can use the **layered** config form instead:
@@ -188,9 +112,35 @@ export default defineSwatchbookConfig({
 
 Each context names an ordered list of file paths (or globs) that layer on top of the base `tokens` files for that context. See the [config reference](../reference/config.mdx) for the resolver vs layered trade-off.
 
-## Next
+## Render your first block
 
-- Embed [doc blocks in MDX doc pages](./authoring-doc-stories.mdx) to build a narrative reference page.
-- Or present them as a [sidebar story catalog](./displaying-tokens-as-stories.mdx), browsable and testable alongside your component stories.
-- Read the [axes reference](../concepts/axes.mdx) for the runtime model behind the toolbar.
-- Poke at the [live Storybook](pathname:///storybook/) to see the addon running against a real multi-axis fixture.
+The addon's blocks render against whichever tuple the toolbar has active. Drop one into an MDX file under your stories glob to confirm the wiring is live:
+
+```tsx title="src/docs/Tokens.mdx"
+import { Meta } from '@storybook/addon-docs/blocks';
+import { TokenNavigator } from '@unpunnyfuns/swatchbook-addon';
+
+<Meta title="Docs/Tokens" />
+
+# Tokens
+
+<TokenNavigator initiallyExpanded={0} />
+```
+
+Open `Docs / Tokens` in the sidebar: the tree lists every token in your project and repaints when you flip an axis. That confirms the install end to end. From here it's a question of how you want to present the catalog.
+
+## Where to next
+
+Tokens render through two surfaces, both built from the same blocks. Pick by what you want around them:
+
+- **MDX doc pages** put blocks inside prose: a usage guide, a rationale, a migration note. Reach for them when the tokens need narrative around them. [Authoring MDX doc pages](./authoring-doc-stories.mdx) has the patterns.
+- **Stories** put the catalog in the sidebar, add a Controls panel, and bring each view under the same interaction, a11y, and visual-regression runs as your component stories. Reach for them when the token reference should sit alongside your components and be covered by the same tests. [Displaying tokens as stories](./displaying-tokens-as-stories.mdx) walks through it.
+
+The two aren't exclusive: plenty of projects run a story catalog for browsing and testing alongside an MDX page or two for the narrative reference.
+
+Also worth a look:
+
+- [Theme the block chrome](../reference/config.mdx#chrome): map the blocks' own surfaces, text, and accents onto your tokens so they flip with the toolbar.
+- [Blocks reference](../reference/blocks/index.mdx): every block's full prop list.
+- [Axes reference](../concepts/axes.mdx): the runtime model behind the toolbar.
+- [Live Storybook](pathname:///storybook/): the addon running against a real multi-axis fixture.
