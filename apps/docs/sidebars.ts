@@ -13,6 +13,7 @@ const sidebars: SidebarsConfig = {
   guides: [
     'guides/quickstart',
     'guides/authoring-doc-stories',
+    'guides/displaying-tokens-as-stories',
     'guides/consuming-the-active-theme',
     {
       type: 'category',

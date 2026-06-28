@@ -1,0 +1,45 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Tokens/Introduction" />
+
+# Tokens
+
+A story-based catalog of this project's DTCG tokens. Each entry under
+**Tokens** renders one DTCG `$type` through the matching swatchbook block, so
+the token set is browsable in the sidebar, carries a Controls panel, and is
+covered by the same interaction, a11y, and visual-regression test surfaces as
+every other story.
+
+## What is here
+
+- **[Overview](?path=/story/tokens-overview--all)**: the whole token graph as a
+  searchable `TokenNavigator` tree.
+- **Colors, Typography, Fonts, Dimensions, Shadows, Borders, Gradients, Motion,
+  StrokeStyles**: one canonical view per type, rendered with its preview block.
+
+The tree mirrors the DTCG layering. Primitive types (`color`, `fontFamily`,
+`fontWeight`, `dimension`, `strokeStyle`) hold a single value; composite types
+(`typography`, `shadow`, `border`, `gradient`, `transition`) bundle several,
+which is why `Fonts` (the primitive font layer) and `Typography` (the composite
+that draws from it) sit apart. Composite rows carry the `composes` indicator
+(a `⊞ N` parts count) in the table and tree views.
+
+## Using a token story
+
+- **Controls** drive how a view displays: `filter`, `sortBy`, `sortDir`,
+  `searchable`, and block-specific knobs such as `DimensionScale`'s `visual`.
+- **The toolbar** drives the theme. Mode, brand, and contrast flip every story
+  at once; a story follows the toolbar by default. A view that needs a fixed
+  theme pins it per-story via `parameters.swatchbook.axes` (see
+  `Tokens/Colors` → `DarkBrandA`).
+
+## How this relates to the other sections
+
+- **Docs** pages compose the same blocks inside prose: narrative reference with
+  rationale and usage around the tokens.
+- **Blocks** stories exercise each block component and its variants and tests.
+- **Tokens** is the catalog: the project's tokens themselves, one browsable,
+  testable view per type.
+
+The authoring pattern (mounting the blocks as stories) is written up in the
+**Displaying tokens as stories** guide on the documentation site.

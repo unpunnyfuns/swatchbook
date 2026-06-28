@@ -89,6 +89,8 @@ pnpm storybook
 
 ## Your first doc page
 
+Tokens can be presented two ways, both rendering the same blocks: an MDX doc page (blocks inside prose, for a narrative reference) or stories (a browsable, testable catalog in the sidebar). They coexist. This quickstart builds an MDX page; [Displaying tokens as stories](./displaying-tokens-as-stories.mdx) covers the story catalog, and [Authoring MDX doc pages](./authoring-doc-stories.mdx) has the full MDX patterns.
+
 Create an MDX file under your stories glob. The addon's blocks render against whichever tuple the toolbar has active, so everything below re-renders live as you flip modifiers:
 
 ```tsx title="src/docs/Tokens.mdx"
@@ -129,7 +131,7 @@ Each block takes filter/scoping props so you can pick what shows up:
 - **`<Diagnostics />`**: collapsible list of parser / resolver / validation warnings. Auto-opens when anything's non-zero.
 - **`<TypographyScale>`, `<DimensionScale>`, `<FontFamilyPreview>`, `<FontWeightScale>`, `<BorderPreview>`, `<ShadowPreview>`, `<GradientPalette>`, `<MotionPreview>`, `<StrokeStylePreview>`**: type-specific blocks with built-in samples. Filter by path glob when you want a subset.
 
-The [blocks reference](../reference/blocks/index.mdx) has the full prop list for each. The [authoring guide](./authoring-doc-stories.mdx) walks through composing them in real pages.
+The [blocks reference](../reference/blocks/index.mdx) has the full prop list for each. The [MDX authoring guide](./authoring-doc-stories.mdx) walks through composing them in real pages.
 
 ## Theme the block chrome against your tokens
 
@@ -188,6 +190,7 @@ Each context names an ordered list of file paths (or globs) that layer on top of
 
 ## Next
 
-- Embed [doc blocks in MDX stories](./authoring-doc-stories.mdx) to build a proper reference page.
+- Embed [doc blocks in MDX doc pages](./authoring-doc-stories.mdx) to build a narrative reference page.
+- Or present them as a [sidebar story catalog](./displaying-tokens-as-stories.mdx), browsable and testable alongside your component stories.
 - Read the [axes reference](../concepts/axes.mdx) for the runtime model behind the toolbar.
 - Poke at the [live Storybook](pathname:///storybook/) to see the addon running against a real multi-axis fixture.
