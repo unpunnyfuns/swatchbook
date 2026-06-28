@@ -1,5 +1,12 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.66.3
+
+### Patch Changes
+
+- 7f8fafb68c314e696865bfc1a67605953ec0f3cc: Docs: drop the Terrazzo-dependencies and Tailwind/CSS-in-JS sections from the quickstart, moving Terrazzo deps into a dedicated guide and pointing at the existing integrations pages
+  - @unpunnyfuns/swatchbook-core@0.66.3
+
 ## 0.66.2
 
 ### Patch Changes

@@ -17,6 +17,7 @@
         "guides/integrations/css-in-js"
       ]
     },
+    "guides/terrazzo-dependencies",
     "guides/sharing-terrazzo-options"
   ],
   "reference": [
