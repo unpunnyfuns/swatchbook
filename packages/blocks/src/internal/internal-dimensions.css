@@ -1,6 +1,6 @@
 /*
  * Internal block-UI dimensional scale. Flat px values in the fixed
- * `--swatchbook-*` namespace — blocks can't reference the consumer's token
+ * `--swatchbook-*` namespace: blocks can't reference the consumer's token
  * prefix (unknown at build time), so they own these constants the same way
  * they own chrome defaults. Mirrors packages/tokens/tokens/size.json
  * (space.* / radius.*); the internal-dimensions drift guard fails if either
