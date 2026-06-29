@@ -4,11 +4,15 @@ import { expect, it } from 'vitest';
 
 const dir = fileURLToPath(new URL('../src', import.meta.url));
 const cssFiles = (): string[] => globSync('**/*.css', { cwd: dir });
+// Read a CSS file with `/* … */` comments stripped, so a comment that merely
+// names a banned construct (e.g. documenting "no light-dark()") isn't a hit.
+const readCss = (f: string): string =>
+  readFileSync(`${dir}/${f}`, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
 
 it('no block CSS uses light-dark() — colors are owned flat values, not OS-coupled', () => {
   const offenders: string[] = [];
   for (const f of cssFiles()) {
-    if (readFileSync(`${dir}/${f}`, 'utf8').includes('light-dark(')) offenders.push(f);
+    if (readCss(f).includes('light-dark(')) offenders.push(f);
   }
   expect(offenders).toEqual([]);
 });
@@ -18,7 +22,7 @@ it('no block CSS hardcodes status/deprecated colors — they come from internal 
   const offenders: string[] = [];
   for (const f of cssFiles()) {
     if (f.endsWith('internal-tokens.css')) continue;
-    const text = readFileSync(`${dir}/${f}`, 'utf8');
+    const text = readCss(f);
     for (const hex of literals) if (text.includes(hex)) offenders.push(`${f}: ${hex}`);
   }
   expect(offenders).toEqual([]);
