@@ -164,6 +164,6 @@
 
 .sb-token-navigator__leaf-row[data-deprecated='true'] .sb-token-navigator__tail {
   text-decoration: line-through;
-  text-decoration-color: light-dark(#92400e, #fbbf24);
+  text-decoration-color: var(--swatchbook-deprecated);
   opacity: 0.75;
 }

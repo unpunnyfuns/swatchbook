@@ -1,0 +1,29 @@
+/*
+ * Internal block-UI tokens. Owned flat values (no light-dark/OS coupling),
+ * in the fixed `--swatchbook-*` namespace but NOT part of the public chrome
+ * roles — implementation detail of the blocks' own surface.
+ *
+ * Status + deprecated colors must stay legible on a surface that flips with
+ * the consumer's chrome (light card standalone, dark in dark mode). A flat
+ * color can't do that — a single saturated hue is never AA on both white and
+ * a dark surface. So:
+ *
+ * - Status colors mix their hue with the adaptive `--swatchbook-text-default`
+ *   chrome role (which is AA-readable on its surface by construction, and
+ *   flips per-mode). 35% text keeps the hue recognizable while pulling
+ *   lightness toward the readable end; verified AA on both light and dark
+ *   surfaces (`dimensional`/`internal-color-tokens` browser guards).
+ * - The deprecated *badge text* reads `--swatchbook-text-muted` directly
+ *   (also adaptive). `--swatchbook-deprecated` is the strikethrough amber only
+ *   (`text-decoration-color`, not contrast-checked) — a mid amber visible on
+ *   both surfaces.
+ *
+ * No `light-dark()` / OS coupling: adaptation rides swatchbook's own chrome.
+ */
+:root {
+  --swatchbook-status-success: color-mix(in oklab, #30a46c, var(--swatchbook-text-default) 35%);
+  --swatchbook-status-warning: color-mix(in oklab, #b08900, var(--swatchbook-text-default) 35%);
+  --swatchbook-status-danger: color-mix(in oklab, #d64545, var(--swatchbook-text-default) 35%);
+  --swatchbook-deprecated: #d97706;
+  --swatchbook-deprecated-bg: rgba(245, 158, 11, 0.15);
+}

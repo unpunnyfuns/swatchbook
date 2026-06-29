@@ -10,15 +10,15 @@
 }
 
 .sb-diagnostics__summary--ok {
-  color: #30a46c;
+  color: var(--swatchbook-status-success);
 }
 
 .sb-diagnostics__summary--error {
-  color: #d64545;
+  color: var(--swatchbook-status-danger);
 }
 
 .sb-diagnostics__summary--warn {
-  color: #b08900;
+  color: var(--swatchbook-status-warning);
 }
 
 .sb-diagnostics__list {
@@ -45,11 +45,11 @@
 }
 
 .sb-diagnostics__label--error {
-  color: #d64545;
+  color: var(--swatchbook-status-danger);
 }
 
 .sb-diagnostics__label--warn {
-  color: #b08900;
+  color: var(--swatchbook-status-warning);
 }
 
 .sb-diagnostics__meta {
