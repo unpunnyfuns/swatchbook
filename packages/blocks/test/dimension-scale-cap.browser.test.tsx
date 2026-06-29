@@ -99,3 +99,23 @@ it('DimensionBar renders a bare bar (no cap marker) when under the cap', () => {
   expect(container.querySelector('.sb-dimension-bar--capped')).toBeNull();
   expect(container.querySelector('.sb-dimension-bar__cap')).toBeNull();
 });
+
+// A capped bar carries a 480px inline width, which would overflow a narrow
+// host like TokenNavigator's preview cell. The bar must fit its container
+// (max-width: 100%) so it never blows out the layout, while the cap marker
+// stays visible. Regression for the pill (9999px) bar overflowing the cell.
+it('a capped bar fits inside a narrow host cell instead of overflowing', () => {
+  document.documentElement.style.fontSize = '20px';
+  const { container } = render(
+    <div style={{ width: 120, maxWidth: 120, display: 'inline-block' }}>
+      <SwatchbookProvider value={makeSnapshot()}>
+        <DimensionBar path="dimension.wide" visual="length" />
+      </SwatchbookProvider>
+    </div>,
+  );
+  const bar = container.querySelector<HTMLElement>('.sb-dimension-bar--capped div');
+  // Inline width still records the 480px cap; the rendered width fits the cell.
+  expect(bar?.style.width).toBe('480px');
+  expect(bar?.getBoundingClientRect().width).toBeLessThanOrEqual(120);
+  expect(container.querySelector('.sb-dimension-bar__cap')).not.toBeNull();
+});

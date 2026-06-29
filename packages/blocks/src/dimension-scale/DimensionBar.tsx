@@ -23,6 +23,8 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     gap: 'var(--swatchbook-space-3xs)',
+    maxWidth: '100%',
+    minWidth: 0,
   } satisfies CSSProperties,
   cap: {
     color: 'var(--swatchbook-text-muted)',
@@ -35,6 +37,10 @@ const styles = {
     background: 'var(--swatchbook-accent-bg, #3b82f6)',
     borderRadius: 2,
     minWidth: 1,
+    // Never exceed the host cell: the px width conveys magnitude in the wide
+    // DimensionScale rows, but the bar also renders in TokenNavigator's narrow
+    // preview cell, where a 480px-capped bar would otherwise overflow.
+    maxWidth: '100%',
   } satisfies CSSProperties,
   radiusSample: {
     width: 56,
