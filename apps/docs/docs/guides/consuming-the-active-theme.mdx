@@ -33,7 +33,7 @@ For CSS-in-JS libraries whose theme values can be `var(--…)` strings (styled-c
 If the consumer is a React story / block / decorator running inside the Storybook preview, use the hooks the addon already ships:
 
 ```tsx
-import { useActiveAxes, useActiveTheme, useColorFormat } from '@unpunnyfuns/swatchbook-blocks';
+import { useActiveAxes, useActiveTheme, useColorFormat } from '@unpunnyfuns/swatchbook-addon';
 
 function ThemeBridge({ children }: { children: ReactNode }) {
   const axes = useActiveAxes();   // { mode: 'Dark', brand: 'Brand A', contrast: 'Normal' }
