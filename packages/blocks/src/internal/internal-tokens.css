@@ -1,13 +1,19 @@
 /*
  * Internal block-UI tokens. Owned flat values (no light-dark/OS coupling),
  * in the fixed `--swatchbook-*` namespace but NOT part of the public chrome
- * roles — implementation detail of the blocks' own surface. Status colors for
- * Diagnostics severity; deprecated-token strikethrough/badge amber.
+ * roles — implementation detail of the blocks' own surface.
+ *
+ * `--swatchbook-deprecated` is the strikethrough/decoration amber only
+ * (`text-decoration-color`, not contrast-checked) — a mid amber visible on
+ * both light and dark surfaces. The deprecated *badge text* must stay legible
+ * on a surface that flips with the consumer's chrome, so it reads the adaptive
+ * `--swatchbook-text-muted` chrome role instead of a flat amber (a flat dark
+ * amber failed WCAG on a dark-mode surface).
  */
 :root {
   --swatchbook-status-success: #30a46c;
   --swatchbook-status-warning: #b08900;
   --swatchbook-status-danger: #d64545;
-  --swatchbook-deprecated: #92400e;
+  --swatchbook-deprecated: #d97706;
   --swatchbook-deprecated-bg: rgba(245, 158, 11, 0.15);
 }
