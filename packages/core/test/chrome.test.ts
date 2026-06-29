@@ -1,7 +1,7 @@
 import { beforeAll, expect, it } from 'vitest';
 import { dirname } from 'node:path';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
-import { CHROME_ROLES, DEFAULT_CHROME_MAP, validateChrome } from '#/chrome.ts';
+import { buildChromeDefaultsCss, CHROME_ROLES, DEFAULT_CHROME_MAP, validateChrome } from '#/chrome.ts';
 import { emitAxisProjectedCss } from '#/css-axis-projected.ts';
 import { loadProject } from '#/load.ts';
 import type { Project } from '#/types.ts';
@@ -138,4 +138,16 @@ it('emitAxisProjectedCss never prefixes chrome source vars with the project pref
   const css = emitAxisProjectedCss(project);
   expect(css).not.toMatch(/--sb-swatchbook-/);
   expect(css).not.toMatch(/--sb-surface-default:\s*var\(/);
+});
+
+it('buildChromeDefaultsCss declares all ten roles at their defaults, no color-scheme', () => {
+  const css = buildChromeDefaultsCss();
+  expect(css.startsWith(':root {')).toBe(true);
+  expect(css.endsWith('}')).toBe(true);
+  expect(css).not.toMatch(/color-scheme/);
+  expect(css).toContain('--swatchbook-surface-default: #ffffff;');
+  expect(css).toContain('--swatchbook-accent-bg: #1d4ed8;');
+  expect(css).toContain('--swatchbook-body-font-size: 14px;');
+  // exactly ten declarations
+  expect(css.match(/--swatchbook-/g)?.length).toBe(10);
 });

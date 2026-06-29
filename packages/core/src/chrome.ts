@@ -1,3 +1,4 @@
+import { makeCSSVar } from '@terrazzo/token-tools/css';
 import type { Diagnostic } from '#/types.ts';
 
 /**
@@ -58,6 +59,19 @@ export const DEFAULT_CHROME_MAP: Record<ChromeRole, string> = {
   bodyFontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
   bodyFontSize: '14px',
 };
+
+/**
+ * The chrome defaults as a standalone `:root` stylesheet block. Shipped by the
+ * blocks as a bundled base layer so `--swatchbook-*` is defined without the
+ * addon. The emitter produces a superset of this (defaults + consumer
+ * overrides) that wins via source order when the addon is present.
+ */
+export function buildChromeDefaultsCss(): string {
+  const lines = CHROME_ROLES.map(
+    (role) => `  ${makeCSSVar(role, { prefix: CHROME_VAR_PREFIX })}: ${DEFAULT_CHROME_MAP[role]};`,
+  );
+  return `:root {\n${lines.join('\n')}\n}`;
+}
 
 export interface ChromeValidationResult {
   entries: Record<string, string>;
