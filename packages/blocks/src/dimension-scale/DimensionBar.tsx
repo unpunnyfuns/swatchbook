@@ -19,6 +19,17 @@ export interface DimensionBarProps {
 }
 
 const styles = {
+  cappedWrap: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 'var(--swatchbook-space-3xs)',
+  } satisfies CSSProperties,
+  cap: {
+    color: 'var(--swatchbook-text-muted)',
+    fontSize: 11,
+    lineHeight: 1,
+    userSelect: 'none',
+  } satisfies CSSProperties,
   bar: {
     height: 14,
     background: 'var(--swatchbook-accent-bg, #3b82f6)',
@@ -39,6 +50,25 @@ const styles = {
   } satisfies CSSProperties,
 };
 
+// Wrap a clamped visual with the cap affordance so every consumer (the scale
+// block and TokenNavigator) surfaces truncation identically. The visual itself
+// is decorative — the token's real value is shown as adjacent text — so the
+// marker is `aria-hidden` and the title carries the hint for sighted hover.
+function withCap(visual: ReactElement): ReactElement {
+  return (
+    <span
+      className="sb-dimension-bar sb-dimension-bar--capped"
+      style={styles.cappedWrap}
+      title={`capped at ${MAX_RENDER_PX}px`}
+    >
+      {visual}
+      <span className="sb-dimension-bar__cap" aria-hidden>
+        …
+      </span>
+    </span>
+  );
+}
+
 export function DimensionBar({ path, visual = 'length' }: DimensionBarProps): ReactElement {
   const project = useProject();
   const { resolved } = project;
@@ -50,17 +80,23 @@ export function DimensionBar({ path, visual = 'length' }: DimensionBarProps): Re
   const cappedValue = capped ? `${MAX_RENDER_PX}px` : cssVar;
 
   switch (visual) {
+    // A fixed 56×56 box: border-radius can't overflow it, so the cap never
+    // applies to the radius sample.
     case 'radius':
       return <div style={{ ...styles.radiusSample, borderRadius: cssVar }} aria-hidden />;
-    case 'size':
-      return (
+    case 'size': {
+      const sample = (
         <div
           style={{ ...styles.sizeSample, width: cappedValue, height: cappedValue }}
           aria-hidden
         />
       );
+      return capped ? withCap(sample) : sample;
+    }
     case 'length':
-    default:
-      return <div style={{ ...styles.bar, width: cappedValue }} aria-hidden />;
+    default: {
+      const bar = <div style={{ ...styles.bar, width: cappedValue }} aria-hidden />;
+      return capped ? withCap(bar) : bar;
+    }
   }
 }

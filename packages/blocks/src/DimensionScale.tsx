@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import './DimensionScale.css';
 import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
 import type { DimensionVisual } from '#/dimension-scale/DimensionBar.tsx';
-import { MAX_RENDER_PX, toPixels } from '#/dimension-scale/dimension-px.ts';
 import { useRootFontSize } from '#/internal/use-root-font-size.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
@@ -45,8 +44,6 @@ interface Row {
   path: string;
   cssVar: string;
   displayValue: string;
-  pxValue: number;
-  capped: boolean;
 }
 
 export function DimensionScale({
@@ -66,16 +63,11 @@ export function DimensionScale({
       return matchPath(path, filter);
     });
     return sortTokens(filtered, { by: sortBy, dir: sortDir, rootFontSizePx: rootFontSize }).map(
-      ([path, token]) => {
-        const pxValue = toPixels(token.$value, rootFontSize);
-        return {
-          path,
-          cssVar: resolveCssVar(path, project),
-          displayValue: formatTokenValue(token.$value, token.$type, 'raw', project.listing[path]),
-          pxValue,
-          capped: Number.isFinite(pxValue) && pxValue > MAX_RENDER_PX,
-        };
-      },
+      ([path, token]) => ({
+        path,
+        cssVar: resolveCssVar(path, project),
+        displayValue: formatTokenValue(token.$value, token.$type, 'raw', project.listing[path]),
+      }),
     );
   }, [resolved, filter, project, sortBy, sortDir, rootFontSize]);
 
@@ -102,9 +94,6 @@ export function DimensionScale({
           </div>
           <div className="sb-dimension-scale__visual-cell">
             <DimensionBar path={row.path} visual={visual} />
-            {row.capped && (
-              <span className="sb-dimension-scale__cap">capped at {MAX_RENDER_PX}px</span>
-            )}
           </div>
           <span className="sb-dimension-scale__css-var">{row.cssVar}</span>
         </div>
