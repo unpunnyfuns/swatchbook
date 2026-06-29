@@ -45,7 +45,7 @@ function declaredVars(prefix: string): Record<string, string> {
 function resolvePx(tokens: any, node: any): string {
   const v =
     typeof node.$value === 'string'
-      ? tokens.size[node.$value.replace('{size.', '').replace('}', '')].$value
+      ? tokens.size[node.$value.replace(/^\{size\.|\}$/g, '')].$value
       : node.$value;
   return v.value === 0 ? '0' : `${v.value}${v.unit}`;
 }
