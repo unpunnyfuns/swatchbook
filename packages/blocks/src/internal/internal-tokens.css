@@ -1,0 +1,13 @@
+/*
+ * Internal block-UI tokens. Owned flat values (no light-dark/OS coupling),
+ * in the fixed `--swatchbook-*` namespace but NOT part of the public chrome
+ * roles — implementation detail of the blocks' own surface. Status colors for
+ * Diagnostics severity; deprecated-token strikethrough/badge amber.
+ */
+:root {
+  --swatchbook-status-success: #30a46c;
+  --swatchbook-status-warning: #b08900;
+  --swatchbook-status-danger: #d64545;
+  --swatchbook-deprecated: #92400e;
+  --swatchbook-deprecated-bg: rgba(245, 158, 11, 0.15);
+}

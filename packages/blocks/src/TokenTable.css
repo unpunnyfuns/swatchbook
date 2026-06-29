@@ -135,7 +135,7 @@
 
 .sb-token-table__path[data-deprecated='true'] {
   text-decoration: line-through;
-  text-decoration-color: light-dark(#92400e, #fbbf24);
+  text-decoration-color: var(--swatchbook-deprecated);
   opacity: 0.75;
 }
 

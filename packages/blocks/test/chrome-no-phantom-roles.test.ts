@@ -3,12 +3,16 @@ import { fileURLToPath } from 'node:url';
 import { buildChromeDefaultsCss } from '@unpunnyfuns/swatchbook-core';
 import { expect, it } from 'vitest';
 
-it('block CSS references only real --swatchbook-* chrome roles', () => {
+it('block CSS references only --swatchbook-* vars defined in a shipped base layer', () => {
   const dir = fileURLToPath(new URL('../src', import.meta.url));
-  // Canonical role var names, taken from the single source rather than re-derived.
-  const known = new Set(
-    [...buildChromeDefaultsCss().matchAll(/(--swatchbook-[a-z-]+):/g)].map((m) => m[1]),
-  );
+  // Known names = the canonical chrome roles plus the internal block-UI tokens,
+  // each defined in a stylesheet the provider ships. A reference to anything
+  // not defined in a base layer is a phantom var.
+  const declarations = [
+    buildChromeDefaultsCss(),
+    readFileSync(`${dir}/internal/internal-tokens.css`, 'utf8'),
+  ].join('\n');
+  const known = new Set([...declarations.matchAll(/(--swatchbook-[a-z-]+):/g)].map((m) => m[1]));
   const offenders: string[] = [];
   for (const f of globSync('**/*.css', { cwd: dir })) {
     const text = readFileSync(`${dir}/${f}`, 'utf8');
