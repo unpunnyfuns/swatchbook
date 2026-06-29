@@ -30,7 +30,7 @@
   border-radius: 3px;
   background: none;
   font: inherit;
-  color: var(--swatchbook-accent-default, LinkText);
+  color: var(--swatchbook-accent-bg, LinkText);
   cursor: pointer;
 }
 
@@ -105,7 +105,7 @@
   font: inherit;
   text-align: left;
   white-space: nowrap;
-  color: var(--swatchbook-accent-default, LinkText);
+  color: var(--swatchbook-accent-bg, LinkText);
   cursor: pointer;
 }
 

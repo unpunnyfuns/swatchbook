@@ -21,7 +21,7 @@
 }
 
 .sb-copy-button:focus-visible {
-  outline: 2px solid var(--swatchbook-accent-default, Highlight);
+  outline: 2px solid var(--swatchbook-accent-bg, Highlight);
   outline-offset: 2px;
 }
 
@@ -41,7 +41,7 @@
 }
 
 .sb-copy-button--copied {
-  color: var(--swatchbook-accent-default, Highlight);
+  color: var(--swatchbook-accent-bg, Highlight);
 }
 
 /* Screen-reader-only live region: visually hidden, still announced by AT. */
