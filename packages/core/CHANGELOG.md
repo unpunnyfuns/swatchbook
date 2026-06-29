@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.67.0
+
+### Patch Changes
+
+- e0cb966bcad349e69fbe38d62aad15ca1ef76336: Blocks render standalone: own the chrome defaults as single literals (no light-dark/OS coupling), ship them as a bundled base layer, and drop the redundant inline fallbacks
+
 ## 0.66.4
 
 ## 0.66.3
