@@ -1,12 +1,12 @@
 .sb-token-navigator__search {
-  padding: 0 0 8px;
+  padding: 0 0 var(--swatchbook-space-sm);
 }
 
 .sb-token-navigator__search-input {
   width: 100%;
   max-width: 360px;
-  padding: 6px 10px;
-  border-radius: 4px;
+  padding: var(--swatchbook-space-xs) var(--swatchbook-space-md);
+  border-radius: var(--swatchbook-radius-2xs);
   border: 1px solid var(--swatchbook-border-default);
   background: var(--swatchbook-surface-default);
   color: var(--swatchbook-text-default);
@@ -21,7 +21,7 @@
 }
 
 .sb-token-navigator__caption {
-  padding: 4px 0 12px;
+  padding: var(--swatchbook-space-2xs) 0 var(--swatchbook-space-md);
   color: var(--swatchbook-text-muted);
   font-size: 12px;
 }
@@ -35,16 +35,16 @@
 .sb-token-navigator__nested {
   list-style: none;
   margin: 0;
-  padding-left: 18px;
+  padding-left: var(--swatchbook-space-lg);
   border-left: 1px solid var(--swatchbook-border-default);
 }
 
 .sb-token-navigator__group-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 6px;
-  border-radius: 4px;
+  gap: var(--swatchbook-space-xs);
+  padding: var(--swatchbook-space-2xs) var(--swatchbook-space-xs);
+  border-radius: var(--swatchbook-radius-2xs);
   cursor: pointer;
   user-select: none;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -66,9 +66,9 @@
 .sb-token-navigator__leaf-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 6px;
-  border-radius: 4px;
+  gap: var(--swatchbook-space-sm);
+  padding: var(--swatchbook-space-2xs) var(--swatchbook-space-xs);
+  border-radius: var(--swatchbook-radius-2xs);
   cursor: pointer;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
@@ -88,8 +88,8 @@
 
 .sb-token-navigator__type-pill {
   display: inline-block;
-  padding: 1px 6px;
-  border-radius: 4px;
+  padding: var(--swatchbook-space-3xs) var(--swatchbook-space-xs);
+  border-radius: var(--swatchbook-radius-2xs);
   font-size: 10px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -117,9 +117,9 @@
   display: inline-block;
   width: 14px;
   height: 14px;
-  border-radius: 3px;
+  border-radius: var(--swatchbook-radius-2xs);
   border: 1px solid var(--swatchbook-border-default);
-  margin-left: 8px;
+  margin-left: var(--swatchbook-space-sm);
 }
 
 .sb-token-navigator__preview-box {
@@ -130,21 +130,21 @@
 }
 
 .sb-token-navigator__preview-dimension {
-  margin-left: 8px;
+  margin-left: var(--swatchbook-space-sm);
   display: inline-block;
   min-width: 40px;
   max-width: 120px;
 }
 
 .sb-token-navigator__preview-scaled {
-  margin-left: 8px;
+  margin-left: var(--swatchbook-space-sm);
   display: inline-block;
   transform: scale(0.5);
   transform-origin: right center;
 }
 
 .sb-token-navigator__preview-motion {
-  margin-left: 8px;
+  margin-left: var(--swatchbook-space-sm);
   display: inline-block;
   width: 80px;
 }

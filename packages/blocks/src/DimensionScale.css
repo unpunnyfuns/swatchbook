@@ -1,16 +1,16 @@
 .sb-dimension-scale__row {
   display: grid;
   grid-template-columns: minmax(160px, 220px) 1fr auto;
-  gap: 16px;
+  gap: var(--swatchbook-space-lg);
   align-items: center;
-  padding: 10px 0;
+  padding: var(--swatchbook-space-md) 0;
   border-bottom: 1px solid var(--swatchbook-border-default);
 }
 
 .sb-dimension-scale__meta {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--swatchbook-space-3xs);
   min-width: 0;
 }
 
@@ -45,5 +45,5 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 10px;
   opacity: 0.6;
-  margin-left: 6px;
+  margin-left: var(--swatchbook-space-xs);
 }

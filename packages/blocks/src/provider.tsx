@@ -1,5 +1,6 @@
 import '#/internal/chrome-base.css';
 import '#/internal/internal-tokens.css';
+import '#/internal/internal-dimensions.css';
 import type { ReactElement, ReactNode } from 'react';
 import { SwatchbookContext, useOptionalSwatchbookData } from '#/contexts.ts';
 import type { ProjectSnapshot } from '#/contexts.ts';

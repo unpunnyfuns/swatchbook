@@ -1,0 +1,28 @@
+/*
+ * Internal block-UI dimensional scale. Flat px values in the fixed
+ * `--swatchbook-*` namespace: blocks can't reference the consumer's token
+ * prefix (unknown at build time), so they own these constants the same way
+ * they own chrome defaults. Mirrors packages/tokens/tokens/size.json
+ * (space.* / radius.*); the internal-dimensions drift guard fails if either
+ * side moves. Spacing/radius literals across block CSS fold onto these.
+ */
+:root {
+  --swatchbook-space-none: 0;
+  --swatchbook-space-3xs: 2px;
+  --swatchbook-space-2xs: 4px;
+  --swatchbook-space-xs: 6px;
+  --swatchbook-space-sm: 8px;
+  --swatchbook-space-md: 12px;
+  --swatchbook-space-lg: 16px;
+  --swatchbook-space-xl: 24px;
+  --swatchbook-space-2xl: 40px;
+  --swatchbook-space-3xl: 64px;
+  --swatchbook-radius-3xs: 2px;
+  --swatchbook-radius-2xs: 4px;
+  --swatchbook-radius-xs: 6px;
+  --swatchbook-radius-sm: 8px;
+  --swatchbook-radius-md: 12px;
+  --swatchbook-radius-lg: 16px;
+  --swatchbook-radius-xl: 24px;
+  --swatchbook-radius-pill: 9999px;
+}

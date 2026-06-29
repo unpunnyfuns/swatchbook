@@ -11,12 +11,13 @@ it('block CSS references only --swatchbook-* vars defined in a shipped base laye
   const declarations = [
     buildChromeDefaultsCss(),
     readFileSync(`${dir}/internal/internal-tokens.css`, 'utf8'),
+    readFileSync(`${dir}/internal/internal-dimensions.css`, 'utf8'),
   ].join('\n');
-  const known = new Set([...declarations.matchAll(/(--swatchbook-[a-z-]+):/g)].map((m) => m[1]));
+  const known = new Set([...declarations.matchAll(/(--swatchbook-[a-z0-9-]+):/g)].map((m) => m[1]));
   const offenders: string[] = [];
   for (const f of globSync('**/*.css', { cwd: dir })) {
     const text = readFileSync(`${dir}/${f}`, 'utf8');
-    for (const m of text.matchAll(/var\((--swatchbook-[a-z-]+)/g)) {
+    for (const m of text.matchAll(/var\((--swatchbook-[a-z0-9-]+)/g)) {
       if (!known.has(m[1])) offenders.push(`${f}: ${m[1]}`);
     }
   }

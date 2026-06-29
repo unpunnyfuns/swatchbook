@@ -1,6 +1,6 @@
 .primary,
 .ghost {
-  border-radius: var(--sb-radius-md);
+  border-radius: var(--sb-radius-sm);
   padding: var(--sb-space-sm) var(--sb-space-md);
   font-family: var(--sb-typography-body-strong-font-family);
   font-size: var(--sb-typography-body-strong-font-size);

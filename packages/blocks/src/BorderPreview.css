@@ -1,16 +1,16 @@
 .sb-border-preview__row {
   display: grid;
   grid-template-columns: minmax(160px, 220px) 140px 1fr;
-  gap: 16px;
+  gap: var(--swatchbook-space-lg);
   align-items: center;
-  padding: 14px 0;
+  padding: var(--swatchbook-space-lg) 0;
   border-bottom: 1px solid var(--swatchbook-border-default);
 }
 
 .sb-border-preview__meta {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--swatchbook-space-3xs);
   min-width: 0;
 }
 
@@ -39,8 +39,8 @@
   font-size: 11px;
   display: grid;
   grid-template-columns: auto 1fr;
-  column-gap: 12px;
-  row-gap: 2px;
+  column-gap: var(--swatchbook-space-md);
+  row-gap: var(--swatchbook-space-3xs);
 }
 
 .sb-border-preview__breakdown-key {

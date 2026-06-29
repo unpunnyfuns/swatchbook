@@ -1,16 +1,16 @@
 .sb-gradient-palette__row {
   display: grid;
   grid-template-columns: minmax(180px, 240px) 1fr minmax(140px, 220px);
-  gap: 16px;
+  gap: var(--swatchbook-space-lg);
   align-items: center;
-  padding: 16px 0;
+  padding: var(--swatchbook-space-lg) 0;
   border-bottom: 1px solid var(--swatchbook-border-default);
 }
 
 .sb-gradient-palette__meta {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--swatchbook-space-3xs);
   min-width: 0;
 }
 
@@ -30,7 +30,7 @@
 
 .sb-gradient-palette__sample {
   height: 56px;
-  border-radius: 6px;
+  border-radius: var(--swatchbook-radius-xs);
   border: 1px solid var(--swatchbook-border-default);
 }
 
@@ -39,19 +39,19 @@
   font-size: 11px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--swatchbook-space-3xs);
 }
 
 .sb-gradient-palette__stop-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--swatchbook-space-sm);
 }
 
 .sb-gradient-palette__stop-swatch {
   width: 10px;
   height: 10px;
-  border-radius: 2px;
+  border-radius: var(--swatchbook-radius-3xs);
   border: 1px solid var(--swatchbook-border-default);
   flex: 0 0 auto;
 }

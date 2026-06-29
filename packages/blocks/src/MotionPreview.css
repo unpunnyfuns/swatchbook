@@ -1,8 +1,8 @@
 .sb-motion-preview__controls {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 0 12px;
+  gap: var(--swatchbook-space-sm);
+  padding: var(--swatchbook-space-sm) 0 var(--swatchbook-space-md);
 }
 
 .sb-motion-preview__control-label {
@@ -15,11 +15,11 @@
 .sb-motion-preview__speed-btn {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px;
-  padding: 4px 8px;
+  padding: var(--swatchbook-space-2xs) var(--swatchbook-space-sm);
   background: transparent;
   color: inherit;
   border: 1px solid var(--swatchbook-border-default);
-  border-radius: 4px;
+  border-radius: var(--swatchbook-radius-2xs);
   cursor: pointer;
 }
 
@@ -31,28 +31,28 @@
 
 .sb-motion-preview__replay-btn {
   font-size: 11px;
-  padding: 4px 10px;
+  padding: var(--swatchbook-space-2xs) var(--swatchbook-space-md);
   margin-left: auto;
   background: transparent;
   color: inherit;
   border: 1px solid var(--swatchbook-border-default);
-  border-radius: 4px;
+  border-radius: var(--swatchbook-radius-2xs);
   cursor: pointer;
 }
 
 .sb-motion-preview__row {
   display: grid;
   grid-template-columns: minmax(180px, 240px) 1fr auto;
-  gap: 16px;
+  gap: var(--swatchbook-space-lg);
   align-items: center;
-  padding: 14px 0;
+  padding: var(--swatchbook-space-lg) 0;
   border-bottom: 1px solid var(--swatchbook-border-default);
 }
 
 .sb-motion-preview__meta {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--swatchbook-space-3xs);
   min-width: 0;
 }
 

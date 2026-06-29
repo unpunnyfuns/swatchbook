@@ -9,7 +9,7 @@
   color: var(--swatchbook-text-muted);
   font: inherit;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--swatchbook-radius-2xs);
   transition:
     background-color 120ms ease,
     color 120ms ease;
@@ -33,7 +33,7 @@
 }
 
 .sb-copy-button--text {
-  padding: 2px 8px;
+  padding: var(--swatchbook-space-3xs) var(--swatchbook-space-sm);
   font-size: 11px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
