@@ -7,22 +7,22 @@
   max-width: 360px;
   padding: 6px 10px;
   border-radius: 4px;
-  border: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.3));
-  background: var(--swatchbook-surface-default, Canvas);
-  color: var(--swatchbook-text-default, CanvasText);
+  border: 1px solid var(--swatchbook-border-default);
+  background: var(--swatchbook-surface-default);
+  color: var(--swatchbook-text-default);
   font-family: inherit;
   font-size: 13px;
   line-height: 1.4;
 }
 
 .sb-token-navigator__search-input:focus-visible {
-  outline: 2px solid var(--swatchbook-accent-bg, #1d4ed8);
+  outline: 2px solid var(--swatchbook-accent-bg);
   outline-offset: 1px;
 }
 
 .sb-token-navigator__caption {
   padding: 4px 0 12px;
-  color: var(--swatchbook-text-muted, CanvasText);
+  color: var(--swatchbook-text-muted);
   font-size: 12px;
 }
 
@@ -36,7 +36,7 @@
   list-style: none;
   margin: 0;
   padding-left: 18px;
-  border-left: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.2));
+  border-left: 1px solid var(--swatchbook-border-default);
 }
 
 .sb-token-navigator__group-row {
@@ -59,7 +59,7 @@
  */
 .sb-token-navigator__tree li[role='treeitem']:focus-visible,
 .sb-token-navigator__nested li[role='treeitem']:focus-visible {
-  outline: 2px solid var(--swatchbook-accent-bg, #1d4ed8);
+  outline: 2px solid var(--swatchbook-accent-bg);
   outline-offset: 1px;
 }
 
@@ -78,7 +78,7 @@
   display: inline-block;
   width: 12px;
   text-align: center;
-  color: var(--swatchbook-text-muted, CanvasText);
+  color: var(--swatchbook-text-muted);
 }
 
 .sb-token-navigator__tail {
@@ -93,12 +93,12 @@
   font-size: 10px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  background: var(--swatchbook-surface-muted, rgba(128, 128, 128, 0.15));
+  background: var(--swatchbook-surface-muted);
 }
 
 .sb-token-navigator__value {
   font-size: 11px;
-  color: var(--swatchbook-text-muted, CanvasText);
+  color: var(--swatchbook-text-muted);
   margin-left: auto;
   min-width: 0;
   text-align: right;
@@ -110,7 +110,7 @@
 .sb-token-navigator__count {
   margin-left: auto;
   font-size: 11px;
-  color: var(--swatchbook-text-default, CanvasText);
+  color: var(--swatchbook-text-default);
 }
 
 .sb-token-navigator__color-swatch {
@@ -118,7 +118,7 @@
   width: 14px;
   height: 14px;
   border-radius: 3px;
-  border: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.2));
+  border: 1px solid var(--swatchbook-border-default);
   margin-left: 8px;
 }
 

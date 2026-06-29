@@ -18,7 +18,7 @@
 }
 
 .sb-color-palette__card {
-  border: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.2));
+  border: 1px solid var(--swatchbook-border-default);
   border-radius: 6px;
   overflow: hidden;
   display: flex;
@@ -28,7 +28,7 @@
 .sb-color-palette__swatch {
   height: 56px;
   width: 100%;
-  border-bottom: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.15));
+  border-bottom: 1px solid var(--swatchbook-border-default);
 }
 
 .sb-color-palette__meta {

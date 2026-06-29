@@ -245,6 +245,6 @@
   --swatchbook-text-muted: #4b5563;
   --swatchbook-accent-bg: #1d4ed8;
   --swatchbook-accent-fg: #ffffff;
-  --swatchbook-body-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --swatchbook-body-font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --swatchbook-body-font-size: 14px;
 }

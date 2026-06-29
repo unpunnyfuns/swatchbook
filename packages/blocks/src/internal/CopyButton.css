@@ -6,7 +6,7 @@
   margin: 0;
   border: 0;
   background: transparent;
-  color: var(--swatchbook-text-muted, CanvasText);
+  color: var(--swatchbook-text-muted);
   font: inherit;
   cursor: pointer;
   border-radius: 4px;
@@ -16,12 +16,12 @@
 }
 
 .sb-copy-button:hover {
-  background: var(--swatchbook-surface-muted, rgba(128, 128, 128, 0.15));
-  color: var(--swatchbook-text-default, CanvasText);
+  background: var(--swatchbook-surface-muted);
+  color: var(--swatchbook-text-default);
 }
 
 .sb-copy-button:focus-visible {
-  outline: 2px solid var(--swatchbook-accent-bg, Highlight);
+  outline: 2px solid var(--swatchbook-accent-bg);
   outline-offset: 2px;
 }
 
@@ -37,11 +37,11 @@
   font-size: 11px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  border: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.25));
+  border: 1px solid var(--swatchbook-border-default);
 }
 
 .sb-copy-button--copied {
-  color: var(--swatchbook-accent-bg, Highlight);
+  color: var(--swatchbook-accent-bg);
 }
 
 /* Screen-reader-only live region: visually hidden, still announced by AT. */

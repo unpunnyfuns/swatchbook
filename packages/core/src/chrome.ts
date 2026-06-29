@@ -56,7 +56,7 @@ export const DEFAULT_CHROME_MAP: Record<ChromeRole, string> = {
   borderDefault: '#e5e7eb',
   accentBg: '#1d4ed8',
   accentFg: '#ffffff',
-  bodyFontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+  bodyFontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
   bodyFontSize: '14px',
 };
 

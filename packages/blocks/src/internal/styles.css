@@ -13,22 +13,22 @@
  */
 
 .sb-block {
-  font-family: var(--swatchbook-body-font-family, system-ui);
-  font-size: var(--swatchbook-body-font-size, 14px);
-  color: var(--swatchbook-text-default, CanvasText);
-  background: var(--swatchbook-surface-default, Canvas);
+  font-family: var(--swatchbook-body-font-family);
+  font-size: var(--swatchbook-body-font-size);
+  color: var(--swatchbook-text-default);
+  background: var(--swatchbook-surface-default);
   padding: 12px;
   border-radius: 6px;
 }
 
 .sb-block__caption {
   padding: 4px 0 12px;
-  color: var(--swatchbook-text-muted, CanvasText);
+  color: var(--swatchbook-text-muted);
   font-size: 12px;
 }
 
 .sb-block__empty {
   padding: 24px 12px;
   text-align: center;
-  color: var(--swatchbook-text-muted, CanvasText);
+  color: var(--swatchbook-text-muted);
 }

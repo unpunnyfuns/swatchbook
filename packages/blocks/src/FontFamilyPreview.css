@@ -4,7 +4,7 @@
   gap: 16px;
   align-items: baseline;
   padding: 14px 0;
-  border-bottom: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.2));
+  border-bottom: 1px solid var(--swatchbook-border-default);
 }
 
 .sb-font-family-sample__meta {
@@ -25,7 +25,7 @@
 .sb-font-family-sample__stack {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px;
-  color: var(--swatchbook-text-muted, CanvasText);
+  color: var(--swatchbook-text-muted);
 }
 
 .sb-font-family-sample__sample {
@@ -36,5 +36,5 @@
 .sb-font-family-sample__css-var {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px;
-  color: var(--swatchbook-text-muted, CanvasText);
+  color: var(--swatchbook-text-muted);
 }

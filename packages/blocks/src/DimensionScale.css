@@ -4,7 +4,7 @@
   gap: 16px;
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.2));
+  border-bottom: 1px solid var(--swatchbook-border-default);
 }
 
 .sb-dimension-scale__meta {
