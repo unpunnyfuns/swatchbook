@@ -2,7 +2,7 @@
   background: var(--sb-color-surface-raised);
   color: var(--sb-color-text-default);
   border: var(--sb-border-default);
-  border-radius: var(--sb-radius-lg);
+  border-radius: var(--sb-radius-md);
   padding: var(--sb-space-lg);
   box-shadow: var(--sb-shadow-md);
   display: flex;

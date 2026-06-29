@@ -5,6 +5,7 @@
     "000": { "$value": { "value": 0,   "unit": "px" } },
     "050": { "$value": { "value": 2,   "unit": "px" } },
     "100": { "$value": { "value": 4,   "unit": "px" } },
+    "150": { "$value": { "value": 6,   "unit": "px" } },
     "200": { "$value": { "value": 8,   "unit": "px" } },
     "300": { "$value": { "value": 12,  "unit": "px" } },
     "400": { "$value": { "value": 16,  "unit": "px" } },
@@ -25,8 +26,9 @@
     "$type": "dimension",
     "$description": "Semantic spacing scale used by components.",
     "none": { "$value": "{size.000}" },
-    "2xs":  { "$value": "{size.050}" },
-    "xs":   { "$value": "{size.100}" },
+    "3xs":  { "$value": "{size.050}" },
+    "2xs":  { "$value": "{size.100}" },
+    "xs":   { "$value": "{size.150}" },
     "sm":   { "$value": "{size.200}" },
     "md":   { "$value": "{size.300}" },
     "lg":   { "$value": "{size.400}" },
@@ -36,10 +38,14 @@
   },
   "radius": {
     "$type": "dimension",
-    "sm":   { "$value": "{size.100}" },
-    "md":   { "$value": "{size.200}" },
-    "lg":   { "$value": "{size.300}" },
-    "xl":   { "$value": "{size.500}" },
+    "none": { "$value": "{size.000}" },
+    "3xs":  { "$value": "{size.050}" },
+    "2xs":  { "$value": "{size.100}" },
+    "xs":   { "$value": "{size.150}" },
+    "sm":   { "$value": "{size.200}" },
+    "md":   { "$value": "{size.300}" },
+    "lg":   { "$value": "{size.400}" },
+    "xl":   { "$value": "{size.600}" },
     "pill": { "$value": { "value": 9999, "unit": "px" } }
   }
 }

@@ -2,8 +2,8 @@
   background: var(--sb-color-surface-default);
   color: var(--sb-color-text-default);
   border: var(--sb-border-default);
-  border-radius: var(--sb-radius-sm);
-  padding: var(--sb-space-xs) var(--sb-space-sm);
+  border-radius: var(--sb-radius-2xs);
+  padding: var(--sb-space-2xs) var(--sb-space-sm);
   font-family: var(--sb-typography-body-font-family);
   font-size: var(--sb-typography-body-font-size);
   font-weight: var(--sb-typography-body-font-weight);
