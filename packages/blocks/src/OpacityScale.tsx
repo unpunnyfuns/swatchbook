@@ -117,8 +117,8 @@ export function OpacityScale({
               className="sb-opacity-scale__swatch"
               style={
                 {
-                  '--sb-opacity-scale-color': sampleColorVar,
-                  '--sb-opacity-scale-alpha': String(row.opacity),
+                  '--swatchbook-opacity-scale-color': sampleColorVar,
+                  '--swatchbook-opacity-scale-alpha': String(row.opacity),
                 } as CSSProperties
               }
               aria-hidden
