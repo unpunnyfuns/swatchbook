@@ -1,5 +1,7 @@
 # @unpunnyfuns/swatchbook-switcher
 
+## 0.67.0
+
 ## 0.66.4
 
 ## 0.66.3

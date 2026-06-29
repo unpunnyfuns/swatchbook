@@ -1,5 +1,21 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.67.0
+
+### Minor Changes
+
+- 8c05741fe903910c1a4605647bef378c0ac2bb40: Fold block spacing and radius onto an internal dimensional scale with a new 6px step
+
+### Patch Changes
+
+- 013c82af3aaca36c67ff34dfc0b87a7d69c1d927: Move the blocks' hardcoded diagnostics + deprecated colors into internal tokens that adapt to the surface (status colors mix their hue with the adaptive chrome text; deprecated badge text uses `text-muted`), fixing WCAG failures on dark-mode surfaces with no `light-dark()`/OS coupling
+- e0cb966bcad349e69fbe38d62aad15ca1ef76336: Blocks render standalone: own the chrome defaults as single literals (no light-dark/OS coupling), ship them as a bundled base layer, and drop the redundant inline fallbacks
+- e28036bde81a5da08334664423d7b8fd51ec48d4: Surface the dimension render cap in TokenNavigator and keep dimension bars within their host cell so a capped bar (e.g. the 9999px pill) no longer overflows the preview
+- e28036bde81a5da08334664423d7b8fd51ec48d4: Use the fixed --swatchbook- namespace for OpacityScale's inline sample vars instead of the consumer --sb- prefix
+- 070913e14b25617995f1a4c5800a6a932c628932: Docs: standardize consumer-facing guides on importing blocks and hooks from `swatchbook-addon` (the umbrella the quickstart installs and that re-exports the surface); package reference pages keep `swatchbook-blocks`
+- Updated dependencies [e0cb966]
+  - @unpunnyfuns/swatchbook-core@0.67.0
+
 ## 0.66.4
 
 ### Patch Changes
