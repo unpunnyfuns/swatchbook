@@ -100,8 +100,8 @@ it("mode-invariant tokens (e.g. size primitives, font families) still don't appe
 it('terminates with a trailing newline + emits a chrome alias block at the tail', () => {
   const css = emitAxisProjectedCss(project);
   expect(css.endsWith('\n')).toBe(true);
-  expect(css).toContain('color-scheme: light dark;');
-  expect(css).toContain('--swatchbook-surface-default:');
+  expect(css).not.toContain('color-scheme:');
+  expect(css).toContain('--swatchbook-surface-default: #ffffff;');
 });
 
 it('respects options.prefix when overriding the project default', () => {

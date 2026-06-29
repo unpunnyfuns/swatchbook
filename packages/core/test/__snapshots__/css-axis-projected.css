@@ -237,15 +237,14 @@
 }
 
 :root {
-  color-scheme: light dark;
-  --swatchbook-border-default: light-dark(#e5e7eb, #334155);
-  --swatchbook-surface-default: light-dark(#ffffff, #0f172a);
-  --swatchbook-surface-muted: light-dark(#f4f4f5, #1e293b);
-  --swatchbook-surface-raised: light-dark(#ffffff, #111827);
-  --swatchbook-text-default: light-dark(#111827, #f1f5f9);
-  --swatchbook-text-muted: light-dark(#4b5563, #94a3b8);
-  --swatchbook-accent-bg: light-dark(#1d4ed8, #3b82f6);
-  --swatchbook-accent-fg: light-dark(#ffffff, #0b1220);
+  --swatchbook-border-default: #e5e7eb;
+  --swatchbook-surface-default: #ffffff;
+  --swatchbook-surface-muted: #f4f4f5;
+  --swatchbook-surface-raised: #ffffff;
+  --swatchbook-text-default: #111827;
+  --swatchbook-text-muted: #4b5563;
+  --swatchbook-accent-bg: #1d4ed8;
+  --swatchbook-accent-fg: #ffffff;
   --swatchbook-body-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --swatchbook-body-font-size: 14px;
 }
