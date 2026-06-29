@@ -388,7 +388,7 @@ export function emitAxisProjectedCss(
 
   // 4. Chrome aliases — trailing `:root` block.
   const chrome = options.chrome ?? project.chrome;
-  const chromeLines: string[] = ['  color-scheme: light dark;'];
+  const chromeLines: string[] = [];
   for (const role of CHROME_ROLES) {
     const sourceVar = makeCSSVar(role, { prefix: CHROME_VAR_PREFIX });
     const target = chrome[role];

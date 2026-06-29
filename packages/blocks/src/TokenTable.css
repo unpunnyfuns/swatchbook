@@ -12,21 +12,21 @@
   max-width: 360px;
   padding: 6px 10px;
   border-radius: 4px;
-  border: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.3));
-  background: var(--swatchbook-surface-default, Canvas);
-  color: var(--swatchbook-text-default, CanvasText);
+  border: 1px solid var(--swatchbook-border-default);
+  background: var(--swatchbook-surface-default);
+  color: var(--swatchbook-text-default);
   font-family: inherit;
   font-size: 13px;
   line-height: 1.4;
 }
 
 .sb-token-table__search-input:focus-visible {
-  outline: 2px solid var(--swatchbook-accent-bg, #1d4ed8);
+  outline: 2px solid var(--swatchbook-accent-bg);
   outline-offset: 1px;
 }
 
 .sb-token-table__empty-row {
-  color: var(--swatchbook-text-muted, CanvasText);
+  color: var(--swatchbook-text-muted);
   font-style: italic;
   text-align: center;
   padding: 16px 12px;
@@ -36,7 +36,7 @@
   caption-side: top;
   text-align: left;
   padding: 8px 0;
-  color: var(--swatchbook-text-muted, CanvasText);
+  color: var(--swatchbook-text-muted);
   font-size: 12px;
 }
 
@@ -46,8 +46,8 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--swatchbook-text-muted, CanvasText);
-  border-bottom: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.3));
+  color: var(--swatchbook-text-muted);
+  border-bottom: 1px solid var(--swatchbook-border-default);
 }
 
 .sb-token-table__th--path {
@@ -63,13 +63,13 @@
 }
 
 .sb-token-table__row:focus-visible {
-  outline: 2px solid var(--swatchbook-accent-bg, #1d4ed8);
+  outline: 2px solid var(--swatchbook-accent-bg);
   outline-offset: -2px;
 }
 
 .sb-token-table__td {
   padding: 8px 12px;
-  border-bottom: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.15));
+  border-bottom: 1px solid var(--swatchbook-border-default);
   vertical-align: top;
 }
 
@@ -95,8 +95,8 @@
   font-size: 10px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  background: var(--swatchbook-surface-muted, rgba(128, 128, 128, 0.15));
-  color: var(--swatchbook-text-muted, CanvasText);
+  background: var(--swatchbook-surface-muted);
+  color: var(--swatchbook-text-muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   flex-shrink: 0;
 }
@@ -106,7 +106,7 @@
   width: 16px;
   height: 16px;
   border-radius: 3px;
-  border: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.3));
+  border: 1px solid var(--swatchbook-border-default);
   flex-shrink: 0;
 }
 

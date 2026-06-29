@@ -4,7 +4,7 @@
   gap: 16px;
   align-items: center;
   padding: 14px 0;
-  border-bottom: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.2));
+  border-bottom: 1px solid var(--swatchbook-border-default);
 }
 
 .sb-border-preview__meta {
@@ -44,5 +44,5 @@
 }
 
 .sb-border-preview__breakdown-key {
-  color: var(--swatchbook-text-muted, CanvasText);
+  color: var(--swatchbook-text-muted);
 }

@@ -1,7 +1,7 @@
 import { beforeAll, expect, it } from 'vitest';
 import { dirname } from 'node:path';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
-import { CHROME_ROLES, DEFAULT_CHROME_MAP, validateChrome } from '#/chrome.ts';
+import { buildChromeDefaultsCss, CHROME_ROLES, DEFAULT_CHROME_MAP, validateChrome } from '#/chrome.ts';
 import { emitAxisProjectedCss } from '#/css-axis-projected.ts';
 import { loadProject } from '#/load.ts';
 import type { Project } from '#/types.ts';
@@ -62,6 +62,17 @@ it('CHROME_ROLES and DEFAULT_CHROME_MAP cover the same ten roles', () => {
   expect(Object.keys(DEFAULT_CHROME_MAP).toSorted()).toEqual([...CHROME_ROLES].toSorted());
 });
 
+it('default chrome values are single owned literals, never light-dark or system colors', () => {
+  for (const value of Object.values(DEFAULT_CHROME_MAP)) {
+    expect(value).not.toMatch(/light-dark\(/);
+    expect(value).not.toMatch(/\b(Canvas|CanvasText|LinkText|ButtonBorder|GrayText|AccentColor)\b/);
+  }
+  expect(DEFAULT_CHROME_MAP.surfaceDefault).toBe('#ffffff');
+  expect(DEFAULT_CHROME_MAP.textDefault).toBe('#111827');
+  expect(DEFAULT_CHROME_MAP.borderDefault).toBe('#e5e7eb');
+  expect(DEFAULT_CHROME_MAP.accentBg).toBe('#1d4ed8');
+});
+
 let project: Project;
 
 // beforeAll: loadProject against the full fixture (~1s) is shared by
@@ -97,7 +108,7 @@ it('emitAxisProjectedCss emits every chrome role — user entry as var, others a
   const rootBlocks = css.split('\n\n').filter((b) => b.startsWith(':root {'));
   const chromeBlock = rootBlocks.find((b) => b.includes('--swatchbook-surface-default:'));
   expect(chromeBlock).toBeDefined();
-  expect(chromeBlock).toContain('color-scheme: light dark;');
+  expect(chromeBlock).not.toContain('color-scheme:');
   expect(chromeBlock).toContain('--swatchbook-surface-default: var(--sb-color-palette-blue-500);');
   expect(chromeBlock).toContain(`--swatchbook-accent-bg: ${DEFAULT_CHROME_MAP.accentBg};`);
   expect(chromeBlock).toContain(`--swatchbook-body-font-size: ${DEFAULT_CHROME_MAP.bodyFontSize};`);
@@ -127,4 +138,16 @@ it('emitAxisProjectedCss never prefixes chrome source vars with the project pref
   const css = emitAxisProjectedCss(project);
   expect(css).not.toMatch(/--sb-swatchbook-/);
   expect(css).not.toMatch(/--sb-surface-default:\s*var\(/);
+});
+
+it('buildChromeDefaultsCss declares all ten roles at their defaults, no color-scheme', () => {
+  const css = buildChromeDefaultsCss();
+  expect(css.startsWith(':root {')).toBe(true);
+  expect(css.endsWith('}')).toBe(true);
+  expect(css).not.toMatch(/color-scheme/);
+  expect(css).toContain('--swatchbook-surface-default: #ffffff;');
+  expect(css).toContain('--swatchbook-accent-bg: #1d4ed8;');
+  expect(css).toContain('--swatchbook-body-font-size: 14px;');
+  // exactly ten declarations
+  expect(css.match(/--swatchbook-/g)?.length).toBe(10);
 });

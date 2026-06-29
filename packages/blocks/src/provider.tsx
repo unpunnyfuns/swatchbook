@@ -1,3 +1,4 @@
+import '#/internal/chrome-base.css';
 import type { ReactElement, ReactNode } from 'react';
 import { SwatchbookContext, useOptionalSwatchbookData } from '#/contexts.ts';
 import type { ProjectSnapshot } from '#/contexts.ts';

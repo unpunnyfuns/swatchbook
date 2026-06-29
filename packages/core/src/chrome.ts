@@ -1,3 +1,4 @@
+import { makeCSSVar } from '@terrazzo/token-tools/css';
 import type { Diagnostic } from '#/types.ts';
 
 /**
@@ -37,29 +38,40 @@ export const CHROME_VAR_PREFIX = 'swatchbook';
  * starting from these defaults and overlaying any user-supplied `chrome`
  * entry as a `var(...)` reference on top.
  *
- * Color roles use the `light-dark()` CSS function so zero-config chrome
- * auto-flips with the active `color-scheme` (which Storybook's preview
- * iframe, MDX docs pages, the OS prefers-color-scheme chain, etc. all
- * participate in). The emitter tags the chrome `:root` block with
- * `color-scheme: light dark` so the function resolves correctly even when
- * no parent element opts in. `light-dark()` is supported in Chrome 123+,
- * Firefox 120+, and Safari 17.5+ — all evergreen.
+ * Single owned literal values. Swatchbook has no intrinsic dark axis, so the
+ * zero-config default is one committed appearance; per-axis variation comes
+ * from `config.chrome` mapping roles to the consumer's tokens. No
+ * `light-dark()` or system colors — those couple to the OS color-scheme,
+ * which is foreign to swatchbook's axis model.
  *
- * Values chosen for WCAG AA contrast in both modes. Consumers theme chrome
+ * Values meet WCAG AA on their respective surfaces. Consumers theme chrome
  * against their own tokens by filling `config.chrome`.
  */
 export const DEFAULT_CHROME_MAP: Record<ChromeRole, string> = {
-  surfaceDefault: 'light-dark(#ffffff, #0f172a)',
-  surfaceMuted: 'light-dark(#f4f4f5, #1e293b)',
-  surfaceRaised: 'light-dark(#ffffff, #111827)',
-  textDefault: 'light-dark(#111827, #f1f5f9)',
-  textMuted: 'light-dark(#4b5563, #94a3b8)',
-  borderDefault: 'light-dark(#e5e7eb, #334155)',
-  accentBg: 'light-dark(#1d4ed8, #3b82f6)',
-  accentFg: 'light-dark(#ffffff, #0b1220)',
-  bodyFontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+  surfaceDefault: '#ffffff',
+  surfaceMuted: '#f4f4f5',
+  surfaceRaised: '#ffffff',
+  textDefault: '#111827',
+  textMuted: '#4b5563',
+  borderDefault: '#e5e7eb',
+  accentBg: '#1d4ed8',
+  accentFg: '#ffffff',
+  bodyFontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
   bodyFontSize: '14px',
 };
+
+/**
+ * The chrome defaults as a standalone `:root` stylesheet block. Shipped by the
+ * blocks as a bundled base layer so `--swatchbook-*` is defined without the
+ * addon. The emitter produces a superset of this (defaults + consumer
+ * overrides) that wins via source order when the addon is present.
+ */
+export function buildChromeDefaultsCss(): string {
+  const lines = CHROME_ROLES.map(
+    (role) => `  ${makeCSSVar(role, { prefix: CHROME_VAR_PREFIX })}: ${DEFAULT_CHROME_MAP[role]};`,
+  );
+  return `:root {\n${lines.join('\n')}\n}`;
+}
 
 export interface ChromeValidationResult {
   entries: Record<string, string>;

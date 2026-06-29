@@ -7,7 +7,7 @@
   min-width: 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
-  color: var(--swatchbook-text-muted, rgba(128, 128, 128, 0.9));
+  color: var(--swatchbook-text-muted);
 }
 
 .sb-indicator__alias-forward,
@@ -21,7 +21,7 @@
 }
 
 .sb-indicator__alias-arrow {
-  color: var(--swatchbook-text-muted, rgba(128, 128, 128, 0.6));
+  color: var(--swatchbook-text-muted);
 }
 
 .sb-indicator__alias-node {
@@ -30,7 +30,7 @@
   border-radius: 3px;
   background: none;
   font: inherit;
-  color: var(--swatchbook-accent-default, LinkText);
+  color: var(--swatchbook-accent-bg);
   cursor: pointer;
 }
 
@@ -39,7 +39,7 @@
 }
 
 .sb-indicator__alias-node--offview {
-  color: var(--swatchbook-text-muted, rgba(128, 128, 128, 0.6));
+  color: var(--swatchbook-text-muted);
   text-decoration: none;
   cursor: default;
 }
@@ -57,11 +57,11 @@
 
 .sb-indicator__variance-glyph,
 .sb-indicator__composes-glyph {
-  color: var(--swatchbook-text-muted, rgba(128, 128, 128, 0.7));
+  color: var(--swatchbook-text-muted);
 }
 
 .sb-indicator__composes {
-  color: var(--swatchbook-text-muted, rgba(128, 128, 128, 0.8));
+  color: var(--swatchbook-text-muted);
 }
 
 .sb-indicator__gamut {
@@ -89,8 +89,8 @@
   margin: 2px 0 0;
   padding: 4px;
   list-style: none;
-  background: var(--swatchbook-surface-raised, light-dark(#fff, #1a1a1a));
-  border: 1px solid var(--swatchbook-border-default, rgba(128, 128, 128, 0.3));
+  background: var(--swatchbook-surface-raised);
+  border: 1px solid var(--swatchbook-border-default);
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
@@ -105,20 +105,20 @@
   font: inherit;
   text-align: left;
   white-space: nowrap;
-  color: var(--swatchbook-accent-default, LinkText);
+  color: var(--swatchbook-accent-bg);
   cursor: pointer;
 }
 
 .sb-indicator__reverse-item:hover:not(:disabled) {
-  background: var(--swatchbook-surface-muted, rgba(128, 128, 128, 0.12));
+  background: var(--swatchbook-surface-muted);
 }
 
 .sb-indicator__reverse-item:disabled {
-  color: var(--swatchbook-text-muted, rgba(128, 128, 128, 0.6));
+  color: var(--swatchbook-text-muted);
   cursor: default;
 }
 
 .sb-indicator__description {
-  color: var(--swatchbook-text-muted, rgba(128, 128, 128, 0.8));
+  color: var(--swatchbook-text-muted);
   cursor: help;
 }
