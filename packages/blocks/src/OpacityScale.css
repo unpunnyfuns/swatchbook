@@ -40,8 +40,8 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--sb-opacity-scale-color);
-  opacity: var(--sb-opacity-scale-alpha);
+  background: var(--swatchbook-opacity-scale-color);
+  opacity: var(--swatchbook-opacity-scale-alpha);
 }
 
 .sb-opacity-scale__meta {
