@@ -35,7 +35,8 @@ function declaredVars(prefix: string): Record<string, string> {
   const css = readFileSync(cssPath, 'utf8');
   const out: Record<string, string> = {};
   for (const m of css.matchAll(/--swatchbook-(space|radius)-([\w-]+):\s*([^;]+);/g)) {
-    if (m[1] === prefix) out[m[2]] = m[3].trim();
+    const [, type, label, raw] = m;
+    if (type === prefix && label !== undefined && raw !== undefined) out[label] = raw.trim();
   }
   return out;
 }

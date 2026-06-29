@@ -1,16 +1,16 @@
 .sb-stroke-style-sample__row {
   display: grid;
   grid-template-columns: minmax(160px, 220px) 1fr auto;
-  gap: 16px;
+  gap: var(--swatchbook-space-lg);
   align-items: center;
-  padding: 14px 0;
+  padding: var(--swatchbook-space-lg) 0;
   border-bottom: 1px solid var(--swatchbook-border-default);
 }
 
 .sb-stroke-style-sample__meta {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--swatchbook-space-3xs);
   min-width: 0;
 }
 

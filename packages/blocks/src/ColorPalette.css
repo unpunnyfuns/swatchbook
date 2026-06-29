@@ -1,5 +1,5 @@
 .sb-color-palette__group {
-  margin-bottom: 20px;
+  margin-bottom: var(--swatchbook-space-xl);
 }
 
 .sb-color-palette__group-header {
@@ -8,18 +8,18 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   opacity: 0.6;
-  margin-bottom: 8px;
+  margin-bottom: var(--swatchbook-space-sm);
 }
 
 .sb-color-palette__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 8px;
+  gap: var(--swatchbook-space-sm);
 }
 
 .sb-color-palette__card {
   border: 1px solid var(--swatchbook-border-default);
-  border-radius: 6px;
+  border-radius: var(--swatchbook-radius-xs);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -32,10 +32,10 @@
 }
 
 .sb-color-palette__meta {
-  padding: 8px 10px;
+  padding: var(--swatchbook-space-sm) var(--swatchbook-space-md);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--swatchbook-space-3xs);
 }
 
 .sb-color-palette__leaf {
@@ -50,5 +50,5 @@
 }
 
 .sb-color-palette__gamut-warn {
-  margin-left: 4px;
+  margin-left: var(--swatchbook-space-2xs);
 }
