@@ -12,8 +12,11 @@ it('a chrome block appended after the base layer wins (addon-overrides-default o
   override.textContent = ':root { --swatchbook-border-default: rgb(1, 2, 3); }';
   document.head.appendChild(override);
   try {
-    expect(getComputedStyle(document.documentElement).getPropertyValue('--swatchbook-border-default').trim())
-      .toBe('rgb(1, 2, 3)');
+    expect(
+      getComputedStyle(document.documentElement)
+        .getPropertyValue('--swatchbook-border-default')
+        .trim(),
+    ).toBe('rgb(1, 2, 3)');
   } finally {
     override.remove();
   }
