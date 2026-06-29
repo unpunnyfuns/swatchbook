@@ -1,12 +1,12 @@
 .sb-opacity-scale__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
+  gap: var(--swatchbook-space-md);
 }
 
 .sb-opacity-scale__card {
   border: 1px solid var(--swatchbook-border-default);
-  border-radius: 6px;
+  border-radius: var(--swatchbook-radius-xs);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -45,10 +45,10 @@
 }
 
 .sb-opacity-scale__meta {
-  padding: 8px 10px;
+  padding: var(--swatchbook-space-sm) var(--swatchbook-space-md);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--swatchbook-space-3xs);
 }
 
 .sb-opacity-scale__path {
