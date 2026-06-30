@@ -4,7 +4,7 @@ React MDX doc blocks for [swatchbook](https://github.com/unpunnyfuns/swatchbook)
 
 Render your DTCG tokens in `.mdx` stories: swatch grids, type-specific previews, per-token inspectors. The blocks react to the toolbar's axis flips without any wiring in your story code.
 
-Most consumers pick this up transitively via [`@unpunnyfuns/swatchbook-addon`](../addon); `import { TokenTable } from '@unpunnyfuns/swatchbook-addon'` works out of the box. Install this package directly when you want blocks *without* the Storybook addon, such as unit tests or a standalone React app wrapping tokens in a custom surface.
+Most consumers pick this up transitively via [`@unpunnyfuns/swatchbook-addon`](../addon); `import { TokenTable } from '@unpunnyfuns/swatchbook-addon'` works out of the box. Install this package directly when you want blocks _without_ the Storybook addon, such as unit tests or a standalone React app wrapping tokens in a custom surface.
 
 ## Install
 
@@ -32,7 +32,7 @@ import snapshot from './tokens-snapshot.json';
 
 <SwatchbookProvider value={snapshot}>
   <TokenTable filter="color.**" />
-</SwatchbookProvider>
+</SwatchbookProvider>;
 ```
 
 Block catalogue, props, and composition patterns live in the [blocks reference](https://unpunnyfuns.github.io/swatchbook/reference/blocks) and the [authoring guide](https://unpunnyfuns.github.io/swatchbook/guides/authoring-doc-stories).

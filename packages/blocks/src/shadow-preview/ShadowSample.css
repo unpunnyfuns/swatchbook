@@ -1,0 +1,7 @@
+.sb-shadow-sample {
+  width: 120px;
+  height: 56px;
+  background: var(--swatchbook-surface-raised);
+  border: 1px solid var(--swatchbook-border-default);
+  border-radius: 6px;
+}

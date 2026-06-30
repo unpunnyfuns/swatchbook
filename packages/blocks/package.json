@@ -2,31 +2,37 @@
   "name": "@unpunnyfuns/swatchbook-blocks",
   "version": "0.67.0",
   "description": "Storybook MDX doc blocks for DTCG design tokens — TokenTable, ColorPalette, TypographyScale, TokenDetail.",
-  "license": "MIT",
-  "author": "unpunnyfuns <unpunnyfuns@gmail.com>",
+  "keywords": [
+    "design-system",
+    "design-tokens",
+    "dtcg",
+    "mdx",
+    "organize",
+    "storybook",
+    "storybook-blocks",
+    "tokens"
+  ],
   "homepage": "https://unpunnyfuns.github.io/swatchbook/",
   "bugs": "https://github.com/unpunnyfuns/swatchbook/issues",
+  "license": "MIT",
+  "author": "unpunnyfuns <unpunnyfuns@gmail.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/unpunnyfuns/swatchbook.git",
     "directory": "packages/blocks"
   },
-  "keywords": [
-    "storybook-blocks",
-    "storybook",
-    "design-tokens",
-    "dtcg",
-    "mdx",
-    "design-system",
-    "organize",
-    "tokens"
+  "files": [
+    "dist"
   ],
   "type": "module",
-  "engines": {
-    "node": ">=24.14.0"
-  },
+  "sideEffects": [
+    "**/*.css"
+  ],
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
+  "imports": {
+    "#/*": "./src/*"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
@@ -35,15 +41,6 @@
     "./style.css": "./dist/style.css",
     "./package.json": "./package.json"
   },
-  "imports": {
-    "#/*": "./src/*"
-  },
-  "files": [
-    "dist"
-  ],
-  "sideEffects": [
-    "**/*.css"
-  ],
   "publishConfig": {
     "access": "public"
   },
@@ -58,10 +55,10 @@
     "format": "oxfmt -c ../../.oxfmtrc.json src test",
     "format:check": "oxfmt --check -c ../../.oxfmtrc.json src test"
   },
-  "peerDependencies": {
-    "react": ">=18",
-    "react-dom": ">=18",
-    "storybook": "^10.1.0"
+  "dependencies": {
+    "@unpunnyfuns/swatchbook-core": "workspace:*",
+    "clsx": "^2.1.1",
+    "colorjs.io": "^0.6.1"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.2",
@@ -79,9 +76,12 @@
     "typescript": "^6.0.3",
     "vitest": "^4.1.8"
   },
-  "dependencies": {
-    "@unpunnyfuns/swatchbook-core": "workspace:*",
-    "clsx": "^2.1.1",
-    "colorjs.io": "^0.6.1"
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "storybook": "^10.1.0"
+  },
+  "engines": {
+    "node": ">=24.14.0"
   }
 }

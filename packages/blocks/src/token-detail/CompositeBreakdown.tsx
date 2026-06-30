@@ -91,7 +91,7 @@ export function CompositeBreakdownContent({
         {layers.map((layer, i) => {
           const v = layer as ShadowLayer;
           return (
-            <div key={shadowLayerKey(v, i)} style={{ display: 'contents' }}>
+            <div key={shadowLayerKey(v, i)} className="sb-token-detail__shadow-layer">
               {multi && (
                 <div className="sb-token-detail__breakdown-layer-header">Layer {i + 1}</div>
               )}

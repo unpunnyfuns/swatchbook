@@ -1,0 +1,39 @@
+.sb-dimension-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--swatchbook-space-3xs);
+  max-width: 100%;
+  min-width: 0;
+}
+
+.sb-dimension-bar__cap {
+  color: var(--swatchbook-text-muted);
+  font-size: var(--swatchbook-type-micro);
+  line-height: var(--swatchbook-leading-none);
+  user-select: none;
+}
+
+/* Never exceed the host cell: the px width conveys magnitude in the wide
+   DimensionScale rows, but the bar also renders in TokenNavigator's narrow
+   preview cell, where a 480px-capped bar would otherwise overflow. */
+.sb-dimension-bar__bar {
+  height: 14px;
+  background: var(--swatchbook-accent-bg);
+  border-radius: 2px;
+  min-width: 1px;
+  max-width: 100%;
+}
+
+.sb-dimension-bar__radius-sample {
+  width: 56px;
+  height: 56px;
+  background: var(--swatchbook-accent-bg);
+  border: 1px solid var(--swatchbook-border-default);
+}
+
+.sb-dimension-bar__size-sample {
+  background: var(--swatchbook-accent-bg);
+  border: 1px solid var(--swatchbook-border-default);
+  min-width: 1px;
+  min-height: 1px;
+}

@@ -9,7 +9,6 @@ import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { useBlockKey, usePersistedState } from '#/internal/persistent-state.ts';
-import { EmptyState } from '#/internal/styles.tsx';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
@@ -526,13 +525,13 @@ export function TokenNavigator({
   if (tree.length === 0) {
     return (
       <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
-        <EmptyState>
+        <div className="sb-block__empty">
           {root
             ? `No tokens under "${root}"${typeFilter ? ` matching ${typeLabel.slice(3)}` : ''}.`
             : typeFilter
               ? `No tokens matching ${typeLabel.slice(3)} in the active theme.`
               : 'No tokens in the active theme.'}
-        </EmptyState>
+        </div>
       </div>
     );
   }

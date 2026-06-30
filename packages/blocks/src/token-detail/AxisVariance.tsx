@@ -68,7 +68,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                   />
                 )}
                 {value}
-                <span style={{ opacity: 0.6, marginLeft: 8 }}>same across every axis</span>
+                <span className="sb-token-detail__constant-label-note">same across every axis</span>
               </td>
             </tr>
           </tbody>
@@ -101,7 +101,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
                 data-axis={axisName}
                 data-context={row.ctx}
               >
-                <td className="sb-token-detail__theme-cell" style={{ width: '30%' }}>
+                <td className="sb-token-detail__theme-cell sb-token-detail__theme-cell--label">
                   {row.ctx}
                 </td>
                 <td className="sb-token-detail__theme-cell">
@@ -138,14 +138,13 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
       <table className="sb-token-detail__theme-table" data-testid="token-detail-values">
         <thead>
           <tr className="sb-token-detail__theme-row">
-            <th className="sb-token-detail__theme-cell" style={{ textAlign: 'left', opacity: 0.7 }}>
+            <th className="sb-token-detail__theme-cell sb-token-detail__theme-cell--header">
               {rowAxis.name} \ {colAxis.name}
             </th>
             {colAxis.contexts.map((col) => (
               <th
                 key={col}
-                className="sb-token-detail__theme-cell"
-                style={{ textAlign: 'left', opacity: 0.7 }}
+                className="sb-token-detail__theme-cell sb-token-detail__theme-cell--header"
               >
                 {col}
               </th>
@@ -187,7 +186,7 @@ export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
         </tbody>
       </table>
       {extra.length > 0 && (
-        <div className="sb-token-detail__aliased-by-truncated" style={{ marginTop: 6 }}>
+        <div className="sb-token-detail__aliased-by-truncated sb-token-detail__aliased-by-truncated--axis-note">
           Values also vary with {extra.map((a) => a.name).join(', ')}; matrix shows the slice for
           the active selection.
         </div>

@@ -10,12 +10,6 @@ export default defineConfig({
     inject: true,
   },
   deps: {
-    neverBundle: [
-      /^@storybook\//,
-      /^virtual:/,
-      /^storybook($|\/)/,
-      'react',
-      'react-dom',
-    ],
+    neverBundle: [/^@storybook\//, /^virtual:/, /^storybook($|\/)/, 'react', 'react-dom'],
   },
 });

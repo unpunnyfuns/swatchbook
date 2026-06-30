@@ -1,0 +1,31 @@
+.sb-motion-sample__track {
+  position: relative;
+  height: 36px;
+  background: var(--swatchbook-surface-muted);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.sb-motion-sample__ball {
+  position: absolute;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  margin-top: -14px;
+  border-radius: 50%;
+  background: var(--swatchbook-accent-bg);
+}
+
+.sb-motion-sample__ball--start {
+  left: 4px;
+}
+
+.sb-motion-sample__ball--end {
+  left: calc(100% - 32px);
+}
+
+.sb-motion-sample__reduced-motion {
+  font-size: var(--swatchbook-type-micro);
+  color: var(--swatchbook-text-muted);
+  font-style: italic;
+}

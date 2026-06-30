@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
 import './CopyButton.css';
 
 export interface CopyButtonProps {
@@ -52,15 +53,17 @@ export function CopyButton({
   }, [value]);
 
   const ariaLabel = label ?? `Copy ${value}`;
-  const classes = ['sb-copy-button', `sb-copy-button--${variant}`];
-  if (copied) classes.push('sb-copy-button--copied');
-  if (className) classes.push(className);
 
   return (
     <>
       <button
         type="button"
-        className={classes.join(' ')}
+        className={clsx(
+          'sb-copy-button',
+          `sb-copy-button--${variant}`,
+          copied && 'sb-copy-button--copied',
+          className,
+        )}
         onClick={handleClick}
         aria-label={ariaLabel}
         title={ariaLabel}
