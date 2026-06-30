@@ -2,20 +2,23 @@
  * GENERATED from @unpunnyfuns/swatchbook-tokens by
  * scripts/generate-internal-scales.mts. Do not edit by hand.
  * Run `pnpm --filter @unpunnyfuns/swatchbook-blocks generate:scales`.
- * Font sizes, line-height, tracking: swatchbook's own tokens styling the block UI.
+ * Font sizes, line-height, tracking, opacity: swatchbook's own tokens styling the block UI.
  */
 :root {
   --swatchbook-leading-loose: 1.5;
   --swatchbook-leading-none: 1;
   --swatchbook-leading-normal: 1.4;
   --swatchbook-leading-tight: 1.2;
+  --swatchbook-opacity-disabled: 0.4;
+  --swatchbook-opacity-muted: 0.7;
+  --swatchbook-opacity-scrim: 0.6;
   --swatchbook-tracking-label: 0.5px;
   --swatchbook-type-body: 1rem;
   --swatchbook-type-caption: 0.75rem;
   --swatchbook-type-heading: 1.25rem;
   --swatchbook-type-micro: 0.6875rem;
-  --swatchbook-type-sample: 1.5rem;
   --swatchbook-type-sample-lg: 1.75rem;
   --swatchbook-type-sample-xl: 2rem;
+  --swatchbook-type-sample: 1.5rem;
   --swatchbook-type-small: 0.875rem;
 }
