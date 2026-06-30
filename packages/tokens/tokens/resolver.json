@@ -10,6 +10,7 @@
         { "$ref": "./color.json" },
         { "$ref": "./size.json" },
         { "$ref": "./font.json" },
+        { "$ref": "./type.json" },
         { "$ref": "./typography.json" },
         { "$ref": "./motion.json" },
         { "$ref": "./border.json" },

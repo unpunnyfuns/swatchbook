@@ -1,0 +1,27 @@
+{
+  "type": {
+    "$type": "dimension",
+    "$description": "Semantic block-UI font-size roles. Canonically anchored at body = 1rem.",
+    "micro":     { "$value": "{font.scale.2xs}" },
+    "caption":   { "$value": "{font.scale.xs}" },
+    "small":     { "$value": "{font.scale.sm}" },
+    "body":      { "$value": "{font.scale.md}" },
+    "heading":   { "$value": "{font.scale.lg}" },
+    "sample":    { "$value": "{font.scale.xl}" },
+    "sample-lg": { "$value": "{font.scale.2xl}" },
+    "sample-xl": { "$value": "{font.scale.3xl}" }
+  },
+  "leading": {
+    "$type": "number",
+    "$description": "Line-height multipliers for block-UI type.",
+    "none":   { "$value": 1 },
+    "tight":  { "$value": 1.2 },
+    "normal": { "$value": 1.4 },
+    "loose":  { "$value": 1.5 }
+  },
+  "tracking": {
+    "$type": "dimension",
+    "$description": "Letter-spacing for block-UI uppercase labels.",
+    "label": { "$value": { "value": 0.5, "unit": "px" } }
+  }
+}
