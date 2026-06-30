@@ -6,15 +6,15 @@
 }
 
 .sb-motion-preview__control-label {
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   color: var(--swatchbook-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--swatchbook-tracking-label);
 }
 
 .sb-motion-preview__speed-btn {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   padding: var(--swatchbook-space-2xs) var(--swatchbook-space-sm);
   background: transparent;
   color: inherit;
@@ -30,7 +30,7 @@
 }
 
 .sb-motion-preview__replay-btn {
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   padding: var(--swatchbook-space-2xs) var(--swatchbook-space-md);
   margin-left: auto;
   background: transparent;
@@ -58,7 +58,7 @@
 
 .sb-motion-preview__path {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
+  font-size: var(--swatchbook-type-caption);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -66,13 +66,13 @@
 
 .sb-motion-preview__specs {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   color: var(--swatchbook-text-muted);
 }
 
 .sb-motion-preview__css-var {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   color: var(--swatchbook-text-muted);
   white-space: nowrap;
 }

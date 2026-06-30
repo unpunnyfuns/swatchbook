@@ -16,7 +16,7 @@
 
 .sb-shadow-preview__path {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
+  font-size: var(--swatchbook-type-caption);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -24,7 +24,7 @@
 
 .sb-shadow-preview__css-var {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   opacity: 0.7;
 }
 
@@ -37,7 +37,7 @@
 
 .sb-shadow-preview__breakdown {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   display: grid;
   grid-template-columns: auto 1fr;
   column-gap: var(--swatchbook-space-md);
@@ -53,9 +53,9 @@
 }
 
 .sb-shadow-preview__layer-header {
-  font-size: 10px;
+  font-size: var(--swatchbook-type-micro);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--swatchbook-tracking-label);
   color: var(--swatchbook-text-muted);
   margin-top: var(--swatchbook-space-xs);
 }

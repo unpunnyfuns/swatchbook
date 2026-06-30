@@ -6,7 +6,7 @@
   gap: var(--swatchbook-space-sm);
   min-width: 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
+  font-size: var(--swatchbook-type-caption);
   color: var(--swatchbook-text-muted);
 }
 
@@ -69,8 +69,8 @@
 }
 
 .sb-indicator__deprecated {
-  font-size: 9px;
-  letter-spacing: 0.04em;
+  font-size: var(--swatchbook-type-micro);
+  letter-spacing: var(--swatchbook-tracking-label);
   text-transform: uppercase;
   color: var(--swatchbook-text-muted);
   background: var(--swatchbook-deprecated-bg);
