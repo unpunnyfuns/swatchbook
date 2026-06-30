@@ -18,18 +18,32 @@ function fmtValue(v: unknown): string {
   return String(v);
 }
 
-function rootBlock(tokens: Record<string, { $value?: unknown }>, groups: string[]): string {
-  const lines = Object.keys(tokens)
-    .filter((p) => {
-      const prefix = p.split('.')[0];
-      return prefix !== undefined && groups.includes(prefix);
-    })
-    .sort()
-    .map((p) => {
-      const token = tokens[p];
-      return `  ${makeCSSVar(p, { prefix: 'swatchbook' })}: ${fmtValue(token?.$value)};`;
-    });
-  return `:root {\n${lines.join('\n')}\n}\n`;
+type Tokens = Record<string, { $value?: unknown }>;
+
+// One `  --swatchbook-<name>: <value>;` line. `name` is the var path (usually
+// the token path; opacity remaps it, below).
+function emitLine(tokens: Tokens, path: string, name: string): string {
+  return `  ${makeCSSVar(name, { prefix: 'swatchbook' })}: ${fmtValue(tokens[path]?.$value)};`;
+}
+
+// Wrap lines in a `:root {}` block, sorted by var name for stable output.
+function wrap(lines: string[]): string {
+  return `:root {\n${[...lines].sort().join('\n')}\n}\n`;
+}
+
+// Tokens whose first path segment is in `groups`, emitted at their own path.
+function group(tokens: Tokens, groups: string[]): string[] {
+  return Object.keys(tokens)
+    .filter((p) => groups.includes(p.split('.')[0] ?? ''))
+    .map((p) => emitLine(tokens, p, p));
+}
+
+// number.opacity.<role> -> --swatchbook-opacity-<role> (strip the `number.`
+// prefix so blocks reference a clean `--swatchbook-opacity-*` namespace).
+function opacity(tokens: Tokens): string[] {
+  return Object.keys(tokens)
+    .filter((p) => p.startsWith('number.opacity.'))
+    .map((p) => emitLine(tokens, p, p.slice('number.'.length)));
 }
 
 /** Resolve swatchbook-tokens and render the two bundled scale stylesheets. */
@@ -38,12 +52,12 @@ export async function generateScales() {
     { resolver: resolverPath, default: { mode: 'Light', brand: 'Default', contrast: 'Normal' } },
     tokensDir,
   );
-  const tokens: Record<string, { $value?: unknown }> = project.defaultTokens;
+  const tokens: Tokens = project.defaultTokens;
   return {
-    dimensions: HEADER('Spacing + radii') + rootBlock(tokens, ['space', 'radius']),
+    dimensions: HEADER('Spacing + radii') + wrap(group(tokens, ['space', 'radius'])),
     typography:
-      HEADER('Font sizes, line-height, tracking') +
-      rootBlock(tokens, ['type', 'leading', 'tracking']),
+      HEADER('Font sizes, line-height, tracking, opacity') +
+      wrap([...group(tokens, ['type', 'leading', 'tracking']), ...opacity(tokens)]),
   };
 }
 

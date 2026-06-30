@@ -25,7 +25,7 @@
 .sb-dimension-scale__specs {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: var(--swatchbook-type-micro);
-  opacity: 0.7;
+  opacity: var(--swatchbook-opacity-muted);
 }
 
 .sb-dimension-scale__visual-cell {
@@ -37,6 +37,6 @@
 .sb-dimension-scale__css-var {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: var(--swatchbook-type-micro);
-  opacity: 0.7;
+  opacity: var(--swatchbook-opacity-muted);
   white-space: nowrap;
 }
