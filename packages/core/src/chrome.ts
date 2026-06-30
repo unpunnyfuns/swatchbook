@@ -24,7 +24,6 @@ export const CHROME_ROLES = [
   'accentBg',
   'accentFg',
   'bodyFontFamily',
-  'bodyFontSize',
 ] as const satisfies readonly string[];
 
 export type ChromeRole = (typeof CHROME_ROLES)[number];
@@ -34,7 +33,7 @@ export const CHROME_VAR_PREFIX = 'swatchbook';
 
 /**
  * Hard-coded literal CSS values for each chrome role. Used as the baseline
- * for every project — the CSS emitter always declares all ten chrome vars,
+ * for every project — the CSS emitter always declares all nine chrome vars,
  * starting from these defaults and overlaying any user-supplied `chrome`
  * entry as a `var(...)` reference on top.
  *
@@ -57,7 +56,6 @@ export const DEFAULT_CHROME_MAP: Record<ChromeRole, string> = {
   accentBg: '#1d4ed8',
   accentFg: '#ffffff',
   bodyFontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
-  bodyFontSize: '14px',
 };
 
 /**

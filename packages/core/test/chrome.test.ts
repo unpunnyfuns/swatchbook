@@ -57,8 +57,8 @@ it('validateChrome drops entries whose target resolves in no theme', () => {
   expect(diagnostics[0]?.message).toContain('color.nowhere');
 });
 
-it('CHROME_ROLES and DEFAULT_CHROME_MAP cover the same ten roles', () => {
-  expect(CHROME_ROLES).toHaveLength(10);
+it('CHROME_ROLES and DEFAULT_CHROME_MAP cover the same nine roles', () => {
+  expect(CHROME_ROLES).toHaveLength(9);
   expect(Object.keys(DEFAULT_CHROME_MAP).toSorted()).toEqual([...CHROME_ROLES].toSorted());
 });
 
@@ -111,10 +111,9 @@ it('emitAxisProjectedCss emits every chrome role — user entry as var, others a
   expect(chromeBlock).not.toContain('color-scheme:');
   expect(chromeBlock).toContain('--swatchbook-surface-default: var(--sb-color-palette-blue-500);');
   expect(chromeBlock).toContain(`--swatchbook-accent-bg: ${DEFAULT_CHROME_MAP.accentBg};`);
-  expect(chromeBlock).toContain(`--swatchbook-body-font-size: ${DEFAULT_CHROME_MAP.bodyFontSize};`);
 });
 
-it('emitAxisProjectedCss emits all ten roles even when chrome config is absent', async () => {
+it('emitAxisProjectedCss emits all nine roles even when chrome config is absent', async () => {
   const p = await loadProject(
     {
       tokens: ['tokens/**/*.json'],
@@ -140,14 +139,13 @@ it('emitAxisProjectedCss never prefixes chrome source vars with the project pref
   expect(css).not.toMatch(/--sb-surface-default:\s*var\(/);
 });
 
-it('buildChromeDefaultsCss declares all ten roles at their defaults, no color-scheme', () => {
+it('buildChromeDefaultsCss declares all nine roles at their defaults, no color-scheme', () => {
   const css = buildChromeDefaultsCss();
   expect(css.startsWith(':root {')).toBe(true);
   expect(css.endsWith('}')).toBe(true);
   expect(css).not.toMatch(/color-scheme/);
   expect(css).toContain('--swatchbook-surface-default: #ffffff;');
   expect(css).toContain('--swatchbook-accent-bg: #1d4ed8;');
-  expect(css).toContain('--swatchbook-body-font-size: 14px;');
-  // exactly ten declarations
-  expect(css.match(/--swatchbook-/g)?.length).toBe(10);
+  // exactly nine declarations
+  expect(css.match(/--swatchbook-/g)?.length).toBe(9);
 });

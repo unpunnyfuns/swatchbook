@@ -34,7 +34,6 @@ export default defineSwatchbookConfig({
     accentBg: 'color.accent.bg',
     accentFg: 'color.accent.fg',
     bodyFontFamily: 'typography.body.font-family',
-    bodyFontSize: 'typography.body.font-size',
   },
   // Demonstrate the consumer-plugin pathway across a cross-section of
   // terrazzo's published platform plugins. Purely for preview — these

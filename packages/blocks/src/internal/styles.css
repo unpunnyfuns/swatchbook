@@ -14,7 +14,7 @@
 
 .sb-block {
   font-family: var(--swatchbook-body-font-family);
-  font-size: var(--swatchbook-body-font-size);
+  font-size: var(--swatchbook-type-body);
   color: var(--swatchbook-text-default);
   background: var(--swatchbook-surface-default);
   padding: var(--swatchbook-space-md);
