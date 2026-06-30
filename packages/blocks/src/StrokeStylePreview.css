@@ -16,7 +16,7 @@
 
 .sb-stroke-style-sample__path {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
+  font-size: var(--swatchbook-type-caption);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -24,7 +24,7 @@
 
 .sb-stroke-style-sample__value {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   color: var(--swatchbook-text-muted);
 }
 
@@ -37,12 +37,12 @@
 
 .sb-stroke-style-sample__object-fallback {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   color: var(--swatchbook-text-muted);
 }
 
 .sb-stroke-style-sample__css-var {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   color: var(--swatchbook-text-muted);
 }

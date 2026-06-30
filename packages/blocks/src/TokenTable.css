@@ -16,8 +16,8 @@
   background: var(--swatchbook-surface-default);
   color: var(--swatchbook-text-default);
   font-family: inherit;
-  font-size: 13px;
-  line-height: 1.4;
+  font-size: var(--swatchbook-type-caption);
+  line-height: var(--swatchbook-leading-normal);
 }
 
 .sb-token-table__search-input:focus-visible {
@@ -37,15 +37,15 @@
   text-align: left;
   padding: var(--swatchbook-space-sm) 0;
   color: var(--swatchbook-text-muted);
-  font-size: 12px;
+  font-size: var(--swatchbook-type-caption);
 }
 
 .sb-token-table__th {
   text-align: left;
   padding: var(--swatchbook-space-sm) var(--swatchbook-space-md);
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--swatchbook-tracking-label);
   color: var(--swatchbook-text-muted);
   border-bottom: 1px solid var(--swatchbook-border-default);
 }
@@ -75,7 +75,7 @@
 
 .sb-token-table__path {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
+  font-size: var(--swatchbook-type-caption);
   overflow-wrap: break-word;
 }
 
@@ -85,15 +85,15 @@
   gap: var(--swatchbook-space-sm);
   min-width: 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
+  font-size: var(--swatchbook-type-caption);
 }
 
 .sb-token-table__type-pill {
   display: inline-block;
   padding: var(--swatchbook-space-3xs) var(--swatchbook-space-xs);
   border-radius: var(--swatchbook-radius-2xs);
-  font-size: 10px;
-  letter-spacing: 0.5px;
+  font-size: var(--swatchbook-type-micro);
+  letter-spacing: var(--swatchbook-tracking-label);
   text-transform: uppercase;
   background: var(--swatchbook-surface-muted);
   color: var(--swatchbook-text-muted);

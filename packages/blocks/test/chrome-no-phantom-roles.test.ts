@@ -11,6 +11,7 @@ it('block CSS references only --swatchbook-* vars defined in a base layer or inl
     buildChromeDefaultsCss(),
     readFileSync(`${dir}/internal/internal-tokens.css`, 'utf8'),
     readFileSync(`${dir}/internal/internal-dimensions.css`, 'utf8'),
+    readFileSync(`${dir}/internal/internal-typography.css`, 'utf8'),
   ].join('\n');
   const known = new Set([...declarations.matchAll(/(--swatchbook-[a-z0-9-]+):/g)].map((m) => m[1]));
   // ...plus vars a component injects inline as a style-object key — per-instance

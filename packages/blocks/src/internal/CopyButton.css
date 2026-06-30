@@ -28,14 +28,14 @@
 .sb-copy-button--icon {
   width: 20px;
   height: 20px;
-  font-size: 13px;
-  line-height: 1;
+  font-size: var(--swatchbook-type-caption);
+  line-height: var(--swatchbook-leading-none);
 }
 
 .sb-copy-button--text {
   padding: var(--swatchbook-space-3xs) var(--swatchbook-space-sm);
-  font-size: 11px;
-  letter-spacing: 0.5px;
+  font-size: var(--swatchbook-type-micro);
+  letter-spacing: var(--swatchbook-tracking-label);
   text-transform: uppercase;
   border: 1px solid var(--swatchbook-border-default);
 }

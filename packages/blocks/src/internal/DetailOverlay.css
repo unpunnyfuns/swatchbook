@@ -30,6 +30,6 @@
   background: transparent;
   color: inherit;
   cursor: pointer;
-  font-size: 16px;
-  line-height: 1;
+  font-size: var(--swatchbook-type-heading);
+  line-height: var(--swatchbook-leading-none);
 }

@@ -64,6 +64,10 @@
       "inputs": ["tokens/**", "scripts/build-tokens.*"],
       "outputs": ["src/css/tokens.generated.css", "src/tokens.snapshot.json"]
     },
+    "generate:scales": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
     "storybook": {
       "dependsOn": ["^build"],
       "cache": false,

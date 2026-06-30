@@ -136,7 +136,7 @@ const paths = listPaths(project.tokenGraph);
 
 ### `CHROME_ROLES`
 
-Frozen list of the ten role names that block chrome reads from. Independent of `config.cssVarPrefix`: these always live under the `--swatchbook-*` namespace so blocks remain stylable regardless of consumer prefix.
+Frozen list of the nine role names that block chrome reads from. Independent of `config.cssVarPrefix`: these always live under the `--swatchbook-*` namespace so blocks remain stylable regardless of consumer prefix.
 
 ```ts
 import { CHROME_ROLES } from '@unpunnyfuns/swatchbook-core';
@@ -144,18 +144,18 @@ import { CHROME_ROLES } from '@unpunnyfuns/swatchbook-core';
 CHROME_ROLES;
 // → ['borderDefault', 'surfaceDefault', 'surfaceMuted', 'surfaceRaised',
 //    'textDefault', 'textMuted', 'accentBg', 'accentFg',
-//    'bodyFontFamily', 'bodyFontSize']
+//    'bodyFontFamily']
 ```
 
 ### `DEFAULT_CHROME_MAP`
 
-Built-in chrome values used when `config.chrome` is empty or partial. Color roles use `light-dark()` so zero-config chrome auto-flips with the active `color-scheme` (which Storybook's preview iframe, MDX docs pages, and the OS preference all participate in).
+Built-in chrome values used when `config.chrome` is empty or partial. Single flat literal values: plain hex strings and font stacks for a standalone light-scheme block surface. Swatchbook has no intrinsic dark axis; per-axis variation comes from `config.chrome` mapping roles to the consumer's tokens.
 
 ```ts
 import { DEFAULT_CHROME_MAP, type ChromeRole } from '@unpunnyfuns/swatchbook-core';
 
-DEFAULT_CHROME_MAP.surfaceDefault;   // 'light-dark(#ffffff, #0f172a)'
-DEFAULT_CHROME_MAP.accentBg;         // 'light-dark(#1d4ed8, #3b82f6)'
+DEFAULT_CHROME_MAP.surfaceDefault;   // '#ffffff'
+DEFAULT_CHROME_MAP.accentBg;         // '#1d4ed8'
 ```
 
 ### `ChromeRole`

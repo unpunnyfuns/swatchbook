@@ -3,7 +3,7 @@
   align-items: center;
   gap: var(--swatchbook-space-sm);
   padding: var(--swatchbook-space-2xs) 0;
-  font-size: 13px;
+  font-size: var(--swatchbook-type-caption);
   font-weight: 600;
   cursor: pointer;
   list-style: none;
@@ -35,13 +35,13 @@
   gap: var(--swatchbook-space-md);
   padding: var(--swatchbook-space-sm) var(--swatchbook-space-2xs);
   border-top: 1px solid var(--swatchbook-border-default);
-  font-size: 12px;
+  font-size: var(--swatchbook-type-caption);
 }
 
 .sb-diagnostics__label {
-  font-size: 10px;
+  font-size: var(--swatchbook-type-micro);
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--swatchbook-tracking-label);
 }
 
 .sb-diagnostics__label--error {
@@ -55,6 +55,6 @@
 .sb-diagnostics__meta {
   margin-top: var(--swatchbook-space-2xs);
   color: var(--swatchbook-text-muted);
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   opacity: 0.7;
 }

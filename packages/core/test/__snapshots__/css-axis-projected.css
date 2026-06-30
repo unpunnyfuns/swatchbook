@@ -77,6 +77,22 @@
   --sb-font-family-mono: "JetBrains Mono", "Menlo", monospace;
   --sb-font-family-sans: "Inter", system-ui, -apple-system, sans-serif;
   --sb-font-family-serif: "Source Serif 4", "Georgia", serif;
+  --sb-font-scale-2xl: var(--sb-font-size-700);
+  --sb-font-scale-2xs: var(--sb-font-size-100);
+  --sb-font-scale-3xl: var(--sb-font-size-800);
+  --sb-font-scale-lg: var(--sb-font-size-500);
+  --sb-font-scale-md: var(--sb-font-size-400);
+  --sb-font-scale-sm: var(--sb-font-size-300);
+  --sb-font-scale-xl: var(--sb-font-size-600);
+  --sb-font-scale-xs: var(--sb-font-size-200);
+  --sb-font-size-100: 0.6875rem;
+  --sb-font-size-200: 0.75rem;
+  --sb-font-size-300: 0.875rem;
+  --sb-font-size-400: 1rem;
+  --sb-font-size-500: 1.25rem;
+  --sb-font-size-600: 1.5rem;
+  --sb-font-size-700: 1.75rem;
+  --sb-font-size-800: 2rem;
   --sb-font-weight-bold: 700;
   --sb-font-weight-medium: 500;
   --sb-font-weight-regular: 400;
@@ -84,6 +100,10 @@
   --sb-gradient-cool: rgb(11.4% 30.6% 84.7%) 0%, rgb(37.6% 64.7% 98%) 50%, rgb(52.5% 93.7% 67.5%) 100%;
   --sb-gradient-sunrise: rgb(99.2% 87.8% 27.8%) 0%, rgb(93.7% 26.7% 26.7%) 55%, rgb(48.6% 22.7% 92.9%) 100%;
   --sb-gradient-surface-fade: rgb(100% 100% 100%) 0%, rgb(6.7% 9.4% 15.3%) 100%;
+  --sb-leading-loose: 1.5;
+  --sb-leading-none: 1;
+  --sb-leading-normal: 1.4;
+  --sb-leading-tight: 1.2;
   --sb-number-line-height-loose: 1.7;
   --sb-number-line-height-normal: 1.4;
   --sb-number-line-height-tight: 1.15;
@@ -135,9 +155,18 @@
   --sb-stroke-style-dotted: dotted;
   --sb-stroke-style-double: double;
   --sb-stroke-style-solid: solid;
+  --sb-tracking-label: 0.5px;
   --sb-transition-emphasized: var(--sb-duration-slow) var(--sb-duration-instant) var(--sb-cubic-bezier-emphasized);
   --sb-transition-enter: var(--sb-duration-normal) var(--sb-duration-instant) var(--sb-cubic-bezier-decelerated);
   --sb-transition-exit: var(--sb-duration-fast) var(--sb-duration-instant) var(--sb-cubic-bezier-accelerated);
+  --sb-type-body: var(--sb-font-size-400);
+  --sb-type-caption: var(--sb-font-size-200);
+  --sb-type-heading: var(--sb-font-size-500);
+  --sb-type-micro: var(--sb-font-size-100);
+  --sb-type-sample: var(--sb-font-size-600);
+  --sb-type-sample-lg: var(--sb-font-size-700);
+  --sb-type-sample-xl: var(--sb-font-size-800);
+  --sb-type-small: var(--sb-font-size-300);
   --sb-typography-body-font-family: var(--sb-font-family-sans);
   --sb-typography-body-font-size: var(--sb-size-rem-400);
   --sb-typography-body-font-weight: var(--sb-font-weight-regular);
@@ -252,5 +281,4 @@
   --swatchbook-accent-bg: #1d4ed8;
   --swatchbook-accent-fg: #ffffff;
   --swatchbook-body-font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --swatchbook-body-font-size: 14px;
 }

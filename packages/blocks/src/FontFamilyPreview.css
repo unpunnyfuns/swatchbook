@@ -16,7 +16,7 @@
 
 .sb-font-family-sample__path {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
+  font-size: var(--swatchbook-type-caption);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -24,17 +24,17 @@
 
 .sb-font-family-sample__stack {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   color: var(--swatchbook-text-muted);
 }
 
 .sb-font-family-sample__sample {
-  font-size: 22px;
-  line-height: 1.2;
+  font-size: var(--swatchbook-type-sample);
+  line-height: var(--swatchbook-leading-tight);
 }
 
 .sb-font-family-sample__css-var {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   color: var(--swatchbook-text-muted);
 }
