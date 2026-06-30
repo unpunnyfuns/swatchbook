@@ -269,6 +269,14 @@
   background: var(--swatchbook-accent-bg);
 }
 
+.sb-token-detail__motion-ball--start {
+  left: 4px;
+}
+
+.sb-token-detail__motion-ball--end {
+  left: calc(100% - 28px);
+}
+
 .sb-token-detail__aliased-by-list {
   list-style: none;
   margin: 0;

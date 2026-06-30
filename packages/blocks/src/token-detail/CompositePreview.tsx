@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { useEffect, useState } from 'react';
+import clsx from 'clsx';
 import { cssVarAsNumber } from '#/internal/css-var-style.ts';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { useTokenDetailData } from '#/token-detail/internal.ts';
@@ -242,11 +243,11 @@ function TransitionSample({
   return (
     <div className="sb-token-detail__motion-track">
       <div
-        className="sb-token-detail__motion-ball"
-        style={{
-          left: phase === 1 ? 'calc(100% - 28px)' : '4px',
-          transition,
-        }}
+        className={clsx(
+          'sb-token-detail__motion-ball',
+          phase === 1 ? 'sb-token-detail__motion-ball--end' : 'sb-token-detail__motion-ball--start',
+        )}
+        style={{ transition }}
         aria-hidden
       />
     </div>
