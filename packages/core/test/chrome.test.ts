@@ -68,8 +68,8 @@ it('default chrome values are single owned literals, never light-dark or system 
     expect(value).not.toMatch(/\b(Canvas|CanvasText|LinkText|ButtonBorder|GrayText|AccentColor)\b/);
   }
   expect(DEFAULT_CHROME_MAP.surfaceDefault).toBe('#ffffff');
-  expect(DEFAULT_CHROME_MAP.textDefault).toBe('#111827');
-  expect(DEFAULT_CHROME_MAP.borderDefault).toBe('#e5e7eb');
+  expect(DEFAULT_CHROME_MAP.textDefault).toBe('#0f172a');
+  expect(DEFAULT_CHROME_MAP.borderDefault).toBe('#e2e8f0');
   expect(DEFAULT_CHROME_MAP.accentBg).toBe('#1d4ed8');
 });
 

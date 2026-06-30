@@ -3,7 +3,7 @@ import { expect, it } from 'vitest';
 
 it('defines the chrome vars on :root with no addon, no chrome config', () => {
   const root = getComputedStyle(document.documentElement);
-  expect(root.getPropertyValue('--swatchbook-border-default').trim()).toBe('#e5e7eb');
+  expect(root.getPropertyValue('--swatchbook-border-default').trim()).toBe('#e2e8f0');
   expect(root.getPropertyValue('--swatchbook-surface-default').trim()).toBe('#ffffff');
 });
 

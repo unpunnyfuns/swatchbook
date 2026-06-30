@@ -48,11 +48,11 @@ export const CHROME_VAR_PREFIX = 'swatchbook';
  */
 export const DEFAULT_CHROME_MAP: Record<ChromeRole, string> = {
   surfaceDefault: '#ffffff',
-  surfaceMuted: '#f4f4f5',
+  surfaceMuted: '#f8fafc',
   surfaceRaised: '#ffffff',
-  textDefault: '#111827',
-  textMuted: '#4b5563',
-  borderDefault: '#e5e7eb',
+  textDefault: '#0f172a',
+  textMuted: '#475569',
+  borderDefault: '#e2e8f0',
   accentBg: '#1d4ed8',
   accentFg: '#ffffff',
   bodyFontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
