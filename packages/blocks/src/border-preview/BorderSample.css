@@ -1,0 +1,6 @@
+.sb-border-sample {
+  width: 120px;
+  height: 56px;
+  background: var(--swatchbook-surface-raised);
+  border-radius: 6px;
+}

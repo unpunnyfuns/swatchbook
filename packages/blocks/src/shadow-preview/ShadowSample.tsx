@@ -1,5 +1,5 @@
-import type { CSSProperties, ReactElement } from 'react';
-import { BORDER_FAINT, SURFACE_RAISED } from '#/internal/styles.tsx';
+import type { ReactElement } from 'react';
+import './ShadowSample.css';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 
 export interface ShadowSampleProps {
@@ -7,16 +7,8 @@ export interface ShadowSampleProps {
   path: string;
 }
 
-const sampleStyle: CSSProperties = {
-  width: 120,
-  height: 56,
-  background: SURFACE_RAISED,
-  border: BORDER_FAINT,
-  borderRadius: 6,
-};
-
 export function ShadowSample({ path }: ShadowSampleProps): ReactElement {
   const project = useProject();
   const cssVar = resolveCssVar(path, project);
-  return <div style={{ ...sampleStyle, boxShadow: cssVar }} aria-hidden />;
+  return <div className="sb-shadow-sample" style={{ boxShadow: cssVar }} aria-hidden />;
 }

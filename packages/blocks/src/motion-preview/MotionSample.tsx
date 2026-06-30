@@ -1,5 +1,5 @@
-import type { CSSProperties, ReactElement } from 'react';
-import { SURFACE_MUTED, TEXT_MUTED } from '#/internal/styles.tsx';
+import type { ReactElement } from 'react';
+import './MotionSample.css';
 import { useEffect, useMemo, useState } from 'react';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { useProject } from '#/internal/use-project.ts';
@@ -21,30 +21,6 @@ export interface MotionSampleProps {
 
 const DEFAULT_DURATION_MS = 300;
 const DEFAULT_EASING = 'cubic-bezier(0.2, 0, 0, 1)';
-
-const styles = {
-  track: {
-    position: 'relative',
-    height: 36,
-    background: SURFACE_MUTED,
-    borderRadius: 18,
-    overflow: 'hidden',
-  } satisfies CSSProperties,
-  ball: {
-    position: 'absolute',
-    top: '50%',
-    width: 28,
-    height: 28,
-    marginTop: -14,
-    borderRadius: '50%',
-    background: 'var(--swatchbook-accent-bg, #3b82f6)',
-  } satisfies CSSProperties,
-  reducedMotion: {
-    fontSize: 'var(--swatchbook-type-micro)',
-    color: TEXT_MUTED,
-    fontStyle: 'italic',
-  } satisfies CSSProperties,
-};
 
 interface Spec {
   durationMs: number;
@@ -162,17 +138,17 @@ export function MotionSample({ path, speed = 1, runKey = 0 }: MotionSampleProps)
 
   if (reducedMotion) {
     return (
-      <div style={styles.reducedMotion}>
+      <div className="sb-motion-sample__reduced-motion">
         Animation suppressed by <code>prefers-reduced-motion: reduce</code>.
       </div>
     );
   }
 
   return (
-    <div style={styles.track}>
+    <div className="sb-motion-sample__track">
       <div
+        className="sb-motion-sample__ball"
         style={{
-          ...styles.ball,
           left: phase === 1 ? 'calc(100% - 32px)' : '4px',
           transition: `left ${scaledDuration}ms ${easing}`,
         }}
