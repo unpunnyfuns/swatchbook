@@ -28,8 +28,8 @@ const styles = {
   } satisfies CSSProperties,
   cap: {
     color: 'var(--swatchbook-text-muted)',
-    fontSize: 11,
-    lineHeight: 1,
+    fontSize: 'var(--swatchbook-type-micro)',
+    lineHeight: 'var(--swatchbook-leading-none)',
     userSelect: 'none',
   } satisfies CSSProperties,
   bar: {

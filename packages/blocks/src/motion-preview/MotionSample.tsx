@@ -40,7 +40,7 @@ const styles = {
     background: 'var(--swatchbook-accent-bg, #3b82f6)',
   } satisfies CSSProperties,
   reducedMotion: {
-    fontSize: 11,
+    fontSize: 'var(--swatchbook-type-micro)',
     color: TEXT_MUTED,
     fontStyle: 'italic',
   } satisfies CSSProperties,

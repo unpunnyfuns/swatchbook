@@ -16,7 +16,7 @@
 
 .sb-dimension-scale__path {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
+  font-size: var(--swatchbook-type-caption);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -24,7 +24,7 @@
 
 .sb-dimension-scale__specs {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   opacity: 0.7;
 }
 
@@ -36,7 +36,7 @@
 
 .sb-dimension-scale__css-var {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   opacity: 0.7;
   white-space: nowrap;
 }

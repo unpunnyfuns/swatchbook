@@ -4,9 +4,9 @@
 
 .sb-color-palette__group-header {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--swatchbook-tracking-label);
   opacity: 0.6;
   margin-bottom: var(--swatchbook-space-sm);
 }
@@ -40,12 +40,12 @@
 
 .sb-color-palette__leaf {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
+  font-size: var(--swatchbook-type-caption);
 }
 
 .sb-color-palette__value {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--swatchbook-type-micro);
   opacity: 0.7;
 }
 

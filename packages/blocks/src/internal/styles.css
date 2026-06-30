@@ -24,7 +24,7 @@
 .sb-block__caption {
   padding: var(--swatchbook-space-2xs) 0 var(--swatchbook-space-md);
   color: var(--swatchbook-text-muted);
-  font-size: 12px;
+  font-size: var(--swatchbook-type-caption);
 }
 
 .sb-block__empty {
