@@ -1,5 +1,16 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.68.0
+
+### Minor Changes
+
+- 7a96b973b95d9cf8bf41cd8c1d3c0d98608d9247: Generate the block UI's spacing/radii/type scale from swatchbook's own tokens and retire the bodyFontSize chrome role
+
+### Patch Changes
+
+- Updated dependencies [b250540]
+  - @unpunnyfuns/swatchbook-core@0.68.0
+
 ## 0.67.0
 
 ### Minor Changes

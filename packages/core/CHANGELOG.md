@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.68.0
+
+### Minor Changes
+
+- b25054059f6fddafade7bb14d77f6f54628068e4: Align the standalone chrome color defaults to swatchbook's neutral color tokens (four drifted neutrals shift slate-ward) and guard them against future drift
+
 ## 0.67.0
 
 ### Patch Changes
