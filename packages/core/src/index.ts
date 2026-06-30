@@ -6,6 +6,7 @@ export {
 } from '#/chrome.ts';
 
 export { defineSwatchbookConfig } from '#/config.ts';
+export { makeCSSVar } from '@terrazzo/token-tools/css';
 export { loadProject } from '#/load.ts';
 export { emitAxisProjectedCss } from '#/css-axis-projected.ts';
 export type { TupleKey } from '#/tuple-key.ts';
