@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import './MotionSample.css';
+import clsx from 'clsx';
 import { useEffect, useMemo, useState } from 'react';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { useProject } from '#/internal/use-project.ts';
@@ -147,11 +148,11 @@ export function MotionSample({ path, speed = 1, runKey = 0 }: MotionSampleProps)
   return (
     <div className="sb-motion-sample__track">
       <div
-        className="sb-motion-sample__ball"
-        style={{
-          left: phase === 1 ? 'calc(100% - 32px)' : '4px',
-          transition: `left ${scaledDuration}ms ${easing}`,
-        }}
+        className={clsx(
+          'sb-motion-sample__ball',
+          phase === 1 ? 'sb-motion-sample__ball--end' : 'sb-motion-sample__ball--start',
+        )}
+        style={{ transition: `left ${scaledDuration}ms ${easing}` }}
         aria-hidden
       />
     </div>

@@ -16,6 +16,14 @@
   background: var(--swatchbook-accent-bg);
 }
 
+.sb-motion-sample__ball--start {
+  left: 4px;
+}
+
+.sb-motion-sample__ball--end {
+  left: calc(100% - 32px);
+}
+
 .sb-motion-sample__reduced-motion {
   font-size: var(--swatchbook-type-micro);
   color: var(--swatchbook-text-muted);
