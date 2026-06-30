@@ -6,6 +6,13 @@
   min-width: 0;
 }
 
+.sb-dimension-bar__cap {
+  color: var(--swatchbook-text-muted);
+  font-size: var(--swatchbook-type-micro);
+  line-height: var(--swatchbook-leading-none);
+  user-select: none;
+}
+
 /* Never exceed the host cell: the px width conveys magnitude in the wide
    DimensionScale rows, but the bar also renders in TokenNavigator's narrow
    preview cell, where a 480px-capped bar would otherwise overflow. */
