@@ -7,7 +7,7 @@
   font-size: var(--swatchbook-type-micro);
   text-transform: uppercase;
   letter-spacing: var(--swatchbook-tracking-label);
-  opacity: 0.6;
+  opacity: var(--swatchbook-opacity-scrim);
   margin-bottom: var(--swatchbook-space-sm);
 }
 
@@ -46,7 +46,7 @@
 .sb-color-palette__value {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: var(--swatchbook-type-micro);
-  opacity: 0.7;
+  opacity: var(--swatchbook-opacity-muted);
 }
 
 .sb-color-palette__gamut-warn {
