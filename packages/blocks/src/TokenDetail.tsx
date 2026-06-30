@@ -73,7 +73,7 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
           <span
             title="Out of sRGB gamut for this format"
             aria-label="out of gamut"
-            style={{ marginLeft: 6 }}
+            className="sb-token-detail__out-of-gamut-icon"
           >
             ⚠
           </span>

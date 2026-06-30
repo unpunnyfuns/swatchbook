@@ -41,7 +41,9 @@ export async function generateScales() {
   const tokens: Record<string, { $value?: unknown }> = project.defaultTokens;
   return {
     dimensions: HEADER('Spacing + radii') + rootBlock(tokens, ['space', 'radius']),
-    typography: HEADER('Font sizes, line-height, tracking') + rootBlock(tokens, ['type', 'leading', 'tracking']),
+    typography:
+      HEADER('Font sizes, line-height, tracking') +
+      rootBlock(tokens, ['type', 'leading', 'tracking']),
   };
 }
 
