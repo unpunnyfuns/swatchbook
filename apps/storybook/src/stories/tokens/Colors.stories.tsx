@@ -1,10 +1,12 @@
-import { ColorTable } from '@unpunnyfuns/swatchbook-blocks';
+import { ColorPalette, ColorTable } from '@unpunnyfuns/swatchbook-blocks';
 import { expect, waitFor } from 'storybook/test';
 import preview from '../../../.storybook/preview.tsx';
 
-// Catalog story for $type: color. Mounts <ColorTable> (the existing block);
-// this is the consumer-facing pattern, distinct from Blocks/ColorTable which
-// exercises the component's variants/tests.
+// Catalog stories for $type: color. The swatch-grid views use <ColorPalette>
+// (Palette = the primitive ramps, Semantic = the role tier), mirroring the
+// Colors docs page; <ColorTable> carries the detailed/searchable form. This is
+// the consumer-facing pattern, distinct from Blocks/ColorPalette and
+// Blocks/ColorTable, which exercise each component's variants and tests.
 const meta = preview.meta({
   title: 'Tokens/Colors',
   component: ColorTable,
@@ -28,7 +30,21 @@ async function assertRenders(canvas: HTMLElement): Promise<void> {
   });
 }
 
+// Swatch grid of the primitive ramps (`color.palette.*`).
 export const Palette = meta.story({
+  render: () => <ColorPalette filter="color.palette.**" />,
+  play: async ({ canvasElement }) => assertRenders(canvasElement),
+});
+
+// Swatch grid grouped by role — the semantic tier (`color.surface.*`,
+// `color.text.*`, `color.accent.*`, …) alongside the ramps.
+export const Semantic = meta.story({
+  render: () => <ColorPalette filter="color.**" />,
+  play: async ({ canvasElement }) => assertRenders(canvasElement),
+});
+
+// Detailed, sortable, searchable table over every color token.
+export const Table = meta.story({
   args: { filter: 'color.**' },
   play: async ({ canvasElement }) => assertRenders(canvasElement),
 });
