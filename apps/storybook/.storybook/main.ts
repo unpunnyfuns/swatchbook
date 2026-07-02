@@ -12,6 +12,9 @@ function pkg(name: string): string {
 export default defineMain({
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(ts|tsx)'],
   staticDirs: ['./assets'],
+  // Suppress the sidebar onboarding checklist / guided tour, which
+  // otherwise reappears on every Storybook upgrade.
+  features: { sidebarOnboardingChecklist: false },
   addons: [
     pkg('@chromatic-com/storybook'),
     pkg('@storybook/addon-vitest'),
