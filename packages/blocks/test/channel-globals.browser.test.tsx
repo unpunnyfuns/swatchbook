@@ -1,12 +1,27 @@
 import { act, cleanup, renderHook } from '@testing-library/react';
-import { addons } from 'storybook/preview-api';
 import { afterEach, describe, expect, it } from 'vitest';
+import { registerChannel } from '#/internal/channel.ts';
+import type { BlockChannel } from '#/internal/channel.ts';
 import { useChannelGlobals } from '#/internal/channel-globals.ts';
 
 // The provider-less (MDX docs) path: blocks read the toolbar's axes/format
-// straight off the Storybook globals channel. Each test emits its own
-// globals so it doesn't depend on the shared module snapshot's prior state.
-const channel = addons.getChannel();
+// off the injected host channel. A plain fake channel stands in for
+// Storybook's — proving blocks need no Storybook symbol to function. Each
+// test emits its own globals so it doesn't depend on the shared snapshot's
+// prior state.
+const listeners = new Map<string, ((payload: any) => void)[]>();
+const channel: BlockChannel & { emit(event: string, payload: unknown): void } = {
+  on(event, listener) {
+    const list = listeners.get(event) ?? [];
+    list.push(listener as (payload: any) => void);
+    listeners.set(event, list);
+  },
+  emit(event, payload) {
+    for (const l of listeners.get(event) ?? []) l(payload);
+  },
+};
+registerChannel(channel);
+
 function emitGlobals(globals: Record<string, unknown>): void {
   act(() => {
     channel.emit('setGlobals', { globals });
