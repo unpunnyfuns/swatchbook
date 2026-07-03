@@ -113,9 +113,9 @@ function snapshotResolveAt(
  *
  * The provider-less path is what makes the hook safe to call from MDX
  * doc blocks and autodocs renders where no story is active. It
- * self-mounts the virtual module's per-theme CSS and tracks the active
- * tuple via the `globalsUpdated` channel event; {@link useGlobals} from
- * `storybook/preview-api` would throw outside a story render.
+ * self-mounts the injected snapshot's per-theme CSS and tracks the active
+ * tuple via the injected channel's `globalsUpdated` event, since a
+ * story-scoped globals hook only works while a story is rendering.
  */
 export function useProject(): ProjectData {
   const snapshot = useOptionalSwatchbookData();
