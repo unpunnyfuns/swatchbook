@@ -1,5 +1,5 @@
 import { expect, waitFor } from 'storybook/test';
-import preview from '../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 import { Button } from '../components/Button.tsx';
 import { Card } from '../components/Card.tsx';
 

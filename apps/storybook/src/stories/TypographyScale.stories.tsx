@@ -1,6 +1,6 @@
 import { TypographyScale } from '@unpunnyfuns/swatchbook-blocks';
 import { expect, waitFor } from 'storybook/test';
-import preview from '../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Blocks/TypographyScale',

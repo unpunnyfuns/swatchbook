@@ -1,6 +1,6 @@
 import { ColorPalette } from '@unpunnyfuns/swatchbook-blocks';
 import { waitFor } from 'storybook/test';
-import preview from '../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Blocks/ColorPalette',

@@ -1,6 +1,6 @@
 import { GradientPalette } from '@unpunnyfuns/swatchbook-blocks';
 import { expect, waitFor } from 'storybook/test';
-import preview from '../../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 // Composite layer ($type: gradient).
 const meta = preview.meta({

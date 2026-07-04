@@ -22,6 +22,8 @@ export default meta;
 export const Palette = meta.story({ args: { filter: 'color.**' } });
 ```
 
+> The `../../../.storybook/` climb shortens to `#storybook/preview` if you add `"#storybook/*": "./.storybook/*"` to your `package.json` `imports` — `#storybook` then denotes your `.storybook/` folder, the same subpath scheme as `#/*` → `./src/*`.
+
 The sidebar tree comes from the `title`. Each export is a real story: controllable, testable, snapshot-able.
 
 ## What becomes a control, and what does not

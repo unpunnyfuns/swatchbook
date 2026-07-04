@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import preview from '../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 import { TailwindCard } from '../components/TailwindCard.tsx';
 
 const meta = preview.meta({

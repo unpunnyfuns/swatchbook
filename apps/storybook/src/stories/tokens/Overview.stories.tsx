@@ -1,6 +1,6 @@
 import { TokenNavigator } from '@unpunnyfuns/swatchbook-blocks';
 import { expect, waitFor } from 'storybook/test';
-import preview from '../../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 // Cross-type catalog: the whole token graph as a searchable tree. Heavy DOM,
 // so chromatic.delay lets it settle before capture; a11y off here, scoped onto

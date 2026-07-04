@@ -1,6 +1,6 @@
 import { DimensionScale } from '@unpunnyfuns/swatchbook-blocks';
 import { expect, waitFor } from 'storybook/test';
-import preview from '../../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 // Primitive layer ($type: dimension). `visual` chooses length | radius | size.
 const meta = preview.meta({

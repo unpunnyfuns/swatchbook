@@ -1,6 +1,6 @@
 import { TypographyScale } from '@unpunnyfuns/swatchbook-blocks';
 import { expect, waitFor } from 'storybook/test';
-import preview from '../../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 // Composite layer ($type: typography). Each token renders as a sample line
 // using all its composed sub-values (fontFamily/fontSize/fontWeight/
