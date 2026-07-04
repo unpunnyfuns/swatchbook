@@ -4,6 +4,7 @@ import './TypographyScale.css';
 import type { TypographyValue } from '#/internal/composite-types.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { useProject } from '#/internal/use-project.ts';
+import type { ProjectData } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
@@ -36,7 +37,7 @@ export interface TypographyScaleProps {
   sortDir?: SortDir;
 }
 
-interface Row {
+export interface TypographyRow {
   path: string;
   sampleStyle: CSSProperties;
   specs: string;
@@ -58,7 +59,7 @@ function asFontFamily(raw: unknown): string | undefined {
   return undefined;
 }
 
-function buildRow(path: string, composite: TypographyValue): Row {
+function buildRow(path: string, composite: TypographyValue): TypographyRow {
   const fontFamily = asFontFamily(composite.fontFamily);
   const fontSize = asDimension(composite.fontSize);
   const fontWeight = composite.fontWeight == null ? undefined : String(composite.fontWeight);
@@ -83,29 +84,53 @@ function buildRow(path: string, composite: TypographyValue): Row {
   return { path, sampleStyle, specs: parts };
 }
 
-export function TypographyScale({
+export interface DeriveTypographyRowsOptions {
+  filter?: string | undefined;
+  sortBy: SortBy;
+  sortDir: SortDir;
+}
+
+/**
+ * Pure derivation of the scale's display rows from resolved project data.
+ * Extracted so it is unit-testable without React or a store.
+ */
+export function deriveTypographyRows(
+  resolved: ProjectData['resolved'],
+  { filter, sortBy, sortDir }: DeriveTypographyRowsOptions,
+): TypographyRow[] {
+  const filtered = Object.entries(resolved).filter(([path, token]) => {
+    if (token.$type !== 'typography') return false;
+    return matchPath(path, filter);
+  });
+  return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => {
+    const value = token.$value;
+    if (!value || typeof value !== 'object') {
+      return { path, sampleStyle: {}, specs: '' };
+    }
+    return buildRow(path, value as TypographyValue);
+  });
+}
+
+export interface TypographyScaleViewProps {
+  rows: TypographyRow[];
+  activeTheme: string;
+  cssVarPrefix: string;
+  activeAxes: Record<string, string>;
+  sample: string;
+  filter?: string | undefined;
+  caption?: string | undefined;
+}
+
+/** Pure presentation for the typography scale. Renders from plain props. */
+export function TypographyScaleView({
+  rows,
+  activeTheme,
+  cssVarPrefix,
+  activeAxes,
+  sample,
   filter,
-  sample = 'The quick brown fox jumps over the lazy dog.',
   caption,
-  sortBy = 'path',
-  sortDir = 'asc',
-}: TypographyScaleProps): ReactElement {
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = useProject();
-
-  const rows = useMemo<Row[]>(() => {
-    const filtered = Object.entries(resolved).filter(([path, token]) => {
-      if (token.$type !== 'typography') return false;
-      return matchPath(path, filter);
-    });
-    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => {
-      const value = token.$value;
-      if (!value || typeof value !== 'object') {
-        return { path, sampleStyle: {}, specs: '' };
-      }
-      return buildRow(path, value as TypographyValue);
-    });
-  }, [resolved, filter, sortBy, sortDir]);
-
+}: TypographyScaleViewProps): ReactElement {
   const captionText =
     caption ??
     `${rows.length} typography token${rows.length === 1 ? '' : 's'}${filter && filter !== 'typography' ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -131,5 +156,32 @@ export function TypographyScale({
         </div>
       ))}
     </div>
+  );
+}
+
+export function TypographyScale({
+  filter,
+  sample = 'The quick brown fox jumps over the lazy dog.',
+  caption,
+  sortBy = 'path',
+  sortDir = 'asc',
+}: TypographyScaleProps): ReactElement {
+  const { resolved, activeTheme, activeAxes, cssVarPrefix } = useProject();
+
+  const rows = useMemo(
+    () => deriveTypographyRows(resolved, { filter, sortBy, sortDir }),
+    [resolved, filter, sortBy, sortDir],
+  );
+
+  return (
+    <TypographyScaleView
+      rows={rows}
+      activeTheme={activeTheme}
+      cssVarPrefix={cssVarPrefix}
+      activeAxes={activeAxes}
+      sample={sample}
+      filter={filter}
+      caption={caption}
+    />
   );
 }
