@@ -6,6 +6,7 @@ sidebar_position: 6
 
 import BuildQueryDiagram from '@site/src/components/diagrams/BuildQueryDiagram';
 import IngestionDiagram from '@site/src/components/diagrams/IngestionDiagram';
+import SnapshotConsumersDiagram from '@site/src/components/diagrams/SnapshotConsumersDiagram';
 
 # The token pipeline
 
@@ -46,6 +47,8 @@ See [consuming the active theme](../guides/consuming-the-active-theme.mdx) for h
 The virtual module lives inside Vite's module graph: the Storybook preview resolves it, consumer apps (Next.js, a Vite SPA, Remix) don't. For production, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources; its plugin ecosystem (`plugin-css`, `plugin-js`, `plugin-tailwind`, `plugin-swift`, `plugin-sass`, …) covers downstream platforms. When both pipelines run, [align their options](../guides/sharing-terrazzo-options.mdx) so what swatchbook shows matches what your apps ship.
 
 ## Where the same property holds
+
+<SnapshotConsumersDiagram />
 
 - **Storybook preview**: the primary case.
 - **Docs site blocks outside Storybook**: the blocks package works outside Storybook given a `ProjectSnapshot` through `SwatchbookProvider`. This docs site does that: a small build step computes the snapshot JSON once and ships it as a regular import.
