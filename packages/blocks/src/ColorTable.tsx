@@ -1,11 +1,9 @@
 import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
-import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
 import cx from 'clsx';
 import type { ReactElement } from 'react';
 import { memo, useCallback, useDeferredValue, useMemo } from 'react';
 import './ColorTable.css';
 import { useColorFormat } from '#/contexts.ts';
-import type { VirtualTokenShape } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import type { ColorFormat, NormalizedColor } from '#/format-color.ts';
 import { RowIndicators } from '#/indicators/RowIndicators.tsx';
@@ -17,6 +15,7 @@ import { useBlockKey, usePersistedState } from '#/internal/persistent-state.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import type { ProjectData } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 const NOOP_REFERENCE = (): void => {};
@@ -80,12 +79,12 @@ export interface ColorTableProps {
   indicators?: IndicatorsProp;
 }
 
-interface Variant {
+export interface ColorVariant {
   label: string;
   path: string;
   cssVar: string;
-  token: VirtualTokenShape;
-  variance: AxisVarianceResult | undefined;
+  token: ProjectData['resolved'][string];
+  variance: ProjectData['varianceByPath'][string] | undefined;
   // The display value in the currently-active color format.
   value: string;
   outOfGamut: boolean;
@@ -93,37 +92,121 @@ interface Variant {
   hex: string;
   hsl: string;
   oklch: string;
+  isDeprecated: boolean;
   description?: string;
   aliasOf?: string;
   aliasChain?: readonly string[];
 }
 
-interface Group {
+export interface ColorGroup {
   base: string;
-  variants: Variant[];
+  variants: ColorVariant[];
   searchText: string;
 }
 
-export function ColorTable({
+export interface DeriveColorGroupsOptions {
+  filter?: string | undefined;
+  variants?: Record<string, string> | undefined;
+  sortBy: SortBy;
+  sortDir: SortDir;
+  colorFormat: ColorFormat;
+}
+
+/**
+ * Pure derivation of the table's display groups from resolved project data.
+ * Carries per-variant `isDeprecated` / `token` / `variance` so the View
+ * renders the indicator strip and deprecation state without reaching back
+ * into the project. Extracted so it is unit-testable without React or a
+ * store.
+ */
+export function deriveColorGroups(
+  resolved: ProjectData['resolved'],
+  listing: ProjectData['listing'],
+  cssVarPrefix: string,
+  varianceByPath: ProjectData['varianceByPath'],
+  { filter, variants, sortBy, sortDir, colorFormat }: DeriveColorGroupsOptions,
+): ColorGroup[] {
+  const defs = buildVariantDefs(variants);
+  const projectFields = { listing, cssVarPrefix };
+  const filtered = Object.entries(resolved).filter(([path, token]) => {
+    if (token.$type !== 'color') return false;
+    return matchPath(path, filter);
+  });
+  const sorted = sortTokens(filtered, { by: sortBy, dir: sortDir });
+
+  const groupMap = new Map<string, { base: string; variants: ColorVariant[] }>();
+  for (const [path, token] of sorted) {
+    const raw = token.$value as NormalizedColor;
+    const hex = resolveColorValue(path, raw, 'hex', projectFields);
+    const hsl = formatColor(raw, 'hsl');
+    const oklch = formatColor(raw, 'oklch');
+    const active = pickActiveFormat(raw, colorFormat, hex, hsl, oklch);
+    const match = matchVariant(path, defs.matchOrder);
+    const dep = token.$deprecated;
+    const variant: ColorVariant = {
+      label: match?.label ?? BASE_LABEL,
+      path,
+      token,
+      variance: varianceByPath[path],
+      cssVar: resolveCssVar(path, projectFields),
+      value: active.value,
+      outOfGamut: active.outOfGamut,
+      hex: hex.value,
+      hsl: hsl.value,
+      oklch: oklch.value,
+      isDeprecated: dep === true || (typeof dep === 'string' && dep.length > 0),
+      ...(token.$description !== undefined && { description: token.$description }),
+      ...(token.aliasOf !== undefined && { aliasOf: token.aliasOf }),
+      ...(token.aliasChain !== undefined && { aliasChain: token.aliasChain }),
+    };
+    const basePath = match?.basePath ?? path;
+    const existing = groupMap.get(basePath);
+    if (existing) existing.variants.push(variant);
+    else groupMap.set(basePath, { base: basePath, variants: [variant] });
+  }
+
+  const out: ColorGroup[] = [];
+  for (const { base, variants: vs } of groupMap.values()) {
+    vs.sort((a, b) => orderIndex(a.label, defs) - orderIndex(b.label, defs));
+    const searchText = vs.map((v) => `${v.path} ${v.value}`).join(' ');
+    out.push({ base, variants: vs, searchText });
+  }
+  return out;
+}
+
+export interface ColorTableViewProps {
+  groups: ColorGroup[];
+  activeTheme: string;
+  cssVarPrefix: string;
+  activeAxes: Record<string, string>;
+  colorFormat: ColorFormat;
+  enabledIndicators: ReturnType<typeof resolveIndicators>;
+  /** Stable persistence key for this table's search + selection + expansion state. */
+  blockKey: string;
+  filter?: string | undefined;
+  caption?: string | undefined;
+  searchable?: boolean;
+  onSelect?: ((path: string) => void) | undefined;
+}
+
+/**
+ * Pure presentation for the color table. Owns its own search, variant
+ * selection, and row-expansion UI state; renders from the derived `groups`
+ * view-model.
+ */
+export function ColorTableView({
+  groups,
+  activeTheme,
+  cssVarPrefix,
+  activeAxes,
+  colorFormat,
+  enabledIndicators,
+  blockKey,
   filter,
   caption,
-  sortBy = 'path',
-  sortDir = 'asc',
   searchable = true,
   onSelect,
-  variants,
-  id,
-  indicators,
-}: ColorTableProps): ReactElement {
-  const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing, varianceByPath } = project;
-  const colorFormat = useColorFormat();
-  const enabledIndicators = useMemo(
-    () => ({ ...resolveIndicators(indicators), gamut: false }),
-    [indicators],
-  );
-  // Persist search + variant selection + expansion across docs-mode remounts.
-  const blockKey = useBlockKey('ColorTable', [filter, caption, id]);
+}: ColorTableViewProps): ReactElement {
   const [query, setQuery] = usePersistedState(`${blockKey}::query`, '');
   const deferredQuery = useDeferredValue(query);
   const [selectedByBase, setSelectedByBase] = usePersistedState<Record<string, string>>(
@@ -134,54 +217,6 @@ export function ColorTable({
     `${blockKey}::expanded`,
     () => new Set(),
   );
-
-  const defs = useMemo(() => buildVariantDefs(variants), [variants]);
-
-  const groups = useMemo<Group[]>(() => {
-    const projectFields = { listing, cssVarPrefix };
-    const filtered = Object.entries(resolved).filter(([path, token]) => {
-      if (token.$type !== 'color') return false;
-      return matchPath(path, filter);
-    });
-    const sorted = sortTokens(filtered, { by: sortBy, dir: sortDir });
-
-    const groupMap = new Map<string, { base: string; variants: Variant[] }>();
-    for (const [path, token] of sorted) {
-      const raw = token.$value as NormalizedColor;
-      const hex = resolveColorValue(path, raw, 'hex', projectFields);
-      const hsl = formatColor(raw, 'hsl');
-      const oklch = formatColor(raw, 'oklch');
-      const active = pickActiveFormat(raw, colorFormat, hex, hsl, oklch);
-      const match = matchVariant(path, defs.matchOrder);
-      const variant: Variant = {
-        label: match?.label ?? BASE_LABEL,
-        path,
-        token,
-        variance: varianceByPath[path],
-        cssVar: resolveCssVar(path, projectFields),
-        value: active.value,
-        outOfGamut: active.outOfGamut,
-        hex: hex.value,
-        hsl: hsl.value,
-        oklch: oklch.value,
-        ...(token.$description !== undefined && { description: token.$description }),
-        ...(token.aliasOf !== undefined && { aliasOf: token.aliasOf }),
-        ...(token.aliasChain !== undefined && { aliasChain: token.aliasChain }),
-      };
-      const basePath = match?.basePath ?? path;
-      const existing = groupMap.get(basePath);
-      if (existing) existing.variants.push(variant);
-      else groupMap.set(basePath, { base: basePath, variants: [variant] });
-    }
-
-    const out: Group[] = [];
-    for (const { base, variants: vs } of groupMap.values()) {
-      vs.sort((a, b) => orderIndex(a.label, defs) - orderIndex(b.label, defs));
-      const searchText = vs.map((v) => `${v.path} ${v.value}`).join(' ');
-      out.push({ base, variants: vs, searchText });
-    }
-    return out;
-  }, [resolved, listing, cssVarPrefix, varianceByPath, filter, sortBy, sortDir, defs, colorFormat]);
 
   const visibleGroups = useMemo(() => {
     if (!searchable || deferredQuery.trim() === '') return groups;
@@ -289,8 +324,72 @@ export function ColorTable({
   );
 }
 
+/**
+ * A grouped, searchable table of `$type: color` tokens. Suffix-matched
+ * variants (see `variants` prop) collapse into a single row with a pill
+ * selector; clicking a row expands it in place to show the description,
+ * alias chain, and (for grouped rows) every variant's hex/HSL/OKLCH values.
+ */
+export function ColorTable({
+  filter,
+  caption,
+  sortBy = 'path',
+  sortDir = 'asc',
+  searchable = true,
+  onSelect,
+  variants,
+  id,
+  indicators,
+}: ColorTableProps): ReactElement {
+  const project = useProject();
+  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing, varianceByPath } = project;
+  const colorFormat = useColorFormat();
+  const enabledIndicators = useMemo(
+    () => ({ ...resolveIndicators(indicators), gamut: false }),
+    [indicators],
+  );
+  // Persist search + variant selection + expansion across docs-mode remounts.
+  const blockKey = useBlockKey('ColorTable', [filter, caption, id]);
+  const groups = useMemo(
+    () =>
+      deriveColorGroups(resolved, listing, cssVarPrefix, varianceByPath, {
+        filter,
+        variants,
+        sortBy,
+        sortDir,
+        colorFormat,
+      }),
+    [
+      resolved,
+      listing,
+      cssVarPrefix,
+      varianceByPath,
+      filter,
+      variants,
+      sortBy,
+      sortDir,
+      colorFormat,
+    ],
+  );
+  return (
+    <ColorTableView
+      groups={groups}
+      activeTheme={activeTheme}
+      cssVarPrefix={cssVarPrefix}
+      activeAxes={activeAxes}
+      colorFormat={colorFormat}
+      enabledIndicators={enabledIndicators}
+      blockKey={blockKey}
+      filter={filter}
+      caption={caption}
+      searchable={searchable}
+      onSelect={onSelect}
+    />
+  );
+}
+
 interface GroupRowProps {
-  group: Group;
+  group: ColorGroup;
   selectedLabel: string | undefined;
   expanded: boolean;
   onToggleExpand(base: string): void;
@@ -312,11 +411,10 @@ const GroupRow = memo(function GroupRow({
 }: GroupRowProps): ReactElement {
   const multi = group.variants.length > 1;
   const active =
-    group.variants.find((v) => v.label === selectedLabel) ?? (group.variants[0] as Variant);
+    group.variants.find((v) => v.label === selectedLabel) ?? (group.variants[0] as ColorVariant);
   const nameText = multi ? group.base : active.path;
 
-  const dep = active.token.$deprecated;
-  const isDeprecated = dep === true || (typeof dep === 'string' && dep.length > 0);
+  const isDeprecated = active.isDeprecated;
 
   const handleRowActivate = (): void => {
     if (onSelect) onSelect(active.path);
@@ -434,7 +532,13 @@ const GroupRow = memo(function GroupRow({
   );
 });
 
-function ExpandedDetail({ group, active }: { group: Group; active: Variant }): ReactElement {
+function ExpandedDetail({
+  group,
+  active,
+}: {
+  group: ColorGroup;
+  active: ColorVariant;
+}): ReactElement {
   const hasDescription = active.description !== undefined && active.description.length > 0;
   const chain = active.aliasChain && active.aliasChain.length > 0 ? active.aliasChain : undefined;
   const multi = group.variants.length > 1;
