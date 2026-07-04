@@ -211,9 +211,21 @@ jobs:
           # to npm with the OIDC token.
           registry-url: https://registry.npmjs.org
 
-      # Node 24 ships npm 10.x; trusted publishing needs >= 11.5.1.
-      - name: Upgrade npm for trusted publishing
-        run: npm install --global npm@latest
+      # Trusted publishing needs npm >= 11.5.1. Node 24 bundles npm 11.x, so
+      # no upgrade happens here — an ad-hoc `npm install -g` is an unpinned
+      # supply-chain surface in the one job holding the OIDC id-token (zizmor
+      # adhoc-packages). Assert the floor instead and fail loudly if a runner
+      # ever serves an npm below it (early 24.x bundled 11.3.0).
+      - name: Assert npm supports trusted publishing
+        run: |
+          set -e
+          need=11.5.1
+          have=$(npm --version)
+          if [ "$(printf '%s\n' "$need" "$have" | sort -V | head -n1)" != "$need" ]; then
+            echo "npm $have < $need (trusted publishing minimum). Bump node-version to a newer 24.x." >&2
+            exit 1
+          fi
+          echo "npm $have >= $need — trusted publishing supported."
 
       - run: pnpm install --frozen-lockfile
 
