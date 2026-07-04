@@ -63,6 +63,13 @@
   text-anchor: middle;
 }
 
+.labelMono {
+  fill: var(--sb-color-text-default);
+  font-family: var(--sb-font-family-mono);
+  font-size: 13px;
+  text-anchor: middle;
+}
+
 .zone {
   fill: var(--sb-color-surface-muted);
 }
