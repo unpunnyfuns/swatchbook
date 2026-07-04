@@ -1,6 +1,6 @@
 import { TokenUsageSnippet } from '@unpunnyfuns/swatchbook-blocks';
 import { expect, userEvent, waitFor } from 'storybook/test';
-import preview from '../../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Internals/TokenDetail/TokenUsageSnippet',

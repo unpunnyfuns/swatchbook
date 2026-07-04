@@ -1,6 +1,6 @@
 import { FontWeightScale } from '@unpunnyfuns/swatchbook-blocks';
 import { expect, waitFor } from 'storybook/test';
-import preview from '../../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 // Primitive layer ($type: fontWeight).
 const meta = preview.meta({

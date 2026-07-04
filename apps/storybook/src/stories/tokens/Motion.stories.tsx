@@ -1,6 +1,6 @@
 import { MotionPreview } from '@unpunnyfuns/swatchbook-blocks';
 import { expect, waitFor } from 'storybook/test';
-import preview from '../../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 // Composite ($type: transition) + primitives ($type: duration, cubicBezier).
 // Respects prefers-reduced-motion. disableSnapshot avoids animated-frame churn

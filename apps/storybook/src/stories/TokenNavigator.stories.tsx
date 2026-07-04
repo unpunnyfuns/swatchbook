@@ -2,7 +2,7 @@ import { SwatchbookProvider, TokenNavigator } from '@unpunnyfuns/swatchbook-bloc
 import type { ProjectSnapshot, VirtualTokenShape } from '@unpunnyfuns/swatchbook-blocks';
 import { useState } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
-import preview from '../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Blocks/TokenNavigator',

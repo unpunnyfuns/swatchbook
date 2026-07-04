@@ -1,6 +1,6 @@
 import { useToken } from '@unpunnyfuns/swatchbook-addon/hooks';
 import { expect, waitFor } from 'storybook/test';
-import preview from '../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 function TokenProbe({ path }: { path: string }) {
   const info = useToken(path);

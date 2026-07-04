@@ -1,4 +1,4 @@
-import preview from '../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 import { Card } from '../components/Card.tsx';
 
 const meta = preview.meta({

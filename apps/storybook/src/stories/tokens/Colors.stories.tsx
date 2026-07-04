@@ -1,6 +1,6 @@
 import { ColorPalette, ColorTable } from '@unpunnyfuns/swatchbook-blocks';
 import { expect, waitFor } from 'storybook/test';
-import preview from '../../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 // Catalog stories for $type: color. The swatch-grid views use <ColorPalette>
 // (Palette = the primitive ramps, Semantic = the role tier), mirroring the

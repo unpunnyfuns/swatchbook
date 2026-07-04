@@ -23,7 +23,7 @@ import type { SwitcherAxis, SwitcherPreset } from '@unpunnyfuns/swatchbook-addon
 import { useState } from 'react';
 import type { ReactElement } from 'react';
 import { expect, userEvent, within } from 'storybook/test';
-import preview from '../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 const FIXTURE_AXES: SwitcherAxis[] = [
   {

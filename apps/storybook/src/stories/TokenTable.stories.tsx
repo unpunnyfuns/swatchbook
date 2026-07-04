@@ -1,6 +1,6 @@
 import { TokenTable } from '@unpunnyfuns/swatchbook-blocks';
 import { expect, userEvent, waitFor } from 'storybook/test';
-import preview from '../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Blocks/TokenTable',

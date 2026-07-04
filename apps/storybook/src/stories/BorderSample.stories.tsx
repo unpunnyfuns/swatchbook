@@ -1,5 +1,5 @@
 import { BorderSample } from '@unpunnyfuns/swatchbook-blocks';
-import preview from '../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 const meta = preview.meta({
   title: 'Internals/Samples/BorderSample',

@@ -1,4 +1,4 @@
-import preview from '../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 import { Input } from '../components/Input.tsx';
 
 const meta = preview.meta({

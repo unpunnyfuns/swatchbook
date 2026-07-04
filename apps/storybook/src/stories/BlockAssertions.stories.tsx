@@ -14,7 +14,7 @@ import {
 } from '@unpunnyfuns/swatchbook-blocks';
 import { diagnostics } from 'virtual:swatchbook/tokens';
 import { expect, waitFor } from 'storybook/test';
-import preview from '../../.storybook/preview.tsx';
+import preview from '#storybook/preview.tsx';
 
 function DiagnosticsProbe() {
   const errors = diagnostics.filter((d) => d.severity === 'error').length;
