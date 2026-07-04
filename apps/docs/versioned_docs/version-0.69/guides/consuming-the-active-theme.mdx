@@ -4,6 +4,8 @@ title: Consuming the active theme
 sidebar_position: 5
 ---
 
+import ThemeConsumptionDiagram from '@site/src/components/diagrams/ThemeConsumptionDiagram';
+
 # Consuming the active theme
 
 Swatchbook's toolbar flips the active tuple. Stories that render under it need a way to pick up the change. Three paths, in order of ergonomic preference:
@@ -11,6 +13,8 @@ Swatchbook's toolbar flips the active tuple. Stories that render under it need a
 1. **CSS variables**: zero-code, recommended for any component reading tokens through `var(--…)`.
 2. **The React hook `useActiveAxes()`**: inside the Storybook preview, the addon already publishes a React context the blocks and decorators use; story code can read from it directly.
 3. **DOM observation**: the framework-agnostic fallback for Vue / Angular / Svelte / plain HTML, or for React trees outside the preview's provider.
+
+<ThemeConsumptionDiagram />
 
 ## CSS variables (recommended)
 

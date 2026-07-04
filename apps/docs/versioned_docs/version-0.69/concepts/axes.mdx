@@ -4,6 +4,8 @@ title: Axes
 sidebar_position: 5
 ---
 
+import AxisFlipDiagram from '@site/src/components/diagrams/AxisFlipDiagram';
+
 # Axes
 
 An **axis** is one independent dimension of your theming model: `mode`, `brand`, `density`, `contrast`, whatever fits your system. Each axis has a set of named **contexts** (one of which is the default), and at any moment exactly one context is selected per axis.
@@ -19,6 +21,10 @@ The canonical representation of "what theme is active" is a **tuple**: one conte
 ```
 
 Every resolved token, every CSS selector, every panel readout keys on this tuple. The composed string (`"Dark · Brand A"`) exists for display.
+
+A flip is a selection, not a rebuild: every value it applies was computed when the project loaded.
+
+<AxisFlipDiagram />
 
 ## Data attributes
 
