@@ -12,6 +12,8 @@ import { useBlockKey, usePersistedState } from '#/internal/persistent-state.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import type { ProjectData } from '#/internal/use-project.ts';
+import type { ColorFormat } from '#/format-color.ts';
 import { useRootFontSize } from '#/internal/use-root-font-size.ts';
 import { RowIndicators } from '#/indicators/RowIndicators.tsx';
 import { resolveIndicators } from '#/indicators/resolve.ts';
@@ -61,69 +63,111 @@ export interface TokenTableProps {
   indicators?: IndicatorsProp;
 }
 
-export function TokenTable({
+export interface TokenRow {
+  path: string;
+  type: string;
+  value: string;
+  outOfGamut: boolean;
+  cssVar: string;
+  isColor: boolean;
+  isDeprecated: boolean;
+  token: ProjectData['resolved'][string];
+  variance: ProjectData['varianceByPath'][string] | undefined;
+}
+
+export interface DeriveTokenRowsOptions {
+  filter?: string | undefined;
+  type?: string | undefined;
+  sortBy: SortBy;
+  sortDir: SortDir;
+  colorFormat: ColorFormat;
+  rootFontSizePx: number;
+}
+
+/**
+ * Pure derivation of the table's display rows from resolved project data.
+ * Carries per-row `isDeprecated` / `token` / `variance` so the View renders
+ * the indicator strip and deprecation state without reaching back into the
+ * project. Extracted so it is unit-testable without React or a store.
+ */
+export function deriveTokenRows(
+  resolved: ProjectData['resolved'],
+  listing: ProjectData['listing'],
+  cssVarPrefix: string,
+  varianceByPath: ProjectData['varianceByPath'],
+  { filter, type, sortBy, sortDir, colorFormat, rootFontSizePx }: DeriveTokenRowsOptions,
+): TokenRow[] {
+  const projectFields = { listing, cssVarPrefix };
+  const filtered = Object.entries(resolved).filter(([path, token]) => {
+    if (!matchPath(path, filter)) return false;
+    if (type && token.$type !== type) return false;
+    return true;
+  });
+  const entries = sortTokens(filtered, { by: sortBy, dir: sortDir, rootFontSizePx });
+  return entries.map(([path, token]) => {
+    const isColor = token.$type === 'color';
+    const color = isColor
+      ? resolveColorValue(path, token.$value, colorFormat, projectFields)
+      : null;
+    const dep = token.$deprecated;
+    return {
+      path,
+      type: token.$type ?? '',
+      value: formatTokenValue(token.$value, token.$type, colorFormat, listing[path]),
+      outOfGamut: color?.outOfGamut ?? false,
+      cssVar: resolveCssVar(path, projectFields),
+      isColor,
+      isDeprecated: dep === true || (typeof dep === 'string' && dep.length > 0),
+      token,
+      variance: varianceByPath[path],
+    };
+  });
+}
+
+export interface TokenTableViewProps {
+  rows: TokenRow[];
+  activeTheme: string;
+  cssVarPrefix: string;
+  activeAxes: Record<string, string>;
+  colorFormat: ColorFormat;
+  enabledIndicators: ReturnType<typeof resolveIndicators>;
+  /** Paths that can be linked to from the indicator strip (membership check). */
+  validPaths: ReadonlySet<string>;
+  /** Stable persistence key for this table's search + selection state. */
+  blockKey: string;
+  filter?: string | undefined;
+  type?: string | undefined;
+  caption?: string | undefined;
+  searchable?: boolean;
+  onSelect?: ((path: string) => void) | undefined;
+}
+
+/**
+ * Pure presentation for the token table. Owns its own search + selection UI
+ * state; renders from the derived `rows` view-model. Composes the connected
+ * DetailOverlay as a child (that child reads the project itself).
+ */
+export function TokenTableView({
+  rows,
+  activeTheme,
+  cssVarPrefix,
+  activeAxes,
+  colorFormat,
+  enabledIndicators,
+  validPaths,
+  blockKey,
   filter,
   type,
   caption,
-  sortBy = 'path',
-  sortDir = 'asc',
   searchable = true,
   onSelect,
-  id,
-  indicators,
-}: TokenTableProps): ReactElement {
-  const project = useProject();
-  const {
-    resolved,
-    activeTheme,
-    activeAxes,
-    cssVarPrefix,
-    listing,
-    varianceByPath,
-    indicators: indicatorBaseline,
-  } = project;
-  const colorFormat = useColorFormat();
-  const rootFontSize = useRootFontSize();
-  // Persist selection + search across docs-mode remounts (see persistent-state).
-  const blockKey = useBlockKey('TokenTable', [filter, type, caption, id]);
-  const enabledIndicators = useMemo(
-    () => resolveIndicators(indicators, indicatorBaseline),
-    [indicators, indicatorBaseline],
-  );
+}: TokenTableViewProps): ReactElement {
   const [selectedPath, setSelectedPath] = usePersistedState<string | null>(
     `${blockKey}::selected`,
     null,
   );
   const [query, setQuery] = usePersistedState(`${blockKey}::query`, '');
   const deferredQuery = useDeferredValue(query);
-
-  const rows = useMemo(() => {
-    const projectFields = { listing, cssVarPrefix };
-    const filtered = Object.entries(resolved).filter(([path, token]) => {
-      if (!matchPath(path, filter)) return false;
-      if (type && token.$type !== type) return false;
-      return true;
-    });
-    const entries = sortTokens(filtered, {
-      by: sortBy,
-      dir: sortDir,
-      rootFontSizePx: rootFontSize,
-    });
-    return entries.map(([path, token]) => {
-      const isColor = token.$type === 'color';
-      const color = isColor
-        ? resolveColorValue(path, token.$value, colorFormat, projectFields)
-        : null;
-      return {
-        path,
-        type: token.$type ?? '',
-        value: formatTokenValue(token.$value, token.$type, colorFormat, listing[path]),
-        outOfGamut: color?.outOfGamut ?? false,
-        cssVar: resolveCssVar(path, projectFields),
-        isColor,
-      };
-    });
-  }, [resolved, listing, cssVarPrefix, filter, type, colorFormat, sortBy, sortDir, rootFontSize]);
 
   const visibleRows = useMemo(() => {
     if (!searchable || deferredQuery.trim() === '') return rows;
@@ -196,9 +240,7 @@ export function TokenTable({
             </tr>
           )}
           {visibleRows.map((row) => {
-            const token = resolved[row.path];
-            const dep = token?.$deprecated;
-            const isDeprecated = dep === true || (typeof dep === 'string' && dep.length > 0);
+            const token = row.token;
             return (
               <tr
                 key={row.path}
@@ -219,7 +261,7 @@ export function TokenTable({
                 <td
                   className={cx('sb-token-table__td', 'sb-token-table__path')}
                   data-deprecated={
-                    enabledIndicators.deprecation && isDeprecated ? 'true' : undefined
+                    enabledIndicators.deprecation && row.isDeprecated ? 'true' : undefined
                   }
                 >
                   {row.path}
@@ -270,9 +312,9 @@ export function TokenTable({
                       path={row.path}
                       token={token}
                       root={undefined}
-                      variance={varianceByPath[row.path]}
+                      variance={row.variance}
                       colorFormat={colorFormat}
-                      canReference={(p) => p in resolved}
+                      canReference={(p) => validPaths.has(p)}
                       onReferenceClick={(p) => setSelectedPath(p)}
                       enabled={enabledIndicators}
                     />
@@ -292,5 +334,83 @@ export function TokenTable({
         />
       )}
     </div>
+  );
+}
+
+/**
+ * A sortable, searchable table of tokens. Click a row to inspect it in a
+ * slide-over (unless `onSelect` is provided, which hands the follow-up to the
+ * consumer).
+ */
+export function TokenTable({
+  filter,
+  type,
+  caption,
+  sortBy = 'path',
+  sortDir = 'asc',
+  searchable = true,
+  onSelect,
+  id,
+  indicators,
+}: TokenTableProps): ReactElement {
+  const project = useProject();
+  const {
+    resolved,
+    activeTheme,
+    activeAxes,
+    cssVarPrefix,
+    listing,
+    varianceByPath,
+    indicators: indicatorBaseline,
+  } = project;
+  const colorFormat = useColorFormat();
+  const rootFontSize = useRootFontSize();
+  // Persist selection + search across docs-mode remounts (see persistent-state).
+  const blockKey = useBlockKey('TokenTable', [filter, type, caption, id]);
+  const enabledIndicators = useMemo(
+    () => resolveIndicators(indicators, indicatorBaseline),
+    [indicators, indicatorBaseline],
+  );
+  const rows = useMemo(
+    () =>
+      deriveTokenRows(resolved, listing, cssVarPrefix, varianceByPath, {
+        filter,
+        type,
+        sortBy,
+        sortDir,
+        colorFormat,
+        rootFontSizePx: rootFontSize,
+      }),
+    [
+      resolved,
+      listing,
+      cssVarPrefix,
+      varianceByPath,
+      filter,
+      type,
+      sortBy,
+      sortDir,
+      colorFormat,
+      rootFontSize,
+    ],
+  );
+  const validPaths = useMemo(() => new Set(Object.keys(resolved)), [resolved]);
+
+  return (
+    <TokenTableView
+      rows={rows}
+      activeTheme={activeTheme}
+      cssVarPrefix={cssVarPrefix}
+      activeAxes={activeAxes}
+      colorFormat={colorFormat}
+      enabledIndicators={enabledIndicators}
+      validPaths={validPaths}
+      blockKey={blockKey}
+      filter={filter}
+      type={type}
+      caption={caption}
+      searchable={searchable}
+      onSelect={onSelect}
+    />
   );
 }
