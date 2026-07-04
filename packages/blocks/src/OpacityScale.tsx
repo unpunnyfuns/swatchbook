@@ -5,6 +5,7 @@ import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+import type { ProjectData } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface OpacityScaleProps {
@@ -40,7 +41,7 @@ export interface OpacityScaleProps {
   sortDir?: SortDir;
 }
 
-interface Row {
+export interface OpacityRow {
   path: string;
   cssVar: string;
   opacity: number;
@@ -52,45 +53,62 @@ function toOpacity(raw: unknown): number {
   return Number.NaN;
 }
 
+export interface DeriveOpacityRowsOptions {
+  filter?: string | undefined;
+  type: 'number' | 'opacity';
+  sortBy: SortBy;
+  sortDir: SortDir;
+}
+
 /**
- * Render each opacity token as a colored sample at that opacity over a
- * checkerboard backdrop, so the transparency is visually readable. The
- * number by itself (`0.4`) doesn't convey what the token looks like
- * applied to a surface; the sample does.
- *
- * Only tokens whose `$value` is a finite number between 0 and 1
- * inclusive are rendered — non-opacity `number` siblings (`line-height`,
- * `z-index`) fall out naturally.
+ * Pure derivation of the scale's display rows from resolved project data.
+ * Only tokens whose `$value` is a finite number between 0 and 1 inclusive
+ * are included — non-opacity `number` siblings (`line-height`, `z-index`)
+ * fall out naturally. Extracted so it is unit-testable without React or
+ * a store.
  */
-export function OpacityScale({
+export function deriveOpacityRows(
+  resolved: ProjectData['resolved'],
+  project: Pick<ProjectData, 'listing' | 'cssVarPrefix'>,
+  { filter, type, sortBy, sortDir }: DeriveOpacityRowsOptions,
+): OpacityRow[] {
+  const filtered = Object.entries(resolved).filter(([path, token]) => {
+    if (token.$type !== type) return false;
+    const v = toOpacity(token.$value);
+    if (!Number.isFinite(v) || v < 0 || v > 1) return false;
+    return matchPath(path, filter);
+  });
+  return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => {
+    const opacity = toOpacity(token.$value);
+    return {
+      path,
+      cssVar: resolveCssVar(path, project),
+      opacity,
+      displayValue: String(opacity),
+    };
+  });
+}
+
+export interface OpacityScaleViewProps {
+  rows: OpacityRow[];
+  activeTheme: string;
+  cssVarPrefix: string;
+  activeAxes: Record<string, string>;
+  sampleColorVar: string;
+  filter?: string | undefined;
+  caption?: string | undefined;
+}
+
+/** Pure presentation for the opacity scale. Renders from plain props. */
+export function OpacityScaleView({
+  rows,
+  activeTheme,
+  cssVarPrefix,
+  activeAxes,
+  sampleColorVar,
   filter,
-  type = 'number',
-  sampleColor = 'color.accent.bg',
   caption,
-  sortBy = 'value',
-  sortDir = 'asc',
-}: OpacityScaleProps): ReactElement {
-  const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
-
-  const rows = useMemo<Row[]>(() => {
-    const filtered = Object.entries(resolved).filter(([path, token]) => {
-      if (token.$type !== type) return false;
-      const v = toOpacity(token.$value);
-      if (!Number.isFinite(v) || v < 0 || v > 1) return false;
-      return matchPath(path, filter);
-    });
-    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => {
-      const opacity = toOpacity(token.$value);
-      return {
-        path,
-        cssVar: resolveCssVar(path, project),
-        opacity,
-        displayValue: String(opacity),
-      };
-    });
-  }, [resolved, filter, type, project, sortBy, sortDir]);
-
+}: OpacityScaleViewProps): ReactElement {
   const captionText =
     caption ??
     `${rows.length} opacity token${rows.length === 1 ? '' : 's'}${
@@ -104,8 +122,6 @@ export function OpacityScale({
       </div>
     );
   }
-
-  const sampleColorVar = resolveCssVar(sampleColor, project);
 
   return (
     <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
@@ -132,5 +148,42 @@ export function OpacityScale({
         ))}
       </div>
     </div>
+  );
+}
+
+/**
+ * Render each opacity token as a colored sample at that opacity over a
+ * checkerboard backdrop, so the transparency is visually readable. The
+ * number by itself (`0.4`) doesn't convey what the token looks like
+ * applied to a surface; the sample does.
+ */
+export function OpacityScale({
+  filter,
+  type = 'number',
+  sampleColor = 'color.accent.bg',
+  caption,
+  sortBy = 'value',
+  sortDir = 'asc',
+}: OpacityScaleProps): ReactElement {
+  const project = useProject();
+  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+
+  const rows = useMemo(
+    () => deriveOpacityRows(resolved, project, { filter, type, sortBy, sortDir }),
+    [resolved, project, filter, type, sortBy, sortDir],
+  );
+
+  const sampleColorVar = resolveCssVar(sampleColor, project);
+
+  return (
+    <OpacityScaleView
+      rows={rows}
+      activeTheme={activeTheme}
+      cssVarPrefix={cssVarPrefix}
+      activeAxes={activeAxes}
+      sampleColorVar={sampleColorVar}
+      filter={filter}
+      caption={caption}
+    />
   );
 }

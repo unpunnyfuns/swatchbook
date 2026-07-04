@@ -3,11 +3,13 @@ import { useMemo } from 'react';
 import './GradientPalette.css';
 import { useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
+import type { ColorFormat } from '#/format-color.ts';
 import { parseColor } from '@unpunnyfuns/swatchbook-core/format-color';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+import type { ProjectData } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface GradientPaletteProps {
@@ -37,10 +39,17 @@ interface GradientStop {
   position?: number;
 }
 
-interface Row {
+export interface GradientRowStop {
+  key: string;
+  cssColor: string;
+  value: string;
+  positionPercent: string;
+}
+
+export interface GradientRow {
   path: string;
   cssVar: string;
-  stops: GradientStop[];
+  stops: GradientRowStop[];
 }
 
 function asStops(raw: unknown): GradientStop[] {
@@ -62,29 +71,61 @@ function stopKey(path: string, stop: GradientStop, fallback: number): string {
   return `${path}|${stop.position ?? fallback}|${stopCssColor(stop)}`;
 }
 
-export function GradientPalette({
-  filter,
-  caption,
-  sortBy = 'path',
-  sortDir = 'asc',
-}: GradientPaletteProps): ReactElement {
-  const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
-  const colorFormat = useColorFormat();
+export interface DeriveGradientRowsOptions {
+  filter?: string | undefined;
+  sortBy: SortBy;
+  sortDir: SortDir;
+  colorFormat: ColorFormat;
+}
 
-  const rows = useMemo<Row[]>(() => {
-    const projectFields = { listing, cssVarPrefix };
-    const filtered = Object.entries(resolved).filter(([path, token]) => {
-      if (token.$type !== 'gradient') return false;
-      return matchPath(path, filter);
-    });
-    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
+/**
+ * Pure derivation of the palette's gradient rows from resolved project
+ * data. Extracted so it is unit-testable without React or a store.
+ */
+export function deriveGradientRows(
+  resolved: ProjectData['resolved'],
+  listing: ProjectData['listing'],
+  cssVarPrefix: ProjectData['cssVarPrefix'],
+  { filter, sortBy, sortDir, colorFormat }: DeriveGradientRowsOptions,
+): GradientRow[] {
+  const projectFields = { listing, cssVarPrefix };
+  const filtered = Object.entries(resolved).filter(([path, token]) => {
+    if (token.$type !== 'gradient') return false;
+    return matchPath(path, filter);
+  });
+  return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => {
+    const stops = asStops(token.$value);
+    return {
       path,
       cssVar: resolveCssVar(path, projectFields),
-      stops: asStops(token.$value),
-    }));
-  }, [resolved, listing, cssVarPrefix, filter, sortBy, sortDir]);
+      stops: stops.map((stop, i) => ({
+        key: stopKey(path, stop, i),
+        cssColor: stopCssColor(stop),
+        value: formatColor(stop.color, colorFormat).value,
+        positionPercent: ((stop.position ?? 0) * 100).toFixed(0),
+      })),
+    };
+  });
+}
 
+export interface GradientPaletteViewProps {
+  rows: GradientRow[];
+  activeTheme: string;
+  cssVarPrefix: string;
+  activeAxes: Record<string, string>;
+  filter?: string | undefined;
+  caption?: string | undefined;
+}
+
+/** Pure presentation for the gradient palette. Renders from plain props. */
+export function GradientPaletteView({
+  rows,
+  activeTheme,
+  cssVarPrefix,
+  activeAxes,
+  filter,
+  caption,
+}: GradientPaletteViewProps): ReactElement {
   const captionText =
     caption ??
     `${rows.length} gradient${rows.length === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -112,16 +153,16 @@ export function GradientPalette({
             aria-hidden
           />
           <div className="sb-gradient-palette__stops">
-            {row.stops.map((stop, i) => (
-              <div key={stopKey(row.path, stop, i)} className="sb-gradient-palette__stop-row">
+            {row.stops.map((stop) => (
+              <div key={stop.key} className="sb-gradient-palette__stop-row">
                 <span
                   className="sb-gradient-palette__stop-swatch"
-                  style={{ background: stopCssColor(stop) }}
+                  style={{ background: stop.cssColor }}
                   aria-hidden
                 />
-                <span>{formatColor(stop.color, colorFormat).value}</span>
+                <span>{stop.value}</span>
                 <span className="sb-gradient-palette__stop-position">
-                  @ {((stop.position ?? 0) * 100).toFixed(0)}%
+                  @ {stop.positionPercent}%
                 </span>
               </div>
             ))}
@@ -129,5 +170,38 @@ export function GradientPalette({
         </div>
       ))}
     </div>
+  );
+}
+
+export function GradientPalette({
+  filter,
+  caption,
+  sortBy = 'path',
+  sortDir = 'asc',
+}: GradientPaletteProps): ReactElement {
+  const project = useProject();
+  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
+  const colorFormat = useColorFormat();
+
+  const rows = useMemo(
+    () =>
+      deriveGradientRows(resolved, listing, cssVarPrefix, {
+        filter,
+        sortBy,
+        sortDir,
+        colorFormat,
+      }),
+    [resolved, listing, cssVarPrefix, filter, sortBy, sortDir, colorFormat],
+  );
+
+  return (
+    <GradientPaletteView
+      rows={rows}
+      activeTheme={activeTheme}
+      cssVarPrefix={cssVarPrefix}
+      activeAxes={activeAxes}
+      filter={filter}
+      caption={caption}
+    />
   );
 }

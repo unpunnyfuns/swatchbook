@@ -1,0 +1,61 @@
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, it } from 'vitest';
+import { TypographyScaleView } from '#/TypographyScale.tsx';
+import type { TypographyRow } from '#/TypographyScale.tsx';
+
+function rows(): TypographyRow[] {
+  return [
+    {
+      path: 'typography.heading',
+      sampleStyle: { fontFamily: 'Inter', fontSize: '24px' },
+      specs: '24px · w700',
+    },
+  ];
+}
+
+// The View renders from plain props — no SwatchbookProvider, no store.
+it('renders a row per token with its path, specs, and sample', () => {
+  render(
+    <TypographyScaleView
+      rows={rows()}
+      activeTheme="Light"
+      cssVarPrefix="sb"
+      activeAxes={{ theme: 'Light' }}
+      sample="Hello"
+    />,
+  );
+  screen.getByText('typography.heading');
+  screen.getByText('24px · w700');
+  screen.getByText('Hello');
+});
+
+it('honors the caption override', () => {
+  render(
+    <TypographyScaleView
+      rows={rows()}
+      activeTheme="Light"
+      cssVarPrefix="sb"
+      activeAxes={{}}
+      sample="Hello"
+      caption="Type scale"
+    />,
+  );
+  screen.getByText('Type scale');
+});
+
+it('renders the empty state when there are no rows', () => {
+  render(
+    <TypographyScaleView
+      rows={[]}
+      activeTheme="Light"
+      cssVarPrefix="sb"
+      activeAxes={{}}
+      sample="Hello"
+    />,
+  );
+  screen.getByText('No typography tokens match this filter.');
+});
+
+afterEach(() => {
+  cleanup();
+});

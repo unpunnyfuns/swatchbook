@@ -61,23 +61,30 @@ export interface TokenNavigatorProps {
   indicators?: IndicatorsProp;
 }
 
-interface LeafNode {
+export interface LeafNode {
   kind: 'leaf';
   segment: string;
   path: string;
   token: VirtualToken;
 }
 
-interface GroupNode {
+export interface GroupNode {
   kind: 'group';
   segment: string;
   path: string;
   children: TreeNode[];
 }
 
-type TreeNode = LeafNode | GroupNode;
+export type TreeNode = LeafNode | GroupNode;
 
-function buildTree(
+/**
+ * Pure derivation of the navigator's tree from the resolved token map:
+ * groups paths by dotted segment (scoped to `root` when set, restricted to
+ * `typeFilter`'s `$type`s when set), producing nested `GroupNode`s down to
+ * `LeafNode`s, sorted groups-before-leaves and alphanumeric within a level.
+ * Extracted so it is unit-testable without React or a store.
+ */
+export function buildTree(
   resolved: Record<string, VirtualToken>,
   root: string | undefined,
   typeFilter: ReadonlySet<string> | undefined,
@@ -167,14 +174,20 @@ function collectLeafPaths(nodes: TreeNode[], out: string[]): void {
 // users + arrow-key users navigate them: depth-first, only descending
 // into expanded groups. Each entry carries enough metadata for the
 // keyboard handler to compute parent / first-child / next / prev.
-interface FlatTreeItem {
+export interface FlatTreeItem {
   path: string;
   kind: 'group' | 'leaf';
   // Dot-path of the parent group, or `null` for top-level entries.
   parentPath: string | null;
 }
 
-function flattenVisible(
+/**
+ * Pure derivation of the flattened, currently-visible treeitem order from a
+ * tree plus the set of expanded group paths — depth-first, only descending
+ * into expanded groups. Appends to `out` (caller passes `[]`). Extracted so
+ * it is unit-testable without React or a store.
+ */
+export function flattenVisible(
   nodes: TreeNode[],
   expanded: Set<string>,
   parentPath: string | null,
@@ -211,39 +224,45 @@ function pruneTreeForMatches(
   return out;
 }
 
-export function TokenNavigator({
+export interface TokenNavigatorViewProps {
+  resolved: Record<string, VirtualToken>;
+  root?: string | undefined;
+  enabledIndicators: ReturnType<typeof resolveIndicators>;
+  cssVarPrefix: string;
+  activeAxes: Record<string, string>;
+  activeTheme: string;
+  /** Stable persistence key for this navigator's expand/select/search state. */
+  blockKey: string;
+  type?: string | readonly string[] | undefined;
+  initiallyExpanded?: number;
+  searchable?: boolean;
+  onSelect?: ((path: string) => void) | undefined;
+}
+
+/**
+ * Pure presentation for the token navigator. Owns its own expand/collapse,
+ * selection, search, and roving-tabindex keyboard-nav state; renders the
+ * tree from the `resolved` view-model. Composes the connected `RowIndicators`
+ * / `DetailOverlay` / sample previews as children (those read the project
+ * themselves).
+ */
+export function TokenNavigatorView({
+  resolved,
   root,
+  enabledIndicators,
+  cssVarPrefix,
+  activeAxes,
+  activeTheme,
+  blockKey,
   type,
   initiallyExpanded = 1,
   searchable = true,
   onSelect,
-  id,
-  indicators,
-}: TokenNavigatorProps): ReactElement {
-  const {
-    resolved,
-    activeTheme,
-    activeAxes,
-    cssVarPrefix,
-    indicators: indicatorBaseline,
-  } = useProject();
-
-  // Persist UI state (expand/collapse, selection, search) across docs-mode
-  // remounts. Keyed on the props that distinguish one navigator from another
-  // (plus the optional `id`); excludes `initiallyExpanded`/`searchable`, whose
-  // changes are handled by the re-seed effect below rather than a fresh key.
-  const typeKey = type === undefined ? '' : typeof type === 'string' ? type : type.join(',');
-  const blockKey = useBlockKey('TokenNavigator', [root, typeKey, id]);
-
+}: TokenNavigatorViewProps): ReactElement {
   const typeFilter = useMemo<ReadonlySet<string> | undefined>(() => {
     if (type === undefined) return undefined;
     return new Set(Array.isArray(type) ? type : [type]);
   }, [type]);
-
-  const enabledIndicators = useMemo(
-    () => resolveIndicators(indicators, indicatorBaseline),
-    [indicators, indicatorBaseline],
-  );
 
   const tree = useMemo(() => buildTree(resolved, root, typeFilter), [resolved, root, typeFilter]);
 
@@ -600,6 +619,57 @@ export function TokenNavigator({
         />
       )}
     </div>
+  );
+}
+
+/**
+ * A collapsible, searchable tree of tokens with roving-tabindex keyboard
+ * navigation. Click a leaf to inspect it in a slide-over (unless `onSelect`
+ * is provided, which hands the follow-up to the consumer).
+ */
+export function TokenNavigator({
+  root,
+  type,
+  initiallyExpanded = 1,
+  searchable = true,
+  onSelect,
+  id,
+  indicators,
+}: TokenNavigatorProps): ReactElement {
+  const {
+    resolved,
+    activeTheme,
+    activeAxes,
+    cssVarPrefix,
+    indicators: indicatorBaseline,
+  } = useProject();
+
+  // Persist UI state (expand/collapse, selection, search) across docs-mode
+  // remounts. Keyed on the props that distinguish one navigator from another
+  // (plus the optional `id`); excludes `initiallyExpanded`/`searchable`, whose
+  // changes are handled by the re-seed effect in `TokenNavigatorView`.
+  const typeKey = type === undefined ? '' : typeof type === 'string' ? type : type.join(',');
+  const blockKey = useBlockKey('TokenNavigator', [root, typeKey, id]);
+
+  const enabledIndicators = useMemo(
+    () => resolveIndicators(indicators, indicatorBaseline),
+    [indicators, indicatorBaseline],
+  );
+
+  return (
+    <TokenNavigatorView
+      resolved={resolved}
+      root={root}
+      enabledIndicators={enabledIndicators}
+      cssVarPrefix={cssVarPrefix}
+      activeAxes={activeAxes}
+      activeTheme={activeTheme}
+      blockKey={blockKey}
+      type={type}
+      initiallyExpanded={initiallyExpanded}
+      searchable={searchable}
+      onSelect={onSelect}
+    />
   );
 }
 
