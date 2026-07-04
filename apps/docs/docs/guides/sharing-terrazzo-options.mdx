@@ -4,9 +4,13 @@ title: Aligning with your token build
 sidebar_position: 6
 ---
 
+import SharedOptionsDiagram from '@site/src/components/diagrams/SharedOptionsDiagram';
+
 # Aligning swatchbook with your production token build
 
 If you run Terrazzo's CLI in production, swatchbook can read the same value-formatting rules, plugin set, and listing metadata so the swatches, values, and snippets in Storybook match exactly what your apps ship. The pattern is one shared TypeScript module that both `terrazzo.config.ts` and `swatchbook.config.ts` import from.
+
+<SharedOptionsDiagram />
 
 ## The shared-options module pattern
 
