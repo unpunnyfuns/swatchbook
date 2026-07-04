@@ -1,5 +1,19 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 0.69.0
+
+### Minor Changes
+
+- c538d16b4888b7a0092638d36b5bab71353e819f: blocks no longer depend on Storybook; the addon injects the preview channel
+
+### Patch Changes
+
+- bcc9c45e9b9531b98f0eb178d8d136dd52d57ac6: internal: split Diagnostics + TokenTable into pure Views + connectors (no API change)
+- 4112b84fae027fda614546b7b80222e0225a973b: internal: split remaining blocks into pure Views + connectors (no API change)
+- d36560a8c82e6d1893380f99d4863cfaeb1d9028: docs: trim the #storybook alias aside in the stories guide to a single line
+- c3c9a18332bd5aa04c7238cb91f9cd963ad62538: docs: note the #storybook subpath-import option in the stories guide
+  - @unpunnyfuns/swatchbook-core@0.69.0
+
 ## 0.68.0
 
 ### Minor Changes
