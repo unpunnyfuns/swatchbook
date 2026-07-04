@@ -1,5 +1,22 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 0.69.0
+
+### Minor Changes
+
+- c538d16b4888b7a0092638d36b5bab71353e819f: blocks no longer depend on Storybook; the addon injects the preview channel
+
+### Patch Changes
+
+- Updated dependencies [bcc9c45]
+- Updated dependencies [4112b84]
+- Updated dependencies [c538d16]
+- Updated dependencies [d36560a]
+- Updated dependencies [c3c9a18]
+  - @unpunnyfuns/swatchbook-blocks@0.69.0
+  - @unpunnyfuns/swatchbook-core@0.69.0
+  - @unpunnyfuns/swatchbook-switcher@0.69.0
+
 ## 0.68.0
 
 ### Patch Changes
