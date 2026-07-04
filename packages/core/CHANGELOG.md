@@ -1,5 +1,13 @@
 # @unpunnyfuns/swatchbook-core
 
+## 0.69.1
+
+### Patch Changes
+
+- e5d400c0444593d9b759eda408b2c0da55a3b04e: docs: add theme-reactive concept diagrams for ingestion order, graph queries, axis flips, and snapshot consumers
+- 0a6ac46a31c2dd01ef09b4f3a8677d5bc7a8ae06: docs: add two-pipeline and shared-options diagrams to the overview and terrazzo alignment pages
+- 2c3d0401e29d822f4fe964ffd2b4b079dbc225a0: docs: add active-theme consumption fork diagram to the consuming guide
+
 ## 0.69.0
 
 ## 0.68.0
