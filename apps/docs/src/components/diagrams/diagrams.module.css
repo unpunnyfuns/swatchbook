@@ -1,0 +1,81 @@
+/*
+ * Shared styling for the concept diagrams. Every visual property binds to a
+ * semantic --sb-* custom property so the diagrams repaint with the swatchbook
+ * switcher (mode, a11y, typeface) and Docusaurus color mode. No fills or
+ * strokes may appear as SVG presentation attributes in the components.
+ */
+
+.scroller {
+  overflow-x: auto;
+  margin-block: 1.5rem;
+}
+
+.diagram {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 560px;
+  max-inline-size: 760px;
+  font-family: var(--sb-font-family-base);
+}
+
+.node {
+  fill: var(--sb-color-surface-raised);
+  stroke: var(--sb-color-code-border);
+  stroke-width: 1.5;
+}
+
+.nodeAccent {
+  fill: var(--sb-color-surface-default);
+  stroke: var(--sb-color-primary-default);
+  stroke-width: 1.5;
+}
+
+.edge {
+  fill: none;
+  stroke: var(--sb-color-text-muted);
+  stroke-width: 1.5;
+}
+
+.edgeAccent {
+  fill: none;
+  stroke: var(--sb-color-primary-default);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+}
+
+.arrowhead {
+  fill: var(--sb-color-text-muted);
+}
+
+.arrowheadAccent {
+  fill: var(--sb-color-primary-default);
+}
+
+.label {
+  fill: var(--sb-color-text-default);
+  font-size: 14px;
+  text-anchor: middle;
+}
+
+.labelSmall {
+  fill: var(--sb-color-text-muted);
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.zone {
+  fill: var(--sb-color-surface-muted);
+}
+
+.zoneTitle {
+  fill: var(--sb-color-text-heading);
+  font-size: 12px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.barrier {
+  stroke: var(--sb-color-code-border);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
