@@ -1,8 +1,3 @@
-// Aliasing scheme: the story files import this module via a deep relative
-// path (`../../.storybook/preview.tsx`). A `#storybook/*` subpath import —
-// `"#storybook/*": "./.storybook/*"` in package.json#imports, parallel to the
-// existing `"#/*": "./src/*"` — would let them write `#storybook/preview.tsx`
-// instead, dropping the `../../` climb. Not wired yet; see issue #1284.
 import addonA11y from '@storybook/addon-a11y';
 import addonDocs from '@storybook/addon-docs';
 import { definePreview } from '@storybook/react-vite';
