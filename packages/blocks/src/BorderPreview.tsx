@@ -3,12 +3,14 @@ import { useMemo } from 'react';
 import './BorderPreview.css';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
+import type { ColorFormat } from '#/format-color.ts';
 import { formatDimension, formatSubColor } from '#/internal/composite-sample-format.ts';
 import type { BorderValue } from '#/internal/composite-types.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+import type { ProjectData } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface BorderPreviewProps {
@@ -29,34 +31,68 @@ export interface BorderPreviewProps {
   sortDir?: SortDir;
 }
 
-interface Row {
+export interface BorderRow {
   path: string;
   cssVar: string;
-  value: BorderValue;
+  width: string;
+  style: string;
+  color: string;
 }
 
-export function BorderPreview({
-  filter,
-  caption,
-  sortBy = 'path',
-  sortDir = 'asc',
-}: BorderPreviewProps): ReactElement {
-  const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
-  const colorFormat = useColorFormat();
+export interface DeriveBorderRowsOptions {
+  filter?: string | undefined;
+  sortBy: SortBy;
+  sortDir: SortDir;
+  colorFormat: ColorFormat;
+}
 
-  const rows = useMemo<Row[]>(() => {
-    const filtered = Object.entries(resolved).filter(([path, token]) => {
-      if (token.$type !== 'border') return false;
-      return matchPath(path, filter);
-    });
-    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
+/**
+ * Pure derivation of the preview's display rows from resolved project data.
+ * Extracted so it is unit-testable without React or a store.
+ */
+export function deriveBorderRows(
+  resolved: ProjectData['resolved'],
+  project: Pick<ProjectData, 'listing' | 'cssVarPrefix'>,
+  { filter, sortBy, sortDir, colorFormat }: DeriveBorderRowsOptions,
+): BorderRow[] {
+  const filtered = Object.entries(resolved).filter(([path, token]) => {
+    if (token.$type !== 'border') return false;
+    return matchPath(path, filter);
+  });
+  return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => {
+    const value = (token.$value ?? {}) as BorderValue;
+    return {
       path,
       cssVar: resolveCssVar(path, project),
-      value: (token.$value ?? {}) as BorderValue,
-    }));
-  }, [resolved, filter, project, sortBy, sortDir]);
+      width: formatDimension(value.width),
+      style: value.style != null ? String(value.style) : '—',
+      color: formatSubColor(value.color, colorFormat),
+    };
+  });
+}
 
+export interface BorderPreviewViewProps {
+  rows: BorderRow[];
+  activeTheme: string;
+  cssVarPrefix: string;
+  activeAxes: Record<string, string>;
+  filter?: string | undefined;
+  caption?: string | undefined;
+}
+
+/**
+ * Pure presentation for the border preview. Renders from plain props;
+ * composes the connected `BorderSample` as a child (that child reads the
+ * project itself).
+ */
+export function BorderPreviewView({
+  rows,
+  activeTheme,
+  cssVarPrefix,
+  activeAxes,
+  filter,
+  caption,
+}: BorderPreviewViewProps): ReactElement {
   const captionText =
     caption ??
     `${rows.length} border${rows.length === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -83,14 +119,47 @@ export function BorderPreview({
           </div>
           <div className="sb-border-preview__breakdown">
             <span className="sb-border-preview__breakdown-key">width</span>
-            <span>{formatDimension(row.value.width)}</span>
+            <span>{row.width}</span>
             <span className="sb-border-preview__breakdown-key">style</span>
-            <span>{row.value.style != null ? String(row.value.style) : '—'}</span>
+            <span>{row.style}</span>
             <span className="sb-border-preview__breakdown-key">color</span>
-            <span>{formatSubColor(row.value.color, colorFormat)}</span>
+            <span>{row.color}</span>
           </div>
         </div>
       ))}
     </div>
+  );
+}
+
+export function BorderPreview({
+  filter,
+  caption,
+  sortBy = 'path',
+  sortDir = 'asc',
+}: BorderPreviewProps): ReactElement {
+  const project = useProject();
+  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+  const colorFormat = useColorFormat();
+
+  const rows = useMemo(
+    () =>
+      deriveBorderRows(resolved, project, {
+        filter,
+        sortBy,
+        sortDir,
+        colorFormat,
+      }),
+    [resolved, project, filter, sortBy, sortDir, colorFormat],
+  );
+
+  return (
+    <BorderPreviewView
+      rows={rows}
+      activeTheme={activeTheme}
+      cssVarPrefix={cssVarPrefix}
+      activeAxes={activeAxes}
+      filter={filter}
+      caption={caption}
+    />
   );
 }

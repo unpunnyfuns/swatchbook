@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
-import { addons } from 'storybook/preview-api';
+import { onChannel } from '#/internal/channel.ts';
+import type { BlockChannel } from '#/internal/channel.ts';
 import { COLOR_FORMATS } from '#/format-color.ts';
 import type { ColorFormat } from '#/format-color.ts';
 
@@ -38,10 +39,11 @@ interface SwatchbookGlobalsPayload {
   [key: string]: unknown;
 }
 
-function ensureSubscribed(): void {
-  if (subscribed || typeof window === 'undefined') return;
+// Attach the globals subscriptions once the host channel is injected.
+// `subscribed` guards against an HMR re-register double-wiring listeners.
+function attach(channel: BlockChannel): void {
+  if (subscribed) return;
   subscribed = true;
-  const channel = addons.getChannel();
   // Storybook fires `globalsUpdated`, `setGlobals`, and `updateGlobals`
   // for the same logical change (preview init + every toolbar tick).
   // Subscribing to all three is intentional — `setGlobals` carries the
@@ -65,18 +67,17 @@ function ensureSubscribed(): void {
     snapshot = { axes: nextAxes, format: nextFormat };
     for (const cb of listeners) cb();
   };
-  channel.on('globalsUpdated', onGlobals);
-  channel.on('updateGlobals', onGlobals);
-  channel.on('setGlobals', onGlobals);
+  channel.on<{ globals?: SwatchbookGlobalsPayload }>('globalsUpdated', onGlobals);
+  channel.on<{ globals?: SwatchbookGlobalsPayload }>('updateGlobals', onGlobals);
+  channel.on<{ globals?: SwatchbookGlobalsPayload }>('setGlobals', onGlobals);
 }
 
-// Subscribe at module load so the `SET_GLOBALS` emission from preview init
-// lands in our snapshot before any block renders. Running `useSyncExternalStore`'s
-// `subscribe` lazily on first hook call would miss the event in most cases.
-ensureSubscribed();
+// Wire at module load so the init `SET_GLOBALS` emission lands in our snapshot
+// before any block renders. `onChannel` runs `attach` immediately if the addon
+// already injected the channel, else the moment it does.
+onChannel(attach);
 
 function subscribe(cb: () => void): () => void {
-  ensureSubscribed();
   listeners.add(cb);
   return () => {
     listeners.delete(cb);

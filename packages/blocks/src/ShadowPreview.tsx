@@ -10,6 +10,7 @@ import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+import type { ProjectData } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
 
@@ -31,10 +32,30 @@ export interface ShadowPreviewProps {
   sortDir?: SortDir;
 }
 
-interface Row {
+/** One shadow layer's breakdown fields, formatted for display. */
+export interface ShadowLayerRow {
+  offset: string;
+  blur: string;
+  spread: string;
+  color: string;
+  inset?: string | undefined;
+}
+
+export interface ShadowRow {
   path: string;
   cssVar: string;
-  layers: ShadowLayer[];
+  layers: ShadowLayerRow[];
+}
+
+export interface DeriveShadowRowsOptions {
+  filter?: string | undefined;
+  sortBy: SortBy;
+  sortDir: SortDir;
+  colorFormat: ColorFormat;
+}
+
+function layerKey(path: string, layer: ShadowLayerRow, fallback: number): string {
+  return `${path}|${layer.offset}|${layer.blur}|${layer.spread}|${fallback}`;
 }
 
 function asLayers(raw: unknown): ShadowLayer[] {
@@ -43,35 +64,58 @@ function asLayers(raw: unknown): ShadowLayer[] {
   return [];
 }
 
-function layerKey(path: string, layer: ShadowLayer, fallback: number): string {
-  const off = `${formatDimension(layer.offsetX)},${formatDimension(layer.offsetY)}`;
-  const blur = formatDimension(layer.blur);
-  const spread = formatDimension(layer.spread);
-  return `${path}|${off}|${blur}|${spread}|${fallback}`;
+function formatLayer(layer: ShadowLayer, colorFormat: ColorFormat): ShadowLayerRow {
+  return {
+    offset: `${formatDimension(layer.offsetX)} ${formatDimension(layer.offsetY)}`,
+    blur: formatDimension(layer.blur),
+    spread: formatDimension(layer.spread),
+    color: formatSubColor(layer.color, colorFormat),
+    inset: layer.inset ? String(layer.inset) : undefined,
+  };
 }
 
-export function ShadowPreview({
+/**
+ * Pure derivation of the preview's display rows from resolved project data.
+ * Extracted so it is unit-testable without React or a store.
+ */
+export function deriveShadowRows(
+  resolved: ProjectData['resolved'],
+  project: Pick<ProjectData, 'listing' | 'cssVarPrefix'>,
+  { filter, sortBy, sortDir, colorFormat }: DeriveShadowRowsOptions,
+): ShadowRow[] {
+  const filtered = Object.entries(resolved).filter(([path, token]) => {
+    if (token.$type !== 'shadow') return false;
+    return matchPath(path, filter);
+  });
+  return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
+    path,
+    cssVar: resolveCssVar(path, project),
+    layers: asLayers(token.$value).map((layer) => formatLayer(layer, colorFormat)),
+  }));
+}
+
+export interface ShadowPreviewViewProps {
+  rows: ShadowRow[];
+  activeTheme: string;
+  cssVarPrefix: string;
+  activeAxes: Record<string, string>;
+  filter?: string | undefined;
+  caption?: string | undefined;
+}
+
+/**
+ * Pure presentation for the shadow preview. Renders from plain props;
+ * composes the connected `ShadowSample` as a child (that child reads the
+ * project itself).
+ */
+export function ShadowPreviewView({
+  rows,
+  activeTheme,
+  cssVarPrefix,
+  activeAxes,
   filter,
   caption,
-  sortBy = 'path',
-  sortDir = 'asc',
-}: ShadowPreviewProps): ReactElement {
-  const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
-  const colorFormat = useColorFormat();
-
-  const rows = useMemo<Row[]>(() => {
-    const filtered = Object.entries(resolved).filter(([path, token]) => {
-      if (token.$type !== 'shadow') return false;
-      return matchPath(path, filter);
-    });
-    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
-      path,
-      cssVar: resolveCssVar(path, project),
-      layers: asLayers(token.$value),
-    }));
-  }, [resolved, filter, project, sortBy, sortDir]);
-
+}: ShadowPreviewViewProps): ReactElement {
   const captionText =
     caption ??
     `${rows.length} shadow${rows.length === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -98,14 +142,13 @@ export function ShadowPreview({
           </div>
           <div className="sb-shadow-preview__breakdown">
             {row.layers.length === 1
-              ? renderLayer(row.layers[0], colorFormat)
+              ? renderLayerEntries(row.layers[0])
               : row.layers.map((layer, i) => (
                   <Layer
                     key={layerKey(row.path, layer, i)}
                     layer={layer}
                     index={i}
                     total={row.layers.length}
-                    colorFormat={colorFormat}
                   />
                 ))}
           </div>
@@ -115,15 +158,15 @@ export function ShadowPreview({
   );
 }
 
-function renderLayer(layer: ShadowLayer | undefined, format: ColorFormat): ReactElement[] {
+function renderLayerEntries(layer: ShadowLayerRow | undefined): ReactElement[] {
   if (!layer) return [];
   const entries: [string, string][] = [
-    ['offset', `${formatDimension(layer.offsetX)} ${formatDimension(layer.offsetY)}`],
-    ['blur', formatDimension(layer.blur)],
-    ['spread', formatDimension(layer.spread)],
-    ['color', formatSubColor(layer.color, format)],
+    ['offset', layer.offset],
+    ['blur', layer.blur],
+    ['spread', layer.spread],
+    ['color', layer.color],
   ];
-  if (layer.inset) entries.push(['inset', String(layer.inset)]);
+  if (layer.inset) entries.push(['inset', layer.inset]);
   return entries.flatMap(([k, v]) => [
     <span key={`k-${k}`} className="sb-shadow-preview__breakdown-key">
       {k}
@@ -136,12 +179,10 @@ function Layer({
   layer,
   index,
   total,
-  colorFormat,
 }: {
-  layer: ShadowLayer;
+  layer: ShadowLayerRow;
   index: number;
   total: number;
-  colorFormat: ColorFormat;
 }): ReactElement {
   return (
     <div className="sb-shadow-preview__layer">
@@ -149,8 +190,41 @@ function Layer({
         layer {index + 1} of {total}
       </div>
       <div className={cx('sb-shadow-preview__breakdown', 'sb-shadow-preview__layer-breakdown')}>
-        {renderLayer(layer, colorFormat)}
+        {renderLayerEntries(layer)}
       </div>
     </div>
+  );
+}
+
+export function ShadowPreview({
+  filter,
+  caption,
+  sortBy = 'path',
+  sortDir = 'asc',
+}: ShadowPreviewProps): ReactElement {
+  const project = useProject();
+  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+  const colorFormat = useColorFormat();
+
+  const rows = useMemo(
+    () =>
+      deriveShadowRows(resolved, project, {
+        filter,
+        sortBy,
+        sortDir,
+        colorFormat,
+      }),
+    [resolved, project, filter, sortBy, sortDir, colorFormat],
+  );
+
+  return (
+    <ShadowPreviewView
+      rows={rows}
+      activeTheme={activeTheme}
+      cssVarPrefix={cssVarPrefix}
+      activeAxes={activeAxes}
+      filter={filter}
+      caption={caption}
+    />
   );
 }

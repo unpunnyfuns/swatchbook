@@ -25,7 +25,8 @@ interface DiagnosticsSummary {
   hasErrorsOrWarnings: boolean;
 }
 
-function summarize(diagnostics: readonly VirtualDiagnostic[]): DiagnosticsSummary {
+/** Aggregate diagnostics into a summary line + severity variant for the header. */
+export function summarize(diagnostics: readonly VirtualDiagnostic[]): DiagnosticsSummary {
   if (diagnostics.length === 0) {
     return { text: '✔ OK · no diagnostics', variant: 'ok', hasErrorsOrWarnings: false };
   }
@@ -53,18 +54,21 @@ function diagnosticKey(d: VirtualDiagnostic, i: number): string {
   return `${d.severity}:${d.group}:${d.filename ?? ''}:${d.line ?? ''}:${d.message}:${i}`;
 }
 
-/**
- * Render the project's load diagnostics — parser errors, resolver warnings,
- * disabled-axes validation issues, etc. — as a collapsible list. Auto-opens
- * when the project carries errors or warnings; stays collapsed for clean
- * loads and info-only loads.
- *
- * Replaces the diagnostics section from the addon's (now-retired) Design
- * Tokens panel. Consumers compose it alongside TokenNavigator / TokenTable
- * on their own MDX pages.
- */
-export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
-  const { activeAxes, cssVarPrefix, diagnostics } = useProject();
+export interface DiagnosticsViewProps {
+  /** Override the section caption. Defaults to a severity summary. */
+  caption?: string | undefined;
+  diagnostics: readonly VirtualDiagnostic[];
+  cssVarPrefix: string;
+  activeAxes: Record<string, string>;
+}
+
+/** Pure presentation for the diagnostics list. Renders from plain props. */
+export function DiagnosticsView({
+  caption,
+  diagnostics,
+  cssVarPrefix,
+  activeAxes,
+}: DiagnosticsViewProps): ReactElement {
   const summary = useMemo(() => summarize(diagnostics), [diagnostics]);
   const headingText = caption ?? `Diagnostics · ${summary.text}`;
 
@@ -111,5 +115,27 @@ export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
         )}
       </details>
     </div>
+  );
+}
+
+/**
+ * Render the project's load diagnostics — parser errors, resolver warnings,
+ * disabled-axes validation issues, etc. — as a collapsible list. Auto-opens
+ * when the project carries errors or warnings; stays collapsed for clean
+ * loads and info-only loads.
+ *
+ * Replaces the diagnostics section from the addon's (now-retired) Design
+ * Tokens panel. Consumers compose it alongside TokenNavigator / TokenTable
+ * on their own MDX pages.
+ */
+export function Diagnostics({ caption }: DiagnosticsProps = {}): ReactElement {
+  const { activeAxes, cssVarPrefix, diagnostics } = useProject();
+  return (
+    <DiagnosticsView
+      caption={caption}
+      diagnostics={diagnostics}
+      cssVarPrefix={cssVarPrefix}
+      activeAxes={activeAxes}
+    />
   );
 }

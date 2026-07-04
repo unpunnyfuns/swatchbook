@@ -6,6 +6,7 @@ import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+import type { ProjectData } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface FontWeightScaleProps {
@@ -29,7 +30,7 @@ export interface FontWeightScaleProps {
   sortDir?: SortDir;
 }
 
-interface Row {
+export interface FontWeightRow {
   path: string;
   cssVar: string;
   display: string;
@@ -45,29 +46,53 @@ function toWeight(raw: unknown): number {
   return Number.NaN;
 }
 
-export function FontWeightScale({
+export interface DeriveFontWeightRowsOptions {
+  filter?: string | undefined;
+  sortBy: SortBy;
+  sortDir: SortDir;
+}
+
+/**
+ * Pure derivation of the scale's display rows from resolved project data.
+ * Extracted so it is unit-testable without React or a store.
+ */
+export function deriveFontWeightRows(
+  resolved: ProjectData['resolved'],
+  project: Pick<ProjectData, 'listing' | 'cssVarPrefix'>,
+  { filter, sortBy, sortDir }: DeriveFontWeightRowsOptions,
+): FontWeightRow[] {
+  const filtered = Object.entries(resolved).filter(([path, token]) => {
+    if (token.$type !== 'fontWeight') return false;
+    return matchPath(path, filter);
+  });
+  return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
+    path,
+    cssVar: resolveCssVar(path, project),
+    display: token.$value == null ? '' : String(token.$value),
+    weight: toWeight(token.$value),
+  }));
+}
+
+export interface FontWeightScaleViewProps {
+  rows: FontWeightRow[];
+  activeTheme: string;
+  cssVarPrefix: string;
+  activeAxes: Record<string, string>;
+  sample: string;
+  filter?: string | undefined;
+  caption?: string | undefined;
+}
+
+/** Pure presentation for the font-weight scale. Renders from plain props. */
+export function FontWeightScaleView({
+  rows,
+  activeTheme,
+  cssVarPrefix,
+  activeAxes,
+  sample,
   filter,
-  sample = 'Aa',
   caption,
-  sortBy = 'value',
-  sortDir = 'asc',
-}: FontWeightScaleProps): ReactElement {
-  const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
-
-  const rows = useMemo<Row[]>(() => {
-    const filtered = Object.entries(resolved).filter(([path, token]) => {
-      if (token.$type !== 'fontWeight') return false;
-      return matchPath(path, filter);
-    });
-    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
-      path,
-      cssVar: resolveCssVar(path, project),
-      display: token.$value == null ? '' : String(token.$value),
-      weight: toWeight(token.$value),
-    }));
-  }, [resolved, filter, project, sortBy, sortDir]);
-
+}: FontWeightScaleViewProps): ReactElement {
   const captionText =
     caption ??
     `${rows.length} fontWeight token${rows.length === 1 ? '' : 's'}${filter && filter !== 'fontWeight' ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -99,5 +124,33 @@ export function FontWeightScale({
         </div>
       ))}
     </div>
+  );
+}
+
+export function FontWeightScale({
+  filter,
+  sample = 'Aa',
+  caption,
+  sortBy = 'value',
+  sortDir = 'asc',
+}: FontWeightScaleProps): ReactElement {
+  const project = useProject();
+  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+
+  const rows = useMemo(
+    () => deriveFontWeightRows(resolved, project, { filter, sortBy, sortDir }),
+    [resolved, project, filter, sortBy, sortDir],
+  );
+
+  return (
+    <FontWeightScaleView
+      rows={rows}
+      activeTheme={activeTheme}
+      cssVarPrefix={cssVarPrefix}
+      activeAxes={activeAxes}
+      sample={sample}
+      filter={filter}
+      caption={caption}
+    />
   );
 }

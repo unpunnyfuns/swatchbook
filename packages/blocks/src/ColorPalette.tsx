@@ -2,10 +2,12 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './ColorPalette.css';
 import { useColorFormat } from '#/contexts.ts';
+import type { ColorFormat } from '#/format-color.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import type { ProjectData } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface ColorPaletteProps {
@@ -41,12 +43,17 @@ export interface ColorPaletteProps {
   sortDir?: SortDir;
 }
 
-interface Swatch {
+export interface ColorPaletteSwatch {
   path: string;
   leaf: string;
   cssVar: string;
   value: string;
   outOfGamut: boolean;
+}
+
+export interface ColorPaletteGroup {
+  group: string;
+  swatches: ColorPaletteSwatch[];
 }
 
 // Count segments in the filter before the first glob (`*` / `**`).
@@ -62,52 +69,76 @@ function fixedPrefixLength(filter: string | undefined): number {
   return fixed;
 }
 
-export function ColorPalette({
-  filter,
-  groupBy,
-  caption,
-  sortBy = 'path',
-  sortDir = 'asc',
-}: ColorPaletteProps): ReactElement {
-  const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
-  const colorFormat = useColorFormat();
+export interface DeriveColorPaletteGroupsOptions {
+  filter?: string | undefined;
+  groupBy?: number | undefined;
+  sortBy: SortBy;
+  sortDir: SortDir;
+  colorFormat: ColorFormat;
+}
 
-  const groups = useMemo(() => {
-    const projectFields = { listing, cssVarPrefix };
-    const filtered = Object.entries(resolved).filter(([path, token]) => {
-      if (token.$type !== 'color') return false;
-      return matchPath(path, filter);
+/**
+ * Pure derivation of the palette's grouped swatch rows from resolved project
+ * data. Extracted so it is unit-testable without React or a store.
+ */
+export function deriveColorPaletteGroups(
+  resolved: ProjectData['resolved'],
+  listing: ProjectData['listing'],
+  cssVarPrefix: ProjectData['cssVarPrefix'],
+  { filter, groupBy, sortBy, sortDir, colorFormat }: DeriveColorPaletteGroupsOptions,
+): ColorPaletteGroup[] {
+  const projectFields = { listing, cssVarPrefix };
+  const filtered = Object.entries(resolved).filter(([path, token]) => {
+    if (token.$type !== 'color') return false;
+    return matchPath(path, filter);
+  });
+  const entries = sortTokens(filtered, { by: sortBy, dir: sortDir });
+
+  const maxDepth = entries.reduce((m, [p]) => Math.max(m, p.split('.').length), 0);
+  const effectiveGroupBy =
+    groupBy ?? Math.min(fixedPrefixLength(filter) + 1, Math.max(maxDepth - 1, 1));
+
+  const bucket = new Map<string, ColorPaletteSwatch[]>();
+  for (const [path, token] of entries) {
+    const segments = path.split('.');
+    const groupKey = segments.slice(0, effectiveGroupBy).join('.');
+    const leaf = segments.slice(effectiveGroupBy).join('.') || segments.at(-1) || path;
+    const list = bucket.get(groupKey) ?? [];
+    const formatted = resolveColorValue(path, token.$value, colorFormat, projectFields);
+    list.push({
+      path,
+      leaf,
+      cssVar: resolveCssVar(path, projectFields),
+      value: formatted.value,
+      outOfGamut: formatted.outOfGamut,
     });
-    const entries = sortTokens(filtered, { by: sortBy, dir: sortDir });
+    bucket.set(groupKey, list);
+  }
 
-    const maxDepth = entries.reduce((m, [p]) => Math.max(m, p.split('.').length), 0);
-    const effectiveGroupBy =
-      groupBy ?? Math.min(fixedPrefixLength(filter) + 1, Math.max(maxDepth - 1, 1));
+  return [...bucket.entries()]
+    .toSorted(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
+    .map(([group, swatches]) => ({ group, swatches }));
+}
 
-    const bucket = new Map<string, Swatch[]>();
-    for (const [path, token] of entries) {
-      const segments = path.split('.');
-      const groupKey = segments.slice(0, effectiveGroupBy).join('.');
-      const leaf = segments.slice(effectiveGroupBy).join('.') || segments.at(-1) || path;
-      const list = bucket.get(groupKey) ?? [];
-      const formatted = resolveColorValue(path, token.$value, colorFormat, projectFields);
-      list.push({
-        path,
-        leaf,
-        cssVar: resolveCssVar(path, projectFields),
-        value: formatted.value,
-        outOfGamut: formatted.outOfGamut,
-      });
-      bucket.set(groupKey, list);
-    }
+export interface ColorPaletteViewProps {
+  groups: ColorPaletteGroup[];
+  activeTheme: string;
+  cssVarPrefix: string;
+  activeAxes: Record<string, string>;
+  filter?: string | undefined;
+  caption?: string | undefined;
+}
 
-    return [...bucket.entries()].toSorted(([a], [b]) =>
-      a.localeCompare(b, undefined, { numeric: true }),
-    );
-  }, [resolved, listing, cssVarPrefix, filter, groupBy, colorFormat, sortBy, sortDir]);
-
-  const totalCount = groups.reduce((acc, [, swatches]) => acc + swatches.length, 0);
+/** Pure presentation for the color palette. Renders from plain props. */
+export function ColorPaletteView({
+  groups,
+  activeTheme,
+  cssVarPrefix,
+  activeAxes,
+  filter,
+  caption,
+}: ColorPaletteViewProps): ReactElement {
+  const totalCount = groups.reduce((acc, { swatches }) => acc + swatches.length, 0);
   const captionText =
     caption ??
     `${totalCount} color${totalCount === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -123,7 +154,7 @@ export function ColorPalette({
   return (
     <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       <div className="sb-block__caption">{captionText}</div>
-      {groups.map(([group, swatches]) => (
+      {groups.map(({ group, swatches }) => (
         <section key={group} className="sb-color-palette__group">
           <div className="sb-color-palette__group-header">{group}</div>
           <div className="sb-color-palette__grid">
@@ -156,5 +187,40 @@ export function ColorPalette({
         </section>
       ))}
     </div>
+  );
+}
+
+export function ColorPalette({
+  filter,
+  groupBy,
+  caption,
+  sortBy = 'path',
+  sortDir = 'asc',
+}: ColorPaletteProps): ReactElement {
+  const project = useProject();
+  const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
+  const colorFormat = useColorFormat();
+
+  const groups = useMemo(
+    () =>
+      deriveColorPaletteGroups(resolved, listing, cssVarPrefix, {
+        filter,
+        groupBy,
+        sortBy,
+        sortDir,
+        colorFormat,
+      }),
+    [resolved, listing, cssVarPrefix, filter, groupBy, sortBy, sortDir, colorFormat],
+  );
+
+  return (
+    <ColorPaletteView
+      groups={groups}
+      activeTheme={activeTheme}
+      cssVarPrefix={cssVarPrefix}
+      activeAxes={activeAxes}
+      filter={filter}
+      caption={caption}
+    />
   );
 }

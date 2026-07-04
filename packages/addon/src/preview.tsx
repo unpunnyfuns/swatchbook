@@ -28,6 +28,7 @@ import {
   AxesContext,
   COLOR_FORMATS,
   ColorFormatContext,
+  registerChannel,
   registerTokenSource,
   SwatchbookContext,
   ThemeContext,
@@ -48,6 +49,13 @@ import type { InitPayload } from '#/channel-types.ts';
 import type { StoryParameters, SwatchbookGlobals } from '#/globals.ts';
 import { useThemeAnnouncement } from '#/hooks/use-theme-announcement.ts';
 import { resolveTuple } from '#/tuple-resolve.ts';
+
+// Hand blocks the preview channel they subscribe to for toolbar axis/format
+// flips and dev-time token HMR. Blocks no longer reach for
+// `addons.getChannel()` themselves — the addon owns the Storybook relationship
+// and injects it here, at the same module-eval point as the token snapshot
+// below, before the preview emits its init SET_GLOBALS.
+registerChannel(addons.getChannel());
 
 // Seed blocks' token store with the build-time snapshot from the addon's
 // virtual module. Blocks no longer import `virtual:swatchbook/tokens`

@@ -1,9 +1,10 @@
 import type { ReactElement } from 'react';
 import './MotionSample.css';
 import clsx from 'clsx';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { useProject } from '#/internal/use-project.ts';
+import type { ProjectData } from '#/internal/use-project.ts';
 
 export type MotionSpeed = 0.25 | 0.5 | 1 | 2;
 
@@ -23,7 +24,7 @@ export interface MotionSampleProps {
 const DEFAULT_DURATION_MS = 300;
 const DEFAULT_EASING = 'cubic-bezier(0.2, 0, 0, 1)';
 
-interface Spec {
+export interface Spec {
   durationMs: number;
   easing: string;
 }
@@ -112,11 +113,33 @@ export function resolveMotionSpec(
   return null;
 }
 
-export function MotionSample({ path, speed = 1, runKey = 0 }: MotionSampleProps): ReactElement {
-  const { resolved } = useProject();
-  const reducedMotion = usePrefersReducedMotion();
+export interface MotionSampleData {
+  /** Resolved duration/easing for the token at `path`, or `null` when unresolved. */
+  spec: Spec | null;
+}
 
-  const spec = useMemo(() => resolveMotionSpec(resolved[path], resolved), [resolved, path]);
+/**
+ * Pure derivation of a single motion token's animation spec from resolved
+ * project data. Extracted so it is unit-testable without React or a store.
+ */
+export function deriveMotionSample(
+  path: string,
+  project: Pick<ProjectData, 'resolved'>,
+): MotionSampleData {
+  return {
+    spec: resolveMotionSpec(project.resolved[path], project.resolved),
+  };
+}
+
+export interface MotionSampleViewProps {
+  spec: Spec | null;
+  speed: MotionSpeed;
+  runKey: number;
+}
+
+/** Pure presentation + animation for a single motion token's sample. Renders from plain props. */
+export function MotionSampleView({ spec, speed, runKey }: MotionSampleViewProps): ReactElement {
+  const reducedMotion = usePrefersReducedMotion();
 
   const durationMs = spec?.durationMs ?? DEFAULT_DURATION_MS;
   const easing = spec?.easing ?? DEFAULT_EASING;
@@ -157,4 +180,10 @@ export function MotionSample({ path, speed = 1, runKey = 0 }: MotionSampleProps)
       />
     </div>
   );
+}
+
+export function MotionSample({ path, speed = 1, runKey = 0 }: MotionSampleProps): ReactElement {
+  const project = useProject();
+  const { spec } = deriveMotionSample(path, project);
+  return <MotionSampleView spec={spec} speed={speed} runKey={runKey} />;
 }

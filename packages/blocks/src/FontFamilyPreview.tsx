@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import './FontFamilyPreview.css';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+import type { ProjectData } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
@@ -27,7 +28,7 @@ export interface FontFamilyPreviewProps {
   sortDir?: SortDir;
 }
 
-interface Row {
+export interface FontFamilyRow {
   path: string;
   cssVar: string;
   stack: string;
@@ -39,28 +40,52 @@ function stackString(raw: unknown): string {
   return '';
 }
 
-export function FontFamilyPreview({
+export interface DeriveFontFamilyRowsOptions {
+  filter?: string | undefined;
+  sortBy: SortBy;
+  sortDir: SortDir;
+}
+
+/**
+ * Pure derivation of the preview's display rows from resolved project data.
+ * Extracted so it is unit-testable without React or a store.
+ */
+export function deriveFontFamilyRows(
+  resolved: ProjectData['resolved'],
+  project: Pick<ProjectData, 'listing' | 'cssVarPrefix'>,
+  { filter, sortBy, sortDir }: DeriveFontFamilyRowsOptions,
+): FontFamilyRow[] {
+  const filtered = Object.entries(resolved).filter(([path, token]) => {
+    if (token.$type !== 'fontFamily') return false;
+    return matchPath(path, filter);
+  });
+  return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
+    path,
+    cssVar: resolveCssVar(path, project),
+    stack: stackString(token.$value),
+  }));
+}
+
+export interface FontFamilyPreviewViewProps {
+  rows: FontFamilyRow[];
+  activeTheme: string;
+  cssVarPrefix: string;
+  activeAxes: Record<string, string>;
+  sample: string;
+  filter?: string | undefined;
+  caption?: string | undefined;
+}
+
+/** Pure presentation for the font-family preview. Renders from plain props. */
+export function FontFamilyPreviewView({
+  rows,
+  activeTheme,
+  cssVarPrefix,
+  activeAxes,
+  sample,
   filter,
-  sample = 'The quick brown fox jumps over the lazy dog.',
   caption,
-  sortBy = 'path',
-  sortDir = 'asc',
-}: FontFamilyPreviewProps): ReactElement {
-  const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
-
-  const rows = useMemo<Row[]>(() => {
-    const filtered = Object.entries(resolved).filter(([path, token]) => {
-      if (token.$type !== 'fontFamily') return false;
-      return matchPath(path, filter);
-    });
-    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
-      path,
-      cssVar: resolveCssVar(path, project),
-      stack: stackString(token.$value),
-    }));
-  }, [resolved, filter, project, sortBy, sortDir]);
-
+}: FontFamilyPreviewViewProps): ReactElement {
   const captionText =
     caption ??
     `${rows.length} fontFamily token${rows.length === 1 ? '' : 's'}${filter && filter !== 'fontFamily' ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -89,5 +114,33 @@ export function FontFamilyPreview({
         </div>
       ))}
     </div>
+  );
+}
+
+export function FontFamilyPreview({
+  filter,
+  sample = 'The quick brown fox jumps over the lazy dog.',
+  caption,
+  sortBy = 'path',
+  sortDir = 'asc',
+}: FontFamilyPreviewProps): ReactElement {
+  const project = useProject();
+  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+
+  const rows = useMemo(
+    () => deriveFontFamilyRows(resolved, project, { filter, sortBy, sortDir }),
+    [resolved, project, filter, sortBy, sortDir],
+  );
+
+  return (
+    <FontFamilyPreviewView
+      rows={rows}
+      activeTheme={activeTheme}
+      cssVarPrefix={cssVarPrefix}
+      activeAxes={activeAxes}
+      sample={sample}
+      filter={filter}
+      caption={caption}
+    />
   );
 }

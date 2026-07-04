@@ -4,6 +4,7 @@ import './StrokeStylePreview.css';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+import type { ProjectData } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
@@ -37,7 +38,7 @@ const STRING_STYLES = new Set([
   'inset',
 ]);
 
-interface Row {
+export interface StrokeStyleRow {
   path: string;
   cssVar: string;
   displayValue: string;
@@ -49,28 +50,51 @@ function extractCssStyle(value: unknown): string | null {
   return null;
 }
 
-export function StrokeStylePreview({
+export interface DeriveStrokeStyleRowsOptions {
+  filter?: string | undefined;
+  sortBy: SortBy;
+  sortDir: SortDir;
+}
+
+/**
+ * Pure derivation of the preview's display rows from resolved project data.
+ * Extracted so it is unit-testable without React or a store.
+ */
+export function deriveStrokeStyleRows(
+  resolved: ProjectData['resolved'],
+  project: Pick<ProjectData, 'listing' | 'cssVarPrefix'>,
+  { filter, sortBy, sortDir }: DeriveStrokeStyleRowsOptions,
+): StrokeStyleRow[] {
+  const filtered = Object.entries(resolved).filter(([path, token]) => {
+    if (token.$type !== 'strokeStyle') return false;
+    return matchPath(path, filter);
+  });
+  return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
+    path,
+    cssVar: resolveCssVar(path, project),
+    displayValue: formatTokenValue(token.$value, token.$type, 'raw', project.listing[path]),
+    cssStyle: extractCssStyle(token.$value),
+  }));
+}
+
+export interface StrokeStylePreviewViewProps {
+  rows: StrokeStyleRow[];
+  activeTheme: string;
+  cssVarPrefix: string;
+  activeAxes: Record<string, string>;
+  filter?: string | undefined;
+  caption?: string | undefined;
+}
+
+/** Pure presentation for the stroke-style preview. Renders from plain props. */
+export function StrokeStylePreviewView({
+  rows,
+  activeTheme,
+  cssVarPrefix,
+  activeAxes,
   filter,
   caption,
-  sortBy = 'path',
-  sortDir = 'asc',
-}: StrokeStylePreviewProps): ReactElement {
-  const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
-
-  const rows = useMemo<Row[]>(() => {
-    const filtered = Object.entries(resolved).filter(([path, token]) => {
-      if (token.$type !== 'strokeStyle') return false;
-      return matchPath(path, filter);
-    });
-    return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
-      path,
-      cssVar: resolveCssVar(path, project),
-      displayValue: formatTokenValue(token.$value, token.$type, 'raw', project.listing[path]),
-      cssStyle: extractCssStyle(token.$value),
-    }));
-  }, [resolved, filter, project, sortBy, sortDir]);
-
+}: StrokeStylePreviewViewProps): ReactElement {
   const captionText =
     caption ??
     `${rows.length} strokeStyle token${rows.length === 1 ? '' : 's'}${filter && filter !== 'strokeStyle' ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -109,5 +133,31 @@ export function StrokeStylePreview({
         </div>
       ))}
     </div>
+  );
+}
+
+export function StrokeStylePreview({
+  filter,
+  caption,
+  sortBy = 'path',
+  sortDir = 'asc',
+}: StrokeStylePreviewProps): ReactElement {
+  const project = useProject();
+  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+
+  const rows = useMemo(
+    () => deriveStrokeStyleRows(resolved, project, { filter, sortBy, sortDir }),
+    [resolved, project, filter, sortBy, sortDir],
+  );
+
+  return (
+    <StrokeStylePreviewView
+      rows={rows}
+      activeTheme={activeTheme}
+      cssVarPrefix={cssVarPrefix}
+      activeAxes={activeAxes}
+      filter={filter}
+      caption={caption}
+    />
   );
 }
