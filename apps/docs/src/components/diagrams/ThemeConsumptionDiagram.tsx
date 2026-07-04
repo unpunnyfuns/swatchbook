@@ -64,11 +64,11 @@ export default function ThemeConsumptionDiagram(): ReactNode {
               y2={row.y + 24}
               markerEnd="url(#theme-consumption-arrow)"
             />
-            <rect className={styles.node} x="450" y={row.y} width="240" height="48" rx="6" />
-            <text className={styles.labelMono} x="570" y={row.y + 21}>
+            <rect className={styles.node} x="450" y={row.y} width="302" height="48" rx="6" />
+            <text className={styles.labelMono} x="601" y={row.y + 21}>
               {row.consumer}
             </text>
-            <text className={styles.labelSmall} x="570" y={row.y + 38}>
+            <text className={styles.labelSmall} x="601" y={row.y + 38}>
               {row.sub}
             </text>
           </g>
