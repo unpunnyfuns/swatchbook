@@ -5,6 +5,7 @@ import './MotionPreview.css';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+import type { ProjectData } from '#/internal/use-project.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { MotionSample, resolveMotionSpec } from '#/motion-preview/MotionSample.tsx';
 import type { MotionSpeed } from '#/motion-preview/MotionSample.tsx';
@@ -23,7 +24,7 @@ export interface MotionPreviewProps {
 
 const SPEEDS: MotionSpeed[] = [0.25, 0.5, 1, 2];
 
-interface Row {
+export interface MotionRow {
   path: string;
   cssVar: string;
   durationMs: number;
@@ -31,7 +32,11 @@ interface Row {
   kind: 'transition' | 'duration' | 'cubicBezier';
 }
 
-function formatSpec(row: Row): string {
+export interface DeriveMotionRowsOptions {
+  filter?: string | undefined;
+}
+
+function formatSpec(row: MotionRow): string {
   switch (row.kind) {
     case 'transition':
       return `transition · ${Math.round(row.durationMs)}ms · ${row.easing}`;
@@ -42,38 +47,67 @@ function formatSpec(row: Row): string {
   }
 }
 
-export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactElement {
-  const project = useProject();
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+/**
+ * Pure derivation of the preview's display rows from resolved project data.
+ * Extracted so it is unit-testable without React or a store.
+ */
+export function deriveMotionRows(
+  resolved: ProjectData['resolved'],
+  project: Pick<ProjectData, 'listing' | 'cssVarPrefix'>,
+  { filter }: DeriveMotionRowsOptions,
+): MotionRow[] {
+  const collected: MotionRow[] = [];
+  for (const [path, token] of Object.entries(resolved)) {
+    if (filter && !matchPath(path, filter)) continue;
+    if (!filter && !['transition', 'duration', 'cubicBezier'].includes(token.$type ?? '')) {
+      continue;
+    }
+    const kind = token.$type as MotionRow['kind'] | undefined;
+    if (!kind) continue;
+    const spec = resolveMotionSpec(token, resolved);
+    if (!spec) continue;
+    collected.push({
+      path,
+      cssVar: resolveCssVar(path, project),
+      durationMs: spec.durationMs,
+      easing: spec.easing,
+      kind,
+    });
+  }
+  collected.sort((a, b) => {
+    if (a.kind !== b.kind) return a.kind.localeCompare(b.kind);
+    return a.path.localeCompare(b.path, undefined, { numeric: true });
+  });
+  return collected;
+}
+
+export interface MotionPreviewViewProps {
+  rows: MotionRow[];
+  activeTheme: string;
+  cssVarPrefix: string;
+  activeAxes: Record<string, string>;
+  filter?: string | undefined;
+  caption?: string | undefined;
+}
+
+/**
+ * Pure presentation for the motion preview. Owns the speed/replay controls'
+ * local UI state and the `prefers-reduced-motion` read (a browser-environment
+ * concern, not project data); renders from the derived `rows` view-model.
+ * Composes the connected `MotionSample` as a child (that child reads the
+ * project itself).
+ */
+export function MotionPreviewView({
+  rows,
+  activeTheme,
+  cssVarPrefix,
+  activeAxes,
+  filter,
+  caption,
+}: MotionPreviewViewProps): ReactElement {
   const [speed, setSpeed] = useState<MotionSpeed>(1);
   const [run, setRun] = useState(0);
   const reducedMotion = usePrefersReducedMotion();
-
-  const rows = useMemo(() => {
-    const collected: Row[] = [];
-    for (const [path, token] of Object.entries(resolved)) {
-      if (filter && !matchPath(path, filter)) continue;
-      if (!filter && !['transition', 'duration', 'cubicBezier'].includes(token.$type ?? '')) {
-        continue;
-      }
-      const kind = token.$type as Row['kind'] | undefined;
-      if (!kind) continue;
-      const spec = resolveMotionSpec(token, resolved);
-      if (!spec) continue;
-      collected.push({
-        path,
-        cssVar: resolveCssVar(path, project),
-        durationMs: spec.durationMs,
-        easing: spec.easing,
-        kind,
-      });
-    }
-    collected.sort((a, b) => {
-      if (a.kind !== b.kind) return a.kind.localeCompare(b.kind);
-      return a.path.localeCompare(b.path, undefined, { numeric: true });
-    });
-    return collected;
-  }, [resolved, filter, project]);
 
   const captionText =
     caption ??
@@ -125,5 +159,26 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
         </div>
       ))}
     </div>
+  );
+}
+
+export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactElement {
+  const project = useProject();
+  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+
+  const rows = useMemo(
+    () => deriveMotionRows(resolved, project, { filter }),
+    [resolved, project, filter],
+  );
+
+  return (
+    <MotionPreviewView
+      rows={rows}
+      activeTheme={activeTheme}
+      cssVarPrefix={cssVarPrefix}
+      activeAxes={activeAxes}
+      filter={filter}
+      caption={caption}
+    />
   );
 }
