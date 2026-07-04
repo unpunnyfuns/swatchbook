@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
-import { addons } from 'storybook/preview-api';
+import { onChannel } from '#/internal/channel.ts';
+import type { BlockChannel } from '#/internal/channel.ts';
 import type { VirtualTokenGraph, VirtualTokenListingShape } from '#/contexts.ts';
 import type { VirtualAxis, VirtualDiagnostic } from '#/types.ts';
 
@@ -97,19 +98,19 @@ export function registerTokenSource(source: Partial<TokenSnapshot>): void {
   applyPatch(source);
 }
 
-function ensureSubscribed(): void {
-  if (subscribed || typeof window === 'undefined') return;
+// Attach once the host channel is injected. `subscribed` guards against an
+// HMR re-register double-wiring the listener.
+function attach(channel: BlockChannel): void {
+  if (subscribed) return;
   subscribed = true;
-  const channel = addons.getChannel();
-  channel.on(TOKENS_UPDATED_EVENT, (payload: Partial<TokenSnapshot>) => {
+  channel.on<Partial<TokenSnapshot>>(TOKENS_UPDATED_EVENT, (payload) => {
     applyPatch(payload);
   });
 }
 
-ensureSubscribed();
+onChannel(attach);
 
 function subscribe(cb: () => void): () => void {
-  ensureSubscribed();
   listeners.add(cb);
   return () => {
     listeners.delete(cb);

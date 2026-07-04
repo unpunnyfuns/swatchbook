@@ -40,6 +40,7 @@ export {
   type VirtualTokenShape,
 } from '#/contexts.ts';
 export { type ChannelGlobals, useChannelGlobals } from '#/internal/channel-globals.ts';
+export { type BlockChannel, onChannel, registerChannel } from '#/internal/channel.ts';
 export {
   SwatchbookProvider,
   type SwatchbookProviderProps,
