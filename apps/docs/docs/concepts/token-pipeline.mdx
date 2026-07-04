@@ -4,6 +4,7 @@ title: The token pipeline
 sidebar_position: 6
 ---
 
+import BuildQueryDiagram from '@site/src/components/diagrams/BuildQueryDiagram';
 import IngestionDiagram from '@site/src/components/diagrams/IngestionDiagram';
 
 # The token pipeline
@@ -23,6 +24,14 @@ import { tokenGraph, defaultTuple, axes, diagnostics, css } from 'virtual:swatch
 "Virtual" means there's no file on disk. Vite asks the plugin to materialize the module on each preview build, and the plugin does this by calling `loadProject(config, cwd)` from `@unpunnyfuns/swatchbook-core` and serializing the result into ESM exports.
 
 Nothing written to disk. Edit your config or a token file, Vite notices, the plugin re-runs `loadProject`, preview sees fresh values over HMR.
+
+## Build once, query fast
+
+Parsing DTCG sources, resolving alias chains, and working out which axes affect which token is the expensive part. All of it happens once, at load, and the results are folded into a walkable token graph inside the snapshot.
+
+<BuildQueryDiagram />
+
+Everything interactive reads from that graph: token tables, alias inspectors, the switcher's repaints. Those queries are lookups, not resolution, so they stay fast regardless of how many axes or aliases a system declares. The display side never reaches back into parsing.
 
 ## HMR
 
