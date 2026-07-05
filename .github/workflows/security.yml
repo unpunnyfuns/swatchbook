@@ -8,6 +8,9 @@ on:
   # riding along on every PR is a cheap, arguably-better-coverage side effect.
   pull_request:
     branches: [main]
+    # `edited` covers stacked-PR base retargets, which fire no default type
+    # (issue #1336); see ci.yml for the full rationale.
+    types: [opened, synchronize, reopened, edited]
 
 permissions:
   contents: read

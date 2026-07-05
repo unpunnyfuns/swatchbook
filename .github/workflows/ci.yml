@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    # `edited` covers stacked PRs: when the base branch's own PR merges,
+    # GitHub retargets the stacked PR to main via an `edited` event, and the
+    # default types never start a run for its head SHA — required checks sit
+    # Expected forever (issue #1336). Title/body edits also re-run; the
+    # concurrency group below cancels superseded runs.
+    types: [opened, synchronize, reopened, edited]
 
 permissions:
   contents: read
