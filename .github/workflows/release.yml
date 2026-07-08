@@ -328,7 +328,13 @@ jobs:
             # badge would otherwise land on whichever package this loop emits
             # last. addon is the package consumers install, so it gets the badge.
             latest="--latest=false"
-            [ "$pkg" = "addon" ] && latest="--latest"
+            # Only the stable line owns the "Latest" badge. While in Changesets
+            # pre-release mode (.changeset/pre.json present) every publish is a
+            # prerelease, so no release takes the badge — it stays on the last
+            # stable (0.69.1) until `pre exit` removes pre.json at 1.0.0.
+            if [ "$pkg" = "addon" ] && [ ! -f .changeset/pre.json ]; then
+              latest="--latest"
+            fi
             gh release create "$tag" \
               --target "$GITHUB_SHA" \
               --title "$tag" \
