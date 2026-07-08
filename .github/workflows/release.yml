@@ -291,6 +291,25 @@ jobs:
 
           echo "All six fixed-group packages confirmed at v$version."
 
+          # During pre-release mode the fixed group must land on the `alpha`
+          # dist-tag, never `latest`. Changesets does this automatically; assert
+          # it so a future change to the publish step can't silently ship a
+          # prerelease as `latest` and clobber the stable line for `npm install`.
+          if [ -f .changeset/pre.json ]; then
+            latest_on_npm=$(npm view @unpunnyfuns/swatchbook-core dist-tags.latest --registry "$NPM_REGISTRY" 2>/dev/null || true)
+            # An empty result means the query failed, not that 'latest' is safe —
+            # fail loudly rather than let a network blip read as a clean pass.
+            if [ -z "$latest_on_npm" ]; then
+              echo "Could not read the 'latest' dist-tag — cannot verify the prerelease didn't leak onto it." >&2
+              exit 1
+            fi
+            if [ "$latest_on_npm" = "$version" ]; then
+              echo "Prerelease $version leaked onto the 'latest' dist-tag — expected 'alpha'." >&2
+              exit 1
+            fi
+            echo "Confirmed: 'latest' still points at $latest_on_npm, not the prerelease $version."
+          fi
+
       # Tag + release the fixed group. `changeset publish` tags only locally on
       # the runner; before the #1065 prepare/publish split the changesets action
       # pushed those tags and cut releases for us, and that side-effect was lost
