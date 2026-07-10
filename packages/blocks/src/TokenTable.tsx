@@ -1,7 +1,8 @@
 import { fuzzyFilter } from '@unpunnyfuns/swatchbook-core/fuzzy';
+import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import cx from 'clsx';
 import type { ReactElement } from 'react';
-import { useCallback, useDeferredValue, useMemo } from 'react';
+import { useCallback, useDeferredValue, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import './TokenTable.css';
 import { useColorFormat } from '#/contexts.ts';
 import { CopyButton } from '#/internal/CopyButton.tsx';
@@ -174,6 +175,40 @@ export function TokenTableView({
     return fuzzyFilter(rows, deferredQuery, (row) => `${row.path} ${row.type} ${row.value}`);
   }, [rows, deferredQuery, searchable]);
 
+  const VIRTUALIZE_THRESHOLD = 50;
+  const scrollParentRef = useRef<HTMLTableSectionElement>(null);
+  const [scrollMargin, setScrollMargin] = useState(0);
+  const virtualize = typeof window !== 'undefined' && visibleRows.length >= VIRTUALIZE_THRESHOLD;
+
+  useLayoutEffect(() => {
+    if (!virtualize) return;
+    const el = scrollParentRef.current;
+    if (!el) return;
+    const update = () => setScrollMargin(el.getBoundingClientRect().top + window.scrollY);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(document.body);
+    window.addEventListener('resize', update);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, [virtualize]);
+
+  const virtualizer = useWindowVirtualizer({
+    count: virtualize ? visibleRows.length : 0,
+    estimateSize: () => 40,
+    overscan: 8,
+    scrollMargin,
+  });
+  const virtualItems = virtualize ? virtualizer.getVirtualItems() : [];
+  const padTop = virtualItems.length > 0 ? (virtualItems[0]?.start ?? 0) - scrollMargin : 0;
+  const padBottom =
+    virtualItems.length > 0
+      ? virtualizer.getTotalSize() -
+        ((virtualItems[virtualItems.length - 1]?.end ?? 0) - scrollMargin)
+      : 0;
+
   const handleRowClick = useCallback(
     (path: string) => {
       if (onSelect) onSelect(path);
@@ -189,6 +224,96 @@ export function TokenTableView({
     `${rows.length} token${rows.length === 1 ? '' : 's'}${
       filter ? ` matching \`${filter}\`` : ''
     }${type ? ` · $type=${type}` : ''}${matchSuffix} · ${activeTheme}`;
+
+  const renderRow = (
+    row: TokenRow,
+    rowIndex: number,
+    measureRef?: (el: HTMLTableRowElement | null) => void,
+  ) => {
+    const token = row.token;
+    return (
+      <tr
+        key={row.path}
+        ref={measureRef}
+        data-index={rowIndex}
+        aria-rowindex={rowIndex + 2}
+        className="sb-token-table__row"
+        onClick={() => handleRowClick(row.path)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleRowClick(row.path);
+          }
+        }}
+        tabIndex={0}
+        aria-haspopup="dialog"
+        aria-label={`Inspect ${row.path}`}
+        data-testid="token-table-row"
+        data-path={row.path}
+      >
+        <td
+          className={cx('sb-token-table__td', 'sb-token-table__path')}
+          data-deprecated={enabledIndicators.deprecation && row.isDeprecated ? 'true' : undefined}
+        >
+          {row.path}
+        </td>
+        <td className="sb-token-table__td">
+          <span className="sb-token-table__value-cell">
+            {row.type && <span className="sb-token-table__type-pill">{row.type}</span>}
+            {row.isColor && (
+              <span
+                className="sb-token-table__swatch"
+                style={{ background: row.cssVar }}
+                aria-hidden
+              />
+            )}
+            <span
+              className="sb-token-table__value-text"
+              title={row.value}
+              data-testid="token-table-value"
+            >
+              {row.value}
+            </span>
+            {row.outOfGamut && (
+              <span
+                title="Out of sRGB gamut for this format"
+                aria-label="out of gamut"
+                className="sb-token-table__gamut-warn"
+              >
+                ⚠
+              </span>
+            )}
+            <span
+              className="sb-token-table__copy-wrap"
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+              role="presentation"
+            >
+              <CopyButton
+                value={row.value}
+                label={`Copy value ${row.value}`}
+                className="sb-token-table__copy"
+              />
+            </span>
+          </span>
+        </td>
+        <td className="sb-token-table__td sb-token-table__refs">
+          {token && (
+            <RowIndicators
+              path={row.path}
+              token={token}
+              root={undefined}
+              variance={row.variance}
+              colorFormat={colorFormat}
+              canReference={(p) => validPaths.has(p)}
+              onReferenceClick={(p) => setSelectedPath(p)}
+              enabled={enabledIndicators}
+            />
+          )}
+        </td>
+      </tr>
+    );
+  };
 
   if (rows.length === 0) {
     return (
@@ -220,10 +345,10 @@ export function TokenTableView({
             : ''}
         </span>
       )}
-      <table className="sb-token-table__table">
+      <table className="sb-token-table__table" aria-rowcount={visibleRows.length + 1}>
         <caption className="sb-token-table__caption">{captionText}</caption>
         <thead>
-          <tr>
+          <tr aria-rowindex={1}>
             <th className={cx('sb-token-table__th', 'sb-token-table__th--path')}>Path</th>
             <th className={cx('sb-token-table__th', 'sb-token-table__th--value')}>Value</th>
             <th className="sb-token-table__th sb-token-table__th--refs">
@@ -231,7 +356,7 @@ export function TokenTableView({
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody ref={scrollParentRef}>
           {visibleRows.length === 0 && (
             <tr>
               <td colSpan={3} className="sb-token-table__td sb-token-table__empty-row">
@@ -239,90 +364,23 @@ export function TokenTableView({
               </td>
             </tr>
           )}
-          {visibleRows.map((row) => {
-            const token = row.token;
-            return (
-              <tr
-                key={row.path}
-                className="sb-token-table__row"
-                onClick={() => handleRowClick(row.path)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleRowClick(row.path);
-                  }
-                }}
-                tabIndex={0}
-                aria-haspopup="dialog"
-                aria-label={`Inspect ${row.path}`}
-                data-testid="token-table-row"
-                data-path={row.path}
-              >
-                <td
-                  className={cx('sb-token-table__td', 'sb-token-table__path')}
-                  data-deprecated={
-                    enabledIndicators.deprecation && row.isDeprecated ? 'true' : undefined
-                  }
-                >
-                  {row.path}
-                </td>
-                <td className="sb-token-table__td">
-                  <span className="sb-token-table__value-cell">
-                    {row.type && <span className="sb-token-table__type-pill">{row.type}</span>}
-                    {row.isColor && (
-                      <span
-                        className="sb-token-table__swatch"
-                        style={{ background: row.cssVar }}
-                        aria-hidden
-                      />
-                    )}
-                    <span
-                      className="sb-token-table__value-text"
-                      title={row.value}
-                      data-testid="token-table-value"
-                    >
-                      {row.value}
-                    </span>
-                    {row.outOfGamut && (
-                      <span
-                        title="Out of sRGB gamut for this format"
-                        aria-label="out of gamut"
-                        className="sb-token-table__gamut-warn"
-                      >
-                        ⚠
-                      </span>
-                    )}
-                    <span
-                      className="sb-token-table__copy-wrap"
-                      onClick={(e) => e.stopPropagation()}
-                      onKeyDown={(e) => e.stopPropagation()}
-                      role="presentation"
-                    >
-                      <CopyButton
-                        value={row.value}
-                        label={`Copy value ${row.value}`}
-                        className="sb-token-table__copy"
-                      />
-                    </span>
-                  </span>
-                </td>
-                <td className="sb-token-table__td sb-token-table__refs">
-                  {token && (
-                    <RowIndicators
-                      path={row.path}
-                      token={token}
-                      root={undefined}
-                      variance={row.variance}
-                      colorFormat={colorFormat}
-                      canReference={(p) => validPaths.has(p)}
-                      onReferenceClick={(p) => setSelectedPath(p)}
-                      enabled={enabledIndicators}
-                    />
-                  )}
-                </td>
-              </tr>
-            );
-          })}
+          {!virtualize && visibleRows.map((row, i) => renderRow(row, i))}
+          {virtualize && padTop > 0 && (
+            <tr aria-hidden="true" style={{ height: padTop }}>
+              <td colSpan={3} />
+            </tr>
+          )}
+          {virtualize &&
+            virtualItems.map((vi) => {
+              const row = visibleRows[vi.index];
+              if (!row) return null;
+              return renderRow(row, vi.index, virtualizer.measureElement);
+            })}
+          {virtualize && padBottom > 0 && (
+            <tr aria-hidden="true" style={{ height: padBottom }}>
+              <td colSpan={3} />
+            </tr>
+          )}
         </tbody>
       </table>
 
