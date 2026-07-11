@@ -1,5 +1,5 @@
 import { SwatchbookProvider, TokenNavigator } from '@unpunnyfuns/swatchbook-blocks';
-import type { ProjectSnapshot, VirtualTokenShape } from '@unpunnyfuns/swatchbook-blocks';
+import type { ProjectSnapshot, VirtualToken } from '@unpunnyfuns/swatchbook-blocks';
 import { useState } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import preview from '#storybook/preview.tsx';
@@ -251,7 +251,7 @@ export const FocusVisibleRow = meta.story({
 // indicator variant: multi-hop forward chain (3 hops → first … last cap),
 // reverse count ≥ 2 (opens a popover menu), out-of-gamut color (display-P3
 // red outside sRGB), string-form deprecation, and boolean-form deprecation.
-const INDICATOR_TOKENS: Record<string, VirtualTokenShape> = {
+const INDICATOR_TOKENS: Record<string, VirtualToken> = {
   // Semantic alias — three-hop chain: text.primary → brand.fg → palette.blue.600 → palette.blue.500
   'color.text.primary': {
     $type: 'color',
