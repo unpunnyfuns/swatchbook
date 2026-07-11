@@ -61,6 +61,11 @@ export function ThemeSwitcher({
       tabIndex={-1}
       className="sb-switcher"
       onKeyDown={onKeyDown}
+      // Load-bearing DOM contract, not just a test hook: the addon's
+      // manager-side click-outside handling (`packages/addon/src/manager.tsx`)
+      // does `target.closest('[data-testid="swatchbook-switcher"]')` to decide
+      // whether a click landed inside the popover. A markup refactor that
+      // drops or renames this attribute silently breaks that popover logic.
       data-testid="swatchbook-switcher"
     >
       {presets.length > 0 && (
