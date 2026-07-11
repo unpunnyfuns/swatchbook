@@ -80,7 +80,7 @@ export const DarkBrandA = meta.story({
 });
 ```
 
-`axes` is a tuple; omitted keys fall back to axis defaults. The `themeName: 'Composed Name'` form sets the active tuple by composed theme name.
+`axes` is a tuple; omitted keys fall back to axis defaults.
 
 ## Hooks
 
@@ -103,7 +103,7 @@ Paths autocomplete from the generated `.swatchbook/tokens.d.ts`. Add `"include":
 
 ### Block-side hooks live in `@unpunnyfuns/swatchbook-blocks`
 
-`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the contexts that back them (`SwatchbookContext`, `ThemeContext`, `AxesContext`, `ColorFormatContext`) live canonically in `@unpunnyfuns/swatchbook-blocks`; see the [blocks reference](./blocks/index.mdx). They're also re-exported from the addon's main entry (`import { useActiveTheme } from '@unpunnyfuns/swatchbook-addon'` works) so consumers picking up the addon don't need a separate blocks dependency for the common hook surface.
+`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the contexts that back them (`ThemeContext`, `AxesContext`, `ColorFormatContext`) live canonically in `@unpunnyfuns/swatchbook-blocks`; see the [blocks reference](./blocks/index.mdx). They're also re-exported from the addon's main entry (`import { useActiveTheme } from '@unpunnyfuns/swatchbook-addon'` works) so consumers picking up the addon don't need a separate blocks dependency for the common hook surface.
 
 The preview decorator mounts a `SwatchbookProvider` (from blocks) that populates every context, so the hooks resolve wherever the addon is registered.
 
@@ -150,4 +150,3 @@ interface AddonOptions {
 - ✅ Use `useToken` for typed lookups when you need the resolved value at runtime (aria labels, conditional rendering).
 - ✅ Prefer `var(--…)` in CSS; `useToken().cssVar` gives you the right string programmatically.
 - ❌ Don't import from `virtual:swatchbook/tokens` directly in consumer code. Go through `useToken` / the panel / the doc blocks so the API stays stable.
-- ❌ Don't combine `parameters.swatchbook.themeName` *and* the toolbar for the same story: the parameter wins and the toolbar change won't stick.

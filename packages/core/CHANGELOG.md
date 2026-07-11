@@ -1,5 +1,15 @@
 # @unpunnyfuns/swatchbook-core
 
+## 1.0.0
+
+### Major Changes
+
+- c6ed29e6554246eda257444ea9c5e9dfc8bd8348: Begin the 1.0.0 alpha: enter the prerelease channel toward a stable 1.0.
+
+### Minor Changes
+
+- 2d81615bcf2b5f170941df058366f9190224c9cb: Pre-1.0 API-surface cleanup: drop dead/leaked exports, rename a few symbols, dedupe duplicate types, and remove the themeName parse-path ahead of the 1.0 freeze.
+
 ## 1.0.0-alpha.2
 
 ### Minor Changes

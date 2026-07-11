@@ -1,6 +1,6 @@
 {
   "name": "@unpunnyfuns/swatchbook-tokens",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Exhaustive DTCG token set — the dogfood fixture the reference Storybook renders against, and a reference for consumers structuring their own token projects.",
   "private": true,
   "type": "module",

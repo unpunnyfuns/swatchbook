@@ -1,5 +1,17 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 1.0.0
+
+### Minor Changes
+
+- 5a73311e540e41a2158bca024e784d8938d0f5f5: Virtualize TokenTable rows so theme-switch cost tracks viewport size, not token count.
+
+### Patch Changes
+
+- Updated dependencies [c6ed29e]
+- Updated dependencies [2d81615]
+  - @unpunnyfuns/swatchbook-core@1.0.0
+
 ## 1.0.0-alpha.2
 
 ### Patch Changes
