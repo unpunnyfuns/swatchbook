@@ -5,8 +5,10 @@ import { useRootFontSize } from '#/internal/use-root-font-size.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import type { ProjectData } from '#/internal/use-project.ts';
 
+/** The visual treatment for a dimension sample: a length bar, a radius square, or a sized square. */
 export type DimensionVisual = 'length' | 'radius' | 'size';
 
+/** Props for the connected {@link DimensionSample} block. */
 export interface DimensionSampleProps {
   /** Full dot-path of the dimension token to preview. */
   path: string;
@@ -66,6 +68,7 @@ function withCap(visual: ReactElement): ReactElement {
   );
 }
 
+/** Props for the pure {@link DimensionSampleView} presenter, derived from the resolved sample data. */
 export type DimensionSampleViewProps = Pick<
   DimensionSampleData,
   'cssVar' | 'capped' | 'cappedValue'
@@ -111,6 +114,7 @@ export function DimensionSampleView({
   }
 }
 
+/** Connected block: resolves `path` against the active project and renders its dimension sample. */
 export function DimensionSample({ path, visual = 'length' }: DimensionSampleProps): ReactElement {
   const project = useProject();
   const rootFontSize = useRootFontSize();

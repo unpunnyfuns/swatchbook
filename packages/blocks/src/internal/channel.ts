@@ -23,10 +23,11 @@ const pending = new Set<(channel: BlockChannel) => void>();
  * Host adapter API. The single most load-bearing function in the host
  * contract — the addon calls it once at preview init.
  *
- * Inject the host channel. Runs any subscribers that registered before the
- * channel existed, then clears the queue. Idempotent for consumers: each
- * subscriber guards its own attach, so a re-register (HMR) does not
- * double-wire.
+ * Inject the host channel. Runs any subscribers that queued before the
+ * channel existed, then clears the queue. The host contract does NOT dedupe:
+ * on HMR a subscriber's module re-runs {@link onChannel}, which re-attaches
+ * immediately once the channel is set, so each subscriber MUST guard its own
+ * attach to stay single-wired.
  */
 export function registerChannel(next: BlockChannel): void {
   channel = next;
