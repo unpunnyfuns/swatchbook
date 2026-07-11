@@ -46,15 +46,6 @@ export interface SwatchbookToken {
 export type TokenMap = Record<string, SwatchbookToken>;
 
 /**
- * How a token's resolved value depends on the project's axes.
- *
- * - `constant` — same value across every tuple (or token missing entirely).
- * - `single` — varies with exactly one axis.
- * - `multi` — varies across two or more axes.
- */
-export type VarianceKind = 'constant' | 'single' | 'multi';
-
-/**
  * Per-axis breakdown carried on every variance result — whether each
  * axis affects this token, and the stringified value seen in each of
  * its contexts (holding other axes at their defaults).
@@ -328,6 +319,21 @@ export type Config = ResolverConfig | LayeredConfig | PlainConfig;
 
 export type DiagnosticSeverity = 'error' | 'warn' | 'info';
 
+/**
+ * A single problem or notice surfaced while loading or building a project.
+ * Collected on `Project.diagnostics`; consumers render these as toolbar
+ * badges, console output, or CLI exit-code triggers.
+ *
+ * `group` is a `swatchbook/<area>` slug for swatchbook-originated
+ * diagnostics (e.g. `swatchbook/chrome`, `swatchbook/disabled-axes`,
+ * `swatchbook/css-options`, `swatchbook/listing`) or a bare Terrazzo group
+ * name (`parser`, `resolver`, `plugin`, …) when the diagnostic is passed
+ * through unchanged from the underlying `@terrazzo/parser` build. `filename`
+ * and `line` are populated only when the diagnostic traces back to a
+ * specific source location Terrazzo reported (a parse or resolver error);
+ * swatchbook-originated diagnostics about config shape or runtime behavior
+ * omit both.
+ */
 export interface Diagnostic {
   severity: DiagnosticSeverity;
   /** Source group from Terrazzo (parser, resolver, plugin, …). */

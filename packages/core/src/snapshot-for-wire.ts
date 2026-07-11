@@ -22,7 +22,7 @@
  * separately for now because the manager bundle has its own
  * import-resolution constraints.
  */
-import type { ListedToken } from '#/token-listing.ts';
+import type { ListedToken } from '@terrazzo/plugin-token-listing';
 import type { TokenGraph } from '#/token-graph/types.ts';
 import type { Project } from '#/types.ts';
 

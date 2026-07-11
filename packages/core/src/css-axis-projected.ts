@@ -276,9 +276,14 @@ export interface EmitAxisProjectedCssOptions {
  * with one modifier), the cell selector uses the axis's actual name
  * — e.g. `[data-mode="Dark"]`.
  *
- * @internal Consumers should not depend on this function directly.
- * External consumers driving their own build pipeline should use
- * Terrazzo's CLI against the DTCG sources directly.
+ * Public, but scoped to swatchbook's own preview build: this is how the
+ * addon produces the stylesheet it injects into Storybook and how the MCP
+ * server answers CSS-preview queries — both call it directly through this
+ * entry rather than duplicating the emission logic. It is not a
+ * general-purpose production CSS emitter; consumers building their own
+ * transform pipeline for a shipped platform should drive
+ * `@terrazzo/plugin-css` / the Terrazzo CLI against their DTCG sources
+ * instead, the same way swatchbook's own preview build does internally.
  */
 export function emitAxisProjectedCss(
   project: Project,

@@ -8,8 +8,6 @@ import type { ListedToken, TokenListingPluginOptions } from '@terrazzo/plugin-to
 import { makeCSSVar } from '@terrazzo/token-tools/css';
 import type { Diagnostic, ParserInput } from '#/types.ts';
 
-export type { ListedToken } from '@terrazzo/plugin-token-listing';
-
 /**
  * Token Listing data indexed by path for fast per-token lookup. Each entry
  * is the raw `ListedToken` emitted by `@terrazzo/plugin-token-listing` —
@@ -19,6 +17,14 @@ export type { ListedToken } from '@terrazzo/plugin-token-listing';
  * Produced by `computeTokenListing`; attached to `Project.listing` when the
  * project is resolver-backed so downstream consumers can read authoritative
  * CSS var names and preview strings instead of re-deriving them.
+ *
+ * Accepted coupling: `ListedToken`'s shape comes straight from
+ * `@terrazzo/plugin-token-listing`, which core depends on at an exact pin
+ * (`"@terrazzo/plugin-token-listing": "0.1.1"`, not a range) precisely
+ * because this type isn't insulated from it. Any upstream listing-format
+ * change is a deliberate, coordinated bump here, not a silent break —
+ * consumers who need insulation from that churn should read
+ * `SlimListedToken` (`/snapshot-for-wire`) instead of this type directly.
  */
 export type TokenListingByPath = Record<string, ListedToken>;
 

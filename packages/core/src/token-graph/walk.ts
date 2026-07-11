@@ -86,6 +86,15 @@ function resolveAtInternal(
   return result;
 }
 
+/**
+ * Resolve a single token to its leaf value at `tuple` — the foundational
+ * single-token resolution primitive every other resolver in this module
+ * builds on. Walks direct writes (last-wins across axes in project order),
+ * alias targets, and partial-alias composition until it reaches a literal.
+ * Returns `undefined` for a path not in the graph or one whose alias chain
+ * fails to resolve. Cycle-safe: a self-referential chain falls back to the
+ * node's baseline value rather than looping.
+ */
 export function resolveAt(
   graph: TokenGraph,
   path: string,
@@ -94,6 +103,14 @@ export function resolveAt(
   return resolveAtInternal(graph, path, tuple, new Map());
 }
 
+/**
+ * Resolve every token in the graph to its leaf value at `tuple` — the
+ * project-wide counterpart to `resolveAt`, sharing one cycle-detection memo
+ * across all paths. The primitive the CSS emitter, the loader's
+ * `defaultTokens` snapshot, and `getVariance`'s per-context sampling all
+ * build on. Paths that fail to resolve are omitted from the result rather
+ * than included as `undefined`.
+ */
 export function resolveAllAt(graph: TokenGraph, tuple: Record<string, string>): TokenMap {
   const memo: CycleMemo = new Map();
   const result: TokenMap = {};
