@@ -96,6 +96,12 @@ const config: Config = {
   ],
 
   themeConfig: {
+    announcementBar: {
+      id: 'v1-0-0-alpha',
+      content:
+        'swatchbook <code>1.0.0-alpha</code> is on npm under the <code>alpha</code> dist-tag. The <a href="/swatchbook/next/">Next docs</a> track it; the default docs below cover the stable 0.69 line.',
+      isCloseable: true,
+    },
     colorMode: {
       respectPrefersColorScheme: true,
     },
