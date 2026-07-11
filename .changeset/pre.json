@@ -13,6 +13,7 @@
     "@unpunnyfuns/swatchbook-tokens": "0.0.0"
   },
   "changesets": [
-    "enter-1-0-alpha"
+    "enter-1-0-alpha",
+    "virtualize-token-table"
   ]
 }

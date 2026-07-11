@@ -1,6 +1,6 @@
 {
   "name": "@unpunnyfuns/swatchbook-docs",
-  "version": "0.0.83-alpha.0",
+  "version": "0.0.83-alpha.1",
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
