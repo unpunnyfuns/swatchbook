@@ -64,7 +64,10 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          app-id: ${{ secrets.RELEASE_APP_ID }}
+          # `client-id`, not the deprecated `app-id`. GitHub's App JWT accepts
+          # either the App ID or the Client ID as the issuer, so the existing
+          # numeric RELEASE_APP_ID secret still authenticates here unchanged.
+          client-id: ${{ secrets.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
