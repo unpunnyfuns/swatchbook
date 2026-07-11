@@ -4,7 +4,7 @@ import {
   tokenGraph as virtualTokenGraph,
 } from 'virtual:swatchbook/tokens';
 import { resolveAllWithProvenanceAt } from '@unpunnyfuns/swatchbook-core/graph';
-import { makeCssVar } from '@unpunnyfuns/swatchbook-core/css-var';
+import { cssVarRef } from '@unpunnyfuns/swatchbook-core/css-var';
 import {
   useActiveAxes,
   useChannelGlobals,
@@ -45,7 +45,7 @@ export interface TokenInfo {
 
 /**
  * Read a DTCG token for the currently active theme. Re-reads on theme
- * switch via the addon's `SwatchbookContext`. Returns `{ value, cssVar,
+ * switch via the addon's `SwatchbookProvider`. Returns `{ value, cssVar,
  * type, description }`.
  *
  * Typed paths appear automatically once `.swatchbook/tokens.d.ts` is
@@ -53,8 +53,8 @@ export interface TokenInfo {
  * `TokenPath` is `string`.
  *
  * Safe to call in autodocs / MDX renders — uses plain React context, not
- * Storybook's preview-only hooks. Reads from the addon-provided
- * `SwatchbookContext` when present (preferred — uses the lifted
+ * Storybook's preview-only hooks. Reads from the addon-mounted
+ * `SwatchbookProvider` when present (preferred — uses the lifted
  * `resolveAt` accessor and the live active tuple); falls back to the
  * module-scope `fallbackResolveAt` (`resolveAllWithProvenanceAt(virtualTokenGraph,
  * tuple)`) over the virtual module's default tuple when no provider is
@@ -83,7 +83,7 @@ export function useToken(path: TokenPath): TokenInfo {
 
   const info: TokenInfo = {
     value: token?.$value,
-    cssVar: makeCssVar(path, prefix),
+    cssVar: cssVarRef(path, prefix),
   };
   if (token?.$type) info.type = token.$type;
   if (token?.$description) info.description = token.$description;

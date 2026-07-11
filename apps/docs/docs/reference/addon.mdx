@@ -80,7 +80,7 @@ export const DarkBrandA = meta.story({
 });
 ```
 
-`axes` is a tuple; omitted keys fall back to axis defaults. The `themeName: 'Composed Name'` form sets the active tuple by composed theme name.
+`axes` is a tuple; omitted keys fall back to axis defaults.
 
 ## Hooks
 
@@ -150,4 +150,3 @@ interface AddonOptions {
 - ✅ Use `useToken` for typed lookups when you need the resolved value at runtime (aria labels, conditional rendering).
 - ✅ Prefer `var(--…)` in CSS; `useToken().cssVar` gives you the right string programmatically.
 - ❌ Don't import from `virtual:swatchbook/tokens` directly in consumer code. Go through `useToken` / the panel / the doc blocks so the API stays stable.
-- ❌ Don't combine `parameters.swatchbook.themeName` *and* the toolbar for the same story: the parameter wins and the toolbar change won't stick.

@@ -22,29 +22,6 @@ export function axisDefaultTuple(axes: readonly ResolveAxis[]): Record<string, s
 }
 
 /**
- * Reverse-engineer a tuple from a `Light · Brand A · Normal`-shape theme
- * name. Splits on ` · ` and zips with `axes` in declared order — the inverse
- * of `tupleToName`, so a round-trip is lossless. Returns `undefined` when the
- * segment count doesn't match the axis count.
- */
-export function tupleForName(
-  name: string,
-  axes: readonly ResolveAxis[],
-): Record<string, string> | undefined {
-  if (!name) return undefined;
-  const parts = name.split(' · ');
-  if (parts.length !== axes.length) return undefined;
-  const out: Record<string, string> = {};
-  for (let i = 0; i < axes.length; i++) {
-    const axis = axes[i] as ResolveAxis;
-    const value = parts[i];
-    if (value === undefined) return undefined;
-    out[axis.name] = value;
-  }
-  return out;
-}
-
-/**
  * Merge a partial tuple onto the axis defaults: drop keys for axes that don't
  * exist, and fall back to the default for contexts not listed on the axis.
  */
@@ -65,9 +42,8 @@ export function normalizeTuple(
 /**
  * Resolve the active tuple from all input channels, in priority order:
  *   1. `parameters.swatchbook.axes` — per-story tuple.
- *   2. `parameters.swatchbook.themeName` — per-story composed theme name.
- *   3. `globals.swatchbookAxes` — toolbar-set tuple.
- *   4. axis defaults.
+ *   2. `globals.swatchbookAxes` — toolbar-set tuple.
+ *   3. axis defaults.
  */
 export function resolveTuple(
   axesGlobal: Record<string, string> | undefined,
@@ -77,10 +53,6 @@ export function resolveTuple(
   const paramAxes = paramSwatchbook?.axes;
   if (paramAxes) {
     return normalizeTuple(paramAxes, axes);
-  }
-  if (paramSwatchbook?.themeName) {
-    const hit = tupleForName(paramSwatchbook.themeName, axes);
-    if (hit) return normalizeTuple(hit, axes);
   }
   if (axesGlobal && typeof axesGlobal === 'object') {
     return normalizeTuple(axesGlobal, axes);

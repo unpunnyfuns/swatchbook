@@ -7,6 +7,13 @@ import * as previewExports from '#/preview.tsx';
 export type { AddonOptions } from '#/options.ts';
 
 /**
+ * Typed shapes for the `parameters.swatchbook.*` / `globals.swatchbook*`
+ * contract the addon reads, so consumers authoring story config can check
+ * it against a named type instead of relying on structural matching.
+ */
+export type { StoryParameters, SwatchbookGlobals, SwatchbookParameters } from '#/globals.ts';
+
+/**
  * Public namespace constants — addon ID, parameter / global keys, the
  * canonical virtual module ID. Useful for consumer code that needs to
  * reach into the addon's namespace (custom toolbar registrations,
