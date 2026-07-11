@@ -2,10 +2,10 @@ import { cleanup, render, screen, within } from '@testing-library/react';
 import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it } from 'vitest';
 import { SwatchbookProvider, TokenTable } from '#/index.ts';
-import type { ProjectSnapshot, VirtualTokenShape } from '#/index.ts';
+import type { ProjectSnapshot, VirtualToken } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
-const TOKENS: Record<string, VirtualTokenShape> = {
+const TOKENS: Record<string, VirtualToken> = {
   'color.primary': {
     $type: 'color',
     $value: { hex: '#0000ff' },

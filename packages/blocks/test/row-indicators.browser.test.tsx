@@ -2,7 +2,7 @@ import { cleanup, render, screen, waitFor, within } from '@testing-library/react
 import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it, vi } from 'vitest';
 import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
-import type { VirtualTokenShape } from '#/contexts.ts';
+import type { VirtualToken } from '#/types.ts';
 import { RowIndicators } from '#/indicators/RowIndicators.tsx';
 import { resolveIndicators } from '#/indicators/resolve.ts';
 
@@ -11,7 +11,7 @@ afterEach(cleanup);
 const noop = () => {};
 const inView = () => true;
 
-function renderRow(path: string, token: VirtualTokenShape, root?: string) {
+function renderRow(path: string, token: VirtualToken, root?: string) {
   return render(
     <RowIndicators
       path={path}
@@ -422,7 +422,7 @@ it('renders nothing when every present indicator is disabled', () => {
 
 function renderEnabled(
   path: string,
-  token: VirtualTokenShape,
+  token: VirtualToken,
   enabled: ReturnType<typeof resolveIndicators>,
 ) {
   return render(

@@ -1,15 +1,15 @@
 import { expect, it } from 'vitest';
-import type { VirtualTokenShape } from '#/contexts.ts';
+import type { VirtualToken } from '#/types.ts';
 
-// Type-level contract: VirtualTokenShape must accept $deprecated so blocks
+// Type-level contract: VirtualToken must accept $deprecated so blocks
 // can read it off resolved tokens. A runtime assertion keeps the test real.
-it('VirtualTokenShape accepts $deprecated as string | boolean', () => {
-  const withMessage: VirtualTokenShape = {
+it('VirtualToken accepts $deprecated as string | boolean', () => {
+  const withMessage: VirtualToken = {
     $type: 'color',
     $value: { hex: '#000' },
     $deprecated: 'use color.new',
   };
-  const withFlag: VirtualTokenShape = {
+  const withFlag: VirtualToken = {
     $type: 'color',
     $value: { hex: '#000' },
     $deprecated: true,

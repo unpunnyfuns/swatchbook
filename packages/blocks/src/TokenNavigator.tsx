@@ -4,7 +4,7 @@ import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useSta
 import './TokenNavigator.css';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
-import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
+import { DimensionSample } from '#/dimension-scale/DimensionSample.tsx';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
@@ -19,7 +19,13 @@ import type { IndicatorName, IndicatorsProp } from '#/indicators/resolve.ts';
 import type { VirtualToken } from '#/types.ts';
 
 export interface TokenNavigatorProps {
-  /** If provided, mount at this dot-path subtree and hide everything outside it. */
+  /**
+   * If provided, mount at this dot-path subtree and hide everything outside
+   * it. Unlike every other listing block's `filter` (a glob over paths,
+   * inclusion-only), `root` is a single literal path that also affects
+   * where the tree mounts and how breadcrumbs render — it re-roots the
+   * navigator, not just narrows its rows.
+   */
   root?: string;
   /**
    * Restrict the tree to tokens with the given DTCG `$type`(s). Pass a single
@@ -27,6 +33,10 @@ export interface TokenNavigatorProps {
    * small-multiples view (`type={['duration', 'cubicBezier', 'transition']}`).
    * Composes with `root` — both constraints must hold. Group nodes that end
    * up with no surviving leaves collapse out.
+   *
+   * Accepts `string | readonly string[]` — wider than `TokenTableProps.type`
+   * (`string`-only) because a small-multiples tree view benefits from
+   * multi-type scoping in a way a flat table doesn't.
    */
   type?: string | readonly string[];
   /**
@@ -904,7 +914,7 @@ const LeafPreview = memo(function LeafPreview({ path, token }: LeafPreviewProps)
           {formatTokenValue(token.$value, type, colorFormat, project.listing[path])}
         </span>
         <span className="sb-token-navigator__preview-dimension">
-          <DimensionBar path={path} visual="length" />
+          <DimensionSample path={path} visual="length" />
         </span>
       </span>
     );

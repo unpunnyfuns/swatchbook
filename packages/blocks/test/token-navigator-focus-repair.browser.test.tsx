@@ -22,15 +22,15 @@ import { cleanup, render, screen, waitFor, within } from '@testing-library/react
 import { afterEach, expect, it } from 'vitest';
 import { SwatchbookProvider, TokenNavigator } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
-import type { VirtualTokenShape } from '#/contexts.ts';
+import type { VirtualToken } from '#/types.ts';
 
 // `bravo` exists only in the Light theme; flipping to Dark drops it.
-const LIGHT: Record<string, VirtualTokenShape> = {
+const LIGHT: Record<string, VirtualToken> = {
   alpha: { $type: 'color', $value: { hex: '#000011' } },
   bravo: { $type: 'color', $value: { hex: '#000022' } },
   charlie: { $type: 'color', $value: { hex: '#000033' } },
 };
-const DARK: Record<string, VirtualTokenShape> = {
+const DARK: Record<string, VirtualToken> = {
   alpha: { $type: 'color', $value: { hex: '#111011' } },
   charlie: { $type: 'color', $value: { hex: '#111033' } },
 };

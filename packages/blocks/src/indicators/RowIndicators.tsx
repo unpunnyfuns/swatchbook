@@ -3,14 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { ColorFormat } from '#/format-color.ts';
 import { formatColor } from '#/format-color.ts';
-import type { VirtualTokenShape } from '#/contexts.ts';
+import type { VirtualToken } from '#/types.ts';
 import { resolveIndicators } from '#/indicators/resolve.ts';
 import type { IndicatorName } from '#/indicators/resolve.ts';
 import './indicators.css';
 
 export interface RowIndicatorsProps {
   path: string;
-  token: VirtualTokenShape;
+  token: VirtualToken;
   /** Active navigator root prefix, for relative chain-node labels. */
   root: string | undefined;
   /** Per-path variance result for the variance badge. */
@@ -40,7 +40,7 @@ const COMPOSITE_TYPES = new Set(['border', 'typography', 'transition', 'gradient
 // typography / border / transition / object-form shadow, stops/layers for an
 // array-form gradient or shadow. `undefined` for non-composites and for an
 // aliased composite (string `$value`), which compose nothing locally.
-function compositeFieldCount(token: VirtualTokenShape): number | undefined {
+function compositeFieldCount(token: VirtualToken): number | undefined {
   if (!token.$type || !COMPOSITE_TYPES.has(token.$type)) return undefined;
   const v = token.$value;
   if (Array.isArray(v)) return v.length > 0 ? v.length : undefined;

@@ -1,4 +1,4 @@
-import type { VirtualTokenShape } from '#/contexts.ts';
+import type { VirtualToken } from '#/types.ts';
 
 /**
  * The group paths to expand so `path` becomes visible in the tree — the
@@ -19,7 +19,7 @@ export function ancestorGroupPaths(path: string, root: string | undefined): stri
 
 /** Context a navigation target is tested against — the active structural filters. */
 export interface InViewContext {
-  resolved: Record<string, VirtualTokenShape>;
+  resolved: Record<string, VirtualToken>;
   root?: string | undefined;
   typeFilter?: ReadonlySet<string> | undefined;
 }

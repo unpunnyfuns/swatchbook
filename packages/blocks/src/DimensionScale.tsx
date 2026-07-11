@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './DimensionScale.css';
-import { DimensionBar } from '#/dimension-scale/DimensionBar.tsx';
-import type { DimensionVisual } from '#/dimension-scale/DimensionBar.tsx';
+import { DimensionSample } from '#/dimension-scale/DimensionSample.tsx';
+import type { DimensionVisual } from '#/dimension-scale/DimensionSample.tsx';
 import { useRootFontSize } from '#/internal/use-root-font-size.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
@@ -88,7 +88,7 @@ export interface DimensionScaleViewProps {
 
 /**
  * Pure presentation for the dimension scale. Renders from plain props;
- * composes the connected `DimensionBar` as a child (that child reads the
+ * composes the connected `DimensionSample` as a child (that child reads the
  * project itself).
  */
 export function DimensionScaleView({
@@ -122,7 +122,7 @@ export function DimensionScaleView({
             <span className="sb-dimension-scale__specs">{row.displayValue}</span>
           </div>
           <div className="sb-dimension-scale__visual-cell">
-            <DimensionBar path={row.path} visual={visual} />
+            <DimensionSample path={row.path} visual={visual} />
           </div>
           <span className="sb-dimension-scale__css-var">{row.cssVar}</span>
         </div>

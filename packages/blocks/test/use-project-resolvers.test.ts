@@ -16,7 +16,7 @@ describe('resolveCssVar', () => {
     const project = { cssVarPrefix: 'sb', listing: {} } as unknown as Parameters<
       typeof resolveCssVar
     >[1];
-    // The fallback derivation (makeCssVar) is covered in core; here we only
+    // The fallback derivation (cssVarRef) is covered in core; here we only
     // assert it's used (kebab-cased, prefixed) and not the listing.
     expect(resolveCssVar('color.brand', project)).toBe('var(--sb-color-brand)');
   });

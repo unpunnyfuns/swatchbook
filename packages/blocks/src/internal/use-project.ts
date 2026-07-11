@@ -3,7 +3,7 @@ import {
   getVariance,
   listPaths,
 } from '@unpunnyfuns/swatchbook-core/graph';
-import { makeCssVar } from '@unpunnyfuns/swatchbook-core/css-var';
+import { cssVarRef } from '@unpunnyfuns/swatchbook-core/css-var';
 import {
   ensureStyleElement,
   SWATCHBOOK_STYLE_ELEMENT_ID,
@@ -11,7 +11,7 @@ import {
 import { tupleToName } from '@unpunnyfuns/swatchbook-core/themes';
 import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
 import { useEffect, useMemo } from 'react';
-import type { VirtualTokenGraph, VirtualTokenListingShape } from '#/contexts.ts';
+import type { VirtualTokenGraph, VirtualTokenListing } from '#/contexts.ts';
 
 type VirtualVarianceByPathShape = Record<string, AxisVarianceResult>;
 
@@ -55,7 +55,7 @@ export interface ProjectData {
    * authoritative CSS var names from `listing[path].names.css` and
    * preview strings from `listing[path].previewValue`.
    */
-  listing: Readonly<Record<string, VirtualTokenListingShape>>;
+  listing: Readonly<Record<string, VirtualTokenListing>>;
   /**
    * Cached per-path `AxisVarianceResult` — blocks use this for O(1)
    * variance lookup instead of re-running the analysis on every
@@ -262,7 +262,7 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
  * Resolve a token's CSS var reference, preferring the authoritative name
  * emitted by `@terrazzo/plugin-css` (as recorded by
  * `@terrazzo/plugin-token-listing` in the snapshot's `listing` field).
- * Falls back to `makeCssVar` when the listing lacks an entry for this
+ * Falls back to `cssVarRef` when the listing lacks an entry for this
  * path — covers non-resolver projects, hand-built snapshots, and any
  * listing-plugin miss.
  */
@@ -272,7 +272,7 @@ export function resolveCssVar(
 ): string {
   const listed = project.listing[path]?.names?.['css'];
   if (listed) return `var(${listed})`;
-  return makeCssVar(path, project.cssVarPrefix);
+  return cssVarRef(path, project.cssVarPrefix);
 }
 
 /**

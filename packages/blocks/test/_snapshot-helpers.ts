@@ -1,4 +1,4 @@
-import type { VirtualTokenShape } from '#/contexts.ts';
+import type { VirtualToken } from '#/types.ts';
 
 /**
  * Build a `resolveAt` function from a flat token map. Used in test
@@ -7,7 +7,7 @@ import type { VirtualTokenShape } from '#/contexts.ts';
  * one resolved view).
  */
 export function makeResolveAt(
-  tokens: Record<string, VirtualTokenShape>,
-): (tuple: Record<string, string>) => Record<string, VirtualTokenShape> {
+  tokens: Record<string, VirtualToken>,
+): (tuple: Record<string, string>) => Record<string, VirtualToken> {
   return (_tuple) => tokens;
 }

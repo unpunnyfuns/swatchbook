@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import './DimensionBar.css';
+import './DimensionSample.css';
 import { MAX_RENDER_PX, toPixels } from '#/dimension-scale/dimension-px.ts';
 import { useRootFontSize } from '#/internal/use-root-font-size.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
@@ -7,7 +7,7 @@ import type { ProjectData } from '#/internal/use-project.ts';
 
 export type DimensionVisual = 'length' | 'radius' | 'size';
 
-export interface DimensionBarProps {
+export interface DimensionSampleProps {
   /** Full dot-path of the dimension token to preview. */
   path: string;
   /**
@@ -19,7 +19,7 @@ export interface DimensionBarProps {
   visual?: DimensionVisual;
 }
 
-export interface DimensionBarData {
+export interface DimensionSampleData {
   /** CSS var reference for the token's dimension (listing name, or prefix fallback). */
   cssVar: string;
   /** The resolved value in pixels, for cap comparison against {@link MAX_RENDER_PX}. `NaN` for non-`px`/`rem` units. */
@@ -31,14 +31,15 @@ export interface DimensionBarData {
 }
 
 /**
- * Pure derivation of a single dimension token's bar geometry from resolved
- * project data. Extracted so it is unit-testable without React or a store.
+ * Pure derivation of a single dimension token's sample geometry from
+ * resolved project data. Extracted so it is unit-testable without React or
+ * a store.
  */
-export function deriveDimensionBar(
+export function deriveDimensionSample(
   path: string,
   project: Pick<ProjectData, 'resolved' | 'listing' | 'cssVarPrefix'>,
   rootFontSizePx: number,
-): DimensionBarData {
+): DimensionSampleData {
   const cssVar = resolveCssVar(path, project);
   const token = project.resolved[path];
   const pxValue = toPixels(token?.$value, rootFontSizePx);
@@ -54,35 +55,38 @@ export function deriveDimensionBar(
 function withCap(visual: ReactElement): ReactElement {
   return (
     <span
-      className="sb-dimension-bar sb-dimension-bar--capped"
+      className="sb-dimension-sample sb-dimension-sample--capped"
       title={`capped at ${MAX_RENDER_PX}px`}
     >
       {visual}
-      <span className="sb-dimension-bar__cap" aria-hidden>
+      <span className="sb-dimension-sample__cap" aria-hidden>
         …
       </span>
     </span>
   );
 }
 
-export type DimensionBarViewProps = Pick<DimensionBarData, 'cssVar' | 'capped' | 'cappedValue'> & {
+export type DimensionSampleViewProps = Pick<
+  DimensionSampleData,
+  'cssVar' | 'capped' | 'cappedValue'
+> & {
   visual: DimensionVisual;
 };
 
 /** Pure presentation for a single dimension token's bar/sample. Renders from plain props. */
-export function DimensionBarView({
+export function DimensionSampleView({
   cssVar,
   capped,
   cappedValue,
   visual,
-}: DimensionBarViewProps): ReactElement {
+}: DimensionSampleViewProps): ReactElement {
   switch (visual) {
     // A fixed 56×56 box: border-radius can't overflow it, so the cap never
     // applies to the radius sample.
     case 'radius':
       return (
         <div
-          className="sb-dimension-bar__radius-sample"
+          className="sb-dimension-sample__radius-sample"
           style={{ borderRadius: cssVar }}
           aria-hidden
         />
@@ -90,7 +94,7 @@ export function DimensionBarView({
     case 'size': {
       const sample = (
         <div
-          className="sb-dimension-bar__size-sample"
+          className="sb-dimension-sample__size-sample"
           style={{ width: cappedValue, height: cappedValue }}
           aria-hidden
         />
@@ -100,18 +104,23 @@ export function DimensionBarView({
     case 'length':
     default: {
       const bar = (
-        <div className="sb-dimension-bar__bar" style={{ width: cappedValue }} aria-hidden />
+        <div className="sb-dimension-sample__bar" style={{ width: cappedValue }} aria-hidden />
       );
       return capped ? withCap(bar) : bar;
     }
   }
 }
 
-export function DimensionBar({ path, visual = 'length' }: DimensionBarProps): ReactElement {
+export function DimensionSample({ path, visual = 'length' }: DimensionSampleProps): ReactElement {
   const project = useProject();
   const rootFontSize = useRootFontSize();
-  const { cssVar, capped, cappedValue } = deriveDimensionBar(path, project, rootFontSize);
+  const { cssVar, capped, cappedValue } = deriveDimensionSample(path, project, rootFontSize);
   return (
-    <DimensionBarView cssVar={cssVar} capped={capped} cappedValue={cappedValue} visual={visual} />
+    <DimensionSampleView
+      cssVar={cssVar}
+      capped={capped}
+      cappedValue={cappedValue}
+      visual={visual}
+    />
   );
 }

@@ -286,6 +286,9 @@ importers:
         specifier: ^0.6.1
         version: 0.6.1
     devDependencies:
+      '@terrazzo/token-tools':
+        specifier: ^2.3.0
+        version: 2.3.0
       '@testing-library/react':
         specifier: ^16.3.2
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)

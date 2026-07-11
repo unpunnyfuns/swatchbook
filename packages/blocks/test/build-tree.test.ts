@@ -1,11 +1,11 @@
 import { expect, it } from 'vitest';
 import { buildTree, flattenVisible } from '#/TokenNavigator.tsx';
-import type { VirtualTokenShape } from '#/contexts.ts';
+import type { VirtualToken } from '#/types.ts';
 
 // Hand-built resolved map: two nested color groups plus one top-level
 // dimension leaf, enough to exercise nesting, sibling ordering, and the
 // group-vs-leaf split without a real project.
-const resolved: Record<string, VirtualTokenShape> = {
+const resolved: Record<string, VirtualToken> = {
   'color.palette.blue.600': { $type: 'color', $value: { hex: '#006' } },
   'color.palette.blue.500': { $type: 'color', $value: { hex: '#005' } },
   'color.brand.primary': { $type: 'color', $value: { hex: '#00f' } },

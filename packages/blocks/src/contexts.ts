@@ -63,7 +63,7 @@ export interface VirtualTokenShape {
  * the single canonical wire shape; both the addon's plugin (server-side
  * emit) and blocks (consumer-side read) reference the same definition.
  */
-export type VirtualTokenListingShape = SlimListedToken;
+export type VirtualTokenListing = SlimListedToken;
 
 export type VirtualPresetShape = Preset;
 
@@ -92,7 +92,13 @@ export interface ProjectSnapshot {
    */
   indicators?: Readonly<Record<string, boolean>>;
   diagnostics: readonly VirtualDiagnosticShape[];
-  css: string;
+  /**
+   * Raw stylesheet text for the active theme. Optional — nothing on the
+   * `SwatchbookProvider` read path consumes it (`useProject()` never reads
+   * `snapshot.css`); the addon populates it incidentally when constructing
+   * its snapshot but injects CSS through its own independent mechanism.
+   */
+  css?: string;
   /**
    * Path-indexed Token Listing data produced by
    * `@terrazzo/plugin-token-listing`. Blocks prefer reading authoritative
@@ -100,7 +106,7 @@ export interface ProjectSnapshot {
    * projects. Treat as enrichment — fall back gracefully when a path is
    * absent.
    */
-  listing?: Readonly<Record<string, VirtualTokenListingShape>>;
+  listing?: Readonly<Record<string, VirtualTokenListing>>;
   /**
    * Pre-built token graph for the project. JSON-serializable; nodes
    * carry per-axis writes plus alias edges. The blocks hook backs

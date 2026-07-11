@@ -12,6 +12,13 @@ import type { MotionSpeed } from '#/motion-preview/MotionSample.tsx';
 
 export type { MotionSpeed };
 
+/**
+ * Unlike the other filter/caption/sortBy/sortDir blocks in this family,
+ * `MotionPreview` has no `sortBy`/`sortDir` — rows are always ordered by
+ * kind (`transition` / `duration` / `cubicBezier`) then path. There's no
+ * single numeric axis across the three kinds that a sort would meaningfully
+ * order by.
+ */
 export interface MotionPreviewProps {
   /**
    * Token-path filter. Defaults to transition + duration + cubicBezier

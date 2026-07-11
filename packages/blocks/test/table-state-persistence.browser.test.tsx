@@ -11,9 +11,9 @@ import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it } from 'vitest';
 import { ColorTable, SwatchbookProvider, TokenTable } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
-import type { VirtualTokenShape } from '#/contexts.ts';
+import type { VirtualToken } from '#/types.ts';
 
-const TOKENS: Record<string, VirtualTokenShape> = {
+const TOKENS: Record<string, VirtualToken> = {
   'color.alpha': { $type: 'color', $value: { hex: '#101010' } },
   'color.beta': { $type: 'color', $value: { hex: '#202020' } },
 };

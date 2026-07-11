@@ -1,10 +1,16 @@
 import { useSyncExternalStore } from 'react';
 import { onChannel } from '#/internal/channel.ts';
 import type { BlockChannel } from '#/internal/channel.ts';
-import type { VirtualTokenGraph, VirtualTokenListingShape } from '#/contexts.ts';
+import type { VirtualTokenGraph, VirtualTokenListing } from '#/contexts.ts';
 import type { VirtualAxis, VirtualDiagnostic } from '#/types.ts';
 
 /**
+ * Host adapter API — same integration tier as {@link BlockChannel} /
+ * {@link registerChannel} / {@link onChannel}, distinct from the
+ * components/hooks/`SwatchbookProvider` surface MDX/story authors use.
+ * Most consumers never touch this; it exists for whoever builds the next
+ * host integration.
+ *
  * Live token snapshot backed by the addon's preview dev-time HMR event.
  *
  * The initial snapshot is *injected* by the addon preview via
@@ -24,6 +30,7 @@ import type { VirtualAxis, VirtualDiagnostic } from '#/types.ts';
 // emits it, this module listens — exported so the two can't drift.
 export const TOKENS_UPDATED_EVENT = 'swatchbook/tokens-updated';
 
+/** Host adapter API — see {@link registerTokenSource}. */
 export interface TokenSnapshot {
   readonly axes: readonly VirtualAxis[];
   readonly presets: readonly {
@@ -36,7 +43,7 @@ export interface TokenSnapshot {
   readonly cssVarPrefix: string;
   /** Project-wide baseline for the row-indicator strip from `config.indicators`. */
   readonly indicators: Readonly<Record<string, boolean>>;
-  readonly listing: Readonly<Record<string, VirtualTokenListingShape>>;
+  readonly listing: Readonly<Record<string, VirtualTokenListing>>;
   readonly tokenGraph: VirtualTokenGraph;
   readonly defaultTuple: Record<string, string>;
   /** Monotonic counter, bumped on each update. Useful as a React key. */
@@ -88,6 +95,8 @@ function applyPatch(patch: Partial<TokenSnapshot>): void {
 }
 
 /**
+ * Host adapter API — same integration tier as {@link registerChannel}.
+ *
  * Seed the initial token snapshot. The addon preview calls this once at
  * init with the build-time `virtual:swatchbook/tokens` data. Keeping the
  * virtual-module read on the addon side (the package that owns it) lets
@@ -125,6 +134,12 @@ function getServerSnapshot(): TokenSnapshot {
   return snapshot;
 }
 
+/**
+ * Host adapter API — same integration tier as {@link registerChannel}. Most
+ * consumers read project data through `useSwatchbookData()` /
+ * `SwatchbookProvider` instead; this is the internal subscription
+ * `useProject()`'s fallback path uses to read the live channel-fed snapshot.
+ */
 export function useTokenSnapshot(): TokenSnapshot {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
