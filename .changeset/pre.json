@@ -1,0 +1,16 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "@unpunnyfuns/swatchbook-docs": "0.0.82",
+    "@unpunnyfuns/swatchbook-storybook": "0.0.0",
+    "@unpunnyfuns/swatchbook-addon": "0.69.1",
+    "@unpunnyfuns/swatchbook-blocks": "0.69.1",
+    "@unpunnyfuns/swatchbook-core": "0.69.1",
+    "@unpunnyfuns/swatchbook-integrations": "0.69.1",
+    "@unpunnyfuns/swatchbook-mcp": "0.69.1",
+    "@unpunnyfuns/swatchbook-switcher": "0.69.1",
+    "@unpunnyfuns/swatchbook-tokens": "0.0.0"
+  },
+  "changesets": []
+}
