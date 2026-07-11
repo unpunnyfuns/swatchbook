@@ -7,7 +7,7 @@
 import type { Project } from '@unpunnyfuns/swatchbook-core';
 import type { TokenGraph } from '@unpunnyfuns/swatchbook-core/graph';
 import { expect, it } from 'vitest';
-import { renderTokenTypes } from '#/preset.ts';
+import { renderTokenTypes } from '#/token-codegen.ts';
 
 function emptyGraph(paths: readonly string[] = []): TokenGraph {
   const nodes: TokenGraph['nodes'] = {};

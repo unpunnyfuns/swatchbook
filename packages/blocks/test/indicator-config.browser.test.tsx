@@ -1,9 +1,9 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 import { SwatchbookProvider, TokenNavigator, TokenTable } from '#/index.ts';
-import type { ProjectSnapshot, VirtualTokenShape } from '#/index.ts';
+import type { ProjectSnapshot, VirtualToken } from '#/index.ts';
 
-const TOKENS: Record<string, VirtualTokenShape> = {
+const TOKENS: Record<string, VirtualToken> = {
   'color.brand': {
     $type: 'color',
     $value: { hex: '#00f' },

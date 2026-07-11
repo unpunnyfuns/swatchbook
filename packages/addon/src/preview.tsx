@@ -1,4 +1,8 @@
 /// <reference types="vite/client" />
+// This subpath's named exports (`decorators`, `globalTypes`, `initialGlobals`)
+// are consumed by `definePreviewAddon(previewExports)` inside `swatchbookAddon()`
+// (`src/index.ts`) rather than intended as a direct import for application
+// code — `swatchbookAddon()` is the supported entry point.
 import { resolveAllWithProvenanceAt } from '@unpunnyfuns/swatchbook-core/graph';
 import type { TokenMap } from '@unpunnyfuns/swatchbook-core';
 import type { Decorator, Preview } from '@storybook/react-vite';
@@ -30,7 +34,7 @@ import {
   ColorFormatContext,
   registerChannel,
   registerTokenSource,
-  SwatchbookContext,
+  SwatchbookProvider,
   ThemeContext,
   TOKENS_UPDATED_EVENT,
   useTokenSnapshot,
@@ -286,7 +290,7 @@ const themedDecorator: Decorator = (Story, context) => {
   );
 
   return (
-    <SwatchbookContext.Provider value={snapshot}>
+    <SwatchbookProvider value={snapshot}>
       <ThemeContext.Provider value={themeName}>
         <AxesContext.Provider value={tuple}>
           <ColorFormatContext.Provider value={colorFormat}>
@@ -305,7 +309,7 @@ const themedDecorator: Decorator = (Story, context) => {
           </ColorFormatContext.Provider>
         </AxesContext.Provider>
       </ThemeContext.Provider>
-    </SwatchbookContext.Provider>
+    </SwatchbookProvider>
   );
 };
 

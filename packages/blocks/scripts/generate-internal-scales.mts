@@ -1,8 +1,9 @@
 import { writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadProject, makeCSSVar } from '@unpunnyfuns/swatchbook-core';
+import { loadProject } from '@unpunnyfuns/swatchbook-core';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
+import { makeCSSVar } from '@terrazzo/token-tools/css';
 
 const HEADER = (what: string) =>
   `/*\n * GENERATED from @unpunnyfuns/swatchbook-tokens by\n` +

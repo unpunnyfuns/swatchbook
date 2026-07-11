@@ -1,5 +1,5 @@
 /**
- * Browser-safe `makeCssVar(path, prefix)` helper. Exported through the
+ * Browser-safe `cssVarRef(path, prefix)` helper. Exported through the
  * `@unpunnyfuns/swatchbook-core/css-var` subpath so the addon's hooks
  * and the blocks-side display surface share one implementation — any
  * future naming-policy shift in Terrazzo (casing, unicode, prefix
@@ -14,7 +14,8 @@
 import { makeCSSVar } from '@terrazzo/token-tools/css';
 import type { Project } from '#/types.ts';
 
-export function makeCssVar(path: string, prefix: string): string {
+/** A `var(--…)` reference for `path` — the wrapped form, not the bare property name (see `cssVarName`). */
+export function cssVarRef(path: string, prefix: string): string {
   return prefix ? makeCSSVar(path, { prefix, wrapVar: true }) : makeCSSVar(path, { wrapVar: true });
 }
 

@@ -1,9 +1,9 @@
-import { DimensionBar } from '@unpunnyfuns/swatchbook-blocks';
+import { DimensionSample } from '@unpunnyfuns/swatchbook-blocks';
 import preview from '#storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Internals/Samples/DimensionBar',
-  component: DimensionBar,
+  title: 'Internals/Samples/DimensionSample',
+  component: DimensionSample,
   argTypes: {
     path: { control: 'text' },
     visual: { control: { type: 'inline-radio' }, options: ['length', 'radius', 'size'] },

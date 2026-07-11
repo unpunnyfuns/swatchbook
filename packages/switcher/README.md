@@ -39,7 +39,9 @@ The component is pure: it doesn't read or write to storage, and it doesn't bake 
 
 Color-format selection isn't part of the switcher; hosts that need it slot a `<ColorFormatSelector>` (or any other custom node) into the optional `footer` prop.
 
-`SwitcherAxis` / `SwitcherPreset` are the accepted shapes and are cross-compatible with `Project.axes` / `Project.presets` from `@unpunnyfuns/swatchbook-core`, so pass them through directly.
+`SwitcherAxis` / `SwitcherPreset` are the accepted shapes and are cross-compatible with `Project.axes` / `Project.presets` from `@unpunnyfuns/swatchbook-core`, so pass them through directly. `SwitcherAxis.source` mirrors core's own source classification; the two packages version that union in lockstep.
+
+Beyond the `--swatchbook-*` custom properties, `./style.css`'s `.sb-switcher` / `.sb-switcher__*` BEM class names are the stable override surface for restyling. The root element also carries `data-testid="swatchbook-switcher"` — a DOM contract the Storybook addon's click-outside handling relies on, not just a test hook.
 
 ## Credits
 

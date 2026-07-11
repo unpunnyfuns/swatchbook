@@ -1,16 +1,6 @@
 import Color from 'colorjs.io';
 import type { ColorFormat } from '#/color-formats.ts';
 
-/**
- * Render a normalized DTCG color payload as a display string in the
- * requested format, with a gamut flag. The shared rendering kernel behind
- * the blocks display surface and the MCP server (which add their own thin
- * wrappers). Pure — never throws; returns the `fallback` for unrecognized
- * input so callers don't need try/catch.
- *
- * `raw` here emits a compact normalized form; consumers that want the full
- * payload (the MCP server) handle `raw` in their own wrapper.
- */
 export interface NormalizedColor {
   colorSpace: string;
   components?: readonly (number | null)[];
@@ -28,6 +18,16 @@ export interface FormatColorResult {
 
 const DEFAULT_FALLBACK = '—';
 
+/**
+ * Render a normalized DTCG color payload as a display string in the
+ * requested format, with a gamut flag. The shared rendering kernel behind
+ * the blocks display surface and the MCP server (which add their own thin
+ * wrappers). Pure — never throws; returns the `fallback` for unrecognized
+ * input so callers don't need try/catch.
+ *
+ * `raw` here emits a compact normalized form; consumers that want the full
+ * payload (the MCP server) handle `raw` in their own wrapper.
+ */
 export function formatColor(
   value: unknown,
   format: ColorFormat,

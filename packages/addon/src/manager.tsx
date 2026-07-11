@@ -1,3 +1,7 @@
+// This module exports nothing (`dist/manager.d.mts` is `export {}`) — it's a
+// side-effect-only module Storybook's manager loader resolves by convention
+// (the `./manager` package.json export), not a subpath meant to be imported
+// for its exports.
 import { presetTuple, ThemeSwitcher } from '@unpunnyfuns/swatchbook-switcher';
 import { COLOR_FORMATS, ColorFormatSelector } from '#/ColorFormatSelector.tsx';
 import type { ColorFormat } from '#/ColorFormatSelector.tsx';

@@ -16,7 +16,7 @@ npm install -D @unpunnyfuns/swatchbook-blocks
 
 Inside Storybook, register `@unpunnyfuns/swatchbook-addon` alongside these blocks; its preview decorator mounts a `SwatchbookProvider` (exported from this package) that the blocks read from. Outside Storybook, wrap your tree in `SwatchbookProvider` and pass a `ProjectSnapshot` directly.
 
-`SwatchbookProvider`, `useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the backing contexts (`SwatchbookContext`, `ThemeContext`, `AxesContext`, `ColorFormatContext`) live in `@unpunnyfuns/swatchbook-blocks`. `@unpunnyfuns/swatchbook-addon` re-exports them verbatim, so either import path works depending on which packages your consumer already pulls in.
+`SwatchbookProvider`, `useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the backing contexts (`ThemeContext`, `AxesContext`, `ColorFormatContext`) live in `@unpunnyfuns/swatchbook-blocks`. `@unpunnyfuns/swatchbook-addon` re-exports them verbatim, so either import path works depending on which packages your consumer already pulls in.
 
 ## Usage
 

@@ -1,8 +1,8 @@
 import { expect, it } from 'vitest';
-import type { VirtualTokenShape } from '#/contexts.ts';
+import type { VirtualToken } from '#/types.ts';
 import { ancestorGroupPaths, isInView } from '#/token-navigator/navigate.ts';
 
-const resolved: Record<string, VirtualTokenShape> = {
+const resolved: Record<string, VirtualToken> = {
   'color.palette.blue.500': { $type: 'color', $value: { hex: '#00f' } },
   'space.md': { $type: 'dimension', $value: '8px' },
 };

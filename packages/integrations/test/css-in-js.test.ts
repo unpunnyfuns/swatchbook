@@ -4,7 +4,8 @@ import { dirname, join } from 'node:path';
 import { loadProject } from '@unpunnyfuns/swatchbook-core';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { beforeAll, expect, it } from 'vitest';
-import cssInJsIntegration, { buildTree, uniqueIdents } from '#/css-in-js.ts';
+import cssInJsIntegration from '#/css-in-js.ts';
+import { buildTree, uniqueIdents } from '#/internal/tree.ts';
 import type { Project } from '@unpunnyfuns/swatchbook-core';
 
 let project: Project;

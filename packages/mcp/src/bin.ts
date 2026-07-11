@@ -28,11 +28,11 @@ Tools exposed:
   describe_project    Orientation — counts, axes, themes, presets, diagnostics.
   list_tokens         List tokens by path glob / \`$type\`.
   search_tokens       Fuzzy search across paths, descriptions, values.
-  resolve_theme       Full resolved token map for an axis tuple.
+  resolve_theme       Full resolved token map for an axis tuple (omit for default).
   get_token           Full detail for one token path.
   get_alias_chain     Forward alias chain per theme.
   get_aliased_by      Backward alias tree.
-  get_consumer_output CSS var + data-attribute activation for a tuple.
+  get_css_usage       CSS var + data-attribute activation for a tuple.
   get_color_formats   hex / rgb / hsl / oklch / raw for a color token.
   get_color_contrast  Pair-wise contrast (WCAG 2.1 ratio or APCA Lc) + pass flags.
   get_axis_variance   Classify token variance (constant / single / multi) per axis.

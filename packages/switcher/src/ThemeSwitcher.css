@@ -1,3 +1,12 @@
+/**
+ * Public restyling contract. `./style.css` is a published export subpath, and
+ * these BEM-style class names are the stable override surface for consumers
+ * who need more than the `--swatchbook-*` custom properties — every class
+ * defined in this file (`.sb-switcher` and its `__element` / `--modifier`
+ * descendants) is part of that contract; don't rename or drop one without
+ * treating it as a breaking change.
+ */
+
 .sb-switcher {
   min-width: 260px;
   padding: 4px 0;

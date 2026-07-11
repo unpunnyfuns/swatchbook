@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { axisDefaultTuple, normalizeTuple, resolveTuple, tupleForName } from '#/tuple-resolve.ts';
+import { axisDefaultTuple, normalizeTuple, resolveTuple } from '#/tuple-resolve.ts';
 import type { ResolveAxis } from '#/tuple-resolve.ts';
 
 const AXES: readonly ResolveAxis[] = [
@@ -9,15 +9,6 @@ const AXES: readonly ResolveAxis[] = [
 
 it('axisDefaultTuple yields every axis at its default', () => {
   expect(axisDefaultTuple(AXES)).toEqual({ mode: 'Light', brand: 'Acme' });
-});
-
-it('tupleForName reverses a " · "-joined theme name in axis order', () => {
-  expect(tupleForName('Dark · Globex', AXES)).toEqual({ mode: 'Dark', brand: 'Globex' });
-});
-
-it('tupleForName returns undefined when the segment count does not match the axes', () => {
-  expect(tupleForName('Dark', AXES)).toBeUndefined();
-  expect(tupleForName('', AXES)).toBeUndefined();
 });
 
 it('normalizeTuple fills omitted axes from defaults and keeps valid contexts', () => {
@@ -35,20 +26,6 @@ it('normalizeTuple drops keys for axes the project does not have', () => {
 it('resolveTuple prefers a per-story axes override over globals', () => {
   // param axes win; the globals tuple ({ mode: Dark }) is ignored.
   expect(resolveTuple({ mode: 'Dark' }, { axes: { brand: 'Globex' } }, AXES)).toEqual({
-    mode: 'Light',
-    brand: 'Globex',
-  });
-});
-
-it('resolveTuple falls to a per-story themeName when there is no axes override', () => {
-  expect(resolveTuple({ mode: 'Dark' }, { themeName: 'Dark · Globex' }, AXES)).toEqual({
-    mode: 'Dark',
-    brand: 'Globex',
-  });
-});
-
-it('resolveTuple ignores an unparseable themeName and falls through to globals', () => {
-  expect(resolveTuple({ brand: 'Globex' }, { themeName: 'nope' }, AXES)).toEqual({
     mode: 'Light',
     brand: 'Globex',
   });

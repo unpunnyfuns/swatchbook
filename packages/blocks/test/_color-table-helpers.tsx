@@ -1,7 +1,7 @@
-import type { ProjectSnapshot, VirtualTokenShape } from '#/index.ts';
+import type { ProjectSnapshot, VirtualToken } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
-const BASE_TOKENS: Record<string, VirtualTokenShape> = {
+const BASE_TOKENS: Record<string, VirtualToken> = {
   'color.surface.default': {
     $type: 'color',
     $value: { hex: '#ffffff' },
@@ -29,7 +29,7 @@ const BASE_TOKENS: Record<string, VirtualTokenShape> = {
  * additional tokens in the resolved map.
  */
 export function makeColorTableSnapshot(
-  extraTokens?: Record<string, VirtualTokenShape>,
+  extraTokens?: Record<string, VirtualToken>,
 ): ProjectSnapshot {
   const tokens = { ...BASE_TOKENS, ...extraTokens };
   const snap: ProjectSnapshot = {

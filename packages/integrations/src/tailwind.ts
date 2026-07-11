@@ -22,10 +22,16 @@ export interface TailwindIntegrationOptions {
    * path prefix, every `shadow` under `shadow`, every `fontFamily` under
    * `font`. Works for any DTCG project without a configuration step.
    */
-  roles?: Readonly<Record<string, readonly (readonly [string, string])[]>>;
+  roles?: TailwindRoleMap;
 }
 
-type RoleMap = Readonly<Record<string, readonly (readonly [string, string])[]>>;
+/**
+ * Tailwind scale name (`color`, `spacing`, `radius`, `shadow`, `font`, or a
+ * consumer-chosen key) mapped to its ordered `[tailwindEntryName, dtcgPath]`
+ * pairs. Shape of both `TailwindIntegrationOptions.roles` and the map
+ * `deriveRoles()` builds internally when a consumer doesn't supply one.
+ */
+export type TailwindRoleMap = Readonly<Record<string, readonly (readonly [string, string])[]>>;
 
 /**
  * Preview-only Tailwind v4 integration for the swatchbook Storybook
@@ -82,7 +88,7 @@ export default function tailwindIntegration(
   };
 }
 
-function renderTailwindTheme(project: Project, roles: RoleMap): string {
+function renderTailwindTheme(project: Project, roles: TailwindRoleMap): string {
   const prefix = project.config.cssVarPrefix ?? '';
   const varPrefix = prefix ? `${prefix}-` : '';
 
@@ -114,7 +120,7 @@ function renderTailwindTheme(project: Project, roles: RoleMap): string {
 // Classify each default-theme token into a Tailwind scale, dropping empty
 // scales. Returns the same shape as the `roles` option; per-token rules and
 // skip reasons live in classify().
-function deriveRoles(project: Project): RoleMap {
+function deriveRoles(project: Project): TailwindRoleMap {
   const scales: Record<string, [string, string][]> = {
     color: [],
     spacing: [],

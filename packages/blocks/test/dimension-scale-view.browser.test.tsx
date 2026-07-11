@@ -10,7 +10,7 @@ function rows(): DimensionRow[] {
   ];
 }
 
-// The View renders from plain props — no provider, no store. DimensionBar
+// The View renders from plain props — no provider, no store. DimensionSample
 // (rendered per-row) is a connected child that reads the project itself; it
 // falls back to an empty snapshot with no provider mounted, which is fine
 // here since only the View's own output is under test.

@@ -1,9 +1,9 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 import { SwatchbookProvider, ColorTable } from '#/index.ts';
-import type { ProjectSnapshot, VirtualTokenShape } from '#/index.ts';
+import type { ProjectSnapshot, VirtualToken } from '#/index.ts';
 
-const TOKENS: Record<string, VirtualTokenShape> = {
+const TOKENS: Record<string, VirtualToken> = {
   'color.primary': {
     $type: 'color',
     $value: { colorSpace: 'srgb', components: [0, 0, 1], alpha: 1 },

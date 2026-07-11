@@ -31,8 +31,6 @@ export interface SwatchbookGlobals {
 export interface SwatchbookParameters {
   /** Per-story tuple override. Highest priority input. */
   axes?: Record<string, string>;
-  /** Per-story composed theme name. Second priority. */
-  themeName?: string;
 }
 
 /**

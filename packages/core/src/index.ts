@@ -6,11 +6,9 @@ export {
 } from '#/chrome.ts';
 
 export { defineSwatchbookConfig } from '#/config.ts';
-export { makeCSSVar } from '@terrazzo/token-tools/css';
 export { loadProject } from '#/load.ts';
 export { emitAxisProjectedCss } from '#/css-axis-projected.ts';
-export type { TupleKey } from '#/tuple-key.ts';
-export { type ListedToken, type TokenListingByPath } from '#/token-listing.ts';
+export type { TokenListingByPath } from '#/token-listing.ts';
 
 export type {
   Axis,
@@ -29,5 +27,4 @@ export type {
   SwatchbookIntegration,
   SwatchbookToken,
   TokenMap,
-  VarianceKind,
 } from '#/types.ts';

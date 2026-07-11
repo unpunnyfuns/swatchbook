@@ -170,6 +170,14 @@ it('resolve_theme: returns the full token map for a partial tuple, filling axis 
   expect(result.count).toBeGreaterThan(0);
 });
 
+it('resolve_theme: omitting tuple entirely resolves the project default theme', async () => {
+  const result = await mcp.callJson<ResolveThemeResult>('resolve_theme', {});
+  for (const axis of project.axes) {
+    expect(result.tuple[axis.name]).toBe(axis.default);
+  }
+  expect(result.count).toBeGreaterThan(0);
+});
+
 it("resolve_theme: invalid axis context falls back to that axis's default", async () => {
   const result = await mcp.callJson<ResolveThemeResult>('resolve_theme', {
     tuple: { mode: 'NotARealMode' },
@@ -200,7 +208,7 @@ it('emit_css: returns a stylesheet with :root + per-tuple selectors', async () =
   expect(css).toMatch(/--sb-color-/);
 });
 
-interface ConsumerOutputResult {
+interface CssUsageResult {
   path: string;
   cssVar: string;
   value: string;
@@ -212,8 +220,8 @@ interface ConsumerOutputResult {
   usageSnippet: string;
 }
 
-it('get_consumer_output: returns cssVar + attrs + selector for a token at the default tuple', async () => {
-  const result = await mcp.callJson<ConsumerOutputResult>('get_consumer_output', {
+it('get_css_usage: returns cssVar + attrs + selector for a token at the default tuple', async () => {
+  const result = await mcp.callJson<CssUsageResult>('get_css_usage', {
     path: COLOR_TOKEN,
   });
   expect(result.cssVar).toBe(`var(--sb-${COLOR_TOKEN.replaceAll('.', '-')})`);
@@ -225,8 +233,8 @@ it('get_consumer_output: returns cssVar + attrs + selector for a token at the de
   }
 });
 
-it('get_consumer_output: composes the selector from a supplied non-default tuple', async () => {
-  const result = await mcp.callJson<ConsumerOutputResult>('get_consumer_output', {
+it('get_css_usage: composes the selector from a supplied non-default tuple', async () => {
+  const result = await mcp.callJson<CssUsageResult>('get_css_usage', {
     path: COLOR_TOKEN,
     tuple: { mode: 'Dark' },
   });
@@ -234,7 +242,7 @@ it('get_consumer_output: composes the selector from a supplied non-default tuple
   expect(result.selector).toContain('[data-sb-mode="Dark"]');
 });
 
-it('get_consumer_output: returns text fallback for unknown paths', async () => {
-  const text = await mcp.callText('get_consumer_output', { path: 'nope.gone.away' });
+it('get_css_usage: returns text fallback for unknown paths', async () => {
+  const text = await mcp.callText('get_css_usage', { path: 'nope.gone.away' });
   expect(text).toBe('Token not found: nope.gone.away');
 });

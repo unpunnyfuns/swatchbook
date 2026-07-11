@@ -12,14 +12,14 @@ import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it } from 'vitest';
 import { SwatchbookProvider, TokenNavigator } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
-import type { VirtualTokenShape } from '#/contexts.ts';
+import type { VirtualToken } from '#/types.ts';
 
 // Same paths in both themes — only the values differ, as with a real mode flip.
-const LIGHT: Record<string, VirtualTokenShape> = {
+const LIGHT: Record<string, VirtualToken> = {
   'color.a': { $type: 'color', $value: { hex: '#000011' } },
   'color.b': { $type: 'color', $value: { hex: '#000022' } },
 };
-const DARK: Record<string, VirtualTokenShape> = {
+const DARK: Record<string, VirtualToken> = {
   'color.a': { $type: 'color', $value: { hex: '#111011' } },
   'color.b': { $type: 'color', $value: { hex: '#111022' } },
 };

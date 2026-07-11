@@ -5,9 +5,10 @@
  * names, theme display names) into a context expecting a canonical
  * tuple key.
  *
- * Produced by {@link canonicalKey}.
+ * Internal — produced and consumed only by {@link canonicalKey} and its
+ * callers; not part of the public API.
  */
-export type TupleKey = string & { readonly __brand: 'TupleKey' };
+type TupleKey = string & { readonly __brand: 'TupleKey' };
 
 /**
  * Canonical key for an axis tuple — axes sorted by name so `{A:a,B:b}`

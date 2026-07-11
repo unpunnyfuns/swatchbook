@@ -17,7 +17,7 @@ export {
   type DimensionVisual,
   type DimensionScaleProps,
 } from '#/DimensionScale.tsx';
-export { DimensionBar, type DimensionBarProps } from '#/dimension-scale/DimensionBar.tsx';
+export { DimensionSample, type DimensionSampleProps } from '#/dimension-scale/DimensionSample.tsx';
 export { FontFamilyPreview, type FontFamilyPreviewProps } from '#/FontFamilyPreview.tsx';
 export { FontWeightScale, type FontWeightScaleProps } from '#/FontWeightScale.tsx';
 export { GradientPalette, type GradientPaletteProps } from '#/GradientPalette.tsx';
@@ -26,21 +26,18 @@ export { OpacityScale, type OpacityScaleProps } from '#/OpacityScale.tsx';
 export {
   AxesContext,
   ColorFormatContext,
-  SwatchbookContext,
   ThemeContext,
   useActiveAxes,
   useActiveTheme,
   useColorFormat,
   useOptionalSwatchbookData,
-  type VirtualAxisShape,
-  type VirtualDiagnosticShape,
-  type VirtualPresetShape,
   type VirtualTokenGraph,
-  type VirtualTokenListingShape,
-  type VirtualTokenShape,
+  type VirtualTokenListing,
 } from '#/contexts.ts';
 export { type ChannelGlobals, useChannelGlobals } from '#/internal/channel-globals.ts';
 export { type BlockChannel, onChannel, registerChannel } from '#/internal/channel.ts';
+export type { IndicatorName, IndicatorsProp } from '#/indicators/resolve.ts';
+export type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 export {
   SwatchbookProvider,
   type SwatchbookProviderProps,

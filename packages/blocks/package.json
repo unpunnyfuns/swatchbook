@@ -62,6 +62,7 @@
     "colorjs.io": "^0.6.1"
   },
   "devDependencies": {
+    "@terrazzo/token-tools": "^2.3.0",
     "@testing-library/react": "^16.3.2",
     "@tsdown/css": "^0.21.9",
     "@types/react": "^19.2.14",

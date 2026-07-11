@@ -13,13 +13,13 @@ import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it } from 'vitest';
 import { SwatchbookProvider, TokenNavigator } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
-import type { VirtualTokenShape } from '#/contexts.ts';
+import type { VirtualToken } from '#/types.ts';
 
 // `color.text.primary` aliases `color.palette.blue.500`. With no `root` set,
 // both live in the tree; `color.palette.blue.500` sits a level below the
 // initial expanded depth, so it starts collapsed and the forward-chain click
 // has genuine expand work to do.
-const TOKENS: Record<string, VirtualTokenShape> = {
+const TOKENS: Record<string, VirtualToken> = {
   'color.text.primary': {
     $type: 'color',
     $value: { hex: '#0000ff' },
@@ -87,7 +87,7 @@ it('clicking a forward chain node navigates the tree to that token', async () =>
 });
 
 it('applies a strikethrough flag to a deprecated row', async () => {
-  const deprecated: Record<string, VirtualTokenShape> = {
+  const deprecated: Record<string, VirtualToken> = {
     'color.old': { $type: 'color', $value: { hex: '#f00' }, $deprecated: 'use color.new' },
   };
   const snap: ProjectSnapshot = {

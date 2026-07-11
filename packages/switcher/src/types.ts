@@ -8,6 +8,15 @@ export interface SwitcherAxis {
   contexts: readonly string[];
   default: string;
   description?: string;
+  /**
+   * Origin of this axis, mirroring `@unpunnyfuns/swatchbook-core`'s internal
+   * source classification (see that package's `types.ts`). The literal union
+   * is coupled to core's: only `'synthetic'` is read here (to relabel the
+   * single-axis fallback as "Permutation"), but consumers commonly pass
+   * `Project.axes` straight through, so a new source kind added on the core
+   * side is a structural-compatibility change for this field too — the two
+   * packages are expected to version in lockstep on this union.
+   */
   source?: 'resolver' | 'layered' | 'synthetic';
 }
 

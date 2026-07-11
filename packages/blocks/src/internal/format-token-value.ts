@@ -1,4 +1,4 @@
-import type { VirtualTokenListingShape } from '#/contexts.ts';
+import type { VirtualTokenListing } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import type { ColorFormat } from '#/format-color.ts';
 import type {
@@ -17,7 +17,7 @@ export function formatTokenValue(
   value: unknown,
   $type: string | undefined,
   colorFormat: ColorFormat,
-  listingEntry?: VirtualTokenListingShape,
+  listingEntry?: VirtualTokenListing,
 ): string {
   if (value == null) return '';
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
