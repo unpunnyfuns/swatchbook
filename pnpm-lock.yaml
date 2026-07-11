@@ -273,6 +273,9 @@ importers:
 
   packages/blocks:
     dependencies:
+      '@tanstack/react-virtual':
+        specifier: 3.14.5
+        version: 3.14.5(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@unpunnyfuns/swatchbook-core':
         specifier: workspace:*
         version: link:../core
@@ -4105,6 +4108,15 @@ packages:
     resolution: {integrity: sha512-pCvohwOCspk3ZFn6eJzrrX3g4n2JY73H6MmYC87XfGPyTty4YsCjYTMArRZm/zOI8dIt3+EcrLHAFPe5A4bgtw==}
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
+
+  '@tanstack/react-virtual@3.14.5':
+    resolution: {integrity: sha512-4EKRXh7zBLkbKbFmG3AUVkircuHd+7OdT1pocJSepxtfBd3qnrJgJ5rtPkRYyo9fmyVb2+pI2xPy5oYvMLQy6A==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  '@tanstack/virtual-core@3.17.3':
+    resolution: {integrity: sha512-8Np/TFELpI0ySuJoVmjvOrQYXH/8sTX0Biv9szhFhY39xOdAAY+smrMxjxOum/ux3eM8MUJQsEJ0/R0UpvC8dw==}
 
   '@terrazzo/cli@2.3.0':
     resolution: {integrity: sha512-xq90WI53j7O24Xi1n9KmEPQKjbnEfu6yrC87CWiHNy3Ww1EFxo9tC1EwEZQ8D5vlViak5j0+Gfl452miOphfKw==}
@@ -13383,6 +13395,14 @@ snapshots:
       '@tailwindcss/oxide': 4.2.4
       tailwindcss: 4.2.4
       vite: 8.0.16(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(terser@5.46.1)(yaml@2.9.0)
+
+  '@tanstack/react-virtual@3.14.5(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
+    dependencies:
+      '@tanstack/virtual-core': 3.17.3
+      react: 19.2.5
+      react-dom: 19.2.5(react@19.2.5)
+
+  '@tanstack/virtual-core@3.17.3': {}
 
   '@terrazzo/cli@2.3.0(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)':
     dependencies:
