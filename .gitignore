@@ -47,3 +47,6 @@ docs/superpowers/
 # sibling branch but the gitignore travels with main so future runs
 # don't accidentally track output.
 packages/core/bench/phase-log*.txt
+
+# Local-only decision log (not committed)
+docs/decisions.md
