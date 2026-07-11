@@ -1,5 +1,5 @@
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
-import { userEvent } from '@vitest/browser/context';
+import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it, vi } from 'vitest';
 import type { AxisVarianceResult } from '@unpunnyfuns/swatchbook-core';
 import type { VirtualTokenShape } from '#/contexts.ts';

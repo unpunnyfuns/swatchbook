@@ -6,7 +6,7 @@
  * Roving-tabindex / arrow-navigation / expand-collapse coverage lives
  * in the sibling `token-navigator-*.browser.test.tsx` files.
  */
-import { userEvent } from '@vitest/browser/context';
+import { userEvent } from 'vitest/browser';
 import { cleanup } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { renderNav, treeItem } from './_token-navigator-keyboard-helpers.tsx';

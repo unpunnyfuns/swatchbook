@@ -9,7 +9,7 @@
  * 2. A deprecated token's leaf-row div carries `data-deprecated="true"`.
  */
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
-import { userEvent } from '@vitest/browser/context';
+import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it } from 'vitest';
 import { SwatchbookProvider, TokenNavigator } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';

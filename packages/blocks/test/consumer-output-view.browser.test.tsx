@@ -1,5 +1,5 @@
 import { cleanup, render, screen } from '@testing-library/react';
-import { userEvent } from '@vitest/browser/context';
+import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it, vi } from 'vitest';
 import { ConsumerOutputView } from '#/token-detail/ConsumerOutput.tsx';
 import type { ConsumerOutputViewProps } from '#/token-detail/ConsumerOutput.tsx';

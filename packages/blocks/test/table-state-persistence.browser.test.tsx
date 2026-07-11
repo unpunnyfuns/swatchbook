@@ -7,7 +7,7 @@
  * full destroy/recreate.
  */
 import { cleanup, render, screen } from '@testing-library/react';
-import { userEvent } from '@vitest/browser/context';
+import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it } from 'vitest';
 import { ColorTable, SwatchbookProvider, TokenTable } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';

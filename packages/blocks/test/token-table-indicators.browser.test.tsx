@@ -1,5 +1,5 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
-import { userEvent } from '@vitest/browser/context';
+import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it } from 'vitest';
 import { SwatchbookProvider, TokenTable } from '#/index.ts';
 import type { ProjectSnapshot, VirtualTokenShape } from '#/index.ts';

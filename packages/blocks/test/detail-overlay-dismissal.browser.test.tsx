@@ -8,7 +8,7 @@
  * `detail-overlay-focus-lifecycle.browser.test.tsx` and
  * `detail-overlay-focus-trap.browser.test.tsx`.
  */
-import { page, userEvent } from '@vitest/browser/context';
+import { page, userEvent } from 'vitest/browser';
 import { cleanup, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 import { renderOverlay } from './_detail-overlay-helpers.tsx';
