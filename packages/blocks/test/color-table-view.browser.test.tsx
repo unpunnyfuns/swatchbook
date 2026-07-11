@@ -1,5 +1,5 @@
 import { cleanup, render, screen } from '@testing-library/react';
-import { userEvent } from '@vitest/browser/context';
+import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it } from 'vitest';
 import { ColorTableView } from '#/ColorTable.tsx';
 import type { ColorGroup, ColorTableViewProps, ColorVariant } from '#/ColorTable.tsx';

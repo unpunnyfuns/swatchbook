@@ -1,7 +1,7 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { afterEach, expect, it, vi } from 'vitest';
-import { userEvent } from '@vitest/browser/context';
+import { userEvent } from 'vitest/browser';
 import { ThemeSwitcher } from '#/index.ts';
 import type { SwitcherAxis } from '#/index.ts';
 

@@ -1,6 +1,6 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { userEvent } from '@vitest/browser/context';
+import { userEvent } from 'vitest/browser';
 import { ColorTable, SwatchbookProvider } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import { makeColorTableSnapshot } from './_color-table-helpers.tsx';

@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
-import { userEvent } from '@vitest/browser/context';
+import { userEvent } from 'vitest/browser';
 import { MotionPreviewView } from '#/MotionPreview.tsx';
 import type { MotionPreviewViewProps, MotionRow } from '#/MotionPreview.tsx';
 
