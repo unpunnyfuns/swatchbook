@@ -1,5 +1,7 @@
 # @unpunnyfuns/swatchbook-switcher
 
+## 1.0.0-alpha.0
+
 ## 0.69.1
 
 ## 0.69.0

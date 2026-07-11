@@ -12,5 +12,7 @@
     "@unpunnyfuns/swatchbook-switcher": "0.69.1",
     "@unpunnyfuns/swatchbook-tokens": "0.0.0"
   },
-  "changesets": []
+  "changesets": [
+    "enter-1-0-alpha"
+  ]
 }

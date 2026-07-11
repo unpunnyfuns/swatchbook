@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-core
 
+## 1.0.0-alpha.0
+
+### Major Changes
+
+- c6ed29e6554246eda257444ea9c5e9dfc8bd8348: Begin the 1.0.0 alpha: enter the prerelease channel toward a stable 1.0.
+
 ## 0.69.1
 
 ### Patch Changes
