@@ -36,7 +36,7 @@ export {
 } from '#/contexts.ts';
 export { type ChannelGlobals, useChannelGlobals } from '#/internal/channel-globals.ts';
 export { type BlockChannel, onChannel, registerChannel } from '#/internal/channel.ts';
-export type { IndicatorsProp } from '#/indicators/resolve.ts';
+export type { IndicatorName, IndicatorsProp } from '#/indicators/resolve.ts';
 export type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 export {
   SwatchbookProvider,
