@@ -495,11 +495,14 @@ export function createServer(initial: Project): McpServer & {
     'resolve_theme',
     {
       description:
-        'Resolve the full token map for a given axis tuple. Agent passes a partial tuple (`{ mode: "Dark", brand: "Brand A" }`); any axis omitted falls back to that axis\'s default. Returns the matching theme name, the complete tuple after filling defaults, and the resolved `{ path: { value, type, aliasOf?, aliasChain? } }` map — effectively "what do all tokens look like if I pin this combination".',
+        'Resolve the full token map for a given axis tuple. Agent passes a partial tuple (`{ mode: "Dark", brand: "Brand A" }`); any axis omitted — or the whole `tuple` argument itself — falls back to that axis\'s default, so calling with no `tuple` resolves the project default theme. Returns the matching theme name, the complete tuple after filling defaults, and the resolved `{ path: { value, type, aliasOf?, aliasChain? } }` map — effectively "what do all tokens look like if I pin this combination".',
       inputSchema: {
         tuple: z
           .record(z.string(), z.string())
-          .describe('Partial axis tuple, e.g. `{ mode: "Dark", brand: "Brand A" }`.'),
+          .optional()
+          .describe(
+            'Partial axis tuple, e.g. `{ mode: "Dark", brand: "Brand A" }`. Omit for the project default theme.',
+          ),
         filter: z.string().optional().describe('Optional path glob to scope the returned map.'),
         type: z.string().optional().describe('Optional DTCG `$type` to scope the returned map.'),
       },
@@ -507,7 +510,7 @@ export function createServer(initial: Project): McpServer & {
     ({ tuple, filter, type }) => {
       const active: Record<string, string> = {};
       for (const axis of project.axes) {
-        const candidate = tuple[axis.name];
+        const candidate = tuple?.[axis.name];
         active[axis.name] =
           candidate && axis.contexts.includes(candidate) ? candidate : axis.default;
       }
@@ -534,7 +537,7 @@ export function createServer(initial: Project): McpServer & {
   );
 
   server.registerTool(
-    'get_consumer_output',
+    'get_css_usage',
     {
       description:
         'CSS var reference + resolved value + HTML data-attribute activation for a token under an optional axis tuple. Tells an agent everything it needs to write a stylesheet or JSX snippet that pins a particular theme combination — `selector` is the compound CSS selector that matches the tuple on `<html>`, `attrs` is the same information as HTML attributes, `cssVar` is the `var(--…)` reference. Tuple defaults to the project default when omitted.',
