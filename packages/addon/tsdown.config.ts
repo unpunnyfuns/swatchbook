@@ -7,6 +7,7 @@ export default defineConfig({
     'src/preview.tsx',
     'src/manager.tsx',
     'src/hooks/index.ts',
+    'src/testing.ts',
   ],
   format: 'esm',
   dts: true,
