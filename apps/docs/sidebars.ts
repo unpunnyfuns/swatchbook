@@ -53,6 +53,7 @@ const sidebars: SidebarsConfig = {
       ],
     },
     'reference/diagnostics',
+    'reference/with-axes',
   ],
   concepts: [
     'concepts/overview',
