@@ -52,3 +52,5 @@ overrides:
   # dev-server proxy, and no workspace sets one — so it is dead here. Pinned to
   # the minimum patched major (not v4) to stay closest to wds's expected API.
   http-proxy-middleware: ^3.0.6
+  # GHSA-xv26-6w52-cph6 (critical) + GHSA-mp7j-qc5w-4988 (#1368), via webpack-dev-server -> sockjs
+  websocket-driver: ^0.7.5
