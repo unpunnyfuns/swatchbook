@@ -6,16 +6,15 @@
       "dependsOn": ["^build"],
       "inputs": [
         "src/**",
+        "src/content/**",
         "tokens/**",
-        "docs/**",
-        "static/**",
+        "public/**",
         "scripts/**",
-        "docusaurus.config.ts",
-        "sidebars.ts",
+        "astro.config.mjs",
         "package.json",
         "tsconfig*.json"
       ],
-      "outputs": ["dist/**", "build/**", ".docusaurus/**"]
+      "outputs": ["dist/**", ".astro/**"]
     },
     "build:storybook": {
       "dependsOn": ["^build"],
