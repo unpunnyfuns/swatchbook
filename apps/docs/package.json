@@ -38,7 +38,8 @@
     "@types/react-dom": "19.2.3",
     "@unpunnyfuns/swatchbook-core": "workspace:*",
     "playwright": "^1.59.1",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "unist-util-visit": "^5.1.0"
   },
   "browserslist": {
     "production": [

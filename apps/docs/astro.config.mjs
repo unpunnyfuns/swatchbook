@@ -2,10 +2,20 @@ import react from '@astrojs/react';
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
 import starlightVersions from 'starlight-versions';
+import { rehypeBaseLinks } from './src/plugins/rehype-base-links.mjs';
+
+const base = '/swatchbook';
 
 export default defineConfig({
   site: 'https://unpunnyfuns.github.io',
-  base: '/swatchbook',
+  base,
+  markdown: {
+    // Root-absolute doc links in MDX bodies (`/reference/config`) are
+    // written unprefixed; Astro doesn't base-prefix markdown-authored
+    // links itself, only the nav/sidebar it generates. This rewrites them
+    // at build time so the source stays plain and portable.
+    rehypePlugins: [[rehypeBaseLinks, { base }]],
+  },
   integrations: [
     react(),
     starlight({

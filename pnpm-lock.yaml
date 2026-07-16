@@ -125,6 +125,9 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+      unist-util-visit:
+        specifier: ^5.1.0
+        version: 5.1.0
 
   apps/storybook:
     dependencies:
