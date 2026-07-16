@@ -20,4 +20,4 @@ yarn-debug.log*
 yarn-error.log*
 
 # Generated frontpage media (captured on deploy, see scripts/capture-media.mjs)
-/static/media
+/public/media

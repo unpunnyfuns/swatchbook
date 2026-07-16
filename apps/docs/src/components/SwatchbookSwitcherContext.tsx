@@ -1,23 +1,21 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { SwitcherAxis, SwitcherPreset } from '@unpunnyfuns/swatchbook-switcher';
 // Bundled at build time by `scripts/build-tokens.mts` from the DTCG tokens
-// under `apps/docs/tokens/`. Keeps the navbar switcher in sync with the CSS
-// the Infima layer reads — no runtime fetch needed.
-import snapshot from '../tokens.snapshot.json';
+// under `apps/docs/tokens/`. Keeps the switcher in sync with the CSS the
+// site's stylesheet reads — no runtime fetch needed.
+import snapshot from '#/tokens.snapshot.json';
 
-type AxesSnapshot = {
+interface AxesSnapshot {
   axes: SwitcherAxis[];
   presets: SwitcherPreset[];
   defaults: Record<string, string>;
   cssVarPrefix: string;
-};
+}
 
 /**
- * The `mode` axis is bridged to Docusaurus's `useColorMode` inside the
- * switcher button (where we're guaranteed to be under the ColorMode
- * provider). This context covers every *other* axis + presets, and
- * lives at the Root swizzle so the state survives page navigations and
- * renders before the colour-mode provider mounts.
+ * The `mode` axis is bridged to Starlight's own light/dark theme inside the
+ * switcher button. This context covers every *other* axis + presets, and
+ * wraps the switcher so state survives page navigations.
  */
 export const MODE_AXIS = 'mode';
 
@@ -87,7 +85,7 @@ function persistNonModeTuple(tuple: Record<string, string>): void {
 
 /**
  * Writes each non-mode axis onto `<html>` as `data-sb-<axis>="<context>"`.
- * Mode stays on Docusaurus's own `[data-theme]`; the emitted compound
+ * Mode stays on Starlight's own `[data-theme]`; the emitted compound
  * selectors in `tokens.generated.css` combine the two.
  */
 function syncNonModeTupleToDocument(
@@ -97,10 +95,7 @@ function syncNonModeTupleToDocument(
   if (typeof document === 'undefined') return;
   for (const axis of axes) {
     if (axis.name === MODE_AXIS) continue;
-    document.documentElement.setAttribute(
-      `data-sb-${axis.name}`,
-      tuple[axis.name] ?? axis.default,
-    );
+    document.documentElement.setAttribute(`data-sb-${axis.name}`, tuple[axis.name] ?? axis.default);
   }
 }
 

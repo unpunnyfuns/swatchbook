@@ -8,7 +8,7 @@ import { chromium } from 'playwright';
 const here = dirname(fileURLToPath(import.meta.url));
 const docsRoot = resolve(here, '..');
 const sbStatic = resolve(docsRoot, '../storybook/storybook-static');
-const outDir = resolve(docsRoot, 'static/media');
+const outDir = resolve(docsRoot, 'public/media');
 const PORT = 6017;
 const base = `http://127.0.0.1:${PORT}`;
 

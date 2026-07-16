@@ -1,0 +1,33 @@
+---
+title: swatchbook
+description: Storybook addon for DTCG design tokens
+template: splash
+hero:
+  title: Design tokens, documented in Storybook.
+  tagline: Parse your DTCG sources, preview every token in doc blocks, and watch them re-render as you switch themes from the toolbar.
+  actions:
+    - text: Get started
+      link: /swatchbook/guides/quickstart/
+      icon: rocket
+      variant: primary
+    - text: Live Storybook
+      link: /swatchbook/storybook/
+      icon: external
+      variant: secondary
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ScreenshotGallery from '#/components/ScreenshotGallery.tsx';
+
+## What it looks like
+
+<ScreenshotGallery client:visible />
+
+## Where to go next
+
+<CardGrid>
+	<LinkCard title="Guides" href="/swatchbook/guides/quickstart/" description="Install, author doc pages, wire integrations." />
+	<LinkCard title="Reference" href="/swatchbook/reference/addon/" description="Packages, blocks, config, diagnostics." />
+	<LinkCard title="Concepts" href="/swatchbook/concepts/overview/" description="The model: axes, the token graph, the pipeline." />
+	<LinkCard title="Developers" href="/swatchbook/developers/" description="Architecture and contributor notes." />
+</CardGrid>
