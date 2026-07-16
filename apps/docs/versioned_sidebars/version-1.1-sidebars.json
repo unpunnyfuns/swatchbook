@@ -47,7 +47,8 @@
         "reference/blocks/hooks"
       ]
     },
-    "reference/diagnostics"
+    "reference/diagnostics",
+    "reference/with-axes"
   ],
   "concepts": [
     "concepts/overview",

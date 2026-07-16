@@ -1,5 +1,17 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 1.1.0
+
+### Minor Changes
+
+- 6b3de672345bfd0bcc30f91426e0102e2920a331: Add `withAxes` (from the `testing` subpath) to run a story's tests under additional axis tuples.
+
+### Patch Changes
+
+- @unpunnyfuns/swatchbook-core@1.1.0
+- @unpunnyfuns/swatchbook-blocks@1.1.0
+- @unpunnyfuns/swatchbook-switcher@1.1.0
+
 ## 1.0.0
 
 ### Patch Changes
