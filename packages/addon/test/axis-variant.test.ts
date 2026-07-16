@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { assertKnownTuple, buildAxisVariant, resolvePreset } from '#/axis-variant.ts';
+import { assertKnownTuple, buildAxisInput, resolvePreset } from '#/axis-variant.ts';
 import type { ResolvePreset } from '#/axis-variant.ts';
 import type { ResolveAxis } from '#/tuple-resolve.ts';
 
@@ -15,17 +15,6 @@ const PRESETS: readonly ResolvePreset[] = [
 ];
 
 const PROJECT = { axes: AXES, presets: PRESETS };
-
-// A fake CSF-factory story: `extend` records its patch so we can assert it
-// without Storybook. `input.name` drives the display-name branch.
-function fakeStory(name?: string) {
-  return {
-    input: name === undefined ? {} : { name },
-    extend(patch: Record<string, unknown>) {
-      return { extended: patch };
-    },
-  };
-}
 
 it('resolvePreset returns the named preset axes', () => {
   expect(resolvePreset('Brand A Dark', PRESETS)).toEqual({ mode: 'Dark', brand: 'Brand A' });
@@ -49,59 +38,20 @@ it('assertKnownTuple throws on an out-of-context axis value', () => {
   );
 });
 
-it('buildAxisVariant stores a raw partial tuple as-authored on swatchbook.axes', () => {
-  const out = buildAxisVariant(fakeStory(), { mode: 'Dark', brand: 'Brand A' }, {}, PROJECT) as {
-    extended: Record<string, unknown>;
-  };
-  expect(out.extended.parameters).toEqual({
-    swatchbook: { axes: { mode: 'Dark', brand: 'Brand A' } },
+it('buildAxisInput stores a raw partial tuple as-authored on swatchbook.axes', () => {
+  expect(buildAxisInput({ mode: 'Dark', brand: 'Brand A' }, PROJECT)).toEqual({
+    parameters: { swatchbook: { axes: { mode: 'Dark', brand: 'Brand A' } } },
   });
 });
 
-it('buildAxisVariant resolves a preset name to its tuple', () => {
-  const out = buildAxisVariant(fakeStory(), 'A11y High Contrast', {}, PROJECT) as {
-    extended: Record<string, unknown>;
-  };
-  expect(out.extended.parameters).toEqual({
-    swatchbook: { axes: { mode: 'Light', contrast: 'High' } },
+it('buildAxisInput resolves a preset name to its tuple', () => {
+  expect(buildAxisInput('A11y High Contrast', PROJECT)).toEqual({
+    parameters: { swatchbook: { axes: { mode: 'Light', contrast: 'High' } } },
   });
 });
 
-it('buildAxisVariant labels a preset variant with the preset name', () => {
-  const out = buildAxisVariant(fakeStory(), 'Brand A Dark', {}, PROJECT) as {
-    extended: { name: string };
-  };
-  expect(out.extended.name).toBe('Brand A Dark');
-});
-
-it('buildAxisVariant labels a raw-tuple variant with axis: context joined by a middle dot', () => {
-  const out = buildAxisVariant(fakeStory(), { mode: 'Dark', brand: 'Brand A' }, {}, PROJECT) as {
-    extended: { name: string };
-  };
-  expect(out.extended.name).toBe('mode: Dark · brand: Brand A');
-});
-
-it('buildAxisVariant prefixes the base name when the base story sets one', () => {
-  const out = buildAxisVariant(fakeStory('Full table'), 'Brand A Dark', {}, PROJECT) as {
-    extended: { name: string };
-  };
-  expect(out.extended.name).toBe('Full table (Brand A Dark)');
-});
-
-it('buildAxisVariant adds a !dev tag only when hidden is set', () => {
-  const shown = buildAxisVariant(fakeStory(), 'Brand A Dark', {}, PROJECT) as {
-    extended: Record<string, unknown>;
-  };
-  expect('tags' in shown.extended).toBe(false);
-
-  const hidden = buildAxisVariant(fakeStory(), 'Brand A Dark', { hidden: true }, PROJECT) as {
-    extended: { tags: string[] };
-  };
-  expect(hidden.extended.tags).toEqual(['!dev']);
-});
-
-it('buildAxisVariant throws before extending on an invalid tuple', () => {
-  expect(() => buildAxisVariant(fakeStory(), { mode: 'Sepia' }, {}, PROJECT)).toThrow(
+it('buildAxisInput throws before returning on an invalid tuple', () => {
+  expect(() => buildAxisInput({ mode: 'Sepia' }, PROJECT)).toThrow(
     /"Sepia" is not a context of axis "mode"/,
   );
 });

@@ -12,18 +12,10 @@ export interface ResolvePreset {
   readonly axes: Partial<Record<string, string>>;
 }
 
-/** Minimal structural view of a CSF-factory story: only the input the helper reads. */
-export interface FactoryStory {
-  readonly input?: { readonly name?: string };
+/** The `.extend()` input `withAxes` produces: a swatchbook axis override, nothing else. */
+export interface AxisVariantInput {
+  parameters: { swatchbook: { axes: Partial<Record<string, string>> } };
 }
-
-/** Options controlling how a generated axis variant behaves. */
-export interface WithAxesOptions {
-  /** Add `!dev` so the variant generates a test but stays out of the sidebar. */
-  hidden?: boolean;
-}
-
-const HIDDEN_TAG = '!dev';
 
 /** Resolve a preset name to its partial axes tuple; throw if no preset carries that name. */
 export function resolvePreset(
@@ -61,44 +53,18 @@ export function assertKnownTuple(
   }
 }
 
-// Compact human label for a raw tuple, e.g. `mode: Dark · brand: Brand A`.
-function tupleLabel(tuple: Partial<Record<string, string>>): string {
-  return Object.entries(tuple)
-    .filter((entry): entry is [string, string] => entry[1] !== undefined)
-    .map(([axis, context]) => `${axis}: ${context}`)
-    .join(' · ');
-}
-
 /**
- * Derive a CSF-factory story variant pinned to a resolved, validated axis
- * tuple. Pure over explicit axes/presets lists so it's testable without the
- * virtual module; the public `withAxes` wrapper injects the addon's virtual
- * exports. Reaches `.extend` through a cast so the public generic need not
- * carry a `.extend` signature (a real `extend<TInput>` is not cleanly
- * assignable to a non-generic structural one).
+ * Build the `.extend()` input that pins a CSF-factory story variant to a
+ * resolved, validated axis tuple. Pure over explicit axes/presets lists so it's
+ * testable without the virtual module; the public `withAxes` wrapper injects the
+ * addon's virtual exports.
  */
-export function buildAxisVariant<TStory extends FactoryStory>(
-  base: TStory,
+export function buildAxisInput(
   axesOrPreset: Readonly<Record<string, string>> | string,
-  options: WithAxesOptions,
   project: { axes: readonly ResolveAxis[]; presets: readonly ResolvePreset[] },
-): TStory {
-  const isPreset = typeof axesOrPreset === 'string';
-  const tuple = isPreset ? resolvePreset(axesOrPreset, project.presets) : axesOrPreset;
+): AxisVariantInput {
+  const tuple =
+    typeof axesOrPreset === 'string' ? resolvePreset(axesOrPreset, project.presets) : axesOrPreset;
   assertKnownTuple(tuple, project.axes);
-
-  const label = isPreset ? axesOrPreset : tupleLabel(tuple);
-  const baseName = base.input?.name;
-  const name = baseName ? `${baseName} (${label})` : label;
-
-  const patch: Record<string, unknown> = {
-    name,
-    parameters: { swatchbook: { axes: tuple } },
-  };
-  if (options.hidden) {
-    patch['tags'] = [HIDDEN_TAG];
-  }
-
-  const extendable = base as unknown as { extend(input: Record<string, unknown>): unknown };
-  return extendable.extend(patch) as TStory;
+  return { parameters: { swatchbook: { axes: tuple } } };
 }
