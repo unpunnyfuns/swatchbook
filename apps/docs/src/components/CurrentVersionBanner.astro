@@ -1,0 +1,44 @@
+---
+// Overrides Starlight's <Banner>. starlight-versions' own VersionBanner only
+// fires on archived-version splash pages ("this content is for 1.0, switch to
+// latest") because it assumes "current" == latest release. Here "current" is
+// the unreleased next tree (root, unprefixed) and "1.0" is the archived
+// stable release, the reverse of the plugin's assumption -- so root pages
+// need their own "this is unreleased, see the stable docs" notice instead.
+import starlightVersionsConfig from 'virtual:starlight-versions-config';
+import VersionBanner from 'starlight-versions/components/VersionBanner.astro';
+
+// `starlight-versions` doesn't export its slug-matching helper publicly
+// (only components + config types are in the package's `exports` map), so
+// this re-derives the same "which archived version, if any, owns this
+// page" check the plugin does internally against the entry id's first
+// path segment.
+const [firstSegment] = Astro.locals.starlightRoute.entry.id.split('/');
+const pageVersion = firstSegment ? starlightVersionsConfig.versionsBySlug[firstSegment] : undefined;
+---
+
+{
+  pageVersion ? (
+    <VersionBanner />
+  ) : (
+    <div class="sb-unreleased-banner" data-pagefind-ignore>
+      Unreleased documentation for an upcoming release. See the <a href="/swatchbook/1.0/">stable 1.0 docs</a>.
+    </div>
+  )
+}
+
+<style>
+  .sb-unreleased-banner {
+    background-color: var(--sl-color-orange-low);
+    box-shadow: var(--sl-shadow-sm);
+    color: var(--sl-color-orange-high);
+    line-height: var(--sl-line-height-headings);
+    padding: var(--sl-nav-pad-y) var(--sl-nav-pad-x);
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  .sb-unreleased-banner :global(a) {
+    color: var(--sl-color-orange-high);
+  }
+</style>

@@ -1,0 +1,53 @@
+---
+title: Displaying tokens as stories
+slug: "1.0/guides/displaying-tokens-as-stories"
+sidebar:
+  order: 7
+---
+
+# Displaying tokens as stories
+
+The doc blocks from `@unpunnyfuns/swatchbook-blocks` are React components, so they render inside a CSF story just as well as inside an MDX page. Mounting them as stories puts your token catalog in the Storybook sidebar, gives each view the Controls panel, and brings it under the interaction, a11y, and visual-regression test surfaces every other story gets.
+
+## The pattern
+
+One short stories file per token type, mounting the matching block:
+
+```tsx title="src/stories/tokens/Colors.stories.tsx"
+import { ColorTable } from '@unpunnyfuns/swatchbook-addon';
+import preview from '../../../.storybook/preview';
+
+const meta = preview.meta({ title: 'Tokens/Colors', component: ColorTable });
+export default meta;
+
+export const Palette = meta.story({ args: { filter: 'color.**' } });
+```
+
+> `#storybook` points to the `.storybook/` folder.
+
+The sidebar tree comes from the `title`. Each export is a real story: controllable, testable, snapshot-able.
+
+## What becomes a control, and what does not
+
+A token story is parametrised in three tiers:
+
+- **Display configuration becomes Controls.** Expose the block's scalar props as `argTypes`: `filter`, `sortBy`, `sortDir`, `searchable`, and any block-specific scalar like `DimensionScale`'s `visual`. Defaults define the canonical view; the controls let a reader narrow or re-sort it live. (Color format is a toolbar-level toggle, not a block prop, so it stays on the toolbar like theme.)
+- **Identity stays fixed.** The token `$type` and the block choice are the story's identity, not knobs. Complex props (`indicators`, `variants`) do not render as clean controls; set them statically in a story's `args` when a view needs them.
+- **Theme stays on the toolbar.** Mode, brand, and contrast are driven by the swatchbook toolbar, which flips every story at once. A story follows the toolbar by default. When a specific theme is the point of a story (a dark palette, a high-contrast pass), pin it with `parameters.swatchbook.axes`:
+
+```tsx
+export const DarkPalette = meta.story({
+  args: { filter: 'color.**' },
+  parameters: { swatchbook: { axes: { mode: 'Dark' } } },
+});
+```
+
+The pin takes priority over the toolbar for that story and reverts when you navigate away.
+
+## Primitive and composite types
+
+Primitive types (`color`, `fontFamily`, `fontWeight`, `dimension`, `strokeStyle`) hold a single value. Composite types (`typography`, `shadow`, `border`, `gradient`, `transition`) bundle several values: a `typography` token, for instance, composes a `fontFamily`, `fontSize`, `fontWeight`, `lineHeight`, and `letterSpacing`. Composite rows carry the `composes` indicator (a `⊞ N` parts count) in the table and tree blocks, so the bundling is visible at a glance.
+
+## MDX or stories?
+
+The same blocks render in both surfaces. The [quickstart's "Where to next"](/guides/quickstart#where-to-next) covers when to reach for each: in short, stories for a browsable, testable catalog, [MDX doc pages](/guides/authoring-doc-stories) for blocks wrapped in narrative. A project can run both.
