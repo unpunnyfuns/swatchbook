@@ -1,3 +1,4 @@
+import { withAxes } from '@unpunnyfuns/swatchbook-addon/testing';
 import { ColorTable } from '@unpunnyfuns/swatchbook-blocks';
 import { expect, userEvent, waitFor } from 'storybook/test';
 import preview from '#storybook/preview.tsx';
@@ -45,6 +46,16 @@ export const RefBlue = meta.story({
   parameters: { a11y: { test: 'error' } },
   play: async ({ canvasElement }) => assertTableRenders(canvasElement),
 });
+
+/**
+ * Axis coverage for the a11y-enabled RefBlue story: the same small blue-palette
+ * table re-rendered under two curated presets via `.extend`. Each generates its
+ * own render + play + a11y test, so axe runs against dark surfaces and against
+ * high-contrast borders, not only the default light baseline.
+ */
+export const RefBlueBrandADark = RefBlue.extend(withAxes('Brand A Dark'));
+export const RefBlueHighContrast = RefBlue.extend(withAxes('A11y High Contrast'));
+
 export const SortedPerceptually = meta.story({
   args: { sortBy: 'value' },
   play: async ({ canvasElement }) => assertTableRenders(canvasElement),
