@@ -38,6 +38,16 @@ it('assertKnownTuple throws on an out-of-context axis value', () => {
   );
 });
 
+it('assertKnownTuple throws on an explicitly undefined axis value', () => {
+  // Typed callers can't express this under exactOptionalPropertyTypes, but an
+  // untyped JS caller or a malformed preset can pass an explicit `undefined`.
+  // It must fail loud rather than silently resolve the axis to its default.
+  const tuple = { mode: undefined } as unknown as Record<string, string>;
+  expect(() => assertKnownTuple(tuple, AXES)).toThrow(
+    /"undefined" is not a context of axis "mode"/,
+  );
+});
+
 it('buildAxisInput stores a raw partial tuple as-authored on swatchbook.axes', () => {
   expect(buildAxisInput({ mode: 'Dark', brand: 'Brand A' }, PROJECT)).toEqual({
     parameters: { swatchbook: { axes: { mode: 'Dark', brand: 'Brand A' } } },

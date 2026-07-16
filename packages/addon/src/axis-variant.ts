@@ -45,7 +45,7 @@ export function assertKnownTuple(
       const known = axes.map((candidate) => candidate.name).join(', ') || '(none)';
       throw new Error(`withAxes: unknown axis "${key}". Known axes: ${known}.`);
     }
-    if (value !== undefined && !axis.contexts.includes(value)) {
+    if (value === undefined || !axis.contexts.includes(value)) {
       throw new Error(
         `withAxes: "${value}" is not a context of axis "${key}". Known contexts: ${axis.contexts.join(', ')}.`,
       );
