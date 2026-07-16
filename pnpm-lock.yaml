@@ -28,7 +28,7 @@ importers:
         specifier: ^2.31.0
         version: 2.31.0(@types/node@25.6.0)
       '@terrazzo/cli':
-        specifier: ^2.4.0
+        specifier: ^2.3.0
         version: 2.4.0(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)
       '@vitest/coverage-v8':
         specifier: ^4.1.8
@@ -338,16 +338,16 @@ importers:
         specifier: ^0.2.1
         version: 0.2.1(@humanwhocodes/momoa@3.3.10)(yaml-to-momoa@0.0.9)
       '@terrazzo/parser':
-        specifier: ^2.4.0
+        specifier: ^2.3.0
         version: 2.4.0(yaml-to-momoa@0.0.9)
       '@terrazzo/plugin-css':
-        specifier: ^2.4.0
+        specifier: ^2.3.0
         version: 2.4.0(@terrazzo/cli@2.4.0(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))(@terrazzo/parser@2.4.0(yaml-to-momoa@0.0.9))
       '@terrazzo/plugin-token-listing':
         specifier: 0.1.1
         version: 0.1.1(@terrazzo/cli@2.4.0(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1))(@terrazzo/parser@2.4.0(yaml-to-momoa@0.0.9))
       '@terrazzo/token-tools':
-        specifier: ^2.4.0
+        specifier: ^2.3.0
         version: 2.4.0
       colorjs.io:
         specifier: ^0.6.1
@@ -13499,7 +13499,7 @@ snapshots:
     dependencies:
       '@terrazzo/cli': 2.4.0(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)
       '@terrazzo/parser': 2.4.0(yaml-to-momoa@0.0.9)
-      '@terrazzo/token-tools': 2.3.0
+      '@terrazzo/token-tools': 2.4.0
 
   '@terrazzo/token-tools@2.3.0':
     dependencies:
