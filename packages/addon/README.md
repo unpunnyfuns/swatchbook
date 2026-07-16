@@ -51,6 +51,10 @@ function Card() {
 
 Returns `{ value, cssVar, type?, description? }`. `cssVar` is stable across themes; `value` flips with the active tuple. Paths autocomplete from the generated `.swatchbook/tokens.d.ts`.
 
+## Testing
+
+Author axis coverage for tests with [`withAxes`](https://unpunnyfuns.github.io/swatchbook/reference/with-axes) from the `testing` subpath.
+
 ## Credits
 
 Token parsing and resolver evaluation come from [Terrazzo](https://terrazzo.app/) by the [Terrazzo team](https://github.com/terrazzoapp) via `@unpunnyfuns/swatchbook-core`.

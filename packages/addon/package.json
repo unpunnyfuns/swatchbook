@@ -48,6 +48,10 @@
       "types": "./dist/hooks/index.d.mts",
       "import": "./dist/hooks/index.mjs"
     },
+    "./testing": {
+      "types": "./dist/testing.d.mts",
+      "import": "./dist/testing.mjs"
+    },
     "./package.json": "./package.json"
   },
   "imports": {
