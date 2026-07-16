@@ -10,15 +10,8 @@ import { collectWatchPaths, swatchbookTokensPlugin } from '#/virtual/plugin.ts';
 
 const CWD = '/project';
 
-function project(sourceFiles: string[]): Project {
-  return {
-    config: {},
-    axes: [],
-    disabledAxes: [],
-    presets: [],
-    sourceFiles,
-    diagnostics: [],
-  } as Project;
+function project(sourceFiles: string[]): Pick<Project, 'sourceFiles'> {
+  return { sourceFiles };
 }
 
 it('uses config.tokens via picomatch.scan base when provided', () => {
@@ -74,9 +67,11 @@ it('excludes the addon virtual IDs from Vite optimizeDeps pre-bundling', () => {
     config: { tokens: ['tokens/**/*.json'] },
     cwd: '/project',
   });
+  // `config` is an ObjectHook whose function form declares a ConfigPluginContext
+  // `this`; the hook body ignores it, so a bare receiver satisfies the type.
   const configResult =
     typeof plugin.config === 'function'
-      ? plugin.config({}, { command: 'serve', mode: 'development' })
+      ? plugin.config.call(undefined as never, {}, { command: 'serve', mode: 'development' })
       : undefined;
   const exclude =
     configResult && 'optimizeDeps' in configResult ? configResult.optimizeDeps?.exclude : undefined;

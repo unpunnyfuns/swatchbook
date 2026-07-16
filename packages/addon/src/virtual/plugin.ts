@@ -272,7 +272,7 @@ export function swatchbookTokensPlugin({
  */
 export function collectWatchPaths(
   config: Config,
-  project: Project | undefined,
+  project: Pick<Project, 'sourceFiles'> | undefined,
   cwd: string,
 ): string[] {
   const paths: string[] = [];
