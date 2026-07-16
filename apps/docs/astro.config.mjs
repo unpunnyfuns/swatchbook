@@ -1,11 +1,7 @@
 import react from '@astrojs/react';
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
-import starlightVersions from 'starlight-versions';
 import { rehypeBaseLinks } from './src/plugins/rehype-base-links.mjs';
-// Kept as its own JSON file (not inline here) so `scripts/snapshot-docs-version.mjs`
-// can read + rewrite it on release without regexing this config's JS source.
-import versionsConfig from './src/versions.config.json' with { type: 'json' };
 
 const base = '/swatchbook';
 
@@ -27,20 +23,6 @@ export default defineConfig({
         { icon: 'storybook', label: 'Live Storybook', href: '/swatchbook/storybook/' },
         { icon: 'github', label: 'GitHub', href: 'https://github.com/unpunnyfuns/swatchbook' },
       ],
-      // starlight-versions always serves "current" (this content/docs/**
-      // tree) unprefixed at root and archived versions under /<slug>/;
-      // there's no config to invert that (confirmed against the plugin's
-      // source and hosted docs). So root here is genuinely the unreleased
-      // next tree, and the stable 1.0 release lives at /1.0/ -- the reverse
-      // of the old Docusaurus layout, where the last release owned / and
-      // `next` was the special path. The custom Banner override below
-      // covers the messaging gap that reversal leaves (the plugin's own
-      // banner only warns on *archived* pages, since it assumes current ==
-      // latest).
-      plugins: [starlightVersions(versionsConfig)],
-      components: {
-        Banner: '#/components/CurrentVersionBanner.astro',
-      },
       // Mirrors sidebars.ts (Docusaurus), one group per top-nav section: Guides
       // for task-oriented walkthroughs, Reference grouped by kind (Packages /
       // Blocks) so it reads as an index rather than a flat page list, Concepts
