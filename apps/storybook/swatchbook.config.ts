@@ -44,14 +44,14 @@ export default defineSwatchbookConfig({
   //
   // Three published plugins are intentionally absent:
   //
-  // - `plugin-js` (2.2.0): doesn't register transforms via
+  // - `plugin-js`: doesn't register transforms via
   //   `getTransforms`, so plugin-token-listing's lookup fails outright.
-  // - `plugin-vanilla-extract` (2.2.0): same architectural shape as
+  // - `plugin-vanilla-extract`: same architectural shape as
   //   plugin-js — a build-time emitter, not a transform contributor.
   //   plugin-token-listing's lookup for format
   //   `@terrazzo/plugin-vanilla-extract` (and the `vanilla-extract`
   //   fallback) returns nothing.
-  // - `plugin-tailwind` (2.2.0): requires a real `template` CSS file
+  // - `plugin-tailwind`: requires a real `template` CSS file
   //   with `@tz` directives plus a `theme` object mapping Tailwind
   //   concepts to token paths. Wiring a meaningful tailwind preview is
   //   its own piece of work and would conflate "demo the listing flow"
