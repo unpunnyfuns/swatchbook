@@ -1,0 +1,61 @@
+---
+id: with-axes
+title: withAxes
+sidebar_position: 8
+---
+
+# `withAxes`
+
+`withAxes` produces the input for a story's `.extend()`, pinning a variant to a
+chosen axis tuple so its full test (render, play, and a11y) runs under that
+tuple. The addon generates one test per story export, so each variant is its own
+test. Import it from the addon's `testing` subpath:
+
+```ts
+import { withAxes } from '@unpunnyfuns/swatchbook-addon/testing';
+
+const meta = preview.meta({ component: ColorTable });
+export default meta;
+
+export const RefBlue = meta.story({ args: { filter: 'color.palette.blue.**' } });
+
+export const RefBlueBrandADark = RefBlue.extend(withAxes('Brand A Dark'));
+export const RefBlueHighContrast = RefBlue.extend(withAxes({ mode: 'Light', contrast: 'High' }));
+```
+
+`'Brand A Dark'` above is an example preset name from the reference app's own
+config, not a value `withAxes` recognizes universally; the presets available to
+you come from your project's `presets` config.
+
+Apply the result through the factory story's `.extend()` at the export site.
+Storybook only generates a test for an export whose right-hand side is a
+`.story()` or `.extend()` call, so `withAxes(...)` must sit inside `.extend()`,
+not stand alone.
+
+## Argument
+
+| Value | Meaning |
+| --- | --- |
+| `Record<string, string>` | A partial axis tuple. Only the axes you name are set; the rest fall back to their defaults at render time. |
+| `string` | A preset name from the project config's `presets`. Resolves to that preset's axes. |
+
+An unknown preset name, an unknown axis key, or an out-of-range axis value throws
+at load, rather than silently running under the default tuple.
+
+## Hiding a variant from the sidebar
+
+Variants are visible sibling stories by default. To keep a variant test-only, add
+a literal `!dev` tag in the `.extend` object and spread the helper for the axes:
+
+```ts
+export const RefBlueHidden = RefBlue.extend({ tags: ['!dev'], ...withAxes({ contrast: 'High' }) });
+```
+
+The tag must be written literally at the call site; it cannot come from the
+helper.
+
+## Choosing what to cover
+
+Axis coverage costs one extra test per variant per story, so opt in where the
+axis changes behavior: a11y-sensitive color and contrast stories gain the most,
+since contrast and readability regressions are axis-specific.
