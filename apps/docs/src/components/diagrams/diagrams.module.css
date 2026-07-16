@@ -1,8 +1,8 @@
 /*
  * Shared styling for the concept diagrams. Every visual property binds to a
  * semantic --sb-* custom property so the diagrams repaint with the swatchbook
- * switcher (mode, a11y, typeface) and Docusaurus color mode. No fills or
- * strokes may appear as SVG presentation attributes in the components.
+ * switcher (mode, a11y, typeface) and the site's light/dark toggle. No fills
+ * or strokes may appear as SVG presentation attributes in the components.
  */
 
 .scroller {

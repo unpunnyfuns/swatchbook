@@ -114,7 +114,7 @@ See *MDX doc blocks cannot use Storybook preview hooks* above; same shape, diffe
 
 **Shape:** in semver pre-1.0, `0.x` treats `minor` as the major-ish position. Bumping `major` now is reserved for the 1.0 cut itself.
 
-**Rule:** breaking changes → `minor`. Features → `minor`. Bug fixes → `patch`. Docs-only PRs → `patch` (so the snapshot rebuild picks them up on the next release).
+**Rule:** breaking changes → `minor`. Features → `minor`. Bug fixes → `patch`. Docs-only PRs don't need a changeset at all — see *Docs-only PRs don't need a changeset* below.
 
 ### One changeset per PR, fixed-version group bumps together
 
@@ -138,17 +138,11 @@ See *MDX doc blocks cannot use Storybook preview hooks* above; same shape, diffe
 
 ## Releases
 
-### Docs-only PRs still need a patch changeset
+### Docs-only PRs don't need a changeset
 
-**Shape:** `scripts/snapshot-docs-version.mjs` rebuilds the current minor's docs snapshot on every release. Docs fixes without a changeset only reach `/next/`, never `/`.
+**Shape:** the docs site has no per-release snapshot. `apps/docs/` serves a single current docs set and the deploy workflow (`.github/workflows/docs.yml`) rebuilds it from `main` on every push, independent of package releases.
 
-**Rule:** if your PR touches `apps/docs/`, file a patch changeset. Even if nothing functional changed.
-
-### Turbo's `build` task inputs include versioned snapshots
-
-**Shape:** `turbo.json`'s `build` inputs list `versioned_docs/**`, `versioned_sidebars/**`, `versions.json`. This is load-bearing for the remote cache: a fresh minor snapshot invalidates cache entries for downstream builds that depend on it.
-
-**Rule:** don't prune those entries from the `build` inputs. If you add a new versioned docs artifact, include it too.
+**Rule:** skip the changeset for `apps/docs/`-only changes. There's nothing for it to gate — the fix reaches the live site on the next push to `main`, not on the next package release.
 
 ### Release publishes through a deployment environment that requires human approval
 

@@ -19,14 +19,16 @@ export default defineConfig({
     react(),
     starlight({
       title: 'swatchbook',
+      logo: { src: './src/assets/logo.svg', alt: 'swatchbook logo' },
+      customCss: ['./src/css/custom.css'],
       social: [
         { icon: 'storybook', label: 'Live Storybook', href: '/swatchbook/storybook/' },
         { icon: 'github', label: 'GitHub', href: 'https://github.com/unpunnyfuns/swatchbook' },
       ],
-      // Mirrors sidebars.ts (Docusaurus), one group per top-nav section: Guides
-      // for task-oriented walkthroughs, Reference grouped by kind (Packages /
-      // Blocks) so it reads as an index rather than a flat page list, Concepts
-      // for the mental model, Developers for contributor-facing internals.
+      // One group per top-nav section: Guides for task-oriented walkthroughs,
+      // Reference grouped by kind (Packages / Blocks) so it reads as an index
+      // rather than a flat page list, Concepts for the mental model,
+      // Developers for contributor-facing internals.
       sidebar: [
         {
           label: 'Guides',
@@ -97,12 +99,10 @@ export default defineConfig({
       ],
     }),
   ],
-  // The 3 Docusaurus client-redirects (docusaurus.config.ts's
-  // plugin-client-redirects entry), preserved so existing inbound links
-  // to the old reference/* paths keep resolving after the concepts/ move.
-  // The 4th preserves quickstart's Docusaurus root-level `slug: /quickstart`
-  // override, which Starlight's path-derived slugs don't reproduce now that
-  // the file lives under guides/.
+  // The first 3 preserve existing inbound links to the old reference/*
+  // paths after the concepts/ move. The 4th preserves quickstart's
+  // root-level `/quickstart` URL, which Starlight's path-derived slugs
+  // don't reproduce now that the file lives under guides/.
   //
   // Destinations carry the `/swatchbook` base by hand: unlike every in-page
   // Starlight link, Astro's static redirect-page generator burns the

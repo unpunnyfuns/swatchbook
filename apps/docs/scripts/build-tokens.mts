@@ -1,6 +1,6 @@
 /**
- * Build-time bridge between swatchbook tokens and Docusaurus's Infima
- * theme. Loads the DTCG project under `apps/docs/tokens/`, emits the
+ * Build-time bridge between swatchbook tokens and Starlight's theme
+ * variables. Loads the DTCG project under `apps/docs/tokens/`, emits the
  * resolved CSS (with a `:root` baseline + per-tuple selector blocks),
  * writes it to `apps/docs/src/css/tokens.generated.css`, and emits a
  * small `tokens.snapshot.json` next to it so the navbar switcher can
@@ -8,9 +8,9 @@
  *
  * `custom.css` imports the CSS; `SwatchbookSwitcherContext` imports the
  * JSON. Changes in `apps/docs/tokens/*.json` flow into both outputs on
- * rebuild (no manual Infima hex retyping, no snapshot drift).
+ * rebuild (no manual hex retyping, no snapshot drift).
  *
- * Runs as a prebuild / prestart step from `apps/docs/package.json`.
+ * Runs as a prebuild / predev step from `apps/docs/package.json`.
  */
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -38,7 +38,7 @@ for (const diagnostic of project.diagnostics) {
 const rawCss = emitAxisProjectedCss(project);
 
 /**
- * Rewrite swatchbook's emitter selectors so `mode` tracks Docusaurus's
+ * Rewrite swatchbook's emitter selectors so `mode` tracks Starlight's
  * built-in `[data-theme]` toggle on `<html>` (lowercased), while the
  * non-mode axes (`a11y`, `brand`) keep their prefixed `data-sb-<axis>`
  * attributes that the navbar switcher provider owns.
@@ -59,7 +59,7 @@ await writeFile(
  * css-var prefix. Intentionally drops `permutationsResolved` (huge and
  * already represented in the emitted CSS) and `diagnostics` (only
  * useful at build time). Lives under src/ so it's bundled with the
- * Docusaurus build rather than fetched at runtime.
+ * docs build rather than fetched at runtime.
  */
 interface SwitcherSnapshot {
   axes: {

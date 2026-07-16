@@ -20,10 +20,9 @@ function readTheme(): StarlightTheme {
 }
 
 /**
- * Bridges swatchbook's `mode` axis to Starlight's own light/dark theme, the
- * same relationship Docusaurus's `useColorMode` served in the previous doc
- * site. Starlight has no theme-change event, so external flips (the site's
- * own `<ThemeSelect>` toggle) are picked up via a MutationObserver on
+ * Bridges swatchbook's `mode` axis to Starlight's own light/dark theme.
+ * Starlight has no theme-change event, so external flips (the site's own
+ * `<ThemeSelect>` toggle) are picked up via a MutationObserver on
  * `<html data-theme>` rather than a subscription.
  */
 export function useStarlightTheme(): [StarlightTheme, (next: StarlightTheme) => void] {

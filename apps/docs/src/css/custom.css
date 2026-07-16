@@ -1,52 +1,44 @@
 /**
- * Hook Docusaurus's Infima theme variables up to swatchbook tokens.
+ * Hook Starlight's theme variables up to swatchbook tokens.
  *
  * `tokens.generated.css` is emitted from `apps/docs/tokens/*.json` by
- * `scripts/build-tokens.mts` (runs as prebuild / prestart). It writes
+ * `scripts/build-tokens.mts` (runs as prebuild / predev). It writes
  * `--sb-color-*` / `--sb-font-*` vars at `:root` and flips per-tuple
  * values via compound attribute selectors — `[data-theme]` for mode
- * (owned by Docusaurus) plus `[data-sb-<axis>]` for a11y + brand
- * (owned by `SwatchbookSwitcherProvider`). The Infima mapping below
- * only needs one declaration block per variable; the underlying
- * swatchbook vars do the flipping.
+ * (owned by Starlight) plus `[data-sb-<axis>]` for a11y + brand (owned
+ * by `SwatchbookSwitcherProvider`). The Starlight mapping below only
+ * needs one declaration block per variable; the underlying swatchbook
+ * vars do the flipping.
  */
 @import './tokens.generated.css';
 
 :root {
   /* Surfaces */
-  --ifm-background-color: var(--sb-color-surface-default);
-  --ifm-background-surface-color: var(--sb-color-surface-raised);
+  --sl-color-bg: var(--sb-color-surface-default);
+  --sl-color-bg-nav: var(--sb-color-surface-raised);
+  --sl-color-bg-sidebar: var(--sb-color-surface-raised);
+  --sl-color-bg-inline-code: var(--sb-color-code-bg);
 
-  /* Text */
-  --ifm-color-content: var(--sb-color-text-default);
-  --ifm-color-content-secondary: var(--sb-color-text-muted);
-  --ifm-heading-color: var(--sb-color-text-heading);
+  /* Text — `--sl-color-white` is Starlight's high-emphasis text token
+     (headings, nav labels); the name is a light/dark-mode artifact of
+     its own default palette, not a literal color. */
+  --sl-color-text: var(--sb-color-text-default);
+  --sl-color-white: var(--sb-color-text-heading);
 
-  /* Primary — full ramp so Infima buttons, links, and focus rings all
-     pull from the same brand source. */
-  --ifm-color-primary: var(--sb-color-primary-default);
-  --ifm-color-primary-dark: var(--sb-color-primary-dark);
-  --ifm-color-primary-darker: var(--sb-color-primary-darker);
-  --ifm-color-primary-darkest: var(--sb-color-primary-darkest);
-  --ifm-color-primary-light: var(--sb-color-primary-light);
-  --ifm-color-primary-lighter: var(--sb-color-primary-lighter);
-  --ifm-color-primary-lightest: var(--sb-color-primary-lightest);
+  /* Accent — Starlight exposes three steps (low/default/high) rather
+     than a full ramp; low/high map to the darkest/lightest primary
+     shades so accent surfaces still track the brand hue at either
+     contrast extreme. */
+  --sl-color-accent: var(--sb-color-primary-default);
+  --sl-color-accent-high: var(--sb-color-primary-lightest);
+  --sl-color-accent-low: var(--sb-color-primary-darkest);
+
+  /* Borders */
+  --sl-color-hairline: var(--sb-color-code-border);
 
   /* Typography — swaps to the comic family + bumps base size on
      a11y=High-contrast via the generated CSS. */
-  --ifm-font-family-base: var(--sb-font-family-base);
-  --ifm-font-size-base: var(--sb-font-size-base);
-
-  /* Code chrome */
-  --ifm-code-background: var(--sb-color-code-bg);
-  --ifm-code-font-size: 95%;
-  --ifm-hr-border-color: var(--sb-color-code-border);
-
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.08);
-}
-
-[data-theme='dark'] {
-  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.08);
+  --sl-font: var(--sb-font-family-base);
 }
 
 /*
@@ -59,32 +51,13 @@
  * longer the sole distinguisher, and the 1.4.11 ratio requirement
  * only applies when colour is carrying the signal.
  *
- * Scoped to rendered MDX content (`.markdown`) so navbar / sidebar /
- * footer / button-style links stay untouched — those land
+ * Scoped to rendered MDX content (`.sl-markdown-content`) so nav /
+ * sidebar / footer / button-style links stay untouched — those land
  * affordances via position and chrome rather than inline prose
  * context.
  */
-.markdown a {
+.sl-markdown-content a {
   text-decoration: underline;
   text-underline-offset: 0.15em;
   text-decoration-thickness: from-font;
-}
-
-/*
- * Accessibility — WCAG 2.1 SC 1.4.3 (Contrast). The default Prism
- * `github` theme colours several token classes (`function`, `keyword`,
- * `deleted`, `built-in`, `attr-name`) with `#d73a49`, which hits only
- * 4.29:1 against the code-block background `#f6f8fa` — axe flags this
- * as failing the 4.5:1 AA threshold for text. Darkening to `#b31d28`
- * (GitHub's own "danger" red) clears AA at ~6.4:1 while staying
- * visually in-family with the rest of the light Prism palette.
- *
- * Light-theme only; the `dracula` dark theme is unaffected.
- */
-html:not([data-theme='dark']) .prism-code .token.function,
-html:not([data-theme='dark']) .prism-code .token.keyword,
-html:not([data-theme='dark']) .prism-code .token.deleted,
-html:not([data-theme='dark']) .prism-code .token.builtin,
-html:not([data-theme='dark']) .prism-code .token.attr-name {
-  color: #b31d28;
 }
