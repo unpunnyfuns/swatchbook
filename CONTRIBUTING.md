@@ -112,13 +112,13 @@ Pick a bump level and write a short description. All five published packages are
 
 **Bump levels, pre-1.0:**
 
-- **`patch`** — bug fixes, docs-only PRs (the snapshot script rebuilds the current minor's docs on every release, so docs fixes need a release cycle to reach `/`).
+- **`patch`** — bug fixes. Docs-only PRs don't need a changeset: the docs site rebuilds from `main` on every push, so a docs fix reaches the live site on the next deploy independent of the release cadence.
 - **`minor`** — new features *and* breaking changes. Pre-1.0, semver `0.x` treats minor as the "major-ish" position, so we bump minor rather than major for breakings until we cut 1.0.
 - **`major`** — reserved for the 1.0 cut itself.
 
 **Skip the changeset** for purely internal refactors (code style, test-only changes, CI, repo hygiene).
 
-Publishing is automatic: Changesets opens a "Version Packages" PR that bumps versions + regenerates `CHANGELOG.md` and the docs snapshot. Merging that PR builds and publishes to npm via trusted publishing (OIDC; no token secrets).
+Publishing is automatic: Changesets opens a "Version Packages" PR that bumps versions + regenerates `CHANGELOG.md`. Merging that PR builds and publishes to npm via trusted publishing (OIDC; no token secrets).
 
 ## Issues and labels
 

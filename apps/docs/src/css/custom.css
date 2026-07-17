@@ -26,9 +26,11 @@
   --sl-color-white: var(--sb-color-text-heading);
 
   /* Accent — Starlight exposes three steps (low/default/high) rather
-     than a full ramp; low/high map to the darkest/lightest primary
-     shades so accent surfaces still track the brand hue at either
-     contrast extreme. */
+     than a full ramp. `accent-high` is the high-contrast end (accent
+     text), `accent-low` the low-contrast end (subtle accent surfaces).
+     Starlight's `:root` defaults are the dark theme, where high-contrast
+     means the pale shade over dark chrome; the light override below flips
+     the pair. */
   --sl-color-accent: var(--sb-color-primary-default);
   --sl-color-accent-high: var(--sb-color-primary-lightest);
   --sl-color-accent-low: var(--sb-color-primary-darkest);
@@ -39,6 +41,18 @@
   /* Typography — swaps to the comic family + bumps base size on
      a11y=High-contrast via the generated CSS. */
   --sl-font: var(--sb-font-family-base);
+}
+
+/*
+ * Light mode inverts the accent contrast pair: high-contrast accent text
+ * must be the dark shade over light chrome, low-contrast surfaces the pale
+ * one. Without this the `:root` (dark) mapping bleeds into light mode and
+ * renders accent text pale-on-light — the sub-3:1 contrast this file's
+ * link-underline block otherwise guards against.
+ */
+:root[data-theme='light'] {
+  --sl-color-accent-high: var(--sb-color-primary-darkest);
+  --sl-color-accent-low: var(--sb-color-primary-lightest);
 }
 
 /*

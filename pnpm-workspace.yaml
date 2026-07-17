@@ -12,16 +12,16 @@ allowBuilds:
 
 overrides:
   # Each pin forces a patched version to clear a Dependabot/GHSA advisory
-  # (ref = the PR that added it). Verified load-bearing via `pnpm audit`
-  # after the Docusaurus removal (#1234): all three are still pulled in by
-  # a live devDependency chain, not by Docusaurus. Removing any regresses
+  # (ref = the PR that added the pin). Verified load-bearing via `pnpm audit`
+  # after the Docusaurus removal (issue #1234): all three are still pulled in
+  # by a live devDependency chain, not by Docusaurus. Removing any regresses
   # to a vulnerable version.
   #
-  # GHSA-v2v4-37r5-5v8g (#691), via @modelcontextprotocol/sdk ->
+  # GHSA-v2v4-37r5-5v8g (PR #691), via @modelcontextprotocol/sdk ->
   # express-rate-limit (the MCP inspector devDependency)
   ip-address: ^10.1.1
-  # GHSA-w7jw-789q-3m8p, critical quote() newline-escaping advisory (#1131),
+  # GHSA-w7jw-789q-3m8p, critical quote() newline-escaping advisory (PR #1131),
   # via @modelcontextprotocol/inspector -> concurrently (MCP devDependency)
   shell-quote: ^1.8.4
-  # GHSA-g7r4-m6w7-qqqr (#1194), via @terrazzo/cli's vite-node -> vite chain
+  # GHSA-g7r4-m6w7-qqqr (PR #1194), via @terrazzo/cli's vite-node -> vite chain
   esbuild: ^0.28.1
