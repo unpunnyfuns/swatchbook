@@ -110,8 +110,8 @@ export default defineConfig({
   // consulting `base`, so an unprefixed target 404s once deployed.
   redirects: {
     '/reference/concepts': '/swatchbook/concepts/',
-    '/reference/axes': '/swatchbook/concepts/axes',
-    '/reference/token-pipeline': '/swatchbook/concepts/token-pipeline',
-    '/quickstart': '/swatchbook/guides/quickstart',
+    '/reference/axes': '/swatchbook/concepts/axes/',
+    '/reference/token-pipeline': '/swatchbook/concepts/token-pipeline/',
+    '/quickstart': '/swatchbook/guides/quickstart/',
   },
 });
