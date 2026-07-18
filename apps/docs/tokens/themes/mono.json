@@ -1,0 +1,4 @@
+{
+  "$description": "typography = Mono overlay: base font-family becomes the monospace stack.",
+  "font": { "family": { "$type": "fontFamily", "base": { "$value": "{font.family.mono}" } } }
+}
