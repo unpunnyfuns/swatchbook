@@ -1,4 +1,11 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+} from 'react';
 import type { SwitcherAxis, SwitcherPreset } from '@unpunnyfuns/swatchbook-switcher';
 // Bundled at build time by `scripts/build-tokens.mts` from the DTCG tokens
 // under `apps/docs/tokens/`. Keeps the switcher in sync with the CSS the
@@ -20,6 +27,8 @@ interface AxesSnapshot {
 export const MODE_AXIS = 'mode';
 
 const LOCAL_STORAGE_KEY = 'swatchbook-docs-switcher';
+
+const SNAPSHOT = snapshot as AxesSnapshot;
 
 interface SwatchbookSwitcherContextValue {
   axes: SwitcherAxis[];
@@ -45,22 +54,24 @@ export function useSwatchbookSwitcher(): SwatchbookSwitcherContextValue {
   return ctx;
 }
 
-function readPersistedNonModeTuple(
-  axes: readonly SwitcherAxis[],
-  defaults: Record<string, string>,
-): Record<string, string> {
+function defaultNonModeTuple(): Record<string, string> {
   const tuple: Record<string, string> = {};
-  for (const axis of axes) {
+  for (const axis of SNAPSHOT.axes) {
     if (axis.name === MODE_AXIS) continue;
-    tuple[axis.name] = defaults[axis.name] ?? axis.default;
+    tuple[axis.name] = SNAPSHOT.defaults[axis.name] ?? axis.default;
   }
+  return tuple;
+}
+
+function readPersistedNonModeTuple(): Record<string, string> {
+  const tuple = defaultNonModeTuple();
   if (typeof window === 'undefined') return tuple;
   try {
     const raw = window.localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!raw) return tuple;
     const parsed = JSON.parse(raw) as { tuple?: Record<string, unknown> };
     if (parsed && typeof parsed.tuple === 'object' && parsed.tuple !== null) {
-      for (const axis of axes) {
+      for (const axis of SNAPSHOT.axes) {
         if (axis.name === MODE_AXIS) continue;
         const candidate = parsed.tuple[axis.name];
         if (typeof candidate === 'string' && axis.contexts.includes(candidate)) {
@@ -88,15 +99,87 @@ function persistNonModeTuple(tuple: Record<string, string>): void {
  * Mode stays on Starlight's own `[data-theme]`; the emitted compound
  * selectors in `tokens.generated.css` combine the two.
  */
-function syncNonModeTupleToDocument(
-  axes: readonly SwitcherAxis[],
-  tuple: Record<string, string>,
-): void {
+function syncNonModeTupleToDocument(tuple: Record<string, string>): void {
   if (typeof document === 'undefined') return;
-  for (const axis of axes) {
+  for (const axis of SNAPSHOT.axes) {
     if (axis.name === MODE_AXIS) continue;
     document.documentElement.setAttribute(`data-sb-${axis.name}`, tuple[axis.name] ?? axis.default);
   }
+}
+
+interface StoreState {
+  nonModeTuple: Record<string, string>;
+  lastApplied: string | null;
+}
+
+/**
+ * Module-level store shared by every mounted provider. The switcher renders in
+ * up to three places at once — desktop header, mobile menu, reference-page demo
+ * — as independent React roots, so per-instance `useState` would let brand /
+ * contrast selections drift out of sync (same-document `localStorage` writes
+ * don't notify other instances, and `storage` events only fire cross-tab).
+ * One in-module store keeps all mounts on a single source of truth for the
+ * non-mode axes; `mode` stays shared through Starlight's `[data-theme]`.
+ */
+const listeners = new Set<() => void>();
+
+let store: StoreState = {
+  nonModeTuple: readPersistedNonModeTuple(),
+  lastApplied: null,
+};
+
+// Referentially stable snapshot for SSR / hydration — never reads storage.
+const serverStore: StoreState = {
+  nonModeTuple: defaultNonModeTuple(),
+  lastApplied: null,
+};
+
+function emit(): void {
+  for (const listener of listeners) listener();
+}
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function getSnapshot(): StoreState {
+  return store;
+}
+
+function getServerSnapshot(): StoreState {
+  return serverStore;
+}
+
+function commitNonModeTuple(next: Record<string, string>): void {
+  store = { ...store, nonModeTuple: next };
+  syncNonModeTupleToDocument(next);
+  persistNonModeTuple(next);
+  emit();
+}
+
+function setNonModeAxisInStore(axisName: string, next: string): void {
+  if (axisName === MODE_AXIS) return;
+  commitNonModeTuple({ ...store.nonModeTuple, [axisName]: next });
+}
+
+function applyNonModeFromPresetInStore(preset: SwitcherPreset): void {
+  const next = { ...store.nonModeTuple };
+  for (const axis of SNAPSHOT.axes) {
+    if (axis.name === MODE_AXIS) continue;
+    const candidate = preset.axes[axis.name];
+    if (candidate !== undefined && axis.contexts.includes(candidate)) {
+      next[axis.name] = candidate;
+    }
+  }
+  commitNonModeTuple(next);
+}
+
+function setLastAppliedInStore(name: string | null): void {
+  store = { ...store, lastApplied: name };
+  emit();
 }
 
 export function SwatchbookSwitcherProvider({
@@ -104,65 +187,29 @@ export function SwatchbookSwitcherProvider({
 }: {
   children: React.ReactNode;
 }): React.ReactElement {
-  const axes = useMemo<SwitcherAxis[]>(() => (snapshot as AxesSnapshot).axes, []);
-  const presets = useMemo<SwitcherPreset[]>(() => (snapshot as AxesSnapshot).presets, []);
-  const defaults = useMemo<Record<string, string>>(() => (snapshot as AxesSnapshot).defaults, []);
-  const cssVarPrefix = (snapshot as AxesSnapshot).cssVarPrefix;
+  const state = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  const [nonModeTuple, setNonModeTupleState] = useState<Record<string, string>>(() =>
-    readPersistedNonModeTuple(axes, defaults),
-  );
-  const [lastApplied, setLastApplied] = useState<string | null>(null);
-
+  // Apply the persisted tuple to `<html>` once per load so a fresh page
+  // reflects the stored selection. Idempotent across the parallel mounts.
   useEffect(() => {
-    syncNonModeTupleToDocument(axes, nonModeTuple);
-    persistNonModeTuple(nonModeTuple);
-  }, [axes, nonModeTuple]);
-
-  const setNonModeAxis = useCallback((axisName: string, next: string) => {
-    if (axisName === MODE_AXIS) return;
-    setNonModeTupleState((prev) => ({ ...prev, [axisName]: next }));
+    syncNonModeTupleToDocument(getSnapshot().nonModeTuple);
   }, []);
 
-  const applyNonModeFromPreset = useCallback(
-    (preset: SwitcherPreset) => {
-      setNonModeTupleState((prev) => {
-        const next: Record<string, string> = { ...prev };
-        for (const axis of axes) {
-          if (axis.name === MODE_AXIS) continue;
-          const candidate = preset.axes[axis.name];
-          if (candidate !== undefined && axis.contexts.includes(candidate)) {
-            next[axis.name] = candidate;
-          }
-        }
-        return next;
-      });
-    },
-    [axes],
-  );
+  const setLastApplied = useCallback((name: string | null) => setLastAppliedInStore(name), []);
 
   const value = useMemo<SwatchbookSwitcherContextValue>(
     () => ({
-      axes,
-      presets,
-      defaults,
-      cssVarPrefix,
-      nonModeTuple,
-      lastApplied,
-      setNonModeAxis,
-      applyNonModeFromPreset,
+      axes: SNAPSHOT.axes,
+      presets: SNAPSHOT.presets,
+      defaults: SNAPSHOT.defaults,
+      cssVarPrefix: SNAPSHOT.cssVarPrefix,
+      nonModeTuple: state.nonModeTuple,
+      lastApplied: state.lastApplied,
+      setNonModeAxis: setNonModeAxisInStore,
+      applyNonModeFromPreset: applyNonModeFromPresetInStore,
       setLastApplied,
     }),
-    [
-      axes,
-      presets,
-      defaults,
-      cssVarPrefix,
-      nonModeTuple,
-      lastApplied,
-      setNonModeAxis,
-      applyNonModeFromPreset,
-    ],
+    [state.nonModeTuple, state.lastApplied, setLastApplied],
   );
 
   return (
