@@ -152,10 +152,10 @@ export const DarkPalette = meta.story({
 
 ### Primitive and composite types
 
-Primitive types (`color`, `fontFamily`, `fontWeight`, `dimension`, `strokeStyle`) hold a single value. Composite types (`typography`, `shadow`, `border`, `gradient`, `transition`) bundle several values: a `typography` token, for instance, composes a `fontFamily`, `fontSize`, `fontWeight`, `lineHeight`, and `letterSpacing`. Composite rows carry the `composes` indicator (a `⊞ N` parts count) in the table and tree blocks, so the bundling is visible at a glance.
+Primitive types (`color`, `fontFamily`, `fontWeight`, `dimension`, `strokeStyle`) hold a single value. Composite types (`typography`, `shadow`, `border`, `gradient`, `transition`) bundle several values: a `typography` token, for instance, composes a `fontFamily`, `fontSize`, `fontWeight`, `lineHeight`, and `letterSpacing`. Enable the `composes` indicator (off by default) to see the bundling at a glance: it adds a `⊞ N` parts count to composite rows in the table and tree blocks.
 
 ## See also
 
 - [Reference: blocks](/reference/blocks): every block's props.
 - [Reference: addon](/reference/addon): the `useToken` hook and its types.
-- [Live Storybook](pathname:///storybook/): doc stories you can steal from.
+- [Live Storybook](/storybook/): doc stories you can steal from.

@@ -48,7 +48,7 @@ Token Listing build problems. Fires when `loadProject` runs the in-memory `@terr
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | The in-memory token-listing plugin build threw or returned an error. | The included detail in the message. Common causes: a plugin in `terrazzoPlugins` doesn't register transforms via `getTransforms`, so the listing's per-platform name lookup fails. |
 | The listing build wrote no `tokens.listing.json` output file.        | The plugin's configuration. The listing plugin needs to be installed and present in the internal plugin set.                                                                       |
-| The listing JSON had no `data` array.                                | The plugin version. Format compatibility is `0.1.0-alpha.x`; a major version change in the plugin's output shape can produce this.                                                 |
+| The listing JSON had no `data` array.                                | The plugin version. swatchbook pins `@terrazzo/plugin-token-listing` at `0.1.1`; an incompatible version change in the plugin's output shape can produce this.                     |
 
 `<TokenTable>` and `<ColorTable>` previews fall back to raw values; they remain readable, but per-platform name columns are blank.
 
