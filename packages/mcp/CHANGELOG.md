@@ -1,5 +1,13 @@
 # @unpunnyfuns/swatchbook-mcp
 
+## 1.1.1
+
+### Patch Changes
+
+- d1f01aacd664b804e7aab387060001e3fdd65fa6: Tighten and align package READMEs so registries show the refreshed copy; no code changes.
+- Updated dependencies [d1f01aa]
+  - @unpunnyfuns/swatchbook-core@1.1.1
+
 ## 1.1.0
 
 ### Patch Changes
