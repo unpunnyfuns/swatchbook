@@ -26,6 +26,19 @@
         "900": { "$value": { "colorSpace": "srgb", "components": [0.0588, 0.0902, 0.1647] } },
         "950": { "$value": { "colorSpace": "srgb", "components": [0.0235, 0.0431, 0.0902] } }
       },
+      "violet": {
+        "$description": "ACME brand accent ramp.",
+        "50":  { "$value": { "colorSpace": "srgb", "components": [0.9608, 0.9529, 1] } },
+        "100": { "$value": { "colorSpace": "srgb", "components": [0.9294, 0.9137, 0.9961] } },
+        "200": { "$value": { "colorSpace": "srgb", "components": [0.8667, 0.8392, 0.9961] } },
+        "300": { "$value": { "colorSpace": "srgb", "components": [0.7686, 0.7098, 0.9922] } },
+        "400": { "$value": { "colorSpace": "srgb", "components": [0.6549, 0.5451, 0.9804] } },
+        "500": { "$value": { "colorSpace": "srgb", "components": [0.5451, 0.3608, 0.9647] } },
+        "600": { "$value": { "colorSpace": "srgb", "components": [0.4863, 0.2275, 0.9294] } },
+        "700": { "$value": { "colorSpace": "srgb", "components": [0.4275, 0.1569, 0.8508] } },
+        "800": { "$value": { "colorSpace": "srgb", "components": [0.3569, 0.1294, 0.7137] } },
+        "900": { "$value": { "colorSpace": "srgb", "components": [0.2980, 0.1137, 0.5843] } }
+      },
       "amber": {
         "$description": "Yellow / orange ramp used by the a11y High-contrast overlay for link + primary tokens. Swaps in place of the brand blues when contrast matters more than brand voice — bright yellow on dark surfaces, deep burnt-orange on light surfaces, both well above AAA contrast ratios.",
         "50":  { "$value": { "colorSpace": "srgb", "components": [1, 0.9843, 0.9216] } },

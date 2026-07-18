@@ -24,7 +24,7 @@ const project = await loadProject(
   {
     tokens: ['tokens/**/*.json'],
     resolver: 'tokens/resolver.json',
-    default: { mode: 'Light', typography: 'Sans', a11y: 'Normal' },
+    default: { mode: 'Light', brand: 'Default', typography: 'Sans', a11y: 'Normal' },
     cssVarPrefix: 'sb',
   },
   docsRoot,
