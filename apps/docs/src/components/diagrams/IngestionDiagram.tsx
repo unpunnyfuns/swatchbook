@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import styles from './diagrams.module.css';
 
-const STAGES: ReadonlyArray<{ x: number; label: string; sub?: string }> = [
+const STAGES: readonly { x: number; label: string; sub?: string }[] = [
   { x: 8, label: 'Token sources', sub: 'DTCG files' },
   { x: 160, label: 'Parse' },
   { x: 312, label: 'Build graph' },

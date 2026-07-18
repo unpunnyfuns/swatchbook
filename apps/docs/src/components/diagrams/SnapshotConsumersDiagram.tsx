@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import styles from './diagrams.module.css';
 
-const CONSUMERS: ReadonlyArray<{ y: number; label: string; sub: string }> = [
+const CONSUMERS: readonly { y: number; label: string; sub: string }[] = [
   { y: 20, label: 'Storybook preview', sub: 'the addon' },
   { y: 80, label: 'Docs-site blocks', sub: 'outside Storybook' },
   { y: 140, label: 'MCP server', sub: 'AI agents' },

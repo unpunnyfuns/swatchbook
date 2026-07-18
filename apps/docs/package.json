@@ -10,6 +10,7 @@
     "prebuild": "pnpm build:tokens",
     "build:tokens": "node scripts/build-tokens.mts",
     "typecheck": "astro check",
+    "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src",
     "capture": "node scripts/capture-media.mjs"
   },
   "dependencies": {
