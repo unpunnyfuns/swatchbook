@@ -33,11 +33,11 @@ import { ColorPalette, ColorTable, TokenTable } from '@unpunnyfuns/swatchbook-ad
 <TokenTable filter="color.**" type="color" />
 ```
 
-`ColorTable` groups variants under their base path: `color.accent.bg` + `color.accent.bg-hover` collapse to one `accent.bg` row with a `default` / `hover` pill selector, and each row expands inline to show all variants side-by-side. `<TokenTable>` is the flat view for comparison. Visit `Docs / Colors`; swatches and values update as you flip the toolbar.
+`ColorTable` groups variants under their base path: `color.accent.bg` + `color.accent.bg-hover` collapse to one `accent.bg` row with a `default` / `hover` pill selector, and each row expands inline to show all variants side-by-side. `<TokenTable>` is the flat view for comparison.
 
 ## A dashboard composition
 
-One page with diagnostics, tree, and table gives a top-to-bottom view: project health, browsable hierarchy, searchable lookup:
+Several blocks compose into a single dashboard page:
 
 ```tsx title="src/docs/tokens.mdx"
 import { Meta } from '@storybook/addon-docs/blocks';
@@ -100,7 +100,7 @@ Force a specific tuple on a single doc page:
 <Meta title="Docs/Colors (Dark)" parameters={{ swatchbook: { axes: { mode: 'Dark' } } }} />
 ```
 
-The toolbar still reflects the story's active tuple, so readers see what they're looking at. Any axis you omit falls back to its default. The pin takes priority over the toolbar for that page and reverts when you navigate away.
+The toolbar still reflects the story's active tuple. Any axis you omit falls back to its default. The pin takes priority over the toolbar for that page and reverts when you navigate away.
 
 ## What MDX can't do
 
@@ -133,7 +133,7 @@ export default meta;
 export const Palette = meta.story({ args: { filter: 'color.**' } });
 ```
 
-The sidebar tree comes from the `title`. Each export is a real story: controllable, testable, snapshot-able.
+The sidebar tree comes from the `title`. Each export is an ordinary story.
 
 ### What becomes a control, and what does not
 

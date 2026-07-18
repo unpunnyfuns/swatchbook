@@ -237,6 +237,12 @@ Four fields are managed internally and stripped from the allowed type:
 
 Everything else passes through. Three plugin-css selectors (`baseSelector`, `baseScheme`, `modeSelectors`) pass the type check but swatchbook ignores them; `permutations`-based emission supersedes them. Setting any produces a `swatchbook/css-options` warn diagnostic.
 
+A few pass-through options are worth calling out:
+
+- `legacyHex` and `transform`, along with the other value-formatting options, reach both the emitted stylesheet and `listing[path].previewValue`, because `@terrazzo/plugin-token-listing` derives preview values from plugin-css output. Flipping `legacyHex: true` changes the swatch CSS and every block that displays a value at once.
+- `include` / `exclude` filter which tokens reach the emitted stylesheet, and nothing more: swatchbook still parses every token, so the listing enumerates them and the blocks display them. A story that reads a filtered-out token through a CSS var gets an unset variable.
+- `utility` opts into Terrazzo's utility-class emission (`.bg-color-accent-bg`). Blocks don't read utility output; it exists so the preview matches a production bundle that ships utility classes.
+
 ```ts
 defineSwatchbookConfig({
   resolver: 'tokens/resolver.json',
@@ -270,6 +276,13 @@ defineSwatchbookConfig({
 ```
 
 Each `platforms` entry names a Terrazzo plugin whose identifier-naming logic derives the token's identifier on that platform. The plugin has to be loaded in the build for the reference to resolve; see `terrazzoPlugins` below.
+
+Two optional hooks refine what the listing records:
+
+- `previewValue(token)` overrides the auto-computed preview string per token; return `undefined` to fall through to the plugin-css value. Useful when production formats values for a non-CSS target you want the docs to mirror.
+- `subtype(token)` classifies a token's intent (`bgColor`, `fgColor`, `borderColor`, `padding`, …). Reserved for future per-`subtype` block defaults; blocks don't read it yet, but setting it puts the metadata in place.
+
+`modes` declares the resolver modes the listing enumerates. Swatchbook's own resolver reading already covers this for resolver projects; set it only for resolver-free layered projects that need modes enumerated explicitly.
 
 `filename` is managed internally (the listing is captured in memory, not written to disk) and is stripped from the option type.
 

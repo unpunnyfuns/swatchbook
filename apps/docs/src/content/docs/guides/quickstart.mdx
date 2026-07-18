@@ -50,21 +50,38 @@ export default definePreview({
 });
 ```
 
-Inline `config` is the primary path. If you'd rather keep the config in its own file (useful when the same config is consumed by a CLI or CI lint outside Storybook), write a `swatchbook.config.ts` and point at it with `options.configPath: '../swatchbook.config.ts'`; see [config reference](/reference/config) for details.
+Inline `config` is the primary path. To keep the config in its own file (useful when the same config is consumed by a CLI or CI lint outside Storybook), write a `swatchbook.config.ts` and point at it with `options.configPath: '../swatchbook.config.ts'`; see [config reference](/reference/config) for details.
 
 Start Storybook:
 
 ```bash
-pnpm storybook
+npm run storybook
 ```
 
 ## What you should see
 
-**Toolbar**: a single Swatchbook icon button in the top bar. Click it to open a popover containing preset pills, one dropdown per modifier in your resolver, and a color-format picker. If you've written a single `theme` modifier with `Light`/`Dark` contexts, you get one dropdown inside the popover; if you have `mode × brand`, you get two. Escape or outside-click closes it.
+A single Swatchbook icon button appears in the top toolbar. Clicking it opens a popover with preset pills, a color-format picker, and one dropdown per modifier in your resolver. A single `theme` modifier with `Light` / `Dark` contexts gives one dropdown; a `mode × brand` resolver gives two.
+
+## Render your first block
+
+The addon's blocks render against the tuple currently active in the toolbar. Drop one into an MDX file under your stories glob to confirm the wiring is live:
+
+```tsx title="src/docs/Tokens.mdx"
+import { Meta } from '@storybook/addon-docs/blocks';
+import { TokenNavigator } from '@unpunnyfuns/swatchbook-addon';
+
+<Meta title="Docs/Tokens" />
+
+# Tokens
+
+<TokenNavigator initiallyExpanded={0} />
+```
+
+Open `Docs / Tokens` in the sidebar: the tree lists every token in your project and repaints when you flip an axis. From here it's a question of how you want to present the catalog.
 
 ## No resolver yet?
 
-If you haven't written a DTCG 2025.10 resolver, you can use the **layered** config form instead:
+If you haven't written a DTCG 2025.10 resolver, use the **layered** config form instead:
 
 ```ts title="swatchbook.config.ts"
 import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
@@ -87,30 +104,9 @@ export default defineSwatchbookConfig({
 
 Each context names an ordered list of file paths (or globs) that layer on top of the base `tokens` files for that context. See the [config reference](/reference/config) for the resolver vs layered trade-off.
 
-## Render your first block
-
-The addon's blocks render against whichever tuple the toolbar has active. Drop one into an MDX file under your stories glob to confirm the wiring is live:
-
-```tsx title="src/docs/Tokens.mdx"
-import { Meta } from '@storybook/addon-docs/blocks';
-import { TokenNavigator } from '@unpunnyfuns/swatchbook-addon';
-
-<Meta title="Docs/Tokens" />
-
-# Tokens
-
-<TokenNavigator initiallyExpanded={0} />
-```
-
-Open `Docs / Tokens` in the sidebar: the tree lists every token in your project and repaints when you flip an axis. That confirms the install end to end. From here it's a question of how you want to present the catalog.
-
 ## Where to next
 
-Tokens render through two surfaces, both built from the same blocks. Pick by what you want around them:
-
-- **MDX doc pages** put blocks inside prose: a usage guide, a rationale, a migration note. **Stories** put the catalog in the sidebar, add a Controls panel, and bring each view under the same interaction, a11y, and visual-regression runs as your component stories. [Token docs in MDX and stories](/guides/authoring-doc-stories) covers both.
-
-The two aren't exclusive: plenty of projects run a story catalog for browsing and testing alongside an MDX page or two for the narrative reference.
+Tokens render through two surfaces, both built from the same blocks. MDX doc pages put blocks inside prose: a usage guide, a rationale, a migration note. Stories put the catalog in the sidebar, add a Controls panel, and bring each view under the same interaction, a11y, and visual-regression runs as your component stories. [Token docs in MDX and stories](/guides/authoring-doc-stories) covers both.
 
 Also worth a look:
 
