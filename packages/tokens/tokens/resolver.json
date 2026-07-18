@@ -2,7 +2,7 @@
   "$schema": "https://www.designtokens.org/TR/2025.10/resolver/",
   "version": "2025.10",
   "name": "swatchbook-reference",
-  "description": "DTCG 2025.10 native resolver. Flat token paths organized per `$type` — color, size/space/radius, font, typography, motion, border, shadow, gradient, stroke, number — plus four independent modifiers: `mode` (light/dark baseline), `brand` (default/ACME accent), `typography` (sans/mono/comic base family), and `a11y` (normal/high-contrast border + focus emphasis + base weight, independent of family).",
+  "description": "DTCG 2025.10 native resolver. Flat token paths organized per `$type`: color, size/space/radius, font, typography, motion, border, shadow, gradient, stroke, number. Plus four independent modifiers: `mode` (light/dark baseline), `brand` (default/ACME accent), `typography` (sans/mono/comic base family), and `a11y` (normal/high-contrast border + focus emphasis + base weight, independent of family).",
   "sets": {
     "tokens": {
       "description": "Flat DTCG tokens grouped by `$type`.",
@@ -48,7 +48,7 @@
       "default": "Sans"
     },
     "a11y": {
-      "description": "Border + focus emphasis + base weight. `Normal` leaves the baseline alone; `High-contrast` thickens borders, boosts the focus ring, and bumps the base font weight — never the font-family, which stays whatever the `typography` modifier set.",
+      "description": "Border + focus emphasis + base weight. `Normal` leaves the baseline alone; `High-contrast` thickens borders, boosts the focus ring, and bumps the base font weight. The font-family stays whatever the `typography` modifier set.",
       "contexts": {
         "Normal": [],
         "High-contrast": [{ "$ref": "./themes/high-contrast.json" }]
