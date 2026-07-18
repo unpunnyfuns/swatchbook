@@ -6,7 +6,7 @@ import AxisFlipDiagram from '#/components/diagrams/AxisFlipDiagram.tsx';
 
 An **axis** is one independent dimension of your theming model: `mode`, `brand`, `density`, `contrast`, whatever fits your system. Each axis has a set of named **contexts** (one of which is the default), and at any moment exactly one context is selected per axis.
 
-The axis shape is the alternative to a flat string-ID model (`"light"`, `"dark"`, `"brand-a-dark-compact"`). One dimension becomes two; two become four. Modelling each dimension independently keeps the combination-counting out of your theme names and into composition at runtime. If your system has exactly one dimension and no plans for more, [`@storybook/addon-themes`](https://storybook.js.org/addons/@storybook/addon-themes)' single-string-ID model is simpler and a better fit.
+The axis shape is the alternative to a flat string-ID model (`"light"`, `"dark"`, `"brand-a-dark-compact"`). Flat IDs have to name every combination, and the count multiplies: one dimension becomes two, two become four. Modelling each dimension independently keeps that counting out of theme names; contexts compose at runtime instead. If your system has exactly one dimension and no plans for more, [`@storybook/addon-themes`](https://storybook.js.org/addons/@storybook/addon-themes)' single-string-ID model is simpler and a better fit.
 
 ## Tuples, not strings
 

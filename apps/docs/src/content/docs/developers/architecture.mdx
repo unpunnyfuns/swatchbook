@@ -2,7 +2,7 @@
 title: Architecture
 ---
 
-Map of the repo, the one data structure everything revolves around, and how data moves from a DTCG token file on disk to a rendered doc block. Written for contributors; if you're consuming swatchbook as a user, the [Reference](/reference/core) section is the right door.
+Map of the repo, the one data structure everything revolves around, and how data moves from a DTCG token file on disk to a rendered doc block. Written for contributors; users consuming swatchbook in their own Storybook want the [Reference](/reference/core) section instead.
 
 ## Repo map
 
@@ -82,7 +82,7 @@ The `Project` snapshot passed to `render` carries everything: axes, `tokenGraph`
 
 ## Data flow: static build path
 
-The simpler of the two flows. Applies to the docs site, emitted CSS for consumers, and the MCP server at startup.
+The simpler of the two flows, used by the docs site, emitted CSS for consumers, and the MCP server at startup.
 
 ```
 tokens/resolver.json
@@ -104,7 +104,7 @@ The same `Project` also feeds:
 - `project.defaultTokens`: the default-tuple snapshot for global views
 - `getVariance(project.tokenGraph, path)` from [`/graph`](/reference/core#graph-queries): per-token variance classification
 - `project.diagnostics`: the `<Diagnostics />` block reads this
-- the MCP server's tool handlers (all fourteen read straight from the project)
+- the MCP server's tool handlers (each reads straight from the project)
 - TypeScript type emission (via Terrazzo's token-tools; not currently exposed as a CLI)
 
 ## Data flow: dev / HMR path
@@ -177,7 +177,7 @@ npx @unpunnyfuns/swatchbook-mcp --config swatchbook.config.ts
  StdioServerTransport → MCP client
 ```
 
-Fourteen tools, all stateless reads against the in-memory `Project`:
+The tools, all stateless reads against the in-memory `Project`:
 
 - Orientation: `describe_project`, `list_axes`, `get_diagnostics`
 - Discovery: `list_tokens`, `search_tokens`, `resolve_theme`
@@ -193,6 +193,6 @@ Fourteen tools, all stateless reads against the in-memory `Project`:
 - `packages/addon/src/virtual/plugin.ts`: the HMR plumbing.
 - `packages/addon/src/preview.tsx`: how the preview decorator wires the provider + channel.
 - `packages/blocks/src/internal/use-project.ts`: the hook every block pulls state through.
-- `packages/mcp/src/server.ts`: the fourteen MCP tools in one file.
+- `packages/mcp/src/server.ts`: the MCP tools in one file.
 
 And the companion [Sharp corners](/developers/sharp-corners) page for the "don't step there" list.
