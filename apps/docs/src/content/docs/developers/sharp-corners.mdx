@@ -2,7 +2,7 @@
 title: Sharp corners
 ---
 
-The "someone will bleed on this" list. Shapes that trip newcomers and sometimes trip returnees. Each entry states the shape, the reason, and the defensive rule.
+This is the "someone will bleed on this" list: shapes that trip newcomers, and sometimes returnees. Each entry states the shape, the reason, and the defensive rule.
 
 ## Storybook addon gotchas
 
@@ -57,10 +57,6 @@ The "someone will bleed on this" list. Shapes that trip newcomers and sometimes 
 **Shape:** if `<Block />` has an empty-state early return (`if (items.length === 0) return <Empty/>`), **all hooks must be called before that `return`**. Adding a new `useMemo` after the guard works the first time the tree is non-empty, but the first time it flips to empty the hook is skipped. The next non-empty render sees one fewer hook than before and React throws `Rendered fewer hooks than expected. This may be caused by an accidental early return statement.`
 
 **Rule:** all hooks at the top of the component body, guards at the bottom. We've hit this once in `TokenNavigator`; scan every block with an empty-state branch when adding a memo or effect.
-
-### Hook the channel, not the Storybook `preview-api` hooks, from MDX
-
-See _MDX doc blocks cannot use Storybook preview hooks_ above; same shape, different angle.
 
 ## Virtual module + provider
 
