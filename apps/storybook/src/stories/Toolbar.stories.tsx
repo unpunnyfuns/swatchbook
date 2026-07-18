@@ -9,9 +9,9 @@
  * contracts: axis switch, preset apply, footer-slot integration, and
  * the "modified-since-preset" reset path.
  *
- * `<ColorFormatSelector>` — exported from `@unpunnyfuns/swatchbook-switcher`
+ * `<ColorFormatSelector>` (exported from `@unpunnyfuns/swatchbook-switcher`
  * for hosts that want a footer control, though neither switcher mount
- * renders it by default — has its own dedicated component tests in
+ * renders it by default) has its own dedicated component tests in
  * `packages/switcher/test/color-format-selector.browser.test.tsx`; the
  * footer-slot story here uses a stand-in button so the integration
  * isn't coupled to the selector's specifics.
@@ -171,7 +171,7 @@ export const SwitchPreset = meta.story({
 });
 
 /**
- * Footer slot integration — host content (a consumer could slot
+ * Footer slot integration: host content (a consumer could slot
  * `@unpunnyfuns/swatchbook-switcher`'s `<ColorFormatSelector>` here; the
  * story uses a stand-in button to decouple from the selector's own tests
  * in `packages/switcher/test/`) renders alongside the axis rows and

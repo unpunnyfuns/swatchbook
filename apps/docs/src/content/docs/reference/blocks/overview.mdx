@@ -85,7 +85,7 @@ Swatch grid grouped by dot-path prefix. `groupBy` is auto-derived from the filte
 <ColorTable filter="color.**" />
 ```
 
-Tabular, color-only companion to `TokenTable`. One row per `$type: color` token with swatch, name, value (in the active color format — see [`useColorFormat`](/reference/blocks/hooks#usecolorformat)), CSS var, and an indicators column carrying the [indicator strip](#indicators). Each value cell has a hover-revealed copy-to-clipboard button; fuzzy search runs across path + value. Clicking a row expands it inline: the detail panel surfaces `$description`, the alias chain, and (for grouped variants) a sub-table comparing every variant's HEX / HSL / OKLCH at once. The collapsed row shows only the active format.
+Tabular, color-only companion to `TokenTable`. One row per `$type: color` token with swatch, name, value (in the active color format: see [`useColorFormat`](/reference/blocks/hooks#usecolorformat)), CSS var, and an indicators column carrying the [indicator strip](#indicators). Each value cell has a hover-revealed copy-to-clipboard button; fuzzy search runs across path + value. Clicking a row expands it inline: the detail panel surfaces `$description`, the alias chain, and (for grouped variants) a sub-table comparing every variant's HEX / HSL / OKLCH at once. The collapsed row shows only the active format.
 
 **Variant grouping**: pass a `variants` map to collapse sibling tokens that share a base path into a single row with a pill selector. Clicking a pill swaps the displayed values to that variant:
 

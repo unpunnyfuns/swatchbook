@@ -176,10 +176,12 @@ export function useActiveAxes(): Readonly<Record<string, string>> {
 }
 
 /**
- * Active color-display format for the current story/docs render. Populated
- * by the addon's preview decorator from the `swatchbookColorFormat` global
- * (per-story `globals` or toolbar dropdown) and consumed by blocks that
- * render color-token values. Emitted CSS is unaffected.
+ * Active color-display format for the current story/docs render, consumed
+ * by blocks that render color-token values. Emitted CSS is unaffected.
+ *
+ * The addon no longer sets a global color format; blocks fall back to the
+ * snapshot's `defaultColorFormat` (from `Config.defaultColorFormat`). An
+ * explicit `ColorFormatContext` value or prop still overrides that default.
  *
  * Runs through plain React context rather than Storybook's `useGlobals` so
  * per-story seeded globals flow through on first render and the same hook

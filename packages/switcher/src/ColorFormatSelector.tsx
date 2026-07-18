@@ -23,7 +23,7 @@ interface ColorFormatSelectorProps {
 /**
  * Pill row for picking how color sub-values render in swatchbook blocks
  * (hex / rgb / hsl / oklch / raw). Neither switcher mount (the Storybook
- * addon toolbar, the docs navbar) renders this by default — blocks read
+ * addon toolbar, the docs navbar) renders this by default: blocks read
  * `Config.defaultColorFormat` for their starting format instead. Exported
  * for hosts that want to slot a color-format control into
  * `<ThemeSwitcher>`'s `footer` themselves.

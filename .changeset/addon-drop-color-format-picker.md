@@ -3,4 +3,4 @@
 '@unpunnyfuns/swatchbook-switcher': minor
 ---
 
-Wire `Config.defaultColorFormat` through the addon's live preview and drop the global color-format picker from the Storybook toolbar; `ColorFormatSelector` moves to `@unpunnyfuns/swatchbook-switcher` for hosts that want their own footer control.
+Add `Config.defaultColorFormat`; blocks own color format, and the switcher's global color-format picker is removed (`COLOR_FORMAT_GLOBAL_KEY` retained, deprecated).

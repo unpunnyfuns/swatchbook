@@ -22,7 +22,7 @@ declare module 'virtual:swatchbook/tokens' {
   export const diagnostics: readonly VirtualDiagnostic[];
   export const css: string;
   export const cssVarPrefix: string;
-  /** `config.defaultColorFormat`, defaulted to `'hex'` — see `SnapshotForWire`. */
+  /** `config.defaultColorFormat`, defaulted to `'hex'`; see `SnapshotForWire`. */
   export const defaultColorFormat: ColorFormat;
   export const indicators: Readonly<Record<string, boolean>>;
   export const listing: Readonly<Record<string, VirtualListingEntry>>;
