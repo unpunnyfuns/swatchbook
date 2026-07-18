@@ -24,14 +24,23 @@ Put everything both builds agree on in one file. Both configs import from it.
 import cssPlugin, { type CSSPluginOptions } from '@terrazzo/plugin-css';
 import swiftPlugin from '@terrazzo/plugin-swift';
 import androidPlugin from '@terrazzo/plugin-android';
-import type { Plugin } from '@terrazzo/parser';
+import { makeCSSVar } from '@terrazzo/token-tools/css';
+import type { Plugin, TokenNormalized } from '@terrazzo/parser';
 import type { TokenListingPluginOptions } from '@terrazzo/plugin-token-listing';
 
-/** Value-formatting policy — shared by production CSS and swatchbook's preview. */
+/** Value-formatting policy shared by production CSS and swatchbook's preview. */
 export const sharedCssOptions: Omit<CSSPluginOptions, 'variableName' | 'permutations'> = {
   legacyHex: true,
   include: ['color.*', 'space.*', 'radius.*', 'shadow.*', 'typography.*'],
 };
+
+// Variable naming is the one policy `sharedCssOptions` can't carry: swatchbook
+// manages `variableName` itself and takes the prefix through `cssVarPrefix`, so
+// the CLI has to reproduce that naming via its own `variableName`. Both read the
+// prefix from here.
+export const cssVarPrefix = 'ds';
+export const sharedVariableName = (token: TokenNormalized) =>
+  makeCSSVar(String(token.id), { prefix: cssVarPrefix });
 
 /** Extra plugins whose naming rules we want reflected in `listing[path].names.*`. */
 export const sharedPlugins: readonly Plugin[] = [
@@ -59,6 +68,7 @@ import {
   sharedCssOptions,
   sharedListingOptions,
   sharedPlugins,
+  sharedVariableName,
 } from './shared-terrazzo-options';
 
 export default defineConfig({
@@ -67,6 +77,7 @@ export default defineConfig({
   plugins: [
     cssPlugin({
       ...sharedCssOptions,
+      variableName: sharedVariableName,
       filename: 'tokens.css',
     }),
     ...sharedPlugins,
@@ -81,6 +92,7 @@ export default defineConfig({
 ```ts title="swatchbook.config.ts"
 import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
 import {
+  cssVarPrefix,
   sharedCssOptions,
   sharedListingOptions,
   sharedPlugins,
@@ -88,14 +100,14 @@ import {
 
 export default defineSwatchbookConfig({
   resolver: 'tokens/resolver.json',
-  cssVarPrefix: 'ds',
+  cssVarPrefix,
   cssOptions: sharedCssOptions,
   listingOptions: sharedListingOptions,
   terrazzoPlugins: sharedPlugins,
 });
 ```
 
-Any change to `sharedCssOptions.legacyHex`, or a new plugin added to `sharedPlugins`, now reaches both the production CLI and swatchbook's Storybook build with one edit. Three swatchbook config fields receive the shared blocks:
+Any change to `sharedCssOptions.legacyHex`, or a new plugin added to `sharedPlugins`, now reaches both the production CLI and swatchbook's Storybook build with one edit. The variable prefix is wired into each side by hand (`variableName` for the CLI, `cssVarPrefix` for swatchbook) from the same shared constant, since swatchbook manages `variableName` internally and won't accept it through `cssOptions`. Three swatchbook config fields receive the shared blocks:
 
 | Config field                                           | Forwards to                      | Controls                                                                               |
 | ------------------------------------------------------ | -------------------------------- | -------------------------------------------------------------------------------------- |
