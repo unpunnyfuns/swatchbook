@@ -84,7 +84,7 @@ Format: `<type>(<scope>): <description>`.
 
 **Subject:** imperative verb first, lowercase even for proper nouns. `feat(addon): rebind keyboard shortcut` — not `Feat(Addon): Rebinding the keyboard shortcut`.
 
-Breaking changes: mark them with a `!` before the colon (`feat(core)!: …`) or a `BREAKING CHANGE:` footer. Post-1.0 the marker is meaningful again, and breaking changes bump `major`.
+Breaking changes: put a `!` before the colon in the title (`feat(core)!: …`). Post-1.0 the marker is meaningful again, and breaking changes bump `major`. (A `BREAKING CHANGE:` footer in the commit or PR body carries the same meaning, but the title itself needs the `!`.)
 
 ### PR body
 
