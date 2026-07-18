@@ -102,11 +102,11 @@ This is the "someone will bleed on this" list: shapes that trip newcomers, and s
 
 ## Changesets
 
-### Pre-1.0 breaking changes bump `minor`, not `major`
+### Post-1.0 breaking changes bump `major`
 
-**Shape:** in semver pre-1.0, `0.x` treats `minor` as the major-ish position. Bumping `major` now is reserved for the 1.0 cut itself.
+**Shape:** post-1.0, swatchbook treats major versions as deliberate stability commitments. Breaking changes must bump major to signal incompatibility to users.
 
-**Rule:** breaking changes → `minor`. Features → `minor`. Bug fixes → `patch`. Docs-only PRs don't need a changeset at all — see _Docs-only PRs don't need a changeset_ below.
+**Rule:** breaking changes → `major`. Features → `minor`. Bug fixes → `patch`. Docs-only PRs don't need a changeset; see _Docs-only PRs don't need a changeset_ below.
 
 ### One changeset per PR, fixed-version group bumps together
 
