@@ -267,8 +267,8 @@ interface CommonConfig {
    */
   maxJointArity?: number;
   /**
-   * Starting color format for blocks that display color values; a
-   * per-block prop overrides it. Defaults to `'hex'`.
+   * Starting color format for blocks that display color values; wrapping
+   * a subtree in `ColorFormatContext` overrides it. Defaults to `'hex'`.
    */
   defaultColorFormat?: ColorFormat;
 }

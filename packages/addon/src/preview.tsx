@@ -74,6 +74,7 @@ registerTokenSource({
   listing: virtualListing,
   tokenGraph: virtualTokenGraph,
   defaultTuple: virtualDefaultTuple,
+  defaultColorFormat: virtualDefaultColorFormat,
 });
 
 // Standard visually-hidden style for the theme-flip live region.
@@ -410,6 +411,7 @@ interface HmrSnapshot {
   listing: typeof virtualListing;
   tokenGraph: typeof virtualTokenGraph;
   defaultTuple: typeof virtualDefaultTuple;
+  defaultColorFormat: typeof virtualDefaultColorFormat;
 }
 if (import.meta.hot) {
   import.meta.hot.on(HMR_EVENT, (payload: HmrSnapshot) => {

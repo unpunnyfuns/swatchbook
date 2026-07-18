@@ -22,7 +22,7 @@ export interface ThemeSwitcherProps {
   onPresetApply(preset: SwitcherPreset): void;
   /** Optional key handler, usually used by consumers to close a popover on Escape. */
   onKeyDown?(event: KeyboardEvent<HTMLDivElement>): void;
-  /** Host-specific content rendered after the axes (e.g. the Storybook addon's color-format picker). */
+  /** Host-specific content rendered after the axes (a generic slot for host-supplied controls). */
   footer?: ReactElement | null;
 }
 

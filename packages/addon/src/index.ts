@@ -36,7 +36,7 @@ export * from '@unpunnyfuns/swatchbook-switcher';
 
 /**
  * Blocks and switcher each declare their own `ColorFormat` / `COLOR_FORMATS`
- * (switcher's copy avoids a runtime dependency on core — see its
+ * (switcher's copy avoids a runtime dependency on core; see its
  * `types.ts`), so the two wildcard re-exports above collide on these names.
  * Pin the addon's public surface to blocks' canonical definitions, the ones
  * every other blocks-facing type on this barrel already comes from.
