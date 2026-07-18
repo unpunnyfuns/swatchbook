@@ -36,23 +36,11 @@ The [config reference](https://unpunnyfuns.github.io/swatchbook/reference/config
 
 ## Browser-safe subpaths
 
-Leaf utilities consumers need without the loader's Node deps live on dedicated subpaths, each tree-shake-clean, no `@terrazzo/parser`, no `node:*` imports:
-
-- `@unpunnyfuns/swatchbook-core/snapshot-for-wire`: `snapshotForWire(project, css)` + `SnapshotForWire` type
-- `@unpunnyfuns/swatchbook-core/themes`: `enumerateThemes({axes, presets, defaultTuple})` + `tupleToName(axes, tuple)` + `ThemeEntry` type
-- `@unpunnyfuns/swatchbook-core/match-path`: `matchPath(path, filter)` glob-style matcher (`*` / `**`)
-- `@unpunnyfuns/swatchbook-core/fuzzy`: uFuzzy-backed token search
-- `@unpunnyfuns/swatchbook-core/css-var`: `cssVarRef(path, prefix)`
-- `@unpunnyfuns/swatchbook-core/data-attr`: `dataAttr(prefix, key)`
-- `@unpunnyfuns/swatchbook-core/style-element`: `ensureStyleElement(id, text)` + `SWATCHBOOK_STYLE_ELEMENT_ID`
+Leaf utilities that don't need the loader's Node deps ship on dedicated, tree-shakeable subpaths (no `@terrazzo/parser`, no `node:*` imports): `/snapshot-for-wire`, `/themes`, `/match-path`, `/fuzzy`, `/css-var`, `/data-attr`, `/style-element`. The [core reference](https://unpunnyfuns.github.io/swatchbook/reference/core) documents each one's exports.
 
 ## Boundaries
 
-- ✅ Build-time use: Node, scripts, SSR, Storybook presets.
-- ✅ Pair with [Terrazzo](https://terrazzo.app/)'s CLI for production artifact emission (CSS / JS / Tailwind / Swift / Sass / …).
-- ✅ Ship `project.tokenGraph` / `project.defaultTokens` / `project.defaultTuple` to the browser via the `snapshot-for-wire` subpath. That's exactly what the addon's preview does.
-- ❌ Don't ship the full `Project` object to the browser. `resolveAt` is a function and `cwd` is a Node-side absolute path; use `snapshotForWire(project, css)` to get a JSON-friendly subset.
-- ❌ Don't reach into `@terrazzo/parser` directly. Stay on the core surface so upgrades don't churn your code.
+`swatchbook-core` is build-time only: Node, scripts, SSR, Storybook presets. Pair it with [Terrazzo](https://terrazzo.app/)'s CLI for production artifact emission (CSS / JS / Tailwind / Swift / Sass). To hand data to the browser, ship the `snapshotForWire(project, css)` subset (the addon's preview does exactly this) rather than the full `Project`, whose `resolveAt` is a function and whose `cwd` is a Node-side absolute path. Stay on the core surface rather than reaching into `@terrazzo/parser` directly, so upgrades don't churn your code.
 
 ## Credits
 
