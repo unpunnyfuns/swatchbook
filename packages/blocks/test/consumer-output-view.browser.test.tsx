@@ -74,3 +74,43 @@ it('toggles the copy button feedback to "Copied" when clicked, using local state
     });
   }
 });
+
+it('copies the token path when the path copy button is clicked', async () => {
+  const originalClipboard = navigator.clipboard;
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(navigator, 'clipboard', {
+    value: { writeText },
+    configurable: true,
+  });
+
+  try {
+    setup();
+    await userEvent.click(screen.getByTestId('consumer-output-path-copy'));
+    await expect.poll(() => writeText).toHaveBeenCalledWith('color.accent.bg');
+  } finally {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
+      configurable: true,
+    });
+  }
+});
+
+it('copies the CSS variable when the CSS copy button is clicked', async () => {
+  const originalClipboard = navigator.clipboard;
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(navigator, 'clipboard', {
+    value: { writeText },
+    configurable: true,
+  });
+
+  try {
+    setup();
+    await userEvent.click(screen.getByTestId('consumer-output-css-copy'));
+    await expect.poll(() => writeText).toHaveBeenCalledWith('var(--sb-color-accent-bg)');
+  } finally {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
+      configurable: true,
+    });
+  }
+});
