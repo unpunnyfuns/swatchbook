@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import styles from './diagrams.module.css';
 
-const STEPS: ReadonlyArray<{ x: number; label: string; sub: string }> = [
+const STEPS: readonly { x: number; label: string; sub: string }[] = [
   { x: 8, label: 'Pick a context', sub: 'mode: Dark' },
   { x: 200, label: 'Tuple updates', sub: 'one context per axis' },
   { x: 392, label: 'Values apply', sub: 'precomputed at load' },

@@ -1,0 +1,5 @@
+# Build-tokens output (see scripts/build-tokens.mts). Regenerated unformatted
+# on every build, so oxfmt must skip them or `format:check` fails post-build.
+# Gitignored at the repo root, but oxfmt reads .gitignore from this directory.
+src/tokens.snapshot.json
+src/css/tokens.generated.css

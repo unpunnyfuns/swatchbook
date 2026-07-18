@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import styles from './diagrams.module.css';
 
-const STAGES: ReadonlyArray<{ x: number; label: string; sub?: string }> = [
+const STAGES: readonly { x: number; label: string; sub?: string }[] = [
   { x: 8, label: 'Token sources', sub: 'DTCG files' },
   { x: 160, label: 'Parse' },
   { x: 312, label: 'Build graph' },
@@ -20,9 +20,9 @@ export default function IngestionDiagram(): ReactNode {
         aria-labelledby="ingestion-diagram-title"
       >
         <title id="ingestion-diagram-title">
-          Token source files are parsed, built into a graph, snapshotted, and shown in the
-          preview as CSS variables and doc blocks. Saving a source file re-runs the whole
-          pipeline in memory.
+          Token source files are parsed, built into a graph, snapshotted, and shown in the preview
+          as CSS variables and doc blocks. Saving a source file re-runs the whole pipeline in
+          memory.
         </title>
         <defs>
           <marker

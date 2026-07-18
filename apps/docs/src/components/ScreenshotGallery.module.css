@@ -1,0 +1,49 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+  }
+}
+
+.figure {
+  margin: 0;
+}
+
+.button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--sl-color-bg-nav);
+  cursor: zoom-in;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease;
+}
+
+.button:hover {
+  transform: translateY(-3px);
+  border-color: var(--sl-color-accent);
+}
+
+.shot {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.caption {
+  margin-top: 0.9rem;
+  font-size: 0.95rem;
+  color: var(--sl-color-gray-3, var(--sl-color-text));
+}

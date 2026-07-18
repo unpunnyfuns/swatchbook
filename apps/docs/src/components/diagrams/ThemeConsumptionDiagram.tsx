@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import styles from './diagrams.module.css';
 
-const ROWS: ReadonlyArray<{ y: number; mechanism: string; consumer: string; sub: string }> = [
+const ROWS: readonly { y: number; mechanism: string; consumer: string; sub: string }[] = [
   { y: 24, mechanism: 'CSS variables', consumer: 'var(--…)', sub: 'zero code' },
   { y: 92, mechanism: 'React context', consumer: 'useActiveAxes()', sub: 'inside the preview' },
   { y: 160, mechanism: 'data attributes', consumer: 'MutationObserver', sub: 'any framework' },
@@ -18,9 +18,9 @@ export default function ThemeConsumptionDiagram(): ReactNode {
         aria-labelledby="theme-consumption-diagram-title"
       >
         <title id="theme-consumption-diagram-title">
-          Flipping an axis updates CSS variables, the React context, and data attributes at
-          once. Stories consume whichever surface fits: plain CSS var() with zero code, the
-          useActiveAxes hook inside the preview, or a MutationObserver in any framework.
+          Flipping an axis updates CSS variables, the React context, and data attributes at once.
+          Stories consume whichever surface fits: plain CSS var() with zero code, the useActiveAxes
+          hook inside the preview, or a MutationObserver in any framework.
         </title>
         <defs>
           <marker

@@ -1,5 +1,5 @@
 {
-  "$description": "Dark theme role tokens the Docusaurus Infima layer maps onto.",
+  "$description": "Dark theme role tokens the Starlight theme layer maps onto.",
   "color": {
     "$type": "color",
     "surface": {

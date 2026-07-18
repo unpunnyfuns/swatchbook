@@ -17,8 +17,7 @@ export default function BuildQueryDiagram(): ReactNode {
         <title id="build-query-diagram-title">
           At load time, sources are parsed, aliases resolved, and axis effects indexed into the
           token graph, once. At display time, blocks query the graph for values, aliases, and
-          variance and get instant answers; nothing on the display side reaches back into
-          parsing.
+          variance and get instant answers; nothing on the display side reaches back into parsing.
         </title>
         <defs>
           <marker

@@ -12,9 +12,9 @@ export default function SharedOptionsDiagram(): ReactNode {
         aria-labelledby="shared-options-diagram-title"
       >
         <title id="shared-options-diagram-title">
-          Both the Terrazzo CLI config and the swatchbook config import one shared options
-          module, so the production build and the Storybook preview format values and name
-          variables the same way.
+          Both the Terrazzo CLI config and the swatchbook config import one shared options module,
+          so the production build and the Storybook preview format values and name variables the
+          same way.
         </title>
         <defs>
           <marker

@@ -5,8 +5,6 @@
 }
 
 .sb-docs-switcher__trigger {
-  /* Match Docusaurus's ColorModeToggle button sizing + reset so the two
-     sit together without a layout jog. */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -16,27 +14,47 @@
   margin: 0;
   background: transparent;
   border: 0;
-  color: var(--ifm-navbar-link-color, inherit);
+  color: var(--sl-color-text, inherit);
   cursor: pointer;
-  border-radius: var(--ifm-button-border-radius, 4px);
+  border-radius: 4px;
 }
 
 .sb-docs-switcher__trigger:hover,
 .sb-docs-switcher__trigger[aria-expanded='true'] {
-  color: var(--ifm-navbar-link-hover-color, var(--ifm-color-primary));
-  background: var(--ifm-color-emphasis-200, rgba(0, 0, 0, 0.05));
+  color: var(--sl-color-text-accent, var(--sl-color-accent));
+  background: var(--sl-color-bg-accent, rgba(0, 0, 0, 0.05));
 }
 
 .sb-docs-switcher__popover {
   position: absolute;
   top: calc(100% + 6px);
-  right: 0;
-  z-index: var(--ifm-z-index-dropdown, 200);
+  /* Default (inline demo on the switcher reference page): anchored to the
+     trigger's left edge, not right. The switcher sits inline in page content
+     near the left sidebar column; a right-anchored popover would drift under
+     the sidebar's `position: fixed` stacking context and become unclickable.
+     The header mount flips this — see `.sb-header-switcher` below. */
+  left: 0;
+  z-index: 200;
   min-width: 260px;
   padding: 4px 0;
-  border-radius: var(--ifm-global-radius, 6px);
-  background: var(--ifm-background-surface-color, Canvas);
-  color: var(--ifm-font-color-base, CanvasText);
-  border: 1px solid var(--ifm-color-emphasis-300, rgba(0, 0, 0, 0.12));
-  box-shadow: var(--ifm-global-shadow-md, 0 6px 18px rgba(0, 0, 0, 0.12));
+  border-radius: 6px;
+  background: var(--sl-color-bg-nav, Canvas);
+  color: var(--sl-color-text, CanvasText);
+  border: 1px solid var(--sl-color-hairline, rgba(0, 0, 0, 0.12));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* Header mount (top-right of the site nav): right-anchor the popover so it
+   opens leftward into the viewport instead of overflowing the right edge. */
+.sb-header-switcher .sb-docs-switcher__popover {
+  right: 0;
+  left: auto;
+}
+
+/* Mobile-menu mount: Starlight relocates the header controls to the bottom of
+   the mobile menu (`.mobile-preferences`), where a downward popover clips
+   below the fold. Open it upward instead. */
+.mobile-preferences .sb-docs-switcher__popover {
+  top: auto;
+  bottom: calc(100% + 6px);
 }

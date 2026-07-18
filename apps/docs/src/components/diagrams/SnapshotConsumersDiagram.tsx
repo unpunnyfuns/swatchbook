@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import styles from './diagrams.module.css';
 
-const CONSUMERS: ReadonlyArray<{ y: number; label: string; sub: string }> = [
+const CONSUMERS: readonly { y: number; label: string; sub: string }[] = [
   { y: 20, label: 'Storybook preview', sub: 'the addon' },
   { y: 80, label: 'Docs-site blocks', sub: 'outside Storybook' },
   { y: 140, label: 'MCP server', sub: 'AI agents' },
@@ -18,8 +18,8 @@ export default function SnapshotConsumersDiagram(): ReactNode {
         aria-labelledby="snapshot-consumers-diagram-title"
       >
         <title id="snapshot-consumers-diagram-title">
-          One project snapshot feeds the Storybook preview, doc blocks outside Storybook, and
-          the MCP server.
+          One project snapshot feeds the Storybook preview, doc blocks outside Storybook, and the
+          MCP server.
         </title>
         <defs>
           <marker

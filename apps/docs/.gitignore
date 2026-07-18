@@ -1,13 +1,6 @@
 # Dependencies
 /node_modules
 
-# Production
-/build
-
-# Generated files
-.docusaurus
-.cache-loader
-
 # Misc
 .DS_Store
 .env.local
@@ -20,4 +13,4 @@ yarn-debug.log*
 yarn-error.log*
 
 # Generated frontpage media (captured on deploy, see scripts/capture-media.mjs)
-/static/media
+/public/media

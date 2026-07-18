@@ -1,30 +1,25 @@
-import { useColorMode } from '@docusaurus/theme-common';
-import { type SwitcherPreset, ThemeSwitcher } from '@unpunnyfuns/swatchbook-switcher';
+import { ThemeSwitcher } from '@unpunnyfuns/swatchbook-switcher';
+import type { SwitcherPreset } from '@unpunnyfuns/swatchbook-switcher';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { MODE_AXIS, useSwatchbookSwitcher } from './SwatchbookSwitcherContext';
+import { MODE_AXIS, useSwatchbookSwitcher } from './SwatchbookSwitcherContext.tsx';
 import './SwatchbookSwitcherButton.css';
+import { useStarlightTheme } from './useStarlightTheme.ts';
+import type { StarlightTheme } from './useStarlightTheme.ts';
 
-type DocusaurusMode = 'light' | 'dark';
-
-function toDocusaurusMode(context: string): DocusaurusMode {
-  return context.toLowerCase() === 'dark' ? 'dark' : 'light';
-}
-
-function toSwatchbookMode(colorMode: DocusaurusMode, contexts: readonly string[]): string {
+function toSwatchbookMode(colorMode: StarlightTheme, contexts: readonly string[]): string {
   const match = contexts.find((ctx) => ctx.toLowerCase() === colorMode);
   return match ?? contexts[0] ?? 'Light';
 }
 
+function toStarlightTheme(context: string): StarlightTheme {
+  return context.toLowerCase() === 'dark' ? 'dark' : 'light';
+}
+
 /**
- * Navbar trigger + popover for the docs-site theme switcher. Replaces
- * Docusaurus's built-in colour-mode toggle (via the `ColorModeToggle`
- * swizzle) and hosts every axis the project ships — including `mode`,
- * which is bridged to `useColorMode` here so `[data-theme]` on `<html>`
- * stays in lockstep.
- *
- * Runs strictly under `<ColorModeProvider>`, which is why the
- * `useColorMode` call lives in the button rather than the Root-level
- * provider (Root sits outside the colour-mode context during SSR).
+ * Trigger + popover for the docs-site theme switcher, hosting every axis the
+ * project ships -- including `mode`, which is bridged to Starlight's own
+ * light/dark theme via `useStarlightTheme` so `[data-theme]` on `<html>`
+ * stays in lockstep with the switcher's active tuple.
  */
 export function SwatchbookSwitcherButton(): React.ReactElement {
   const {
@@ -37,7 +32,7 @@ export function SwatchbookSwitcherButton(): React.ReactElement {
     applyNonModeFromPreset,
     setLastApplied,
   } = useSwatchbookSwitcher();
-  const { colorMode, setColorMode } = useColorMode();
+  const [colorMode, setColorMode] = useStarlightTheme();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
@@ -77,7 +72,7 @@ export function SwatchbookSwitcherButton(): React.ReactElement {
   const onAxisChange = useCallback(
     (axisName: string, next: string) => {
       if (axisName === MODE_AXIS) {
-        setColorMode(toDocusaurusMode(next));
+        setColorMode(toStarlightTheme(next));
         return;
       }
       setNonModeAxis(axisName, next);
@@ -89,7 +84,7 @@ export function SwatchbookSwitcherButton(): React.ReactElement {
     (preset: SwitcherPreset) => {
       const nextMode = preset.axes[MODE_AXIS];
       if (typeof nextMode === 'string' && modeAxis?.contexts.includes(nextMode)) {
-        setColorMode(toDocusaurusMode(nextMode));
+        setColorMode(toStarlightTheme(nextMode));
       }
       applyNonModeFromPreset(preset);
       setLastApplied(preset.name);

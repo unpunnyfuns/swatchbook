@@ -1,0 +1,16 @@
+---
+/**
+ * Overrides Starlight's built-in light/dark ThemeSelect with the swatchbook
+ * switcher: one control for every axis the project ships (mode, brand,
+ * contrast), replacing the plain toggle in the site header. `mode` is bridged
+ * to Starlight's own theme, so the early-theme script and `data-theme` remain
+ * the source of truth; this only swaps the picker UI. Starlight renders this
+ * slot in both the desktop header and the mobile menu — each mounts an
+ * independent island that syncs via `data-theme` + `localStorage`.
+ */
+import SwatchbookSwitcher from './SwatchbookSwitcher.tsx';
+---
+
+<div class="sb-header-switcher">
+  <SwatchbookSwitcher client:load />
+</div>

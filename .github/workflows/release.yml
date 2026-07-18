@@ -108,7 +108,7 @@ jobs:
         with:
           # `version` only — NO `publish:` input. This job is structurally
           # incapable of publishing; that is the gated `publish` job's job.
-          # `pnpm run version` → `changeset version` + docs snapshot.
+          # `pnpm run version` → `changeset version`.
           version: pnpm run version
           commit: 'chore(release): version packages'
           title: 'chore(release): version packages'

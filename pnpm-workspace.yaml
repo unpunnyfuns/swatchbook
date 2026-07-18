@@ -12,45 +12,16 @@ allowBuilds:
 
 overrides:
   # Each pin forces a patched version to clear a Dependabot/GHSA advisory
-  # (ref = the PR that added it). All verified load-bearing; removing any
-  # regresses to a vulnerable/older version (#1224).
+  # (ref = the PR that added the pin). Verified load-bearing via `pnpm audit`
+  # after the Docusaurus removal (issue #1234): all three are still pulled in
+  # by a live devDependency chain, not by Docusaurus. Removing any regresses
+  # to a vulnerable version.
   #
-  # webpackbar is the exception: a #734 transitive-cleanup pin with no
-  # specific advisory recorded. Verify before removing.
-  webpackbar: 7.0.0
-  # GHSA-w5hq-g745-h8pq (#656), via webpack-dev-server -> sockjs
-  uuid: ^14.0.0
-  # GHSA-v2v4-37r5-5v8g (#691)
+  # GHSA-v2v4-37r5-5v8g (PR #691), via @modelcontextprotocol/sdk ->
+  # express-rate-limit (the MCP inspector devDependency)
   ip-address: ^10.1.1
-  # GHSA-5c6j-r48x-rmvq + GHSA-qj8w-gfj5-8c6v (#711), via copy-webpack-plugin
-  serialize-javascript: ^7.0.5
-  # GHSA-58qx-3vcg-4xpx (#1012)
-  ws: ^8.20.1
-  # GHSA-q8mj-m7cp-5q26 (#1037)
-  qs: ^6.15.2
-  # critical quote() newline-escaping advisory (#1131), via @docusaurus/core
+  # GHSA-w7jw-789q-3m8p, critical quote() newline-escaping advisory (PR #1131),
+  # via @modelcontextprotocol/inspector -> concurrently (MCP devDependency)
   shell-quote: ^1.8.4
-  # GHSA-gv7w-rqvm-qjhr + GHSA-g7r4-m6w7-qqqr (#1194), Storybook / Vite
+  # GHSA-g7r4-m6w7-qqqr (PR #1194), via @terrazzo/cli's vite-node -> vite chain
   esbuild: ^0.28.1
-  # GHSA-v6wh-96g9-6wx3 (#1223)
-  launch-editor: ^2.14.1
-  # GHSA-h67p-54hq-rp68 (#1223). Scoped to 4.x: Docusaurus's front-matter
-  # parser needs js-yaml 3.x; a blanket override breaks `docs#build`.
-  'js-yaml@>=4': ^4.2.0
-  # Same advisory (CVE-2026-53550) on the 3.x line, alert #35: Docusaurus's
-  # gray-matter parser pins js-yaml `^3.13.1` and 3.14.2 is still vulnerable.
-  # 3.15.0 is the patched 3.x (same major, API-compatible), so it clears the
-  # alert without the blanket-override breakage noted above.
-  'js-yaml@3': ^3.15.0
-  # GHSA-4x5r-pxfx-6jf8 (#1223)
-  '@babel/core': ^7.29.6
-  # GHSA-mx8g-39q3-5c79 (#1255), via @docusaurus/core dev server
-  webpack-dev-server: 5.2.5
-  # GHSA-64mm-vxmg-q3vj (#1255), forced major: webpack-dev-server@5.2.5 still
-  # declares ^2.0.9 and calls the v2 two-arg createProxyMiddleware(context,
-  # config) form that v3 dropped, but that path runs only with a configured
-  # dev-server proxy, and no workspace sets one — so it is dead here. Pinned to
-  # the minimum patched major (not v4) to stay closest to wds's expected API.
-  http-proxy-middleware: ^3.0.6
-  # GHSA-xv26-6w52-cph6 (critical) + GHSA-mp7j-qc5w-4988 (#1368), via webpack-dev-server -> sockjs
-  websocket-driver: ^0.7.5
