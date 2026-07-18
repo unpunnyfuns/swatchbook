@@ -2,7 +2,7 @@
 title: Addon
 ---
 
-Wiring swatchbook into Storybook is this package's job. It loads your config at build time through `@unpunnyfuns/swatchbook-core`, exposes the resolved graph as a virtual module, and at preview time registers a decorator, a manager toolbar, and the `useToken` hook. The MDX doc blocks live in `@unpunnyfuns/swatchbook-blocks`, which this package depends on and re-exports; importing either package's name gets you the blocks.
+Wiring swatchbook into Storybook is this package's job. It loads your config at build time through `@unpunnyfuns/swatchbook-core`, exposes the resolved graph as a virtual module, and at preview time registers a decorator and a manager toolbar, and exposes the `useToken` hook. The MDX doc blocks live in `@unpunnyfuns/swatchbook-blocks`, which this package depends on and re-exports; importing either package's name gets you the blocks.
 
 ## Install
 
@@ -10,7 +10,7 @@ Wiring swatchbook into Storybook is this package's job. It loads your config at 
 npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
 ```
 
-This gives you the toolbar, preview decorator, and the `useToken()` hook. The addon depends on `@unpunnyfuns/swatchbook-blocks` and re-exports its full surface (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `Diagnostics`, `SwatchbookProvider`, block-side hooks), so no separate install is needed inside a Storybook that already registers the addon; import from either package's name and both resolve to the same module. Install `@unpunnyfuns/swatchbook-blocks` directly only for a non-Storybook consumer of the blocks. See the [authoring guide](/guides/authoring-doc-stories) for MDX composition patterns.
+This gives you the toolbar, preview decorator, and the `useToken()` hook. The addon depends on `@unpunnyfuns/swatchbook-blocks` and re-exports its full surface (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `Diagnostics`, `SwatchbookProvider`, block-side hooks), so no separate install is needed inside a Storybook that already registers the addon; import from either package's name for the same re-exported surface. Install `@unpunnyfuns/swatchbook-blocks` directly only for a non-Storybook consumer of the blocks. See the [authoring guide](/guides/authoring-doc-stories) for MDX composition patterns.
 
 Peer requirements: Storybook 10.1+ on the Vite builder, React 18+.
 

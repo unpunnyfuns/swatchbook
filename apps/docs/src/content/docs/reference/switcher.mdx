@@ -142,7 +142,7 @@ The Storybook addon's manager toolbar imports this directly to avoid carrying a 
 
 The component is pure: it reads its inputs, draws the menu, and calls back when the user clicks. It never touches `localStorage` / `sessionStorage`, the DOM outside its own subtree, or the router. Applying a change, and persisting it across reloads, is the host's policy. Two common shapes for applying it:
 
-- **Attribute on `<html>`**: set `data-<prefix>-<axis>` on `document.documentElement` per change. Pairs with `cssVarPrefix` from `loadProject` so emitted CSS targets the same selectors. The Storybook addon and the docs-site switcher both use this.
+- **Attribute on `<html>`**: set `data-<prefix>-<axis>` on `document.documentElement` per change. Pairs with `cssVarPrefix` from `loadProject` so emitted CSS targets the same selectors. The Storybook addon and the docs-site switcher both use this, though the docs-site switcher drives `mode` through Starlight's `data-theme` instead.
 - **Class on `<body>`**: toggle `theme-<value>` on `document.body.classList`. Useful if the project's stylesheet uses class-based scoping instead of attribute selectors.
 
 For persistence, the Storybook addon piggybacks on Storybook's globals API; the docs-site switcher syncs with the site's own light/dark theme (Starlight's `data-theme` + `starlight-theme` `localStorage` key) for `mode` and persists the rest via a separate `localStorage` key.

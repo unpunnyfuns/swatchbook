@@ -20,7 +20,7 @@ import { tokenGraph, defaultTuple, axes, diagnostics, css } from 'virtual:swatch
 
 "Virtual" means there's no file on disk. Vite asks the plugin to materialize the module on each preview build, and the plugin does this by calling `loadProject(config, cwd)` from `@unpunnyfuns/swatchbook-core` and serializing the result into ESM exports.
 
-Edit your config or a token file, Vite notices, the plugin re-runs `loadProject`, and the preview sees fresh values over HMR.
+Edit a token or resolver file, Vite notices, the plugin re-runs `loadProject`, and the preview sees fresh values over HMR.
 
 ## Build once, query fast
 
@@ -53,4 +53,4 @@ The virtual module lives inside Vite's module graph: the Storybook preview resol
 ## Sharp edges
 
 - **Vite is required.** The addon bundles the plugin for Storybook's Vite integration. Webpack-based Storybook setups don't get the virtual module materialized; they would fall back to a pre-built snapshot or switch to the Vite builder. Storybook 10's default is Vite, so this only bites older setups.
-- The virtual module's addon-internal status and the dir-level `fs.watch` that keeps atomic-save editors working are covered under [Sharp corners](/developers/sharp-corners).
+- The virtual module's addon-internal status and the directory-level `fs.watch` that keeps atomic-save editors working are covered under [Sharp corners](/developers/sharp-corners).
