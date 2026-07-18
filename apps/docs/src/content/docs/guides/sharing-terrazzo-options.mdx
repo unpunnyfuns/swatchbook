@@ -4,7 +4,7 @@ title: Aligning with your token build
 
 import SharedOptionsDiagram from '#/components/diagrams/SharedOptionsDiagram.tsx';
 
-If you run Terrazzo's CLI in production, swatchbook can read the same value-formatting rules, plugin set, and listing metadata so the swatches, values, and snippets in Storybook match exactly what your apps ship. The pattern is one shared TypeScript module that both `terrazzo.config.ts` and `swatchbook.config.ts` import from.
+If you run Terrazzo's CLI in production, swatchbook can read the same value-formatting rules, plugin set, and listing metadata, so the swatches, values, and snippets in Storybook match exactly what your apps ship. The pattern is one shared TypeScript module that both `terrazzo.config.ts` and `swatchbook.config.ts` import from.
 
 <SharedOptionsDiagram />
 
@@ -14,9 +14,9 @@ Swatchbook is the preview side of a [Terrazzo](https://terrazzo.app/) pipeline: 
 
 `@terrazzo/parser`, `@terrazzo/plugin-css`, and `@terrazzo/plugin-token-listing` come along with `swatchbook-core` transitively. The default install already parses tokens, emits the preview stylesheet, and derives the token listing without any Terrazzo entry in your `package.json`.
 
-`swatchbook-core` also declares `@terrazzo/parser` and `@terrazzo/plugin-css` as **peer** dependencies. pnpm hoists them to one shared instance, so swatchbook's internal build and any Terrazzo plugin you add later resolve the same parser. The failure this avoids is a second, duplicate parser: a plugin built against one instance cannot read a graph produced by another, and the symptom is plugin output that silently goes missing from the listing.
+`swatchbook-core` also declares `@terrazzo/parser` and `@terrazzo/plugin-css` as **peer** dependencies, so your package manager resolves them to the copy your project already has instead of nesting a private duplicate. That keeps swatchbook's internal build and any Terrazzo plugin you add later on the same parser instance, as long as the version ranges agree; a mismatched pin can still split them. The failure this avoids is a second, duplicate parser: a plugin built against one instance cannot read a graph produced by another, and the symptom is plugin output that silently goes missing from the listing.
 
-## The shared-options module pattern
+## The shared-options module
 
 Put everything both builds agree on in one file. Both configs import from it.
 
@@ -24,14 +24,23 @@ Put everything both builds agree on in one file. Both configs import from it.
 import cssPlugin, { type CSSPluginOptions } from '@terrazzo/plugin-css';
 import swiftPlugin from '@terrazzo/plugin-swift';
 import androidPlugin from '@terrazzo/plugin-android';
-import type { Plugin } from '@terrazzo/parser';
+import { makeCSSVar } from '@terrazzo/token-tools/css';
+import type { Plugin, TokenNormalized } from '@terrazzo/parser';
 import type { TokenListingPluginOptions } from '@terrazzo/plugin-token-listing';
 
-/** Value-formatting policy — shared by production CSS and swatchbook's preview. */
+/** Value-formatting policy shared by production CSS and swatchbook's preview. */
 export const sharedCssOptions: Omit<CSSPluginOptions, 'variableName' | 'permutations'> = {
   legacyHex: true,
   include: ['color.*', 'space.*', 'radius.*', 'shadow.*', 'typography.*'],
 };
+
+// Variable naming is the one policy `sharedCssOptions` can't carry: swatchbook
+// manages `variableName` itself and takes the prefix through `cssVarPrefix`, so
+// the CLI has to reproduce that naming via its own `variableName`. Both read the
+// prefix from here.
+export const cssVarPrefix = 'ds';
+export const sharedVariableName = (token: TokenNormalized) =>
+  makeCSSVar(String(token.id), { prefix: cssVarPrefix });
 
 /** Extra plugins whose naming rules we want reflected in `listing[path].names.*`. */
 export const sharedPlugins: readonly Plugin[] = [
@@ -59,6 +68,7 @@ import {
   sharedCssOptions,
   sharedListingOptions,
   sharedPlugins,
+  sharedVariableName,
 } from './shared-terrazzo-options';
 
 export default defineConfig({
@@ -67,6 +77,7 @@ export default defineConfig({
   plugins: [
     cssPlugin({
       ...sharedCssOptions,
+      variableName: sharedVariableName,
       filename: 'tokens.css',
     }),
     ...sharedPlugins,
@@ -81,6 +92,7 @@ export default defineConfig({
 ```ts title="swatchbook.config.ts"
 import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
 import {
+  cssVarPrefix,
   sharedCssOptions,
   sharedListingOptions,
   sharedPlugins,
@@ -88,20 +100,22 @@ import {
 
 export default defineSwatchbookConfig({
   resolver: 'tokens/resolver.json',
-  cssVarPrefix: 'ds',
+  cssVarPrefix,
   cssOptions: sharedCssOptions,
   listingOptions: sharedListingOptions,
   terrazzoPlugins: sharedPlugins,
 });
 ```
 
-Now any change to `sharedCssOptions.legacyHex`, or a new plugin added to `sharedPlugins`, reaches both the production CLI and swatchbook's Storybook build with one edit. Three swatchbook config fields receive the shared blocks:
+Any change to `sharedCssOptions.legacyHex`, or a new plugin added to `sharedPlugins`, now reaches both the production CLI and swatchbook's Storybook build with one edit. The variable prefix is wired into each side by hand (`variableName` for the CLI, `cssVarPrefix` for swatchbook) from the same shared constant, since swatchbook manages `variableName` internally and won't accept it through `cssOptions`. Three swatchbook config fields receive the shared blocks:
 
 | Config field                                           | Forwards to                      | Controls                                                                               |
 | ------------------------------------------------------ | -------------------------------- | -------------------------------------------------------------------------------------- |
 | [`cssOptions`](/reference/config#cssoptions)           | `@terrazzo/plugin-css`           | value formatting (hex vs `color()`), transforms, include/exclude globs, utility groups |
 | [`listingOptions`](/reference/config#listingoptions)   | `@terrazzo/plugin-token-listing` | per-platform naming, mode metadata, `previewValue` / `subtype` hooks                   |
 | [`terrazzoPlugins`](/reference/config#terrazzoplugins) | additional plugins in the build  | which plugin naming logic is available to the listing                                  |
+
+The `terrazzo.config.ts` above imports `defineConfig` from `@terrazzo/cli`, the package a `tz build` consumer already has installed. `@terrazzo/parser` also exports a lower-level `defineConfig` that takes a `cwd` option; prefer the cli export in user-facing config files.
 
 ### Monorepo layouts
 
@@ -124,29 +138,29 @@ apps/
 
 If the shared module imports from other workspace packages, make sure your bundler (tsdown / rolldown / whatever `pnpm -r build` runs) resolves those imports in source form, or publish the shared module alongside the tokens package itself.
 
-## Why this pattern, not a "read my Terrazzo config" field
+## Why plugin objects, not a "read my Terrazzo config" field
 
-Swatchbook accepts plugin objects via `terrazzoPlugins` rather than ingesting a constructed `terrazzo.config.ts`. The reason is that plugin options live inside each plugin's closure once the factory runs; there's no general way for swatchbook to read `legacyHex` (or any other constructor argument) back out of a `cssPlugin({ legacyHex: true })` call. A `config.terrazzo: TerrazzoConfig` field could only inherit `tokens` + `plugins` and would silently ignore everything in `cssOptions`, which is the field most consumers expect alignment for. The shared-module pattern handles every option symmetrically and works the same way `tsconfig.json` `extends` or `vite.config` / `vitest.config` factoring does.
+Swatchbook accepts plugin objects via `terrazzoPlugins` rather than ingesting a constructed `terrazzo.config.ts`. Plugin options live inside each plugin's closure once the factory runs; there's no general way for swatchbook to read `legacyHex` (or any other constructor argument) back out of a `cssPlugin({ legacyHex: true })` call. A `config.terrazzo: TerrazzoConfig` field could only inherit `tokens` + `plugins` and would silently ignore everything in `cssOptions`, which is the field most consumers expect alignment for. The shared-module pattern handles every option symmetrically, the same way `tsconfig.json` `extends` or `vite.config` / `vitest.config` factoring does.
 
-## Drift symptoms: why this matters
+## Drift symptoms
 
-Without alignment, the docs and production diverge in subtle ways. Concretely:
+Without alignment, the docs and production diverge in subtle ways:
 
 - A `<ColorTable>` cell shows `color(display-p3 0.24 0.56 0.89)` because swatchbook's default `plugin-css` produces the modern `color()` form. Your production CSS passes `legacyHex: true` and ships `#3d8fe4`. Designers QA the docs, sign off on the modern form, and the rollout looks different than expected.
 - `<TokenUsageSnippet>` emits `var(--ds-colour-surface-default)` using a British-spelling `variableName` policy you configured in production, but swatchbook's default policy emits `--ds-color-surface-default`. Consumer-facing code reads fine; docs snippets are wrong.
 - A future per-platform column in a block you write renders `colorSurfaceDefault` for Swift, but production Swift ships `ColorSurfaceDefault` because `@terrazzo/plugin-swift` wasn't loaded in the swatchbook build.
 
-The shared-options module above closes each of these gaps in one place.
+The shared module above closes all three. One structural mismatch it can't reach: if production reads a flat `tokens.json` while swatchbook reads a DTCG resolver, the two pipelines see different theme sets and the listing reflects only swatchbook's resolver view. Keep both on the same source shape; if production needs flat output, emit it with Terrazzo's `plugin-js` (or similar) driven from the resolver's themes.
 
 ## What swatchbook owns (and you can't override)
 
-Five fields are stripped at the type level. They're load-bearing for how swatchbook emits CSS and publishes the listing; letting consumers override them breaks the preview model.
+Five fields are stripped at the type level. They're load-bearing for how swatchbook emits CSS and publishes the listing; letting consumers override them breaks the preview model. Swatchbook runs its whole Terrazzo build in memory and never writes to disk, which is what two of these fields would otherwise change.
 
-- **`cssOptions.variableName`**: swatchbook routes naming through `@terrazzo/token-tools`' `makeCSSVar` with your `cssVarPrefix`, so every variable carries the prefix and kebab-cases consistently with what the listing records under `names.css`. A custom policy would make the listing's `names.css` disagree with the emitted stylesheet, which is worse than the default.
+- **`cssOptions.variableName`**: swatchbook routes naming through `@terrazzo/token-tools`' `makeCSSVar` with your `cssVarPrefix`, so every variable carries the prefix and kebab-cases consistently with what the listing records under `names.css`. A custom policy would make the listing's `names.css` disagree with the emitted stylesheet, which is worse than the default. `cssVarPrefix` is your only lever for the prefix, and it's a top-level config field rather than part of the shared-options module; make sure it matches whatever `--<prefix>-*` your production stylesheet emits.
 - **`cssOptions.permutations`** (the internal Terrazzo field that controls per-theme CSS blocks): swatchbook synthesizes one entry per resolver theme (or per layered tuple) so the emitted stylesheet declares each theme under a compound `data-<prefix>-<axis>` selector. Overriding this defeats axis-aware rendering.
-- **`cssOptions.filename`**: the internal stylesheet is captured in memory, never written to disk.
+- **`cssOptions.filename`**: the internal stylesheet stays in memory, so there's no output file to name.
 - **`cssOptions.skipBuild`**: setting `true` nulls out the listing's `previewValue` derivation, breaking every block that displays a value.
-- **`listingOptions.filename`**: the listing is captured in memory; the `outputFile` handler finds the entry by filename, and swatchbook owns that handshake.
+- **`listingOptions.filename`**: the listing stays in memory too; the `outputFile` handler finds the entry by filename, and swatchbook owns that handshake.
 
 Everything else passes through untouched.
 
@@ -162,11 +176,11 @@ Setting any of these doesn't hit a type error because they're still part of `CSS
 
 ## Per-platform identifier display
 
-Swatchbook isn't a replacement for `@terrazzo/cli`, `tz build`, or Style Dictionary. What it does, through the listing, is _display_ the identifiers those transformers produce, so the docs line up with what production ships. The transformation happens in the user-configured plugin; swatchbook just reads its output.
+Swatchbook doesn't transform tokens for production; through the listing it _displays_ the identifiers those transformers produce, so the docs line up with what ships. The transformation happens in the user-configured plugin; swatchbook reads its output.
 
-The Token Listing records `names.<platform>` for every platform registered in `listingOptions.platforms`, using the named plugin's own identifier-naming logic. Blocks read these without duplicating any rules.
+The Token Listing records `names.<platform>` for every platform registered in `listingOptions.platforms`, using the named plugin's own identifier-naming logic, so blocks read those names without duplicating any rules.
 
-Load the plugin in `terrazzoPlugins`, name it in `listingOptions.platforms`, and `listing[path].names.swift` (or `.android`, `.js`, `.sass`, …) populates automatically. `<TokenDetail>` / `<ConsumerOutput>` pick up the extra platforms and render one row per platform in the Consumer Output section, with no block-writing required for the common display case. The names match production only when the plugin invocations match: pass `plugin-swift({ /* your prod options */ })`, not `plugin-swift()`, or the rows show a plausible default rather than your production identifier. The shared-options module above is the way to keep both sides identical in one place.
+Loading the plugin and naming its platform are both required: a plugin in `terrazzoPlugins` with no matching `listingOptions.platforms` entry runs but contributes no names; a `platforms` entry whose plugin isn't loaded fails at listing time. With both in place, `listing[path].names.swift` (or `.android`, `.js`, `.sass`, …) populates automatically, and `<TokenDetail>` / `<ConsumerOutput>` render one row per platform in the Consumer Output section with no block-writing required. The names match production only when the plugin invocations match: pass `plugin-swift({ /* your prod options */ })`, not `plugin-swift()`, or the rows show a plausible default rather than your production identifier. Keeping that invocation in the shared module is what holds both sides identical.
 
 For custom blocks, the data is on the project snapshot:
 
@@ -177,41 +191,13 @@ const swiftName = project.listing?.[path]?.names?.swift;
 
 See [`useSwatchbookData`](/reference/blocks/hooks#useswatchbookdata) for the `ProjectSnapshot.listing` shape in the block context.
 
-The output files those plugins produce (`tokens.swift`, `tokens.xml`, …) land in the in-memory output set and are discarded. Swatchbook doesn't write them to disk; `terrazzoPlugins` runs plugins purely for their _naming contribution_ to the listing, not for file emission.
-
-## Per-knob notes
-
-### `cssOptions.legacyHex`, `cssOptions.transform`
-
-Value-formatting changes flow both into the emitted stylesheet and into `listing[path].previewValue` (since `@terrazzo/plugin-token-listing` derives preview values by asking plugin-css for its CSS output). Setting `legacyHex: true` flips both simultaneously: the swatch CSS uses `#3d8fe4`, and every block that displays a value (`<TokenTable>`, `<TokenDetail>`, `<ColorTable>`) shows the same hex string.
-
-### `cssOptions.include` / `cssOptions.exclude`
-
-Glob-based filters on which tokens reach the emitted CSS. Useful when production ships only a subset (say, excluding brand-internal tokens). Swatchbook still parses all tokens (the listing still enumerates them, the blocks still display them), but the injected stylesheet carries only the filtered set. If a story uses a filtered-out token via CSS var, it'll read as unset.
-
-### `cssOptions.utility`
-
-Terrazzo's utility-CSS emission (classes like `.bg-color-accent-bg`). Production builds that ship utility classes can opt into the same emission in swatchbook's preview. Blocks don't consume utility output directly; this is purely "make sure the preview's behavior matches the final bundle's."
-
-### `listingOptions.previewValue`
-
-A hook that can override the auto-computed preview string per token. Useful if production formats values for a non-CSS target and you want docs to show that format. Return `undefined` to fall through to the automatic (plugin-css) value.
-
-### `listingOptions.subtype`
-
-A hook that classifies a token's intent (`bgColor`, `fgColor`, `borderColor`, `padding`, …). Reserved for future per-`subtype` block defaults; currently unused by blocks but worth setting so the metadata is in place.
-
-### `listingOptions.modes`
-
-Declares the resolver modes covered by the listing. Mostly redundant with swatchbook's own resolver reading, but can be set if you use resolver-free layered projects and want the listing to enumerate modes explicitly.
+These plugins run purely for their naming contribution to the listing: their output files (`tokens.swift`, `tokens.xml`, …) are captured with the rest of the in-memory build and discarded. The exception is a plugin that bypasses the Terrazzo build API and writes through `fs` directly: during HMR it will try to write files relative to the Storybook preview's cwd, so prefer plugins that emit through the supported `outputFile` hook.
 
 ## Style Dictionary
 
-[Style Dictionary](https://styledictionary.com) is the other common token build. Since 4.x it reads DTCG-shaped JSON natively, which opens alignment options.
+[Style Dictionary](https://styledictionary.com) is the other common token build; since 4.x it reads DTCG-shaped JSON natively.
 
-### If your source is DTCG
-
-Swatchbook reads DTCG from disk via `@terrazzo/parser`. Style Dictionary (4.x with `preprocessors: ['tokens-studio']` or straight DTCG) reads the same files. Point both at the same directory:
+Point both tools at the same source tree and token identity is preserved across pipelines, even though the CSS variable names won't match character-for-character. Swatchbook names variables through Terrazzo's `@terrazzo/token-tools/css.makeCSSVar`; Style Dictionary names them through its own `transforms` (`name/cti/kebab`, `name/cti/camel`, custom transforms), and the two don't round-trip.
 
 ```ts title="swatchbook.config.ts"
 defineSwatchbookConfig({
@@ -230,30 +216,9 @@ export default {
 };
 ```
 
-The shared piece is the source tree. Alignment ends there: swatchbook computes its own CSS variable names using Terrazzo's naming rules, while Style Dictionary uses its own transform chain. Names _won't_ match character-for-character unless you hand-tune both sides.
+For a preview-only tool the naming gap is usually fine: the swatchbook block shows what the tokens _are_, your apps ship what Style Dictionary emits, and as long as both read the same DTCG input token identity holds across pipelines. If you do need names to match, either treat DTCG dot-paths as the canonical identifier and display those via `<TokenDetail path="…">` (the `path` is stable across pipelines), or write a thin adapter that exposes Style Dictionary's computed names through a custom block via `useSwatchbookData()` (block-writing work the addon doesn't ship).
 
-For a preview-only tool that's usually fine. The swatchbook-rendered block shows what the tokens _are_; your apps ship what Style Dictionary emits. As long as both read the same DTCG input, token identity is preserved across pipelines even when naming differs.
-
-### If you need names to match exactly
-
-This is harder. Style Dictionary's `transforms` (`name/cti/kebab`, `name/cti/camel`, custom naming transforms) produce a naming scheme that doesn't round-trip through Terrazzo's `@terrazzo/token-tools/css.makeCSSVar`. Two routes:
-
-1. **Loosen the naming contract.** Treat DTCG dot-paths as the canonical identifier; display those in blocks via `<TokenDetail path="…">`; let each build name CSS variables however it wants. The `path` is always stable across pipelines.
-2. **Write a thin adapter.** Expose the CSS variable names Style Dictionary computes as a lookup map, read them through a custom block via `useSwatchbookData()`, and render them next to Terrazzo's names. Requires block-writing work; the addon doesn't ship this.
-
-### When to use Style Dictionary _and_ Terrazzo side-by-side
-
-Some teams use Terrazzo for CSS + JS targets (because `@terrazzo/plugin-css` integrates natively with swatchbook) and Style Dictionary for platform targets Terrazzo doesn't cover (some legacy XML formats, Flutter, specific design-tool round-trips). This works: both read the DTCG source tree, both emit to their own `dist/`. Swatchbook aligns with Terrazzo's side; Style Dictionary's side stays unaligned but also stays out of swatchbook's view.
-
-If you're weighing whether to add Terrazzo to an SD-only pipeline, the pragmatic answer is: if you want swatchbook's per-platform `names.*` columns populated with Swift/Android/etc. identifiers, add the Terrazzo plugin for that platform (`plugin-swift`, `plugin-android`) to the swatchbook build via `terrazzoPlugins`. The plugin runs in-memory only (nothing's written to disk, no parallel production artifact is produced), just the naming contribution to the listing.
-
-## Common pitfalls
-
-- **`cssVarPrefix` drift**: swatchbook's `cssVarPrefix` is independent of the prefix plugin-css would pick if you set `variableName` yourself. Since swatchbook owns `variableName`, setting `cssVarPrefix: 'sb'` is the only lever you need for prefix control on the swatchbook side. Production's prefix lives in its own plugin-css call (or in a `variableName` policy you ship). Both sides should pick the same prefix; the guide's "one shared module" pattern doesn't cover prefix because swatchbook takes it from a top-level field; double-check that `cssVarPrefix: 'ds'` in swatchbook matches whatever `--ds-*` your production stylesheet emits.
-- **Resolver vs `tokens` divergence**: if your production build reads a flat `tokens.json` but swatchbook reads a DTCG resolver, the two pipelines see different theme sets. The listing will only reflect swatchbook's resolver view. Keep both on the same shape; if production needs flat output, emit it with Terrazzo's `plugin-js` or similar driven from the resolver's themes.
-- **Plugin loaded but not listed**: a plugin in `terrazzoPlugins` without a matching entry in `listingOptions.platforms` runs but doesn't contribute to `names.*`. Conversely, a platform entry in `listingOptions.platforms` whose plugin isn't in `terrazzoPlugins` will fail at listing time. Both sides or neither.
-- **Plugins that write to disk**: swatchbook captures `outputFile` calls in memory. A plugin that writes via `fs` directly (bypassing the Terrazzo build API) will try to write files relative to the Storybook preview's cwd during HMR. Prefer plugins that use the supported `outputFile` hook.
-- **`@terrazzo/cli` vs `@terrazzo/parser`'s `defineConfig`**: `@terrazzo/cli` is what a `tz build` consumer already has installed; `@terrazzo/parser` exports a lower-level `defineConfig` that takes a `cwd` option. Prefer the cli export in user-facing config files.
+The two builds also coexist. Some teams run Terrazzo for CSS + JS targets (because `@terrazzo/plugin-css` integrates with swatchbook natively) and Style Dictionary for targets Terrazzo doesn't cover (some legacy XML formats, Flutter, specific design-tool round-trips). Both read the DTCG source tree, both emit to their own `dist/`; swatchbook aligns with the Terrazzo side and leaves Style Dictionary's out of view. If you're weighing whether to add Terrazzo to an SD-only pipeline just for swatchbook's per-platform `names.*` columns, adding the matching Terrazzo plugin (`plugin-swift`, `plugin-android`) via `terrazzoPlugins` runs it in-memory for the naming contribution only.
 
 ## When you don't need any of this
 

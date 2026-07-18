@@ -4,11 +4,11 @@ title: Consuming the active theme
 
 import ThemeConsumptionDiagram from '#/components/diagrams/ThemeConsumptionDiagram.tsx';
 
-Swatchbook's toolbar flips the active tuple. Stories that render under it need a way to pick up the change. Three paths, in order of ergonomic preference:
+Swatchbook's toolbar flips the active tuple, and a story rendering under it needs a way to notice the change. Three approaches, from least code to most:
 
-1. **CSS variables**: zero-code, recommended for any component reading tokens through `var(--…)`.
-2. **The React hook `useActiveAxes()`**: inside the Storybook preview, the addon already publishes a React context the blocks and decorators use; story code can read from it directly.
-3. **DOM observation**: the framework-agnostic fallback for Vue / Angular / Svelte / plain HTML, or for React trees outside the preview's provider.
+1. **CSS variables**: no code at all, and the right choice for any component that already reads tokens through `var(--…)`.
+2. **The React hook `useActiveAxes()`**: for story code inside the Storybook preview, reading the same React context the blocks and decorators use.
+3. **DOM observation**: the framework-agnostic fallback for Vue / Angular / Svelte / plain HTML, or React trees outside the preview's provider.
 
 <ThemeConsumptionDiagram />
 
@@ -83,7 +83,7 @@ function useSwatchbookAxes(): Record<string, string> {
 }
 ```
 
-Inside the preview, prefer `useActiveAxes()`; it's reactive without the observer cost and pools updates with the blocks' own re-renders.
+Inside the preview, prefer `useActiveAxes()`: it updates without the observer cost and pools with the blocks' own re-renders.
 
 ## What the DOM contract guarantees
 
@@ -96,16 +96,16 @@ Any change to this shape is a breaking change. The DOM is the API.
 
 ## What swatchbook doesn't ship
 
-- **No Vue, Angular, or Svelte bindings.** React is the only framework with shipped hooks (`useActiveAxes` / `useActiveTheme` / `useColorFormat`), because swatchbook's blocks are React and the addon's preview decorator publishes a React context. Other frameworks consume the DOM contract directly: ten lines of observer code, pick the idiom (`ref`, signal, store) that fits.
+- **No Vue, Angular, or Svelte bindings.** React is the only framework with shipped hooks (`useActiveAxes` / `useActiveTheme` / `useColorFormat`), because swatchbook's blocks are React and the addon's preview decorator publishes a React context. Other frameworks consume the DOM contract directly: about ten lines of observer code in whatever idiom the framework uses.
 - **No recipes per component library.** MUI, Chakra, Mantine, styled-components, emotion, Tailwind class-mode: each has its own theming model. The CSS-variable and DOM-attribute contracts above are the starting points; your component library's theming docs are the rest.
 
 ## Known gotchas
 
-**Component library theme is a JS object: can it read the `--<prefix>-*` CSS variables directly?**
-Only if the library consumes CSS variables natively. Tailwind v4 does (see the [Tailwind integration](/guides/integrations/tailwind)); any provider whose theme values are `var(--…)` strings does (see the [CSS-in-JS integration](/guides/integrations/css-in-js)). If the theme is a JS object _read_ at render time (MUI's `createTheme`, Chakra, Mantine), use `useActiveAxes()` in React, or the DOM-observation path elsewhere, to rebuild the theme object on axis flips.
+**Component library theme is a plain JS object: can it read the `--<prefix>-*` variables directly?**
+Only if the library consumes CSS variables natively. When the theme is a JS object _read_ at render time (MUI's `createTheme`, Chakra, Mantine), it can't; rebuild the theme object on axis flips with `useActiveAxes()` in React, or the DOM-observation path elsewhere.
 
 **Tailwind's `dark:` variant isn't responding to swatchbook.**
-Tailwind looks for `.dark` on an ancestor, or `data-theme="dark"` in its attribute mode. Swatchbook writes `data-<prefix>-mode="Dark"`, so the attribute shape and name don't match. Either configure Tailwind to key on swatchbook's attribute (`@custom-variant dark (&:where([data-<prefix>-mode=Dark], [data-<prefix>-mode=Dark] *));`), or have the preview decorator mirror a `.dark` class via the DOM-observation path.
+See the [Tailwind integration](/guides/integrations/tailwind#gotchas) for keying Tailwind's dark variant on swatchbook's attribute.
 
 **Storybook's own manager theme (light/dark chrome around the preview) doesn't flip.**
 That's `@storybook/theming`, which controls Storybook's UI chrome, a separate concern. See [Storybook's manager theming docs](https://storybook.js.org/docs/configure/user-interface/theming).

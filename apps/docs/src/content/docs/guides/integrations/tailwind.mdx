@@ -68,7 +68,7 @@ Tailwind's compiler sees the block and emits utilities:
 .p-sb-md { padding: var(--spacing-sb-md); }
 ```
 
-At runtime the toolbar flips one `data-sb-<axis>` attribute per axis on `<html>` (e.g. `data-sb-mode`), the per-tuple stylesheet redefines `--sb-*` vars, and every Tailwind utility re-paints via cascade.
+At runtime, flipping the toolbar repaints every Tailwind utility through the CSS cascade; see [Consuming the active theme](/guides/consuming-the-active-theme) for the mechanism.
 
 ## The `sb-` prefix
 
@@ -78,7 +78,7 @@ This matters because Tailwind v4's `max-w-<name>` / `w-<name>` / `size-<name>` u
 
 ## How the role map is built
 
-Zero-config: the integration walks your project's default-theme token graph at render time and classifies each token into a Tailwind scale by `$type` + path:
+With no configuration, the integration walks your project's default-theme token graph at render time and classifies each token into a Tailwind scale by `$type` and path:
 
 | DTCG `$type` | Path shape                                        | Tailwind scale | Role name                                                  |
 | ------------ | ------------------------------------------------- | -------------- | ---------------------------------------------------------- |
@@ -105,6 +105,16 @@ tailwindIntegration({
 ```
 
 Tailwind scale names are keys; each entry is `[tailwindEntryName, dtcgPath]`.
+
+## Gotchas
+
+**Tailwind's `dark:` variant doesn't respond to the toolbar.** Tailwind looks for `.dark` on an ancestor, or `data-theme="dark"` in attribute mode. Swatchbook instead writes the active mode to `data-<cssVarPrefix>-mode` (`data-sb-mode="Dark"` under this guide's `sb` prefix; `data-swatch-mode` by default), so the shape and name don't match. Either point Tailwind at swatchbook's attribute, swapping `sb` for your own prefix:
+
+```css
+@custom-variant dark (&:where([data-sb-mode=Dark], [data-sb-mode=Dark] *));
+```
+
+or have the preview decorator mirror a `.dark` class through the [DOM-observation path](/guides/consuming-the-active-theme#dom-observation-for-everything-else).
 
 ## What this doesn't do
 
