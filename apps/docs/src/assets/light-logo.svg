@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2.4 -2.4 28.8 28.8" width="256" height="256" role="img" aria-label="swatchbook">
+  <defs>
+    <!-- gradient.cool token (blue -> green), mirrored so the scroll loops seamlessly -->
+    <linearGradient id="cool" x1="0" y1="0" x2="0.3333" y2="0" spreadMethod="repeat">
+      <stop offset="0" stop-color="#1d4ed8"/>
+      <stop offset="0.25" stop-color="#60a5fa"/>
+      <stop offset="0.5" stop-color="#86efac"/>
+      <stop offset="0.75" stop-color="#60a5fa"/>
+      <stop offset="1" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <clipPath id="badge">
+      <path transform="translate(-2.4 -2.4) scale(1.8)" d="M9.166.33a2.25 2.25 0 00-2.332 0l-5.25 3.182A2.25 2.25 0 00.5 5.436v5.128a2.25 2.25 0 001.084 1.924l5.25 3.182a2.25 2.25 0 002.332 0l5.25-3.182a2.25 2.25 0 001.084-1.924V5.436a2.25 2.25 0 00-1.084-1.924L9.166.33z"/>
+    </clipPath>
+    <style>
+      .sb-scroll { animation: sb-scroll 14s linear infinite; }
+      @keyframes sb-scroll { to { transform: translateX(-28.8px); } }
+      @media (prefers-reduced-motion: reduce) { .sb-scroll { animation: none; } }
+    </style>
+  </defs>
+  <!-- Badge: animated token spectrum -->
+  <g clip-path="url(#badge)">
+    <rect class="sb-scroll" x="-30" y="-6" width="86.4" height="40.8" fill="url(#cool)"/>
+  </g>
+  <!-- Token mark, held solid over the moving badge -->
+  <g fill="#1e293b">
+    <path d="M14 16C14 17.1046 13.1046 18 12 18C10.8954 18 10 17.1046 10 16C10 14.8954 10.8954 14 12 14C13.1046 14 14 14.8954 14 16Z"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM12 12C9.79086 12 8 10.2091 8 8C8 5.79086 9.79086 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C14.2091 20 16 18.2091 16 16C16 13.7909 14.2091 12 12 12ZM14 8C14 9.10457 13.1046 10 12 10C10.8954 10 10 9.10457 10 8C10 6.89543 10.8954 6 12 6C13.1046 6 14 6.89543 14 8Z"/>
+  </g>
+</svg>

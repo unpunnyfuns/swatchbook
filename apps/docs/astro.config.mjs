@@ -19,7 +19,11 @@ export default defineConfig({
     react(),
     starlight({
       title: 'swatchbook',
-      logo: { src: './src/assets/logo.svg', alt: 'swatchbook logo' },
+      logo: {
+        light: './src/assets/light-logo.svg',
+        dark: './src/assets/dark-logo.svg',
+        alt: 'swatchbook logo',
+      },
       customCss: ['./src/css/custom.css'],
       // Replace the stock light/dark toggle with the swatchbook switcher —
       // one control for every axis (mode/brand/contrast). Dogfoods the
