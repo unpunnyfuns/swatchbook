@@ -8,8 +8,6 @@ import BuildQueryDiagram from '#/components/diagrams/BuildQueryDiagram.tsx';
 import IngestionDiagram from '#/components/diagrams/IngestionDiagram.tsx';
 import SnapshotConsumersDiagram from '#/components/diagrams/SnapshotConsumersDiagram.tsx';
 
-# The token pipeline
-
 Swatchbook doesn't require a separate token build step. Tokens flow into the preview through a Vite virtual module the addon publishes at dev-server start, updated via HMR on every source file change. No generated CSS in your repo, no `predev` script, no config to keep in sync.
 
 <IngestionDiagram />
