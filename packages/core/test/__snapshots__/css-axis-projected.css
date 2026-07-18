@@ -74,8 +74,8 @@
   --sb-duration-normal: 240ms;
   --sb-duration-slow: 400ms;
   --sb-font-family-comic: "Comic Sans MS", "Comic Neue", "Chalkboard SE", "Marker Felt", cursive;
-  --sb-font-family-mono: "JetBrains Mono", "Menlo", monospace;
-  --sb-font-family-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --sb-font-family-mono: "Geist Mono", "JetBrains Mono", "Menlo", monospace;
+  --sb-font-family-sans: "Geist", "Inter", system-ui, -apple-system, sans-serif;
   --sb-font-family-serif: "Source Serif 4", "Georgia", serif;
   --sb-font-scale-2xl: var(--sb-font-size-700);
   --sb-font-scale-2xs: var(--sb-font-size-100);

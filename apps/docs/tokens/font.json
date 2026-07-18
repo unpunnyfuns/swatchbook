@@ -4,6 +4,7 @@
       "$type": "fontFamily",
       "system": {
         "$value": [
+          "Geist",
           "system-ui",
           "-apple-system",
           "Segoe UI",
@@ -15,6 +16,7 @@
       },
       "mono": {
         "$value": [
+          "Geist Mono",
           "ui-monospace",
           "SFMono-Regular",
           "SF Mono",
