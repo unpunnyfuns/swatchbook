@@ -1,7 +1,5 @@
 ---
 title: Aligning with your token build
-sidebar:
-  order: 6
 ---
 
 import SharedOptionsDiagram from '#/components/diagrams/SharedOptionsDiagram.tsx';
@@ -9,6 +7,14 @@ import SharedOptionsDiagram from '#/components/diagrams/SharedOptionsDiagram.tsx
 If you run Terrazzo's CLI in production, swatchbook can read the same value-formatting rules, plugin set, and listing metadata so the swatches, values, and snippets in Storybook match exactly what your apps ship. The pattern is one shared TypeScript module that both `terrazzo.config.ts` and `swatchbook.config.ts` import from.
 
 <SharedOptionsDiagram />
+
+## Dependencies
+
+Swatchbook is the preview side of a [Terrazzo](https://terrazzo.app/) pipeline: it parses DTCG with Terrazzo's parser and renders what Terrazzo's plugins emit. The zero-config install needs no direct Terrazzo dependency.
+
+`@terrazzo/parser`, `@terrazzo/plugin-css`, and `@terrazzo/plugin-token-listing` come along with `swatchbook-core` transitively. The default install already parses tokens, emits the preview stylesheet, and derives the token listing without any Terrazzo entry in your `package.json`.
+
+`swatchbook-core` also declares `@terrazzo/parser` and `@terrazzo/plugin-css` as **peer** dependencies. pnpm hoists them to one shared instance, so swatchbook's internal build and any Terrazzo plugin you add later resolve the same parser. The failure this avoids is a second, duplicate parser: a plugin built against one instance cannot read a graph produced by another, and the symptom is plugin output that silently goes missing from the listing.
 
 ## The shared-options module pattern
 

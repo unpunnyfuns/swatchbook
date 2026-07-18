@@ -1,7 +1,5 @@
 ---
 title: Integrations
-sidebar:
-  order: 1
 ---
 
 Preview-side adapters that let stories use third-party styling libraries against swatchbook's tokens. Two integrations ship today, both under [`@unpunnyfuns/swatchbook-integrations`](https://www.npmjs.com/package/@unpunnyfuns/swatchbook-integrations):
@@ -10,6 +8,11 @@ Preview-side adapters that let stories use third-party styling libraries against
 - [**CSS-in-JS**](/guides/integrations/css-in-js): a typed JS theme accessor for emotion, styled-components, or any `ThemeProvider` consuming a plain object.
 
 Both are preview-only. They let utility classes and theme accessors resolve correctly inside Storybook; they don't replace your production build. For production artifacts, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources. Keep both pipelines in step with [shared Terrazzo options](/guides/sharing-terrazzo-options).
+
+## Package exports
+
+- **Tailwind v4** (`@unpunnyfuns/swatchbook-integrations/tailwind`): serves an `@theme` block so utility classes like `bg-sb-surface-default` resolve against your tokens inside Storybook.
+- **CSS-in-JS** (`@unpunnyfuns/swatchbook-integrations/css-in-js`): serves a `virtual:swatchbook/theme` module of theme accessors (`theme.color.accent.bg`).
 
 ## Wiring
 
