@@ -71,7 +71,7 @@
   },
   "storybook": {
     "displayName": "Swatchbook",
-    "icon": "https://raw.githubusercontent.com/unpunnyfuns/swatchbook/main/apps/docs/static/img/logo.png",
+    "icon": "https://unpunnyfuns.github.io/swatchbook/logo-256.png",
     "supportedFrameworks": [
       "react"
     ]
