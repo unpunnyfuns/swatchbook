@@ -104,7 +104,7 @@ Any change to this shape is a breaking change. The DOM is the API.
 ## Known gotchas
 
 **Component library theme is a JS object: can it read the `--<prefix>-*` CSS variables directly?**
-Only if the library consumes CSS variables natively. Tailwind v4 does (see the [Tailwind integration](/guides/integrations/tailwind)); any provider whose theme values are `var(--…)` strings does (see the [CSS-in-JS integration](/guides/integrations/css-in-js)). If the theme is a JS object *read* at render time (MUI's `createTheme`, Chakra, Mantine), use `useActiveAxes()` in React, or the DOM-observation path elsewhere, to rebuild the theme object on axis flips.
+Only if the library consumes CSS variables natively. Tailwind v4 does (see the [Tailwind integration](/guides/integrations/tailwind)); any provider whose theme values are `var(--…)` strings does (see the [CSS-in-JS integration](/guides/integrations/css-in-js)). If the theme is a JS object _read_ at render time (MUI's `createTheme`, Chakra, Mantine), use `useActiveAxes()` in React, or the DOM-observation path elsewhere, to rebuild the theme object on axis flips.
 
 **Tailwind's `dark:` variant isn't responding to swatchbook.**
 Tailwind looks for `.dark` on an ancestor, or `data-theme="dark"` in its attribute mode. Swatchbook writes `data-<prefix>-mode="Dark"`, so the attribute shape and name don't match. Either configure Tailwind to key on swatchbook's attribute (`@custom-variant dark (&:where([data-<prefix>-mode=Dark], [data-<prefix>-mode=Dark] *));`), or have the preview decorator mirror a `.dark` class via the DOM-observation path.

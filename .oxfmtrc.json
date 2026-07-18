@@ -4,5 +4,13 @@
   "singleQuote": true,
   "jsxSingleQuote": false,
   "semi": true,
-  "trailingComma": "all"
+  "trailingComma": "all",
+  "overrides": [
+    {
+      "files": ["*.mdx"],
+      "options": {
+        "embeddedLanguageFormatting": "off"
+      }
+    }
+  ]
 }

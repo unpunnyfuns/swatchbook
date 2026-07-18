@@ -11,6 +11,8 @@
     "build:tokens": "node scripts/build-tokens.mts",
     "typecheck": "astro check",
     "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src",
+    "format": "oxfmt -c ../../.oxfmtrc.json src",
+    "format:check": "oxfmt --check -c ../../.oxfmtrc.json src",
     "capture": "node scripts/capture-media.mjs"
   },
   "dependencies": {

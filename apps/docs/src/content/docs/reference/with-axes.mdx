@@ -32,10 +32,10 @@ not stand alone.
 
 ## Argument
 
-| Value | Meaning |
-| --- | --- |
+| Value                    | Meaning                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
 | `Record<string, string>` | A partial axis tuple. Only the axes you name are set; the rest fall back to their defaults at render time. |
-| `string` | A preset name from the project config's `presets`. Resolves to that preset's axes. |
+| `string`                 | A preset name from the project config's `presets`. Resolves to that preset's axes.                         |
 
 An unknown preset name, an unknown axis key, or an out-of-range axis value throws
 at load, rather than silently running under the default tuple.

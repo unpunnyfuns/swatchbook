@@ -62,19 +62,19 @@ import { Diagnostics, TokenNavigator, TokenTable } from '@unpunnyfuns/swatchbook
 
 ## Blocks at a glance
 
-| Block | What it renders |
-| --- | --- |
-| `TokenDetail` | A single token's full picture: alias chain, aliased-by tree, per-axis variance, composite preview. |
-| `TokenTable` | Filterable table of tokens. Supports path glob and `$type` filters. |
-| `TokenNavigator` | Expandable tree; scope to a subtree or `$type`. |
-| `ColorPalette` | Swatch grid grouped by sub-path. |
-| `ColorTable` | Color-specific table; variant suffixes (`-hover`, `-disabled`) collapse onto the base row with a pill selector + inline expand. |
-| `TypographyScale` | Each `typography` token as a sample line using its own value. |
-| `FontFamilyPreview` | Pangram per `fontFamily` primitive. |
-| `FontWeightScale` | Same "Aa" sample at each `fontWeight`. |
-| `StrokeStylePreview` | Border rendered per `strokeStyle` primitive. |
-| `Diagnostics` | Collapsible list of parser / resolver warnings; auto-opens on non-zero. |
-| Motion / shadow / border / gradient previews | Inside `TokenDetail`'s composite rendering, or standalone blocks. |
+| Block                                        | What it renders                                                                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `TokenDetail`                                | A single token's full picture: alias chain, aliased-by tree, per-axis variance, composite preview.                              |
+| `TokenTable`                                 | Filterable table of tokens. Supports path glob and `$type` filters.                                                             |
+| `TokenNavigator`                             | Expandable tree; scope to a subtree or `$type`.                                                                                 |
+| `ColorPalette`                               | Swatch grid grouped by sub-path.                                                                                                |
+| `ColorTable`                                 | Color-specific table; variant suffixes (`-hover`, `-disabled`) collapse onto the base row with a pill selector + inline expand. |
+| `TypographyScale`                            | Each `typography` token as a sample line using its own value.                                                                   |
+| `FontFamilyPreview`                          | Pangram per `fontFamily` primitive.                                                                                             |
+| `FontWeightScale`                            | Same "Aa" sample at each `fontWeight`.                                                                                          |
+| `StrokeStylePreview`                         | Border rendered per `strokeStyle` primitive.                                                                                    |
+| `Diagnostics`                                | Collapsible list of parser / resolver warnings; auto-opens on non-zero.                                                         |
+| Motion / shadow / border / gradient previews | Inside `TokenDetail`'s composite rendering, or standalone blocks.                                                               |
 
 See the [blocks reference](/reference/blocks) for the full prop surface.
 

@@ -18,8 +18,8 @@ export default function SnapshotConsumersDiagram(): ReactNode {
         aria-labelledby="snapshot-consumers-diagram-title"
       >
         <title id="snapshot-consumers-diagram-title">
-          One project snapshot feeds the Storybook preview, doc blocks outside Storybook, and
-          the MCP server.
+          One project snapshot feeds the Storybook preview, doc blocks outside Storybook, and the
+          MCP server.
         </title>
         <defs>
           <marker

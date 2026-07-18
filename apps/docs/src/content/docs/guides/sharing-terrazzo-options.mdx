@@ -91,11 +91,11 @@ export default defineSwatchbookConfig({
 
 Now any change to `sharedCssOptions.legacyHex`, or a new plugin added to `sharedPlugins`, reaches both the production CLI and swatchbook's Storybook build with one edit. Three swatchbook config fields receive the shared blocks:
 
-| Config field | Forwards to | Controls |
-| --- | --- | --- |
-| [`cssOptions`](/reference/config#cssoptions) | `@terrazzo/plugin-css` | value formatting (hex vs `color()`), transforms, include/exclude globs, utility groups |
-| [`listingOptions`](/reference/config#listingoptions) | `@terrazzo/plugin-token-listing` | per-platform naming, mode metadata, `previewValue` / `subtype` hooks |
-| [`terrazzoPlugins`](/reference/config#terrazzoplugins) | additional plugins in the build | which plugin naming logic is available to the listing |
+| Config field                                           | Forwards to                      | Controls                                                                               |
+| ------------------------------------------------------ | -------------------------------- | -------------------------------------------------------------------------------------- |
+| [`cssOptions`](/reference/config#cssoptions)           | `@terrazzo/plugin-css`           | value formatting (hex vs `color()`), transforms, include/exclude globs, utility groups |
+| [`listingOptions`](/reference/config#listingoptions)   | `@terrazzo/plugin-token-listing` | per-platform naming, mode metadata, `previewValue` / `subtype` hooks                   |
+| [`terrazzoPlugins`](/reference/config#terrazzoplugins) | additional plugins in the build  | which plugin naming logic is available to the listing                                  |
 
 ### Monorepo layouts
 
@@ -156,7 +156,7 @@ Setting any of these doesn't hit a type error because they're still part of `CSS
 
 ## Per-platform identifier display
 
-Swatchbook isn't a replacement for `@terrazzo/cli`, `tz build`, or Style Dictionary. What it does, through the listing, is *display* the identifiers those transformers produce, so the docs line up with what production ships. The transformation happens in the user-configured plugin; swatchbook just reads its output.
+Swatchbook isn't a replacement for `@terrazzo/cli`, `tz build`, or Style Dictionary. What it does, through the listing, is _display_ the identifiers those transformers produce, so the docs line up with what production ships. The transformation happens in the user-configured plugin; swatchbook just reads its output.
 
 The Token Listing records `names.<platform>` for every platform registered in `listingOptions.platforms`, using the named plugin's own identifier-naming logic. Blocks read these without duplicating any rules.
 
@@ -171,7 +171,7 @@ const swiftName = project.listing?.[path]?.names?.swift;
 
 See [`useSwatchbookData`](/reference/blocks/hooks#useswatchbookdata) for the `ProjectSnapshot.listing` shape in the block context.
 
-The output files those plugins produce (`tokens.swift`, `tokens.xml`, …) land in the in-memory output set and are discarded. Swatchbook doesn't write them to disk; `terrazzoPlugins` runs plugins purely for their *naming contribution* to the listing, not for file emission.
+The output files those plugins produce (`tokens.swift`, `tokens.xml`, …) land in the in-memory output set and are discarded. Swatchbook doesn't write them to disk; `terrazzoPlugins` runs plugins purely for their _naming contribution_ to the listing, not for file emission.
 
 ## Per-knob notes
 
@@ -224,9 +224,9 @@ export default {
 };
 ```
 
-The shared piece is the source tree. Alignment ends there: swatchbook computes its own CSS variable names using Terrazzo's naming rules, while Style Dictionary uses its own transform chain. Names *won't* match character-for-character unless you hand-tune both sides.
+The shared piece is the source tree. Alignment ends there: swatchbook computes its own CSS variable names using Terrazzo's naming rules, while Style Dictionary uses its own transform chain. Names _won't_ match character-for-character unless you hand-tune both sides.
 
-For a preview-only tool that's usually fine. The swatchbook-rendered block shows what the tokens *are*; your apps ship what Style Dictionary emits. As long as both read the same DTCG input, token identity is preserved across pipelines even when naming differs.
+For a preview-only tool that's usually fine. The swatchbook-rendered block shows what the tokens _are_; your apps ship what Style Dictionary emits. As long as both read the same DTCG input, token identity is preserved across pipelines even when naming differs.
 
 ### If you need names to match exactly
 
@@ -235,7 +235,7 @@ This is harder. Style Dictionary's `transforms` (`name/cti/kebab`, `name/cti/cam
 1. **Loosen the naming contract.** Treat DTCG dot-paths as the canonical identifier; display those in blocks via `<TokenDetail path="…">`; let each build name CSS variables however it wants. The `path` is always stable across pipelines.
 2. **Write a thin adapter.** Expose the CSS variable names Style Dictionary computes as a lookup map, read them through a custom block via `useSwatchbookData()`, and render them next to Terrazzo's names. Requires block-writing work; the addon doesn't ship this.
 
-### When to use Style Dictionary *and* Terrazzo side-by-side
+### When to use Style Dictionary _and_ Terrazzo side-by-side
 
 Some teams use Terrazzo for CSS + JS targets (because `@terrazzo/plugin-css` integrates natively with swatchbook) and Style Dictionary for platform targets Terrazzo doesn't cover (some legacy XML formats, Flutter, specific design-tool round-trips). This works: both read the DTCG source tree, both emit to their own `dist/`. Swatchbook aligns with Terrazzo's side; Style Dictionary's side stays unaligned but also stays out of swatchbook's view.
 

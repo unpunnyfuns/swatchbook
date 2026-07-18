@@ -6,7 +6,6 @@ sidebar:
 
 Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via Terrazzo, builds a walkable token graph (a data structure you can query for any token's value in any axis combination), resolves aliases per tuple. No React, no Storybook dependency.
 
-
 ## Install
 
 ```bash
@@ -79,18 +78,18 @@ For production builds, prefer Terrazzo's CLI; `emitAxisProjectedCss` exists prim
 
 Leaf utilities consumers need without the loader's Node deps live on dedicated subpaths. Each is tree-shake-clean, no `@terrazzo/parser`, no `node:*` imports, safe to import from preview-side bundles, the Storybook manager, or any browser consumer.
 
-| Subpath | Export | Purpose |
-| --- | --- | --- |
-| `/graph` | `resolveAt`, `resolveAllAt`, `resolveAliasAt`, `resolveAliasAllAt`, `getVariance`, `getAffectedBy`, `listPaths` + `TokenGraph` / `TokenGraphNode` / `WriteValue` types | Graph query helpers, browser-safe, no Terrazzo dependency at query time. See [Graph queries](#graph-queries) below. |
-| `/snapshot-for-wire` | `snapshotForWire(project, css)` + `SnapshotForWire` type | JSON-friendly subset of `Project` for cross-boundary transport. |
-| `/themes` | `enumerateThemes({axes, presets, defaultTuple})` + `tupleToName(axes, tuple)` + `ThemeEntry` / `ThemeEnumAxis` / `ThemeEnumPreset` types | Enumerate single-axis tuples + presets as a unified theme list; compose stable theme IDs from tuples. |
-| `/match-path` | `matchPath(path, filter)` | Glob-style path matcher (`*` single-segment, `**` multi-segment, bare prefix treated as descendants); shared by blocks' filter prop and the MCP `list_tokens` tool. |
-| `/fuzzy` | `fuzzyFilter` + `fuzzyMatches` | uFuzzy-backed token search; powers the MCP `search_tokens` tool. |
-| `/css-var` | `cssVarRef(path, prefix)` | Compose `var(--prefix-path)` strings, same shape Terrazzo's plugin-css emits. |
-| `/data-attr` | `dataAttr(prefix, key)` | Compose `data-prefix-key` attribute names, namespaced to `cssVarPrefix`. |
-| `/style-element` | `ensureStyleElement(elementId, text)` + `SWATCHBOOK_STYLE_ELEMENT_ID` | Idempotent `<style>` injector, shared between the addon's preview decorator and the blocks-side stylesheet path. |
-| `/color-formats` | `COLOR_FORMATS` + `ColorFormat` type | The canonical color-format set (`hex`, `rgb`, `hsl`, `oklch`, `raw`) the toolbar and blocks switch between. |
-| `/format-color` | `formatColor`, `parseColor` + `NormalizedColor` / `FormatColorResult` types | Canonical color rendering, shared by blocks, MCP, and the addon so every surface stringifies a color the same way. |
+| Subpath              | Export                                                                                                                                                                 | Purpose                                                                                                                                                             |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/graph`             | `resolveAt`, `resolveAllAt`, `resolveAliasAt`, `resolveAliasAllAt`, `getVariance`, `getAffectedBy`, `listPaths` + `TokenGraph` / `TokenGraphNode` / `WriteValue` types | Graph query helpers, browser-safe, no Terrazzo dependency at query time. See [Graph queries](#graph-queries) below.                                                 |
+| `/snapshot-for-wire` | `snapshotForWire(project, css)` + `SnapshotForWire` type                                                                                                               | JSON-friendly subset of `Project` for cross-boundary transport.                                                                                                     |
+| `/themes`            | `enumerateThemes({axes, presets, defaultTuple})` + `tupleToName(axes, tuple)` + `ThemeEntry` / `ThemeEnumAxis` / `ThemeEnumPreset` types                               | Enumerate single-axis tuples + presets as a unified theme list; compose stable theme IDs from tuples.                                                               |
+| `/match-path`        | `matchPath(path, filter)`                                                                                                                                              | Glob-style path matcher (`*` single-segment, `**` multi-segment, bare prefix treated as descendants); shared by blocks' filter prop and the MCP `list_tokens` tool. |
+| `/fuzzy`             | `fuzzyFilter` + `fuzzyMatches`                                                                                                                                         | uFuzzy-backed token search; powers the MCP `search_tokens` tool.                                                                                                    |
+| `/css-var`           | `cssVarRef(path, prefix)`                                                                                                                                              | Compose `var(--prefix-path)` strings, same shape Terrazzo's plugin-css emits.                                                                                       |
+| `/data-attr`         | `dataAttr(prefix, key)`                                                                                                                                                | Compose `data-prefix-key` attribute names, namespaced to `cssVarPrefix`.                                                                                            |
+| `/style-element`     | `ensureStyleElement(elementId, text)` + `SWATCHBOOK_STYLE_ELEMENT_ID`                                                                                                  | Idempotent `<style>` injector, shared between the addon's preview decorator and the blocks-side stylesheet path.                                                    |
+| `/color-formats`     | `COLOR_FORMATS` + `ColorFormat` type                                                                                                                                   | The canonical color-format set (`hex`, `rgb`, `hsl`, `oklch`, `raw`) the toolbar and blocks switch between.                                                         |
+| `/format-color`      | `formatColor`, `parseColor` + `NormalizedColor` / `FormatColorResult` types                                                                                            | Canonical color rendering, shared by blocks, MCP, and the addon so every surface stringifies a color the same way.                                                  |
 
 ```ts
 import { resolveAt, getVariance } from '@unpunnyfuns/swatchbook-core/graph';
@@ -101,15 +100,15 @@ import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire'
 
 `@unpunnyfuns/swatchbook-core/graph` exports the full set of graph query helpers. All are browser-safe: no `@terrazzo/parser`, no `node:*` imports. Import from this subpath whenever resolution or variance queries are needed outside the Node build context (the preview, the Storybook manager, integrations).
 
-| Export | Signature | Description |
-| --- | --- | --- |
-| `resolveAt` | `(graph, path, tuple) → SwatchbookToken \| undefined` | Resolved leaf value for one token at a given tuple. Memoizable across calls with the same shared `memo` map. |
-| `resolveAllAt` | `(graph, tuple) → TokenMap` | Resolved `TokenMap` for every path in the graph at a given tuple. |
-| `resolveAliasAt` | `(graph, path, tuple) → SwatchbookToken \| undefined` | Alias-preserving view; stops at the first alias/partial-alias write and returns a token with `aliasOf` populated rather than recursing to a leaf. |
-| `resolveAliasAllAt` | `(graph, tuple) → TokenMap` | Full `TokenMap` with alias-preserving view for every path. |
-| `getVariance` | `(graph, path) → AxisVarianceResult` | `AxisVarianceResult` (whether the token's value changes across axes, and which axes) for one token path: which axes affect it, and the stringified value per context per axis. |
-| `getAffectedBy` | `(graph, path) → readonly string[]` | Set of axis names that can change this token's resolved value at any tuple. |
-| `listPaths` | `(graph) → readonly string[]` | Sorted array of every token path in the graph. |
+| Export              | Signature                                             | Description                                                                                                                                                                    |
+| ------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `resolveAt`         | `(graph, path, tuple) → SwatchbookToken \| undefined` | Resolved leaf value for one token at a given tuple. Memoizable across calls with the same shared `memo` map.                                                                   |
+| `resolveAllAt`      | `(graph, tuple) → TokenMap`                           | Resolved `TokenMap` for every path in the graph at a given tuple.                                                                                                              |
+| `resolveAliasAt`    | `(graph, path, tuple) → SwatchbookToken \| undefined` | Alias-preserving view; stops at the first alias/partial-alias write and returns a token with `aliasOf` populated rather than recursing to a leaf.                              |
+| `resolveAliasAllAt` | `(graph, tuple) → TokenMap`                           | Full `TokenMap` with alias-preserving view for every path.                                                                                                                     |
+| `getVariance`       | `(graph, path) → AxisVarianceResult`                  | `AxisVarianceResult` (whether the token's value changes across axes, and which axes) for one token path: which axes affect it, and the stringified value per context per axis. |
+| `getAffectedBy`     | `(graph, path) → readonly string[]`                   | Set of axis names that can change this token's resolved value at any tuple.                                                                                                    |
+| `listPaths`         | `(graph) → readonly string[]`                         | Sorted array of every token path in the graph.                                                                                                                                 |
 
 ```ts
 import { resolveAt, getVariance, listPaths } from '@unpunnyfuns/swatchbook-core/graph';

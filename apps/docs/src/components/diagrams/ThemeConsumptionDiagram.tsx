@@ -18,9 +18,9 @@ export default function ThemeConsumptionDiagram(): ReactNode {
         aria-labelledby="theme-consumption-diagram-title"
       >
         <title id="theme-consumption-diagram-title">
-          Flipping an axis updates CSS variables, the React context, and data attributes at
-          once. Stories consume whichever surface fits: plain CSS var() with zero code, the
-          useActiveAxes hook inside the preview, or a MutationObserver in any framework.
+          Flipping an axis updates CSS variables, the React context, and data attributes at once.
+          Stories consume whichever surface fits: plain CSS var() with zero code, the useActiveAxes
+          hook inside the preview, or a MutationObserver in any framework.
         </title>
         <defs>
           <marker

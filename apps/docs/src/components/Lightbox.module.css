@@ -62,7 +62,9 @@
   color: #fff;
   background: rgba(255, 255, 255, 0.12);
   border-radius: 999px;
-  transition: background 0.12s ease, transform 0.12s ease;
+  transition:
+    background 0.12s ease,
+    transform 0.12s ease;
 }
 
 .close:hover,

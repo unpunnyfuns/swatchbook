@@ -82,14 +82,14 @@ This matters because Tailwind v4's `max-w-<name>` / `w-<name>` / `size-<name>` u
 
 Zero-config: the integration walks your project's default-theme token graph at render time and classifies each token into a Tailwind scale by `$type` + path:
 
-| DTCG `$type` | Path shape | Tailwind scale | Role name |
-| --- | --- | --- | --- |
-| `color` | any | `color` | path minus `color.` prefix |
-| `dimension` | `space.*` / `spacing.*` | `spacing` | path minus that prefix |
-| `dimension` | `radius.*` / `borderRadius.*` / `border-radius.*` | `radius` | path minus that prefix |
-| `dimension` | anything else | `spacing` | full path dot→dash |
-| `shadow` | any | `shadow` | path minus `shadow.` prefix |
-| `fontFamily` | any | `font` | path minus `font.` / `font.family.` / `fontFamily.` prefix |
+| DTCG `$type` | Path shape                                        | Tailwind scale | Role name                                                  |
+| ------------ | ------------------------------------------------- | -------------- | ---------------------------------------------------------- |
+| `color`      | any                                               | `color`        | path minus `color.` prefix                                 |
+| `dimension`  | `space.*` / `spacing.*`                           | `spacing`      | path minus that prefix                                     |
+| `dimension`  | `radius.*` / `borderRadius.*` / `border-radius.*` | `radius`       | path minus that prefix                                     |
+| `dimension`  | anything else                                     | `spacing`      | full path dot→dash                                         |
+| `shadow`     | any                                               | `shadow`       | path minus `shadow.` prefix                                |
+| `fontFamily` | any                                               | `font`         | path minus `font.` / `font.family.` / `fontFamily.` prefix |
 
 Font-size-ish dimensions (`font.size.*`, `text.*`) are skipped, because Tailwind's `--text-*` entries want size+line-height pairs this integration doesn't synthesize.
 

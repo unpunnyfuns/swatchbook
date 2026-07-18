@@ -28,7 +28,7 @@ Peer requirements: React 18+. The package ships its own stylesheet at `dist/styl
 import '@unpunnyfuns/swatchbook-switcher/style.css';
 ```
 
-The component is a *menu*, not a *button*. It draws no trigger of its own; you decide when it's visible (popover, drawer, inline) and how the active tuple gets applied.
+The component is a _menu_, not a _button_. It draws no trigger of its own; you decide when it's visible (popover, drawer, inline) and how the active tuple gets applied.
 
 ## Mount example
 
@@ -94,17 +94,17 @@ interface ThemeSwitcherProps {
 }
 ```
 
-| Prop | Required | Purpose |
-| --- | --- | --- |
-| `axes` | yes | Axes the project ships. The component renders one row per entry. Omit this to draw a presets-only menu. |
-| `presets` | no | Saved tuple snapshots rendered above the axes. Empty / omitted = no presets section. |
-| `activeTuple` | yes | Active axis selections, keyed by axis name. Drives which pill in each axis row is `--active`. |
-| `defaults` | yes | Fallback values used to fill in axes a preset doesn't explicitly set. |
-| `lastApplied` | yes | Name of the most recently applied preset, or `null`. Drives the "modified since applied" dot. |
-| `onAxisChange` | yes | Receives `(axisName, next)` when the user clicks an axis pill. Caller decides what "applied" means: set `data-*` attributes, route, write to global state. |
-| `onPresetApply` | yes | Receives the full preset object when a preset pill is clicked. Caller fills in omitted axes from `defaults` and applies the resulting tuple. |
-| `onKeyDown` | no | Optional key handler, typically used by hosts to close their popover on `Escape`. |
-| `footer` | no | Host-specific node rendered after the axes (e.g. the Storybook addon's color-format picker). The switcher itself ships no color-format UI. |
+| Prop            | Required | Purpose                                                                                                                                                    |
+| --------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `axes`          | yes      | Axes the project ships. The component renders one row per entry. Omit this to draw a presets-only menu.                                                    |
+| `presets`       | no       | Saved tuple snapshots rendered above the axes. Empty / omitted = no presets section.                                                                       |
+| `activeTuple`   | yes      | Active axis selections, keyed by axis name. Drives which pill in each axis row is `--active`.                                                              |
+| `defaults`      | yes      | Fallback values used to fill in axes a preset doesn't explicitly set.                                                                                      |
+| `lastApplied`   | yes      | Name of the most recently applied preset, or `null`. Drives the "modified since applied" dot.                                                              |
+| `onAxisChange`  | yes      | Receives `(axisName, next)` when the user clicks an axis pill. Caller decides what "applied" means: set `data-*` attributes, route, write to global state. |
+| `onPresetApply` | yes      | Receives the full preset object when a preset pill is clicked. Caller fills in omitted axes from `defaults` and applies the resulting tuple.               |
+| `onKeyDown`     | no       | Optional key handler, typically used by hosts to close their popover on `Escape`.                                                                          |
+| `footer`        | no       | Host-specific node rendered after the axes (e.g. the Storybook addon's color-format picker). The switcher itself ships no color-format UI.                 |
 
 ## Input shapes
 
@@ -142,7 +142,7 @@ The Storybook addon's manager toolbar imports this directly to avoid carrying a 
 
 ## Axis-state propagation
 
-The component is *pure*: it reads its inputs, draws the menu, and calls back when the user clicks. It does not:
+The component is _pure_: it reads its inputs, draws the menu, and calls back when the user clicks. It does not:
 
 - Read or write to `localStorage` / `sessionStorage`.
 - Touch the DOM outside its own subtree.
