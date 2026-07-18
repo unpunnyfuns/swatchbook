@@ -2,13 +2,6 @@ export const ADDON_ID = 'swatchbook';
 export const TOOL_ID = `${ADDON_ID}/theme-switcher`;
 /** Canonical active-permutation tuple: `Record<axisName, contextName>`. Read by toolbar, panel, blocks. */
 export const AXES_GLOBAL_KEY = 'swatchbookAxes';
-/**
- * @deprecated The toolbar color-format global and its footer control were
- * removed; blocks now read their starting format from
- * `Config.defaultColorFormat` instead. Retained as a dead constant so this
- * key doesn't disappear from the public surface.
- */
-export const COLOR_FORMAT_GLOBAL_KEY = 'swatchbookColorFormat';
 
 export const VIRTUAL_MODULE_ID = 'virtual:swatchbook/tokens';
 export const RESOLVED_VIRTUAL_MODULE_ID = `\0${VIRTUAL_MODULE_ID}`;

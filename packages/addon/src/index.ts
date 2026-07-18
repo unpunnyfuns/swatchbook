@@ -19,13 +19,7 @@ export type { StoryParameters, SwatchbookGlobals, SwatchbookParameters } from '#
  * reach into the addon's namespace (custom toolbar registrations,
  * channel events, manager hooks that need a stable handle on these keys).
  */
-export {
-  ADDON_ID,
-  AXES_GLOBAL_KEY,
-  COLOR_FORMAT_GLOBAL_KEY,
-  TOOL_ID,
-  VIRTUAL_MODULE_ID,
-} from '#/constants.ts';
+export { ADDON_ID, AXES_GLOBAL_KEY, TOOL_ID, VIRTUAL_MODULE_ID } from '#/constants.ts';
 
 /**
  * Re-export the full user-facing surface from `@unpunnyfuns/swatchbook-blocks`

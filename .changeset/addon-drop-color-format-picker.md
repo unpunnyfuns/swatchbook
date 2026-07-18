@@ -3,4 +3,4 @@
 '@unpunnyfuns/swatchbook-switcher': minor
 ---
 
-Add `Config.defaultColorFormat`; blocks own color format, and the switcher's global color-format picker is removed (`COLOR_FORMAT_GLOBAL_KEY` retained, deprecated).
+Add `Config.defaultColorFormat`; blocks own color format, and the global color-format picker is removed from the toolbar (its global key is now internal, not part of the addon's public export surface).

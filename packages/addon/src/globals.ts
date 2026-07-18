@@ -1,5 +1,3 @@
-import type { ColorFormat } from '@unpunnyfuns/swatchbook-blocks';
-
 /**
  * Typed shapes for the slice of Storybook globals + parameters the
  * swatchbook addon reads. Storybook itself types both as broad bags
@@ -18,12 +16,6 @@ import type { ColorFormat } from '@unpunnyfuns/swatchbook-blocks';
  */
 export interface SwatchbookGlobals {
   swatchbookAxes?: Record<string, string>;
-  /**
-   * @deprecated The toolbar no longer writes this global; blocks read
-   * `Config.defaultColorFormat` for their starting color format instead.
-   * Kept optional here only so the type shape doesn't shrink.
-   */
-  swatchbookColorFormat?: ColorFormat;
   [key: string]: unknown;
 }
 
