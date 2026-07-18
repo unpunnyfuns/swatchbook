@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+reviews:
+  path_instructions:
+    - path: apps/docs/src/content/docs/**/*.{md,mdx}
+      instructions: >-
+        Links between docs pages use extensionless, root-absolute slugs
+        (`/reference/config`, `/guides/quickstart`) by convention. This is
+        intentional: do NOT suggest adding a `.mdx`/`.md` extension, and do NOT
+        suggest converting them to relative paths. A build-time rehype plugin
+        (`apps/docs/src/plugins/rehype-base-links.mjs`) rewrites these
+        markdown-authored links to carry the site's `/swatchbook` base, so an
+        unprefixed root-absolute slug is correct and resolves on the deployed
+        site.
+
+        In JSX/MDX component props (for example `<LinkCard href="...">`), the
+        `/swatchbook/` base is carried by hand, because the rehype plugin only
+        rewrites markdown-syntax links, not JSX attribute values. Do NOT flag a
+        hand-prefixed absolute href in a JSX prop as needing a relative or
+        source-slug form.
