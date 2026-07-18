@@ -53,7 +53,7 @@ Returns `{ value, cssVar, type?, description? }`. `cssVar` is stable across them
 
 ## Testing
 
-Author axis coverage for tests with [`withAxes`](https://unpunnyfuns.github.io/swatchbook/reference/with-axes) from the `testing` subpath.
+Author axis coverage for tests with [`withAxes`](https://unpunnyfuns.github.io/swatchbook/guides/creating-story-variants) from the `testing` subpath.
 
 ## Credits
 
