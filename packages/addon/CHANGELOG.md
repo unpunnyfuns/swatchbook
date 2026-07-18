@@ -1,5 +1,16 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 1.1.1
+
+### Patch Changes
+
+- 350b975bb1f4c78fe9dd178dbc8c29fe5f4b9ffd: Repair the Storybook addon registry icon: restore the logo PNG (dropped in the Docusaurus→Starlight migration) and point `storybook.icon` at its new stable path.
+- d1f01aacd664b804e7aab387060001e3fdd65fa6: Tighten and align package READMEs so registries show the refreshed copy; no code changes.
+- Updated dependencies [d1f01aa]
+  - @unpunnyfuns/swatchbook-core@1.1.1
+  - @unpunnyfuns/swatchbook-blocks@1.1.1
+  - @unpunnyfuns/swatchbook-switcher@1.1.1
+
 ## 1.1.0
 
 ### Minor Changes

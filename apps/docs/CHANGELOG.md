@@ -1,5 +1,12 @@
 # @unpunnyfuns/swatchbook-docs
 
+## 0.0.85
+
+### Patch Changes
+
+- Updated dependencies [d1f01aa]
+  - @unpunnyfuns/swatchbook-switcher@1.1.1
+
 ## 0.0.84
 
 ### Patch Changes
