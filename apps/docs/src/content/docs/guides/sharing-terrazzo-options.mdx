@@ -14,7 +14,7 @@ swatchbook is the preview side of a [Terrazzo](https://terrazzo.app/) pipeline: 
 
 `@terrazzo/parser`, `@terrazzo/plugin-css`, and `@terrazzo/plugin-token-listing` come along with `swatchbook-core` transitively. The default install already parses tokens, emits the preview stylesheet, and derives the token listing without any Terrazzo entry in your `package.json`.
 
-`swatchbook-core` also declares `@terrazzo/parser` and `@terrazzo/plugin-css` as **peer** dependencies. pnpm hoists them to one shared instance, so swatchbook's internal build and any Terrazzo plugin you add later resolve the same parser. The failure this avoids is a second, duplicate parser: a plugin built against one instance cannot read a graph produced by another, and the symptom is plugin output that silently goes missing from the listing.
+`swatchbook-core` also declares `@terrazzo/parser` and `@terrazzo/plugin-css` as **peer** dependencies, so your package manager resolves them to the copy your project already has instead of nesting a private duplicate. That keeps swatchbook's internal build and any Terrazzo plugin you add later on the same parser instance, as long as the version ranges agree; a mismatched pin can still split them. The failure this avoids is a second, duplicate parser: a plugin built against one instance cannot read a graph produced by another, and the symptom is plugin output that silently goes missing from the listing.
 
 ## The shared-options module
 
