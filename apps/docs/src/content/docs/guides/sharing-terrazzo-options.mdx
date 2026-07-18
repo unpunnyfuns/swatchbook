@@ -10,7 +10,7 @@ If you run Terrazzo's CLI in production, swatchbook can read the same value-form
 
 ## Dependencies
 
-Swatchbook is the preview side of a [Terrazzo](https://terrazzo.app/) pipeline: it parses DTCG with Terrazzo's parser and renders what Terrazzo's plugins emit. The zero-config install needs no direct Terrazzo dependency.
+swatchbook is the preview side of a [Terrazzo](https://terrazzo.app/) pipeline: it parses DTCG with Terrazzo's parser and renders what Terrazzo's plugins emit. The zero-config install needs no direct Terrazzo dependency.
 
 `@terrazzo/parser`, `@terrazzo/plugin-css`, and `@terrazzo/plugin-token-listing` come along with `swatchbook-core` transitively. The default install already parses tokens, emits the preview stylesheet, and derives the token listing without any Terrazzo entry in your `package.json`.
 
@@ -128,7 +128,7 @@ If the shared module imports from other workspace packages, make sure your bundl
 
 ## Why plugin objects, not a "read my Terrazzo config" field
 
-Swatchbook accepts plugin objects via `terrazzoPlugins` rather than ingesting a constructed `terrazzo.config.ts`. Plugin options live inside each plugin's closure once the factory runs; there's no general way for swatchbook to read `legacyHex` (or any other constructor argument) back out of a `cssPlugin({ legacyHex: true })` call. A `config.terrazzo: TerrazzoConfig` field could only inherit `tokens` + `plugins` and would silently ignore everything in `cssOptions`, which is the field most consumers expect alignment for. The shared-module pattern handles every option symmetrically, the same way `tsconfig.json` `extends` or `vite.config` / `vitest.config` factoring does.
+swatchbook accepts plugin objects via `terrazzoPlugins` rather than ingesting a constructed `terrazzo.config.ts`. Plugin options live inside each plugin's closure once the factory runs; there's no general way for swatchbook to read `legacyHex` (or any other constructor argument) back out of a `cssPlugin({ legacyHex: true })` call. A `config.terrazzo: TerrazzoConfig` field could only inherit `tokens` + `plugins` and would silently ignore everything in `cssOptions`, which is the field most consumers expect alignment for. The shared-module pattern handles every option symmetrically, the same way `tsconfig.json` `extends` or `vite.config` / `vitest.config` factoring does.
 
 ## Drift symptoms
 
@@ -142,7 +142,7 @@ The shared module above closes all three. One structural mismatch it can't reach
 
 ## What swatchbook owns (and you can't override)
 
-Five fields are stripped at the type level. They're load-bearing for how swatchbook emits CSS and publishes the listing; letting consumers override them breaks the preview model. Swatchbook runs its whole Terrazzo build in memory and never writes to disk, which is what two of these fields would otherwise change.
+Five fields are stripped at the type level. They're load-bearing for how swatchbook emits CSS and publishes the listing; letting consumers override them breaks the preview model. swatchbook runs its whole Terrazzo build in memory and never writes to disk, which is what two of these fields would otherwise change.
 
 - **`cssOptions.variableName`**: swatchbook routes naming through `@terrazzo/token-tools`' `makeCSSVar` with your `cssVarPrefix`, so every variable carries the prefix and kebab-cases consistently with what the listing records under `names.css`. A custom policy would make the listing's `names.css` disagree with the emitted stylesheet, which is worse than the default. `cssVarPrefix` is your only lever for the prefix, and it's a top-level config field rather than part of the shared-options module; make sure it matches whatever `--<prefix>-*` your production stylesheet emits.
 - **`cssOptions.permutations`** (the internal Terrazzo field that controls per-theme CSS blocks): swatchbook synthesizes one entry per resolver theme (or per layered tuple) so the emitted stylesheet declares each theme under a compound `data-<prefix>-<axis>` selector. Overriding this defeats axis-aware rendering.
@@ -164,7 +164,7 @@ Setting any of these doesn't hit a type error because they're still part of `CSS
 
 ## Per-platform identifier display
 
-Swatchbook doesn't transform tokens for production; through the listing it _displays_ the identifiers those transformers produce, so the docs line up with what ships. The transformation happens in the user-configured plugin; swatchbook reads its output.
+swatchbook doesn't transform tokens for production; through the listing it _displays_ the identifiers those transformers produce, so the docs line up with what ships. The transformation happens in the user-configured plugin; swatchbook reads its output.
 
 The Token Listing records `names.<platform>` for every platform registered in `listingOptions.platforms`, using the named plugin's own identifier-naming logic, so blocks read those names without duplicating any rules.
 
@@ -185,7 +185,7 @@ These plugins run purely for their naming contribution to the listing: their out
 
 [Style Dictionary](https://styledictionary.com) is the other common token build; since 4.x it reads DTCG-shaped JSON natively.
 
-Point both tools at the same source tree and token identity is preserved across pipelines, even though the CSS variable names won't match character-for-character. Swatchbook names variables through Terrazzo's `@terrazzo/token-tools/css.makeCSSVar`; Style Dictionary names them through its own `transforms` (`name/cti/kebab`, `name/cti/camel`, custom transforms), and the two don't round-trip.
+Point both tools at the same source tree and token identity is preserved across pipelines, even though the CSS variable names won't match character-for-character. swatchbook names variables through Terrazzo's `@terrazzo/token-tools/css.makeCSSVar`; Style Dictionary names them through its own `transforms` (`name/cti/kebab`, `name/cti/camel`, custom transforms), and the two don't round-trip.
 
 ```ts title="swatchbook.config.ts"
 defineSwatchbookConfig({
@@ -210,7 +210,7 @@ The two builds also coexist. Some teams run Terrazzo for CSS + JS targets (becau
 
 ## When you don't need any of this
 
-If you don't run a production token build alongside swatchbook (the tokens exist only for the docs site and Storybook), leave `cssOptions`, `listingOptions`, and `terrazzoPlugins` unset. Swatchbook loads `plugin-css` with defaults and `plugin-token-listing` with a single `css` platform. Drift isn't a concern when there's only one pipeline.
+If you don't run a production token build alongside swatchbook (the tokens exist only for the docs site and Storybook), leave `cssOptions`, `listingOptions`, and `terrazzoPlugins` unset. swatchbook loads `plugin-css` with defaults and `plugin-token-listing` with a single `css` platform. Drift isn't a concern when there's only one pipeline.
 
 ## See also
 

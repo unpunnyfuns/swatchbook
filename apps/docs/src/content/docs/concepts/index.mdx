@@ -27,12 +27,12 @@ Design-system authors with DTCG tokens, especially systems with more than one in
 
 ## Preview host, not transformer
 
-Swatchbook is the **preview side** of a DTCG pipeline. It parses tokens, displays them inside Storybook, and reacts to axis flips from a toolbar. It does **not** transform tokens for production platforms; that is what a consumer's `@terrazzo/cli` (or Style Dictionary, or comparable) build is for.
+swatchbook is the **preview side** of a DTCG pipeline. It parses tokens, displays them inside Storybook, and reacts to axis flips from a toolbar. It does **not** transform tokens for production platforms; that is what a consumer's `@terrazzo/cli` (or Style Dictionary, or comparable) build is for.
 
 - **Terrazzo CLI** runs at build time, takes DTCG sources, and emits CSS / Swift / Android / JS / Sass for production consumption.
-- **Swatchbook** runs at Storybook preview time, reads the same DTCG sources, and renders interactive previews of what the production build produces.
+- **swatchbook** runs at Storybook preview time, reads the same DTCG sources, and renders interactive previews of what the production build produces.
 
-A consumer maintains **one DTCG source of truth**, and both tools read from it. Swatchbook's preview-time loader reuses Terrazzo's parser end-to-end, so the `$value` shapes, `$type` semantics, alias forms, and resolver schema all come from Terrazzo; swatchbook does not introduce its own DTCG dialect. The [Aligning with your token build](/guides/sharing-terrazzo-options) guide describes how the two coordinate through shared `terrazzo.config.ts` fields.
+A consumer maintains **one DTCG source of truth**, and both tools read from it. swatchbook's preview-time loader reuses Terrazzo's parser end-to-end, so the `$value` shapes, `$type` semantics, alias forms, and resolver schema all come from Terrazzo; swatchbook does not introduce its own DTCG dialect. The [Aligning with your token build](/guides/sharing-terrazzo-options) guide describes how the two coordinate through shared `terrazzo.config.ts` fields.
 
 When a feature request frames swatchbook as owning transform logic, custom naming schemes, or a competing plugin protocol, the right answer is usually "point Terrazzo CLI at the same sources and read its output via the token listing."
 

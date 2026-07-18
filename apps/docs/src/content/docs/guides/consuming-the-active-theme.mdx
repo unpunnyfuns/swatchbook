@@ -4,7 +4,7 @@ title: Consuming the active theme
 
 import ThemeConsumptionDiagram from '#/components/diagrams/ThemeConsumptionDiagram.tsx';
 
-Swatchbook's toolbar flips the active tuple, and a story rendering under it needs a way to notice the change. Three approaches, from least code to most:
+swatchbook's toolbar flips the active tuple, and a story rendering under it needs a way to notice the change. Three approaches, from least code to most:
 
 1. **CSS variables**: no code at all, and the right choice for any component that already reads tokens through `var(--…)`.
 2. **The React hook `useActiveAxes()`**: for story code inside the Storybook preview, reading the same React context the blocks and decorators use.
@@ -14,7 +14,7 @@ Swatchbook's toolbar flips the active tuple, and a story rendering under it need
 
 ## CSS variables (recommended)
 
-Swatchbook emits CSS custom properties keyed on the active tuple. A component reading those variables updates automatically when the toolbar flips an axis:
+swatchbook emits CSS custom properties keyed on the active tuple. A component reading those variables updates automatically when the toolbar flips an axis:
 
 ```css
 .my-button {

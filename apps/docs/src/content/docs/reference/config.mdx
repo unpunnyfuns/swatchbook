@@ -82,7 +82,7 @@ Type: `string`, optional.
 
 Path to a [DTCG 2025.10 resolver](https://www.designtokens.org/TR/2025.10/resolver/) document. Mutually exclusive with `axes`.
 
-Terrazzo normalizes the document, then Swatchbook enumerates individual tuples (one per non-default `(axis, context)`) and realizes each via `resolver.apply()`. One `Axis` surfaces per modifier; the resolver file itself and every `$ref` target it pulls in land on `Project.sourceFiles`.
+Terrazzo normalizes the document, then swatchbook enumerates individual tuples (one per non-default `(axis, context)`) and realizes each via `resolver.apply()`. One `Axis` surfaces per modifier; the resolver file itself and every `$ref` target it pulls in land on `Project.sourceFiles`.
 
 ### `axes`
 
@@ -296,7 +296,7 @@ Two optional hooks refine what the listing records:
 - `previewValue(token)` overrides the auto-computed preview string per token; return `undefined` to fall through to the plugin-css value. Useful when production formats values for a non-CSS target you want the docs to mirror.
 - `subtype(token)` classifies a token's intent (`bgColor`, `fgColor`, `borderColor`, `padding`, …). Reserved for future per-`subtype` block defaults; blocks don't read it yet, but setting it puts the metadata in place.
 
-`modes` declares the resolver modes the listing enumerates. Swatchbook's own resolver reading already covers this for resolver projects; set it only for resolver-free layered projects that need modes enumerated explicitly.
+`modes` declares the resolver modes the listing enumerates. swatchbook's own resolver reading already covers this for resolver projects; set it only for resolver-free layered projects that need modes enumerated explicitly.
 
 `filename` is managed internally (the listing is captured in memory, not written to disk) and is stripped from the option type.
 
