@@ -82,7 +82,7 @@ Type: `string`, optional.
 
 Path to a [DTCG 2025.10 resolver](https://www.designtokens.org/TR/2025.10/resolver/) document. Mutually exclusive with `axes`.
 
-Terrazzo normalizes the document, then Swatchbook enumerates individual tuples (one per non-default `(axis, context)`) and realizes each via `resolver.apply()`. One `Axis` surfaces per modifier; the resolver file itself and every `$ref` target it pulls in land on `Project.sourceFiles`.
+Terrazzo normalizes the document, then swatchbook enumerates individual tuples (one per non-default `(axis, context)`) and realizes each via `resolver.apply()`. One `Axis` surfaces per modifier; the resolver file itself and every `$ref` target it pulls in land on `Project.sourceFiles`.
 
 ### `axes`
 
@@ -122,7 +122,7 @@ default: { brand: 'Brand A' }
 
 ### `cssVarPrefix`
 
-Type: `string`, optional.
+Type: `string`, optional. Default `swatch`.
 
 Prefix prepended to every emitted CSS variable. `color.accent.bg` becomes `var(--<prefix>-color-accent-bg)`; an empty string disables the prefix. Typical values are short and project-specific (`ds`, `sb`, `ui`).
 
@@ -204,11 +204,11 @@ Produces a single `:root` chrome block with all nine roles declared: overrides b
 ```css
 :root {
   --swatchbook-surface-default: var(--ds-color-brand-bg-primary);
-  --swatchbook-surface-muted:   #f4f4f5;
+  --swatchbook-surface-muted:   #f8fafc;
   --swatchbook-surface-raised:  #ffffff;
   --swatchbook-text-default:    var(--ds-color-brand-fg-primary);
-  --swatchbook-text-muted:      #4b5563;
-  --swatchbook-border-default:  #e5e7eb;
+  --swatchbook-text-muted:      #475569;
+  --swatchbook-border-default:  #e2e8f0;
   --swatchbook-accent-bg:       var(--ds-color-brand-accent-primary);
   --swatchbook-accent-fg:       #ffffff;
   --swatchbook-body-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -234,7 +234,7 @@ defineSwatchbookConfig({
 });
 ```
 
-Precedence runs lowest to highest: the hard-coded indicator defaults (`alias`, `variance`, `gamut`, `deprecation` on; `description` off), then this `config.indicators` baseline, then a block's own `indicators` prop. A block that sets `indicators={{ description: false }}` overrides the baseline above for that block; a block with no prop inherits the baseline.
+Precedence runs lowest to highest: the hard-coded indicator defaults (`alias`, `variance`, `gamut`, `deprecation` on; `description` and `composes` off), then this `config.indicators` baseline, then a block's own `indicators` prop. A block that sets `indicators={{ description: false }}` overrides the baseline above for that block; a block with no prop inherits the baseline.
 
 ### `cssOptions`
 
@@ -296,7 +296,7 @@ Two optional hooks refine what the listing records:
 - `previewValue(token)` overrides the auto-computed preview string per token; return `undefined` to fall through to the plugin-css value. Useful when production formats values for a non-CSS target you want the docs to mirror.
 - `subtype(token)` classifies a token's intent (`bgColor`, `fgColor`, `borderColor`, `padding`, …). Reserved for future per-`subtype` block defaults; blocks don't read it yet, but setting it puts the metadata in place.
 
-`modes` declares the resolver modes the listing enumerates. Swatchbook's own resolver reading already covers this for resolver projects; set it only for resolver-free layered projects that need modes enumerated explicitly.
+`modes` declares the resolver modes the listing enumerates. swatchbook's own resolver reading already covers this for resolver projects; set it only for resolver-free layered projects that need modes enumerated explicitly.
 
 `filename` is managed internally (the listing is captured in memory, not written to disk) and is stripped from the option type.
 
@@ -308,7 +308,7 @@ Additional Terrazzo plugins loaded alongside swatchbook's internal `plugin-css` 
 
 Common use: load `@terrazzo/plugin-swift` / `-android` / `-js` / `-sass` alongside so their naming logic populates `listing[path].names.<platform>` for block consumption.
 
-See [Sharing Terrazzo options](/guides/sharing-terrazzo-options) for the pattern of sharing one options file between `terrazzo.config.ts` and `swatchbook.config.ts`.
+See [Aligning with your token build](/guides/sharing-terrazzo-options) for the pattern of sharing one options file between `terrazzo.config.ts` and `swatchbook.config.ts`.
 
 ### `maxJointArity`
 
@@ -322,4 +322,4 @@ Bump to 5+ only when tokens genuinely diverge across five or more axes at once: 
 
 - [Axes reference](/concepts/axes): the runtime model for selection.
 - [Reference: core](/reference/core): the loader APIs this config drives.
-- [Sharing Terrazzo options](/guides/sharing-terrazzo-options): keep the swatchbook build aligned with a production Terrazzo CLI.
+- [Aligning with your token build](/guides/sharing-terrazzo-options): keep the swatchbook build aligned with a production Terrazzo CLI.

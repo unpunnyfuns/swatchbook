@@ -6,7 +6,7 @@ import BuildQueryDiagram from '#/components/diagrams/BuildQueryDiagram.tsx';
 import IngestionDiagram from '#/components/diagrams/IngestionDiagram.tsx';
 import SnapshotConsumersDiagram from '#/components/diagrams/SnapshotConsumersDiagram.tsx';
 
-Swatchbook doesn't require a separate token build step. Tokens flow into the preview through a Vite virtual module the addon publishes at dev-server start, updated via HMR on every source file change. No generated CSS in your repo, no `predev` script, no config to keep in sync.
+swatchbook doesn't require a separate token build step. Tokens flow into the preview through a Vite virtual module the addon publishes at dev-server start, updated via HMR on every source file change. No generated CSS in your repo, no `predev` script, no config to keep in sync.
 
 <IngestionDiagram />
 
@@ -34,13 +34,13 @@ Everything interactive reads from that graph: token tables, alias inspectors, th
 
 The Vite plugin watches every file your config loaded (the resolver, every `$ref` target, every token file the globs matched) and triggers a reload on any change. Reload is cheap (one `loadProject` call and one module invalidation, not a full-page reload), so the preview re-renders in place without losing toolbar state, story args, or scroll position.
 
-A short-form HMR event rides Storybook's channel to push the fresh snapshot into running blocks. Token graph updates in under a second on a typical save; edit a token with the [live Storybook](pathname:///storybook/) open to see it.
+A short-form HMR event rides Storybook's channel to push the fresh snapshot into running blocks. Token graph updates in under a second on a typical save; edit a token with the [live Storybook](/storybook/) open to see it.
 
 See [consuming the active theme](/guides/consuming-the-active-theme) for how stories react to axis flips: related but distinct plumbing.
 
 ## Not a production theming API
 
-The virtual module lives inside Vite's module graph: the Storybook preview resolves it, consumer apps (Next.js, a Vite SPA, Remix) don't. Swatchbook's place in the pipeline is [preview host, not transformer](/concepts/#preview-host-not-transformer); for production, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources and [align the options](/guides/sharing-terrazzo-options) so what swatchbook shows matches what your apps ship.
+The virtual module lives inside Vite's module graph: the Storybook preview resolves it, consumer apps (Next.js, a Vite SPA, Remix) don't. swatchbook's place in the pipeline is [preview host, not transformer](/concepts/#preview-host-not-transformer); for production, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources and [align the options](/guides/sharing-terrazzo-options) so what swatchbook shows matches what your apps ship.
 
 ## Where the same property holds
 

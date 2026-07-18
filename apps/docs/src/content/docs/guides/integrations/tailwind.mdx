@@ -108,7 +108,7 @@ Tailwind scale names are keys; each entry is `[tailwindEntryName, dtcgPath]`.
 
 ## Gotchas
 
-**Tailwind's `dark:` variant doesn't respond to the toolbar.** Tailwind looks for `.dark` on an ancestor, or `data-theme="dark"` in attribute mode. Swatchbook instead writes the active mode to `data-<cssVarPrefix>-mode` (`data-sb-mode="Dark"` under this guide's `sb` prefix; `data-swatch-mode` by default), so the shape and name don't match. Either point Tailwind at swatchbook's attribute, swapping `sb` for your own prefix:
+**Tailwind's `dark:` variant doesn't respond to the toolbar.** Tailwind looks for `.dark` on an ancestor, or `data-theme="dark"` in attribute mode. swatchbook instead writes the active mode to `data-<cssVarPrefix>-mode` (`data-sb-mode="Dark"` under this guide's `sb` prefix; `data-swatch-mode` by default), so the shape and name don't match. Either point Tailwind at swatchbook's attribute, swapping `sb` for your own prefix:
 
 ```css
 @custom-variant dark (&:where([data-sb-mode=Dark], [data-sb-mode=Dark] *));

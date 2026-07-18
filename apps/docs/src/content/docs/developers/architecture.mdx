@@ -10,13 +10,13 @@ Monorepo under `@unpunnyfuns`. pnpm workspaces + Turborepo orchestration. Every 
 
 ### Published packages (fixed-version group, always release together)
 
-| Package                            | Role                                                                                                                              | Depends on             |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `@unpunnyfuns/swatchbook-core`     | Framework-free DTCG loader. Parses a resolver, normalizes axes, builds a token graph, resolves themes, emits CSS and diagnostics. | none                   |
-| `@unpunnyfuns/swatchbook-addon`    | Storybook 10 addon. Toolbar, preview decorator, Vite plugin that publishes a virtual module. Re-exports `-blocks` + `-switcher`.  | core, blocks, switcher |
-| `@unpunnyfuns/swatchbook-blocks`   | MDX doc blocks + the `SwatchbookProvider` + hooks. Pure React, framework-agnostic beyond Storybook.                               | none (peer: storybook) |
-| `@unpunnyfuns/swatchbook-switcher` | Framework-agnostic axis / preset popover UI. Used by the addon toolbar and the docs-site navbar.                                  | none                   |
-| `@unpunnyfuns/swatchbook-mcp`      | Model Context Protocol server exposing a project to AI agents. Runs without Storybook.                                            | core                   |
+| Package                            | Role                                                                                                                              | Depends on                    |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `@unpunnyfuns/swatchbook-core`     | Framework-free DTCG loader. Parses a resolver, normalizes axes, builds a token graph, resolves themes, emits CSS and diagnostics. | none                          |
+| `@unpunnyfuns/swatchbook-addon`    | Storybook 10 addon. Toolbar, preview decorator, Vite plugin that publishes a virtual module. Re-exports `-blocks` + `-switcher`.  | core, blocks, switcher        |
+| `@unpunnyfuns/swatchbook-blocks`   | MDX doc blocks + the `SwatchbookProvider` + hooks. Pure React, framework-agnostic beyond Storybook.                               | core (peer: react, react-dom) |
+| `@unpunnyfuns/swatchbook-switcher` | Framework-agnostic axis / preset popover UI. Used by the addon toolbar and the docs-site navbar.                                  | none                          |
+| `@unpunnyfuns/swatchbook-mcp`      | Model Context Protocol server exposing a project to AI agents. Runs without Storybook.                                            | core                          |
 
 ### Apps (private workspaces, not published)
 

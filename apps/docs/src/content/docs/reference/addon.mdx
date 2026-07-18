@@ -2,7 +2,7 @@
 title: Addon
 ---
 
-Wiring swatchbook into Storybook is this package's job. It loads your config at build time through `@unpunnyfuns/swatchbook-core`, exposes the resolved graph as a virtual module, and at preview time registers a decorator, a manager toolbar, and the `useToken` hook. The MDX doc blocks ship separately, in `@unpunnyfuns/swatchbook-blocks`.
+Wiring swatchbook into Storybook is this package's job. It loads your config at build time through `@unpunnyfuns/swatchbook-core`, exposes the resolved graph as a virtual module, and at preview time registers a decorator, a manager toolbar, and the `useToken` hook. The MDX doc blocks live in `@unpunnyfuns/swatchbook-blocks`, which this package depends on and re-exports; importing either package's name gets you the blocks.
 
 ## Install
 
@@ -10,7 +10,7 @@ Wiring swatchbook into Storybook is this package's job. It loads your config at 
 npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
 ```
 
-This gives you the toolbar, preview decorator, and the `useToken()` hook. The MDX doc blocks (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `Diagnostics`, `SwatchbookProvider`, block-side hooks) live in `@unpunnyfuns/swatchbook-blocks`; install it alongside if you want them. See the [authoring guide](/guides/authoring-doc-stories) for MDX composition patterns.
+This gives you the toolbar, preview decorator, and the `useToken()` hook. The addon depends on `@unpunnyfuns/swatchbook-blocks` and re-exports its full surface (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `Diagnostics`, `SwatchbookProvider`, block-side hooks), so no separate install is needed inside a Storybook that already registers the addon; import from either package's name and both resolve to the same module. Install `@unpunnyfuns/swatchbook-blocks` directly only for a non-Storybook consumer of the blocks. See the [authoring guide](/guides/authoring-doc-stories) for MDX composition patterns.
 
 Peer requirements: Storybook 10.1+ on the Vite builder, React 18+.
 
@@ -51,7 +51,7 @@ export default definePreview({
 ## What it registers
 
 - **Preview decorator**: reads the active axis tuple, writes one `data-<prefix>-<axis>="<context>"` attribute per axis on `<html>` + story wrapper, mounts the per-theme CSS, emits `INIT_EVENT` to the manager. The prefix follows `cssVarPrefix` (default `swatch`).
-- **Toolbar tool**: a single Swatchbook `IconButton`. Clicking opens a popover containing preset pills, one dropdown per axis, and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`). Escape and outside-click close it.
+- **Toolbar tool**: a single swatchbook `IconButton`. Clicking opens a popover containing preset pills, one dropdown per axis, and a color-format picker (`hex` / `rgb` / `hsl` / `oklch` / `raw`). Escape and outside-click close it.
 
 For a browsable tree + diagnostics surface, compose `<Diagnostics />` + `<TokenNavigator />` + `<TokenTable />` on an MDX page. See the [authoring guide](/guides/authoring-doc-stories)'s dashboard example. The [Diagnostics reference](/reference/diagnostics) catalogs every group and message that can appear in the Design Tokens panel.
 

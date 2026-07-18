@@ -94,7 +94,7 @@ interface ThemeSwitcherProps {
 
 | Prop            | Required | Purpose                                                                                                                                                    |
 | --------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `axes`          | yes      | Axes the project ships. The component renders one row per entry. Omit this to draw a presets-only menu.                                                    |
+| `axes`          | yes      | Axes the project ships. The component renders one row per entry. Pass an empty array for a presets-only menu.                                              |
 | `presets`       | no       | Saved tuple snapshots rendered above the axes. Empty / omitted = no presets section.                                                                       |
 | `activeTuple`   | yes      | Active axis selections, keyed by axis name. Drives which pill in each axis row is `--active`.                                                              |
 | `defaults`      | yes      | Fallback values used to fill in axes a preset doesn't explicitly set.                                                                                      |

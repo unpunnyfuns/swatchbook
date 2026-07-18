@@ -2,7 +2,7 @@
 title: Diagnostics
 ---
 
-Swatchbook surfaces load-time and runtime problems as `Diagnostic` entries on `Project.diagnostics`. Every warning or error has a stable `group` (a namespaced string) and a `message` describing what fired and why. Diagnostics appear in three places:
+swatchbook surfaces load-time and runtime problems as `Diagnostic` entries on `Project.diagnostics`. Every warning or error has a stable `group` (a namespaced string) and a `message` describing what fired and why. Diagnostics appear in three places:
 
 - **The Design Tokens panel** in Storybook, live, while you author.
 - **`Project.diagnostics`** on the loaded project, for programmatic consumers (build scripts, tests, CI checks).
@@ -48,17 +48,17 @@ Token Listing build problems. Fires when `loadProject` runs the in-memory `@terr
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | The in-memory token-listing plugin build threw or returned an error. | The included detail in the message. Common causes: a plugin in `terrazzoPlugins` doesn't register transforms via `getTransforms`, so the listing's per-platform name lookup fails. |
 | The listing build wrote no `tokens.listing.json` output file.        | The plugin's configuration. The listing plugin needs to be installed and present in the internal plugin set.                                                                       |
-| The listing JSON had no `data` array.                                | The plugin version. Format compatibility is `0.1.0-alpha.x`; a major version change in the plugin's output shape can produce this.                                                 |
+| The listing JSON had no `data` array.                                | The plugin version. swatchbook pins `@terrazzo/plugin-token-listing` at `0.1.1`; an incompatible version change in the plugin's output shape can produce this.                     |
 
 `<TokenTable>` and `<ColorTable>` previews fall back to raw values; they remain readable, but per-platform name columns are blank.
 
 ## `swatchbook/css-options`
 
-`config.cssOptions` carries a key Swatchbook ignores. Fires when load-bearing fields are set on the soft-inert `cssOptions` trio (`baseSelector` / `baseScheme` / `modeSelectors`).
+`config.cssOptions` carries a key swatchbook ignores. Fires when load-bearing fields are set on the soft-inert `cssOptions` trio (`baseSelector` / `baseScheme` / `modeSelectors`).
 
 | Severity | When it fires                                                                                                                                                                   | What to check                                                                                                                                                                                                                                              |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `warn`   | Any of `cssOptions.baseSelector`, `cssOptions.baseScheme`, or `cssOptions.modeSelectors` is set. Swatchbook drives emission through its own permutations API and ignores these. | Whether the value is intentional. If the consumer's production CLI build needs these, set them on the production config and leave them off `cssOptions`. The [Aligning with your token build](/guides/sharing-terrazzo-options) guide describes the split. |
+| `warn`   | Any of `cssOptions.baseSelector`, `cssOptions.baseScheme`, or `cssOptions.modeSelectors` is set. swatchbook drives emission through its own permutations API and ignores these. | Whether the value is intentional. If the consumer's production CLI build needs these, set them on the production config and leave them off `cssOptions`. The [Aligning with your token build](/guides/sharing-terrazzo-options) guide describes the split. |
 
 A separate set of `cssOptions` fields (`variableName`, `permutations`, `filename`, `skipBuild`) is fully stripped before being passed to the internal `plugin-css` build; those don't emit a diagnostic.
 

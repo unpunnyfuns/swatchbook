@@ -27,24 +27,24 @@ Design-system authors with DTCG tokens, especially systems with more than one in
 
 ## Preview host, not transformer
 
-Swatchbook is the **preview side** of a DTCG pipeline. It parses tokens, displays them inside Storybook, and reacts to axis flips from a toolbar. It does **not** transform tokens for production platforms; that is what a consumer's `@terrazzo/cli` (or Style Dictionary, or comparable) build is for.
+swatchbook is the **preview side** of a DTCG pipeline. It parses tokens, displays them inside Storybook, and reacts to axis flips from a toolbar. It does **not** transform tokens for production platforms; that is what a consumer's `@terrazzo/cli` (or Style Dictionary, or comparable) build is for.
 
 - **Terrazzo CLI** runs at build time, takes DTCG sources, and emits CSS / Swift / Android / JS / Sass for production consumption.
-- **Swatchbook** runs at Storybook preview time, reads the same DTCG sources, and renders interactive previews of what the production build produces.
+- **swatchbook** runs at Storybook preview time, reads the same DTCG sources, and renders interactive previews of what the production build produces.
 
-A consumer maintains **one DTCG source of truth**, and both tools read from it. Swatchbook's preview-time loader reuses Terrazzo's parser end-to-end, so the `$value` shapes, `$type` semantics, alias forms, and resolver schema all come from Terrazzo; swatchbook does not introduce its own DTCG dialect. The [Aligning with your token build](/guides/sharing-terrazzo-options) guide describes how the two coordinate through shared `terrazzo.config.ts` fields.
+A consumer maintains **one DTCG source of truth**, and both tools read from it. swatchbook's preview-time loader reuses Terrazzo's parser end-to-end, so the `$value` shapes, `$type` semantics, alias forms, and resolver schema all come from Terrazzo; swatchbook does not introduce its own DTCG dialect. The [Aligning with your token build](/guides/sharing-terrazzo-options) guide describes how the two coordinate through shared `terrazzo.config.ts` fields.
 
 When a feature request frames swatchbook as owning transform logic, custom naming schemes, or a competing plugin protocol, the right answer is usually "point Terrazzo CLI at the same sources and read its output via the token listing."
 
 ## Tuples
 
-An **axis** is one independent dimension of the theming model (mode, brand, contrast, density), each with a set of named contexts. A **tuple** is one context selected per axis, the canonical representation of "what theme is active right now":
+Theming state is addressed by dimension, not by a flat ID: each independent dimension (mode, brand, contrast, density) is an **axis**, and picking one context per axis gives a **tuple**:
 
 ```ts
 { mode: 'Dark', brand: 'Brand A', contrast: 'Normal' }
 ```
 
-Every resolved value, every CSS selector, every panel readout keys on a tuple. Partial tuples fill any missing axis with its default. Tuples are the **only** way the system addresses theming state; composed names like `"Dark · Brand A"` exist for display, not for resolution.
+Resolution, CSS selectors, and panel readouts all key on the tuple itself; a label like `"Dark · Brand A"` is a display convenience, never an input to resolution. See [Axes](/concepts/axes) for how a flip works and how a partial tuple fills in.
 
 ## The token graph
 

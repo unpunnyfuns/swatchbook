@@ -124,7 +124,7 @@ This is the "someone will bleed on this" list: shapes that trip newcomers, and s
 
 ### Chrome variables read from a fixed `--swatchbook-*` namespace
 
-**Shape:** blocks read ten chrome variables (surface colors, text colors, border roles) from a fixed `--swatchbook-*` namespace that's independent of the consumer's `cssVarPrefix`. The `DEFAULT_CHROME_MAP` provides `light-dark()` defaults so zero-config chrome auto-flips with OS color-scheme.
+**Shape:** blocks read nine chrome variables (surface colors, text colors, border roles, plus the body font stack) from a fixed `--swatchbook-*` namespace that's independent of the consumer's `cssVarPrefix`. `DEFAULT_CHROME_MAP` provides one hard-coded light-scheme literal per role, not a `light-dark()` value: swatchbook has no intrinsic dark axis, so the zero-config default is a single committed appearance, and `light-dark()` / system colors would couple the chrome to the OS color-scheme, which is foreign to swatchbook's axis model. `config.chrome` wires roles to consumer tokens for per-axis variation.
 
 **Rule:** when adding a new chrome role, add it to `CHROME_ROLES` in `packages/core/src/chrome.ts` and provide a `DEFAULT_CHROME_MAP` entry. Consumers wire roles to their own tokens via `config.chrome`.
 
