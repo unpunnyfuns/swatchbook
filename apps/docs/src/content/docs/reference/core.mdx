@@ -2,7 +2,7 @@
 title: Core
 ---
 
-Published as `@unpunnyfuns/swatchbook-core`. Framework-free DTCG loader. Parses token files via Terrazzo, builds a walkable token graph (a data structure you can query for any token's value in any axis combination), resolves aliases per tuple. No React, no Storybook dependency.
+swatchbook-core parses DTCG sources and builds the token graph and project object the rest of swatchbook consumes. It walks that graph for any token's value in any axis combination and resolves aliases per tuple. No React, no Storybook, and no need to reach past it into `@terrazzo/parser` for the common cases.
 
 ## Install
 
@@ -74,7 +74,7 @@ For production builds, prefer Terrazzo's CLI; `emitAxisProjectedCss` exists prim
 
 ## Browser-safe subpaths
 
-Leaf utilities consumers need without the loader's Node deps live on dedicated subpaths. Each is tree-shake-clean, no `@terrazzo/parser`, no `node:*` imports, safe to import from preview-side bundles, the Storybook manager, or any browser consumer.
+Leaf utilities consumers need without the loader's Node deps live on dedicated subpaths. Each is tree-shake-clean, no `@terrazzo/parser`, no `node:*` imports, safe to import from preview-side bundles, the Storybook manager, or any browser consumer. Ship `project.tokenGraph` to the browser through `/snapshot-for-wire` rather than the full `Project`: `resolveAt` is a function and `cwd` is a Node-side absolute path, so the object isn't JSON-serializable as-is, and `snapshotForWire(project, css)` returns the transportable subset.
 
 | Subpath              | Export                                                                                                                                                                 | Purpose                                                                                                                                                             |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -131,7 +131,7 @@ const paths = listPaths(project.tokenGraph);
 
 ### `CHROME_ROLES`
 
-Frozen list of the nine role names that block chrome reads from. Independent of `config.cssVarPrefix`: these always live under the `--swatchbook-*` namespace so blocks remain stylable regardless of consumer prefix.
+Frozen list of the nine chrome role names, always under the `--swatchbook-*` namespace regardless of `config.cssVarPrefix`. See [`config.chrome`](/reference/config#chrome) for what each role maps to.
 
 ```ts
 import { CHROME_ROLES } from '@unpunnyfuns/swatchbook-core';
@@ -144,7 +144,7 @@ CHROME_ROLES;
 
 ### `DEFAULT_CHROME_MAP`
 
-Built-in chrome values used when `config.chrome` is empty or partial. Single flat literal values: plain hex strings and font stacks for a standalone light-scheme block surface. Swatchbook has no intrinsic dark axis; per-axis variation comes from `config.chrome` mapping roles to the consumer's tokens.
+Built-in chrome values used when `config.chrome` is empty or partial: flat hex strings and font stacks for a standalone light-scheme block surface. Per-axis variation comes from mapping roles to your own tokens via [`config.chrome`](/reference/config#chrome).
 
 ```ts
 import { DEFAULT_CHROME_MAP, type ChromeRole } from '@unpunnyfuns/swatchbook-core';
@@ -164,7 +164,7 @@ type ChromeRole = (typeof CHROME_ROLES)[number];
 
 ### `Config`
 
-Three valid shapes: `ResolverConfig | LayeredConfig | PlainConfig`. Each variant has a different load strategy; TypeScript picks the right shape based on which field is present, so invalid combinations like `{ resolver, axes }` are caught at compile time. See [Config reference](/reference/config) for the full per-field semantics.
+Three valid shapes: `ResolverConfig | LayeredConfig | PlainConfig`. Which load-strategy field is present selects the variant, so invalid combinations like `{ resolver, axes }` are compile-time errors. See [Picking a theming input](/reference/config#picking-a-theming-input) for choosing between them and [Config reference](/reference/config) for the full per-field semantics.
 
 ```ts
 type Config = ResolverConfig | LayeredConfig | PlainConfig;
@@ -196,7 +196,7 @@ interface LayeredConfig extends CommonConfig {
 
 ### `PlainConfig`
 
-Plain-parse: single synthetic axis (`theme`), no resolver, no overlays. The simplest "I just have token files" case.
+Plain-parse: single synthetic axis (`theme`), no resolver, no overlays.
 
 ```ts
 interface PlainConfig extends CommonConfig {
@@ -345,15 +345,7 @@ See the [Integrations guide](/guides/integrations) for factories that build thes
 
 ### `Diagnostic`
 
-```ts
-interface Diagnostic {
-  severity: DiagnosticSeverity;
-  group: string;
-  message: string;
-  filename?: string;
-  line?: number;
-}
-```
+One load-time warning or error on `Project.diagnostics`. See the [Diagnostics reference](/reference/diagnostics) for the interface shape and the full catalog by group.
 
 ### `DiagnosticSeverity`
 
@@ -430,11 +422,3 @@ type ResolveAt = (tuple: Record<string, string>) => TokenMap;
 ```
 
 The shape of `project.resolveAt`.
-
-## Do / don't
-
-- ✅ Use this package at build time: Node scripts, SSR, Storybook presets. It has no DOM dependency.
-- ✅ Ship `project.tokenGraph` to the browser via [`/snapshot-for-wire`](#browser-safe-subpaths); `TokenGraph` is JSON-serializable. Query it on the browser side with the [`/graph`](#graph-queries) helpers.
-- ✅ Use `getVariance(graph, path)` from `/graph` for per-token variance classification.
-- ❌ Don't import from `@terrazzo/parser` directly unless you need features core doesn't expose.
-- ❌ Don't ship the full `Project` object to the browser: `resolveAt` is a function and `cwd` is a Node-side absolute path. Use `snapshotForWire(project, css)` to get a JSON-friendly subset.

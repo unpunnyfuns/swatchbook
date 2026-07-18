@@ -2,15 +2,13 @@
 title: Hooks
 ---
 
-Context-reading hooks for authoring custom blocks. Source of truth lives in `@unpunnyfuns/swatchbook-blocks`; `@unpunnyfuns/swatchbook-addon` re-exports everything so a one-stop `import { useSwatchbookData } from '@unpunnyfuns/swatchbook-addon'` works too. Either entry reads from the nearest `SwatchbookProvider` (mounted automatically by the addon's preview decorator inside Storybook).
-
-Outside Storybook, wrap the tree in `SwatchbookProvider` and pass a `ProjectSnapshot` so the hooks have something to resolve against. See the [blocks intro](/reference/blocks) for the wiring.
+Context-reading hooks for authoring custom blocks. They read from the nearest `SwatchbookProvider`, mounted automatically by the addon's preview decorator inside Storybook, and are [re-exported from the addon](/reference/blocks) so either import path works. Outside Storybook, wrap the tree in `SwatchbookProvider` and pass a `ProjectSnapshot` so the hooks have something to resolve against.
 
 ## `useSwatchbookData()`
 
 Returns the full `ProjectSnapshot` the provider is holding (`axes`, `activeTheme`, `activeAxes`, `cssVarPrefix`, `diagnostics`, `css`, `listing`, `tokenGraph`, `defaultTuple`, `resolveAt`). Useful for custom blocks that need graph-level information the canned blocks don't expose.
 
-The snapshot's `listing?: Readonly<Record<string, VirtualTokenListing>>` field carries per-token metadata from `@terrazzo/plugin-token-listing`: authoritative CSS variable names (`names.css`), preview values, source file + line references. Empty for layered / plain-parse projects; read-it-when-present, fall back gracefully. Blocks that need a token's CSS var reference use `resolveCssVar(path, project)` internally, an internal helper in `packages/blocks/src/internal/use-project.ts` that reads `listing[path].names.css` first and falls back to `cssVarRef(path, cssVarPrefix)` from `@unpunnyfuns/swatchbook-core/css-var` when a listing entry is absent.
+The snapshot's `listing?: Readonly<Record<string, VirtualTokenListing>>` field carries per-token metadata from `@terrazzo/plugin-token-listing`: authoritative CSS variable names (`names.css`), preview values, source file + line references. It's empty for layered / plain-parse projects, so read it when present and fall back gracefully. For a token's CSS var reference, prefer `listing[path].names.css` when a listing entry exists and fall back to `cssVarRef(path, cssVarPrefix)` from `@unpunnyfuns/swatchbook-core/css-var` otherwise.
 
 Throws when no `SwatchbookProvider` is mounted above. For code paths that need to handle the no-provider case (MDX doc blocks rendered without a preview decorator, conditional fallbacks), use [`useOptionalSwatchbookData`](#useoptionalswatchbookdata) instead.
 
