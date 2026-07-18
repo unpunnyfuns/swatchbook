@@ -4,7 +4,7 @@
     "$description": "Composite typography tokens. Each bundles family, size, weight, and line-height.",
     "body": {
       "$value": {
-        "fontFamily": "{font.family.sans}",
+        "fontFamily": "{font.family.base}",
         "fontSize":   "{size.rem-400}",
         "fontWeight": "{font.weight.regular}",
         "lineHeight": 1.5,
@@ -13,7 +13,7 @@
     },
     "body-strong": {
       "$value": {
-        "fontFamily": "{font.family.sans}",
+        "fontFamily": "{font.family.base}",
         "fontSize":   "{size.rem-400}",
         "fontWeight": "{font.weight.semibold}",
         "lineHeight": 1.5,
@@ -22,7 +22,7 @@
     },
     "heading": {
       "$value": {
-        "fontFamily": "{font.family.sans}",
+        "fontFamily": "{font.family.base}",
         "fontSize":   "{size.rem-700}",
         "fontWeight": "{font.weight.bold}",
         "lineHeight": 1.2,

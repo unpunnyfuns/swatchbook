@@ -2,6 +2,7 @@
   "font": {
     "family": {
       "$type": "fontFamily",
+      "base": { "$value": "{font.family.sans}" },
       "sans": { "$value": ["Geist", "Inter", "system-ui", "-apple-system", "sans-serif"] },
       "serif":{ "$value": ["Source Serif 4", "Georgia", "serif"] },
       "mono": { "$value": ["Geist Mono", "JetBrains Mono", "Menlo", "monospace"] },

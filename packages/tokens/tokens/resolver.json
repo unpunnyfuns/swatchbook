@@ -2,7 +2,7 @@
   "$schema": "https://www.designtokens.org/TR/2025.10/resolver/",
   "version": "2025.10",
   "name": "swatchbook-reference",
-  "description": "DTCG 2025.10 native resolver. Flat token paths organized per `$type` — color, size/space/radius, font, typography, motion, border, shadow, gradient, stroke, number — plus three independent modifiers: `mode` (light/dark baseline), `brand` (default/Brand A accent), and `contrast` (normal/high border + focus emphasis).",
+  "description": "DTCG 2025.10 native resolver. Flat token paths organized per `$type` — color, size/space/radius, font, typography, motion, border, shadow, gradient, stroke, number — plus four independent modifiers: `mode` (light/dark baseline), `brand` (default/Brand A accent), `typography` (sans/mono/comic base family), and `contrast` (normal/high border + focus emphasis).",
   "sets": {
     "tokens": {
       "description": "Flat DTCG tokens grouped by `$type`.",
@@ -38,6 +38,15 @@
       },
       "default": "Default"
     },
+    "typography": {
+      "description": "Type-family axis. `Sans` leaves the baseline alone; `Mono` and `Comic` swap the proportional base family.",
+      "contexts": {
+        "Sans": [],
+        "Mono": [{ "$ref": "./themes/typography-mono.json" }],
+        "Comic": [{ "$ref": "./themes/typography-comic.json" }]
+      },
+      "default": "Sans"
+    },
     "contrast": {
       "description": "Border + focus emphasis. `Normal` leaves the baseline alone; `High` thickens borders and boosts the focus ring.",
       "contexts": {
@@ -51,6 +60,7 @@
     { "$ref": "#/sets/tokens" },
     { "$ref": "#/modifiers/mode" },
     { "$ref": "#/modifiers/brand" },
+    { "$ref": "#/modifiers/typography" },
     { "$ref": "#/modifiers/contrast" }
   ]
 }
