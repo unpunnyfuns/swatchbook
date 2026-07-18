@@ -25,7 +25,7 @@ addons: [
     options: {
       config: {
         resolver: 'tokens/resolver.json',
-        cssVarPrefix: 'ds',
+        cssVarPrefix: 'sb',
       },
     },
   },

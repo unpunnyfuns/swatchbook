@@ -4,7 +4,7 @@ A Storybook addon and MDX doc blocks for visualising [DTCG design tokens](https:
 
 Built on [Terrazzo](https://terrazzo.app/)'s parser. Your production build runs Terrazzo's CLI against the same DTCG source; swatchbook reads it too, inside Storybook.
 
-If your stories already style with CSS variables, they pick up the toolbar's axis flips automatically. That's mostly what the tool does.
+If your stories already style with swatchbook's token CSS variables, they pick up the toolbar's axis flips automatically.
 
 **Documentation** · [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/)
 **Live Storybook** · [/storybook](https://unpunnyfuns.github.io/swatchbook/storybook/)

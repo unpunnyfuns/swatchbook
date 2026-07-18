@@ -42,7 +42,7 @@ await server.connect(new StdioServerTransport());
 
 ## Tools
 
-Fourteen read-only tools covering token listing, search, theme resolution, alias chains, color formats + contrast, axis variance, and diagnostics. Full catalogue in the [MCP reference](https://unpunnyfuns.github.io/swatchbook/reference/mcp).
+A set of read-only tools covering token listing, search, theme resolution, alias chains, color formats + contrast, axis variance, and diagnostics. Full catalogue in the [MCP reference](https://unpunnyfuns.github.io/swatchbook/reference/mcp).
 
 ## Credits
 

@@ -39,10 +39,7 @@ Block catalogue, props, and composition patterns live in the [blocks reference](
 
 ## Boundaries
 
-- ✅ Compose multiple blocks per page; each mounts independently.
-- ✅ Render outside Storybook with a hand-built or loaded `ProjectSnapshot`.
-- ❌ Don't import from `virtual:swatchbook/tokens`; it's the addon's internal wiring, not a public API. Use `SwatchbookProvider`.
-- ❌ Don't use `useGlobals` / `useArgs` from `storybook/preview-api` inside custom blocks; those hooks throw in docs context.
+Blocks read from `SwatchbookProvider`, not the addon's internal `virtual:swatchbook/tokens` module; don't import that directly. And `useGlobals` / `useArgs` from `storybook/preview-api` throw in a docs context, so don't call them inside custom blocks.
 
 ## Credits
 

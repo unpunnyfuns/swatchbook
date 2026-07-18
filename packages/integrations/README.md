@@ -1,6 +1,6 @@
 # swatchbook-integrations
 
-Preview-side adapters that let your Storybook stories use [Tailwind v4](./src/tailwind.ts) or a [CSS-in-JS library](./src/css-in-js.ts) against [swatchbook](https://github.com/unpunnyfuns/swatchbook)'s tokens.
+These adapters let your Storybook stories style with [Tailwind v4](./src/tailwind.ts) or a [CSS-in-JS library](./src/css-in-js.ts) against [swatchbook](https://github.com/unpunnyfuns/swatchbook)'s tokens.
 
 Not a replacement for your production build. Integrations are preview-only: they let `bg-sb-surface-default` or `theme.color.accent.bg` resolve correctly inside Storybook; for production artifacts, run [Terrazzo](https://terrazzo.app/)'s CLI against the same DTCG sources.
 
@@ -40,8 +40,11 @@ Per-integration wiring details live in the [Integrations guide](https://unpunnyf
 
 ## Boundaries
 
-- ✅ Preview-side use inside Storybook. Stories that style with utility classes or theme accessors pick up the swatchbook toolbar's axis flips via CSS cascade.
-- ❌ No MUI / Vuetify / Bootstrap SCSS factories. Those need resolved values per named theme; run Terrazzo's CLI with `@terrazzo/plugin-js` for that case.
+Preview-side use inside Storybook only: stories that style with utility classes or theme accessors pick up the toolbar's axis flips via the CSS cascade. There are no MUI / Vuetify / Bootstrap SCSS factories here; those need resolved values per named theme, so run Terrazzo's CLI with `@terrazzo/plugin-js` for that.
+
+## Credits
+
+Token parsing and resolver evaluation come from [Terrazzo](https://terrazzo.app/) by the [Terrazzo team](https://github.com/terrazzoapp) via `@unpunnyfuns/swatchbook-core`.
 
 ## Documentation
 
