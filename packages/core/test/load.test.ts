@@ -16,7 +16,7 @@ describe('loadProject — resolver mode', () => {
       {
         tokens: ['tokens/**/*.json'],
         resolver: resolverPath,
-        default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+        default: { mode: 'Light', brand: 'Default', a11y: 'Normal' },
       },
       fixtureCwd,
     );
@@ -24,10 +24,10 @@ describe('loadProject — resolver mode', () => {
 
   it('enumerates singletons only — default tuple + one per `(axis, non-default-context)`', () => {
     // Bounded by `Σ(axes × contexts)`, independent of the cartesian
-    // product. For the reference fixture (3 axes × 2 contexts each):
-    // 1 default + 3 axes × 1 non-default ctx = 4 singletons.
+    // product. For the reference fixture (mode ×2, brand ×2, typography
+    // ×3, a11y ×2): 1 default + (1 + 1 + 2 + 1) non-default ctx = 6 singletons.
     const expected = 1 + project.axes.reduce((acc, a) => acc + (a.contexts.length - 1), 0);
-    expect(expected).toBe(4);
+    expect(expected).toBe(6);
     // Graph records every context for each axis.
     for (const axis of project.axes) {
       for (const ctx of axis.contexts) {
@@ -59,35 +59,43 @@ describe('loadProject — resolver mode', () => {
       },
       {
         name: 'brand',
-        contexts: ['Default', 'Brand A'],
+        contexts: ['Default', 'ACME'],
         default: 'Default',
         description:
-          'Accent palette. `Default` leaves the baseline alone; `Brand A` overrides the accent scale.',
+          'Accent palette. `Default` leaves the baseline alone; `ACME` overrides the accent scale.',
         source: 'resolver',
       },
       {
-        name: 'contrast',
-        contexts: ['Normal', 'High'],
+        name: 'typography',
+        contexts: ['Sans', 'Mono', 'Comic'],
+        default: 'Sans',
+        description:
+          'Type-family axis. `Sans` leaves the baseline alone; `Mono` and `Comic` swap the proportional base family.',
+        source: 'resolver',
+      },
+      {
+        name: 'a11y',
+        contexts: ['Normal', 'High-contrast'],
         default: 'Normal',
         description:
-          'Border + focus emphasis. `Normal` leaves the baseline alone; `High` thickens borders and boosts the focus ring.',
+          'Border + focus emphasis + base weight. `Normal` leaves the baseline alone; `High-contrast` thickens borders, boosts the focus ring, and bumps the base font weight — never the font-family, which stays whatever the `typography` modifier set.',
         source: 'resolver',
       },
     ]);
   });
 
   it('resolveAt composes any tuple from the token graph — no listPermutations needed', () => {
-    const light = project.resolveAt({ mode: 'Light', brand: 'Default', contrast: 'Normal' });
+    const light = project.resolveAt({ mode: 'Light', brand: 'Default', a11y: 'Normal' });
     const accentBg = light['color.accent.bg'];
     expect(accentBg).toBeDefined();
     expect(accentBg?.$type).toBe('color');
   });
 
   it('produces different surface values for Light vs Dark at the same brand', () => {
-    const light = project.resolveAt({ mode: 'Light', brand: 'Default', contrast: 'Normal' })[
+    const light = project.resolveAt({ mode: 'Light', brand: 'Default', a11y: 'Normal' })[
       'color.surface.default'
     ];
-    const dark = project.resolveAt({ mode: 'Dark', brand: 'Default', contrast: 'Normal' })[
+    const dark = project.resolveAt({ mode: 'Dark', brand: 'Default', a11y: 'Normal' })[
       'color.surface.default'
     ];
     expect(light).toBeDefined();

@@ -1,7 +1,12 @@
 import { beforeAll, expect, it } from 'vitest';
 import { dirname } from 'node:path';
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
-import { buildChromeDefaultsCss, CHROME_ROLES, DEFAULT_CHROME_MAP, validateChrome } from '#/chrome.ts';
+import {
+  buildChromeDefaultsCss,
+  CHROME_ROLES,
+  DEFAULT_CHROME_MAP,
+  validateChrome,
+} from '#/chrome.ts';
 import { emitAxisProjectedCss } from '#/css-axis-projected.ts';
 import { loadProject } from '#/load.ts';
 import type { Project } from '#/types.ts';
@@ -82,7 +87,7 @@ beforeAll(async () => {
     {
       tokens: ['tokens/**/*.json'],
       resolver: resolverPath,
-      default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+      default: { mode: 'Light', brand: 'Default', a11y: 'Normal' },
       cssVarPrefix: 'sb',
       chrome: {
         surfaceDefault: 'color.palette.blue.500',
@@ -118,7 +123,7 @@ it('emitAxisProjectedCss emits all nine roles even when chrome config is absent'
     {
       tokens: ['tokens/**/*.json'],
       resolver: resolverPath,
-      default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+      default: { mode: 'Light', brand: 'Default', a11y: 'Normal' },
       cssVarPrefix: 'sb',
     },
     fixtureCwd,

@@ -13,16 +13,16 @@ import { resolverPath } from '@unpunnyfuns/swatchbook-tokens';
  */
 export default defineSwatchbookConfig({
   resolver: resolverPath,
-  default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
-  // Uncomment to suppress the `contrast` axis from this Storybook —
+  default: { mode: 'Light', brand: 'Default', a11y: 'Normal' },
+  // Uncomment to suppress the `a11y` axis from this Storybook —
   // the toolbar dropdown disappears, CSS emission drops it from
   // compound selectors, and the Design Tokens panel shows a pinned indicator.
-  // disabledAxes: ['contrast'],
+  // disabledAxes: ['a11y'],
   cssVarPrefix: 'sb',
   // Dogfood: wire block chrome to the reference tokens. Without this
   // map, chrome falls back to the hard-coded `light-dark()` defaults
-  // in `DEFAULT_CHROME_MAP` — readable, but deaf to our Brand A /
-  // contrast axes. Mapping to `color.*` / `typography.*` makes block
+  // in `DEFAULT_CHROME_MAP` — readable, but deaf to our ACME /
+  // a11y axes. Mapping to `color.*` / `typography.*` makes block
   // chrome track every toolbar flip.
   chrome: {
     surfaceDefault: 'color.surface.default',
@@ -72,17 +72,17 @@ export default defineSwatchbookConfig({
   presets: [
     {
       name: 'Default Light',
-      axes: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+      axes: { mode: 'Light', brand: 'Default', a11y: 'Normal' },
       description: 'Baseline light mode with the stock accent.',
     },
     {
-      name: 'Brand A Dark',
-      axes: { mode: 'Dark', brand: 'Brand A', contrast: 'Normal' },
-      description: 'Dark surfaces paired with the violet Brand A accent.',
+      name: 'ACME Dark',
+      axes: { mode: 'Dark', brand: 'ACME', a11y: 'Normal' },
+      description: 'Dark surfaces paired with the violet ACME accent.',
     },
     {
       name: 'A11y High Contrast',
-      axes: { mode: 'Light', contrast: 'High' },
+      axes: { mode: 'Light', a11y: 'High-contrast' },
       description: 'High-contrast borders on the light baseline.',
     },
   ],

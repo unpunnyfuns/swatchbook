@@ -10,7 +10,7 @@ function ThemeProbe() {
         Surface-driven — flips with Light ↔ Dark.
       </Card>
       <Button data-testid="probe-button" variant="primary">
-        Accent-driven — flips with Brand A.
+        Accent-driven — flips with ACME.
       </Button>
     </div>
   );
@@ -79,20 +79,20 @@ export const Dark = meta.story({
 });
 
 /**
- * Stacked composition: Brand A overrides `color.accent.bg` from blue to
+ * Stacked composition: ACME overrides `color.accent.bg` from blue to
  * violet. The button (whose styles read `var(--sb-color-accent-bg)` directly)
  * must render with a red channel that exceeds the blue channel — violet's
  * defining property — whereas plain Light/Dark accents are blue-dominant.
  */
-export const LightBrandA = meta.story({
-  parameters: { swatchbook: { axes: { mode: 'Light', brand: 'Brand A' } } },
+export const LightACME = meta.story({
+  parameters: { swatchbook: { axes: { mode: 'Light', brand: 'ACME' } } },
   play: async ({ canvasElement }) => {
     const button = canvasElement.querySelector<HTMLElement>('[data-testid="probe-button"]');
     if (!button) throw new Error('probe-button missing');
     const bg = await bgWhenMounted(button);
     const [r, g] = parseRgb(bg);
-    // Blue.700 (default accent): r=29 < g=78. Violet.700 (Brand A): r=109 > g=40.
-    expect(r, `Brand A accent should be violet (r > g); got rgb(${r}, ${g}, _)`).toBeGreaterThan(g);
+    // Blue.700 (default accent): r=29 < g=78. Violet.700 (ACME): r=109 > g=40.
+    expect(r, `ACME accent should be violet (r > g); got rgb(${r}, ${g}, _)`).toBeGreaterThan(g);
   },
 });
 
@@ -108,17 +108,17 @@ export const PerAxisDataAttrs = meta.story({
   // stay focused on stories whose pixels matter. Still runs in the
   // addon-vitest path, which is the right home for DOM assertions.
   parameters: {
-    swatchbook: { axes: { mode: 'Dark', brand: 'Brand A' } },
+    swatchbook: { axes: { mode: 'Dark', brand: 'ACME' } },
     chromatic: { disableSnapshot: true },
   },
   play: async ({ canvasElement }) => {
     const wrapper = canvasElement.querySelector<HTMLElement>('[data-sb-mode]');
     if (!wrapper) throw new Error('expected story wrapper with data-sb-mode attribute');
     expect(wrapper.getAttribute('data-sb-mode')).toBe('Dark');
-    expect(wrapper.getAttribute('data-sb-brand')).toBe('Brand A');
-    expect(wrapper.getAttribute('data-sb-contrast')).toBe('Normal');
+    expect(wrapper.getAttribute('data-sb-brand')).toBe('ACME');
+    expect(wrapper.getAttribute('data-sb-a11y')).toBe('Normal');
     expect(document.documentElement.getAttribute('data-sb-mode')).toBe('Dark');
-    expect(document.documentElement.getAttribute('data-sb-brand')).toBe('Brand A');
+    expect(document.documentElement.getAttribute('data-sb-brand')).toBe('ACME');
     expect(document.documentElement.getAttribute('data-sb-theme')).toBeNull();
   },
 });

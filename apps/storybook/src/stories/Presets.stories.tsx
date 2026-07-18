@@ -10,7 +10,7 @@ function PresetProbe() {
         Flips with the active preset tuple.
       </Card>
       <Button data-testid="preset-button" variant="primary">
-        Accent follows Brand A.
+        Accent follows ACME.
       </Button>
     </div>
   );
@@ -52,22 +52,22 @@ export const DefaultLightPreset = meta.story({
     const wrapper = await findWrapper(canvasElement);
     await waitForAttr(wrapper, 'data-sb-mode', 'Light');
     await waitForAttr(wrapper, 'data-sb-brand', 'Default');
-    await waitForAttr(wrapper, 'data-sb-contrast', 'Normal');
+    await waitForAttr(wrapper, 'data-sb-a11y', 'Normal');
   },
 });
 
 /**
- * `Brand A Dark` preset — full-tuple match. Per-axis `data-sb-*` attributes
+ * `ACME Dark` preset — full-tuple match. Per-axis `data-sb-*` attributes
  * should reflect the preset exactly.
  */
-export const BrandADarkPreset = meta.story({
+export const ACMEDarkPreset = meta.story({
   parameters: {
-    swatchbook: { axes: { mode: 'Dark', brand: 'Brand A' } },
+    swatchbook: { axes: { mode: 'Dark', brand: 'ACME' } },
   },
   play: async ({ canvasElement }) => {
     const wrapper = await findWrapper(canvasElement);
     await waitForAttr(wrapper, 'data-sb-mode', 'Dark');
-    await waitForAttr(wrapper, 'data-sb-brand', 'Brand A');
-    await waitForAttr(wrapper, 'data-sb-contrast', 'Normal');
+    await waitForAttr(wrapper, 'data-sb-brand', 'ACME');
+    await waitForAttr(wrapper, 'data-sb-a11y', 'Normal');
   },
 });

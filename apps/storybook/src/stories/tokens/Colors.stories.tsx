@@ -59,9 +59,9 @@ export const RefBlue = meta.story({
 // Demonstrates the theme-pin escape hatch: this story pins a tuple over the
 // toolbar via parameters.swatchbook.axes. The decorator writes data-sb-<axis>
 // on <html> and reverts on unmount.
-export const DarkBrandA = meta.story({
+export const DarkACME = meta.story({
   args: { filter: 'color.**' },
-  parameters: { swatchbook: { axes: { mode: 'Dark', brand: 'Brand A', contrast: 'Normal' } } },
+  parameters: { swatchbook: { axes: { mode: 'Dark', brand: 'ACME', a11y: 'Normal' } } },
   play: async ({ canvasElement }) => {
     await assertRenders(canvasElement);
     await waitFor(() => {

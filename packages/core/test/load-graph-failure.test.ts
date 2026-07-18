@@ -24,7 +24,7 @@ describe('loadProject — graph build failure recovery', () => {
       {
         tokens: ['tokens/**/*.json'],
         resolver: resolverPath,
-        default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+        default: { mode: 'Light', brand: 'Default', a11y: 'Normal' },
       },
       fixtureCwd,
     );

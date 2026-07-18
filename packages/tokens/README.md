@@ -8,7 +8,7 @@ Private workspace package. Not published.
 
 ## Composition
 
-`tokens/resolver.json` is a DTCG 2025.10 native resolver (`sets` + `modifiers` + `resolutionOrder`). Three independent modifiers compose into named themes: every combination of `mode` (Light/Dark), `brand` (Default/Brand A), and `contrast` (Normal/High).
+`tokens/resolver.json` is a DTCG 2025.10 native resolver (`sets` + `modifiers` + `resolutionOrder`). Four independent modifiers compose into named themes: every combination of `mode` (Light/Dark), `brand` (Default/ACME), `typography` (Sans/Mono/Comic), and `a11y` (Normal/High-contrast).
 
 ## Consumption
 
