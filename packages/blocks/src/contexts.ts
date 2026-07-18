@@ -116,6 +116,15 @@ export interface ProjectSnapshot {
   /** The default tuple — `{ axis: axis.default }` for every axis. */
   defaultTuple: Record<string, string>;
   /**
+   * Starting color format for blocks that display color values —
+   * `config.defaultColorFormat` from core, passed through the wire
+   * snapshot. `useColorFormat()` falls back to this when no
+   * `ColorFormatContext`/prop override is active. Optional — hand-built
+   * snapshots (tests, MDX) that omit it fall through to the bare
+   * `'hex'` default.
+   */
+  defaultColorFormat?: ColorFormat;
+  /**
    * Pre-built `resolveAt(tuple)` accessor. The addon's preview decorator
    * instantiates this once per iframe lifetime. When present, use-project
    * prefers it over building its own from `tokenGraph`, so it MUST preserve
@@ -182,5 +191,6 @@ export const ColorFormatContext = createContext<ColorFormat | null>(null);
 export function useColorFormat(): ColorFormat {
   const contextValue = useContext(ColorFormatContext);
   const channelGlobals = useChannelGlobals();
-  return contextValue ?? channelGlobals.format ?? 'hex';
+  const snapshot = useContext(SwatchbookContext);
+  return contextValue ?? channelGlobals.format ?? snapshot?.defaultColorFormat ?? 'hex';
 }
