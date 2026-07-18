@@ -28,6 +28,12 @@ export interface GradientPaletteProps {
   sortBy?: SortBy;
   /** `'asc'` (default) or `'desc'`. */
   sortDir?: SortDir;
+  /**
+   * Highest-precedence color format for this palette's values, overriding
+   * an outer `ColorFormatContext` and the project's `defaultColorFormat`.
+   * Omit to inherit the existing precedence chain (see `useColorFormat`).
+   */
+  colorFormat?: ColorFormat;
 }
 
 interface GradientStop {
@@ -178,10 +184,12 @@ export function GradientPalette({
   caption,
   sortBy = 'path',
   sortDir = 'asc',
+  colorFormat,
 }: GradientPaletteProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
-  const colorFormat = useColorFormat();
+  const contextColorFormat = useColorFormat();
+  const format = colorFormat ?? contextColorFormat;
 
   const rows = useMemo(
     () =>
@@ -189,9 +197,9 @@ export function GradientPalette({
         filter,
         sortBy,
         sortDir,
-        colorFormat,
+        colorFormat: format,
       }),
-    [resolved, listing, cssVarPrefix, filter, sortBy, sortDir, colorFormat],
+    [resolved, listing, cssVarPrefix, filter, sortBy, sortDir, format],
   );
 
   return (

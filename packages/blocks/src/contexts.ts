@@ -119,10 +119,10 @@ export interface ProjectSnapshot {
   /**
    * Starting color format for blocks that display color values:
    * `config.defaultColorFormat` from core, passed through the wire
-   * snapshot. `useColorFormat()` falls back to this when no
-   * `ColorFormatContext` override is active. Optional: hand-built
-   * snapshots (tests, MDX) that omit it fall through to the bare
-   * `'hex'` default.
+   * snapshot. `useColorFormat()` falls back to this when neither a
+   * block's own `colorFormat` prop nor a `ColorFormatContext` override is
+   * active. Optional: hand-built snapshots (tests, MDX) that omit it fall
+   * through to the bare `'hex'` default.
    */
   defaultColorFormat?: ColorFormat;
   /**
@@ -180,13 +180,14 @@ export function useActiveAxes(): Readonly<Record<string, string>> {
  * Active color-display format for the current story/docs render, consumed
  * by blocks that render color-token values. Emitted CSS is unaffected.
  *
- * The addon no longer sets a global color format; blocks fall back to the
- * active snapshot's `defaultColorFormat` (from `Config.defaultColorFormat`).
- * "Active snapshot" is whichever source is actually feeding the render:
+ * Sits in the middle of the precedence chain a block resolves via
+ * `colorFormat ?? useColorFormat()`: a block's own `colorFormat` prop wins
+ * over this context, which wins over the active snapshot's
+ * `defaultColorFormat` (from `Config.defaultColorFormat`). "Active
+ * snapshot" is whichever source is actually feeding the render:
  * `SwatchbookProvider` when a story decorator mounted one, otherwise the
  * channel-fed `TokenSnapshot` that MDX-embedded blocks (no `<Story/>`, no
- * provider) read through `useProject()`'s fallback path. Wrapping a block
- * in an explicit `ColorFormatContext` still overrides either.
+ * provider) read through `useProject()`'s fallback path.
  *
  * Runs through plain React context rather than Storybook's `useGlobals` so
  * per-story seeded globals flow through on first render and the same hook
@@ -195,6 +196,12 @@ export function useActiveAxes(): Readonly<Record<string, string>> {
  */
 export const ColorFormatContext = createContext<ColorFormat | null>(null);
 
+/**
+ * Resolves the color-display format from the context/snapshot/default
+ * chain: `ColorFormatContext` → active snapshot's `defaultColorFormat` →
+ * `'hex'`. Composing blocks read `colorFormat ?? useColorFormat()` to give
+ * their own `colorFormat` prop top precedence over this chain.
+ */
 export function useColorFormat(): ColorFormat {
   const contextValue = useContext(ColorFormatContext);
   const channelGlobals = useChannelGlobals();

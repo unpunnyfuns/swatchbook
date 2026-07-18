@@ -4,7 +4,7 @@ import cx from 'clsx';
 import type { ReactElement } from 'react';
 import { useCallback, useDeferredValue, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import './TokenTable.css';
-import { useColorFormat } from '#/contexts.ts';
+import { ColorFormatContext, useColorFormat } from '#/contexts.ts';
 import { CopyButton } from '#/internal/CopyButton.tsx';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
@@ -62,6 +62,13 @@ export interface TokenTableProps {
   id?: string;
   /** Configure the per-row indicator strip. See `IndicatorsProp`. */
   indicators?: IndicatorsProp;
+  /**
+   * Highest-precedence color format for this table's values, overriding
+   * an outer `ColorFormatContext` and the project's `defaultColorFormat`.
+   * Omit to inherit the existing precedence chain (see `useColorFormat`).
+   * Also governs the composed row-detail `TokenDetail` slide-over.
+   */
+  colorFormat?: ColorFormat;
 }
 
 export interface TokenRow {
@@ -410,6 +417,7 @@ export function TokenTable({
   onSelect,
   id,
   indicators,
+  colorFormat,
 }: TokenTableProps): ReactElement {
   const project = useProject();
   const {
@@ -421,7 +429,8 @@ export function TokenTable({
     varianceByPath,
     indicators: indicatorBaseline,
   } = project;
-  const colorFormat = useColorFormat();
+  const contextColorFormat = useColorFormat();
+  const format = colorFormat ?? contextColorFormat;
   const rootFontSize = useRootFontSize();
   // Persist selection + search across docs-mode remounts (see persistent-state).
   const blockKey = useBlockKey('TokenTable', [filter, type, caption, id]);
@@ -436,7 +445,7 @@ export function TokenTable({
         type,
         sortBy,
         sortDir,
-        colorFormat,
+        colorFormat: format,
         rootFontSizePx: rootFontSize,
       }),
     [
@@ -448,19 +457,19 @@ export function TokenTable({
       type,
       sortBy,
       sortDir,
-      colorFormat,
+      format,
       rootFontSize,
     ],
   );
   const validPaths = useMemo(() => new Set(Object.keys(resolved)), [resolved]);
 
-  return (
+  const view = (
     <TokenTableView
       rows={rows}
       activeTheme={activeTheme}
       cssVarPrefix={cssVarPrefix}
       activeAxes={activeAxes}
-      colorFormat={colorFormat}
+      colorFormat={format}
       enabledIndicators={enabledIndicators}
       validPaths={validPaths}
       blockKey={blockKey}
@@ -470,5 +479,15 @@ export function TokenTable({
       searchable={searchable}
       onSelect={onSelect}
     />
+  );
+
+  // The composed row-detail slide-over renders `<TokenDetail>`, which reads
+  // ColorFormatContext for itself: provide the override so it inherits it
+  // too, but only when a prop override is actually set, to avoid clobbering
+  // the ambient default with a value that's just its own echo.
+  return colorFormat !== undefined ? (
+    <ColorFormatContext.Provider value={colorFormat}>{view}</ColorFormatContext.Provider>
+  ) : (
+    view
   );
 }

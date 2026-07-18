@@ -30,6 +30,12 @@ export interface ShadowPreviewProps {
   sortBy?: SortBy;
   /** `'asc'` (default) or `'desc'`. */
   sortDir?: SortDir;
+  /**
+   * Highest-precedence color format for this preview's values, overriding
+   * an outer `ColorFormatContext` and the project's `defaultColorFormat`.
+   * Omit to inherit the existing precedence chain (see `useColorFormat`).
+   */
+  colorFormat?: ColorFormat;
 }
 
 /** One shadow layer's breakdown fields, formatted for display. */
@@ -201,10 +207,12 @@ export function ShadowPreview({
   caption,
   sortBy = 'path',
   sortDir = 'asc',
+  colorFormat,
 }: ShadowPreviewProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
-  const colorFormat = useColorFormat();
+  const contextColorFormat = useColorFormat();
+  const format = colorFormat ?? contextColorFormat;
 
   const rows = useMemo(
     () =>
@@ -212,9 +220,9 @@ export function ShadowPreview({
         filter,
         sortBy,
         sortDir,
-        colorFormat,
+        colorFormat: format,
       }),
-    [resolved, project, filter, sortBy, sortDir, colorFormat],
+    [resolved, project, filter, sortBy, sortDir, format],
   );
 
   return (

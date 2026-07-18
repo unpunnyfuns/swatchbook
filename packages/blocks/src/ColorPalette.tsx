@@ -41,6 +41,12 @@ export interface ColorPaletteProps {
   sortBy?: SortBy;
   /** `'asc'` (default) or `'desc'`. */
   sortDir?: SortDir;
+  /**
+   * Highest-precedence color format for this palette's values, overriding
+   * an outer `ColorFormatContext` and the project's `defaultColorFormat`.
+   * Omit to inherit the existing precedence chain (see `useColorFormat`).
+   */
+  colorFormat?: ColorFormat;
 }
 
 export interface ColorPaletteSwatch {
@@ -196,10 +202,12 @@ export function ColorPalette({
   caption,
   sortBy = 'path',
   sortDir = 'asc',
+  colorFormat,
 }: ColorPaletteProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix, listing } = project;
-  const colorFormat = useColorFormat();
+  const contextColorFormat = useColorFormat();
+  const format = colorFormat ?? contextColorFormat;
 
   const groups = useMemo(
     () =>
@@ -208,9 +216,9 @@ export function ColorPalette({
         groupBy,
         sortBy,
         sortDir,
-        colorFormat,
+        colorFormat: format,
       }),
-    [resolved, listing, cssVarPrefix, filter, groupBy, sortBy, sortDir, colorFormat],
+    [resolved, listing, cssVarPrefix, filter, groupBy, sortBy, sortDir, format],
   );
 
   return (

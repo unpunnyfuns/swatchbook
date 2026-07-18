@@ -77,6 +77,12 @@ export interface ColorTableProps {
   id?: string;
   /** Configure the per-row indicator strip. See `IndicatorsProp`. Gamut stays in the Value cell, so it is not part of this strip. */
   indicators?: IndicatorsProp;
+  /**
+   * Highest-precedence color format for this table's values, overriding
+   * an outer `ColorFormatContext` and the project's `defaultColorFormat`.
+   * Omit to inherit the existing precedence chain (see `useColorFormat`).
+   */
+  colorFormat?: ColorFormat;
 }
 
 export interface ColorVariant {
@@ -340,10 +346,12 @@ export function ColorTable({
   variants,
   id,
   indicators,
+  colorFormat,
 }: ColorTableProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix, listing, varianceByPath } = project;
-  const colorFormat = useColorFormat();
+  const contextColorFormat = useColorFormat();
+  const format = colorFormat ?? contextColorFormat;
   const enabledIndicators = useMemo(
     () => ({ ...resolveIndicators(indicators), gamut: false }),
     [indicators],
@@ -357,19 +365,9 @@ export function ColorTable({
         variants,
         sortBy,
         sortDir,
-        colorFormat,
+        colorFormat: format,
       }),
-    [
-      resolved,
-      listing,
-      cssVarPrefix,
-      varianceByPath,
-      filter,
-      variants,
-      sortBy,
-      sortDir,
-      colorFormat,
-    ],
+    [resolved, listing, cssVarPrefix, varianceByPath, filter, variants, sortBy, sortDir, format],
   );
   return (
     <ColorTableView
@@ -377,7 +375,7 @@ export function ColorTable({
       activeTheme={activeTheme}
       cssVarPrefix={cssVarPrefix}
       activeAxes={activeAxes}
-      colorFormat={colorFormat}
+      colorFormat={format}
       enabledIndicators={enabledIndicators}
       blockKey={blockKey}
       filter={filter}

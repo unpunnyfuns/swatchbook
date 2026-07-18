@@ -249,7 +249,7 @@ defineSwatchbookConfig({
 });
 ```
 
-Wrapping a subtree in `ColorFormatContext` overrides this for that subtree; see [`useColorFormat`](/reference/blocks/hooks#usecolorformat) for the full precedence order.
+A block's own `colorFormat` prop overrides this, and so does wrapping a subtree in `ColorFormatContext`; see [`useColorFormat`](/reference/blocks/hooks#usecolorformat) for the full precedence order.
 
 ### `cssOptions`
 
