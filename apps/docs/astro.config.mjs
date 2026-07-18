@@ -21,6 +21,10 @@ export default defineConfig({
       title: 'swatchbook',
       logo: { src: './src/assets/logo.svg', alt: 'swatchbook logo' },
       customCss: ['./src/css/custom.css'],
+      // Replace the stock light/dark toggle with the swatchbook switcher —
+      // one control for every axis (mode/brand/contrast). Dogfoods the
+      // product's own thesis: the switcher supersedes a plain theme toggle.
+      components: { ThemeSelect: './src/components/ThemeSelect.astro' },
       social: [
         { icon: 'storybook', label: 'Live Storybook', href: '/swatchbook/storybook/' },
         { icon: 'github', label: 'GitHub', href: 'https://github.com/unpunnyfuns/swatchbook' },

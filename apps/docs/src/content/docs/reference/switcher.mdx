@@ -4,7 +4,7 @@ sidebar:
   order: 3
 ---
 
-import SwatchbookSwitcherDemo from '#/components/SwatchbookSwitcherDemo.tsx';
+import SwatchbookSwitcher from '#/components/SwatchbookSwitcher.tsx';
 
 # Switcher
 
@@ -12,9 +12,9 @@ Published as `@unpunnyfuns/swatchbook-switcher`. Framework-agnostic React compon
 
 ## Live on this page
 
-<SwatchbookSwitcherDemo client:load />
+<SwatchbookSwitcher client:load />
 
-The `mode` axis is bridged to this site's own light/dark theme: flipping it here updates the page immediately, and flipping the theme toggle in the site header updates the switcher's `mode` pill back.
+This same component is the site header's theme control, in place of a plain light/dark toggle: the `mode` axis is bridged to Starlight's own theme, so flipping `mode` here or in the header updates the page immediately and both instances stay in sync.
 
 Most consumers pick it up transitively via `@unpunnyfuns/swatchbook-addon`; `import { ThemeSwitcher } from '@unpunnyfuns/swatchbook-addon'` works without adding a sibling dependency. Install directly when you're outside Storybook (Docusaurus, Next.js, a vanilla React app).
 
