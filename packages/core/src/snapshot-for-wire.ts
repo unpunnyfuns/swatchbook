@@ -23,6 +23,7 @@
  * import-resolution constraints.
  */
 import type { ListedToken } from '@terrazzo/plugin-token-listing';
+import type { ColorFormat } from '#/color-formats.ts';
 import type { TokenGraph } from '#/token-graph/types.ts';
 import type { Project } from '#/types.ts';
 
@@ -52,6 +53,8 @@ export interface SnapshotForWire {
   cssVarPrefix: string;
   /** Project-wide baseline for the block row-indicator strip; `config.indicators` passed through verbatim. */
   indicators: Readonly<Record<string, boolean>>;
+  /** Starting color format for blocks that display color values; `config.defaultColorFormat`, defaulted to `'hex'`. */
+  defaultColorFormat: ColorFormat;
   css: string;
   listing: Readonly<Record<string, SlimListedToken>>;
   defaultTuple: Project['defaultTuple'];
@@ -72,6 +75,7 @@ export function snapshotForWire(project: Project, css: string): SnapshotForWire 
     diagnostics: project.diagnostics,
     cssVarPrefix: project.config.cssVarPrefix ?? '',
     indicators: project.config.indicators ?? {},
+    defaultColorFormat: project.config.defaultColorFormat ?? 'hex',
     css,
     listing: slimListing(project.listing),
     defaultTuple: project.defaultTuple,

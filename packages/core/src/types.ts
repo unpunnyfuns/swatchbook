@@ -3,6 +3,7 @@ import type { Plugin, Resolver, TokenNormalized } from '@terrazzo/parser';
 import type { CSSPluginOptions } from '@terrazzo/plugin-css';
 import type { TokenListingPluginOptions } from '@terrazzo/plugin-token-listing';
 import type { ChromeRole } from '#/chrome.ts';
+import type { ColorFormat } from '#/color-formats.ts';
 import type { TokenListingByPath } from '#/token-listing.ts';
 import type { TokenGraph } from '#/token-graph/types.ts';
 
@@ -265,6 +266,11 @@ interface CommonConfig {
    * @default 4
    */
   maxJointArity?: number;
+  /**
+   * Starting color format for blocks that display color values; a
+   * per-block prop overrides it. Defaults to `'hex'`.
+   */
+  defaultColorFormat?: ColorFormat;
 }
 
 /**
