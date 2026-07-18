@@ -60,17 +60,19 @@
   /* Borders */
   --sl-color-hairline: var(--sb-color-code-border);
 
-  /* Typography — family follows the typography axis (Sans/Mono/Comic);
+  /* Typography: family follows the typography axis (Sans/Mono/Comic).
      a11y=High-contrast bumps size + weight via the generated CSS but
      never touches family. Starlight has no `--sl-font-weight` slot, so
-     body weight is wired through our own var below. */
+     body weight and root size are wired through our own vars below. */
   --sl-font: var(--sb-font-family-base);
   --sl-font-mono: var(--sb-font-family-mono);
   --sb-doc-font-weight: var(--sb-font-weight-base, 400);
+  --sb-doc-font-size: var(--sb-font-size-base, 100%);
 }
 
 body {
   font-weight: var(--sb-doc-font-weight);
+  font-size: var(--sb-doc-font-size);
 }
 
 /*

@@ -1,5 +1,5 @@
 {
-  "$description": "High-contrast a11y overlay. Colour boosts re-route role tokens through each mode's `color.accessible.*` namespace (amber primary; darker neutrals for muted text). Independent of colour, it bumps the base font weight and a 108% base-size bump as readability signals. Does not touch `font.family` — whichever typography context is active stays active.",
+  "$description": "High-contrast a11y overlay. Colour boosts re-route role tokens through each mode's `color.accessible.*` namespace (amber primary; darker neutrals for muted text). Independent of colour, it bumps the base font weight and a 108% base-size bump as readability signals. Does not touch `font.family`: whichever typography context is active stays active.",
   "color": {
     "$type": "color",
     "text": {
