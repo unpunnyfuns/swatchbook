@@ -84,7 +84,7 @@ Format: `<type>(<scope>): <description>`.
 
 **Subject:** imperative verb first, lowercase even for proper nouns. `feat(addon): rebind keyboard shortcut` — not `Feat(Addon): Rebinding the keyboard shortcut`.
 
-Breaking changes: drop the `!` suffix. Breaking-ness is tracked in the changeset body, not the conventional-commits marker — we're pre-1.0 so breaking changes bump `minor`, not `major`.
+Breaking changes: put a `!` before the colon in the title (`feat(core)!: …`). Post-1.0 the marker is meaningful again, and breaking changes bump `major`. (A `BREAKING CHANGE:` footer in the commit or PR body carries the same meaning, but the title itself needs the `!`.)
 
 ### PR body
 
@@ -110,11 +110,11 @@ pnpm changeset
 
 Pick a bump level and write a short description. All five published packages are a **fixed group** (always the same version), so the bump level you pick applies to every one of them.
 
-**Bump levels, pre-1.0:**
+**Bump levels:**
 
 - **`patch`** — bug fixes. Docs-only PRs don't need a changeset: the docs site rebuilds from `main` on every push, so a docs fix reaches the live site on the next deploy independent of the release cadence.
-- **`minor`** — new features *and* breaking changes. Pre-1.0, semver `0.x` treats minor as the "major-ish" position, so we bump minor rather than major for breakings until we cut 1.0.
-- **`major`** — reserved for the 1.0 cut itself.
+- **`minor`** — new features.
+- **`major`** — breaking changes. Each major is a deliberate stability commitment, not a PR that happens to break something.
 
 **Skip the changeset** for purely internal refactors (code style, test-only changes, CI, repo hygiene).
 
