@@ -13,7 +13,8 @@
     "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src",
     "format": "oxfmt -c ../../.oxfmtrc.json src",
     "format:check": "oxfmt --check -c ../../.oxfmtrc.json src",
-    "capture": "node scripts/capture-media.mjs"
+    "capture": "node scripts/capture-media.mjs",
+    "gen:logo": "node scripts/gen-logo.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.1",
