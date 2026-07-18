@@ -1,7 +1,11 @@
 import { cleanup, render, screen } from '@testing-library/react';
+import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { ColorFormatSelector } from '#/ColorFormatSelector.tsx';
+
+// Classic-JSX compile: every file using `<…/>` needs React in scope.
+void React;
 
 afterEach(cleanup);
 

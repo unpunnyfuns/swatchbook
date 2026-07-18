@@ -37,7 +37,7 @@ import '@unpunnyfuns/swatchbook-switcher/style.css';
 
 The component is pure: it doesn't read or write to storage, and it doesn't bake in any particular way of applying the active tuple. The caller decides how to translate `onAxisChange` / `onPresetApply` into DOM updates, routing changes, or global state.
 
-Color-format selection isn't part of the switcher; hosts that need it slot a `<ColorFormatSelector>` (or any other custom node) into the optional `footer` prop.
+Neither switcher mount (the Storybook addon toolbar, the docs-site navbar) renders a color-format control — blocks read `Config.defaultColorFormat` for their starting format. The package exports `<ColorFormatSelector>` for a host that wants one anyway; slot it (or any other custom node) into the optional `footer` prop.
 
 `SwitcherAxis` / `SwitcherPreset` are the accepted shapes and are cross-compatible with `Project.axes` / `Project.presets` from `@unpunnyfuns/swatchbook-core`, so pass them through directly. `SwitcherAxis.source` mirrors core's own source classification; the two packages version that union in lockstep.
 

@@ -26,7 +26,7 @@ Returns the active tuple as `Readonly<Record<string, string>>`.
 
 ## `useColorFormat()`
 
-Returns the active color format (`'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw'`), the display setting toggled from the toolbar popover. Pair with `formatColor(value, format)` (also exported) to render colors the same way the built-in blocks do. `hex` falls back to space-separated `rgb()` for out-of-gamut colors, marked with a ⚠ warning.
+Returns the active color format (`'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw'`). Precedence: a `ColorFormatContext` value (a host wrapping its own tree) or per-block prop, then the Storybook globals channel (`swatchbookColorFormat`, unset unless a story sets it directly), then `Config.defaultColorFormat` from the project snapshot, then `'hex'`. Pair with `formatColor(value, format)` (also exported) to render colors the same way the built-in blocks do. `hex` falls back to space-separated `rgb()` for out-of-gamut colors, marked with a ⚠ warning.
 
 ## Reactivity
 

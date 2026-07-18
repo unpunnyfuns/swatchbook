@@ -92,17 +92,17 @@ interface ThemeSwitcherProps {
 }
 ```
 
-| Prop            | Required | Purpose                                                                                                                                                    |
-| --------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `axes`          | yes      | Axes the project ships. The component renders one row per entry. Pass an empty array for a presets-only menu.                                              |
-| `presets`       | no       | Saved tuple snapshots rendered above the axes. Empty / omitted = no presets section.                                                                       |
-| `activeTuple`   | yes      | Active axis selections, keyed by axis name. Drives which pill in each axis row is `--active`.                                                              |
-| `defaults`      | yes      | Fallback values used to fill in axes a preset doesn't explicitly set.                                                                                      |
-| `lastApplied`   | yes      | Name of the most recently applied preset, or `null`. Drives the "modified since applied" dot.                                                              |
-| `onAxisChange`  | yes      | Receives `(axisName, next)` when the user clicks an axis pill. Caller decides what "applied" means: set `data-*` attributes, route, write to global state. |
-| `onPresetApply` | yes      | Receives the full preset object when a preset pill is clicked. Caller fills in omitted axes from `defaults` and applies the resulting tuple.               |
-| `onKeyDown`     | no       | Optional key handler, typically used by hosts to close their popover on `Escape`.                                                                          |
-| `footer`        | no       | Host-specific node rendered after the axes (e.g. the Storybook addon's color-format picker). The switcher itself ships no color-format UI.                 |
+| Prop            | Required | Purpose                                                                                                                                                                                                                                         |
+| --------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `axes`          | yes      | Axes the project ships. The component renders one row per entry. Pass an empty array for a presets-only menu.                                                                                                                                   |
+| `presets`       | no       | Saved tuple snapshots rendered above the axes. Empty / omitted = no presets section.                                                                                                                                                            |
+| `activeTuple`   | yes      | Active axis selections, keyed by axis name. Drives which pill in each axis row is `--active`.                                                                                                                                                   |
+| `defaults`      | yes      | Fallback values used to fill in axes a preset doesn't explicitly set.                                                                                                                                                                           |
+| `lastApplied`   | yes      | Name of the most recently applied preset, or `null`. Drives the "modified since applied" dot.                                                                                                                                                   |
+| `onAxisChange`  | yes      | Receives `(axisName, next)` when the user clicks an axis pill. Caller decides what "applied" means: set `data-*` attributes, route, write to global state.                                                                                      |
+| `onPresetApply` | yes      | Receives the full preset object when a preset pill is clicked. Caller fills in omitted axes from `defaults` and applies the resulting tuple.                                                                                                    |
+| `onKeyDown`     | no       | Optional key handler, typically used by hosts to close their popover on `Escape`.                                                                                                                                                               |
+| `footer`        | no       | Host-specific node rendered after the axes. Neither switcher mount (the Storybook addon toolbar, this docs site's navbar) passes one; the package exports a `<ColorFormatSelector>` a host can slot in here if it wants a color-format control. |
 
 ## Input shapes
 

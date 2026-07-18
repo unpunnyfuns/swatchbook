@@ -6,21 +6,16 @@
  * don't need scattered `Record<string, unknown>` casts.
  */
 
-import type { ColorFormat } from '@unpunnyfuns/swatchbook-blocks';
-
 /**
  * Globals keys written by the addon's toolbar and read by its decorator.
  *
  * - `swatchbookAxes` — active axis tuple (axis name → context name).
- * - `swatchbookColorFormat` — display-side color format for blocks. Does
- *   not affect emitted CSS.
  *
  * The index signature retains Storybook's other globals — consumers who
  * stash unrelated globals on the same bag don't get type errors.
  */
 export interface SwatchbookGlobals {
   swatchbookAxes?: Record<string, string>;
-  swatchbookColorFormat?: ColorFormat;
   [key: string]: unknown;
 }
 

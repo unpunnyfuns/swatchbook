@@ -56,9 +56,11 @@ export const DefaultHex = meta.story({
 
 /**
  * `parameters.globals` seeds the format global before render — the cell
- * should render `rgb(R G B)` syntax. This exercises the full pipeline:
- * preview.tsx reads the global, blocks' `useColorFormat` subscribes to
- * the channel, `formatColor` produces the string.
+ * should render `rgb(R G B)` syntax. The addon toolbar no longer exposes
+ * a color-format control (blocks read `Config.defaultColorFormat`
+ * instead); this exercises the lower-level escape hatch blocks still
+ * honor — `useColorFormat` subscribes to the Storybook globals channel
+ * directly and `formatColor` produces the string.
  */
 export const RgbFormat = meta.story({
   globals: { swatchbookColorFormat: 'rgb' },

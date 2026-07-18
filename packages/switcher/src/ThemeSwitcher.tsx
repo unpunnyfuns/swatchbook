@@ -28,11 +28,12 @@ export interface ThemeSwitcherProps {
 
 /**
  * Popover body for the swatchbook theme switcher. Renders preset pills
- * (when the project ships any) and one row per axis. Color-format
- * selection is specific to the Storybook addon (it toggles how blocks
- * stringify colors); hosts that need it slot
- * `<ColorFormatSelector>` into the `footer` prop rather than it being
- * baked into every consumer.
+ * (when the project ships any) and one row per axis. Neither switcher
+ * mount (the Storybook addon toolbar, the docs navbar) renders a
+ * color-format control — blocks read `Config.defaultColorFormat` for
+ * their starting format. Hosts that want one anyway can slot the
+ * package's own `<ColorFormatSelector>` into the `footer` prop rather
+ * than it being baked into every consumer.
  *
  * Consumers own the trigger + positioning — the switcher just draws
  * the menu. Uses classic JSX so it survives embedding in Storybook's
