@@ -16,27 +16,13 @@ Props: `caption?: string` overrides the summary heading.
 
 ### The `Diagnostic` shape
 
-Every `loadProject()` call returns a `diagnostics: Diagnostic[]` list. The block renders it directly.
-
-```ts
-interface Diagnostic {
-  severity: 'error' | 'warn' | 'info';
-  group: string;
-  message: string;
-  filename?: string;
-  line?: number;
-}
-```
-
-`group` is namespaced by feature area (`swatchbook/<area>`) and is stable across releases, so consumers can filter on it:
+Every `loadProject()` call returns a `diagnostics: Diagnostic[]` list, and the block renders it directly. Each entry carries a `severity`, a namespaced `group`, and a `message`; the [Diagnostics reference](/reference/diagnostics) has the interface and the full catalog by group. The groups you'll see:
 
 - `swatchbook/token-graph`: graph construction and walker integrity, including malformed token shapes the parser surfaced (unresolved alias targets, cycles, invalid color components).
 - `swatchbook/resolver`: resolver-file issues (missing `$ref`, unknown modifier, context with no files).
 - `swatchbook/presets`: preset validation (unknown axis key, invalid context value).
 - `swatchbook/css-options`, `swatchbook/chrome`, `swatchbook/disabled-axes`, `swatchbook/default`, `swatchbook/listing`: configuration and feature-area checks.
 - Plugin-originated groups: depends on your setup.
-
-The [Diagnostics reference](/reference/diagnostics) catalogs what fires under each group.
 
 ### Severities
 
@@ -48,7 +34,7 @@ The [Diagnostics reference](/reference/diagnostics) catalogs what fires under ea
 
 - **`parser: Could not resolve alias "{color.palette.blue.500}"`**: the alias target doesn't exist in the merged graph. Check for a typo in the path, or a missing token file that wasn't included in `tokens` globs.
 - **`parser: Invalid token value for $type "color"`**: the `$value` doesn't parse as the declared `$type`. Usually a string missing a unit or a color in the wrong format.
-- **`swatchbook/presets: Preset "X" has unknown axis key "Y"`**: a preset references an axis that doesn't exist on the project. Either the axis name was renamed or the preset predates the resolver change.
+- **`swatchbook/presets: Preset "X" has unknown axis key "Y"`**: a preset references an axis that doesn't exist on the project, usually a renamed axis or a typo in the preset's `axes` key.
 
 ### Failing CI on errors
 

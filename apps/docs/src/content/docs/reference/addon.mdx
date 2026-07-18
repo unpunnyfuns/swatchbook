@@ -2,7 +2,7 @@
 title: Addon
 ---
 
-Published as `@unpunnyfuns/swatchbook-addon`. Storybook addon. Loads your config at build time via `@unpunnyfuns/swatchbook-core`, exposes the resolved graph as a virtual module, registers a preview decorator + manager toolbar, and ships a `useToken` hook. Block-side hooks (`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`) live in `@unpunnyfuns/swatchbook-blocks`.
+Wiring swatchbook into Storybook is this package's job. It loads your config at build time through `@unpunnyfuns/swatchbook-core`, exposes the resolved graph as a virtual module, and at preview time registers a decorator, a manager toolbar, and the `useToken` hook. The MDX doc blocks ship separately, in `@unpunnyfuns/swatchbook-blocks`.
 
 ## Install
 
@@ -97,11 +97,11 @@ function Brand() {
 
 Paths autocomplete from the generated `.swatchbook/tokens.d.ts`. Add `"include": [".swatchbook/**/*.d.ts"]` to your consumer tsconfig.
 
-### Block-side hooks live in `@unpunnyfuns/swatchbook-blocks`
+Reach for `useToken`, the doc blocks, or the Design Tokens panel rather than importing `virtual:swatchbook/tokens` directly: the virtual module is internal wiring and its shape isn't a stable API. Prefer `var(--…)` in CSS where you can; `useToken().cssVar` returns the same reference string for programmatic use.
 
-`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the contexts that back them (`ThemeContext`, `AxesContext`, `ColorFormatContext`) live canonically in `@unpunnyfuns/swatchbook-blocks`; see the [blocks reference](/reference/blocks). They're also re-exported from the addon's main entry (`import { useActiveTheme } from '@unpunnyfuns/swatchbook-addon'` works) so consumers picking up the addon don't need a separate blocks dependency for the common hook surface.
+### Block-side hooks
 
-The preview decorator mounts a `SwatchbookProvider` (from blocks) that populates every context, so the hooks resolve wherever the addon is registered.
+The block-side hooks (`useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`) are re-exported from the addon's main entry, so `import { useActiveTheme } from '@unpunnyfuns/swatchbook-addon'` works without a separate blocks dependency; they're documented in the [blocks hooks reference](/reference/blocks/hooks). The preview decorator mounts the `SwatchbookProvider` that backs them, so they resolve wherever the addon is registered.
 
 ## Exported constants
 
@@ -140,9 +140,3 @@ interface AddonOptions {
 ```
 
 `Config` and `SwatchbookIntegration` come from [`@unpunnyfuns/swatchbook-core`](/reference/core). See the [Registration](#registration) section above for a worked example, and the [Integrations guide](/guides/integrations) for `integrations` factories.
-
-## Do / don't
-
-- ✅ Use `useToken` for typed lookups when you need the resolved value at runtime (aria labels, conditional rendering).
-- ✅ Prefer `var(--…)` in CSS; `useToken().cssVar` gives you the right string programmatically.
-- ❌ Don't import from `virtual:swatchbook/tokens` directly in consumer code. Go through `useToken` / the panel / the doc blocks so the API stays stable.

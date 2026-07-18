@@ -2,7 +2,7 @@
 title: MCP server
 ---
 
-Published as `@unpunnyfuns/swatchbook-mcp`. [Model Context Protocol](https://modelcontextprotocol.io/) server for swatchbook. Exposes a DTCG project's tokens, axes, and diagnostics to AI agents without running Storybook.
+A [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes a DTCG project's tokens, axes, and diagnostics to AI agents without running Storybook.
 
 ## What it's for
 
@@ -28,7 +28,7 @@ npx @unpunnyfuns/swatchbook-mcp --config tokens/resolver.json
 
 CLI flags:
 
-| Flag                    | What                                                                                                                       |
+| Flag                    | Description                                                                                                                |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `--config <path>`, `-c` | Required. A `swatchbook.config.{ts,mts,js,mjs}` (full config) or a DTCG `resolver.json` (bare, other options at defaults). |
 | `--cwd <path>`          | Override the working directory for resolving relative `resolver` / `tokens` paths.                                         |

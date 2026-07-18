@@ -8,8 +8,6 @@ Swatchbook surfaces load-time and runtime problems as `Diagnostic` entries on `P
 - **`Project.diagnostics`** on the loaded project, for programmatic consumers (build scripts, tests, CI checks).
 - **The terminal** when `loadProject` runs outside Storybook: preset boot, MCP server start, the docs site's build.
 
-This page catalogs every diagnostic group the core emits, what triggers each known message, and what to check when one fires.
-
 ## The diagnostic shape
 
 ```ts
@@ -126,7 +124,7 @@ The fields:
 - **`$value`**: the serialized `$value` at this tuple, as it was when the failure happened.
 - **`cause`**: the original error message. The original error object is attached to `err.cause` for stack-walking.
 
-This wrap turns colorjs.io-style tracebacks (`coords.map is not a function`, four frames deep in a third-party library) into a single actionable line of forensic detail. The `swatchbook/token-graph` load-time validators catch most malformed-shape causes before they reach emit; the wrap catches the rest.
+This wrap turns colorjs.io-style tracebacks (`coords.map is not a function`, four frames deep in a third-party library) into a single actionable line of detail. The `swatchbook/token-graph` load-time validators catch most malformed-shape causes before they reach emit; the wrap catches the rest.
 
 ## See also
 
