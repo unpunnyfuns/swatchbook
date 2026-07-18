@@ -1,7 +1,5 @@
 ---
 title: Quickstart
-sidebar:
-  order: 0
 ---
 
 Assumes an existing Storybook 10 project with the Vite builder. Install, register, author the first doc page.
@@ -110,8 +108,7 @@ Open `Docs / Tokens` in the sidebar: the tree lists every token in your project 
 
 Tokens render through two surfaces, both built from the same blocks. Pick by what you want around them:
 
-- **MDX doc pages** put blocks inside prose: a usage guide, a rationale, a migration note. Reach for them when the tokens need narrative around them. [Authoring MDX doc pages](/guides/authoring-doc-stories) has the patterns.
-- **Stories** put the catalog in the sidebar, add a Controls panel, and bring each view under the same interaction, a11y, and visual-regression runs as your component stories. Reach for them when the token reference should sit alongside your components and be covered by the same tests. [Displaying tokens as stories](/guides/displaying-tokens-as-stories) walks through it.
+- **MDX doc pages** put blocks inside prose: a usage guide, a rationale, a migration note. **Stories** put the catalog in the sidebar, add a Controls panel, and bring each view under the same interaction, a11y, and visual-regression runs as your component stories. [Token docs in MDX and stories](/guides/authoring-doc-stories) covers both.
 
 The two aren't exclusive: plenty of projects run a story catalog for browsing and testing alongside an MDX page or two for the narrative reference.
 
@@ -119,7 +116,7 @@ Also worth a look:
 
 - [Theme the block chrome](/reference/config#chrome): map the blocks' own surfaces, text, and accents onto your tokens so they flip with the toolbar.
 - [Integrations](/guides/integrations): wiring for Tailwind v4 or a CSS-in-JS theme provider.
-- [Terrazzo dependencies](/guides/terrazzo-dependencies): extra Terrazzo plugins for per-platform names, and aligning with a production `@terrazzo/cli` build.
+- [Aligning with your token build](/guides/sharing-terrazzo-options): extra Terrazzo plugins for per-platform names, and aligning with a production `@terrazzo/cli` build.
 - [Blocks reference](/reference/blocks): every block's full prop list.
 - [Axes reference](/concepts/axes): the runtime model behind the toolbar.
 - [Live Storybook](pathname:///storybook/): the addon running against a real multi-axis fixture.

@@ -39,7 +39,6 @@ export default defineConfig({
           items: [
             'guides/quickstart',
             'guides/authoring-doc-stories',
-            'guides/displaying-tokens-as-stories',
             'guides/consuming-the-active-theme',
             {
               label: 'Integrations',
@@ -49,7 +48,6 @@ export default defineConfig({
                 'guides/integrations/css-in-js',
               ],
             },
-            'guides/terrazzo-dependencies',
             'guides/sharing-terrazzo-options',
           ],
         },
@@ -64,7 +62,6 @@ export default defineConfig({
                 'reference/config',
                 'reference/switcher',
                 'reference/mcp',
-                'reference/integrations',
               ],
             },
             {
@@ -84,12 +81,7 @@ export default defineConfig({
         },
         {
           label: 'Concepts',
-          items: [
-            'concepts/overview',
-            'concepts/concepts',
-            'concepts/axes',
-            'concepts/token-pipeline',
-          ],
+          items: ['concepts', 'concepts/axes', 'concepts/token-pipeline'],
         },
         {
           label: 'Developers',
@@ -106,7 +98,13 @@ export default defineConfig({
   // The first 3 preserve existing inbound links to the old reference/*
   // paths after the concepts/ move. The 4th preserves quickstart's
   // root-level `/quickstart` URL, which Starlight's path-derived slugs
-  // don't reproduce now that the file lives under guides/.
+  // don't reproduce now that the file lives under guides/. The next 5
+  // cover the docs consolidation: terrazzo-dependencies merged into
+  // sharing-terrazzo-options, displaying-tokens-as-stories merged into
+  // authoring-doc-stories, concepts/overview and concepts/concepts merged
+  // into concepts/index (which also makes '/reference/concepts' above
+  // resolve to a real page instead of 404ing), and reference/integrations
+  // cut in favor of the guides/integrations index.
   //
   // Destinations carry the `/swatchbook` base by hand: unlike every in-page
   // Starlight link, Astro's static redirect-page generator burns the
@@ -117,5 +115,10 @@ export default defineConfig({
     '/reference/axes': '/swatchbook/concepts/axes/',
     '/reference/token-pipeline': '/swatchbook/concepts/token-pipeline/',
     '/quickstart': '/swatchbook/guides/quickstart/',
+    '/guides/terrazzo-dependencies': '/swatchbook/guides/sharing-terrazzo-options/',
+    '/guides/displaying-tokens-as-stories': '/swatchbook/guides/authoring-doc-stories/',
+    '/concepts/overview': '/swatchbook/concepts/',
+    '/concepts/concepts': '/swatchbook/concepts/',
+    '/reference/integrations': '/swatchbook/guides/integrations/',
   },
 });
