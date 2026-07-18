@@ -1,11 +1,12 @@
 ---
-title: withAxes
+title: Creating story variants
 ---
 
-`withAxes` produces the input for a story's `.extend()`, pinning a variant to a
-chosen axis tuple so its full test (render, play, and a11y) runs under that
-tuple. The addon generates one test per story export, so each variant is its own
-test. Import it from the addon's `testing` subpath:
+A story variant pins a base story to a chosen axis tuple, so it renders and runs
+its full test (render, play, and a11y) under that tuple instead of whatever the
+toolbar has selected. The `withAxes` helper produces the input for the variant's
+`.extend()`; the addon generates one test per story export, so each variant is
+its own test. Import it from the addon's `testing` subpath:
 
 ```ts
 import { withAxes } from '@unpunnyfuns/swatchbook-addon/testing';

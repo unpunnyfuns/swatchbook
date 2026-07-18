@@ -39,6 +39,7 @@ export default defineConfig({
           items: [
             'guides/quickstart',
             'guides/authoring-doc-stories',
+            'guides/creating-story-variants',
             'guides/consuming-the-active-theme',
             {
               label: 'Integrations',
@@ -76,7 +77,6 @@ export default defineConfig({
               ],
             },
             'reference/diagnostics',
-            'reference/with-axes',
           ],
         },
         {
@@ -120,5 +120,6 @@ export default defineConfig({
     '/concepts/overview': '/swatchbook/concepts/',
     '/concepts/concepts': '/swatchbook/concepts/',
     '/reference/integrations': '/swatchbook/guides/integrations/',
+    '/reference/with-axes': '/swatchbook/guides/creating-story-variants/',
   },
 });
