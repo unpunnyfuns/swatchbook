@@ -1,12 +1,12 @@
 {
   "typography": {
     "$type": "typography",
-    "$description": "Composite typography tokens. Each bundles family, size, weight, and line-height.",
+    "$description": "Composite typography tokens. Each bundles family, size, weight, and line-height. `body` aliases both `font.family.base` and `font.weight.base` so the typography axis (family) and the a11y axis (weight) can each override their own slot independently.",
     "body": {
       "$value": {
         "fontFamily": "{font.family.base}",
         "fontSize":   "{size.rem-400}",
-        "fontWeight": "{font.weight.regular}",
+        "fontWeight": "{font.weight.base}",
         "lineHeight": 1.5,
         "letterSpacing": { "value": 0, "unit": "px" }
       }

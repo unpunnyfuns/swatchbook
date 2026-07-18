@@ -1,7 +1,7 @@
 {
   "color": {
     "$type": "color",
-    "$description": "Brand A — swaps the accent from blue to violet. Composable with light/dark.",
+    "$description": "ACME — swaps the accent from blue to violet. Composable with light/dark.",
     "accent": {
       "bg":       { "$value": "{color.violet.700}" },
       "bg-hover": { "$value": "{color.violet.900}" },
