@@ -116,10 +116,10 @@ export interface ProjectSnapshot {
   /** The default tuple — `{ axis: axis.default }` for every axis. */
   defaultTuple: Record<string, string>;
   /**
-   * Starting color format for blocks that display color values —
+   * Starting color format for blocks that display color values:
    * `config.defaultColorFormat` from core, passed through the wire
    * snapshot. `useColorFormat()` falls back to this when no
-   * `ColorFormatContext`/prop override is active. Optional — hand-built
+   * `ColorFormatContext`/prop override is active. Optional: hand-built
    * snapshots (tests, MDX) that omit it fall through to the bare
    * `'hex'` default.
    */
