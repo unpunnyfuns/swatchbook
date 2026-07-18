@@ -4,11 +4,11 @@
  * `tokens.generated.css` is emitted from `apps/docs/tokens/*.json` by
  * `scripts/build-tokens.mts` (runs as prebuild / predev). It writes
  * `--sb-color-*` / `--sb-font-*` vars at `:root` and flips per-tuple
- * values via compound attribute selectors — `[data-theme]` for mode
- * (owned by Starlight) plus `[data-sb-<axis>]` for a11y + brand (owned
- * by `SwatchbookSwitcherProvider`). The Starlight mapping below only
- * needs one declaration block per variable; the underlying swatchbook
- * vars do the flipping.
+ * values via compound attribute selectors: `[data-theme]` for mode
+ * (owned by Starlight) plus `[data-sb-<axis>]` for a11y, brand, and
+ * typography (owned by `SwatchbookSwitcherProvider`). The Starlight
+ * mapping below only needs one declaration block per variable; the
+ * underlying swatchbook vars do the flipping.
  *
  * `@import` must stay the first statement in the file (besides
  * `@charset` / empty `@layer`) or the browser drops it silently.

@@ -78,7 +78,7 @@ describe('loadProject — resolver mode', () => {
         contexts: ['Normal', 'High-contrast'],
         default: 'Normal',
         description:
-          'Border + focus emphasis + base weight. `Normal` leaves the baseline alone; `High-contrast` thickens borders, boosts the focus ring, and bumps the base font weight — never the font-family, which stays whatever the `typography` modifier set.',
+          'Border + focus emphasis + base weight. `Normal` leaves the baseline alone; `High-contrast` thickens borders, boosts the focus ring, and bumps the base font weight. The font-family stays whatever the `typography` modifier set.',
         source: 'resolver',
       },
     ]);
