@@ -22,6 +22,23 @@ afterEach(() => {
   cleanup();
 });
 
+// Headless Chromium denies the clipboard-write permission, so
+// `navigator.clipboard.writeText` rejects regardless of the click. Its
+// `writeText` isn't spyable, so stub the whole `clipboard` object. `clipboard`
+// is an inherited accessor on `Navigator.prototype`; restore by descriptor
+// (deleting the own stub when there was no own property) so nothing is left
+// shadowing that accessor for later tests.
+function stubClipboard() {
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  const original = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+  Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+  const restore = () => {
+    if (original) Object.defineProperty(navigator, 'clipboard', original);
+    else Reflect.deleteProperty(navigator, 'clipboard');
+  };
+  return { writeText, restore };
+}
+
 it('renders Path + CSS rows with no extra platforms', () => {
   setup();
   expect(screen.getByTestId('consumer-output-path').textContent).toBe('color.accent.bg');
@@ -51,16 +68,9 @@ it('renders nothing when hasToken is false', () => {
 });
 
 it('toggles the copy button feedback to "Copied" when clicked, using local state', async () => {
-  // Headless Chromium denies the clipboard-write permission outright, so
-  // `navigator.clipboard.writeText` rejects regardless of the click. Stub it
-  // to isolate what this test actually checks: the View's own local
-  // `copied` state toggle, not the browser's clipboard permission model.
-  const originalClipboard = navigator.clipboard;
-  Object.defineProperty(navigator, 'clipboard', {
-    value: { writeText: vi.fn().mockResolvedValue(undefined) },
-    configurable: true,
-  });
-
+  // Stub the clipboard so the click resolves, isolating what this test checks:
+  // the View's own local `copied` state toggle, not the permission model.
+  const { restore } = stubClipboard();
   try {
     setup();
     const button = screen.getByTestId('consumer-output-path-copy');
@@ -68,49 +78,28 @@ it('toggles the copy button feedback to "Copied" when clicked, using local state
     await userEvent.click(button);
     await expect.poll(() => button.textContent).toBe('Copied');
   } finally {
-    Object.defineProperty(navigator, 'clipboard', {
-      value: originalClipboard,
-      configurable: true,
-    });
+    restore();
   }
 });
 
 it('copies the token path when the path copy button is clicked', async () => {
-  const originalClipboard = navigator.clipboard;
-  const writeText = vi.fn().mockResolvedValue(undefined);
-  Object.defineProperty(navigator, 'clipboard', {
-    value: { writeText },
-    configurable: true,
-  });
-
+  const { writeText, restore } = stubClipboard();
   try {
     setup();
     await userEvent.click(screen.getByTestId('consumer-output-path-copy'));
     await expect.poll(() => writeText.mock.calls).toEqual([['color.accent.bg']]);
   } finally {
-    Object.defineProperty(navigator, 'clipboard', {
-      value: originalClipboard,
-      configurable: true,
-    });
+    restore();
   }
 });
 
 it('copies the CSS variable when the CSS copy button is clicked', async () => {
-  const originalClipboard = navigator.clipboard;
-  const writeText = vi.fn().mockResolvedValue(undefined);
-  Object.defineProperty(navigator, 'clipboard', {
-    value: { writeText },
-    configurable: true,
-  });
-
+  const { writeText, restore } = stubClipboard();
   try {
     setup();
     await userEvent.click(screen.getByTestId('consumer-output-css-copy'));
     await expect.poll(() => writeText.mock.calls).toEqual([['var(--sb-color-accent-bg)']]);
   } finally {
-    Object.defineProperty(navigator, 'clipboard', {
-      value: originalClipboard,
-      configurable: true,
-    });
+    restore();
   }
 });
