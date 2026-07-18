@@ -22,7 +22,11 @@
 .sb-docs-switcher__trigger:hover,
 .sb-docs-switcher__trigger[aria-expanded='true'] {
   color: var(--sl-color-text-accent, var(--sl-color-accent));
-  background: var(--sl-color-bg-accent, rgba(0, 0, 0, 0.05));
+  /* Neutral surface, not `--sl-color-bg-accent`: that variable resolves to the
+     same value as `--sl-color-text-accent`, so an accent bg behind the now-accent
+     icon hid it entirely. `--sl-color-gray-6` is Starlight's subtle hover surface
+     and flips with the theme. */
+  background: var(--sl-color-gray-6, rgba(128, 128, 128, 0.12));
 }
 
 .sb-docs-switcher__popover {
