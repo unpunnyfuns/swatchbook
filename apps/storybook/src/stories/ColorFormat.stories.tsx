@@ -55,16 +55,13 @@ export const DefaultHex = meta.story({
 });
 
 /**
- * `parameters.globals` seeds the format global before render — the cell
- * should render `rgb(R G B)` syntax. The addon toolbar no longer exposes
- * a color-format control (blocks read `Config.defaultColorFormat`
- * instead); this exercises the lower-level escape hatch blocks still
- * honor: `useColorFormat` subscribes to the Storybook globals channel
- * directly and `formatColor` produces the string.
+ * A block's `colorFormat` prop overrides the project default. The addon
+ * toolbar no longer exposes a color-format control — blocks start from
+ * `Config.defaultColorFormat` and a per-block `colorFormat` prop wins over
+ * it — so the value cell should render `rgb(R G B)` syntax.
  */
 export const RgbFormat = meta.story({
-  globals: { swatchbookColorFormat: 'rgb' },
-  render: () => <TokenTable filter="color.**" type="color" />,
+  render: () => <TokenTable filter="color.**" type="color" colorFormat="rgb" />,
   play: async ({ canvasElement }) => {
     const text = await waitForMatch(
       canvasElement,
@@ -76,8 +73,7 @@ export const RgbFormat = meta.story({
 });
 
 export const OklchFormat = meta.story({
-  globals: { swatchbookColorFormat: 'oklch' },
-  render: () => <TokenTable filter="color.**" type="color" />,
+  render: () => <TokenTable filter="color.**" type="color" colorFormat="oklch" />,
   play: async ({ canvasElement }) => {
     const text = await waitForMatch(
       canvasElement,
@@ -89,8 +85,7 @@ export const OklchFormat = meta.story({
 });
 
 export const RawFormat = meta.story({
-  globals: { swatchbookColorFormat: 'raw' },
-  render: () => <TokenTable filter="color.**" type="color" />,
+  render: () => <TokenTable filter="color.**" type="color" colorFormat="raw" />,
   play: async ({ canvasElement }) => {
     const text = await waitForMatch(
       canvasElement,
