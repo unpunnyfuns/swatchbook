@@ -31,7 +31,7 @@ function gradientValueToCss(stops: readonly GradientStop[], colorFormat: ColorFo
  * Presenter for `$type: gradient` tokens: a gradient chip. Unlike the
  * other composite presenters, a gradient's css var (per Terrazzo's
  * `transformGradient`) resolves to a bare `<color> <pct>, ...` stop list,
- * not a complete property value — DTCG gradients carry no direction, so
+ * not a complete property value: DTCG gradients carry no direction, so
  * both branches need one supplied at render time. `90deg` (`to right`)
  * matches the direction the standalone block previously hard-coded.
  */
