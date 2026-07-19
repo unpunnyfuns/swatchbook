@@ -5,7 +5,7 @@ import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
 import type { ColorFormat } from '#/format-color.ts';
 import { formatDimension, formatSubColor } from '#/internal/composite-sample-format.ts';
-import type { BorderValue } from '#/internal/composite-types.ts';
+import type { BorderValue, RealisedToken } from '#/internal/composite-types.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
@@ -40,6 +40,8 @@ export interface BorderPreviewProps {
 export interface BorderRow {
   path: string;
   cssVar: string;
+  /** Realised token, fed to `BorderSample` per the presenter contract. */
+  token: RealisedToken<'border'>;
   width: string;
   style: string;
   color: string;
@@ -70,6 +72,7 @@ export function deriveBorderRows(
     return {
       path,
       cssVar: resolveCssVar(path, project),
+      token: token as RealisedToken<'border'>,
       width: formatDimension(value.width),
       style: value.style != null ? String(value.style) : '—',
       color: formatSubColor(value.color, colorFormat),
@@ -82,20 +85,23 @@ export interface BorderPreviewViewProps {
   activeTheme: string;
   cssVarPrefix: string;
   activeAxes: Record<string, string>;
+  /** Forwarded to each row's `BorderSample` for its realised-CSS branch. */
+  colorFormat: ColorFormat;
   filter?: string | undefined;
   caption?: string | undefined;
 }
 
 /**
  * Pure presentation for the border preview. Renders from plain props;
- * composes the connected `BorderSample` as a child (that child reads the
- * project itself).
+ * composes the connected `BorderSample` as a child, feeding it this row's
+ * already-resolved `token`/`cssVar` per the presenter contract.
  */
 export function BorderPreviewView({
   rows,
   activeTheme,
   cssVarPrefix,
   activeAxes,
+  colorFormat,
   filter,
   caption,
 }: BorderPreviewViewProps): ReactElement {
@@ -121,7 +127,12 @@ export function BorderPreviewView({
             <span className="sb-border-preview__css-var">{row.cssVar}</span>
           </div>
           <div className="sb-border-preview__sample-cell">
-            <BorderSample path={row.path} />
+            <BorderSample
+              path={row.path}
+              token={row.token}
+              cssVar={row.cssVar}
+              colorFormat={colorFormat}
+            />
           </div>
           <div className="sb-border-preview__breakdown">
             <span className="sb-border-preview__breakdown-key">width</span>
@@ -166,6 +177,7 @@ export function BorderPreview({
       activeTheme={activeTheme}
       cssVarPrefix={cssVarPrefix}
       activeAxes={activeAxes}
+      colorFormat={format}
       filter={filter}
       caption={caption}
     />

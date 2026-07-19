@@ -1,13 +1,19 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, it } from 'vitest';
+import type { RealisedToken } from '@unpunnyfuns/swatchbook-core/token-value-types';
 import { BorderPreviewView } from '#/BorderPreview.tsx';
 import type { BorderPreviewViewProps, BorderRow } from '#/BorderPreview.tsx';
 
 function rows(): BorderRow[] {
+  const token: RealisedToken<'border'> = {
+    $type: 'border',
+    $value: { width: { value: 1, unit: 'px' }, style: 'solid', color: '#000000' },
+  };
   return [
     {
       path: 'border.default',
       cssVar: 'var(--sb-border-default)',
+      token,
       width: '1px',
       style: 'solid',
       color: '#000000',
@@ -15,6 +21,7 @@ function rows(): BorderRow[] {
     {
       path: 'border.focus',
       cssVar: 'var(--sb-border-focus)',
+      token,
       width: '2px',
       style: 'dashed',
       color: '#0066ff',
@@ -23,9 +30,8 @@ function rows(): BorderRow[] {
 }
 
 // The View renders from plain props — no provider, no store. BorderSample
-// (rendered per-row) is a connected child that reads the project itself; it
-// falls back to an empty snapshot with no provider mounted, which is fine
-// here since only the View's own output is under test.
+// (rendered per-row) is a connected child fed this row's token/cssVar
+// directly, so it needs no provider either.
 function setup(extra: Partial<BorderPreviewViewProps> = {}) {
   return render(
     <BorderPreviewView
@@ -33,6 +39,7 @@ function setup(extra: Partial<BorderPreviewViewProps> = {}) {
       activeTheme="Light"
       cssVarPrefix="sb"
       activeAxes={{ theme: 'Light' }}
+      colorFormat="hex"
       {...extra}
     />,
   );

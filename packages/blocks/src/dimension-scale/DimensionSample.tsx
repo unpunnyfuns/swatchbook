@@ -1,17 +1,15 @@
 import type { ReactElement } from 'react';
 import './DimensionSample.css';
 import { MAX_RENDER_PX, toPixels } from '#/dimension-scale/dimension-px.ts';
+import { formatTokenValue } from '@unpunnyfuns/swatchbook-core/token-value-css';
 import { useRootFontSize } from '#/internal/use-root-font-size.ts';
-import { resolveCssVar, useProject } from '#/internal/use-project.ts';
-import type { ProjectData } from '#/internal/use-project.ts';
+import type { PresenterProps } from '#/presenters/types.ts';
 
 /** The visual treatment for a dimension sample: a length bar, a radius square, or a sized square. */
 export type DimensionVisual = 'length' | 'radius' | 'size';
 
 /** Props for the connected {@link DimensionSample} block. */
-export interface DimensionSampleProps {
-  /** Full dot-path of the dimension token to preview. */
-  path: string;
+export interface DimensionSampleProps extends PresenterProps<'dimension'> {
   /**
    * Visualization kind:
    * - `'length'` (default): horizontal bar whose width equals the token's dimension.
@@ -22,7 +20,7 @@ export interface DimensionSampleProps {
 }
 
 export interface DimensionSampleData {
-  /** CSS var reference for the token's dimension (listing name, or prefix fallback). */
+  /** CSS var reference, or the realised `$value` as a `px`/`rem` literal. */
   cssVar: string;
   /** The resolved value in pixels, for cap comparison against {@link MAX_RENDER_PX}. `NaN` for non-`px`/`rem` units. */
   pxValue: number;
@@ -33,18 +31,18 @@ export interface DimensionSampleData {
 }
 
 /**
- * Pure derivation of a single dimension token's sample geometry from
- * resolved project data. Extracted so it is unit-testable without React or
- * a store.
+ * Pure derivation of a single dimension token's sample geometry from its
+ * realised `$value`. The cap decision always reads the numeric `$value` (so
+ * it holds regardless of whether `cssVar` is present); `cssVar`, when given,
+ * wins as the rendered value up to that cap.
  */
 export function deriveDimensionSample(
-  path: string,
-  project: Pick<ProjectData, 'resolved' | 'listing' | 'cssVarPrefix'>,
+  props: Pick<PresenterProps<'dimension'>, 'token' | 'cssVar' | 'colorFormat'>,
   rootFontSizePx: number,
 ): DimensionSampleData {
-  const cssVar = resolveCssVar(path, project);
-  const token = project.resolved[path];
-  const pxValue = toPixels(token?.$value, rootFontSizePx);
+  const realised = formatTokenValue(props.token.$value, 'dimension', props.colorFormat);
+  const cssVar = props.cssVar ?? realised;
+  const pxValue = toPixels(props.token.$value, rootFontSizePx);
   const capped = Number.isFinite(pxValue) && pxValue > MAX_RENDER_PX;
   const cappedValue = capped ? `${MAX_RENDER_PX}px` : cssVar;
   return { cssVar, pxValue, capped, cappedValue };
@@ -114,16 +112,20 @@ export function DimensionSampleView({
   }
 }
 
-/** Connected block: resolves `path` against the active project and renders its dimension sample. */
-export function DimensionSample({ path, visual = 'length' }: DimensionSampleProps): ReactElement {
-  const project = useProject();
+/** Connected block: renders a realised dimension token's sample, capped for oversized values. */
+export function DimensionSample({
+  token,
+  cssVar,
+  colorFormat,
+  visual = 'length',
+}: DimensionSampleProps): ReactElement {
   const rootFontSize = useRootFontSize();
-  const { cssVar, capped, cappedValue } = deriveDimensionSample(path, project, rootFontSize);
+  const derived = deriveDimensionSample({ token, cssVar, colorFormat }, rootFontSize);
   return (
     <DimensionSampleView
-      cssVar={cssVar}
-      capped={capped}
-      cappedValue={cappedValue}
+      cssVar={derived.cssVar}
+      capped={derived.capped}
+      cappedValue={derived.cappedValue}
       visual={visual}
     />
   );

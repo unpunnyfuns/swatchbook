@@ -1,19 +1,23 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, it } from 'vitest';
+import type { RealisedToken } from '@unpunnyfuns/swatchbook-core/token-value-types';
 import { DimensionScaleView } from '#/DimensionScale.tsx';
 import type { DimensionRow, DimensionScaleViewProps } from '#/DimensionScale.tsx';
 
 function rows(): DimensionRow[] {
+  const token: RealisedToken<'dimension'> = {
+    $type: 'dimension',
+    $value: { value: 8, unit: 'px' },
+  };
   return [
-    { path: 'space.sm', cssVar: 'var(--sb-space-sm)', displayValue: '0.5rem' },
-    { path: 'space.lg', cssVar: 'var(--sb-space-lg)', displayValue: '32px' },
+    { path: 'space.sm', cssVar: 'var(--sb-space-sm)', token, displayValue: '0.5rem' },
+    { path: 'space.lg', cssVar: 'var(--sb-space-lg)', token, displayValue: '32px' },
   ];
 }
 
 // The View renders from plain props — no provider, no store. DimensionSample
-// (rendered per-row) is a connected child that reads the project itself; it
-// falls back to an empty snapshot with no provider mounted, which is fine
-// here since only the View's own output is under test.
+// (rendered per-row) is a connected child fed this row's token/cssVar
+// directly, so it needs no provider either.
 function setup(extra: Partial<DimensionScaleViewProps> = {}) {
   return render(
     <DimensionScaleView
@@ -22,6 +26,7 @@ function setup(extra: Partial<DimensionScaleViewProps> = {}) {
       cssVarPrefix="sb"
       activeAxes={{ theme: 'Light' }}
       visual="length"
+      colorFormat="hex"
       {...extra}
     />,
   );

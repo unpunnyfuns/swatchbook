@@ -3,14 +3,18 @@ import './MotionSample.css';
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
-import { useProject } from '#/internal/use-project.ts';
-import type { ProjectData } from '#/internal/use-project.ts';
+import type { PresenterProps } from '#/presenters/types.ts';
 
 export type MotionSpeed = 0.25 | 0.5 | 1 | 2;
 
-export interface MotionSampleProps {
-  /** Full dot-path of the motion token (`transition`, `duration`, or `cubicBezier`). */
-  path: string;
+/**
+ * Props for the connected {@link MotionSample} block. `token` accepts any
+ * of the three motion `$type`s (`transition`, `duration`, `cubicBezier`) —
+ * looser than a single-type `PresenterProps<'transition'>` because
+ * `resolveMotionSpec` dispatches on the realised `$type` at runtime and
+ * TokenNavigator/MotionPreview feed it all three from one call site.
+ */
+export interface MotionSampleProps extends PresenterProps {
   /** Playback speed multiplier. Defaults to `1`. */
   speed?: MotionSpeed;
   /**
@@ -84,6 +88,13 @@ function asEasing(
   return fallback;
 }
 
+/**
+ * Extracts a duration/easing `Spec` from a token's `$value`, dispatching on
+ * `$type` (`transition` / `duration` / `cubicBezier`). `themeTokens` backs
+ * `{path}`-form sub-value alias resolution for callers still walking a raw
+ * (not-yet-realised) project map; pass `{}` when `token` is already a
+ * realised leaf (no alias strings survive resolution).
+ */
 export function resolveMotionSpec(
   token: { $type?: string | undefined; $value?: unknown } | undefined,
   themeTokens: Record<string, { $value?: unknown }>,
@@ -111,24 +122,6 @@ export function resolveMotionSpec(
     return { durationMs: DEFAULT_DURATION_MS, easing };
   }
   return null;
-}
-
-export interface MotionSampleData {
-  /** Resolved duration/easing for the token at `path`, or `null` when unresolved. */
-  spec: Spec | null;
-}
-
-/**
- * Pure derivation of a single motion token's animation spec from resolved
- * project data. Extracted so it is unit-testable without React or a store.
- */
-export function deriveMotionSample(
-  path: string,
-  project: Pick<ProjectData, 'resolved'>,
-): MotionSampleData {
-  return {
-    spec: resolveMotionSpec(project.resolved[path], project.resolved),
-  };
 }
 
 export interface MotionSampleViewProps {
@@ -182,8 +175,24 @@ export function MotionSampleView({ spec, speed, runKey }: MotionSampleViewProps)
   );
 }
 
-export function MotionSample({ path, speed = 1, runKey = 0 }: MotionSampleProps): ReactElement {
-  const project = useProject();
-  const { spec } = deriveMotionSample(path, project);
+/**
+ * Connected block: renders a realised motion token's animated sample.
+ * `durationMs` always comes from the realised `$value` — the ball's
+ * setInterval loop needs a JS-readable number, which an opaque `cssVar`
+ * reference can't supply without a synchronous computed-style read. `cssVar`,
+ * when given, substitutes for `easing` instead: the one part of the Spec a
+ * CSS custom property can stand in for cleanly (`transition-timing-function`
+ * accepts a `var()`).
+ */
+export function MotionSample({
+  token,
+  cssVar,
+  speed = 1,
+  runKey = 0,
+}: MotionSampleProps): ReactElement {
+  const realised = resolveMotionSpec(token, {});
+  const spec: Spec | null = realised
+    ? { durationMs: realised.durationMs, easing: cssVar ?? realised.easing }
+    : null;
   return <MotionSampleView spec={spec} speed={speed} runKey={runKey} />;
 }

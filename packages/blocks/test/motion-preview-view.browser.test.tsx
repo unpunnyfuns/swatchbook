@@ -1,14 +1,24 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 import { userEvent } from 'vitest/browser';
+import type { RealisedToken } from '@unpunnyfuns/swatchbook-core/token-value-types';
 import { MotionPreviewView } from '#/MotionPreview.tsx';
 import type { MotionPreviewViewProps, MotionRow } from '#/MotionPreview.tsx';
 
 function rows(): MotionRow[] {
+  const transitionToken: RealisedToken<'transition'> = {
+    $type: 'transition',
+    $value: { duration: { value: 200, unit: 'ms' }, timingFunction: [0.2, 0, 0, 1] },
+  };
+  const durationToken: RealisedToken<'duration'> = {
+    $type: 'duration',
+    $value: { value: 100, unit: 'ms' },
+  };
   return [
     {
       path: 'transition.fade',
       cssVar: 'var(--sb-transition-fade)',
+      token: transitionToken,
       durationMs: 200,
       easing: 'cubic-bezier(0.2, 0, 0, 1)',
       kind: 'transition',
@@ -16,6 +26,7 @@ function rows(): MotionRow[] {
     {
       path: 'duration.short',
       cssVar: 'var(--sb-duration-short)',
+      token: durationToken,
       durationMs: 100,
       easing: 'cubic-bezier(0.2, 0, 0, 1)',
       kind: 'duration',
@@ -24,10 +35,8 @@ function rows(): MotionRow[] {
 }
 
 // The View renders from plain props — no provider, no store. MotionSample
-// (rendered per-row) is a connected child that reads the project itself; it
-// falls back to an empty snapshot with no provider mounted, which is fine
-// here since only the View's own output (rows, caption, speed control) is
-// under test.
+// (rendered per-row) is a connected child fed this row's token/cssVar
+// directly, so it needs no provider either.
 function setup(extra: Partial<MotionPreviewViewProps> = {}) {
   return render(
     <MotionPreviewView
@@ -35,6 +44,7 @@ function setup(extra: Partial<MotionPreviewViewProps> = {}) {
       activeTheme="Light"
       cssVarPrefix="sb"
       activeAxes={{ theme: 'Light' }}
+      colorFormat="hex"
       {...extra}
     />,
   );
