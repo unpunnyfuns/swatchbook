@@ -11,7 +11,15 @@ on:
     branches: [main]
     paths:
       - 'apps/docs/**'
+      # docs.yml builds and embeds the reference Storybook, so a story-only
+      # change to apps/storybook must also refresh the hosted site.
+      - 'apps/storybook/**'
   workflow_dispatch:
+    inputs:
+      ref:
+        description: Commit SHA or ref to build and deploy. Defaults to the triggering commit.
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -42,6 +50,10 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          # A release dispatch passes the published commit SHA so the built
+          # docs match the release; a push or bare manual run falls back to
+          # the triggering commit.
+          ref: ${{ inputs.ref || github.sha }}
           # Don't write the GITHUB_TOKEN into .git/config of the checked-out
           # tree. The deploy-pages step uses actions/upload-pages-artifact
           # which would otherwise ship the token in the artifact

@@ -376,4 +376,7 @@ jobs:
       - name: Deploy the docs for the published release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run docs.yml --ref main
+        # Dispatch on main (workflow_dispatch needs a branch ref) but pass the
+        # published commit SHA so docs.yml checks that out and the live docs
+        # match the release, even if main has advanced since publish started.
+        run: gh workflow run docs.yml --ref main -f ref="$GITHUB_SHA"
