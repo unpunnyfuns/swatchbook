@@ -11,8 +11,8 @@ import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import type { ProjectData } from '#/internal/use-project.ts';
+import { usePresenter } from '#/presenters/registry.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
-import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
 
 export interface ShadowPreviewProps {
   /**
@@ -128,6 +128,7 @@ export function ShadowPreviewView({
   filter,
   caption,
 }: ShadowPreviewViewProps): ReactElement {
+  const Sample = usePresenter('shadow');
   const captionText =
     caption ??
     `${rows.length} shadow${rows.length === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -150,12 +151,14 @@ export function ShadowPreviewView({
             <span className="sb-shadow-preview__css-var">{row.cssVar}</span>
           </div>
           <div className="sb-shadow-preview__sample-cell">
-            <ShadowSample
-              path={row.path}
-              token={row.token}
-              cssVar={row.cssVar}
-              colorFormat={colorFormat}
-            />
+            {Sample && (
+              <Sample
+                path={row.path}
+                token={row.token}
+                cssVar={row.cssVar}
+                colorFormat={colorFormat}
+              />
+            )}
           </div>
           <div className="sb-shadow-preview__breakdown">
             {row.layers.length === 1

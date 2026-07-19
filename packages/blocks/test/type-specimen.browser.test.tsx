@@ -39,7 +39,7 @@ it('shows the sample text', () => {
       path="typography.heading"
       token={token}
       colorFormat="hex"
-      sample="Sphinx of black quartz"
+      options={{ sample: 'Sphinx of black quartz' }}
     />,
   );
   screen.getByText('Sphinx of black quartz');

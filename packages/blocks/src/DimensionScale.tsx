@@ -2,7 +2,6 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './DimensionScale.css';
 import { useColorFormat } from '#/contexts.ts';
-import { DimensionSample } from '#/dimension-scale/DimensionSample.tsx';
 import type { DimensionVisual } from '#/dimension-scale/DimensionSample.tsx';
 import type { ColorFormat } from '#/format-color.ts';
 import type { RealisedToken } from '#/internal/composite-types.ts';
@@ -13,6 +12,7 @@ import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import type { ProjectData } from '#/internal/use-project.ts';
 import { useRootFontSize } from '#/internal/use-root-font-size.ts';
+import { usePresenter } from '#/presenters/registry.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export type { DimensionVisual };
@@ -109,6 +109,7 @@ export function DimensionScaleView({
   filter,
   caption,
 }: DimensionScaleViewProps): ReactElement {
+  const Sample = usePresenter('dimension');
   const captionText =
     caption ??
     `${rows.length} dimension${rows.length === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -131,13 +132,15 @@ export function DimensionScaleView({
             <span className="sb-dimension-scale__specs">{row.displayValue}</span>
           </div>
           <div className="sb-dimension-scale__visual-cell">
-            <DimensionSample
-              path={row.path}
-              token={row.token}
-              cssVar={row.cssVar}
-              colorFormat={colorFormat}
-              visual={visual}
-            />
+            {Sample && (
+              <Sample
+                path={row.path}
+                token={row.token}
+                cssVar={row.cssVar}
+                colorFormat={colorFormat}
+                options={{ visual }}
+              />
+            )}
           </div>
           <span className="sb-dimension-scale__css-var">{row.cssVar}</span>
         </div>

@@ -6,8 +6,8 @@ import type { RealisedToken } from '#/internal/composite-types.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import type { ProjectData } from '#/internal/use-project.ts';
+import { usePresenter } from '#/presenters/registry.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
-import { TypeSpecimen } from '#/presenters/TypeSpecimen.tsx';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 
@@ -91,6 +91,7 @@ export function TypographyScaleView({
   filter,
   caption,
 }: TypographyScaleViewProps): ReactElement {
+  const Specimen = usePresenter('typography');
   const captionText =
     caption ??
     `${rows.length} typography token${rows.length === 1 ? '' : 's'}${filter && filter !== 'typography' ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -106,16 +107,19 @@ export function TypographyScaleView({
   return (
     <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       <div className="sb-block__caption">{captionText}</div>
-      {rows.map((row) => (
-        <TypeSpecimen
-          key={row.path}
-          path={row.path}
-          token={row.token}
-          cssVar={row.cssVar}
-          colorFormat={colorFormat}
-          sample={sample}
-        />
-      ))}
+      {rows.map(
+        (row) =>
+          Specimen && (
+            <Specimen
+              key={row.path}
+              path={row.path}
+              token={row.token}
+              cssVar={row.cssVar}
+              colorFormat={colorFormat}
+              options={{ sample }}
+            />
+          ),
+      )}
     </div>
   );
 }

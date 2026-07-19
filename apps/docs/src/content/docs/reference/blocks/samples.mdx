@@ -10,7 +10,7 @@ Lower-level than the per-type overview blocks: these render the visual for **one
 <MotionSample path="transition.enter" />
 ```
 
-Animated ball + track for one `transition` / `duration` / `cubicBezier`. `speed?: MotionSpeed` (default `1`); `runKey?: number` forces a restart when it changes.
+Animated ball + track for one `transition` / `duration` / `cubicBezier`. `options.speed?: MotionSpeed` (default `1`); `options.runKey?: number` forces a restart when it changes.
 
 ```ts
 import type { MotionSpeed } from '@unpunnyfuns/swatchbook-blocks';
@@ -38,7 +38,7 @@ Surface rectangle with the token's border applied.
 ## DimensionSample
 
 ```tsx
-<DimensionSample path="size.md" visual="length" />
+<DimensionSample path="size.md" options={{ visual: 'length' }} />
 ```
 
-Width-driven bar, border-radius square, or sized square for one `dimension` token. `visual?: 'length' | 'radius' | 'size'` (default `'length'`).
+Width-driven bar, border-radius square, or sized square for one `dimension` token. `options.visual?: 'length' | 'radius' | 'size'` (default `'length'`).

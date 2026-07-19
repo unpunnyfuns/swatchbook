@@ -8,16 +8,8 @@ import type { PresenterProps } from '#/presenters/types.ts';
 /** The visual treatment for a dimension sample: a length bar, a radius square, or a sized square. */
 export type DimensionVisual = 'length' | 'radius' | 'size';
 
-/** Props for the connected {@link DimensionSample} block. */
-export interface DimensionSampleProps extends PresenterProps<'dimension'> {
-  /**
-   * Visualization kind:
-   * - `'length'` (default): horizontal bar whose width equals the token's dimension.
-   * - `'radius'`: 56×56 square with the token applied as `border-radius`.
-   * - `'size'`: a square sized to the token's dimension.
-   */
-  visual?: DimensionVisual;
-}
+/** Props for the connected {@link DimensionSample} block. `options.visual` selects the visualization kind (see {@link DimensionVisual}); defaults to `'length'`. */
+export type DimensionSampleProps = PresenterProps<'dimension'>;
 
 export interface DimensionSampleData {
   /** CSS var reference, or the realised `$value` as a `px`/`rem` literal. */
@@ -117,8 +109,9 @@ export function DimensionSample({
   token,
   cssVar,
   colorFormat,
-  visual = 'length',
+  options,
 }: DimensionSampleProps): ReactElement {
+  const visual = (options?.['visual'] as DimensionVisual | undefined) ?? 'length';
   const rootFontSize = useRootFontSize();
   const derived = deriveDimensionSample({ token, cssVar, colorFormat }, rootFontSize);
   return (

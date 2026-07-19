@@ -4,11 +4,8 @@ import type { TypographyValue } from '@unpunnyfuns/swatchbook-core/token-value-t
 import { formatLength } from '#/internal/value-to-css.ts';
 import type { PresenterProps } from '#/presenters/types.ts';
 
-/** Props for the connected {@link TypeSpecimen} block. */
-export interface TypeSpecimenProps extends PresenterProps<'typography'> {
-  /** Sample text rendered in the styled preview. Defaults to a pangram. */
-  sample?: string;
-}
+/** Props for the connected {@link TypeSpecimen} block. `options.sample` overrides the rendered sample text; defaults to a pangram. */
+export type TypeSpecimenProps = PresenterProps<'typography'>;
 
 const DEFAULT_SAMPLE = 'The quick brown fox jumps over the lazy dog.';
 
@@ -63,12 +60,8 @@ function describeValue(value: TypographyValue): string {
  * branch renders without it; the realised branch below applies every field
  * the token carries, `letterSpacing` included.
  */
-export function TypeSpecimen({
-  path,
-  token,
-  cssVar,
-  sample = DEFAULT_SAMPLE,
-}: TypeSpecimenProps): ReactElement {
+export function TypeSpecimen({ path, token, cssVar, options }: TypeSpecimenProps): ReactElement {
+  const sample = (options?.['sample'] as string | undefined) ?? DEFAULT_SAMPLE;
   const value = (token.$value ?? {}) as TypographyValue;
   const sampleStyle: CSSProperties = cssVar ? { font: cssVar } : styleFromValue(value);
   const description = token.$description ?? describeValue(value);

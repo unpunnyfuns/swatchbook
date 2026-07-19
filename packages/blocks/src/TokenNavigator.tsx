@@ -940,7 +940,7 @@ const LeafPreview = memo(function LeafPreview({ path, token }: LeafPreviewProps)
             token={token as RealisedToken<'dimension'>}
             cssVar={resolveCssVar(path, project)}
             colorFormat={colorFormat}
-            visual="length"
+            options={{ visual: 'length' }}
           />
         </span>
       </span>

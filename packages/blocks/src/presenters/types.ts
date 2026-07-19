@@ -17,6 +17,13 @@ export interface PresenterProps<T extends TokenType = TokenType> {
   cssVar?: string | undefined;
   /** Relevant to color/gradient; other presenters ignore it (uniform props). */
   colorFormat: ColorFormat;
+  /**
+   * Optional block-level display hints (RJSF `ui:options`-style). A query
+   * block passes its own config (e.g. `{ visual }`, `{ speed }`, `{ sample }`)
+   * here; built-in presenters read the keys they understand, custom presenters
+   * ignore them. Not part of the token; purely presentation.
+   */
+  options?: Record<string, unknown> | undefined;
 }
 
 /** A presenter component for tokens of `$type` T. */

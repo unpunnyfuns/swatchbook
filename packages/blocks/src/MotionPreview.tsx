@@ -9,9 +9,10 @@ import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import type { ProjectData } from '#/internal/use-project.ts';
-import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
-import { MotionSample, resolveMotionSpec } from '#/motion-preview/MotionSample.tsx';
+import { resolveMotionSpec } from '#/motion-preview/MotionSample.tsx';
 import type { MotionSpeed } from '#/motion-preview/MotionSample.tsx';
+import { usePresenter } from '#/presenters/registry.ts';
+import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export type { MotionSpeed };
 
@@ -121,6 +122,7 @@ export function MotionPreviewView({
   filter,
   caption,
 }: MotionPreviewViewProps): ReactElement {
+  const Sample = usePresenter('transition');
   const [speed, setSpeed] = useState<MotionSpeed>(1);
   const [run, setRun] = useState(0);
   const reducedMotion = usePrefersReducedMotion();
@@ -170,14 +172,15 @@ export function MotionPreviewView({
             <span className="sb-motion-preview__path">{row.path}</span>
             <span className="sb-motion-preview__specs">{formatSpec(row)}</span>
           </div>
-          <MotionSample
-            path={row.path}
-            token={row.token}
-            cssVar={row.cssVar}
-            colorFormat={colorFormat}
-            speed={speed}
-            runKey={run}
-          />
+          {Sample && (
+            <Sample
+              path={row.path}
+              token={row.token}
+              cssVar={row.cssVar}
+              colorFormat={colorFormat}
+              options={{ speed, runKey: run }}
+            />
+          )}
           <span className="sb-motion-preview__css-var">{row.cssVar}</span>
         </div>
       ))}

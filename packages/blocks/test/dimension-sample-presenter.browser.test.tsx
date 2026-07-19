@@ -12,7 +12,12 @@ afterEach(() => cleanup());
 
 it('renders the realised $value as a length when no cssVar', () => {
   const { container } = render(
-    <DimensionSample path="space.lg" token={token} colorFormat="hex" visual="length" />,
+    <DimensionSample
+      path="space.lg"
+      token={token}
+      colorFormat="hex"
+      options={{ visual: 'length' }}
+    />,
   );
   const el = container.querySelector<HTMLElement>('.sb-dimension-sample__bar');
   expect(el?.style.width).not.toBe('');
@@ -27,7 +32,7 @@ it('prefers cssVar for the visual when supplied', () => {
       token={token}
       cssVar="var(--sb-space-lg)"
       colorFormat="hex"
-      visual="length"
+      options={{ visual: 'length' }}
     />,
   );
   const el = container.querySelector<HTMLElement>('.sb-dimension-sample__bar');
@@ -40,7 +45,12 @@ it('caps an oversized realised value at MAX_RENDER_PX regardless of cssVar', () 
     $value: { value: 600, unit: 'px' },
   };
   const { container } = render(
-    <DimensionSample path="space.wide" token={wide} colorFormat="hex" visual="length" />,
+    <DimensionSample
+      path="space.wide"
+      token={wide}
+      colorFormat="hex"
+      options={{ visual: 'length' }}
+    />,
   );
   const bar = container.querySelector<HTMLElement>('.sb-dimension-sample--capped div');
   expect(bar?.style.width).toBe('480px');

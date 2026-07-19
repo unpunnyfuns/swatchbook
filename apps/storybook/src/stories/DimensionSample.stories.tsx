@@ -19,9 +19,6 @@ const meta = preview.meta({
   title: 'Internals/Samples/DimensionSample',
   component: DimensionSample,
   args: { colorFormat: 'hex' },
-  argTypes: {
-    visual: { control: { type: 'inline-radio' }, options: ['length', 'radius', 'size'] },
-  },
 });
 
 export default meta;
@@ -29,5 +26,5 @@ export default meta;
 export const SpaceMd = meta.story({ args: { path: 'space.md', token: spaceMd } });
 export const SpaceLg = meta.story({ args: { path: 'space.lg', token: spaceLg } });
 export const RadiusLg = meta.story({
-  args: { path: 'radius.lg', token: radiusLg, visual: 'radius' },
+  args: { path: 'radius.lg', token: radiusLg, options: { visual: 'radius' } },
 });

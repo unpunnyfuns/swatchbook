@@ -84,7 +84,12 @@ it('re-evaluates the cap when a responsive breakpoint changes the root font-size
 it('DimensionSample surfaces the cap marker for an oversized length token', () => {
   document.documentElement.style.fontSize = '20px';
   const { container } = render(
-    <DimensionSample path="dimension.wide" token={wideToken} colorFormat="hex" visual="length" />,
+    <DimensionSample
+      path="dimension.wide"
+      token={wideToken}
+      colorFormat="hex"
+      options={{ visual: 'length' }}
+    />,
   );
   const wrap = container.querySelector('.sb-dimension-sample--capped');
   expect(wrap?.getAttribute('title')).toContain('capped at 480px');
@@ -96,7 +101,12 @@ it('DimensionSample surfaces the cap marker for an oversized length token', () =
 it('DimensionSample renders a bare bar (no cap marker) when under the cap', () => {
   document.documentElement.style.fontSize = '16px';
   const { container } = render(
-    <DimensionSample path="dimension.wide" token={wideToken} colorFormat="hex" visual="length" />,
+    <DimensionSample
+      path="dimension.wide"
+      token={wideToken}
+      colorFormat="hex"
+      options={{ visual: 'length' }}
+    />,
   );
   expect(container.querySelector('.sb-dimension-sample--capped')).toBeNull();
   expect(container.querySelector('.sb-dimension-sample__cap')).toBeNull();
@@ -110,7 +120,12 @@ it('a capped bar fits inside a narrow host cell instead of overflowing', () => {
   document.documentElement.style.fontSize = '20px';
   const { container } = render(
     <div style={{ width: 120, maxWidth: 120, display: 'inline-block' }}>
-      <DimensionSample path="dimension.wide" token={wideToken} colorFormat="hex" visual="length" />
+      <DimensionSample
+        path="dimension.wide"
+        token={wideToken}
+        colorFormat="hex"
+        options={{ visual: 'length' }}
+      />
     </div>,
   );
   const bar = container.querySelector<HTMLElement>('.sb-dimension-sample--capped div');

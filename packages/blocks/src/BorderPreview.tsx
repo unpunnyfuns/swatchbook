@@ -1,7 +1,6 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './BorderPreview.css';
-import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { useColorFormat } from '#/contexts.ts';
 import type { ColorFormat } from '#/format-color.ts';
 import { formatDimension, formatSubColor } from '#/internal/composite-sample-format.ts';
@@ -11,6 +10,7 @@ import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import type { ProjectData } from '#/internal/use-project.ts';
+import { usePresenter } from '#/presenters/registry.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface BorderPreviewProps {
@@ -105,6 +105,7 @@ export function BorderPreviewView({
   filter,
   caption,
 }: BorderPreviewViewProps): ReactElement {
+  const Sample = usePresenter('border');
   const captionText =
     caption ??
     `${rows.length} border${rows.length === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -127,12 +128,14 @@ export function BorderPreviewView({
             <span className="sb-border-preview__css-var">{row.cssVar}</span>
           </div>
           <div className="sb-border-preview__sample-cell">
-            <BorderSample
-              path={row.path}
-              token={row.token}
-              cssVar={row.cssVar}
-              colorFormat={colorFormat}
-            />
+            {Sample && (
+              <Sample
+                path={row.path}
+                token={row.token}
+                cssVar={row.cssVar}
+                colorFormat={colorFormat}
+              />
+            )}
           </div>
           <div className="sb-border-preview__breakdown">
             <span className="sb-border-preview__breakdown-key">width</span>

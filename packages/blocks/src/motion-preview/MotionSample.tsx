@@ -13,17 +13,11 @@ export type MotionSpeed = 0.25 | 0.5 | 1 | 2;
  * looser than a single-type `PresenterProps<'transition'>` because
  * `resolveMotionSpec` dispatches on the realised `$type` at runtime and
  * TokenNavigator/MotionPreview feed it all three from one call site.
+ * `options.speed` is the playback speed multiplier (defaults to `1`);
+ * `options.runKey` forces the animation to restart when changed, e.g. from
+ * an outer block's "replay" button re-triggering every sample at once.
  */
-export interface MotionSampleProps extends PresenterProps {
-  /** Playback speed multiplier. Defaults to `1`. */
-  speed?: MotionSpeed;
-  /**
-   * Change this value to force the animation to restart. Useful when an
-   * outer block exposes a "replay" button that should re-trigger every
-   * sample at once.
-   */
-  runKey?: number;
-}
+export type MotionSampleProps = PresenterProps;
 
 const DEFAULT_DURATION_MS = 300;
 const DEFAULT_EASING = 'cubic-bezier(0.2, 0, 0, 1)';
@@ -183,12 +177,9 @@ export function MotionSampleView({ spec, speed, runKey }: MotionSampleViewProps)
  * the uniform `PresenterProps` contract every presenter shares, but this
  * View has nowhere safe to apply it.
  */
-export function MotionSample({
-  token,
-  cssVar: _cssVar,
-  speed = 1,
-  runKey = 0,
-}: MotionSampleProps): ReactElement {
+export function MotionSample({ token, cssVar: _cssVar, options }: MotionSampleProps): ReactElement {
+  const speed = (options?.['speed'] as MotionSpeed | undefined) ?? 1;
+  const runKey = (options?.['runKey'] as number | undefined) ?? 0;
   // The token's transition CSS var is a full duration+delay+easing
   // shorthand (e.g. `--sb-transition-enter: 200ms 0ms ease-out`), not an
   // easing-only value. Substituting it into this sample's

@@ -11,9 +11,6 @@ const meta = preview.meta({
   title: 'Internals/Samples/MotionSample',
   component: MotionSample,
   args: { path: 'transition.enter', token: transitionEnter, colorFormat: 'hex' },
-  argTypes: {
-    speed: { control: { type: 'inline-radio' }, options: [0.25, 0.5, 1, 2] },
-  },
 });
 
 export default meta;
