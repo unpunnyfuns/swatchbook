@@ -37,7 +37,7 @@ let tokens: Record<string, { $value?: unknown }>;
 // loadProject is ~1s — resolve once (the project's allowed perf escape hatch).
 beforeAll(async () => {
   const project = await loadProject(
-    { resolver: resolverPath, default: { mode: 'Light', brand: 'Default', contrast: 'Normal' } },
+    { resolver: resolverPath, default: { mode: 'Light', brand: 'Default', a11y: 'Normal' } },
     tokensDir,
   );
   tokens = project.defaultTokens;

@@ -1,0 +1,23 @@
+<!--
+  Geist Sans + Geist Mono (OFL), self-hosted same-origin. Metric-matched
+  pair from the Geist superfamily: leading the sans/mono token stacks
+  with these (see packages/tokens/tokens/font.json) is the root-cause fix
+  for monospace rendering visibly larger than the proportional font.
+  Storybook serves `public/` at root (no base prefix), unlike the docs app.
+-->
+<link rel="preload" href="/fonts/GeistVF.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/GeistMonoVF.woff2" as="font" type="font/woff2" crossorigin />
+<style>
+  @font-face {
+    font-family: 'Geist';
+    src: url('/fonts/GeistVF.woff2') format('woff2');
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Geist Mono';
+    src: url('/fonts/GeistMonoVF.woff2') format('woff2');
+    font-weight: 100 900;
+    font-display: swap;
+  }
+</style>

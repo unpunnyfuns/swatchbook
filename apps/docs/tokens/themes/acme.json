@@ -1,0 +1,15 @@
+{
+  "$description": "brand = ACME overlay: swaps the primary accent from the blue brand ramp to violet. Composable with mode.",
+  "color": {
+    "$type": "color",
+    "primary": {
+      "lightest": { "$value": "{color.palette.violet.300}" },
+      "lighter":  { "$value": "{color.palette.violet.400}" },
+      "light":    { "$value": "{color.palette.violet.500}" },
+      "default":  { "$value": "{color.palette.violet.600}" },
+      "dark":     { "$value": "{color.palette.violet.700}" },
+      "darker":   { "$value": "{color.palette.violet.800}" },
+      "darkest":  { "$value": "{color.palette.violet.900}" }
+    }
+  }
+}

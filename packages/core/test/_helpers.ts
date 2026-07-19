@@ -13,7 +13,7 @@ export async function loadWithPrefix(prefix: string | undefined): Promise<Projec
     {
       tokens: ['tokens/**/*.json'],
       resolver: resolverPath,
-      default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+      default: { mode: 'Light', brand: 'Default', a11y: 'Normal' },
       ...(prefix !== undefined && { cssVarPrefix: prefix }),
     },
     fixtureCwd,
@@ -65,7 +65,7 @@ export async function loadReferenceFixtureParserInput(): Promise<{
     {
       tokens: ['tokens/**/*.json'],
       resolver: resolverPath,
-      default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+      default: { mode: 'Light', brand: 'Default', a11y: 'Normal' },
     },
     fixtureCwd,
     logger,
@@ -74,7 +74,7 @@ export async function loadReferenceFixtureParserInput(): Promise<{
     throw new Error('reference fixture has no parserInput — resolver did not load');
   }
   const { tuple: defaultTuple } = resolveDefaultTuple(
-    { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+    { mode: 'Light', brand: 'Default', a11y: 'Normal' },
     normalized.axes,
   );
   return { parserInput: normalized.parserInput, axes: normalized.axes, defaultTuple };

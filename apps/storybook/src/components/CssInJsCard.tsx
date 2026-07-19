@@ -3,7 +3,7 @@ import type { CSSProperties, ReactElement } from 'react';
 // `space` / `radius` / `shadow` namespaces carry `var(--sb-*)` string
 // leaves, so interpolating them into inline `style` (or any CSS-in-JS
 // library's style prop) resolves through swatchbook's cascade — the
-// toolbar flips mode/brand/contrast and the computed values follow.
+// toolbar flips mode/brand/a11y and the computed values follow.
 import { color, radius, shadow, space } from 'virtual:swatchbook/theme';
 
 export interface CssInJsCardProps {

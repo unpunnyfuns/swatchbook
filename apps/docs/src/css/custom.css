@@ -4,13 +4,35 @@
  * `tokens.generated.css` is emitted from `apps/docs/tokens/*.json` by
  * `scripts/build-tokens.mts` (runs as prebuild / predev). It writes
  * `--sb-color-*` / `--sb-font-*` vars at `:root` and flips per-tuple
- * values via compound attribute selectors — `[data-theme]` for mode
- * (owned by Starlight) plus `[data-sb-<axis>]` for a11y + brand (owned
- * by `SwatchbookSwitcherProvider`). The Starlight mapping below only
- * needs one declaration block per variable; the underlying swatchbook
- * vars do the flipping.
+ * values via compound attribute selectors: `[data-theme]` for mode
+ * (owned by Starlight) plus `[data-sb-<axis>]` for a11y, brand, and
+ * typography (owned by `SwatchbookSwitcherProvider`). The Starlight
+ * mapping below only needs one declaration block per variable; the
+ * underlying swatchbook vars do the flipping.
+ *
+ * `@import` must stay the first statement in the file (besides
+ * `@charset` / empty `@layer`) or the browser drops it silently.
  */
 @import './tokens.generated.css';
+
+/*
+ * Geist Sans + Geist Mono (OFL), self-hosted same-origin. Metric-matched
+ * pair from the Geist superfamily: leading the sans/mono token stacks
+ * with these (see apps/docs/tokens/font.json) is the root-cause fix for
+ * monospace rendering visibly larger than the proportional font.
+ */
+@font-face {
+  font-family: Geist;
+  src: url('/swatchbook/fonts/GeistVF.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/swatchbook/fonts/GeistMonoVF.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
 
 :root {
   /* Surfaces */
@@ -38,9 +60,19 @@
   /* Borders */
   --sl-color-hairline: var(--sb-color-code-border);
 
-  /* Typography — swaps to the comic family + bumps base size on
-     a11y=High-contrast via the generated CSS. */
+  /* Typography: family follows the typography axis (Sans/Mono/Comic).
+     a11y=High-contrast bumps size + weight via the generated CSS but
+     never touches family. Starlight has no `--sl-font-weight` slot, so
+     body weight and root size are wired through our own vars below. */
   --sl-font: var(--sb-font-family-base);
+  --sl-font-mono: var(--sb-font-family-mono);
+  --sb-doc-font-weight: var(--sb-font-weight-base, 400);
+  --sb-doc-font-size: var(--sb-font-size-base, 100%);
+}
+
+body {
+  font-weight: var(--sb-doc-font-weight);
+  font-size: var(--sb-doc-font-size);
 }
 
 /*

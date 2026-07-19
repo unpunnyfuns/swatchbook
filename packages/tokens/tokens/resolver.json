@@ -2,7 +2,7 @@
   "$schema": "https://www.designtokens.org/TR/2025.10/resolver/",
   "version": "2025.10",
   "name": "swatchbook-reference",
-  "description": "DTCG 2025.10 native resolver. Flat token paths organized per `$type` — color, size/space/radius, font, typography, motion, border, shadow, gradient, stroke, number — plus three independent modifiers: `mode` (light/dark baseline), `brand` (default/Brand A accent), and `contrast` (normal/high border + focus emphasis).",
+  "description": "DTCG 2025.10 native resolver. Flat token paths organized per `$type`: color, size/space/radius, font, typography, motion, border, shadow, gradient, stroke, number. Plus four independent modifiers: `mode` (light/dark baseline), `brand` (default/ACME accent), `typography` (sans/mono/comic base family), and `a11y` (normal/high-contrast border + focus emphasis + base weight, independent of family).",
   "sets": {
     "tokens": {
       "description": "Flat DTCG tokens grouped by `$type`.",
@@ -31,18 +31,27 @@
       "default": "Light"
     },
     "brand": {
-      "description": "Accent palette. `Default` leaves the baseline alone; `Brand A` overrides the accent scale.",
+      "description": "Accent palette. `Default` leaves the baseline alone; `ACME` overrides the accent scale.",
       "contexts": {
         "Default": [],
-        "Brand A": [{ "$ref": "./themes/brand-a.json" }]
+        "ACME": [{ "$ref": "./themes/acme.json" }]
       },
       "default": "Default"
     },
-    "contrast": {
-      "description": "Border + focus emphasis. `Normal` leaves the baseline alone; `High` thickens borders and boosts the focus ring.",
+    "typography": {
+      "description": "Type-family axis. `Sans` leaves the baseline alone; `Mono` and `Comic` swap the proportional base family.",
+      "contexts": {
+        "Sans": [],
+        "Mono": [{ "$ref": "./themes/typography-mono.json" }],
+        "Comic": [{ "$ref": "./themes/typography-comic.json" }]
+      },
+      "default": "Sans"
+    },
+    "a11y": {
+      "description": "Border + focus emphasis + base weight. `Normal` leaves the baseline alone; `High-contrast` thickens borders, boosts the focus ring, and bumps the base font weight. The font-family stays whatever the `typography` modifier set.",
       "contexts": {
         "Normal": [],
-        "High": [{ "$ref": "./themes/contrast-high.json" }]
+        "High-contrast": [{ "$ref": "./themes/high-contrast.json" }]
       },
       "default": "Normal"
     }
@@ -51,6 +60,7 @@
     { "$ref": "#/sets/tokens" },
     { "$ref": "#/modifiers/mode" },
     { "$ref": "#/modifiers/brand" },
-    { "$ref": "#/modifiers/contrast" }
+    { "$ref": "#/modifiers/typography" },
+    { "$ref": "#/modifiers/a11y" }
   ]
 }

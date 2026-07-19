@@ -2,13 +2,15 @@
   "font": {
     "family": {
       "$type": "fontFamily",
-      "sans": { "$value": ["Inter", "system-ui", "-apple-system", "sans-serif"] },
+      "base": { "$value": "{font.family.sans}" },
+      "sans": { "$value": ["Geist", "Inter", "system-ui", "-apple-system", "sans-serif"] },
       "serif":{ "$value": ["Source Serif 4", "Georgia", "serif"] },
-      "mono": { "$value": ["JetBrains Mono", "Menlo", "monospace"] },
+      "mono": { "$value": ["Geist Mono", "JetBrains Mono", "Menlo", "monospace"] },
       "comic":{ "$value": ["Comic Sans MS", "Comic Neue", "Chalkboard SE", "Marker Felt", "cursive"] }
     },
     "weight": {
       "$type": "fontWeight",
+      "base":     { "$value": "{font.weight.regular}" },
       "regular":  { "$value": 400 },
       "medium":   { "$value": 500 },
       "semibold": { "$value": 600 },

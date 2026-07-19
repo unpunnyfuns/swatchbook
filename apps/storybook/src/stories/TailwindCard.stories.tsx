@@ -28,7 +28,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component:
-          "Demonstrates that a Tailwind v4 project can share swatchbook's DTCG tokens via `var(--sb-*)` references in its `@theme` block. Use the swatchbook toolbar above to flip mode / brand / contrast; every Tailwind colour utility updates through CSS cascade. See `.storybook/tailwind.css` for the mapping — and the note there about Tailwind's sizing scale colliding with DTCG semantic spacing names.",
+          "Demonstrates that a Tailwind v4 project can share swatchbook's DTCG tokens via `var(--sb-*)` references in its `@theme` block. Use the swatchbook toolbar above to flip mode / brand / a11y; every Tailwind colour utility updates through CSS cascade. See `.storybook/tailwind.css` for the mapping — and the note there about Tailwind's sizing scale colliding with DTCG semantic spacing names.",
       },
     },
   },

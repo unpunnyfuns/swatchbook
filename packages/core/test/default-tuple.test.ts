@@ -15,15 +15,32 @@ describe('Config.default tuple resolution', () => {
       {
         tokens: ['tokens/**/*.json'],
         resolver: resolverPath,
-        default: { mode: 'Dark', brand: 'Brand A', contrast: 'High' },
+        default: { mode: 'Dark', brand: 'ACME', typography: 'Mono', a11y: 'High-contrast' },
       },
       fixtureCwd,
     );
-    expect(project.defaultTuple).toEqual({ mode: 'Light', brand: 'Default', contrast: 'Normal' });
+    expect(project.defaultTuple).toEqual({
+      mode: 'Light',
+      brand: 'Default',
+      typography: 'Sans',
+      a11y: 'Normal',
+    });
     expect(Object.keys(project.defaultTokens).length).toBeGreaterThan(0);
     // Structural equality with resolveAt at the user-specified default.
-    const expected = project.resolveAt({ mode: 'Dark', brand: 'Brand A', contrast: 'High' });
+    const expected = project.resolveAt({
+      mode: 'Dark',
+      brand: 'ACME',
+      typography: 'Mono',
+      a11y: 'High-contrast',
+    });
     expect(Object.keys(project.defaultTokens).toSorted()).toEqual(Object.keys(expected).toSorted());
+    // typography: 'Mono' swaps font.family.base to the monospace stack;
+    // typography.body.fontFamily aliases font.family.base, so this checks
+    // the axis actually took effect rather than falling back to Sans.
+    const body = project.defaultTokens['typography.body']?.$value as
+      | { fontFamily?: unknown }
+      | undefined;
+    expect(body?.fontFamily).toEqual(['Geist Mono', 'JetBrains Mono', 'Menlo', 'monospace']);
   });
 
   it("fills omitted axes from each axis's own default", async () => {
@@ -35,7 +52,7 @@ describe('Config.default tuple resolution', () => {
       },
       fixtureCwd,
     );
-    const dark = project.resolveAt({ mode: 'Dark', brand: 'Default', contrast: 'Normal' });
+    const dark = project.resolveAt({ mode: 'Dark', brand: 'Default', a11y: 'Normal' });
     expect(project.defaultTokens['color.text.default']?.$value).toEqual(
       dark['color.text.default']?.$value,
     );
@@ -46,7 +63,7 @@ describe('Config.default tuple resolution', () => {
       { tokens: ['tokens/**/*.json'], resolver: resolverPath },
       fixtureCwd,
     );
-    const light = project.resolveAt({ mode: 'Light', brand: 'Default', contrast: 'Normal' });
+    const light = project.resolveAt({ mode: 'Light', brand: 'Default', a11y: 'Normal' });
     expect(project.defaultTokens['color.text.default']?.$value).toEqual(
       light['color.text.default']?.$value,
     );
@@ -65,7 +82,7 @@ describe('Config.default tuple resolution', () => {
       (d) => d.group === 'swatchbook/default' && d.message.includes('notAnAxis'),
     );
     expect(warn?.severity).toBe('warn');
-    const dark = project.resolveAt({ mode: 'Dark', brand: 'Default', contrast: 'Normal' });
+    const dark = project.resolveAt({ mode: 'Dark', brand: 'Default', a11y: 'Normal' });
     expect(project.defaultTokens['color.text.default']?.$value).toEqual(
       dark['color.text.default']?.$value,
     );
@@ -84,7 +101,7 @@ describe('Config.default tuple resolution', () => {
       (d) => d.group === 'swatchbook/default' && d.message.includes('NopeMode'),
     );
     expect(warn?.severity).toBe('warn');
-    const light = project.resolveAt({ mode: 'Light', brand: 'Default', contrast: 'Normal' });
+    const light = project.resolveAt({ mode: 'Light', brand: 'Default', a11y: 'Normal' });
     expect(project.defaultTokens['color.text.default']?.$value).toEqual(
       light['color.text.default']?.$value,
     );

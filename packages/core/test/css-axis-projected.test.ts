@@ -18,7 +18,7 @@
  *     interaction is the canonical case),
  *   - smart dedup: cells re-emit values when ANY axis touches the var,
  *     so cascade resolves orthogonal-after-probe tokens correctly
- *     (Brand A's `accent.fg = white` IS now emitted because Dark
+ *     (ACME's `accent.fg = white` IS now emitted because Dark
  *     touches the var, even though it matches baseline),
  *   - the chrome alias block is emitted unchanged at the tail.
  */
@@ -39,9 +39,10 @@ it('emits one :root baseline block plus N per-axis cell blocks plus the trailing
   // Two `:root {` openings — baseline + chrome trailer.
   const rootMatches = css.match(/(^|\n):root\s*\{/g) ?? [];
   expect(rootMatches).toHaveLength(2);
-  // The fixture has three axes with one non-default context each
-  // (Dark, Brand A, High). Each axis cell block exists if any token
-  // touches that axis — for our fixture all three axes touch something.
+  // The fixture's axes each have one or more non-default contexts
+  // (Dark; ACME; Sans/Mono/Comic; Normal/High-contrast). Each axis cell
+  // block exists if any token touches that axis — for our fixture every
+  // axis touches something.
   for (const axis of project.axes) {
     for (const ctx of axis.contexts) {
       if (ctx === axis.default) continue;
@@ -53,10 +54,10 @@ it('emits one :root baseline block plus N per-axis cell blocks plus the trailing
 it('emits compound [data-A][data-B] blocks for joint-variant tokens (joint blocks contain the cartesian-correct value, not the projection-composed value)', () => {
   const css = emitAxisProjectedCss(project);
   // The fixture has joint variance on `color.accent.fg` between mode and
-  // contrast (Dark mode's `accessible.accent.fg = neutral.900` is aliased
-  // through by contrast=High; the joint Dark+High tuple resolves to dark
-  // text rather than the white that projection-composition of Light's
-  // accessible.accent would produce).
+  // a11y (Dark mode's `accessible.accent.fg = neutral.900` is aliased
+  // through by a11y=High-contrast; the joint Dark+High-contrast tuple
+  // resolves to dark text rather than the white that projection-composition
+  // of Light's accessible.accent would produce).
   const compoundSelectors = css.match(/\[data-sb-[^\]]+\]\[data-sb-[^\]]+\]/g) ?? [];
   expect(compoundSelectors.length).toBeGreaterThan(0);
 
@@ -68,15 +69,15 @@ it('emits compound [data-A][data-B] blocks for joint-variant tokens (joint block
 
 it('per-axis cell blocks contain only the delta tokens that genuinely differ from baseline at that axis-context (delta cells, joint case handled by compound block above)', () => {
   const css = emitAxisProjectedCss(project);
-  // `color.accent.fg` at brand=Brand A alone equals baseline (white),
-  // so it doesn't appear in the Brand A cell. The joint Dark+BrandA
+  // `color.accent.fg` at brand=ACME alone equals baseline (white),
+  // so it doesn't appear in the ACME cell. The joint Dark+ACME
   // divergence is handled by the compound `[data-sb-mode][data-sb-brand]`
   // block (covered above), not by re-emitting the baseline-equal value
   // into the brand cell.
-  const brandACell = extractBlock(css, '[data-sb-brand="Brand A"]');
-  expect(brandACell).toBeTruthy();
-  // Brand A genuinely changes the violet roles — those land in the cell.
-  expect(brandACell).toMatch(/--sb-color-accent-bg:/);
+  const acmeCell = extractBlock(css, '[data-sb-brand="ACME"]');
+  expect(acmeCell).toBeTruthy();
+  // ACME genuinely changes the violet roles — those land in the cell.
+  expect(acmeCell).toMatch(/--sb-color-accent-bg:/);
 });
 
 it('baseline-only tokens (palette primitives) appear ONLY in :root, never in any cell', () => {

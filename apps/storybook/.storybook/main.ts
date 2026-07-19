@@ -11,7 +11,10 @@ function pkg(name: string): string {
 
 export default defineMain({
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(ts|tsx)'],
-  staticDirs: ['./assets'],
+  // `./assets` is relative to this file's own directory (`.storybook/`);
+  // `../public` points at the project-root `public/` dir (self-hosted
+  // fonts), served at root with no base prefix.
+  staticDirs: ['./assets', '../public'],
   // Suppress the sidebar onboarding checklist / guided tour, which
   // otherwise reappears on every Storybook upgrade.
   features: { sidebarOnboardingChecklist: false },

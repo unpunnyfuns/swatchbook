@@ -53,7 +53,7 @@ export const RefBlue = meta.story({
  * own render + play + a11y test, so axe runs against dark surfaces and against
  * high-contrast borders, not only the default light baseline.
  */
-export const RefBlueBrandADark = RefBlue.extend(withAxes('Brand A Dark'));
+export const RefBlueACMEDark = RefBlue.extend(withAxes('ACME Dark'));
 export const RefBlueHighContrast = RefBlue.extend(withAxes('A11y High Contrast'));
 
 export const SortedPerceptually = meta.story({

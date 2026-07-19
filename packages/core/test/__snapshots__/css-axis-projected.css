@@ -73,9 +73,10 @@
   --sb-duration-instant: 0ms;
   --sb-duration-normal: 240ms;
   --sb-duration-slow: 400ms;
+  --sb-font-family-base: var(--sb-font-family-sans);
   --sb-font-family-comic: "Comic Sans MS", "Comic Neue", "Chalkboard SE", "Marker Felt", cursive;
-  --sb-font-family-mono: "JetBrains Mono", "Menlo", monospace;
-  --sb-font-family-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --sb-font-family-mono: "Geist Mono", "JetBrains Mono", "Menlo", monospace;
+  --sb-font-family-sans: "Geist", "Inter", system-ui, -apple-system, sans-serif;
   --sb-font-family-serif: "Source Serif 4", "Georgia", serif;
   --sb-font-scale-2xl: var(--sb-font-size-700);
   --sb-font-scale-2xs: var(--sb-font-size-100);
@@ -93,6 +94,7 @@
   --sb-font-size-600: 1.5rem;
   --sb-font-size-700: 1.75rem;
   --sb-font-size-800: 2rem;
+  --sb-font-weight-base: var(--sb-font-weight-regular);
   --sb-font-weight-bold: 700;
   --sb-font-weight-medium: 500;
   --sb-font-weight-regular: 400;
@@ -167,12 +169,12 @@
   --sb-type-sample-lg: var(--sb-font-size-700);
   --sb-type-sample-xl: var(--sb-font-size-800);
   --sb-type-small: var(--sb-font-size-300);
-  --sb-typography-body-font-family: var(--sb-font-family-sans);
+  --sb-typography-body-font-family: var(--sb-font-family-base);
   --sb-typography-body-font-size: var(--sb-size-rem-400);
-  --sb-typography-body-font-weight: var(--sb-font-weight-regular);
+  --sb-typography-body-font-weight: var(--sb-font-weight-base);
   --sb-typography-body-line-height: 1.5;
   --sb-typography-body-letter-spacing: 0px;
-  --sb-typography-body-strong-font-family: var(--sb-font-family-sans);
+  --sb-typography-body-strong-font-family: var(--sb-font-family-base);
   --sb-typography-body-strong-font-size: var(--sb-size-rem-400);
   --sb-typography-body-strong-font-weight: var(--sb-font-weight-semibold);
   --sb-typography-body-strong-line-height: 1.5;
@@ -182,7 +184,7 @@
   --sb-typography-code-font-weight: var(--sb-font-weight-regular);
   --sb-typography-code-line-height: 1.4;
   --sb-typography-code-letter-spacing: 0px;
-  --sb-typography-heading-font-family: var(--sb-font-family-sans);
+  --sb-typography-heading-font-family: var(--sb-font-family-base);
   --sb-typography-heading-font-size: var(--sb-size-rem-700);
   --sb-typography-heading-font-weight: var(--sb-font-weight-bold);
   --sb-typography-heading-line-height: 1.2;
@@ -215,7 +217,7 @@
   --sb-color-text-subtle: var(--sb-color-palette-neutral-400);
 }
 
-[data-sb-brand="Brand A"] {
+[data-sb-brand="ACME"] {
   --sb-border-focus: 2px solid var(--sb-color-border-focus);
   --sb-color-accent-bg: var(--sb-color-violet-700);
   --sb-color-accent-bg-hover: var(--sb-color-violet-900);
@@ -223,7 +225,45 @@
   --sb-color-text-accent: var(--sb-color-violet-700);
 }
 
-[data-sb-contrast="High"] {
+[data-sb-typography="Mono"] {
+  --sb-font-family-base: var(--sb-font-family-mono);
+  --sb-typography-body-font-family: var(--sb-font-family-base);
+  --sb-typography-body-font-size: var(--sb-size-rem-400);
+  --sb-typography-body-font-weight: var(--sb-font-weight-base);
+  --sb-typography-body-line-height: 1.5;
+  --sb-typography-body-letter-spacing: 0px;
+  --sb-typography-body-strong-font-family: var(--sb-font-family-base);
+  --sb-typography-body-strong-font-size: var(--sb-size-rem-400);
+  --sb-typography-body-strong-font-weight: var(--sb-font-weight-semibold);
+  --sb-typography-body-strong-line-height: 1.5;
+  --sb-typography-body-strong-letter-spacing: 0px;
+  --sb-typography-heading-font-family: var(--sb-font-family-base);
+  --sb-typography-heading-font-size: var(--sb-size-rem-700);
+  --sb-typography-heading-font-weight: var(--sb-font-weight-bold);
+  --sb-typography-heading-line-height: 1.2;
+  --sb-typography-heading-letter-spacing: -0.5px;
+}
+
+[data-sb-typography="Comic"] {
+  --sb-font-family-base: var(--sb-font-family-comic);
+  --sb-typography-body-font-family: var(--sb-font-family-base);
+  --sb-typography-body-font-size: var(--sb-size-rem-400);
+  --sb-typography-body-font-weight: var(--sb-font-weight-base);
+  --sb-typography-body-line-height: 1.5;
+  --sb-typography-body-letter-spacing: 0px;
+  --sb-typography-body-strong-font-family: var(--sb-font-family-base);
+  --sb-typography-body-strong-font-size: var(--sb-size-rem-400);
+  --sb-typography-body-strong-font-weight: var(--sb-font-weight-semibold);
+  --sb-typography-body-strong-line-height: 1.5;
+  --sb-typography-body-strong-letter-spacing: 0px;
+  --sb-typography-heading-font-family: var(--sb-font-family-base);
+  --sb-typography-heading-font-size: var(--sb-size-rem-700);
+  --sb-typography-heading-font-weight: var(--sb-font-weight-bold);
+  --sb-typography-heading-line-height: 1.2;
+  --sb-typography-heading-letter-spacing: -0.5px;
+}
+
+[data-sb-a11y="High-contrast"] {
   --sb-border-dashed: 1px dashed var(--sb-color-border-default);
   --sb-border-default: 2px solid var(--sb-color-border-default);
   --sb-border-focus: 3px solid var(--sb-color-border-focus);
@@ -234,39 +274,46 @@
   --sb-color-border-strong: var(--sb-color-palette-neutral-900);
   --sb-color-text-muted: var(--sb-color-accessible-text-muted);
   --sb-color-text-subtle: var(--sb-color-accessible-text-subtle);
-  --sb-typography-body-font-family: var(--sb-font-family-comic);
+  --sb-font-weight-base: var(--sb-font-weight-semibold);
+  --sb-typography-body-font-family: var(--sb-font-family-base);
   --sb-typography-body-font-size: var(--sb-size-rem-400);
-  --sb-typography-body-font-weight: var(--sb-font-weight-regular);
-  --sb-typography-body-line-height: 1.6;
+  --sb-typography-body-font-weight: var(--sb-font-weight-base);
+  --sb-typography-body-line-height: 1.5;
   --sb-typography-body-letter-spacing: 0px;
-  --sb-typography-body-strong-font-family: var(--sb-font-family-comic);
-  --sb-typography-body-strong-font-size: var(--sb-size-rem-400);
-  --sb-typography-body-strong-font-weight: var(--sb-font-weight-bold);
-  --sb-typography-body-strong-line-height: 1.6;
-  --sb-typography-body-strong-letter-spacing: 0px;
-  --sb-typography-heading-font-family: var(--sb-font-family-comic);
-  --sb-typography-heading-font-size: var(--sb-size-rem-700);
-  --sb-typography-heading-font-weight: var(--sb-font-weight-bold);
-  --sb-typography-heading-line-height: 1.3;
-  --sb-typography-heading-letter-spacing: 0px;
 }
 
-[data-sb-mode="Dark"][data-sb-brand="Brand A"] {
+[data-sb-mode="Dark"][data-sb-brand="ACME"] {
   --sb-color-accent-fg: var(--sb-color-palette-neutral-0);
 }
 
-[data-sb-mode="Dark"][data-sb-contrast="High"] {
+[data-sb-mode="Dark"][data-sb-a11y="High-contrast"] {
   --sb-color-accent-bg: var(--sb-color-accessible-accent-bg);
   --sb-color-accent-bg-hover: var(--sb-color-accessible-accent-bg-hover);
   --sb-color-text-muted: var(--sb-color-accessible-text-muted);
   --sb-color-text-subtle: var(--sb-color-accessible-text-subtle);
 }
 
-[data-sb-brand="Brand A"][data-sb-contrast="High"] {
+[data-sb-brand="ACME"][data-sb-a11y="High-contrast"] {
   --sb-color-accent-bg-hover: var(--sb-color-accessible-accent-bg-hover);
 }
 
-[data-sb-mode="Dark"][data-sb-brand="Brand A"][data-sb-contrast="High"] {
+[data-sb-typography="Mono"][data-sb-a11y="High-contrast"] {
+  --sb-typography-body-font-family: var(--sb-font-family-base);
+  --sb-typography-body-font-size: var(--sb-size-rem-400);
+  --sb-typography-body-font-weight: var(--sb-font-weight-base);
+  --sb-typography-body-line-height: 1.5;
+  --sb-typography-body-letter-spacing: 0px;
+}
+
+[data-sb-typography="Comic"][data-sb-a11y="High-contrast"] {
+  --sb-typography-body-font-family: var(--sb-font-family-base);
+  --sb-typography-body-font-size: var(--sb-size-rem-400);
+  --sb-typography-body-font-weight: var(--sb-font-weight-base);
+  --sb-typography-body-line-height: 1.5;
+  --sb-typography-body-letter-spacing: 0px;
+}
+
+[data-sb-mode="Dark"][data-sb-brand="ACME"][data-sb-a11y="High-contrast"] {
   --sb-color-accent-bg-hover: var(--sb-color-accessible-accent-bg-hover);
   --sb-color-accent-fg: var(--sb-color-accessible-accent-fg);
 }

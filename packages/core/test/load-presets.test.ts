@@ -16,9 +16,9 @@ describe('loadProject — presets', () => {
       {
         tokens: ['tokens/**/*.json'],
         resolver: resolverPath,
-        default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+        default: { mode: 'Light', brand: 'Default', a11y: 'Normal' },
         presets: [
-          { name: 'Brand A Dark', axes: { mode: 'Dark', brand: 'Brand A' } },
+          { name: 'ACME Dark', axes: { mode: 'Dark', brand: 'ACME' } },
           { name: 'Default Light', axes: { mode: 'Light' } },
         ],
       },
@@ -28,7 +28,7 @@ describe('loadProject — presets', () => {
 
   it('exposes validated presets on the project', () => {
     expect(project.presets).toEqual([
-      { name: 'Brand A Dark', axes: { mode: 'Dark', brand: 'Brand A' } },
+      { name: 'ACME Dark', axes: { mode: 'Dark', brand: 'ACME' } },
       { name: 'Default Light', axes: { mode: 'Light' } },
     ]);
   });

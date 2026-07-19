@@ -5,7 +5,7 @@
  * 5+-axis joint divergences in richer multi-axis systems.
  *
  * Asserted against the reference fixture, which has one arity-3 joint
- * (mode + brand + contrast on `color.accent.fg`). Capping at 2 should
+ * (mode + brand + a11y on `color.accent.fg`). Capping at 2 should
  * drop the arity-3 block; the default (4) and an explicit 3 keep it.
  */
 import { beforeAll, expect, it } from 'vitest';
@@ -20,7 +20,7 @@ const fixtureCwd = dirname(tokensDir);
 const baseConfig = {
   tokens: ['tokens/**/*.json'],
   resolver: resolverPath,
-  default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+  default: { mode: 'Light', brand: 'Default', a11y: 'Normal' },
   cssVarPrefix: 'sb',
 };
 
@@ -40,22 +40,26 @@ beforeAll(async () => {
 
 it('default emits the arity-3 compound block for the reference fixture', () => {
   const css = emitAxisProjectedCss(projectDefault);
-  expect(css).toContain('[data-sb-mode="Dark"][data-sb-brand="Brand A"][data-sb-contrast="High"]');
+  expect(css).toContain(
+    '[data-sb-mode="Dark"][data-sb-brand="ACME"][data-sb-a11y="High-contrast"]',
+  );
 });
 
 it('explicit maxJointArity=3 keeps the arity-3 block (same as default)', () => {
   const css = emitAxisProjectedCss(projectArity3);
-  expect(css).toContain('[data-sb-mode="Dark"][data-sb-brand="Brand A"][data-sb-contrast="High"]');
+  expect(css).toContain(
+    '[data-sb-mode="Dark"][data-sb-brand="ACME"][data-sb-a11y="High-contrast"]',
+  );
 });
 
 it('maxJointArity=2 drops the arity-3 block but keeps arity-2 blocks', () => {
   const css = emitAxisProjectedCss(projectArity2);
   expect(css).not.toContain(
-    '[data-sb-mode="Dark"][data-sb-brand="Brand A"][data-sb-contrast="High"]',
+    '[data-sb-mode="Dark"][data-sb-brand="ACME"][data-sb-a11y="High-contrast"]',
   );
   // Arity-2 blocks still present.
-  expect(css).toContain('[data-sb-mode="Dark"][data-sb-brand="Brand A"]');
-  expect(css).toContain('[data-sb-mode="Dark"][data-sb-contrast="High"]');
+  expect(css).toContain('[data-sb-mode="Dark"][data-sb-brand="ACME"]');
+  expect(css).toContain('[data-sb-mode="Dark"][data-sb-a11y="High-contrast"]');
 });
 
 it('maxJointArity=1 disables all joint-block emission', () => {
