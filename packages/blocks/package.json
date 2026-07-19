@@ -38,6 +38,10 @@
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
     },
+    "./host": {
+      "types": "./dist/host.d.mts",
+      "import": "./dist/host.mjs"
+    },
     "./style.css": "./dist/style.css",
     "./package.json": "./package.json"
   },
