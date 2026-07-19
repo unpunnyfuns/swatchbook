@@ -14,7 +14,7 @@ function rows(): TypographyRow[] {
 }
 
 // The View renders from plain props — no SwatchbookProvider, no store.
-it('renders a row per token with its leaf label and sample', () => {
+it('renders a row per token with its full path and sample', () => {
   render(
     <TypographyScaleView
       rows={rows()}
@@ -25,7 +25,7 @@ it('renders a row per token with its leaf label and sample', () => {
       colorFormat="hex"
     />,
   );
-  screen.getByText('heading');
+  screen.getByText('typography.heading');
   screen.getByText('Hello');
 });
 

@@ -27,10 +27,10 @@ it('styles the sample from the realised value when no cssVar is given', () => {
   expect(sample?.style.letterSpacing).toBe('0.5px');
 });
 
-it('shows the leaf label and a derived spec summary', () => {
+it('shows a derived spec summary without a token-identity label', () => {
   render(<TypeSpecimen path="typography.heading" token={token} colorFormat="hex" />);
-  screen.getByText('heading');
   screen.getByText('24px · w700 · lh 1.2');
+  expect(screen.queryByText('heading')).toBeNull();
 });
 
 it('shows the sample text', () => {

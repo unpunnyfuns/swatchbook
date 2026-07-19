@@ -1,21 +1,8 @@
 .sb-type-specimen {
-  display: grid;
-  grid-template-columns: minmax(160px, 220px) 1fr;
-  gap: var(--swatchbook-space-lg);
-  align-items: baseline;
-  padding: var(--swatchbook-space-lg) 0;
-  border-bottom: 1px solid var(--swatchbook-border-default);
-}
-
-.sb-type-specimen__meta {
   display: flex;
   flex-direction: column;
   gap: var(--swatchbook-space-3xs);
-}
-
-.sb-type-specimen__leaf {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: var(--swatchbook-type-caption);
+  min-width: 0;
 }
 
 .sb-type-specimen__description {

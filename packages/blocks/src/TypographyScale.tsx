@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
+import './TypographyScale.css';
 import { useColorFormat } from '#/contexts.ts';
 import type { ColorFormat } from '#/format-color.ts';
 import type { RealisedToken } from '#/internal/composite-types.ts';
@@ -107,19 +108,20 @@ export function TypographyScaleView({
   return (
     <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       <div className="sb-block__caption">{captionText}</div>
-      {rows.map(
-        (row) =>
-          Specimen && (
+      {rows.map((row) => (
+        <div key={row.path} className="sb-typography-scale__row">
+          <span className="sb-typography-scale__path">{row.path}</span>
+          {Specimen && (
             <Specimen
-              key={row.path}
               path={row.path}
               token={row.token}
               cssVar={row.cssVar}
               colorFormat={colorFormat}
               options={{ sample }}
             />
-          ),
-      )}
+          )}
+        </div>
+      ))}
     </div>
   );
 }

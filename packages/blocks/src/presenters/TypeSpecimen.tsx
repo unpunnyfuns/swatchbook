@@ -9,11 +9,6 @@ export type TypeSpecimenProps = PresenterProps<'typography'>;
 
 const DEFAULT_SAMPLE = 'The quick brown fox jumps over the lazy dog.';
 
-// Last dot-segment of a token path, used as the specimen's leaf label.
-function leafOf(path: string): string {
-  return path.split('.').at(-1) ?? path;
-}
-
 function asFontFamily(raw: unknown): string | undefined {
   if (typeof raw === 'string') return raw;
   if (Array.isArray(raw)) return raw.map(String).join(', ');
@@ -51,26 +46,24 @@ function describeValue(value: TypographyValue): string {
 }
 
 /**
- * Presenter for `$type: typography` tokens: a leaf label, spec summary, and
- * a sample line styled per R3. Terrazzo's `generateShorthand` assigns a
- * typography token's base css var the CSS `font` shorthand value (style,
- * weight, size/line-height, family, each a per-subvalue `var()`), so
- * `cssVar` applies directly to the sample's `font` property. That
- * shorthand's grammar has no slot for `letter-spacing`, so the cssVar
- * branch renders without it; the realised branch below applies every field
- * the token carries, `letterSpacing` included.
+ * Presenter for `$type: typography` tokens: a spec summary and a sample line
+ * styled per R3. Token identity (the path) is the consuming block's
+ * responsibility, not this presenter's; see `TypographyScale`. Terrazzo's
+ * `generateShorthand` assigns a typography token's base css var the CSS
+ * `font` shorthand value (style, weight, size/line-height, family, each a
+ * per-subvalue `var()`), so `cssVar` applies directly to the sample's `font`
+ * property. That shorthand's grammar has no slot for `letter-spacing`, so
+ * the cssVar branch renders without it; the realised branch below applies
+ * every field the token carries, `letterSpacing` included.
  */
-export function TypeSpecimen({ path, token, cssVar, options }: TypeSpecimenProps): ReactElement {
+export function TypeSpecimen({ token, cssVar, options }: TypeSpecimenProps): ReactElement {
   const sample = (options?.['sample'] as string | undefined) ?? DEFAULT_SAMPLE;
   const value = (token.$value ?? {}) as TypographyValue;
   const sampleStyle: CSSProperties = cssVar ? { font: cssVar } : styleFromValue(value);
   const description = token.$description ?? describeValue(value);
   return (
     <div className="sb-type-specimen">
-      <div className="sb-type-specimen__meta">
-        <span className="sb-type-specimen__leaf">{leafOf(path)}</span>
-        {description && <span className="sb-type-specimen__description">{description}</span>}
-      </div>
+      {description && <span className="sb-type-specimen__description">{description}</span>}
       <div className="sb-type-specimen__sample" style={sampleStyle}>
         {sample}
       </div>
