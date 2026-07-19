@@ -101,6 +101,7 @@ export default defineConfig({
                 'reference/blocks/overview',
                 'reference/blocks/inspector',
                 'reference/blocks/samples',
+                'reference/blocks/presenters',
                 'reference/blocks/utility',
                 'reference/blocks/hooks',
               ],

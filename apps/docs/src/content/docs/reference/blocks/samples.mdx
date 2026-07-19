@@ -2,12 +2,12 @@
 title: Sample blocks
 ---
 
-Lower-level than the per-type overview blocks: these render the visual for **one** token by path. Useful for custom MDX layouts that don't want the full overview chrome, and for embedding a single sample next to prose.
+Lower-level than the per-type overview blocks: these render the visual for **one** already-realised token. Useful for custom MDX layouts that don't want the full overview chrome, and for embedding a single sample next to prose. Each is a built-in [presenter](/reference/blocks/presenters), so it takes the uniform `PresenterProps` shape (`path`, `token`, `cssVar?`, `colorFormat`, `options?`) rather than a bare path: a presenter renders a token it's handed, it doesn't look one up.
 
 ## MotionSample
 
 ```tsx
-<MotionSample path="transition.enter" />
+<MotionSample path={path} token={token} colorFormat={colorFormat} options={{ speed: 1 }} />
 ```
 
 Animated ball + track for one `transition` / `duration` / `cubicBezier`. `options.speed?: MotionSpeed` (default `1`); `options.runKey?: number` forces a restart when it changes.
@@ -22,7 +22,7 @@ The four allowed playback rates the speed pills surface above the sample track. 
 ## ShadowSample
 
 ```tsx
-<ShadowSample path="shadow.md" />
+<ShadowSample path={path} token={token} colorFormat={colorFormat} />
 ```
 
 Surface rectangle with the token's shadow applied as `box-shadow`.
@@ -30,7 +30,7 @@ Surface rectangle with the token's shadow applied as `box-shadow`.
 ## BorderSample
 
 ```tsx
-<BorderSample path="border.default" />
+<BorderSample path={path} token={token} colorFormat={colorFormat} />
 ```
 
 Surface rectangle with the token's border applied.
@@ -38,7 +38,7 @@ Surface rectangle with the token's border applied.
 ## DimensionSample
 
 ```tsx
-<DimensionSample path="size.md" options={{ visual: 'length' }} />
+<DimensionSample path={path} token={token} colorFormat={colorFormat} options={{ visual: 'length' }} />
 ```
 
 Width-driven bar, border-radius square, or sized square for one `dimension` token. `options.visual?: 'length' | 'radius' | 'size'` (default `'length'`).
