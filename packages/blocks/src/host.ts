@@ -4,17 +4,17 @@ import type { ColorFormat } from '#/format-color.ts';
 import type { VirtualAxis, VirtualDiagnostic } from '#/types.ts';
 
 /**
- * Host adapter API — generic ambient project source. A host (an addon,
+ * Host adapter API: generic ambient project source. A host (an addon,
  * a plugin, a CLI preview server) decodes its own transport (Storybook
  * channel, WebSocket, whatever) and pushes decoded snapshots in via
  * {@link registerProjectSource}. This module carries no transport or
- * decoding logic of its own — that keeps blocks importable standalone
+ * decoding logic of its own; that keeps blocks importable standalone
  * (outside Storybook, in unit tests, in the docs site) with no host
  * dependency. Until a host registers a source, blocks render from empty
  * defaults.
  */
 
-/** Host adapter API — see {@link registerProjectSource}. */
+/** Host adapter API: see {@link registerProjectSource}. */
 export interface ProjectSource {
   readonly axes: readonly VirtualAxis[];
   readonly presets: readonly {
