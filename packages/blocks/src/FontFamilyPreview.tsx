@@ -1,9 +1,12 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
-import './FontFamilyPreview.css';
+import { useColorFormat } from '#/contexts.ts';
+import type { ColorFormat } from '#/format-color.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import type { ProjectData } from '#/internal/use-project.ts';
+import { usePresenter } from '#/presenters/registry.ts';
+import type { RealisedToken } from '@unpunnyfuns/swatchbook-core/token-value-types';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
@@ -31,13 +34,8 @@ export interface FontFamilyPreviewProps {
 export interface FontFamilyRow {
   path: string;
   cssVar: string;
-  stack: string;
-}
-
-function stackString(raw: unknown): string {
-  if (typeof raw === 'string') return raw;
-  if (Array.isArray(raw)) return raw.map(String).join(', ');
-  return '';
+  /** Realised token, fed to `FontFamilySpecimen` per the presenter contract. */
+  token: RealisedToken<'fontFamily'>;
 }
 
 export interface DeriveFontFamilyRowsOptions {
@@ -62,7 +60,7 @@ export function deriveFontFamilyRows(
   return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
     path,
     cssVar: resolveCssVar(path, project),
-    stack: stackString(token.$value),
+    token: token as RealisedToken<'fontFamily'>,
   }));
 }
 
@@ -72,20 +70,28 @@ export interface FontFamilyPreviewViewProps {
   cssVarPrefix: string;
   activeAxes: Record<string, string>;
   sample: string;
+  /** Forwarded to each row's `FontFamilySpecimen` (uniform presenter contract; unused for fontFamily). */
+  colorFormat: ColorFormat;
   filter?: string | undefined;
   caption?: string | undefined;
 }
 
-/** Pure presentation for the font-family preview. Renders from plain props. */
+/**
+ * Pure presentation for the font-family preview. Renders from plain props;
+ * composes the connected `FontFamilySpecimen` as a child, feeding it this
+ * row's already-resolved `token`/`cssVar` per the presenter contract.
+ */
 export function FontFamilyPreviewView({
   rows,
   activeTheme,
   cssVarPrefix,
   activeAxes,
   sample,
+  colorFormat,
   filter,
   caption,
 }: FontFamilyPreviewViewProps): ReactElement {
+  const Specimen = usePresenter('fontFamily');
   const captionText =
     caption ??
     `${rows.length} fontFamily token${rows.length === 1 ? '' : 's'}${filter && filter !== 'fontFamily' ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -101,18 +107,19 @@ export function FontFamilyPreviewView({
   return (
     <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       <div className="sb-block__caption">{captionText}</div>
-      {rows.map((row) => (
-        <div key={row.path} className="sb-font-family-sample__row">
-          <div className="sb-font-family-sample__meta">
-            <span className="sb-font-family-sample__path">{row.path}</span>
-            <span className="sb-font-family-sample__stack">{row.stack}</span>
-          </div>
-          <div className="sb-font-family-sample__sample" style={{ fontFamily: row.cssVar }}>
-            {sample}
-          </div>
-          <span className="sb-font-family-sample__css-var">{row.cssVar}</span>
-        </div>
-      ))}
+      {rows.map(
+        (row) =>
+          Specimen && (
+            <Specimen
+              key={row.path}
+              path={row.path}
+              token={row.token}
+              cssVar={row.cssVar}
+              colorFormat={colorFormat}
+              options={{ sample }}
+            />
+          ),
+      )}
     </div>
   );
 }
@@ -126,6 +133,7 @@ export function FontFamilyPreview({
 }: FontFamilyPreviewProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+  const colorFormat = useColorFormat();
 
   const rows = useMemo(
     () => deriveFontFamilyRows(resolved, project, { filter, sortBy, sortDir }),
@@ -139,6 +147,7 @@ export function FontFamilyPreview({
       cssVarPrefix={cssVarPrefix}
       activeAxes={activeAxes}
       sample={sample}
+      colorFormat={colorFormat}
       filter={filter}
       caption={caption}
     />

@@ -20,7 +20,15 @@ export {
 } from '#/DimensionScale.tsx';
 export { DimensionSample, type DimensionSampleProps } from '#/dimension-scale/DimensionSample.tsx';
 export { FontFamilyPreview, type FontFamilyPreviewProps } from '#/FontFamilyPreview.tsx';
+export {
+  FontFamilySpecimen,
+  type FontFamilySpecimenProps,
+} from '#/presenters/FontFamilySpecimen.tsx';
 export { FontWeightScale, type FontWeightScaleProps } from '#/FontWeightScale.tsx';
+export {
+  FontWeightSpecimen,
+  type FontWeightSpecimenProps,
+} from '#/presenters/FontWeightSpecimen.tsx';
 export { GradientPalette, type GradientPaletteProps } from '#/GradientPalette.tsx';
 export { GradientSwatch, type GradientSwatchProps } from '#/presenters/GradientSwatch.tsx';
 export { MotionPreview, type MotionPreviewProps, type MotionSpeed } from '#/MotionPreview.tsx';

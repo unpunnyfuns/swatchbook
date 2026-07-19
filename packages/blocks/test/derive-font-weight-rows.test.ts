@@ -22,15 +22,13 @@ it('produces one row per fontWeight token, excluding other types', () => {
   expect(rows.map((r) => r.path)).toEqual(['font.weight.regular', 'font.weight.bold']);
 });
 
-it('derives the css var from the listing and the numeric weight from the value', () => {
+it('derives the css var from the listing and carries the realised token', () => {
   const rows = deriveFontWeightRows(resolved, project, opts);
   const regular = rows.find((r) => r.path === 'font.weight.regular')!;
   expect(regular.cssVar).toBe('var(--sb-font-weight-regular)');
-  expect(regular.display).toBe('400');
-  expect(regular.weight).toBe(400);
+  expect(regular.token.$value).toBe(400);
   const bold = rows.find((r) => r.path === 'font.weight.bold')!;
-  expect(bold.display).toBe('700');
-  expect(bold.weight).toBe(700);
+  expect(bold.token.$value).toBe('700');
 });
 
 it('falls back to a prefix-derived css var when the listing has no entry', () => {

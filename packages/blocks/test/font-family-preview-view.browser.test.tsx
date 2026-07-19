@@ -8,7 +8,7 @@ function rows(): FontFamilyRow[] {
     {
       path: 'font.family.body',
       cssVar: 'var(--sb-font-family-body)',
-      stack: 'Inter, sans-serif',
+      token: { $type: 'fontFamily', $value: 'Inter, sans-serif' },
     },
   ];
 }
@@ -22,6 +22,7 @@ it('renders a row per token with its path, stack, and css var', () => {
       cssVarPrefix="sb"
       activeAxes={{ theme: 'Light' }}
       sample="Hello"
+      colorFormat="hex"
     />,
   );
   screen.getByText('font.family.body');
@@ -38,6 +39,7 @@ it('honors the caption override', () => {
       cssVarPrefix="sb"
       activeAxes={{}}
       sample="Hello"
+      colorFormat="hex"
       caption="Font stacks"
     />,
   );
@@ -52,6 +54,7 @@ it('renders the empty state when there are no rows', () => {
       cssVarPrefix="sb"
       activeAxes={{}}
       sample="Hello"
+      colorFormat="hex"
     />,
   );
   screen.getByText('No fontFamily tokens match this filter.');

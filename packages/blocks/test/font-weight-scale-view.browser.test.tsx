@@ -8,8 +8,7 @@ function rows(): FontWeightRow[] {
     {
       path: 'font.weight.regular',
       cssVar: 'var(--sb-font-weight-regular)',
-      display: '400',
-      weight: 400,
+      token: { $type: 'fontWeight', $value: 400 },
     },
   ];
 }
@@ -23,6 +22,7 @@ it('renders a row per token with its path, weight, and css var', () => {
       cssVarPrefix="sb"
       activeAxes={{ theme: 'Light' }}
       sample="Aa"
+      colorFormat="hex"
     />,
   );
   screen.getByText('font.weight.regular');
@@ -39,6 +39,7 @@ it('honors the caption override', () => {
       cssVarPrefix="sb"
       activeAxes={{}}
       sample="Aa"
+      colorFormat="hex"
       caption="Font weights"
     />,
   );
@@ -53,6 +54,7 @@ it('renders the empty state when there are no rows', () => {
       cssVarPrefix="sb"
       activeAxes={{}}
       sample="Aa"
+      colorFormat="hex"
     />,
   );
   screen.getByText('No fontWeight tokens match this filter.');

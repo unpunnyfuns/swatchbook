@@ -3,6 +3,8 @@ import type { TokenType } from '@unpunnyfuns/swatchbook-core/token-value-types';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { ColorSwatch } from '#/presenters/ColorSwatch.tsx';
 import { DimensionSample } from '#/dimension-scale/DimensionSample.tsx';
+import { FontFamilySpecimen } from '#/presenters/FontFamilySpecimen.tsx';
+import { FontWeightSpecimen } from '#/presenters/FontWeightSpecimen.tsx';
 import { GradientSwatch } from '#/presenters/GradientSwatch.tsx';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
 import type { PresenterComponent, PresenterRegistry } from '#/presenters/types.ts';
@@ -21,6 +23,8 @@ export const DEFAULT_PRESENTERS: PresenterRegistry = {
   gradient: GradientSwatch as PresenterComponent,
   transition: MotionSample as PresenterComponent,
   typography: TypeSpecimen as PresenterComponent,
+  fontFamily: FontFamilySpecimen as PresenterComponent,
+  fontWeight: FontWeightSpecimen as PresenterComponent,
 };
 
 /** Overrides win per `$type`; unlisted types keep the built-in. */
