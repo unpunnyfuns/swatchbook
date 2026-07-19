@@ -16,16 +16,21 @@ it('renders resolved tokens from a wire snapshot with no addon or channel', () =
   expect(document.querySelectorAll('.sb-color-swatch__chip').length).toBeGreaterThan(0);
 });
 
-it('a controlled provider (axes prop) ignores defaultAxes and rejects useSetAxes', () => {
+it('a controlled provider keeps the axes prop over a conflicting defaultAxes and rejects useSetAxes', () => {
   function Probe() {
     expect(() => useSetAxes()).toThrow(/uncontrolled/);
     return null;
   }
   render(
-    <SwatchbookProvider snapshot={makeWireSnapshot()} axes={{ mode: 'Light' }}>
+    <SwatchbookProvider
+      snapshot={makeWireSnapshot()}
+      axes={{ mode: 'Light' }}
+      defaultAxes={{ mode: 'Dark' }}
+    >
       <Probe />
     </SwatchbookProvider>,
   );
+  expect(document.querySelector('[data-sb-mode="Light"]')).not.toBeNull();
 });
 
 it('an uncontrolled provider flips its tuple through useSetAxes', async () => {

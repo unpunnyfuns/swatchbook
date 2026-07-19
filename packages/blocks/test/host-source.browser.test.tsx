@@ -1,6 +1,24 @@
 import { act, renderHook } from '@testing-library/react';
-import { expect, it } from 'vitest';
+import { afterEach, expect, it } from 'vitest';
 import { registerProjectSource, useProjectSource } from '#/host.ts';
+
+afterEach(() => {
+  // Restore the ambient source to a clean baseline so other files sharing
+  // this worker don't inherit this file's activeAxes / cssVarPrefix.
+  registerProjectSource({
+    axes: [],
+    presets: [],
+    diagnostics: [],
+    css: '',
+    cssVarPrefix: '',
+    indicators: {},
+    listing: {},
+    tokenGraph: { nodes: {}, axes: [], axisDefaults: {}, axisContexts: {} },
+    defaultTuple: {},
+    defaultColorFormat: 'hex',
+    activeAxes: null,
+  });
+});
 
 it('a pushed source (including activeAxes) is read back', () => {
   registerProjectSource({ cssVarPrefix: 'sb', activeAxes: { mode: 'Dark' } });

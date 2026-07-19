@@ -12,6 +12,23 @@ import { Diagnostics } from '#/index.ts';
 
 afterEach(() => {
   cleanup();
+  // registerProjectSource patches are partial and retain omitted fields, so
+  // resetting only `diagnostics` would leave a lingering seed on the
+  // module-level store for later files sharing the same worker. Restore the
+  // full baseline source instead.
+  registerProjectSource({
+    axes: [],
+    presets: [],
+    diagnostics: [],
+    css: '',
+    cssVarPrefix: '',
+    indicators: {},
+    listing: {},
+    tokenGraph: { nodes: {}, axes: [], axisDefaults: {}, axisContexts: {} },
+    defaultTuple: {},
+    defaultColorFormat: 'hex',
+    activeAxes: null,
+  });
 });
 
 it('renders from empty defaults with no provider and no registered source', () => {

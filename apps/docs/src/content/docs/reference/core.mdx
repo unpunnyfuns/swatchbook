@@ -104,6 +104,7 @@ import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire'
 import { loadProject, emitAxisProjectedCss } from '@unpunnyfuns/swatchbook-core';
 import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
 import { writeFile } from 'node:fs/promises';
+import config from './swatchbook.config.ts';
 
 const project = await loadProject(config, process.cwd());
 const css = emitAxisProjectedCss(project);

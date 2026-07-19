@@ -88,7 +88,9 @@ export function registerProjectSource(patch: Partial<ProjectSource>): void {
     tokenGraph: patch.tokenGraph ?? source.tokenGraph,
     defaultTuple: patch.defaultTuple ?? source.defaultTuple,
     defaultColorFormat: patch.defaultColorFormat ?? source.defaultColorFormat,
-    activeAxes: patch.activeAxes ?? source.activeAxes,
+    // activeAxes distinguishes omitted (fall back to current) from an
+    // explicit null (clear the tuple); `??` alone can't express that.
+    activeAxes: 'activeAxes' in patch ? (patch.activeAxes ?? null) : source.activeAxes,
     version: source.version + 1,
   };
   for (const cb of listeners) cb();

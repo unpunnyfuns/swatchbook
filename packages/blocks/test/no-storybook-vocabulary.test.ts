@@ -11,6 +11,10 @@ const BANNED = [
   'swatchbookColorFormat',
   'BlockChannel',
   'registerChannel',
+  'onChannel',
+  'useChannelGlobals',
+  'ChannelGlobals',
+  'registerTokenSource',
 ];
 
 function walk(dir: string): string[] {
