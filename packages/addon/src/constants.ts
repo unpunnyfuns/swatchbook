@@ -36,9 +36,14 @@ export const INIT_REQUEST_EVENT = 'swatchbook/init-request';
 export const PREVIEW_MOUSEDOWN_EVENT = 'swatchbook/preview-mousedown';
 
 /** Custom Vite HMR event: plugin → preview. Preview forwards it to the
- * Storybook channel as `TOKENS_UPDATED_EVENT` (exported from
- * `@unpunnyfuns/swatchbook-blocks`, the single source of truth for that
- * wire string, which blocks also listen on) so blocks can update their
- * snapshot. A distinct wire string from the channel event so the plugin
- * doesn't need a Storybook-channel dependency. */
+ * Storybook channel as `TOKENS_UPDATED_EVENT` so `host-source.ts`'s
+ * listener can push a fresh patch into blocks' ambient project source.
+ * A distinct wire string from the channel event so the plugin doesn't
+ * need a Storybook-channel dependency. */
 export const HMR_EVENT = 'swatchbook/hmr-tokens';
+/** Channel event: preview → preview (self). Carries a dev-time token
+ * snapshot patch; `host-source.ts` listens and forwards it into blocks'
+ * ambient project source via `registerProjectSource`. Addon-internal:
+ * emitted by `preview.tsx`'s HMR handler, consumed by `host-source.ts`,
+ * never crosses a package boundary. */
+export const TOKENS_UPDATED_EVENT = 'swatchbook/tokens-updated';

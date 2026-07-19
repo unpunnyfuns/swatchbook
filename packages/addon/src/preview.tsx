@@ -28,15 +28,8 @@ import {
   presets as virtualPresets,
   tokenGraph as virtualTokenGraph,
 } from 'virtual:swatchbook/tokens';
-import {
-  AxesContext,
-  registerChannel,
-  registerTokenSource,
-  SwatchbookProvider,
-  ThemeContext,
-  TOKENS_UPDATED_EVENT,
-  useTokenSnapshot,
-} from '@unpunnyfuns/swatchbook-blocks';
+import { AxesContext, SwatchbookProvider, ThemeContext } from '@unpunnyfuns/swatchbook-blocks';
+import { registerProjectSource, useProjectSource } from '@unpunnyfuns/swatchbook-blocks/host';
 import {
   AXES_GLOBAL_KEY,
   HMR_EVENT,
@@ -44,25 +37,27 @@ import {
   INIT_REQUEST_EVENT,
   PREVIEW_MOUSEDOWN_EVENT,
   STYLE_ELEMENT_ID,
+  TOKENS_UPDATED_EVENT,
 } from '#/constants.ts';
 import type { InitPayload } from '#/channel-types.ts';
 import type { StoryParameters, SwatchbookGlobals } from '#/globals.ts';
+import { installHostSource } from '#/host-source.ts';
 import { useThemeAnnouncement } from '#/hooks/use-theme-announcement.ts';
 import { resolveTuple } from '#/tuple-resolve.ts';
 
-// Hand blocks the preview channel they subscribe to for toolbar axis/format
-// flips and dev-time token HMR. Blocks no longer reach for
-// `addons.getChannel()` themselves — the addon owns the Storybook relationship
-// and injects it here, at the same module-eval point as the token snapshot
-// below, before the preview emits its init SET_GLOBALS.
-registerChannel(addons.getChannel());
+// Decode the preview channel into blocks' generic ambient project source.
+// Blocks no longer reach for `addons.getChannel()` (or know any Storybook
+// vocabulary) themselves: the addon owns the Storybook relationship and
+// wires it here, at the same module-eval point as the token snapshot below,
+// before the preview emits its init SET_GLOBALS.
+installHostSource(addons.getChannel());
 
-// Seed blocks' token store with the build-time snapshot from the addon's
-// virtual module. Blocks no longer import `virtual:swatchbook/tokens`
+// Seed blocks' ambient project source with the build-time snapshot from the
+// addon's virtual module. Blocks no longer import `virtual:swatchbook/tokens`
 // directly (keeping them standalone-importable); the addon, which owns that
 // module, pushes the initial snapshot in at preview init. Dev-time updates
-// continue over TOKENS_UPDATED_EVENT.
-registerTokenSource({
+// continue over TOKENS_UPDATED_EVENT, decoded by `installHostSource` above.
+registerProjectSource({
   axes: virtualAxes,
   presets: virtualPresets,
   diagnostics,
@@ -243,13 +238,14 @@ const themedDecorator: Decorator = (Story, context) => {
     wrapperAttrs[dataAttr(cssVarPrefix, name)] = value;
   });
 
-  // Read token data from the live snapshot store (seeded from the virtual
-  // module at init, updated in place on each dev-time HMR token save) rather
-  // than the static virtual-module exports — so blocks rendered inside
-  // stories pick up edited values without a full preview reload. The tuple /
-  // theme still come from the toolbar globals + per-story params above.
-  const live = useTokenSnapshot();
-  // `TokenSnapshot` carries everything `SnapshotForWire` needs except
+  // Read token data from the live ambient project source (seeded from the
+  // virtual module at init, updated in place on each dev-time HMR token
+  // save) rather than the static virtual-module exports, so blocks
+  // rendered inside stories pick up edited values without a full preview
+  // reload. The tuple / theme still come from the toolbar globals +
+  // per-story params above.
+  const live = useProjectSource();
+  // `ProjectSource` carries everything `SnapshotForWire` needs except
   // `disabledAxes` (a virtual-module export, not part of the live store).
   // `SwatchbookProvider` assembles `activeTheme`/`resolveAt` itself from
   // this plus `tuple` below.

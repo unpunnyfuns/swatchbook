@@ -14,8 +14,9 @@
  * Consumers:
  * - addon's Vite plugin emits the virtual ESM module body from this
  * - addon's Vite plugin sends it as the HMR custom event payload
- * - blocks' channel-tokens listener reads the same shape from
- *   `TOKENS_UPDATED_EVENT`
+ * - the addon's `host-source.ts` listener reads the same shape from
+ *   `TOKENS_UPDATED_EVENT` and forwards it into blocks' ambient project
+ *   source
  *
  * The `InitPayload` shape in `packages/addon/src/channel-types.ts` is
  * a subset of this (manager-side doesn't need CSS or listing); kept
@@ -41,9 +42,10 @@ export interface SlimListedToken {
 
 /**
  * JSON-friendly snapshot of `Project` for wire transport (virtual
- * module body, HMR custom event, Storybook channel TOKENS_UPDATED_EVENT).
- * Field set is the union every blocks-side consumer reads; the
- * manager-side INIT_EVENT shape is a subset (no `css` / `listing`).
+ * module body, HMR custom event, the addon's TOKENS_UPDATED_EVENT
+ * Storybook-channel broadcast). Field set is the union every blocks-side
+ * consumer reads; the manager-side INIT_EVENT shape is a subset (no
+ * `css` / `listing`).
  */
 export interface SnapshotForWire {
   axes: Project['axes'];

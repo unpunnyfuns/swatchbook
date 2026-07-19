@@ -29,8 +29,7 @@ function computeVarianceByPath(graph: VirtualTokenGraph | undefined): VirtualVar
 import { useActiveAxes, useActiveTheme, useOptionalSwatchbookData } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import type { ColorFormat, FormatColorResult } from '#/format-color.ts';
-import { useChannelGlobals } from '#/internal/channel-globals.ts';
-import { useTokenSnapshot } from '#/internal/channel-tokens.ts';
+import { useProjectSource } from '#/host.ts';
 import type { ProjectSnapshot, VirtualAxis, VirtualDiagnostic, VirtualToken } from '#/types.ts';
 
 type ResolvedTokens = Record<string, VirtualToken>;
@@ -107,15 +106,15 @@ function snapshotResolveAt(
 
 /**
  * Reads project data either from a mounted {@link SwatchbookProvider}
- * (preferred — the addon's preview decorator installs one around every
- * story) or, when no provider is present, from the virtual module plus
- * Storybook globals directly.
+ * (preferred: the addon's preview decorator installs one around every
+ * story) or, when no provider is present, from the ambient project source
+ * a host pushes into via `registerProjectSource` (`#/host.ts`).
  *
  * The provider-less path is what makes the hook safe to call from MDX
  * doc blocks and autodocs renders where no story is active. It
- * self-mounts the injected snapshot's per-theme CSS and tracks the active
- * tuple via the injected channel's `globalsUpdated` event, since a
- * story-scoped globals hook only works while a story is rendering.
+ * self-mounts the source's per-theme CSS and tracks the active tuple via
+ * the source's `activeAxes`, since a story-scoped globals hook only works
+ * while a story is rendering.
  */
 export function useProject(): ProjectData {
   const snapshot = useOptionalSwatchbookData();
@@ -191,41 +190,43 @@ export function useProject(): ProjectData {
 function useVirtualModuleFallback(enabled: boolean): ProjectData {
   const contextThemeName = useActiveTheme();
   const contextAxes = useActiveAxes();
-  const channelGlobals = useChannelGlobals();
-  // Subscribe to the live token snapshot rather than reading the virtual
-  // module's module-level exports directly. Initial values come from
-  // `virtual:swatchbook/tokens` at load time; subsequent dev-time edits
-  // flow through the addon's HMR channel and update this snapshot in
-  // place so blocks re-render without a full preview reload.
-  const tokens = useTokenSnapshot();
+  // Subscribe to the ambient project source rather than reading the
+  // virtual module's module-level exports directly. Initial values come
+  // from the host's build-time seed; subsequent dev-time edits flow
+  // through the host's own decoding (the addon's `host-source.ts`) and
+  // update this source in place so blocks re-render without a full
+  // preview reload.
+  const source = useProjectSource();
 
   useEffect(() => {
     if (!enabled) return;
-    ensureStylesheet(tokens.css);
-  }, [enabled, tokens.css]);
+    ensureStylesheet(source.css);
+  }, [enabled, source.css]);
 
   // Memoize against the stable identities — `contextAxes` is a
   // useContext value that's stable across renders unless the
-  // provider mutates; `channelGlobals.axes` updates on channel
-  // events; `tokens.axes` is a stable virtual-module export.
+  // provider mutates; `source.activeAxes` updates when a host pushes a
+  // new tuple; `source.axes` is a stable field on the ambient source.
   // Without this memo `activeAxes` would have fresh identity per
   // render and defeat downstream `useMemo([project, …])` calls.
   const activeAxes = useMemo<Record<string, string>>(() => {
     const hasContextAxes = Object.keys(contextAxes).length > 0;
-    return hasContextAxes ? { ...contextAxes } : (channelGlobals.axes ?? defaultTuple(tokens.axes));
-  }, [contextAxes, channelGlobals.axes, tokens.axes]);
+    return hasContextAxes ? { ...contextAxes } : (source.activeAxes ?? defaultTuple(source.axes));
+  }, [contextAxes, source.activeAxes, source.axes]);
 
-  const activeTheme = contextThemeName || tupleToName(tokens.axes, activeAxes);
+  const activeTheme = contextThemeName || tupleToName(source.axes, activeAxes);
 
   // `resolveAllWithProvenanceAt` is a pure function over the graph; the only memo
   // we need is for the outer closure so React's reference equality
-  // stays stable between renders. `tokens.tokenGraph` is the stable
-  // module-level virtual-module export — changes only on HMR refresh.
-  const resolveAt = useMemo(() => makeResolveAt(tokens.tokenGraph), [tokens.tokenGraph]);
+  // stays stable between renders. `source.tokenGraph` keeps its prior
+  // reference across a source update unless the patch actually touches
+  // it (see `registerProjectSource`'s per-field merge), so this only
+  // recomputes on a real token refresh.
+  const resolveAt = useMemo(() => makeResolveAt(source.tokenGraph), [source.tokenGraph]);
 
   const fallbackVarianceByPath = useMemo(
-    () => computeVarianceByPath(tokens.tokenGraph),
-    [tokens.tokenGraph],
+    () => computeVarianceByPath(source.tokenGraph),
+    [source.tokenGraph],
   );
 
   // Memoize the returned ProjectData against the stable inner fields
@@ -235,23 +236,23 @@ function useVirtualModuleFallback(enabled: boolean): ProjectData {
     () => ({
       activeTheme,
       activeAxes,
-      axes: tokens.axes,
+      axes: source.axes,
       resolved: resolveAt(activeAxes),
-      diagnostics: tokens.diagnostics,
-      cssVarPrefix: tokens.cssVarPrefix,
-      indicators: tokens.indicators,
-      listing: tokens.listing,
+      diagnostics: source.diagnostics,
+      cssVarPrefix: source.cssVarPrefix,
+      indicators: source.indicators,
+      listing: source.listing,
       varianceByPath: fallbackVarianceByPath,
       resolveAt,
     }),
     [
       activeTheme,
       activeAxes,
-      tokens.axes,
-      tokens.diagnostics,
-      tokens.cssVarPrefix,
-      tokens.indicators,
-      tokens.listing,
+      source.axes,
+      source.diagnostics,
+      source.cssVarPrefix,
+      source.indicators,
+      source.listing,
       fallbackVarianceByPath,
       resolveAt,
     ],

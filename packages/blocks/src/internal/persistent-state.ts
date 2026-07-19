@@ -4,11 +4,11 @@ import type { Dispatch, SetStateAction } from 'react';
 /**
  * Block UI state that survives a docs-mode remount.
  *
- * In MDX docs mode Storybook re-renders the docs container on every
- * `updateGlobals` (axis flip), which unmounts and remounts the embedded
- * blocks — destroying any plain `useState` (expand/collapse, selection,
- * search). This is the same problem `channel-globals` solves for the
- * globals: lift the value out of React into module state so it persists
+ * In MDX docs mode Storybook re-renders the docs container on every axis
+ * flip, which unmounts and remounts the embedded blocks: destroying any
+ * plain `useState` (expand/collapse, selection, search). This is the same
+ * problem the ambient project source (`#/host.ts`) solves for token/axis
+ * data: lift the value out of React into module state so it persists
  * across the remount, and re-seed component state from it on mount.
  *
  * `usePersistedState` is a drop-in `useState` whose value is mirrored to a
