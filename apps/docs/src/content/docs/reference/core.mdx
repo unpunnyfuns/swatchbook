@@ -76,23 +76,54 @@ For production builds, prefer Terrazzo's CLI; `emitAxisProjectedCss` exists prim
 
 Leaf utilities consumers need without the loader's Node deps live on dedicated subpaths. Each is tree-shake-clean, no `@terrazzo/parser`, no `node:*` imports, safe to import from preview-side bundles, the Storybook manager, or any browser consumer. Ship `project.tokenGraph` to the browser through `/snapshot-for-wire` rather than the full `Project`: `resolveAt` is a function and `cwd` is a Node-side absolute path, so the object isn't JSON-serializable as-is, and `snapshotForWire(project, css)` returns the transportable subset.
 
-| Subpath              | Export                                                                                                                                                                 | Purpose                                                                                                                                                             |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/graph`             | `resolveAt`, `resolveAllAt`, `resolveAliasAt`, `resolveAliasAllAt`, `getVariance`, `getAffectedBy`, `listPaths` + `TokenGraph` / `TokenGraphNode` / `WriteValue` types | Graph query helpers, browser-safe, no Terrazzo dependency at query time. See [Graph queries](#graph-queries) below.                                                 |
-| `/snapshot-for-wire` | `snapshotForWire(project, css)` + `SnapshotForWire` type                                                                                                               | JSON-friendly subset of `Project` for cross-boundary transport.                                                                                                     |
-| `/themes`            | `enumerateThemes({axes, presets, defaultTuple})` + `tupleToName(axes, tuple)` + `ThemeEntry` / `ThemeEnumAxis` / `ThemeEnumPreset` types                               | Enumerate single-axis tuples + presets as a unified theme list; compose stable theme IDs from tuples.                                                               |
-| `/match-path`        | `matchPath(path, filter)`                                                                                                                                              | Glob-style path matcher (`*` single-segment, `**` multi-segment, bare prefix treated as descendants); shared by blocks' filter prop and the MCP `list_tokens` tool. |
-| `/fuzzy`             | `fuzzyFilter` + `fuzzyMatches`                                                                                                                                         | uFuzzy-backed token search; powers the MCP `search_tokens` tool.                                                                                                    |
-| `/css-var`           | `cssVarRef(path, prefix)`                                                                                                                                              | Compose `var(--prefix-path)` strings, same shape Terrazzo's plugin-css emits.                                                                                       |
-| `/data-attr`         | `dataAttr(prefix, key)`                                                                                                                                                | Compose `data-prefix-key` attribute names, namespaced to `cssVarPrefix`.                                                                                            |
-| `/style-element`     | `ensureStyleElement(elementId, text)` + `SWATCHBOOK_STYLE_ELEMENT_ID`                                                                                                  | Idempotent `<style>` injector, shared between the addon's preview decorator and the blocks-side stylesheet path.                                                    |
-| `/color-formats`     | `COLOR_FORMATS` + `ColorFormat` type                                                                                                                                   | The canonical color-format set (`hex`, `rgb`, `hsl`, `oklch`, `raw`) the toolbar and blocks switch between.                                                         |
-| `/format-color`      | `formatColor`, `parseColor` + `NormalizedColor` / `FormatColorResult` types                                                                                            | Canonical color rendering, shared by blocks, MCP, and the addon so every surface stringifies a color the same way.                                                  |
+| Subpath              | Export                                                                                                                                                                    | Purpose                                                                                                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/graph`             | `resolveAt`, `resolveAllAt`, `resolveAliasAt`, `resolveAliasAllAt`, `getVariance`, `getAffectedBy`, `listPaths` + `TokenGraph` / `TokenGraphNode` / `WriteValue` types    | Graph query helpers, browser-safe, no Terrazzo dependency at query time. See [Graph queries](#graph-queries) below.                                                            |
+| `/snapshot-for-wire` | `snapshotForWire(project, css)` + `SnapshotForWire` type                                                                                                                  | JSON-friendly subset of `Project` for cross-boundary transport.                                                                                                                |
+| `/themes`            | `enumerateThemes({axes, presets, defaultTuple})` + `tupleToName(axes, tuple)` + `ThemeEntry` / `ThemeEnumAxis` / `ThemeEnumPreset` types                                  | Enumerate single-axis tuples + presets as a unified theme list; compose stable theme IDs from tuples.                                                                          |
+| `/match-path`        | `matchPath(path, filter)`                                                                                                                                                 | Glob-style path matcher (`*` single-segment, `**` multi-segment, bare prefix treated as descendants); shared by blocks' filter prop and the MCP `list_tokens` tool.            |
+| `/fuzzy`             | `fuzzyFilter` + `fuzzyMatches`                                                                                                                                            | uFuzzy-backed token search; powers the MCP `search_tokens` tool.                                                                                                               |
+| `/css-var`           | `cssVarRef(path, prefix)`                                                                                                                                                 | Compose `var(--prefix-path)` strings, same shape Terrazzo's plugin-css emits.                                                                                                  |
+| `/data-attr`         | `dataAttr(prefix, key)`                                                                                                                                                   | Compose `data-prefix-key` attribute names, namespaced to `cssVarPrefix`.                                                                                                       |
+| `/style-element`     | `ensureStyleElement(elementId, text)` + `SWATCHBOOK_STYLE_ELEMENT_ID`                                                                                                     | Idempotent `<style>` injector, shared between the addon's preview decorator and the blocks-side stylesheet path.                                                               |
+| `/color-formats`     | `COLOR_FORMATS` + `ColorFormat` type                                                                                                                                      | The canonical color-format set (`hex`, `rgb`, `hsl`, `oklch`, `raw`) the toolbar and blocks switch between.                                                                    |
+| `/format-color`      | `formatColor`, `parseColor` + `NormalizedColor` / `FormatColorResult` types                                                                                               | Canonical color rendering, shared by blocks, MCP, and the addon so every surface stringifies a color the same way.                                                             |
+| `/token-value-types` | `TypographyValue` / `BorderValue` / `TransitionValue` / `ShadowLayer` / `GradientStop` / `ColorValue` / `DashedStrokeStyleValue` / `TokenType` / `RealisedToken<T>` types | Typed envelopes for DTCG 2025.10 composite `$value` shapes, one per `$type`, so a typo'd sub-value key is a compile error rather than a silent `Record<string, unknown>` miss. |
+| `/token-value-css`   | `formatDimension`, `formatSubColor`, `formatTokenValue`                                                                                                                   | Composite sub-field display formatting (shadow offset/blur/spread, border width, …) shared by the preview tables.                                                              |
 
 ```ts
 import { resolveAt, getVariance } from '@unpunnyfuns/swatchbook-core/graph';
 import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
 ```
+
+## Rendering blocks standalone
+
+`snapshotForWire`'s output is what `@unpunnyfuns/swatchbook-blocks`' `SwatchbookProvider` consumes outside Storybook: `loadProject` builds the `Project`, `snapshotForWire(project, css)` reduces it to the JSON-safe wire shape, and that shape is typically written to a file for a standalone consumer to import.
+
+```ts
+import { loadProject, emitAxisProjectedCss } from '@unpunnyfuns/swatchbook-core';
+import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
+import { writeFile } from 'node:fs/promises';
+import config from './swatchbook.config.ts';
+
+const project = await loadProject(config, process.cwd());
+const css = emitAxisProjectedCss(project);
+const wire = snapshotForWire(project, css);
+await writeFile('tokens-snapshot.json', JSON.stringify(wire));
+```
+
+```tsx
+import { SwatchbookProvider, TokenTable, useSetAxes } from '@unpunnyfuns/swatchbook-blocks';
+import wire from './tokens-snapshot.json';
+
+<SwatchbookProvider snapshot={wire} defaultAxes={{ mode: 'Light' }}>
+  <TokenTable filter="color.**" />
+</SwatchbookProvider>;
+```
+
+`axes` (controlled: the host drives the tuple and re-renders the provider on change) and `defaultAxes` (uncontrolled: the provider owns the tuple, flipped through `useSetAxes()`) are mutually exclusive. See [Blocks](/reference/blocks) for the full provider API.
+
+A Storybook-hosted render doesn't need any of this: the addon's preview decorator assembles the wire snapshot and mounts the provider automatically. The pattern above is for consumers rendering blocks with no addon and no Storybook channel in the page at all. The integration seam for a different host to feed the same blocks is `@unpunnyfuns/swatchbook-blocks/host`'s `registerProjectSource` / `useProjectSource`, which is what the addon itself uses to push Storybook's channel data in.
 
 ## Graph queries
 

@@ -1,7 +1,7 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { userEvent } from 'vitest/browser';
-import { ColorTable, SwatchbookProvider } from '#/index.ts';
+import { ColorTable, SwatchbookContext } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import { makeColorTableSnapshot } from './_color-table-helpers.tsx';
 
@@ -20,9 +20,9 @@ describe('ColorTable — grouping', () => {
 
   it('collapses sibling variants into one row with a pill per variant', () => {
     render(
-      <SwatchbookProvider value={makeVariantSnapshot()}>
+      <SwatchbookContext.Provider value={makeVariantSnapshot()}>
         <ColorTable filter="color.bg.**" variants={{ hover: 'h', disabled: 'd' }} />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const rows = screen.getAllByTestId('color-table-row');
@@ -39,9 +39,9 @@ describe('ColorTable — grouping', () => {
 
   it('defaults to the "base" variant when one is present', () => {
     render(
-      <SwatchbookProvider value={makeVariantSnapshot()}>
+      <SwatchbookContext.Provider value={makeVariantSnapshot()}>
         <ColorTable filter="color.bg.**" variants={{ hover: 'h', disabled: 'd' }} />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const hiRow = screen
@@ -54,9 +54,9 @@ describe('ColorTable — grouping', () => {
 
   it('clicking a pill swaps the active variant and the displayed values', async () => {
     render(
-      <SwatchbookProvider value={makeVariantSnapshot()}>
+      <SwatchbookContext.Provider value={makeVariantSnapshot()}>
         <ColorTable filter="color.bg.**" variants={{ hover: 'h', disabled: 'd' }} />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const hiRowInitial = screen
@@ -84,9 +84,9 @@ describe('ColorTable — grouping', () => {
       'color.bg.hi.hover': { $type: 'color', $value: { hex: '#333333' } },
     });
     render(
-      <SwatchbookProvider value={snap}>
+      <SwatchbookContext.Provider value={snap}>
         <ColorTable filter="color.bg.**" variants={{ hover: 'hover', disabled: 'disabled' }} />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const rows = screen.getAllByTestId('color-table-row');
@@ -97,9 +97,9 @@ describe('ColorTable — grouping', () => {
 
   it('ignores variants that would match characters inside a segment (neutral-900 ≠ suffix 0)', () => {
     render(
-      <SwatchbookProvider value={makeColorTableSnapshot()}>
+      <SwatchbookContext.Provider value={makeColorTableSnapshot()}>
         <ColorTable filter="color.palette.**" variants={{ zero: '0' }} />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     expect(screen.queryAllByTestId('color-table-variant').length).toBe(0);
   });

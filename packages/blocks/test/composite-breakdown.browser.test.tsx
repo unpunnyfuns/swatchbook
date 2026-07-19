@@ -1,6 +1,6 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { CompositeBreakdown, SwatchbookProvider } from '#/index.ts';
+import { CompositeBreakdown, SwatchbookContext } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
@@ -47,9 +47,9 @@ describe('CompositeBreakdown', () => {
 
   it('surfaces the full alias chain for each aliased sub-value on a composite token', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <CompositeBreakdown path="border.default" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const aliasAnnotations = screen.getAllByTestId('breakdown-alias');
@@ -62,9 +62,9 @@ describe('CompositeBreakdown', () => {
 
   it('omits the alias annotation on sub-values that are literal (not aliases)', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <CompositeBreakdown path="border.default" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     // border.default has partialAliasOf only on `color`; `width` and `style`

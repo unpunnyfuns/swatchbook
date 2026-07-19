@@ -124,7 +124,9 @@ tokens/*.json + resolver.json
        ↓
   addons.getChannel().emit(TOKENS_UPDATED_EVENT, snapshot)
        ↓
-  useTokenSnapshot() store      ← packages/blocks/src/internal/channel-tokens.ts
+  installHostSource(channel)     ← packages/addon/src/host-source.ts
+       ↓
+  registerProjectSource(patch)   ← packages/blocks/src/host.ts
        ↓                          (useSyncExternalStore)
    every block re-renders with fresh data
 ```
@@ -132,7 +134,7 @@ tokens/*.json + resolver.json
 Key points:
 
 - **Watchers live on parent directories, not on files.** Atomic-save editors (VS Code, vim, Zed) unlink + recreate the file inode, which kills file-level watchers. Dir-level + filename filter survives the dance. Same pattern in the MCP server's bin.
-- **The addon publishes a channel event rather than a full reload.** A full reload would drop toolbar state, `args`, scroll position. Broadcasting a snapshot through Storybook's channel lets blocks re-render in place via `useSyncExternalStore`.
+- **The addon owns the entire Storybook-channel decode.** `host-source.ts`'s `installHostSource` is the one place that translates Storybook's channel events into the host-agnostic `ProjectSource` shape blocks understand; blocks themselves carry no Storybook vocabulary and never touch `addons.getChannel()`. A full preview reload would drop toolbar state, `args`, scroll position, so the addon pushes a patch into blocks' generic ambient project source instead, and blocks re-render in place via `useProjectSource()` (`useSyncExternalStore` under the hood).
 - **Outside the preview iframe, the channel never fires.** The docs site renders blocks against the virtual module's baked-at-build values, which is correct behavior for static docs.
 - **MCP mirrors the pattern.** `packages/mcp/src/bin.ts` watches the same sourceFiles, reloads via `loadFromConfig`, and calls `setProject(next)` on the already-connected MCP server.
 
@@ -149,7 +151,9 @@ user clicks a context in the toolbar popover
    ↓
 addons.getChannel().emit('globalsUpdated', …)
    ↓
-useChannelGlobals() store            ← packages/blocks/src/internal/channel-globals.ts
+installHostSource(channel)           ← packages/addon/src/host-source.ts
+   ↓
+registerProjectSource({ activeAxes })← packages/blocks/src/host.ts
    ↓
 useProject() recomputes activeTheme  ← packages/blocks/src/internal/use-project.ts
    ↓
@@ -158,10 +162,10 @@ blocks re-render with new active theme / resolved tokens
 
 Two paths through `useProject`:
 
-- **Inside story renders.** The addon's preview decorator mounts `SwatchbookProvider` around every story, seeding context from the virtual module. `useOptionalSwatchbookData()` finds it, and the hook is cheap.
-- **MDX doc blocks + autodocs.** No story render is active, so no provider. The hook falls back to `useVirtualModuleFallback(enabled=true)` which reads the virtual module directly and subscribes to `globalsUpdated` via the channel. `useGlobals()` from `storybook/preview-api` wouldn't work here; it throws outside a story render.
+- **Inside story renders.** The addon's `themedDecorator` reads the toolbar tuple straight off `context.globals`, the plain object Storybook passes into every decorator (no hook involved), and mounts `SwatchbookProvider` with `snapshot={wire}` (assembled from `useProjectSource()`) and the controlled `axes={tuple}` around every story. `useOptionalSwatchbookData()` finds that provider, and the hook is cheap.
+- **MDX doc blocks + autodocs.** No decorator runs, so there's no `context.globals` to read and no provider to find. The hook falls back to `useVirtualModuleFallback(enabled=true)`, which reads the same ambient `useProjectSource()` blocks' generic `/host` subpath exposes: the store `installHostSource` keeps current via the channel above.
 
-Why the channel instead of `useGlobals`: MDX doc blocks render in a context where Storybook's preview `HooksContext` isn't mounted. The channel is the one communication surface that works in both story render and MDX contexts.
+Why the ambient source instead of the decorator's `context.globals`: MDX doc blocks render with no story or decorator wrapping them at all, so there's no `context.globals` argument to read in the first place. `@unpunnyfuns/swatchbook-blocks/host`'s `registerProjectSource` / `useProjectSource()` is the one communication surface that works in both story render and MDX contexts, and it carries no Storybook vocabulary; any host (an addon, a plugin, a preview server) can feed it the same way.
 
 ## MCP server
 

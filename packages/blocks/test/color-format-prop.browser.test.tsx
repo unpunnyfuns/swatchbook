@@ -1,6 +1,6 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
-import { ColorFormatContext, ColorTable, SwatchbookProvider, TokenDetail } from '#/index.ts';
+import { ColorFormatContext, ColorTable, SwatchbookContext, TokenDetail } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import { makeColorTableSnapshot } from './_color-table-helpers.tsx';
 import { makeResolveAt } from './_snapshot-helpers.ts';
@@ -13,9 +13,9 @@ it('a colorFormat prop overrides the project default', () => {
   const snapshot = makeColorTableSnapshot();
   snapshot.defaultColorFormat = 'hex';
   render(
-    <SwatchbookProvider value={snapshot}>
+    <SwatchbookContext.Provider value={snapshot}>
       <ColorTable filter="color.text.default" colorFormat="oklch" />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
 
   const row = screen.getByTestId('color-table-row');
@@ -27,11 +27,11 @@ it('a colorFormat prop overrides an outer ColorFormatContext', () => {
   const snapshot = makeColorTableSnapshot();
   snapshot.defaultColorFormat = 'hex';
   render(
-    <SwatchbookProvider value={snapshot}>
+    <SwatchbookContext.Provider value={snapshot}>
       <ColorFormatContext.Provider value="rgb">
         <ColorTable filter="color.text.default" colorFormat="oklch" />
       </ColorFormatContext.Provider>
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
 
   const row = screen.getByTestId('color-table-row');
@@ -67,9 +67,9 @@ function makeTokenDetailSnapshot(): ProjectSnapshot {
 // nested-propagation path with zero prior coverage.
 it('a colorFormat prop on TokenDetail propagates into the nested AxisVariance', () => {
   render(
-    <SwatchbookProvider value={makeTokenDetailSnapshot()}>
+    <SwatchbookContext.Provider value={makeTokenDetailSnapshot()}>
       <TokenDetail path="color.brand.primary" colorFormat="oklch" />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
 
   const cell = screen.getByTestId('token-detail-constant');
@@ -79,9 +79,9 @@ it('a colorFormat prop on TokenDetail propagates into the nested AxisVariance', 
 
 it('without a colorFormat prop, TokenDetail leaves the nested AxisVariance on the project default', () => {
   render(
-    <SwatchbookProvider value={makeTokenDetailSnapshot()}>
+    <SwatchbookContext.Provider value={makeTokenDetailSnapshot()}>
       <TokenDetail path="color.brand.primary" />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
 
   const cell = screen.getByTestId('token-detail-constant');

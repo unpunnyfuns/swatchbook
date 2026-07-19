@@ -10,7 +10,7 @@
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it } from 'vitest';
-import { SwatchbookProvider, TokenNavigator } from '#/index.ts';
+import { SwatchbookContext, TokenNavigator } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import type { VirtualToken } from '#/types.ts';
 
@@ -41,10 +41,10 @@ function snapshotFor(activeTheme: 'Light' | 'Dark'): ProjectSnapshot {
 // `id` scopes the navigator's persisted UI state; each test passes its own so
 // the module-level store doesn't leak expand state between tests.
 const view = (theme: 'Light' | 'Dark', id: string) => (
-  <SwatchbookProvider value={snapshotFor(theme)}>
+  <SwatchbookContext.Provider value={snapshotFor(theme)}>
     {/* initiallyExpanded=0 — the `color` group starts collapsed. */}
     <TokenNavigator initiallyExpanded={0} searchable={false} id={id} />
-  </SwatchbookProvider>
+  </SwatchbookContext.Provider>
 );
 
 const group = (path: string): HTMLLIElement =>

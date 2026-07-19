@@ -9,7 +9,7 @@
  */
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
-import { SwatchbookProvider, TokenNavigator } from '#/index.ts';
+import { SwatchbookContext, TokenNavigator } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import type { VirtualTokenGraph } from '#/contexts.ts';
 
@@ -65,9 +65,9 @@ afterEach(cleanup);
 
 it('a varying alias shows its per-tuple forward chain in the dark theme', async () => {
   render(
-    <SwatchbookProvider value={darkSnapshot()}>
+    <SwatchbookContext.Provider value={darkSnapshot()}>
       <TokenNavigator searchable={false} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   const leaves = await screen.findAllByTestId('token-navigator-leaf');
   const surfaceLeaf = leaves.find((el) => el.getAttribute('data-path') === 'surface')!;

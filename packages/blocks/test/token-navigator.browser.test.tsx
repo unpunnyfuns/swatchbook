@@ -1,7 +1,7 @@
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { userEvent } from 'vitest/browser';
-import { SwatchbookProvider, TokenNavigator } from '#/index.ts';
+import { SwatchbookContext, TokenNavigator } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
@@ -32,9 +32,9 @@ describe('TokenNavigator', () => {
 
   it('groups tokens by dot-path prefix in a treeview', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <TokenNavigator />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     const tree = screen.getByRole('tree');
     // Top-level groups are `color` and `radius` (groups before leaves at the same level).
@@ -47,9 +47,9 @@ describe('TokenNavigator', () => {
 
   it('scopes the tree under a `root` prop to only that subtree', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <TokenNavigator root="color" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     expect(screen.queryByText('radius')).toBeNull();
     // Leaves `bg` and `fg` visible under the scoped root.
@@ -59,18 +59,18 @@ describe('TokenNavigator', () => {
 
   it('shows an empty-state message when the root matches no tokens', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <TokenNavigator root="does-not-exist" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     screen.getByText(/No tokens under "does-not-exist"/);
   });
 
   it('filters by DTCG $type with a single string', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <TokenNavigator type="dimension" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     const tree = screen.getByRole('tree');
     const topGroups = within(tree)
@@ -83,9 +83,9 @@ describe('TokenNavigator', () => {
 
   it('filters by DTCG $type with an array of types', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <TokenNavigator type={['color', 'dimension']} />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     const tree = screen.getByRole('tree');
     const topGroups = within(tree)
@@ -97,27 +97,27 @@ describe('TokenNavigator', () => {
 
   it('composes `type` with `root` — both constraints must hold', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <TokenNavigator root="color" type="dimension" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     screen.getByText(/No tokens under "color"/);
   });
 
   it('shows a type-aware empty-state when no tokens match', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <TokenNavigator type="fontWeight" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     screen.getByText(/No tokens matching \$type=fontWeight/);
   });
 
   it('renders a search input by default that prunes the tree to matching leaves', async () => {
     const { container } = render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <TokenNavigator />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const input = screen.getByTestId('token-navigator-search') as HTMLInputElement;
@@ -137,9 +137,9 @@ describe('TokenNavigator', () => {
 
   it('auto-expands groups on the path to a matching leaf', async () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <TokenNavigator initiallyExpanded={0} />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const input = screen.getByTestId('token-navigator-search') as HTMLInputElement;
@@ -159,9 +159,9 @@ describe('TokenNavigator', () => {
 
   it('shows an empty message when the search matches nothing', async () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <TokenNavigator />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const input = screen.getByTestId('token-navigator-search') as HTMLInputElement;
@@ -173,9 +173,9 @@ describe('TokenNavigator', () => {
 
   it('hides the search input when searchable={false}', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <TokenNavigator searchable={false} />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     expect(screen.queryByTestId('token-navigator-search')).toBeNull();
   });

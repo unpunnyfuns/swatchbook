@@ -2,8 +2,9 @@ import type { ReactNode } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { addons } from 'storybook/preview-api';
 import { describe, expect, it } from 'vitest';
-import { AxesContext, registerChannel, ThemeContext } from '@unpunnyfuns/swatchbook-blocks';
+import { AxesContext, ThemeContext } from '@unpunnyfuns/swatchbook-blocks';
 import { useToken } from '#/hooks/use-token.ts';
+import { installHostSource } from '#/host-source.ts';
 
 /**
  * The hook resolves through `useActiveAxes` (the post-cells contract);
@@ -95,10 +96,10 @@ describe('useToken', () => {
     // No provider/decorator context — the MDX / autodocs case. The active
     // tuple then comes only from the toolbar globals over the channel; the
     // hook used to ignore those and stay pinned to the default tuple.
-    // Wire blocks to the preview channel, as the addon preview does at init —
-    // blocks subscribe to the injected channel, not `addons.getChannel()`.
+    // Wire the addon's host-source decoding, as the real preview does at
+    // init, so the ambient project source picks up the channel's globals.
     const channel = addons.getChannel();
-    registerChannel(channel);
+    installHostSource(channel);
     const { result } = renderHook(() => useToken('color.accent.bg'));
     expect(result.current.value).toEqual({ colorSpace: 'srgb', components: [0, 0.4, 1] });
 

@@ -20,7 +20,7 @@
  */
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
-import { SwatchbookProvider, TokenNavigator } from '#/index.ts';
+import { SwatchbookContext, TokenNavigator } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import type { VirtualToken } from '#/types.ts';
 
@@ -50,9 +50,9 @@ function snapshotFor(activeTheme: 'Light' | 'Dark'): ProjectSnapshot {
 }
 
 const view = (theme: 'Light' | 'Dark') => (
-  <SwatchbookProvider value={snapshotFor(theme)}>
+  <SwatchbookContext.Provider value={snapshotFor(theme)}>
     <TokenNavigator searchable={false} />
-  </SwatchbookProvider>
+  </SwatchbookContext.Provider>
 );
 
 afterEach(cleanup);

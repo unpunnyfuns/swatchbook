@@ -1,7 +1,7 @@
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { userEvent } from 'vitest/browser';
-import { SwatchbookProvider, TokenTable } from '#/index.ts';
+import { SwatchbookContext, TokenTable } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
@@ -42,7 +42,7 @@ function makeSnapshot(): ProjectSnapshot {
   return snap;
 }
 
-describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => {
+describe('SwatchbookContext + blocks (no Storybook, no virtual module)', () => {
   afterEach(() => {
     cleanup();
   });
@@ -51,9 +51,9 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     const snapshot = makeSnapshot();
 
     render(
-      <SwatchbookProvider value={snapshot}>
+      <SwatchbookContext.Provider value={snapshot}>
         <TokenTable />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const table = screen.getByRole('table');
@@ -68,9 +68,9 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
   it('clicking a row opens the TokenDetail overlay by default', async () => {
     const snapshot = makeSnapshot();
     const { findByTestId } = render(
-      <SwatchbookProvider value={snapshot}>
+      <SwatchbookContext.Provider value={snapshot}>
         <TokenTable />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const rows = screen.getAllByTestId('token-table-row');
@@ -85,9 +85,9 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     const snapshot = makeSnapshot();
     const picks: string[] = [];
     render(
-      <SwatchbookProvider value={snapshot}>
+      <SwatchbookContext.Provider value={snapshot}>
         <TokenTable onSelect={(p) => picks.push(p)} />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     const rows = screen.getAllByTestId('token-table-row');
     rows[0]?.click();
@@ -99,9 +99,9 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     const snapshot = makeSnapshot();
 
     render(
-      <SwatchbookProvider value={snapshot}>
+      <SwatchbookContext.Provider value={snapshot}>
         <TokenTable filter="color.**" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const table = screen.getByRole('table');
@@ -114,9 +114,9 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
   it('renders a search input by default that filters rows by substring', async () => {
     const snapshot = makeSnapshot();
     const { container } = render(
-      <SwatchbookProvider value={snapshot}>
+      <SwatchbookContext.Provider value={snapshot}>
         <TokenTable />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const input = screen.getByTestId('token-table-search') as HTMLInputElement;
@@ -142,9 +142,9 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
   it('shows a "no matches" row when the search query matches nothing', async () => {
     const snapshot = makeSnapshot();
     render(
-      <SwatchbookProvider value={snapshot}>
+      <SwatchbookContext.Provider value={snapshot}>
         <TokenTable />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const input = screen.getByTestId('token-table-search') as HTMLInputElement;
@@ -156,9 +156,9 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
   it('hides the search input when searchable={false}', () => {
     const snapshot = makeSnapshot();
     render(
-      <SwatchbookProvider value={snapshot}>
+      <SwatchbookContext.Provider value={snapshot}>
         <TokenTable searchable={false} />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     expect(screen.queryByTestId('token-table-search')).toBeNull();
@@ -168,9 +168,9 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     const snapshot = makeSnapshot();
 
     render(
-      <SwatchbookProvider value={snapshot}>
+      <SwatchbookContext.Provider value={snapshot}>
         <TokenTable filter="typography.**" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     expect(screen.queryByRole('table')).toBeNull();
@@ -181,9 +181,9 @@ describe('SwatchbookProvider + blocks (no Storybook, no virtual module)', () => 
     const snapshot: ProjectSnapshot = { ...makeSnapshot(), cssVarPrefix: 'swatch' };
 
     const { container } = render(
-      <SwatchbookProvider value={snapshot}>
+      <SwatchbookContext.Provider value={snapshot}>
         <TokenTable />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const wrapper = container.querySelector('[data-swatchbook-block]') as HTMLElement | null;

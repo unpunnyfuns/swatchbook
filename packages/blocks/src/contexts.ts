@@ -2,9 +2,8 @@ import type { Axis, Diagnostic, Preset } from '@unpunnyfuns/swatchbook-core';
 import type { TokenGraph } from '@unpunnyfuns/swatchbook-core/graph';
 import type { SlimListedToken } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
 import { createContext, useContext } from 'react';
-import { useChannelGlobals } from '#/internal/channel-globals.ts';
-import { useTokenSnapshot } from '#/internal/channel-tokens.ts';
 import type { ColorFormat } from '#/format-color.ts';
+import { useProjectSource } from '#/host.ts';
 
 /**
  * Typed shape of the addon's `virtual:swatchbook/tokens` module.
@@ -182,12 +181,13 @@ export function useActiveAxes(): Readonly<Record<string, string>> {
  *
  * Sits in the middle of the precedence chain a block resolves via
  * `colorFormat ?? useColorFormat()`: a block's own `colorFormat` prop wins
- * over this context, which wins over the active snapshot's
+ * over this context, which wins over the active source's
  * `defaultColorFormat` (from `Config.defaultColorFormat`). "Active
- * snapshot" is whichever source is actually feeding the render:
- * `SwatchbookProvider` when a story decorator mounted one, otherwise the
- * channel-fed `TokenSnapshot` that MDX-embedded blocks (no `<Story/>`, no
- * provider) read through `useProject()`'s fallback path.
+ * source" is whichever one is actually feeding the render:
+ * `SwatchbookProvider`'s snapshot when a story decorator mounted one,
+ * otherwise the ambient `ProjectSource` (`#/host.ts`) that MDX-embedded
+ * blocks (no `<Story/>`, no provider) read through `useProject()`'s
+ * fallback path.
  *
  * Runs through plain React context rather than Storybook's `useGlobals` so
  * per-story seeded globals flow through on first render and the same hook
@@ -197,19 +197,15 @@ export function useActiveAxes(): Readonly<Record<string, string>> {
 export const ColorFormatContext = createContext<ColorFormat | null>(null);
 
 /**
- * Resolves the color-display format from the context/snapshot/default
- * chain: `ColorFormatContext` → active snapshot's `defaultColorFormat` →
- * `'hex'`. Composing blocks read `colorFormat ?? useColorFormat()` to give
- * their own `colorFormat` prop top precedence over this chain.
+ * Resolves the color-display format from the context/snapshot/source
+ * chain: `ColorFormatContext` → provider snapshot's `defaultColorFormat`
+ * → ambient source's `defaultColorFormat` → `'hex'`. Composing blocks
+ * read `colorFormat ?? useColorFormat()` to give their own `colorFormat`
+ * prop top precedence over this chain.
  */
 export function useColorFormat(): ColorFormat {
   const contextValue = useContext(ColorFormatContext);
-  const channelGlobals = useChannelGlobals();
   const snapshot = useContext(SwatchbookContext);
-  // No provider mounted (the MDX/autodocs provider-less path): fall back
-  // to the channel-fed TokenSnapshot's default instead of the provider's,
-  // since there is no provider snapshot to read.
-  const tokenSnapshot = useTokenSnapshot();
-  const activeDefault = snapshot ? snapshot.defaultColorFormat : tokenSnapshot.defaultColorFormat;
-  return contextValue ?? channelGlobals.format ?? activeDefault ?? 'hex';
+  const source = useProjectSource();
+  return contextValue ?? snapshot?.defaultColorFormat ?? source.defaultColorFormat ?? 'hex';
 }

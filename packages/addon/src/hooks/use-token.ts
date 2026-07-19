@@ -5,11 +5,8 @@ import {
 } from 'virtual:swatchbook/tokens';
 import { resolveAllWithProvenanceAt } from '@unpunnyfuns/swatchbook-core/graph';
 import { cssVarRef } from '@unpunnyfuns/swatchbook-core/css-var';
-import {
-  useActiveAxes,
-  useChannelGlobals,
-  useOptionalSwatchbookData,
-} from '@unpunnyfuns/swatchbook-blocks';
+import { useActiveAxes, useOptionalSwatchbookData } from '@unpunnyfuns/swatchbook-blocks';
+import { useProjectSource } from '@unpunnyfuns/swatchbook-blocks/host';
 
 // Module-scope `resolveAt` for the no-provider fallback path. Built
 // once from the stable virtual-module exports — mirrors what the
@@ -63,20 +60,20 @@ export interface TokenInfo {
 export function useToken(path: TokenPath): TokenInfo {
   const snapshot = useOptionalSwatchbookData();
   const contextAxes = useActiveAxes();
-  const channelGlobals = useChannelGlobals();
+  const source = useProjectSource();
   const hasContextAxes = Object.keys(contextAxes).length > 0;
 
   const prefix = snapshot?.cssVarPrefix ?? virtualCssVarPrefix;
   const resolver = snapshot?.resolveAt ?? fallbackResolveAt;
   // Match the active-tuple resolution blocks use (see use-project's
-  // virtual-module fallback): decorator context first, then the live
-  // toolbar globals over the channel (the only signal in MDX / autodocs
-  // where no decorator runs), then the static default tuple. Without the
-  // channel-globals step, useToken stayed pinned to the default in MDX and
-  // disagreed with the rendered CSS after a toolbar axis flip.
+  // fallback): decorator context first, then the ambient project source's
+  // `activeAxes` (the only signal in MDX / autodocs where no decorator
+  // runs; fed by the addon's `host-source.ts`), then the static default
+  // tuple. Without that step, useToken stayed pinned to the default in
+  // MDX and disagreed with the rendered CSS after a toolbar axis flip.
   const tuple = hasContextAxes
     ? (contextAxes as Record<string, string>)
-    : (channelGlobals.axes ?? snapshot?.defaultTuple ?? virtualDefaultTuple);
+    : (source.activeAxes ?? snapshot?.defaultTuple ?? virtualDefaultTuple);
   const token = resolver(tuple)[path] as
     | { $value?: unknown; $type?: string; $description?: string }
     | undefined;

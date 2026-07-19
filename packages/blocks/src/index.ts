@@ -37,6 +37,7 @@ export { OpacitySwatch, type OpacitySwatchProps } from '#/presenters/OpacitySwat
 export {
   AxesContext,
   ColorFormatContext,
+  SwatchbookContext,
   ThemeContext,
   useActiveAxes,
   useActiveTheme,
@@ -45,8 +46,6 @@ export {
   type VirtualTokenGraph,
   type VirtualTokenListing,
 } from '#/contexts.ts';
-export { type ChannelGlobals, useChannelGlobals } from '#/internal/channel-globals.ts';
-export { type BlockChannel, onChannel, registerChannel } from '#/internal/channel.ts';
 export type { IndicatorName, IndicatorsProp } from '#/indicators/resolve.ts';
 export type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 export type { PresenterProps, PresenterComponent, PresenterRegistry } from '#/presenters/types.ts';
@@ -61,14 +60,9 @@ export { formatTokenValue } from '@unpunnyfuns/swatchbook-core/token-value-css';
 export {
   SwatchbookProvider,
   type SwatchbookProviderProps,
+  useSetAxes,
   useSwatchbookData,
 } from '#/provider.tsx';
-export {
-  registerTokenSource,
-  TOKENS_UPDATED_EVENT,
-  type TokenSnapshot,
-  useTokenSnapshot,
-} from '#/internal/channel-tokens.ts';
 export type {
   ProjectSnapshot,
   VirtualAxis,

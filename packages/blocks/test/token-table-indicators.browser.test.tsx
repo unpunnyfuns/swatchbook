@@ -1,7 +1,7 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it } from 'vitest';
-import { SwatchbookProvider, TokenTable } from '#/index.ts';
+import { SwatchbookContext, TokenTable } from '#/index.ts';
 import type { ProjectSnapshot, VirtualToken } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
@@ -47,18 +47,18 @@ function rowFor(path: string) {
 
 it('renders the alias chain indicator in the table', () => {
   render(
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <TokenTable type="color" />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   expect(within(rowFor('color.primary')).getByTestId('row-indicator-alias-forward')).toBeTruthy();
 });
 
 it("clicking an alias node opens that token's detail overlay", async () => {
   render(
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <TokenTable type="color" />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   const fwd = within(rowFor('color.primary')).getByTestId('row-indicator-alias-forward');
   const node = within(fwd).getAllByTestId('alias-node')[0] as HTMLElement;
@@ -69,9 +69,9 @@ it("clicking an alias node opens that token's detail overlay", async () => {
 
 it("strikes through a deprecated row's path cell", () => {
   render(
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <TokenTable type="color" />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   const pathCell = within(rowFor('color.legacy')).getByText('color.legacy').closest('td')!;
   expect(pathCell.getAttribute('data-deprecated')).toBe('true');

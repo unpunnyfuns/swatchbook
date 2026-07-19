@@ -1,6 +1,6 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
-import { GradientPalette, SwatchbookProvider } from '#/index.ts';
+import { GradientPalette, SwatchbookContext } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
@@ -37,9 +37,9 @@ afterEach(() => {
 
 it('renders a wide-gamut stop in its own color space, not as raw sRGB percentages', () => {
   const { container } = render(
-    <SwatchbookProvider value={makeSnapshot()}>
+    <SwatchbookContext.Provider value={makeSnapshot()}>
       <GradientPalette />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   const swatches = container.querySelectorAll<HTMLElement>('.sb-gradient-palette__stop-swatch');
   expect(swatches.length).toBe(2);

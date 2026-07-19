@@ -1,4 +1,4 @@
-import { SwatchbookProvider, TokenNavigator } from '@unpunnyfuns/swatchbook-blocks';
+import { SwatchbookContext, TokenNavigator } from '@unpunnyfuns/swatchbook-blocks';
 import type { ProjectSnapshot, VirtualToken } from '@unpunnyfuns/swatchbook-blocks';
 import { useState } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
@@ -339,7 +339,7 @@ const INDICATORS_SNAPSHOT: ProjectSnapshot = (() => {
  */
 export const Indicators = meta.story({
   render: () => (
-    <SwatchbookProvider value={INDICATORS_SNAPSHOT}>
+    <SwatchbookContext.Provider value={INDICATORS_SNAPSHOT}>
       {/*
         Give the navigator a unique `id` so its `usePersistedState` block key
         doesn't collide with sibling stories that share the same `root`/`type`
@@ -349,7 +349,7 @@ export const Indicators = meta.story({
         collapsed so leaf rows never appear.
       */}
       <TokenNavigator id="indicators" initiallyExpanded={6} />
-    </SwatchbookProvider>
+    </SwatchbookContext.Provider>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

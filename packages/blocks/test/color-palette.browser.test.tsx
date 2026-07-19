@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { SwatchbookProvider, ColorPalette } from '#/index.ts';
+import { SwatchbookContext, ColorPalette } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
@@ -32,9 +32,9 @@ describe('ColorPalette', () => {
 
   it('filters to color-type tokens by default and ignores dimensions', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <ColorPalette />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     expect(screen.queryByText('radius.sm')).toBeNull();
     expect(screen.queryByText('sm')).toBeNull();
@@ -42,9 +42,9 @@ describe('ColorPalette', () => {
 
   it('narrows to the filter subtree and derives groupBy from it', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <ColorPalette filter="color.**" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     // `color.*` has fixed length 1. Auto groupBy clamps so every swatch
     // keeps a leaf label — depth-2 tokens get `color.<leaf>` groups,
@@ -59,9 +59,9 @@ describe('ColorPalette', () => {
     // levels above the 4-segment palette tokens: the swatch label must stay
     // 'blue.500' (group-relative), not collapse to the bare '500' leaf.
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <ColorPalette filter="color.**" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     screen.getByText('color.palette');
     screen.getByText('blue.500');
@@ -74,9 +74,9 @@ describe('ColorPalette', () => {
     // auto groupBy clamps so all blue shades land under one group with
     // their shade as the leaf.
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <ColorPalette filter="color.palette.blue.**" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     screen.getByText('color.palette.blue');
     screen.getByText('500');
@@ -84,9 +84,9 @@ describe('ColorPalette', () => {
 
   it('shows the empty state when the filter matches no color tokens', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <ColorPalette filter="typography.**" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     screen.getByText('No color tokens match this filter.');
   });

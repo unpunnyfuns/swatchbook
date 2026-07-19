@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { SwatchbookProvider, TokenDetail } from '#/index.ts';
+import { SwatchbookContext, TokenDetail } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
@@ -34,18 +34,18 @@ describe('TokenDetail', () => {
 
   it('renders the token value for a known path', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <TokenDetail path="color.brand.primary" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     expect(screen.getByRole('heading', { name: 'color.brand.primary' })).toBeDefined();
   });
 
   it('shows the not-found message for an unknown path', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <TokenDetail path="color.missing" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     expect(screen.getByText(/not found in theme/)).toBeDefined();
   });
@@ -56,15 +56,15 @@ describe('TokenDetail', () => {
     // missing one changed the hook order and crashed React.
     const snapshot = makeSnapshot();
     const { rerender } = render(
-      <SwatchbookProvider value={snapshot}>
+      <SwatchbookContext.Provider value={snapshot}>
         <TokenDetail path="color.brand.primary" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     expect(() =>
       rerender(
-        <SwatchbookProvider value={snapshot}>
+        <SwatchbookContext.Provider value={snapshot}>
           <TokenDetail path="color.gone" />
-        </SwatchbookProvider>,
+        </SwatchbookContext.Provider>,
       ),
     ).not.toThrow();
     expect(screen.getByText(/not found in theme/)).toBeDefined();
@@ -72,7 +72,7 @@ describe('TokenDetail', () => {
 
   it('renders a deprecation notice with the message', async () => {
     render(
-      <SwatchbookProvider
+      <SwatchbookContext.Provider
         value={makeSnapshot({
           'color.old': {
             $type: 'color',
@@ -82,7 +82,7 @@ describe('TokenDetail', () => {
         })}
       >
         <TokenDetail path="color.old" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     const notice = await screen.findByTestId('token-detail-deprecated');
     expect(notice.textContent).toContain('use color.new instead');

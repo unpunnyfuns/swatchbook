@@ -6,7 +6,7 @@
  * that drives every assertion.
  */
 import { render, screen, within } from '@testing-library/react';
-import { SwatchbookProvider, TokenNavigator } from '#/index.ts';
+import { SwatchbookContext, TokenNavigator } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
@@ -34,13 +34,13 @@ export function renderNav(
   props: { initiallyExpanded?: number; onSelect?: (p: string) => void } = {},
 ) {
   return render(
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <TokenNavigator
         initiallyExpanded={props.initiallyExpanded ?? 0}
         searchable={false}
         {...(props.onSelect ? { onSelect: props.onSelect } : {})}
       />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
 }
 

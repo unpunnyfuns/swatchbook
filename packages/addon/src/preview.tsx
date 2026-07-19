@@ -3,13 +3,12 @@
 // are consumed by `definePreviewAddon(previewExports)` inside `swatchbookAddon()`
 // (`src/index.ts`) rather than intended as a direct import for application
 // code — `swatchbookAddon()` is the supported entry point.
-import { resolveAllWithProvenanceAt } from '@unpunnyfuns/swatchbook-core/graph';
-import type { TokenMap } from '@unpunnyfuns/swatchbook-core';
 import type { Decorator, Preview } from '@storybook/react-vite';
 import type { CSSProperties } from 'react';
 import { useEffect, useMemo } from 'react';
 import { addons } from 'storybook/preview-api';
 import { dataAttr } from '@unpunnyfuns/swatchbook-core/data-attr';
+import type { SnapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
 import { ensureStyleElement } from '@unpunnyfuns/swatchbook-core/style-element';
 import { tupleToName } from '@unpunnyfuns/swatchbook-core/themes';
 // Side-effect import for integrations that opted into `autoInject`
@@ -29,16 +28,8 @@ import {
   presets as virtualPresets,
   tokenGraph as virtualTokenGraph,
 } from 'virtual:swatchbook/tokens';
-import {
-  AxesContext,
-  registerChannel,
-  registerTokenSource,
-  SwatchbookProvider,
-  ThemeContext,
-  TOKENS_UPDATED_EVENT,
-  useTokenSnapshot,
-} from '@unpunnyfuns/swatchbook-blocks';
-import type { ProjectSnapshot } from '@unpunnyfuns/swatchbook-blocks';
+import { AxesContext, SwatchbookProvider, ThemeContext } from '@unpunnyfuns/swatchbook-blocks';
+import { registerProjectSource, useProjectSource } from '@unpunnyfuns/swatchbook-blocks/host';
 import {
   AXES_GLOBAL_KEY,
   HMR_EVENT,
@@ -46,25 +37,27 @@ import {
   INIT_REQUEST_EVENT,
   PREVIEW_MOUSEDOWN_EVENT,
   STYLE_ELEMENT_ID,
+  TOKENS_UPDATED_EVENT,
 } from '#/constants.ts';
 import type { InitPayload } from '#/channel-types.ts';
 import type { StoryParameters, SwatchbookGlobals } from '#/globals.ts';
+import { installHostSource } from '#/host-source.ts';
 import { useThemeAnnouncement } from '#/hooks/use-theme-announcement.ts';
 import { resolveTuple } from '#/tuple-resolve.ts';
 
-// Hand blocks the preview channel they subscribe to for toolbar axis/format
-// flips and dev-time token HMR. Blocks no longer reach for
-// `addons.getChannel()` themselves — the addon owns the Storybook relationship
-// and injects it here, at the same module-eval point as the token snapshot
-// below, before the preview emits its init SET_GLOBALS.
-registerChannel(addons.getChannel());
+// Decode the preview channel into blocks' generic ambient project source.
+// Blocks no longer reach for `addons.getChannel()` (or know any Storybook
+// vocabulary) themselves: the addon owns the Storybook relationship and
+// wires it here, at the same module-eval point as the token snapshot below,
+// before the preview emits its init SET_GLOBALS.
+installHostSource(addons.getChannel());
 
-// Seed blocks' token store with the build-time snapshot from the addon's
-// virtual module. Blocks no longer import `virtual:swatchbook/tokens`
+// Seed blocks' ambient project source with the build-time snapshot from the
+// addon's virtual module. Blocks no longer import `virtual:swatchbook/tokens`
 // directly (keeping them standalone-importable); the addon, which owns that
 // module, pushes the initial snapshot in at preview init. Dev-time updates
-// continue over TOKENS_UPDATED_EVENT.
-registerTokenSource({
+// continue over TOKENS_UPDATED_EVENT, decoded by `installHostSource` above.
+registerProjectSource({
   axes: virtualAxes,
   presets: virtualPresets,
   diagnostics,
@@ -204,12 +197,6 @@ function broadcastInit(): void {
   );
 }
 
-// Single shared `resolveAt` instance for the lifetime of the preview
-// iframe. `virtualTokenGraph` is a module-level virtual-module export
-// with stable identity, so this closure never needs to rebuild;
-// downstream `ProjectSnapshot` consumers can key memos on the snapshot
-// wrapper without worrying about `resolveAt` churning when Storybook
-// recreates `context.globals`.
 const themedDecorator: Decorator = (Story, context) => {
   const globals = context.globals as SwatchbookGlobals;
   const parameters = context.parameters as StoryParameters;
@@ -251,37 +238,39 @@ const themedDecorator: Decorator = (Story, context) => {
     wrapperAttrs[dataAttr(cssVarPrefix, name)] = value;
   });
 
-  // Read token data from the live snapshot store (seeded from the virtual
-  // module at init, updated in place on each dev-time HMR token save) rather
-  // than the static virtual-module exports — so blocks rendered inside
-  // stories pick up edited values without a full preview reload. The tuple /
-  // theme still come from the toolbar globals + per-story params above.
-  const live = useTokenSnapshot();
-  const resolveAt = useMemo(
-    () =>
-      (t: Record<string, string>): TokenMap =>
-        resolveAllWithProvenanceAt(live.tokenGraph, t),
-    [live.tokenGraph],
-  );
-  const snapshot = useMemo<ProjectSnapshot>(
+  // Read token data from the live ambient project source (seeded from the
+  // virtual module at init, updated in place on each dev-time HMR token
+  // save) rather than the static virtual-module exports, so blocks
+  // rendered inside stories pick up edited values without a full preview
+  // reload. The tuple / theme still come from the toolbar globals +
+  // per-story params above.
+  const live = useProjectSource();
+  // `ProjectSource` carries everything `SnapshotForWire` needs except
+  // `disabledAxes` (a virtual-module export, not part of the live store).
+  // `SwatchbookProvider` assembles `activeTheme`/`resolveAt` itself from
+  // this plus `tuple` below.
+  const wire = useMemo<SnapshotForWire>(
     () => ({
       axes: live.axes,
-      activeTheme: themeName,
-      activeAxes: tuple,
+      disabledAxes: virtualDisabledAxes,
+      presets: live.presets,
+      // `SnapshotForWire.diagnostics` is `Project['diagnostics']` (mutable);
+      // the live store's is `readonly`. Copy rather than widen the wire
+      // type just for this one call site.
+      diagnostics: [...live.diagnostics],
       cssVarPrefix: live.cssVarPrefix,
-      diagnostics: live.diagnostics,
+      indicators: live.indicators,
+      defaultColorFormat: live.defaultColorFormat,
       css: live.css,
       listing: live.listing,
-      tokenGraph: live.tokenGraph,
       defaultTuple: live.defaultTuple,
-      defaultColorFormat: live.defaultColorFormat,
-      resolveAt,
+      tokenGraph: live.tokenGraph,
     }),
-    [themeName, tuple, live, resolveAt],
+    [live],
   );
 
   return (
-    <SwatchbookProvider value={snapshot}>
+    <SwatchbookProvider snapshot={wire} axes={tuple}>
       <ThemeContext.Provider value={themeName}>
         <AxesContext.Provider value={tuple}>
           <div

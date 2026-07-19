@@ -2,12 +2,13 @@
  * Regression for the MDX-embedded, provider-less path: a block rendered
  * with no `<SwatchbookProvider>` (the shape blocks take when embedded
  * directly in an MDX doc with no `<Story/>`) must still honor
- * `Config.defaultColorFormat` via the channel-fed `TokenSnapshot` that
- * `registerTokenSource` seeds, not silently fall back to `'hex'`.
+ * `Config.defaultColorFormat` via the ambient `ProjectSource` that
+ * `registerProjectSource` seeds, not silently fall back to `'hex'`.
  */
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
-import { ColorTable, registerTokenSource } from '#/index.ts';
+import { registerProjectSource } from '#/host.ts';
+import { ColorTable } from '#/index.ts';
 import type { VirtualTokenGraph } from '#/index.ts';
 
 function graph(): VirtualTokenGraph {
@@ -30,12 +31,12 @@ function graph(): VirtualTokenGraph {
 
 afterEach(() => {
   cleanup();
-  // `registerTokenSource` patches are partial and retain omitted fields, so
+  // `registerProjectSource` patches are partial and retain omitted fields, so
   // resetting only `defaultColorFormat` left `axes` / `defaultTuple` /
   // `cssVarPrefix` / `tokenGraph` from this test's patch on the module-level
   // store for later files sharing the same worker. Restore the full baseline
-  // snapshot instead.
-  registerTokenSource({
+  // source instead.
+  registerProjectSource({
     axes: [],
     presets: [],
     diagnostics: [],
@@ -46,11 +47,12 @@ afterEach(() => {
     tokenGraph: { nodes: {}, axes: [], axisDefaults: {}, axisContexts: {} },
     defaultTuple: {},
     defaultColorFormat: 'hex',
+    activeAxes: null,
   });
 });
 
-it('honors defaultColorFormat from the channel token source with no provider mounted', () => {
-  registerTokenSource({
+it('honors defaultColorFormat from the ambient project source with no provider mounted', () => {
+  registerProjectSource({
     axes: [{ name: 'mode', contexts: ['light'], default: 'light', source: 'resolver' }],
     defaultTuple: { mode: 'light' },
     cssVarPrefix: 'sb',

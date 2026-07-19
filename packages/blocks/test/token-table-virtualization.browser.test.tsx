@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
-import { SwatchbookProvider, TokenTable } from '#/index.ts';
+import { SwatchbookContext, TokenTable } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
@@ -26,9 +26,9 @@ afterEach(() => cleanup());
 
 it('mounts only a bounded window of rows for a large table', async () => {
   render(
-    <SwatchbookProvider value={bigSnapshot(1000)}>
+    <SwatchbookContext.Provider value={bigSnapshot(1000)}>
       <TokenTable searchable={false} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   await screen.findAllByTestId('token-table-row');
   const mounted = screen.getAllByTestId('token-table-row').length;
@@ -38,9 +38,9 @@ it('mounts only a bounded window of rows for a large table', async () => {
 
 it('reveals later rows on scroll and unmounts earlier ones', async () => {
   render(
-    <SwatchbookProvider value={bigSnapshot(1000)}>
+    <SwatchbookContext.Provider value={bigSnapshot(1000)}>
       <TokenTable searchable={false} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   await screen.findAllByTestId('token-table-row');
   expect(screen.queryByText('color.gen.p0')).not.toBeNull();
@@ -54,9 +54,9 @@ it('reveals later rows on scroll and unmounts earlier ones', async () => {
 
 it('renders every row and no spacer for a small table', async () => {
   render(
-    <SwatchbookProvider value={bigSnapshot(20)}>
+    <SwatchbookContext.Provider value={bigSnapshot(20)}>
       <TokenTable searchable={false} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   await screen.findAllByTestId('token-table-row');
   expect(screen.getAllByTestId('token-table-row').length).toBe(20);
@@ -68,9 +68,9 @@ it('renders every row and no spacer for a small table', async () => {
 
 it('exposes the full row count and true row indices despite windowing', async () => {
   render(
-    <SwatchbookProvider value={bigSnapshot(1000)}>
+    <SwatchbookContext.Provider value={bigSnapshot(1000)}>
       <TokenTable searchable={false} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   const table = await screen.findByRole('table');
   expect(table.getAttribute('aria-rowcount')).toBe('1001');
@@ -80,9 +80,9 @@ it('exposes the full row count and true row indices despite windowing', async ()
 
 it('can reach and mount the final row when scrolled to the bottom', async () => {
   render(
-    <SwatchbookProvider value={bigSnapshot(1000)}>
+    <SwatchbookContext.Provider value={bigSnapshot(1000)}>
       <TokenTable searchable={false} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   await screen.findAllByTestId('token-table-row');
   window.scrollTo(0, document.body.scrollHeight);

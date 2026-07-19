@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
-import { SwatchbookProvider, TokenNavigator, TokenTable } from '#/index.ts';
+import { SwatchbookContext, TokenNavigator, TokenTable } from '#/index.ts';
 import type { ProjectSnapshot, VirtualToken } from '#/index.ts';
 
 const TOKENS: Record<string, VirtualToken> = {
@@ -31,27 +31,27 @@ afterEach(cleanup);
 
 it('TokenNavigator indicators={false} renders no strip', () => {
   render(
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <TokenNavigator searchable={false} indicators={false} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   expect(screen.queryByTestId('row-indicator-deprecated')).toBeNull();
 });
 
 it('TokenTable indicators={{ description: true }} shows the description glyph', () => {
   render(
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <TokenTable type="color" indicators={{ description: true }} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   expect(screen.getByTestId('row-indicator-description')).toBeTruthy();
 });
 
 it('TokenTable indicators={{ deprecation: false }} drops the badge and the path strikethrough', () => {
   render(
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <TokenTable type="color" indicators={{ deprecation: false }} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   expect(screen.queryByTestId('row-indicator-deprecated')).toBeNull();
   const pathCell = screen.getByText('color.brand').closest('td')!;
@@ -60,18 +60,18 @@ it('TokenTable indicators={{ deprecation: false }} drops the badge and the path 
 
 it('config.indicators baseline shows the description glyph with no per-block prop', () => {
   render(
-    <SwatchbookProvider value={snapshot({ description: true })}>
+    <SwatchbookContext.Provider value={snapshot({ description: true })}>
       <TokenTable type="color" />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   expect(screen.getByTestId('row-indicator-description')).toBeTruthy();
 });
 
 it('per-block indicators prop overrides a config.indicators baseline back off', () => {
   render(
-    <SwatchbookProvider value={snapshot({ description: true })}>
+    <SwatchbookContext.Provider value={snapshot({ description: true })}>
       <TokenTable type="color" indicators={{ description: false }} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   expect(screen.queryByTestId('row-indicator-description')).toBeNull();
 });

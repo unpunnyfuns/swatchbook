@@ -24,16 +24,18 @@ import { ColorPalette, TokenTable, TokenDetail } from '@unpunnyfuns/swatchbook-a
 <TokenDetail path="color.accent.bg" />
 ```
 
-Outside Storybook, wrap your tree in `SwatchbookProvider` and pass a `ProjectSnapshot`:
+Outside Storybook, wrap your tree in `SwatchbookProvider` and pass a wire snapshot (core's `snapshotForWire(project, css)`, typically written to JSON at build time):
 
 ```tsx
 import { SwatchbookProvider, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
-import snapshot from './tokens-snapshot.json';
+import wire from './tokens-snapshot.json';
 
-<SwatchbookProvider value={snapshot}>
+<SwatchbookProvider snapshot={wire} defaultAxes={{ mode: 'Light' }}>
   <TokenTable filter="color.**" />
 </SwatchbookProvider>;
 ```
+
+Pass `defaultAxes` and flip the tuple with `useSetAxes()`, or pass `axes` to drive it from the host's own state.
 
 Block catalogue, props, and composition patterns live in the [blocks reference](https://unpunnyfuns.github.io/swatchbook/reference/blocks) and the [authoring guide](https://unpunnyfuns.github.io/swatchbook/guides/authoring-doc-stories).
 

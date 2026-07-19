@@ -10,7 +10,7 @@ The MDX-embeddable doc blocks for token reference pages live in `@unpunnyfuns/sw
 npm install -D @unpunnyfuns/swatchbook-blocks
 ```
 
-Inside Storybook, register `@unpunnyfuns/swatchbook-addon` alongside these blocks; its preview decorator mounts a `SwatchbookProvider` (exported from this package) that the blocks read from. Outside Storybook, wrap your tree in `SwatchbookProvider` and pass a `ProjectSnapshot` directly.
+Inside Storybook, register `@unpunnyfuns/swatchbook-addon` alongside these blocks; its preview decorator mounts a `SwatchbookProvider` (exported from this package) that the blocks read from. Outside Storybook, wrap your tree in `SwatchbookProvider` and pass a `SnapshotForWire` via the `snapshot` prop directly.
 
 `SwatchbookProvider`, `useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the backing contexts (`ThemeContext`, `AxesContext`, `ColorFormatContext`) live in `@unpunnyfuns/swatchbook-blocks`. `@unpunnyfuns/swatchbook-addon` re-exports them verbatim, so either import path works depending on which packages your consumer already pulls in.
 
@@ -31,20 +31,22 @@ The addon's preview decorator wraps every story and docs render in a `Swatchbook
 
 ### Using blocks outside Storybook
 
-Blocks are pure presentation. Given a `ProjectSnapshot` (the shape the addon internally publishes into `virtual:swatchbook/tokens`), they render in any React tree: unit tests, standalone docs apps, custom tooling.
+Blocks are pure presentation. Given a `SnapshotForWire` (produced by core's `snapshotForWire(project, css)`), they render in any React tree: unit tests, standalone docs apps, custom tooling.
 
 ```tsx
 import { SwatchbookProvider, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
-import snapshot from './tokens-snapshot.json';
+import wire from './tokens-snapshot.json';
 
 export function TokenDocs() {
   return (
-    <SwatchbookProvider value={snapshot}>
-      <TokenTable filter='color.*' />
+    <SwatchbookProvider snapshot={wire} defaultAxes={{ mode: 'Light' }}>
+      <TokenTable filter='color.**' />
     </SwatchbookProvider>
   );
 }
 ```
+
+`wire` is typically written to a JSON file at build time and imported directly. Pass `snapshot` (required) plus either `defaultAxes` and let the provider own the tuple (flip it with `useSetAxes()`), or `axes` to drive the tuple from the host's own state.
 
 `SwatchbookProvider` is the canonical entry point.
 

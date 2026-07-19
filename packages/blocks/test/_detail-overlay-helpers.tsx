@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import { vi } from 'vitest';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
-import { SwatchbookProvider } from '#/provider.tsx';
+import { SwatchbookContext } from '#/contexts.ts';
 import type { ProjectSnapshot } from '#/contexts.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
@@ -28,9 +28,9 @@ export function emptySnapshot(): ProjectSnapshot {
 
 export function renderOverlay(onClose = vi.fn()): { onClose: ReturnType<typeof vi.fn> } {
   render(
-    <SwatchbookProvider value={emptySnapshot()}>
+    <SwatchbookContext.Provider value={emptySnapshot()}>
       <DetailOverlay path="color.accent.bg" onClose={onClose} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   return { onClose };
 }

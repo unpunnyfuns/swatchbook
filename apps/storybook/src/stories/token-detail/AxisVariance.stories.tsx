@@ -3,7 +3,7 @@ import { expect, waitFor } from 'storybook/test';
 import preview from '#storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Internals/TokenDetail/AxisVariance',
+  title: 'Inspector/TokenDetail/AxisVariance',
   component: AxisVariance,
   argTypes: {
     path: { control: 'text' },
