@@ -16,11 +16,11 @@ export default meta;
 
 export const RefBlue = meta.story({ args: { filter: 'color.palette.blue.**' } });
 
-export const RefBlueBrandADark = RefBlue.extend(withAxes('Brand A Dark'));
-export const RefBlueHighContrast = RefBlue.extend(withAxes({ mode: 'Light', contrast: 'High' }));
+export const RefBlueACMEDark = RefBlue.extend(withAxes('ACME Dark'));
+export const RefBlueHighContrast = RefBlue.extend(withAxes({ mode: 'Light', a11y: 'High-contrast' }));
 ```
 
-`'Brand A Dark'` above is an example preset name from the reference app's own
+`'ACME Dark'` above is an example preset name from the reference app's own
 config, not a value `withAxes` recognizes universally; the presets available to
 you come from your project's `presets` config.
 
@@ -45,7 +45,7 @@ Variants are visible sibling stories by default. To keep a variant test-only, ad
 a literal `!dev` tag in the `.extend` object and spread the helper for the axes:
 
 ```ts
-export const RefBlueHidden = RefBlue.extend({ tags: ['!dev'], ...withAxes({ contrast: 'High' }) });
+export const RefBlueHidden = RefBlue.extend({ tags: ['!dev'], ...withAxes({ a11y: 'High-contrast' }) });
 ```
 
 The tag must be written literally at the call site; it cannot come from the

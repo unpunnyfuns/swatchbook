@@ -1,0 +1,4 @@
+{
+  "$description": "typography = Comic overlay: base font-family becomes the comic stack.",
+  "font": { "family": { "$type": "fontFamily", "base": { "$value": "{font.family.comic}" } } }
+}

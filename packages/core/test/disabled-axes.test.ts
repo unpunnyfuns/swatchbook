@@ -12,27 +12,27 @@ const axes: Axis[] = [
   { name: 'mode', contexts: ['Light', 'Dark'], default: 'Light', source: 'resolver' },
   {
     name: 'brand',
-    contexts: ['Default', 'Brand A'],
+    contexts: ['Default', 'ACME'],
     default: 'Default',
     source: 'resolver',
   },
   {
-    name: 'contrast',
-    contexts: ['Normal', 'High'],
+    name: 'a11y',
+    contexts: ['Normal', 'High-contrast'],
     default: 'Normal',
     source: 'resolver',
   },
 ];
 
 it('validateDisabledAxes passes a known axis name through unchanged', () => {
-  const { names, diagnostics } = validateDisabledAxes(['contrast'], axes);
-  expect(names).toEqual(['contrast']);
+  const { names, diagnostics } = validateDisabledAxes(['a11y'], axes);
+  expect(names).toEqual(['a11y']);
   expect(diagnostics).toEqual([]);
 });
 
 it('validateDisabledAxes drops unknown names with a warn diagnostic', () => {
-  const { names, diagnostics } = validateDisabledAxes(['contrast', 'density'], axes);
-  expect(names).toEqual(['contrast']);
+  const { names, diagnostics } = validateDisabledAxes(['a11y', 'density'], axes);
+  expect(names).toEqual(['a11y']);
   expect(diagnostics).toHaveLength(1);
   expect(diagnostics[0]?.severity).toBe('warn');
   expect(diagnostics[0]?.group).toBe('swatchbook/disabled-axes');
@@ -40,8 +40,8 @@ it('validateDisabledAxes drops unknown names with a warn diagnostic', () => {
 });
 
 it('validateDisabledAxes dedupes repeated entries silently', () => {
-  const { names, diagnostics } = validateDisabledAxes(['contrast', 'contrast'], axes);
-  expect(names).toEqual(['contrast']);
+  const { names, diagnostics } = validateDisabledAxes(['a11y', 'a11y'], axes);
+  expect(names).toEqual(['a11y']);
   expect(diagnostics).toEqual([]);
 });
 
@@ -62,7 +62,7 @@ beforeAll(async () => {
     {
       tokens: ['tokens/**/*.json'],
       resolver: resolverPath,
-      disabledAxes: ['contrast'],
+      disabledAxes: ['a11y'],
       default: { mode: 'Light', brand: 'Default' },
       cssVarPrefix: 'sb',
     },
@@ -72,22 +72,23 @@ beforeAll(async () => {
 }, 30_000);
 
 it('filters disabled axes out of Project.axes', () => {
-  expect(project.axes.map((a) => a.name)).toEqual(['mode', 'brand']);
+  expect(project.axes.map((a) => a.name)).toEqual(['mode', 'brand', 'typography']);
 });
 
 it('carries the filtered-out names on Project.disabledAxes', () => {
-  expect(project.disabledAxes).toEqual(['contrast']);
+  expect(project.disabledAxes).toEqual(['a11y']);
 });
 
 it('drops the disabled axis from the project axes list and defaultTuple', () => {
   // Singleton enumeration over surviving axes: 1 default tuple + 1 per
-  // non-default cell on each surviving axis (mode=Dark, brand=Brand A) = 3.
-  expect(project.axes.map((a) => a.name)).not.toContain('contrast');
-  expect(project.defaultTuple).not.toHaveProperty('contrast');
+  // non-default cell on each surviving axis (mode=Dark, brand=ACME,
+  // typography=Mono/Comic).
+  expect(project.axes.map((a) => a.name)).not.toContain('a11y');
+  expect(project.defaultTuple).not.toHaveProperty('a11y');
 });
 
-it('emits CSS with no data-contrast selectors', () => {
-  expect(css).not.toMatch(/data-contrast/);
+it('emits CSS with no data-a11y selectors', () => {
+  expect(css).not.toMatch(/data-a11y/);
 });
 
 it('keeps graph axisContexts keyed against the surviving axes only', () => {
@@ -101,12 +102,12 @@ it('surfaces a warn diagnostic when disabledAxes references an unknown axis', as
     {
       tokens: ['tokens/**/*.json'],
       resolver: resolverPath,
-      disabledAxes: ['contrast', 'density'],
+      disabledAxes: ['a11y', 'density'],
       default: { mode: 'Light', brand: 'Default' },
     },
     fixtureCwd,
   );
-  expect(p.disabledAxes).toEqual(['contrast']);
+  expect(p.disabledAxes).toEqual(['a11y']);
   const warn = p.diagnostics.find(
     (d) => d.group === 'swatchbook/disabled-axes' && d.severity === 'warn',
   );

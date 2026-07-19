@@ -4,6 +4,7 @@
       "$type": "fontFamily",
       "system": {
         "$value": [
+          "Geist",
           "system-ui",
           "-apple-system",
           "Segoe UI",
@@ -15,6 +16,7 @@
       },
       "mono": {
         "$value": [
+          "Geist Mono",
           "ui-monospace",
           "SFMono-Regular",
           "SF Mono",
@@ -25,24 +27,8 @@
         ]
       },
       "comic": {
-        "$description": "Variable-width comic stack, used as the a11y=High-contrast escalation for typeface=Variable.",
+        "$description": "Comic stack, used as the typography=Comic context's base font-family.",
         "$value": ["Comic Sans MS", "Comic Neue", "Chalkboard SE", "Marker Felt", "cursive"]
-      },
-      "comic-mono": {
-        "$description": "Comic-flavoured monospace stack, used as the a11y=High-contrast escalation for typeface=Monotype — prefers Comic Mono / Fantasque Sans Mono / Comic Shanns Mono if installed locally, falls through to Comic Sans MS and the system monospace so rendering never regresses past a plain fixed-pitch face.",
-        "$value": [
-          "Comic Mono",
-          "Fantasque Sans Mono",
-          "Comic Shanns Mono",
-          "Comic Sans MS",
-          "ui-monospace",
-          "SFMono-Regular",
-          "SF Mono",
-          "Menlo",
-          "Consolas",
-          "Liberation Mono",
-          "monospace"
-        ]
       }
     }
   }

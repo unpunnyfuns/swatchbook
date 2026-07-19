@@ -15,7 +15,7 @@ export interface TailwindCardProps {
  * `sb-` prefix (`bg-sb-surface-raised`, `p-sb-lg`, `rounded-sb-lg`,
  * `shadow-sb-md`) so it never collides with Tailwind's shipped scales —
  * see `.storybook/tailwind.css` for the `@theme` wiring. Switching
- * mode / brand / contrast in the swatchbook toolbar flips every utility
+ * mode / brand / a11y in the swatchbook toolbar flips every utility
  * via CSS cascade.
  */
 export function TailwindCard({ title, body, status = 'default' }: TailwindCardProps): ReactElement {

@@ -15,13 +15,13 @@ importers:
     devDependencies:
       '@changesets/cli':
         specifier: ^2.31.0
-        version: 2.31.0(@types/node@25.6.0)
+        version: 2.31.0
       '@terrazzo/cli':
         specifier: ^2.3.0
-        version: 2.4.0(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(lightningcss@1.32.0)
+        version: 2.4.0(esbuild@0.28.1)(lightningcss@1.32.0)
       '@vitest/coverage-v8':
         specifier: ^4.1.8
-        version: 4.1.8(@vitest/browser@4.1.8)(vitest@4.1.8)
+        version: 4.1.8(vitest@4.1.8)
       oxfmt:
         specifier: ^0.45.0
         version: 0.45.0
@@ -36,7 +36,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^4.1.8
-        version: 4.1.8(@types/node@25.6.0)(@vitest/browser-playwright@4.1.8)(@vitest/coverage-v8@4.1.8)(@vitest/ui@4.1.8)(vite@8.0.16(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(yaml@2.9.0))
+        version: 4.1.8(@vitest/coverage-v8@4.1.8)(vite@8.0.16(esbuild@0.28.1)(yaml@2.9.0))
 
   apps/docs:
     dependencies:
@@ -6844,7 +6844,7 @@ snapshots:
     dependencies:
       '@changesets/types': 6.1.0
 
-  '@changesets/cli@2.31.0(@types/node@25.6.0)':
+  '@changesets/cli@2.31.0':
     dependencies:
       '@changesets/apply-release-plan': 7.1.1
       '@changesets/assemble-release-plan': 6.0.10
@@ -6860,7 +6860,7 @@ snapshots:
       '@changesets/should-skip-package': 0.1.2
       '@changesets/types': 6.1.0
       '@changesets/write': 0.4.0
-      '@inquirer/external-editor': 1.0.3(@types/node@25.6.0)
+      '@inquirer/external-editor': 1.0.3
       '@manypkg/get-packages': 1.1.3
       ansi-colors: 4.1.3
       enquirer: 2.4.1
@@ -7292,12 +7292,10 @@ snapshots:
   '@img/sharp-win32-x64@0.35.3':
     optional: true
 
-  '@inquirer/external-editor@1.0.3(@types/node@25.6.0)':
+  '@inquirer/external-editor@1.0.3':
     dependencies:
       chardet: 2.1.1
       iconv-lite: 0.7.2
-    optionalDependencies:
-      '@types/node': 25.6.0
 
   '@joshwooding/vite-plugin-react-docgen-typescript@0.7.0(typescript@6.0.3)(vite@8.0.16(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(yaml@2.9.0))':
     dependencies:
@@ -8719,6 +8717,40 @@ snapshots:
       - terser
       - tsx
 
+  '@terrazzo/cli@2.4.0(esbuild@0.28.1)(lightningcss@1.32.0)':
+    dependencies:
+      '@clack/prompts': 1.5.1
+      '@humanwhocodes/momoa': 3.3.10
+      '@terrazzo/json-schema-tools': 0.2.1(@humanwhocodes/momoa@3.3.10)(yaml-to-momoa@0.0.9)
+      '@terrazzo/parser': 2.4.0(yaml-to-momoa@0.0.9)
+      '@terrazzo/token-tools': 2.4.0
+      chokidar: 5.0.0
+      detect-package-manager: 3.0.2
+      dtcg-examples: 1.0.3
+      escodegen: 2.1.0
+      merge-anything: 5.1.7
+      meriyah: 7.1.0
+      mime: 4.1.0
+      picocolors: 1.1.1
+      scule: 1.3.0
+      vite: 8.0.16(esbuild@0.28.1)(yaml@2.9.0)
+      vite-node: 5.3.0(lightningcss@1.32.0)(yaml@2.9.0)
+      yaml: 2.9.0
+      yaml-to-momoa: 0.0.9
+    transitivePeerDependencies:
+      - '@types/node'
+      - '@vitejs/devtools'
+      - esbuild
+      - jiti
+      - less
+      - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - terser
+      - tsx
+
   '@terrazzo/json-schema-tools@0.2.1(@humanwhocodes/momoa@3.3.10)(yaml-to-momoa@0.0.9)':
     dependencies:
       '@humanwhocodes/momoa': 3.3.10
@@ -9040,6 +9072,20 @@ snapshots:
     optionalDependencies:
       '@vitest/browser': 4.1.8(vite@8.0.16(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(yaml@2.9.0))(vitest@4.1.8)
 
+  '@vitest/coverage-v8@4.1.8(vitest@4.1.8)':
+    dependencies:
+      '@bcoe/v8-coverage': 1.0.2
+      '@vitest/utils': 4.1.8
+      ast-v8-to-istanbul: 1.0.3
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-reports: 3.2.0
+      magicast: 0.5.3
+      obug: 2.1.2
+      std-env: 4.1.0
+      tinyrainbow: 3.1.0
+      vitest: 4.1.8(@vitest/coverage-v8@4.1.8)(vite@8.0.16(esbuild@0.28.1)(yaml@2.9.0))
+
   '@vitest/expect@3.2.4':
     dependencies:
       '@types/chai': 5.2.3
@@ -9064,6 +9110,14 @@ snapshots:
       magic-string: 0.30.21
     optionalDependencies:
       vite: 8.0.16(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(yaml@2.9.0)
+
+  '@vitest/mocker@4.1.8(vite@8.0.16(esbuild@0.28.1)(yaml@2.9.0))':
+    dependencies:
+      '@vitest/spy': 4.1.8
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 8.0.16(esbuild@0.28.1)(yaml@2.9.0)
 
   '@vitest/pretty-format@3.2.4':
     dependencies:
@@ -12469,6 +12523,26 @@ snapshots:
       - tsx
       - yaml
 
+  vite-node@5.3.0(lightningcss@1.32.0)(yaml@2.9.0):
+    dependencies:
+      cac: 6.7.14
+      es-module-lexer: 2.1.0
+      obug: 2.1.2
+      pathe: 2.0.3
+      vite: 7.3.5(lightningcss@1.32.0)(yaml@2.9.0)
+    transitivePeerDependencies:
+      - '@types/node'
+      - jiti
+      - less
+      - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - terser
+      - tsx
+      - yaml
+
   vite@7.3.5(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(yaml@2.9.0):
     dependencies:
       esbuild: 0.28.1
@@ -12484,6 +12558,19 @@ snapshots:
       lightningcss: 1.32.0
       yaml: 2.9.0
 
+  vite@7.3.5(lightningcss@1.32.0)(yaml@2.9.0):
+    dependencies:
+      esbuild: 0.28.1
+      fdir: 6.5.0(picomatch@4.0.4)
+      picomatch: 4.0.4
+      postcss: 8.5.15
+      rollup: 4.61.1
+      tinyglobby: 0.2.17
+    optionalDependencies:
+      fsevents: 2.3.3
+      lightningcss: 1.32.0
+      yaml: 2.9.0
+
   vite@8.0.16(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(yaml@2.9.0):
     dependencies:
       lightningcss: 1.32.0
@@ -12496,6 +12583,18 @@ snapshots:
       esbuild: 0.28.1
       fsevents: 2.3.3
       jiti: 2.6.1
+      yaml: 2.9.0
+
+  vite@8.0.16(esbuild@0.28.1)(yaml@2.9.0):
+    dependencies:
+      lightningcss: 1.32.0
+      picomatch: 4.0.4
+      postcss: 8.5.15
+      rolldown: 1.0.3
+      tinyglobby: 0.2.17
+    optionalDependencies:
+      esbuild: 0.28.1
+      fsevents: 2.3.3
       yaml: 2.9.0
 
   vitefu@1.1.3(vite@8.0.16(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(yaml@2.9.0)):
@@ -12529,6 +12628,33 @@ snapshots:
       '@vitest/browser-playwright': 4.1.8(playwright@1.59.1)(vite@8.0.16(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(yaml@2.9.0))(vitest@4.1.8)
       '@vitest/coverage-v8': 4.1.8(@vitest/browser@4.1.8)(vitest@4.1.8)
       '@vitest/ui': 4.1.8(vitest@4.1.8)
+    transitivePeerDependencies:
+      - msw
+
+  vitest@4.1.8(@vitest/coverage-v8@4.1.8)(vite@8.0.16(esbuild@0.28.1)(yaml@2.9.0)):
+    dependencies:
+      '@vitest/expect': 4.1.8
+      '@vitest/mocker': 4.1.8(vite@8.0.16(esbuild@0.28.1)(yaml@2.9.0))
+      '@vitest/pretty-format': 4.1.8
+      '@vitest/runner': 4.1.8
+      '@vitest/snapshot': 4.1.8
+      '@vitest/spy': 4.1.8
+      '@vitest/utils': 4.1.8
+      es-module-lexer: 2.1.0
+      expect-type: 1.3.0
+      magic-string: 0.30.21
+      obug: 2.1.2
+      pathe: 2.0.3
+      picomatch: 4.0.4
+      std-env: 4.1.0
+      tinybench: 2.9.0
+      tinyexec: 1.2.4
+      tinyglobby: 0.2.17
+      tinyrainbow: 3.1.0
+      vite: 8.0.16(esbuild@0.28.1)(yaml@2.9.0)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@vitest/coverage-v8': 4.1.8(vitest@4.1.8)
     transitivePeerDependencies:
       - msw
 

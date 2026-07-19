@@ -26,7 +26,7 @@
       "fg":       { "$value": "{color.palette.neutral.900}" }
     },
     "accessible": {
-      "$description": "AAA-contrast accent and text alternates for Dark mode. Inverted pattern — light-blue button background carries dark text; muted/subtle text lifts toward the top of the neutral ramp so it stays legible on dark muted/subtle surfaces. The contrast-high overlay aliases role tokens to this namespace so each mode owns its own AAA values without contrast-high branching per mode.",
+      "$description": "AAA-contrast accent and text alternates for Dark mode. Inverted pattern — light-blue button background carries dark text; muted/subtle text lifts toward the top of the neutral ramp so it stays legible on dark muted/subtle surfaces. The high-contrast overlay aliases role tokens to this namespace so each mode owns its own AAA values without high-contrast branching per mode.",
       "accent": {
         "bg":       { "$value": "{color.palette.blue.100}" },
         "bg-hover": { "$value": "{color.palette.blue.50}" },

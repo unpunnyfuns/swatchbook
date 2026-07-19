@@ -40,6 +40,11 @@ describe('buildTokenGraph baseline seeding', () => {
     const { parserInput, axes, defaultTuple } = await loadReferenceFixtureParserInput();
     const { graph } = buildTokenGraph(parserInput, axes, defaultTuple);
     expect(graph.axes).toEqual(axes.map((a) => a.name));
-    expect(graph.axisDefaults).toEqual({ mode: 'Light', brand: 'Default', contrast: 'Normal' });
+    expect(graph.axisDefaults).toEqual({
+      mode: 'Light',
+      brand: 'Default',
+      typography: 'Sans',
+      a11y: 'Normal',
+    });
   });
 });

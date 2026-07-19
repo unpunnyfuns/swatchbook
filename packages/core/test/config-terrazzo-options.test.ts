@@ -11,7 +11,7 @@ describe('Config terrazzo options plumbing', () => {
     const project = await loadProject(
       {
         resolver: resolverPath,
-        default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+        default: { mode: 'Light', brand: 'Default', a11y: 'Normal' },
         cssVarPrefix: 'sb',
         cssOptions: { legacyHex: true },
       },
@@ -30,7 +30,7 @@ describe('Config terrazzo options plumbing', () => {
     const project = await loadProject(
       {
         resolver: resolverPath,
-        default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+        default: { mode: 'Light', brand: 'Default', a11y: 'Normal' },
         cssVarPrefix: 'sb',
         listingOptions: {
           platforms: {
@@ -57,7 +57,7 @@ describe('Config terrazzo options plumbing', () => {
     const project = await loadProject(
       {
         resolver: resolverPath,
-        default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+        default: { mode: 'Light', brand: 'Default', a11y: 'Normal' },
         cssVarPrefix: 'sb',
         terrazzoPlugins: [
           {

@@ -1,0 +1,52 @@
+{
+  "color": {
+    "$type": "color",
+    "$description": "High-contrast overlay — strengthens borders and focus rings, escalates the accent to AAA contrast and lifts muted/subtle text toward each mode's `color.accessible.*` slot (alias indirection keeps this file mode-agnostic; Light picks up a deep-blue button with darker muted text on light surfaces, Dark an inverted light-blue-with-dark-text button paired with lighter muted text on dark surfaces).",
+    "border": {
+      "default": { "$value": "{color.palette.neutral.700}" },
+      "strong":  { "$value": "{color.palette.neutral.900}" },
+      "focus":   { "$value": "{color.palette.yellow.500}" }
+    },
+    "text": {
+      "muted":  { "$value": "{color.accessible.text.muted}" },
+      "subtle": { "$value": "{color.accessible.text.subtle}" }
+    },
+    "accent": {
+      "bg":       { "$value": "{color.accessible.accent.bg}" },
+      "bg-hover": { "$value": "{color.accessible.accent.bg-hover}" },
+      "fg":       { "$value": "{color.accessible.accent.fg}" }
+    }
+  },
+  "font": {
+    "weight": {
+      "$type": "fontWeight",
+      "$description": "Bumps the base text weight to semibold, independent of whichever typography family context is active; `typography.body` aliases `font.weight.base` so this reaches rendered text without touching `font.family`.",
+      "base": { "$value": "{font.weight.semibold}" }
+    }
+  },
+  "border": {
+    "$type": "border",
+    "$description": "High-contrast border widths — composite bumps to 2px default, 3px focus.",
+    "default": {
+      "$value": {
+        "color": "{color.border.default}",
+        "width": { "value": 2, "unit": "px" },
+        "style": "solid"
+      }
+    },
+    "strong": {
+      "$value": {
+        "color": "{color.border.strong}",
+        "width": { "value": 2, "unit": "px" },
+        "style": "solid"
+      }
+    },
+    "focus": {
+      "$value": {
+        "color": "{color.border.focus}",
+        "width": { "value": 3, "unit": "px" },
+        "style": "solid"
+      }
+    }
+  }
+}

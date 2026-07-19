@@ -51,14 +51,16 @@ describe('Token Listing integration', () => {
     const project = await loadProject({ tokens: ['tokens/**/*.json'] }, typographyAliasCwd);
     expect(project.diagnostics.filter((d) => d.group === 'swatchbook/listing')).toHaveLength(0);
     expect(project.listing['typography.body']).toBeDefined();
-    expect(project.listing['color.ink']?.$extensions['app.terrazzo.listing'].previewValue).toBe('#1a1a1a');
+    expect(project.listing['color.ink']?.$extensions['app.terrazzo.listing'].previewValue).toBe(
+      '#1a1a1a',
+    );
   });
 
   it('surfaces a swatchbook/listing warn diagnostic when a terrazzoPlugin throws', async () => {
     const project = await loadProject(
       {
         resolver: resolverPath,
-        default: { mode: 'Light', brand: 'Default', contrast: 'Normal' },
+        default: { mode: 'Light', brand: 'Default', a11y: 'Normal' },
         cssVarPrefix: 'sb',
         terrazzoPlugins: [
           {

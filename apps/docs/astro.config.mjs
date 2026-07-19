@@ -25,6 +25,31 @@ export default defineConfig({
         alt: 'swatchbook logo',
       },
       customCss: ['./src/css/custom.css'],
+      // Preload the self-hosted Geist variable fonts so the browser
+      // fetches them before custom.css's @font-face is parsed, avoiding
+      // a flash of the fallback stack.
+      head: [
+        {
+          tag: 'link',
+          attrs: {
+            rel: 'preload',
+            href: '/swatchbook/fonts/GeistVF.woff2',
+            as: 'font',
+            type: 'font/woff2',
+            crossorigin: true,
+          },
+        },
+        {
+          tag: 'link',
+          attrs: {
+            rel: 'preload',
+            href: '/swatchbook/fonts/GeistMonoVF.woff2',
+            as: 'font',
+            type: 'font/woff2',
+            crossorigin: true,
+          },
+        },
+      ],
       // Replace the stock light/dark toggle with the swatchbook switcher —
       // one control for every axis (mode/brand/contrast). Dogfoods the
       // product's own thesis: the switcher supersedes a plain theme toggle.
