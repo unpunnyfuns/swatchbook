@@ -53,7 +53,6 @@ export interface ColorPaletteProps {
 
 export interface ColorPaletteSwatch {
   path: string;
-  leaf: string;
   cssVar: string;
   /** Realised token, fed to the `color` presenter per the presenter contract. */
   token: RealisedToken<'color'>;
@@ -109,11 +108,9 @@ export function deriveColorPaletteGroups(
   for (const [path, token] of entries) {
     const segments = path.split('.');
     const groupKey = segments.slice(0, effectiveGroupBy).join('.');
-    const leaf = segments.slice(effectiveGroupBy).join('.') || segments.at(-1) || path;
     const list = bucket.get(groupKey) ?? [];
     list.push({
       path,
-      leaf,
       cssVar: resolveCssVar(path, projectFields),
       token: token as RealisedToken<'color'>,
     });

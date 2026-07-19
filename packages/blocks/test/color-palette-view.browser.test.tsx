@@ -5,7 +5,7 @@ import type { ColorPaletteGroup, ColorPaletteViewProps } from '#/ColorPalette.ts
 import type { RealisedToken } from '@unpunnyfuns/swatchbook-core/token-value-types';
 
 const blueToken: RealisedToken<'color'> = { $type: 'color', $value: { hex: '#0066ff' } };
-// Out-of-gamut in sRGB (rgb component past 255) — exercises the ⚠ marker.
+// Out-of-gamut in sRGB (rgb component past 255): exercises the ⚠ marker.
 const oorToken: RealisedToken<'color'> = {
   $type: 'color',
   $value: { colorSpace: 'srgb', components: [300 / 255, 0, 0] },
@@ -18,13 +18,11 @@ function groups(): ColorPaletteGroup[] {
       swatches: [
         {
           path: 'color.brand.bg',
-          leaf: 'bg',
           cssVar: 'var(--sb-color-brand-bg)',
           token: blueToken,
         },
         {
           path: 'color.brand.fg',
-          leaf: 'fg',
           cssVar: 'var(--sb-color-brand-fg)',
           token: oorToken,
         },
@@ -33,7 +31,7 @@ function groups(): ColorPaletteGroup[] {
   ];
 }
 
-// The View renders + groups from plain props — no provider, no store.
+// The View renders + groups from plain props: no provider, no store.
 function setup(extra: Partial<ColorPaletteViewProps> = {}) {
   return render(
     <ColorPaletteView

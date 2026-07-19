@@ -1,5 +1,5 @@
 /**
- * Checkerboard backdrop so the chip's transparency reads visually — a flat
+ * Checkerboard backdrop so the chip's transparency reads visually. A flat
  * background wouldn't distinguish `opacity: 1` from `opacity: 0.4`.
  */
 .sb-opacity-swatch {

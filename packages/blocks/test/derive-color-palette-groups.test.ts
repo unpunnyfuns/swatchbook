@@ -48,8 +48,8 @@ it('falls back to a prefix-derived css var when the listing has no entry', () =>
 it('applies an explicit groupBy over the derived default', () => {
   const groups = deriveColorPaletteGroups(resolved, listing, cssVarPrefix, { ...opts, groupBy: 2 });
   expect(groups.map((g) => g.group)).toEqual(['color.brand', 'color.text']);
-  expect(groups[0]?.swatches.map((s) => s.leaf)).toEqual(['bg', 'fg']);
-  expect(groups[1]?.swatches.map((s) => s.leaf)).toEqual(['muted']);
+  expect(groups[0]?.swatches.map((s) => s.path)).toEqual(['color.brand.bg', 'color.brand.fg']);
+  expect(groups[1]?.swatches.map((s) => s.path)).toEqual(['color.text.muted']);
 });
 
 it('applies the path filter', () => {

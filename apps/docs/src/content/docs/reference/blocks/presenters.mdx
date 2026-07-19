@@ -88,9 +88,12 @@ Keys the built-ins read:
 
 - `DimensionSample`: `visual?: 'length' | 'radius' | 'size'` (default `'length'`), set by `DimensionScale`'s own `visual` prop.
 - `MotionSample`: `speed?: MotionSpeed` (default `1`) and `runKey?: number` (forces a restart when it changes), set by `MotionPreview`'s speed pills and replay button.
-- `TypeSpecimen`: `sample?: string`, set by `TypographyScale`'s own `sample` prop.
+- `TypeSpecimen`, `FontFamilySpecimen`, `FontWeightSpecimen`: `sample?: string`, set by `TypographyScale` / `FontFamilyPreview` / `FontWeightScale`'s own `sample` prop.
+- `OpacitySwatch`: `sampleColorVar?: string`, the color painted behind the checkerboard so the chip's alpha reads visually; defaults to the swatchbook accent surface.
 
 A custom `DimensionSample` replacement registered via `presenters={{ dimension: MyDimension }}` still receives `options={{ visual: 'radius' }}` when rendered inside `DimensionScale` with `visual="radius"`; whether it reads that key is up to it.
+
+A custom `transition` presenter can read `options.runKey`, a counter that changes on each replay, to support `MotionPreview`'s replay button the way the built-in `MotionSample` does.
 
 ## Realised value vs. listing preview
 

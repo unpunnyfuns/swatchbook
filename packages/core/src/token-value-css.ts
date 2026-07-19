@@ -8,9 +8,9 @@ import type { BorderValue, DashedStrokeStyleValue, ShadowLayer } from '#/token-v
  * border width, …) in the preview tables. Renders `—` for a missing
  * sub-field and falls back to JSON for shapes it doesn't recognize.
  *
- * Distinct from `formatTokenValue`'s internal `formatDimension`, which
- * formats a token's top-level value and has no `—` placeholder — these are
- * the per-layer sample formatters shared by `ShadowPreview` + `BorderPreview`.
+ * Distinct from `formatTokenValue`'s internal `formatInternalDimension`,
+ * which formats a token's top-level value and has no `—` placeholder — these
+ * are the per-layer sample formatters shared by `ShadowPreview` + `BorderPreview`.
  */
 export function formatDimension(raw: unknown): string {
   if (raw == null) return '—';
