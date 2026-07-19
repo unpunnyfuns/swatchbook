@@ -195,6 +195,10 @@ jobs:
       # npm trusted publishing: the OIDC token is exchanged for a short-lived
       # publish token — no NPM_TOKEN secret. Also covers provenance.
       id-token: write
+      # `actions: write` so the final step can dispatch the Docs workflow
+      # after a real publish. workflow_dispatch is exempt from the
+      # GITHUB_TOKEN-does-not-trigger-workflows rule, so no App token is needed.
+      actions: write
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -364,3 +368,15 @@ jobs:
               "$latest"
             echo "  ✓ released $tag"
           done
+
+      # Deploy the docs for the just-published version. docs.yml no longer
+      # runs on every push to main (only docs-only changes); a real release
+      # refreshes the site through this dispatch so the live docs track the
+      # published version (#1414).
+      - name: Deploy the docs for the published release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # Dispatch on main (workflow_dispatch needs a branch ref) but pass the
+        # published commit SHA so docs.yml checks that out and the live docs
+        # match the release, even if main has advanced since publish started.
+        run: gh workflow run docs.yml --ref main -f ref="$GITHUB_SHA"
