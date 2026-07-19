@@ -62,7 +62,7 @@ export const DefaultLightPreset = meta.story({
  */
 export const ACMEDarkPreset = meta.story({
   parameters: {
-    swatchbook: { axes: { mode: 'Dark', brand: 'ACME' } },
+    swatchbook: { axes: { mode: 'Dark', brand: 'ACME', typography: 'Sans', a11y: 'Normal' } },
   },
   play: async ({ canvasElement }) => {
     const wrapper = await findWrapper(canvasElement);

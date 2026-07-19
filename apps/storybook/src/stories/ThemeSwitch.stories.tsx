@@ -81,7 +81,7 @@ export const Dark = meta.story({
 /**
  * Stacked composition: ACME overrides `color.accent.bg` from blue to
  * violet. The button (whose styles read `var(--sb-color-accent-bg)` directly)
- * must render with a red channel that exceeds the blue channel — violet's
+ * must render with a red channel that exceeds the green channel — violet's
  * defining property — whereas plain Light/Dark accents are blue-dominant.
  */
 export const LightACME = meta.story({

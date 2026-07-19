@@ -22,7 +22,7 @@
  * monospace rendering visibly larger than the proportional font.
  */
 @font-face {
-  font-family: 'Geist';
+  font-family: Geist;
   src: url('/swatchbook/fonts/GeistVF.woff2') format('woff2');
   font-weight: 100 900;
   font-display: swap;
