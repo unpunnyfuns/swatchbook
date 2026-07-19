@@ -22,6 +22,7 @@ export { DimensionSample, type DimensionSampleProps } from '#/dimension-scale/Di
 export { FontFamilyPreview, type FontFamilyPreviewProps } from '#/FontFamilyPreview.tsx';
 export { FontWeightScale, type FontWeightScaleProps } from '#/FontWeightScale.tsx';
 export { GradientPalette, type GradientPaletteProps } from '#/GradientPalette.tsx';
+export { GradientSwatch, type GradientSwatchProps } from '#/presenters/GradientSwatch.tsx';
 export { MotionPreview, type MotionPreviewProps, type MotionSpeed } from '#/MotionPreview.tsx';
 export { OpacityScale, type OpacityScaleProps } from '#/OpacityScale.tsx';
 export {

@@ -2,12 +2,22 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 import { GradientPaletteView } from '#/GradientPalette.tsx';
 import type { GradientPaletteViewProps, GradientRow } from '#/GradientPalette.tsx';
+import type { RealisedToken } from '@unpunnyfuns/swatchbook-core/token-value-types';
+
+const token: RealisedToken<'gradient'> = {
+  $type: 'gradient',
+  $value: [
+    { color: { hex: '#0066ff' }, position: 0 },
+    { color: { hex: '#ffffff' }, position: 1 },
+  ],
+};
 
 function rows(): GradientRow[] {
   return [
     {
       path: 'gradient.brand',
       cssVar: 'var(--sb-gradient-brand)',
+      token,
       stops: [
         {
           key: 'gradient.brand|0|rgb(0% 40% 100%)',
@@ -34,6 +44,7 @@ function setup(extra: Partial<GradientPaletteViewProps> = {}) {
       activeTheme="Light"
       cssVarPrefix="sb"
       activeAxes={{ theme: 'Light' }}
+      colorFormat="hex"
       {...extra}
     />,
   );

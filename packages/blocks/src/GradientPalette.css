@@ -28,12 +28,6 @@
   opacity: var(--swatchbook-opacity-muted);
 }
 
-.sb-gradient-palette__sample {
-  height: 56px;
-  border-radius: var(--swatchbook-radius-xs);
-  border: 1px solid var(--swatchbook-border-default);
-}
-
 .sb-gradient-palette__stops {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: var(--swatchbook-type-micro);

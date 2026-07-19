@@ -3,6 +3,7 @@ import type { TokenType } from '@unpunnyfuns/swatchbook-core/token-value-types';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { ColorSwatch } from '#/presenters/ColorSwatch.tsx';
 import { DimensionSample } from '#/dimension-scale/DimensionSample.tsx';
+import { GradientSwatch } from '#/presenters/GradientSwatch.tsx';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
 import type { PresenterComponent, PresenterRegistry } from '#/presenters/types.ts';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
@@ -16,6 +17,7 @@ export const DEFAULT_PRESENTERS: PresenterRegistry = {
   shadow: ShadowSample as PresenterComponent,
   border: BorderSample as PresenterComponent,
   dimension: DimensionSample as PresenterComponent,
+  gradient: GradientSwatch as PresenterComponent,
   transition: MotionSample as PresenterComponent,
 };
 

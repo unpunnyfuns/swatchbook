@@ -1,0 +1,6 @@
+.sb-gradient-swatch__chip {
+  height: 56px;
+  width: 100%;
+  border-radius: var(--swatchbook-radius-xs);
+  border: 1px solid var(--swatchbook-border-default);
+}
