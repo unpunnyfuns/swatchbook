@@ -2,14 +2,19 @@ import '#/internal/chrome-base.css';
 import '#/internal/internal-tokens.css';
 import '#/internal/internal-dimensions.css';
 import '#/internal/internal-typography.css';
+import { useMemo } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import { SwatchbookContext, useOptionalSwatchbookData } from '#/contexts.ts';
 import type { ProjectSnapshot } from '#/contexts.ts';
+import { mergePresenters, PresenterContext } from '#/presenters/registry.ts';
+import type { PresenterRegistry } from '#/presenters/types.ts';
 
 export type { ProjectSnapshot };
 
 export interface SwatchbookProviderProps {
   value: ProjectSnapshot;
+  /** Overrides merged over {@link DEFAULT_PRESENTERS} for this subtree. */
+  presenters?: PresenterRegistry;
   children: ReactNode;
 }
 
@@ -22,8 +27,17 @@ export interface SwatchbookProviderProps {
  * a {@link ProjectSnapshot} (often imported from a JSON file) and wrap
  * their blocks in this provider.
  */
-export function SwatchbookProvider({ value, children }: SwatchbookProviderProps): ReactElement {
-  return <SwatchbookContext.Provider value={value}>{children}</SwatchbookContext.Provider>;
+export function SwatchbookProvider({
+  value,
+  presenters,
+  children,
+}: SwatchbookProviderProps): ReactElement {
+  const merged = useMemo(() => mergePresenters(presenters), [presenters]);
+  return (
+    <SwatchbookContext.Provider value={value}>
+      <PresenterContext.Provider value={merged}>{children}</PresenterContext.Provider>
+    </SwatchbookContext.Provider>
+  );
 }
 
 /**

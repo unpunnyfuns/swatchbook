@@ -38,6 +38,15 @@ export { type ChannelGlobals, useChannelGlobals } from '#/internal/channel-globa
 export { type BlockChannel, onChannel, registerChannel } from '#/internal/channel.ts';
 export type { IndicatorName, IndicatorsProp } from '#/indicators/resolve.ts';
 export type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
+export type { PresenterProps, PresenterComponent, PresenterRegistry } from '#/presenters/types.ts';
+export {
+  DEFAULT_PRESENTERS,
+  PresenterContext,
+  usePresenter,
+  mergePresenters,
+} from '#/presenters/registry.ts';
+export type { TokenType, RealisedToken } from '@unpunnyfuns/swatchbook-core/token-value-types';
+export { formatTokenValue } from '@unpunnyfuns/swatchbook-core/token-value-css';
 export {
   SwatchbookProvider,
   type SwatchbookProviderProps,
