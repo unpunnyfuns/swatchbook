@@ -1,8 +1,16 @@
 name: Docs
 
+# Deploy on a docs-only push to main (immediate, for typo and link fixes),
+# or when the release workflow publishes a new version (dispatched from
+# release.yml's publish job). This keeps the live site tracking the
+# published version rather than every push to main (#1414): a code change
+# that lands on main without a release no longer redeploys the docs.
+# workflow_dispatch also covers a manual redeploy.
 on:
   push:
     branches: [main]
+    paths:
+      - 'apps/docs/**'
   workflow_dispatch:
 
 permissions:
