@@ -10,8 +10,8 @@ export default defineConfig({
       include: ['test/**/*.test-d.ts'],
       // The default tsconfig.json excludes test/, so vitest's typechecker
       // (which invokes bare `tsc` and only adds `-p` when this is set) would
-      // otherwise never load the .test-d.ts file into a program at all —
-      // silently passing regardless of what the assertions say.
+      // otherwise never load the .test-d.ts file into a program at all.
+      // It would silently pass regardless of what the assertions say.
       tsconfig: './tsconfig.typecheck.json',
     },
   },

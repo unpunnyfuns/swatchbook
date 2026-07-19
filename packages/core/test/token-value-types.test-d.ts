@@ -1,5 +1,5 @@
 import { expectTypeOf, it } from 'vitest';
-import type { RealisedToken, ShadowLayer, TokenType } from '@unpunnyfuns/swatchbook-core/token-value-types';
+import type { RealisedToken, ShadowLayer, TokenType } from '#/token-value-types.ts';
 
 it('RealisedToken narrows $type and carries realised value + metadata', () => {
   const t: RealisedToken<'shadow'> = { $type: 'shadow', $value: [], $description: 'x' };
