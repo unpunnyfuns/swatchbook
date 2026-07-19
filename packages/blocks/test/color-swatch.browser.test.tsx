@@ -30,6 +30,24 @@ it('uses cssVar for the chip when supplied', () => {
   );
 });
 
+it('uses options.label over the bare leaf when supplied (grouped consumer context)', () => {
+  render(
+    <ColorSwatch
+      path="color.palette.blue.50"
+      token={token}
+      colorFormat="hex"
+      options={{ label: 'blue.50' }}
+    />,
+  );
+  screen.getByText('blue.50');
+  expect(screen.queryByText('50')).toBeNull();
+});
+
+it('falls back to the bare leaf when options.label is absent (standalone usage)', () => {
+  render(<ColorSwatch path="color.palette.blue.50" token={token} colorFormat="hex" />);
+  screen.getByText('50');
+});
+
 it('renders a JSON value with the chip still painting a real color when colorFormat is raw', () => {
   const { container } = render(
     <ColorSwatch path="color.brand.primary" token={token} colorFormat="raw" />,

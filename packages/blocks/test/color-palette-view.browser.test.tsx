@@ -19,11 +19,13 @@ function groups(): ColorPaletteGroup[] {
         {
           path: 'color.brand.bg',
           cssVar: 'var(--sb-color-brand-bg)',
+          leaf: 'bg',
           token: blueToken,
         },
         {
           path: 'color.brand.fg',
           cssVar: 'var(--sb-color-brand-fg)',
+          leaf: 'fg',
           token: oorToken,
         },
       ],
@@ -76,4 +78,24 @@ it('shows the empty state when there are no groups', () => {
   setup({ groups: [] });
   screen.getByText('No color tokens match this filter.');
   expect(screen.queryByText('color.brand')).toBeNull();
+});
+
+it('passes the group-relative leaf through to the swatch label, not just the last path segment', () => {
+  setup({
+    groups: [
+      {
+        group: 'color.palette',
+        swatches: [
+          {
+            path: 'color.palette.blue.50',
+            cssVar: 'var(--sb-color-palette-blue-50)',
+            leaf: 'blue.50',
+            token: blueToken,
+          },
+        ],
+      },
+    ],
+  });
+  screen.getByText('blue.50');
+  expect(screen.queryByText('50')).toBeNull();
 });

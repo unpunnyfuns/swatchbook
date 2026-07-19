@@ -19,16 +19,26 @@ function leafOf(path: string): string {
  * `token.$value`, with `raw` guarded to `hex` (`cssColorFormat`) so the chip
  * always paints a real color even when the display format is a JSON debug
  * string. The value text below the chip uses the actual `colorFormat`,
- * `raw` included.
+ * `raw` included. `options.label` lets a grouped consumer (e.g.
+ * `ColorPalette`) supply a group-relative label instead of the bare leaf
+ * segment, so context lost to grouping (`blue` in `color.palette.blue.50`)
+ * still reads on the swatch; standalone usage falls back to `leafOf(path)`.
  */
-export function ColorSwatch({ path, token, cssVar, colorFormat }: ColorSwatchProps): ReactElement {
+export function ColorSwatch({
+  path,
+  token,
+  cssVar,
+  colorFormat,
+  options,
+}: ColorSwatchProps): ReactElement {
   const chipBackground = cssVar ?? formatColor(token.$value, cssColorFormat(colorFormat)).value;
   const { value, outOfGamut } = formatColor(token.$value, colorFormat);
+  const label = typeof options?.['label'] === 'string' ? options['label'] : leafOf(path);
   return (
     <div className="sb-color-swatch">
       <div className="sb-color-swatch__chip" style={{ background: chipBackground }} aria-hidden />
       <div className="sb-color-swatch__meta">
-        <span className="sb-color-swatch__leaf">{leafOf(path)}</span>
+        <span className="sb-color-swatch__leaf">{label}</span>
         <span className="sb-color-swatch__value">
           {value}
           {outOfGamut && (

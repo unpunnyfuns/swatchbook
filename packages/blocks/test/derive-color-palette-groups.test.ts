@@ -30,6 +30,8 @@ it('groups color tokens under the derived default groupBy, excluding other types
     'color.brand.fg',
     'color.text.muted',
   ]);
+  // Group is 'color' (1 segment); leaf is the group-relative remainder.
+  expect(groups[0]?.swatches.map((s) => s.leaf)).toEqual(['brand.bg', 'brand.fg', 'text.muted']);
 });
 
 it('derives the css var from the listing and carries the realised token for the presenter', () => {
@@ -69,4 +71,25 @@ it('applies sortDir desc within a group', () => {
   });
   const brand = groups.find((g) => g.group === 'color.brand');
   expect(brand?.swatches.map((s) => s.path)).toEqual(['color.brand.fg', 'color.brand.bg']);
+});
+
+it('carries the group-relative remainder as leaf for a deep path under a shallow group', () => {
+  // color.palette.blue.50 has 4 segments; grouping at depth 2 ('color.palette')
+  // must keep 'blue' in the label, not just the last segment ('50').
+  const deepResolved = {
+    'color.palette.blue.50': {
+      $type: 'color',
+      $value: { colorSpace: 'srgb', components: [0.9, 0.95, 1] },
+    },
+    'color.palette.blue.500': {
+      $type: 'color',
+      $value: { colorSpace: 'srgb', components: [0.2, 0.4, 0.9] },
+    },
+  } as unknown as ProjectData['resolved'];
+  const groups = deriveColorPaletteGroups(deepResolved, listing, cssVarPrefix, {
+    ...opts,
+    groupBy: 2,
+  });
+  expect(groups.map((g) => g.group)).toEqual(['color.palette']);
+  expect(groups[0]?.swatches.map((s) => s.leaf)).toEqual(['blue.50', 'blue.500']);
 });

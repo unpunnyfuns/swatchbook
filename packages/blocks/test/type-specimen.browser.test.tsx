@@ -57,11 +57,10 @@ it('falls back to the default sample when options.sample is not a string', () =>
   screen.getByText('The quick brown fox jumps over the lazy dog.');
 });
 
-it('prefers $description over the derived spec summary when the token has one', () => {
+it('always shows the spec summary (font size included), even when the token has a $description', () => {
   const described: RealisedToken<'typography'> = { ...token, $description: 'Primary heading' };
   render(<TypeSpecimen path="typography.heading" token={described} colorFormat="hex" />);
-  screen.getByText('Primary heading');
-  expect(screen.queryByText('24px · w700 · lh 1.2')).toBeNull();
+  screen.getByText('24px · w700 · lh 1.2');
 });
 
 // Terrazzo's generateShorthand assigns a typography token's base css var the

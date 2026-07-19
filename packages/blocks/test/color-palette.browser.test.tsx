@@ -54,6 +54,21 @@ describe('ColorPalette', () => {
     screen.getByText('color.palette');
   });
 
+  it('keeps the group-relative remainder on a deep path collapsed under a shallow group', () => {
+    // Auto groupBy for 'color.**' lands at depth 2 ('color.palette'), two
+    // levels above the 4-segment palette tokens: the swatch label must stay
+    // 'blue.500' (group-relative), not collapse to the bare '500' leaf.
+    render(
+      <SwatchbookProvider value={makeSnapshot()}>
+        <ColorPalette filter="color.**" />
+      </SwatchbookProvider>,
+    );
+    screen.getByText('color.palette');
+    screen.getByText('blue.500');
+    screen.getByText('red.500');
+    expect(screen.queryByText('500')).toBeNull();
+  });
+
   it('clamps auto-groupBy so each swatch keeps a leaf label', () => {
     // `color.palette.blue.*` has fixed length 3; with 4-segment tokens the
     // auto groupBy clamps so all blue shades land under one group with

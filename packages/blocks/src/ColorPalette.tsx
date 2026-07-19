@@ -54,6 +54,13 @@ export interface ColorPaletteProps {
 export interface ColorPaletteSwatch {
   path: string;
   cssVar: string;
+  /**
+   * Label relative to the swatch's group: the path segments after the
+   * group's own prefix (e.g. `blue.50` for `color.palette.blue.50` under
+   * group `color.palette`). Falls back to the full leaf/path when the
+   * group already consumes every segment.
+   */
+  leaf: string;
   /** Realised token, fed to the `color` presenter per the presenter contract. */
   token: RealisedToken<'color'>;
 }
@@ -108,10 +115,12 @@ export function deriveColorPaletteGroups(
   for (const [path, token] of entries) {
     const segments = path.split('.');
     const groupKey = segments.slice(0, effectiveGroupBy).join('.');
+    const leaf = segments.slice(effectiveGroupBy).join('.') || segments.at(-1) || path;
     const list = bucket.get(groupKey) ?? [];
     list.push({
       path,
       cssVar: resolveCssVar(path, projectFields),
+      leaf,
       token: token as RealisedToken<'color'>,
     });
     bucket.set(groupKey, list);
@@ -177,6 +186,7 @@ export function ColorPaletteView({
                     token={swatch.token}
                     cssVar={swatch.cssVar}
                     colorFormat={colorFormat}
+                    options={{ label: swatch.leaf }}
                   />
                 ),
             )}

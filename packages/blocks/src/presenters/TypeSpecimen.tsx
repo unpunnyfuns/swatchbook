@@ -35,9 +35,9 @@ function styleFromValue(value: TypographyValue): CSSProperties {
   return style;
 }
 
-// Compact spec summary shown under the leaf label when the token has no
-// $description: size, weight, and line-height are the dimensions a reader
-// scans a type scale for.
+// Compact spec summary always shown above the sample: size, weight, and
+// line-height are the dimensions a reader scans a type scale for, and no
+// $description (which is prose, not a spec) may take its place.
 function describeValue(value: TypographyValue): string {
   const fontSize = value.fontSize != null ? formatLength(value.fontSize) : undefined;
   const fontWeight = value.fontWeight != null ? `w${String(value.fontWeight)}` : undefined;
@@ -61,10 +61,10 @@ export function TypeSpecimen({ token, cssVar, options }: TypeSpecimenProps): Rea
   const sample = typeof rawSample === 'string' ? rawSample : DEFAULT_SAMPLE;
   const value = (token.$value ?? {}) as TypographyValue;
   const sampleStyle: CSSProperties = cssVar ? { font: cssVar } : styleFromValue(value);
-  const description = token.$description ?? describeValue(value);
+  const specs = describeValue(value);
   return (
     <div className="sb-type-specimen">
-      {description && <span className="sb-type-specimen__description">{description}</span>}
+      {specs && <span className="sb-type-specimen__description">{specs}</span>}
       <div className="sb-type-specimen__sample" style={sampleStyle}>
         {sample}
       </div>
