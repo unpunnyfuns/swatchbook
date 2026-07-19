@@ -44,7 +44,7 @@ it('caps an oversized realised value at MAX_RENDER_PX regardless of cssVar', () 
     $type: 'dimension',
     $value: { value: 600, unit: 'px' },
   };
-  const { container } = render(
+  const { container: withoutCssVar } = render(
     <DimensionSample
       path="space.wide"
       token={wide}
@@ -52,7 +52,24 @@ it('caps an oversized realised value at MAX_RENDER_PX regardless of cssVar', () 
       options={{ visual: 'length' }}
     />,
   );
-  const bar = container.querySelector<HTMLElement>('.sb-dimension-sample--capped div');
+  const bar = withoutCssVar.querySelector<HTMLElement>('.sb-dimension-sample--capped div');
   expect(bar?.style.width).toBe('480px');
-  expect(container.querySelector('.sb-dimension-sample__cap')).not.toBeNull();
+  expect(withoutCssVar.querySelector('.sb-dimension-sample__cap')).not.toBeNull();
+
+  // The cap decision reads the token's numeric $value, so a cssVar supplied
+  // alongside an oversized value is still overridden by the capped px
+  // literal rather than rendered as the live custom property.
+  cleanup();
+  const { container: withCssVar } = render(
+    <DimensionSample
+      path="space.wide"
+      token={wide}
+      cssVar="var(--sb-space-wide)"
+      colorFormat="hex"
+      options={{ visual: 'length' }}
+    />,
+  );
+  const cappedBar = withCssVar.querySelector<HTMLElement>('.sb-dimension-sample--capped div');
+  expect(cappedBar?.style.width).toBe('480px');
+  expect(cappedBar?.style.width).not.toContain('var(');
 });

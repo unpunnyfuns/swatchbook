@@ -57,7 +57,8 @@ function describeValue(value: TypographyValue): string {
  * every field the token carries, `letterSpacing` included.
  */
 export function TypeSpecimen({ token, cssVar, options }: TypeSpecimenProps): ReactElement {
-  const sample = (options?.['sample'] as string | undefined) ?? DEFAULT_SAMPLE;
+  const rawSample = options?.['sample'];
+  const sample = typeof rawSample === 'string' ? rawSample : DEFAULT_SAMPLE;
   const value = (token.$value ?? {}) as TypographyValue;
   const sampleStyle: CSSProperties = cssVar ? { font: cssVar } : styleFromValue(value);
   const description = token.$description ?? describeValue(value);

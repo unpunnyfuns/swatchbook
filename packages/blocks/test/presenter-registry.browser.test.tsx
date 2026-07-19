@@ -18,6 +18,11 @@ function Probe() {
   return <span data-testid="probe">{P ? 'custom' : 'none'}</span>;
 }
 
+function DimensionProbe() {
+  const P = usePresenter('dimension');
+  return <span data-testid="probe">{P ? 'defined' : 'none'}</span>;
+}
+
 const Custom = () => <i>x</i>;
 
 afterEach(() => cleanup());
@@ -33,10 +38,11 @@ it('a provider presenters override reaches usePresenter', () => {
 
 it('unlisted types fall through (partial merge)', () => {
   render(
-    <SwatchbookProvider value={EMPTY} presenters={{ color: () => <i>x</i> }}>
-      <PresenterContext.Consumer>{() => <Probe />}</PresenterContext.Consumer>
+    <SwatchbookProvider value={EMPTY} presenters={{ color: Custom }}>
+      <PresenterContext.Consumer>{() => <DimensionProbe />}</PresenterContext.Consumer>
     </SwatchbookProvider>,
   );
-  // color is overridden; a gap type (shadow) stays whatever DEFAULT has (none yet)
-  expect(screen.getByTestId('probe').textContent).toBe('custom');
+  // color is overridden by the provider; dimension is untouched, so it must
+  // still resolve to DEFAULT_PRESENTERS.dimension rather than disappearing.
+  expect(screen.getByTestId('probe').textContent).toBe('defined');
 });

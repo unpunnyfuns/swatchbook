@@ -91,8 +91,11 @@ function formatInternalDimension(v: unknown): string {
   return formatUnknown(v);
 }
 
+// The leading `\d+` is bounded to 15 digits so a long run of digits with no
+// following `.` (adversarial input) can't force catastrophic backtracking;
+// no real dimension/number token has a 16+ digit integer part.
 function cleanFloatNoise(s: string): string {
-  return s.replace(/-?\d+\.\d{8,}/g, (m) => `${+Number(m).toFixed(3)}`);
+  return s.replace(/-?\d{1,15}\.\d{8,}/g, (m) => `${+Number(m).toFixed(3)}`);
 }
 
 function formatFontFamily(v: unknown): string {

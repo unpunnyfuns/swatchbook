@@ -15,9 +15,9 @@ import type { RealisedToken, TokenType } from '@unpunnyfuns/swatchbook-core/toke
 interface PresenterProps<T extends TokenType = TokenType> {
   path: string;
   token: RealisedToken<T>;
-  cssVar?: string;
+  cssVar?: string | undefined;
   colorFormat: ColorFormat;
-  options?: Record<string, unknown>;
+  options?: Record<string, unknown> | undefined;
 }
 ```
 

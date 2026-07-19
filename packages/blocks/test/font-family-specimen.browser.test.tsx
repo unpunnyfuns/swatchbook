@@ -38,6 +38,18 @@ it('honors an options.sample override', () => {
   screen.getByText('Sphinx of black quartz');
 });
 
+it('falls back to the default sample when options.sample is not a string', () => {
+  render(
+    <FontFamilySpecimen
+      path="font.family.mono"
+      token={token}
+      colorFormat="hex"
+      options={{ sample: {} }}
+    />,
+  );
+  screen.getByText('The quick brown fox jumps over the lazy dog.');
+});
+
 it('applies cssVar to the sample instead of the realised value', () => {
   const { container } = render(
     <FontFamilySpecimen

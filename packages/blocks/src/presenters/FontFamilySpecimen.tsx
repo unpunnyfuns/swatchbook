@@ -25,7 +25,8 @@ export function FontFamilySpecimen({
   cssVar,
   options,
 }: FontFamilySpecimenProps): ReactElement {
-  const sample = (options?.['sample'] as string | undefined) ?? DEFAULT_SAMPLE;
+  const rawSample = options?.['sample'];
+  const sample = typeof rawSample === 'string' ? rawSample : DEFAULT_SAMPLE;
   const stack = stackString(token.$value);
   const sampleStyle: CSSProperties = { fontFamily: cssVar ?? stack };
   return (

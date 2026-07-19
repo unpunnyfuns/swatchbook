@@ -35,6 +35,18 @@ it('honors an options.sample override', () => {
   screen.getByText('Sphinx of black quartz');
 });
 
+it('falls back to the default sample when options.sample is not a string', () => {
+  render(
+    <FontWeightSpecimen
+      path="font.weight.bold"
+      token={token}
+      colorFormat="hex"
+      options={{ sample: {} }}
+    />,
+  );
+  screen.getByText('Aa');
+});
+
 it('applies cssVar to the sample instead of the realised value', () => {
   const { container } = render(
     <FontWeightSpecimen

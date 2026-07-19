@@ -45,6 +45,18 @@ it('shows the sample text', () => {
   screen.getByText('Sphinx of black quartz');
 });
 
+it('falls back to the default sample when options.sample is not a string', () => {
+  render(
+    <TypeSpecimen
+      path="typography.heading"
+      token={token}
+      colorFormat="hex"
+      options={{ sample: {} }}
+    />,
+  );
+  screen.getByText('The quick brown fox jumps over the lazy dog.');
+});
+
 it('prefers $description over the derived spec summary when the token has one', () => {
   const described: RealisedToken<'typography'> = { ...token, $description: 'Primary heading' };
   render(<TypeSpecimen path="typography.heading" token={described} colorFormat="hex" />);

@@ -48,7 +48,8 @@ export function OpacitySwatchView({
  */
 export function OpacitySwatch({ token, cssVar, options }: OpacitySwatchProps): ReactElement {
   const opacity = cssVar ?? opacityValueToCss(token.$value);
+  const rawSampleColorVar = options?.['sampleColorVar'];
   const sampleColorVar =
-    (options?.['sampleColorVar'] as string | undefined) ?? DEFAULT_SAMPLE_COLOR_VAR;
+    typeof rawSampleColorVar === 'string' ? rawSampleColorVar : DEFAULT_SAMPLE_COLOR_VAR;
   return <OpacitySwatchView opacity={opacity} sampleColorVar={sampleColorVar} />;
 }

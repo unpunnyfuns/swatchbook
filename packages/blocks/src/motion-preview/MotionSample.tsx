@@ -178,8 +178,10 @@ export function MotionSampleView({ spec, speed, runKey }: MotionSampleViewProps)
  * View has nowhere safe to apply it.
  */
 export function MotionSample({ token, cssVar: _cssVar, options }: MotionSampleProps): ReactElement {
-  const speed = (options?.['speed'] as MotionSpeed | undefined) ?? 1;
-  const runKey = (options?.['runKey'] as number | undefined) ?? 0;
+  const rawSpeed = options?.['speed'];
+  const speed = (typeof rawSpeed === 'number' ? rawSpeed : 1) as MotionSpeed;
+  const rawRunKey = options?.['runKey'];
+  const runKey = typeof rawRunKey === 'number' ? rawRunKey : 0;
   // The token's transition CSS var is a full duration+delay+easing
   // shorthand (e.g. `--sb-transition-enter: 200ms 0ms ease-out`), not an
   // easing-only value. Substituting it into this sample's

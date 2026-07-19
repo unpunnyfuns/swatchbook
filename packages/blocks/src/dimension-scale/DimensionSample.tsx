@@ -11,6 +11,13 @@ export type DimensionVisual = 'length' | 'radius' | 'size';
 /** Props for the connected {@link DimensionSample} block. `options.visual` selects the visualization kind (see {@link DimensionVisual}); defaults to `'length'`. */
 export type DimensionSampleProps = PresenterProps<'dimension'>;
 
+// A consumer-supplied `options.visual` is untyped at the call site; an
+// unrecognized value (or a non-string) falls back to 'length' rather than
+// propagating a bogus visual into the switch below.
+function asDimensionVisual(raw: unknown): DimensionVisual {
+  return raw === 'length' || raw === 'radius' || raw === 'size' ? raw : 'length';
+}
+
 export interface DimensionSampleData {
   /** CSS var reference, or the realised `$value` as a `px`/`rem` literal. */
   cssVar: string;
@@ -111,7 +118,7 @@ export function DimensionSample({
   colorFormat,
   options,
 }: DimensionSampleProps): ReactElement {
-  const visual = (options?.['visual'] as DimensionVisual | undefined) ?? 'length';
+  const visual = asDimensionVisual(options?.['visual']);
   const rootFontSize = useRootFontSize();
   const derived = deriveDimensionSample({ token, cssVar, colorFormat }, rootFontSize);
   return (

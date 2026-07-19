@@ -18,7 +18,8 @@ export function FontWeightSpecimen({
   cssVar,
   options,
 }: FontWeightSpecimenProps): ReactElement {
-  const sample = (options?.['sample'] as string | undefined) ?? DEFAULT_SAMPLE;
+  const rawSample = options?.['sample'];
+  const sample = typeof rawSample === 'string' ? rawSample : DEFAULT_SAMPLE;
   const display = token.$value == null ? '' : String(token.$value);
   const sampleStyle: CSSProperties = {
     fontWeight: cssVar ? cssVarAsNumber(cssVar) : (display as CSSProperties['fontWeight']),
