@@ -236,6 +236,21 @@ defineSwatchbookConfig({
 
 Precedence runs lowest to highest: the hard-coded indicator defaults (`alias`, `variance`, `gamut`, `deprecation` on; `description` and `composes` off), then this `config.indicators` baseline, then a block's own `indicators` prop. A block that sets `indicators={{ description: false }}` overrides the baseline above for that block; a block with no prop inherits the baseline.
 
+### `defaultColorFormat`
+
+Type: `'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw'`, optional, defaults to `'hex'`.
+
+Starting color format for blocks that display color values (`TokenTable`, `ColorPalette`, `ColorTable`, `TokenDetail`, `TokenNavigator`). Emitted CSS is unaffected: this is a display-only setting for the Storybook preview / docs blocks.
+
+```ts
+defineSwatchbookConfig({
+  resolver: 'tokens/resolver.json',
+  defaultColorFormat: 'oklch',
+});
+```
+
+A block's own `colorFormat` prop overrides this, and so does wrapping a subtree in `ColorFormatContext`; see [`useColorFormat`](/reference/blocks/hooks#usecolorformat) for the full precedence order.
+
 ### `cssOptions`
 
 Type: `Omit<CSSPluginOptions, 'variableName' | 'permutations' | 'filename' | 'skipBuild'>`, optional.

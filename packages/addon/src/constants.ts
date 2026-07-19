@@ -2,8 +2,6 @@ export const ADDON_ID = 'swatchbook';
 export const TOOL_ID = `${ADDON_ID}/theme-switcher`;
 /** Canonical active-permutation tuple: `Record<axisName, contextName>`. Read by toolbar, panel, blocks. */
 export const AXES_GLOBAL_KEY = 'swatchbookAxes';
-/** Display-only color format for blocks (`hex` | `rgb` | `hsl` | `oklch` | `raw`). Emitted CSS is unaffected. */
-export const COLOR_FORMAT_GLOBAL_KEY = 'swatchbookColorFormat';
 
 export const VIRTUAL_MODULE_ID = 'virtual:swatchbook/tokens';
 export const RESOLVED_VIRTUAL_MODULE_ID = `\0${VIRTUAL_MODULE_ID}`;

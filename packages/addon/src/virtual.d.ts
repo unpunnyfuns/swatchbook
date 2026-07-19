@@ -13,6 +13,7 @@ declare module 'virtual:swatchbook/tokens' {
     VirtualListingEntry,
     VirtualPreset,
   } from '#/channel-types.ts';
+  import type { ColorFormat } from '@unpunnyfuns/swatchbook-core/color-formats';
   import type { TokenGraph } from '@unpunnyfuns/swatchbook-core/graph';
 
   export const axes: readonly VirtualAxis[];
@@ -21,6 +22,8 @@ declare module 'virtual:swatchbook/tokens' {
   export const diagnostics: readonly VirtualDiagnostic[];
   export const css: string;
   export const cssVarPrefix: string;
+  /** `config.defaultColorFormat`, defaulted to `'hex'`; see `SnapshotForWire`. */
+  export const defaultColorFormat: ColorFormat;
   export const indicators: Readonly<Record<string, boolean>>;
   export const listing: Readonly<Record<string, VirtualListingEntry>>;
   export const defaultTuple: Record<string, string>;

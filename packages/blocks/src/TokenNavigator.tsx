@@ -3,7 +3,8 @@ import type { KeyboardEvent, ReactElement } from 'react';
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import './TokenNavigator.css';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
-import { useColorFormat } from '#/contexts.ts';
+import { ColorFormatContext, useColorFormat } from '#/contexts.ts';
+import type { ColorFormat } from '#/format-color.ts';
 import { DimensionSample } from '#/dimension-scale/DimensionSample.tsx';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
@@ -69,6 +70,13 @@ export interface TokenNavigatorProps {
   id?: string;
   /** Configure the per-row indicator strip. See `IndicatorsProp`. */
   indicators?: IndicatorsProp;
+  /**
+   * Highest-precedence color format for this tree's values, overriding
+   * an outer `ColorFormatContext` and the project's `defaultColorFormat`.
+   * Omit to inherit the existing precedence chain (see `useColorFormat`).
+   * Also governs the composed row-detail `TokenDetail` slide-over.
+   */
+  colorFormat?: ColorFormat;
 }
 
 export interface LeafNode {
@@ -645,6 +653,7 @@ export function TokenNavigator({
   onSelect,
   id,
   indicators,
+  colorFormat,
 }: TokenNavigatorProps): ReactElement {
   const {
     resolved,
@@ -666,7 +675,7 @@ export function TokenNavigator({
     [indicators, indicatorBaseline],
   );
 
-  return (
+  const view = (
     <TokenNavigatorView
       resolved={resolved}
       root={root}
@@ -680,6 +689,17 @@ export function TokenNavigator({
       searchable={searchable}
       onSelect={onSelect}
     />
+  );
+
+  // Every leaf row's own value/swatch and the row-detail slide-over
+  // (`<TokenDetail>`) read ColorFormatContext for themselves: provide the
+  // override so the whole tree inherits it, but only when a prop override
+  // is actually set, to avoid clobbering the ambient default with a value
+  // that's just its own echo.
+  return colorFormat !== undefined ? (
+    <ColorFormatContext.Provider value={colorFormat}>{view}</ColorFormatContext.Provider>
+  ) : (
+    view
   );
 }
 

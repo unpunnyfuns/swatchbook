@@ -61,6 +61,7 @@
     "@testing-library/react": "^16.3.2",
     "@tsdown/css": "^0.21.9",
     "@types/react": "^19.2.14",
+    "@unpunnyfuns/swatchbook-core": "workspace:*",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/browser": "^4.1.8",
     "@vitest/browser-playwright": "^4.1.8",

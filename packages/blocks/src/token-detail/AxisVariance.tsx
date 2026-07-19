@@ -11,6 +11,12 @@ import type { DetailToken } from '#/token-detail/internal.ts';
 export interface AxisVarianceProps {
   /** Full dot-path of the token. */
   path: string;
+  /**
+   * Highest-precedence color format for this block's values, overriding
+   * an outer `ColorFormatContext` and the project's `defaultColorFormat`.
+   * Omit to inherit the existing precedence chain (see `useColorFormat`).
+   */
+  colorFormat?: ColorFormat;
 }
 
 type Variance =
@@ -18,13 +24,14 @@ type Variance =
   | { kind: 'one-axis'; axis: string; varyingAxes: readonly [string] }
   | { kind: 'multi-axis'; varyingAxes: readonly [string, string, ...string[]] };
 
-export function AxisVariance({ path }: AxisVarianceProps): ReactElement {
+export function AxisVariance({ path, colorFormat }: AxisVarianceProps): ReactElement {
   const { token, cssVar, axes, activeAxes, cssVarPrefix, varianceByPath, resolveAt } =
     useTokenDetailData(path);
-  const colorFormat = useColorFormat();
+  const contextColorFormat = useColorFormat();
+  const format = colorFormat ?? contextColorFormat;
   const tokenType = token?.$type;
   const isColor = tokenType === 'color';
-  const formatFn = (t: DetailToken | undefined): string => valueFor(t, tokenType, colorFormat);
+  const formatFn = (t: DetailToken | undefined): string => valueFor(t, tokenType, format);
 
   const variance = useMemo<Variance>(() => {
     // Read the pre-computed per-path variance from the snapshot. The

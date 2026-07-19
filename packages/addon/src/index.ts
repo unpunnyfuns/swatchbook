@@ -19,13 +19,7 @@ export type { StoryParameters, SwatchbookGlobals, SwatchbookParameters } from '#
  * reach into the addon's namespace (custom toolbar registrations,
  * channel events, manager hooks that need a stable handle on these keys).
  */
-export {
-  ADDON_ID,
-  AXES_GLOBAL_KEY,
-  COLOR_FORMAT_GLOBAL_KEY,
-  TOOL_ID,
-  VIRTUAL_MODULE_ID,
-} from '#/constants.ts';
+export { ADDON_ID, AXES_GLOBAL_KEY, TOOL_ID, VIRTUAL_MODULE_ID } from '#/constants.ts';
 
 /**
  * Re-export the full user-facing surface from `@unpunnyfuns/swatchbook-blocks`
@@ -39,6 +33,16 @@ export {
  */
 export * from '@unpunnyfuns/swatchbook-blocks';
 export * from '@unpunnyfuns/swatchbook-switcher';
+
+/**
+ * Blocks and switcher each declare their own `ColorFormat` / `COLOR_FORMATS`
+ * (switcher's copy avoids a runtime dependency on core; see its
+ * `types.ts`), so the two wildcard re-exports above collide on these names.
+ * Pin the addon's public surface to blocks' canonical definitions, the ones
+ * every other blocks-facing type on this barrel already comes from.
+ */
+export { COLOR_FORMATS } from '@unpunnyfuns/swatchbook-blocks';
+export type { ColorFormat } from '@unpunnyfuns/swatchbook-blocks';
 
 /**
  * CSF Next factory. Consumers call this inside

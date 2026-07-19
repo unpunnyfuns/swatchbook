@@ -3,8 +3,6 @@
 // (the `./manager` package.json export), not a subpath meant to be imported
 // for its exports.
 import { presetTuple, ThemeSwitcher } from '@unpunnyfuns/swatchbook-switcher';
-import { COLOR_FORMATS, ColorFormatSelector } from '#/ColorFormatSelector.tsx';
-import type { ColorFormat } from '#/ColorFormatSelector.tsx';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 // Storybook-internal surface (fragile across Storybook MAJORS). See the
@@ -20,7 +18,6 @@ import type {
 import {
   ADDON_ID,
   AXES_GLOBAL_KEY,
-  COLOR_FORMAT_GLOBAL_KEY,
   INIT_EVENT,
   INIT_REQUEST_EVENT,
   PREVIEW_MOUSEDOWN_EVENT,
@@ -91,13 +88,6 @@ function AxesToolbar(): ReactElement {
   const rawTuple = globals[AXES_GLOBAL_KEY];
   const globalTuple =
     rawTuple && typeof rawTuple === 'object' ? (rawTuple as Record<string, string>) : undefined;
-  const rawColorFormat = globals[COLOR_FORMAT_GLOBAL_KEY];
-  const activeColorFormat: ColorFormat =
-    typeof rawColorFormat === 'string' &&
-    (COLOR_FORMATS as readonly string[]).includes(rawColorFormat)
-      ? (rawColorFormat as ColorFormat)
-      : 'hex';
-
   const activeTuple = useMemo<Record<string, string>>(() => {
     const out: Record<string, string> = { ...defaults };
     if (globalTuple) {
@@ -244,14 +234,6 @@ function AxesToolbar(): ReactElement {
     onAxisChange: setAxis,
     onPresetApply: applyPreset,
     onKeyDown: handleKeyDown,
-    // Color format is addon-local chrome — drives how swatchbook blocks
-    // stringify colors inside stories and docs. Slotted through the
-    // switcher's `footer` escape hatch so shared theming UI stays free
-    // of this concern.
-    footer: h(ColorFormatSelector, {
-      active: activeColorFormat,
-      onSelect: (next: ColorFormat) => updateGlobals({ [COLOR_FORMAT_GLOBAL_KEY]: next }),
-    }),
   });
 
   return h(

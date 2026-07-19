@@ -20,6 +20,7 @@ import {
   axes as virtualAxes,
   css,
   cssVarPrefix,
+  defaultColorFormat as virtualDefaultColorFormat,
   defaultTuple as virtualDefaultTuple,
   diagnostics,
   disabledAxes as virtualDisabledAxes,
@@ -30,8 +31,6 @@ import {
 } from 'virtual:swatchbook/tokens';
 import {
   AxesContext,
-  COLOR_FORMATS,
-  ColorFormatContext,
   registerChannel,
   registerTokenSource,
   SwatchbookProvider,
@@ -39,10 +38,9 @@ import {
   TOKENS_UPDATED_EVENT,
   useTokenSnapshot,
 } from '@unpunnyfuns/swatchbook-blocks';
-import type { ColorFormat, ProjectSnapshot } from '@unpunnyfuns/swatchbook-blocks';
+import type { ProjectSnapshot } from '@unpunnyfuns/swatchbook-blocks';
 import {
   AXES_GLOBAL_KEY,
-  COLOR_FORMAT_GLOBAL_KEY,
   HMR_EVENT,
   INIT_EVENT,
   INIT_REQUEST_EVENT,
@@ -76,6 +74,7 @@ registerTokenSource({
   listing: virtualListing,
   tokenGraph: virtualTokenGraph,
   defaultTuple: virtualDefaultTuple,
+  defaultColorFormat: virtualDefaultColorFormat,
 });
 
 // Standard visually-hidden style for the theme-flip live region.
@@ -205,13 +204,6 @@ function broadcastInit(): void {
   );
 }
 
-function resolveColorFormat(raw: SwatchbookGlobals[typeof COLOR_FORMAT_GLOBAL_KEY]): ColorFormat {
-  if (typeof raw === 'string' && (COLOR_FORMATS as readonly string[]).includes(raw)) {
-    return raw as ColorFormat;
-  }
-  return 'hex';
-}
-
 // Single shared `resolveAt` instance for the lifetime of the preview
 // iframe. `virtualTokenGraph` is a module-level virtual-module export
 // with stable identity, so this closure never needs to rebuild;
@@ -222,13 +214,11 @@ const themedDecorator: Decorator = (Story, context) => {
   const globals = context.globals as SwatchbookGlobals;
   const parameters = context.parameters as StoryParameters;
   const axesGlobal = globals[AXES_GLOBAL_KEY];
-  const colorFormatGlobal = globals[COLOR_FORMAT_GLOBAL_KEY];
   const paramSwatchbook = parameters.swatchbook;
   const tuple = useMemo(
     () => resolveTuple(axesGlobal, paramSwatchbook, virtualAxes),
     [axesGlobal, paramSwatchbook],
   );
-  const colorFormat = useMemo(() => resolveColorFormat(colorFormatGlobal), [colorFormatGlobal]);
   const themeName = useMemo(() => composeThemeName(tuple), [tuple]);
 
   useEffect(() => {
@@ -284,6 +274,7 @@ const themedDecorator: Decorator = (Story, context) => {
       listing: live.listing,
       tokenGraph: live.tokenGraph,
       defaultTuple: live.defaultTuple,
+      defaultColorFormat: live.defaultColorFormat,
       resolveAt,
     }),
     [themeName, tuple, live, resolveAt],
@@ -293,20 +284,18 @@ const themedDecorator: Decorator = (Story, context) => {
     <SwatchbookProvider value={snapshot}>
       <ThemeContext.Provider value={themeName}>
         <AxesContext.Provider value={tuple}>
-          <ColorFormatContext.Provider value={colorFormat}>
-            <div
-              {...wrapperAttrs}
-              style={{
-                padding: '1rem',
-                minHeight: '100%',
-              }}
-            >
-              <Story />
-            </div>
-            <div role="status" aria-live="polite" style={SR_ONLY_STYLE}>
-              {announcement}
-            </div>
-          </ColorFormatContext.Provider>
+          <div
+            {...wrapperAttrs}
+            style={{
+              padding: '1rem',
+              minHeight: '100%',
+            }}
+          >
+            <Story />
+          </div>
+          <div role="status" aria-live="polite" style={SR_ONLY_STYLE}>
+            {announcement}
+          </div>
         </AxesContext.Provider>
       </ThemeContext.Provider>
     </SwatchbookProvider>
@@ -324,10 +313,6 @@ export const globalTypes: NonNullable<Preview['globalTypes']> = {
     name: 'Axes',
     description: 'Per-axis context selection — the active theme name tuple.',
   },
-  [COLOR_FORMAT_GLOBAL_KEY]: {
-    name: 'Color format',
-    description: 'Display format for color tokens in blocks. Emitted CSS is unaffected.',
-  },
 };
 
 function buildInitialAxes(): Record<string, string> {
@@ -338,7 +323,6 @@ function buildInitialAxes(): Record<string, string> {
 
 export const initialGlobals: NonNullable<Preview['initialGlobals']> = {
   [AXES_GLOBAL_KEY]: buildInitialAxes(),
-  [COLOR_FORMAT_GLOBAL_KEY]: 'hex',
 };
 
 // Module-level channel subscription: writes the active tuple's attributes
@@ -427,6 +411,7 @@ interface HmrSnapshot {
   listing: typeof virtualListing;
   tokenGraph: typeof virtualTokenGraph;
   defaultTuple: typeof virtualDefaultTuple;
+  defaultColorFormat: typeof virtualDefaultColorFormat;
 }
 if (import.meta.hot) {
   import.meta.hot.on(HMR_EVENT, (payload: HmrSnapshot) => {

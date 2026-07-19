@@ -15,11 +15,21 @@ import type { DetailToken } from '#/token-detail/internal.ts';
 export interface CompositeBreakdownProps {
   /** Full dot-path of the token. */
   path: string;
+  /**
+   * Highest-precedence color format for this block's values, overriding
+   * an outer `ColorFormatContext` and the project's `defaultColorFormat`.
+   * Omit to inherit the existing precedence chain (see `useColorFormat`).
+   */
+  colorFormat?: ColorFormat;
 }
 
-export function CompositeBreakdown({ path }: CompositeBreakdownProps): ReactElement | null {
+export function CompositeBreakdown({
+  path,
+  colorFormat,
+}: CompositeBreakdownProps): ReactElement | null {
   const { token, resolved } = useTokenDetailData(path);
-  const colorFormat = useColorFormat();
+  const contextColorFormat = useColorFormat();
+  const format = colorFormat ?? contextColorFormat;
   if (!token) return null;
   return (
     <CompositeBreakdownContent
@@ -27,7 +37,7 @@ export function CompositeBreakdown({ path }: CompositeBreakdownProps): ReactElem
       rawValue={token.$value}
       partialAliasOf={token.partialAliasOf}
       resolved={resolved}
-      colorFormat={colorFormat}
+      colorFormat={format}
     />
   );
 }

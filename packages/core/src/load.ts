@@ -58,6 +58,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
   const configWithDefaults: Config = {
     ...config,
     cssVarPrefix,
+    defaultColorFormat: config.defaultColorFormat ?? 'hex',
   };
   const tParse = performance.now();
   const normalized = await normalizePermutations(configWithDefaults, cwd, logger);

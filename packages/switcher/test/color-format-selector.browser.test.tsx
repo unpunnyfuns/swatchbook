@@ -1,7 +1,11 @@
 import { cleanup, render, screen } from '@testing-library/react';
+import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { ColorFormatSelector } from '#/ColorFormatSelector.tsx';
+
+// Classic-JSX compile: every file using `<…/>` needs React in scope.
+void React;
 
 afterEach(cleanup);
 
@@ -34,5 +38,22 @@ describe('ColorFormatSelector', () => {
     render(<ColorFormatSelector active="hex" onSelect={onSelect} />);
     await userEvent.click(screen.getByRole('button', { name: 'RGB color format' }));
     expect(onSelect).toHaveBeenCalledWith('rgb');
+  });
+
+  it('generates a unique label id per instance so aria-labelledby never collides', () => {
+    render(
+      <>
+        <ColorFormatSelector active="hex" onSelect={() => {}} />
+        <ColorFormatSelector active="rgb" onSelect={() => {}} />
+      </>,
+    );
+    const labels = screen.getAllByText('Color format');
+    const groups = screen.getAllByRole('group');
+    expect(labels).toHaveLength(2);
+    expect(groups).toHaveLength(2);
+    const [firstLabelId, secondLabelId] = labels.map((label) => label.id);
+    expect(firstLabelId).not.toBe(secondLabelId);
+    expect(groups[0]?.getAttribute('aria-labelledby')).toBe(firstLabelId);
+    expect(groups[1]?.getAttribute('aria-labelledby')).toBe(secondLabelId);
   });
 });

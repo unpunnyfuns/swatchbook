@@ -22,17 +22,18 @@ export interface ThemeSwitcherProps {
   onPresetApply(preset: SwitcherPreset): void;
   /** Optional key handler, usually used by consumers to close a popover on Escape. */
   onKeyDown?(event: KeyboardEvent<HTMLDivElement>): void;
-  /** Host-specific content rendered after the axes (e.g. the Storybook addon's color-format picker). */
+  /** Host-specific content rendered after the axes (a generic slot for host-supplied controls). */
   footer?: ReactElement | null;
 }
 
 /**
  * Popover body for the swatchbook theme switcher. Renders preset pills
- * (when the project ships any) and one row per axis. Color-format
- * selection is specific to the Storybook addon (it toggles how blocks
- * stringify colors); hosts that need it slot
- * `<ColorFormatSelector>` into the `footer` prop rather than it being
- * baked into every consumer.
+ * (when the project ships any) and one row per axis. Neither switcher
+ * mount (the Storybook addon toolbar, the docs navbar) renders a
+ * color-format control: blocks read `Config.defaultColorFormat` for
+ * their starting format. Hosts that want one anyway can slot the
+ * package's own `<ColorFormatSelector>` into the `footer` prop rather
+ * than it being baked into every consumer.
  *
  * Consumers own the trigger + positioning — the switcher just draws
  * the menu. Uses classic JSX so it survives embedding in Storybook's

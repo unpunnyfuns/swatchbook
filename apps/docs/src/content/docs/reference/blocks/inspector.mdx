@@ -12,7 +12,7 @@ Single-token deep-dive. `<TokenDetail>` is the composition; each subcomponent be
 
 Full deep-dive: header + composite preview + composite breakdown + alias chain + aliased-by tree + per-axis variance + consumer output + usage snippet. A token carrying DTCG `$deprecated` shows a deprecation notice below the header, with the message when `$deprecated` is a string.
 
-Props: `path: string`, `heading?: string` (defaults to `path`).
+Props: `path: string`, `heading?: string` (defaults to `path`), `colorFormat?: ColorFormat` (overrides the ambient `useColorFormat()` chain for this block and its composed `CompositeBreakdown` / `AxisVariance` sub-parts; see [`useColorFormat`](/reference/blocks/hooks#usecolorformat)).
 
 ## TokenHeader
 
@@ -38,6 +38,8 @@ Type-dispatched live preview of the token's resolved value (typography sample, s
 
 Labelled sub-value grid for composite types (`typography`, `border`, `transition`, `shadow`, `gradient`). Renders nothing for primitives.
 
+Also takes `colorFormat?: ColorFormat`, overriding the ambient `useColorFormat()` chain for this block's color sub-values.
+
 ## AliasChain
 
 ```tsx
@@ -61,6 +63,8 @@ Backward alias tree: every token that transitively aliases this one. Truncates a
 ```
 
 Per-axis value table. Collapses to one row when the value is constant, a list for one varying axis, or a matrix for two axes (extras pinned to the active selection).
+
+Also takes `colorFormat?: ColorFormat`, overriding the ambient `useColorFormat()` chain for color-valued tokens.
 
 ## TokenUsageSnippet
 

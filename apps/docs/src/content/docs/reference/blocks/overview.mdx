@@ -47,6 +47,7 @@ Props:
 - `searchable?: boolean`: render a runtime search input above the tree. Defaults to `true`. Pass `false` to hide the input (the `root` / `type` props still apply at authoring time).
 - `onSelect?(path: string): void`: receives a leaf's full dot-path on click; suppresses the built-in overlay.
 - `indicators?`: configure the per-row strip; see [Indicators](#indicators).
+- `colorFormat?: ColorFormat`: overrides the ambient `useColorFormat()` chain for every color value in the tree, including the row-detail `TokenDetail` slide-over; see [`useColorFormat`](/reference/blocks/hooks#usecolorformat).
 
 ### TokenTable
 
@@ -66,10 +67,11 @@ Props:
 - `searchable?: boolean`: render a runtime search input above the table. Defaults to `true`.
 - `onSelect?(path: string): void`: suppress the built-in drawer.
 - `indicators?`: configure the per-row strip; see [Indicators](#indicators).
+- `colorFormat?: ColorFormat`: overrides the ambient `useColorFormat()` chain for every value in the table, including the row-detail `TokenDetail` slide-over; see [`useColorFormat`](/reference/blocks/hooks#usecolorformat).
 
 ## Per-type
 
-Every block in this group scopes to one DTCG `$type`, filters / sorts, and renders a type-specific visual. All accept `filter?: string`, `sortBy?`, `sortDir?`, and `caption?: string`.
+Every block in this group scopes to one DTCG `$type`, filters / sorts, and renders a type-specific visual. All accept `filter?: string`, `sortBy?`, `sortDir?`, and `caption?: string`. The color-displaying blocks in this group (`ColorPalette`, `GradientPalette`, `BorderPreview`, `ShadowPreview`) also accept `colorFormat?: ColorFormat`, overriding the ambient `useColorFormat()` chain for that block's values; see [`useColorFormat`](/reference/blocks/hooks#usecolorformat).
 
 ### ColorPalette
 
@@ -85,7 +87,7 @@ Swatch grid grouped by dot-path prefix. `groupBy` is auto-derived from the filte
 <ColorTable filter="color.**" />
 ```
 
-Tabular, color-only companion to `TokenTable`. One row per `$type: color` token with swatch, name, value (in the active color format from the toolbar toggle), CSS var, and an indicators column carrying the [indicator strip](#indicators). Each value cell has a hover-revealed copy-to-clipboard button; fuzzy search runs across path + value. Clicking a row expands it inline: the detail panel surfaces `$description`, the alias chain, and (for grouped variants) a sub-table comparing every variant's HEX / HSL / OKLCH at once. The collapsed row shows only the format the user already picked.
+Tabular, color-only companion to `TokenTable`. One row per `$type: color` token with swatch, name, value (in the active color format: see [`useColorFormat`](/reference/blocks/hooks#usecolorformat)), CSS var, and an indicators column carrying the [indicator strip](#indicators). Each value cell has a hover-revealed copy-to-clipboard button; fuzzy search runs across path + value. Clicking a row expands it inline: the detail panel surfaces `$description`, the alias chain, and (for grouped variants) a sub-table comparing every variant's HEX / HSL / OKLCH at once. The collapsed row shows only the active format.
 
 **Variant grouping**: pass a `variants` map to collapse sibling tokens that share a base path into a single row with a pill selector. Clicking a pill swaps the displayed values to that variant:
 
@@ -108,6 +110,7 @@ Props:
 - `onSelect?(path: string): void`: replaces the expand-in-place default with a consumer-driven callback, invoked with the currently-selected variant's path.
 - `variants?: Record<string, string>`: label-to-suffix map for grouping. Accepts both DTCG dot-segment (`hi.disabled`) and Backmarket hyphen-tail (`hi-d`) conventions. Single-member groups render as plain rows; empty / omitted map disables grouping entirely.
 - `indicators?`: configure the per-row strip; see [Indicators](#indicators). `ColorTable`'s strip omits `gamut` and `composes`.
+- `colorFormat?: ColorFormat`: overrides the ambient `useColorFormat()` chain for this table's values; see [`useColorFormat`](/reference/blocks/hooks#usecolorformat).
 
 ### TypographyScale
 

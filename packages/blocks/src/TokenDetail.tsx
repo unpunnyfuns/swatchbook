@@ -1,6 +1,6 @@
 import cx from 'clsx';
 import type { ReactElement } from 'react';
-import { useColorFormat } from '#/contexts.ts';
+import { ColorFormatContext, useColorFormat } from '#/contexts.ts';
 import { formatColor } from '#/format-color.ts';
 import type { ColorFormat } from '#/format-color.ts';
 import { CopyButton } from '#/internal/CopyButton.tsx';
@@ -25,6 +25,13 @@ export interface TokenDetailProps {
   path: string;
   /** Override the heading. Defaults to the path. */
   heading?: string;
+  /**
+   * Highest-precedence color format for this block's values, overriding
+   * an outer `ColorFormatContext` and the project's `defaultColorFormat`.
+   * Omit to inherit the existing precedence chain (see `useColorFormat`).
+   * Also governs the composed `CompositeBreakdown` / `AxisVariance` sub-parts.
+   */
+  colorFormat?: ColorFormat;
 }
 
 export interface TokenDetailDerived {
@@ -157,13 +164,14 @@ export function TokenDetailView({
   );
 }
 
-export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
+export function TokenDetail({ path, heading, colorFormat }: TokenDetailProps): ReactElement {
   const { token, cssVar, activeTheme, activeAxes, cssVarPrefix } = useTokenDetailData(path);
-  const colorFormat = useColorFormat();
+  const contextColorFormat = useColorFormat();
+  const format = colorFormat ?? contextColorFormat;
   const { listing } = useProject();
-  const derived = deriveTokenDetail(path, token, listing, colorFormat);
+  const derived = deriveTokenDetail(path, token, listing, format);
 
-  return (
+  const view = (
     <TokenDetailView
       path={path}
       {...(heading !== undefined && { heading })}
@@ -174,5 +182,15 @@ export function TokenDetail({ path, heading }: TokenDetailProps): ReactElement {
       cssVarPrefix={cssVarPrefix}
       {...derived}
     />
+  );
+
+  // Only the composed CompositeBreakdown/AxisVariance sub-parts read
+  // ColorFormatContext for themselves: provide the override so they inherit
+  // it too, but only when a prop override is actually set, to avoid
+  // clobbering the ambient default with a value that's just its own echo.
+  return colorFormat !== undefined ? (
+    <ColorFormatContext.Provider value={colorFormat}>{view}</ColorFormatContext.Provider>
+  ) : (
+    view
   );
 }

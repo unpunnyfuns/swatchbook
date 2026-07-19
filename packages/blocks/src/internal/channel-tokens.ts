@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react';
 import { onChannel } from '#/internal/channel.ts';
 import type { BlockChannel } from '#/internal/channel.ts';
 import type { VirtualTokenGraph, VirtualTokenListing } from '#/contexts.ts';
+import type { ColorFormat } from '#/format-color.ts';
 import type { VirtualAxis, VirtualDiagnostic } from '#/types.ts';
 
 /**
@@ -46,6 +47,14 @@ export interface TokenSnapshot {
   readonly listing: Readonly<Record<string, VirtualTokenListing>>;
   readonly tokenGraph: VirtualTokenGraph;
   readonly defaultTuple: Record<string, string>;
+  /**
+   * Starting color format for blocks that display color values:
+   * `config.defaultColorFormat` from core, forwarded from the addon's
+   * `registerTokenSource` call. `useColorFormat()` falls back to this on
+   * the provider-less (MDX/autodocs) path when no `ColorFormatContext`/
+   * channel-globals override is active.
+   */
+  readonly defaultColorFormat: ColorFormat;
   /** Monotonic counter, bumped on each update. Useful as a React key. */
   readonly version: number;
 }
@@ -67,6 +76,7 @@ const EMPTY_SNAPSHOT: TokenSnapshot = {
   listing: {},
   tokenGraph: EMPTY_TOKEN_GRAPH,
   defaultTuple: {},
+  defaultColorFormat: 'hex',
   version: 0,
 };
 
@@ -89,6 +99,7 @@ function applyPatch(patch: Partial<TokenSnapshot>): void {
     listing: patch.listing ?? snapshot.listing,
     tokenGraph: patch.tokenGraph ?? snapshot.tokenGraph,
     defaultTuple: patch.defaultTuple ?? snapshot.defaultTuple,
+    defaultColorFormat: patch.defaultColorFormat ?? snapshot.defaultColorFormat,
     version: snapshot.version + 1,
   };
   for (const cb of listeners) cb();

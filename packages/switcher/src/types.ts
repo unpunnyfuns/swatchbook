@@ -25,3 +25,15 @@ export interface SwitcherPreset {
   axes: Partial<Record<string, string>>;
   description?: string;
 }
+
+/**
+ * Color-value display formats. Mirrors `@unpunnyfuns/swatchbook-core`'s
+ * canonical `ColorFormat` union (see that package's `color-formats.ts`) for
+ * the same reason the axis/preset shapes above are re-declared rather than
+ * imported: the switcher stays framework-agnostic and doesn't pull `core`
+ * as a runtime dependency. `packages/switcher/test/color-format-parity.test.ts`
+ * guards this list against drifting from core's.
+ */
+export type ColorFormat = 'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw';
+
+export const COLOR_FORMATS: readonly ColorFormat[] = ['hex', 'rgb', 'hsl', 'oklch', 'raw'];
