@@ -20,7 +20,7 @@ const listing = {
 
 const cssVarPrefix = 'sb';
 
-const opts = { sortBy: 'path', sortDir: 'asc', colorFormat: 'hex' } as const;
+const opts = { sortBy: 'path', sortDir: 'asc' } as const;
 
 it('groups color tokens under the derived default groupBy, excluding other types', () => {
   const groups = deriveColorPaletteGroups(resolved, listing, cssVarPrefix, opts);
@@ -32,12 +32,11 @@ it('groups color tokens under the derived default groupBy, excluding other types
   ]);
 });
 
-it('derives the css var from the listing and formats the color value for the given colorFormat', () => {
+it('derives the css var from the listing and carries the realised token for the presenter', () => {
   const groups = deriveColorPaletteGroups(resolved, listing, cssVarPrefix, opts);
   const bg = groups[0]?.swatches.find((s) => s.path === 'color.brand.bg');
   expect(bg?.cssVar).toBe('var(--sb-color-brand-bg)');
-  expect(bg?.value).toBe('#0066ff');
-  expect(bg?.outOfGamut).toBe(false);
+  expect(bg?.token).toEqual(resolved['color.brand.bg']);
 });
 
 it('falls back to a prefix-derived css var when the listing has no entry', () => {

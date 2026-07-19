@@ -2,6 +2,14 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 import { ColorPaletteView } from '#/ColorPalette.tsx';
 import type { ColorPaletteGroup, ColorPaletteViewProps } from '#/ColorPalette.tsx';
+import type { RealisedToken } from '@unpunnyfuns/swatchbook-core/token-value-types';
+
+const blueToken: RealisedToken<'color'> = { $type: 'color', $value: { hex: '#0066ff' } };
+// Out-of-gamut in sRGB (rgb component past 255) — exercises the ⚠ marker.
+const oorToken: RealisedToken<'color'> = {
+  $type: 'color',
+  $value: { colorSpace: 'srgb', components: [300 / 255, 0, 0] },
+};
 
 function groups(): ColorPaletteGroup[] {
   return [
@@ -12,15 +20,13 @@ function groups(): ColorPaletteGroup[] {
           path: 'color.brand.bg',
           leaf: 'bg',
           cssVar: 'var(--sb-color-brand-bg)',
-          value: '#0066ff',
-          outOfGamut: false,
+          token: blueToken,
         },
         {
           path: 'color.brand.fg',
           leaf: 'fg',
           cssVar: 'var(--sb-color-brand-fg)',
-          value: 'rgb(300 0 0)',
-          outOfGamut: true,
+          token: oorToken,
         },
       ],
     },
@@ -35,6 +41,7 @@ function setup(extra: Partial<ColorPaletteViewProps> = {}) {
       activeTheme="Light"
       cssVarPrefix="sb"
       activeAxes={{ theme: 'Light' }}
+      colorFormat="hex"
       {...extra}
     />,
   );

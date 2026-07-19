@@ -3,11 +3,13 @@ import { useMemo } from 'react';
 import './ColorPalette.css';
 import { useColorFormat } from '#/contexts.ts';
 import type { ColorFormat } from '#/format-color.ts';
+import type { RealisedToken } from '#/internal/composite-types.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
-import { resolveColorValue, resolveCssVar, useProject } from '#/internal/use-project.ts';
+import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import type { ProjectData } from '#/internal/use-project.ts';
+import { usePresenter } from '#/presenters/registry.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface ColorPaletteProps {
@@ -53,8 +55,8 @@ export interface ColorPaletteSwatch {
   path: string;
   leaf: string;
   cssVar: string;
-  value: string;
-  outOfGamut: boolean;
+  /** Realised token, fed to the `color` presenter per the presenter contract. */
+  token: RealisedToken<'color'>;
 }
 
 export interface ColorPaletteGroup {
@@ -80,7 +82,6 @@ export interface DeriveColorPaletteGroupsOptions {
   groupBy?: number | undefined;
   sortBy: SortBy;
   sortDir: SortDir;
-  colorFormat: ColorFormat;
 }
 
 /**
@@ -91,7 +92,7 @@ export function deriveColorPaletteGroups(
   resolved: ProjectData['resolved'],
   listing: ProjectData['listing'],
   cssVarPrefix: ProjectData['cssVarPrefix'],
-  { filter, groupBy, sortBy, sortDir, colorFormat }: DeriveColorPaletteGroupsOptions,
+  { filter, groupBy, sortBy, sortDir }: DeriveColorPaletteGroupsOptions,
 ): ColorPaletteGroup[] {
   const projectFields = { listing, cssVarPrefix };
   const filtered = Object.entries(resolved).filter(([path, token]) => {
@@ -110,13 +111,11 @@ export function deriveColorPaletteGroups(
     const groupKey = segments.slice(0, effectiveGroupBy).join('.');
     const leaf = segments.slice(effectiveGroupBy).join('.') || segments.at(-1) || path;
     const list = bucket.get(groupKey) ?? [];
-    const formatted = resolveColorValue(path, token.$value, colorFormat, projectFields);
     list.push({
       path,
       leaf,
       cssVar: resolveCssVar(path, projectFields),
-      value: formatted.value,
-      outOfGamut: formatted.outOfGamut,
+      token: token as RealisedToken<'color'>,
     });
     bucket.set(groupKey, list);
   }
@@ -131,19 +130,27 @@ export interface ColorPaletteViewProps {
   activeTheme: string;
   cssVarPrefix: string;
   activeAxes: Record<string, string>;
+  /** Forwarded to each swatch's `color` presenter. */
+  colorFormat: ColorFormat;
   filter?: string | undefined;
   caption?: string | undefined;
 }
 
-/** Pure presentation for the color palette. Renders from plain props. */
+/**
+ * Pure presentation for the color palette. Renders from plain props;
+ * composes the registry's `color` presenter per swatch, feeding it this
+ * row's already-resolved `token`/`cssVar` per the presenter contract.
+ */
 export function ColorPaletteView({
   groups,
   activeTheme,
   cssVarPrefix,
   activeAxes,
+  colorFormat,
   filter,
   caption,
 }: ColorPaletteViewProps): ReactElement {
+  const Swatch = usePresenter('color');
   const totalCount = groups.reduce((acc, { swatches }) => acc + swatches.length, 0);
   const captionText =
     caption ??
@@ -164,31 +171,18 @@ export function ColorPaletteView({
         <section key={group} className="sb-color-palette__group">
           <div className="sb-color-palette__group-header">{group}</div>
           <div className="sb-color-palette__grid">
-            {swatches.map((swatch) => (
-              <div key={swatch.path} className="sb-color-palette__card">
-                <div
-                  className="sb-color-palette__swatch"
-                  style={{ background: swatch.cssVar }}
-                  aria-hidden
-                />
-                <div className="sb-color-palette__meta">
-                  <span className="sb-color-palette__leaf">{swatch.leaf}</span>
-                  <span className="sb-color-palette__value">
-                    {swatch.value}
-                    {swatch.outOfGamut && (
-                      <span
-                        title="Out of sRGB gamut for this format"
-                        aria-label="out of gamut"
-                        className="sb-color-palette__gamut-warn"
-                      >
-                        {' '}
-                        ⚠
-                      </span>
-                    )}
-                  </span>
-                </div>
-              </div>
-            ))}
+            {swatches.map(
+              (swatch) =>
+                Swatch && (
+                  <Swatch
+                    key={swatch.path}
+                    path={swatch.path}
+                    token={swatch.token}
+                    cssVar={swatch.cssVar}
+                    colorFormat={colorFormat}
+                  />
+                ),
+            )}
           </div>
         </section>
       ))}
@@ -216,9 +210,8 @@ export function ColorPalette({
         groupBy,
         sortBy,
         sortDir,
-        colorFormat: format,
       }),
-    [resolved, listing, cssVarPrefix, filter, groupBy, sortBy, sortDir, format],
+    [resolved, listing, cssVarPrefix, filter, groupBy, sortBy, sortDir],
   );
 
   return (
@@ -227,6 +220,7 @@ export function ColorPalette({
       activeTheme={activeTheme}
       cssVarPrefix={cssVarPrefix}
       activeAxes={activeAxes}
+      colorFormat={format}
       filter={filter}
       caption={caption}
     />

@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import type { TokenType } from '@unpunnyfuns/swatchbook-core/token-value-types';
 import { BorderSample } from '#/border-preview/BorderSample.tsx';
+import { ColorSwatch } from '#/presenters/ColorSwatch.tsx';
 import { DimensionSample } from '#/dimension-scale/DimensionSample.tsx';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
 import type { PresenterComponent, PresenterRegistry } from '#/presenters/types.ts';
@@ -11,6 +12,7 @@ import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
  * its presenter lands. A consumer's `presenters` override merges over this.
  */
 export const DEFAULT_PRESENTERS: PresenterRegistry = {
+  color: ColorSwatch as PresenterComponent,
   shadow: ShadowSample as PresenterComponent,
   border: BorderSample as PresenterComponent,
   dimension: DimensionSample as PresenterComponent,
