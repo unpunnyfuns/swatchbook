@@ -1,17 +1,15 @@
 /**
  * Typed envelopes for DTCG 2025.10 composite `$value` shapes — one per
- * `$type` the blocks render. Sub-values stay `unknown` because each
- * may be a primitive (number / string), a sub-value alias (string in
- * `{token.path}` form, post-resolution flattened to a string), or
- * a nested composite. The win over `Record<string, unknown>` isn't
- * value-level narrowing — it's that typo-ing a key (`fontFamlly`)
- * becomes a compile error.
+ * `$type` the packages that render tokens consume. Sub-values stay
+ * `unknown` because each may be a primitive (number / string), a
+ * sub-value alias (string in `{token.path}` form, post-resolution
+ * flattened to a string), or a nested composite. The win over
+ * `Record<string, unknown>` isn't value-level narrowing — it's that
+ * typo-ing a key (`fontFamlly`) becomes a compile error.
  *
- * Adopted across `internal/format-token-value.ts`,
- * `token-detail/CompositeBreakdown.tsx`, `TypographyScale.tsx`, and
- * `format-color.ts`. The DTCG spec is the source of truth for the
- * keys; this file translates that into TypeScript without re-deriving
- * the spec at every consuming site.
+ * The DTCG spec is the source of truth for the keys; this file
+ * translates that into TypeScript without re-deriving the spec at
+ * every consuming site.
  */
 
 /**
