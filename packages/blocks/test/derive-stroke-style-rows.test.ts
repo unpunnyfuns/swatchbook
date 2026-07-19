@@ -44,16 +44,18 @@ it('falls back to a prefix-derived css var when the listing has no entry', () =>
   expect(dashed.cssVar).toBe('var(--sb-stroke-style-dashed)');
 });
 
-it('extracts a border-style keyword for string-form values', () => {
+it('carries the realised token through for each row', () => {
   const rows = deriveStrokeStyleRows(resolved, project, opts);
   const solid = rows.find((r) => r.path === 'stroke.style.solid')!;
-  expect(solid.cssStyle).toBe('solid');
-});
-
-it('has no css-style keyword for object-form (dashed) values', () => {
-  const rows = deriveStrokeStyleRows(resolved, project, opts);
+  expect(solid.token.$value).toBe('solid');
   const dashed = rows.find((r) => r.path === 'stroke.style.dashed')!;
-  expect(dashed.cssStyle).toBeNull();
+  expect(dashed.token.$value).toEqual({
+    dashArray: [
+      { value: 4, unit: 'px' },
+      { value: 2, unit: 'px' },
+    ],
+    lineCap: 'round',
+  });
 });
 
 it('applies the path filter', () => {

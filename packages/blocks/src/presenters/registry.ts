@@ -7,7 +7,9 @@ import { FontFamilySpecimen } from '#/presenters/FontFamilySpecimen.tsx';
 import { FontWeightSpecimen } from '#/presenters/FontWeightSpecimen.tsx';
 import { GradientSwatch } from '#/presenters/GradientSwatch.tsx';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
+import { OpacitySwatch } from '#/presenters/OpacitySwatch.tsx';
 import type { PresenterComponent, PresenterRegistry } from '#/presenters/types.ts';
+import { StrokeSample } from '#/presenters/StrokeSample.tsx';
 import { TypeSpecimen } from '#/presenters/TypeSpecimen.tsx';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
 
@@ -25,6 +27,8 @@ export const DEFAULT_PRESENTERS: PresenterRegistry = {
   typography: TypeSpecimen as PresenterComponent,
   fontFamily: FontFamilySpecimen as PresenterComponent,
   fontWeight: FontWeightSpecimen as PresenterComponent,
+  number: OpacitySwatch as PresenterComponent,
+  strokeStyle: StrokeSample as PresenterComponent,
 };
 
 /** Overrides win per `$type`; unlisted types keep the built-in. */

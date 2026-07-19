@@ -28,19 +28,6 @@
   color: var(--swatchbook-text-muted);
 }
 
-.sb-stroke-style-sample__line {
-  height: 0;
-  border-top-width: 4px;
-  border-top-color: var(--swatchbook-text-default);
-  width: 100%;
-}
-
-.sb-stroke-style-sample__object-fallback {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: var(--swatchbook-type-micro);
-  color: var(--swatchbook-text-muted);
-}
-
 .sb-stroke-style-sample__css-var {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: var(--swatchbook-type-micro);

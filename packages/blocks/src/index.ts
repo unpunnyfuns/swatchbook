@@ -33,6 +33,7 @@ export { GradientPalette, type GradientPaletteProps } from '#/GradientPalette.ts
 export { GradientSwatch, type GradientSwatchProps } from '#/presenters/GradientSwatch.tsx';
 export { MotionPreview, type MotionPreviewProps, type MotionSpeed } from '#/MotionPreview.tsx';
 export { OpacityScale, type OpacityScaleProps } from '#/OpacityScale.tsx';
+export { OpacitySwatch, type OpacitySwatchProps } from '#/presenters/OpacitySwatch.tsx';
 export {
   AxesContext,
   ColorFormatContext,
@@ -78,6 +79,7 @@ export type {
 export { MotionSample, type MotionSampleProps } from '#/motion-preview/MotionSample.tsx';
 export { ShadowPreview, type ShadowPreviewProps } from '#/ShadowPreview.tsx';
 export { ShadowSample, type ShadowSampleProps } from '#/shadow-preview/ShadowSample.tsx';
+export { StrokeSample, type StrokeSampleProps } from '#/presenters/StrokeSample.tsx';
 export { StrokeStylePreview, type StrokeStylePreviewProps } from '#/StrokeStylePreview.tsx';
 export { TokenDetail, type TokenDetailProps } from '#/TokenDetail.tsx';
 export { AliasChain, type AliasChainProps } from '#/token-detail/AliasChain.tsx';

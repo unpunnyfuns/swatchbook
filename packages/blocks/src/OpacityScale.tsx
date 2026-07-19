@@ -1,11 +1,15 @@
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './OpacityScale.css';
+import { useColorFormat } from '#/contexts.ts';
+import type { ColorFormat } from '#/format-color.ts';
+import type { RealisedToken } from '#/internal/composite-types.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import type { ProjectData } from '#/internal/use-project.ts';
+import { usePresenter } from '#/presenters/registry.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface OpacityScaleProps {
@@ -46,6 +50,8 @@ export interface OpacityRow {
   cssVar: string;
   opacity: number;
   displayValue: string;
+  /** Realised token, fed to `OpacitySwatch` per the presenter contract. */
+  token: RealisedToken<'number'>;
 }
 
 function toOpacity(raw: unknown): number {
@@ -85,6 +91,7 @@ export function deriveOpacityRows(
       cssVar: resolveCssVar(path, project),
       opacity,
       displayValue: String(opacity),
+      token: token as RealisedToken<'number'>,
     };
   });
 }
@@ -95,20 +102,28 @@ export interface OpacityScaleViewProps {
   cssVarPrefix: string;
   activeAxes: Record<string, string>;
   sampleColorVar: string;
+  /** Forwarded to each row's `OpacitySwatch` (uniform presenter contract; unused for opacity). */
+  colorFormat: ColorFormat;
   filter?: string | undefined;
   caption?: string | undefined;
 }
 
-/** Pure presentation for the opacity scale. Renders from plain props. */
+/**
+ * Pure presentation for the opacity scale. Renders from plain props;
+ * composes the connected `OpacitySwatch` as a child, feeding it this row's
+ * already-resolved `token`/`cssVar` per the presenter contract.
+ */
 export function OpacityScaleView({
   rows,
   activeTheme,
   cssVarPrefix,
   activeAxes,
   sampleColorVar,
+  colorFormat,
   filter,
   caption,
 }: OpacityScaleViewProps): ReactElement {
+  const Swatch = usePresenter('number');
   const captionText =
     caption ??
     `${rows.length} opacity token${rows.length === 1 ? '' : 's'}${
@@ -129,16 +144,15 @@ export function OpacityScaleView({
       <div className="sb-opacity-scale__grid">
         {rows.map((row) => (
           <div key={row.path} className="sb-opacity-scale__card">
-            <div
-              className="sb-opacity-scale__swatch"
-              style={
-                {
-                  '--swatchbook-opacity-scale-color': sampleColorVar,
-                  '--swatchbook-opacity-scale-alpha': String(row.opacity),
-                } as CSSProperties
-              }
-              aria-hidden
-            />
+            {Swatch && (
+              <Swatch
+                path={row.path}
+                token={row.token}
+                cssVar={row.cssVar}
+                colorFormat={colorFormat}
+                options={{ sampleColorVar }}
+              />
+            )}
             <div className="sb-opacity-scale__meta">
               <span className="sb-opacity-scale__path">{row.path}</span>
               <span className="sb-opacity-scale__value">{row.displayValue}</span>
@@ -167,6 +181,7 @@ export function OpacityScale({
 }: OpacityScaleProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+  const colorFormat = useColorFormat();
 
   const rows = useMemo(
     () => deriveOpacityRows(resolved, project, { filter, type, sortBy, sortDir }),
@@ -182,6 +197,7 @@ export function OpacityScale({
       cssVarPrefix={cssVarPrefix}
       activeAxes={activeAxes}
       sampleColorVar={sampleColorVar}
+      colorFormat={colorFormat}
       filter={filter}
       caption={caption}
     />
