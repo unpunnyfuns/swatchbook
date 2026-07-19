@@ -62,7 +62,7 @@ function makeTokenDetailSnapshot(): ProjectSnapshot {
 // top-line value is computed directly from the prop, not through
 // context, so it can't tell a working wrap from a broken one.
 // `AxisVariance` is a separately rendered child that reads
-// `ColorFormatContext` for itself — its "constant" value cell only
+// `ColorFormatContext` for itself; its "constant" value cell only
 // picks up the override if the wrap actually happened. This is the
 // nested-propagation path with zero prior coverage.
 it('a colorFormat prop on TokenDetail propagates into the nested AxisVariance', () => {

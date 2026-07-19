@@ -274,7 +274,7 @@ const themedDecorator: Decorator = (Story, context) => {
       listing: live.listing,
       tokenGraph: live.tokenGraph,
       defaultTuple: live.defaultTuple,
-      defaultColorFormat: virtualDefaultColorFormat,
+      defaultColorFormat: live.defaultColorFormat,
       resolveAt,
     }),
     [themeName, tuple, live, resolveAt],

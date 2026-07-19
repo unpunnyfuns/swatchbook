@@ -30,9 +30,23 @@ function graph(): VirtualTokenGraph {
 
 afterEach(() => {
   cleanup();
-  // Reset the module-level token store so this test's `defaultColorFormat`
-  // doesn't leak into other files sharing the same worker.
-  registerTokenSource({ defaultColorFormat: 'hex' });
+  // `registerTokenSource` patches are partial and retain omitted fields, so
+  // resetting only `defaultColorFormat` left `axes` / `defaultTuple` /
+  // `cssVarPrefix` / `tokenGraph` from this test's patch on the module-level
+  // store for later files sharing the same worker. Restore the full baseline
+  // snapshot instead.
+  registerTokenSource({
+    axes: [],
+    presets: [],
+    diagnostics: [],
+    css: '',
+    cssVarPrefix: '',
+    indicators: {},
+    listing: {},
+    tokenGraph: { nodes: {}, axes: [], axisDefaults: {}, axisContexts: {} },
+    defaultTuple: {},
+    defaultColorFormat: 'hex',
+  });
 });
 
 it('honors defaultColorFormat from the channel token source with no provider mounted', () => {

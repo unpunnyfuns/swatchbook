@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import type { ReactElement } from 'react';
 import type { ColorFormat } from '#/types.ts';
 
@@ -33,16 +33,13 @@ interface ColorFormatSelectorProps {
  * (true whenever this renders inside `<ThemeSwitcher>`'s `footer`).
  */
 export function ColorFormatSelector({ active, onSelect }: ColorFormatSelectorProps): ReactElement {
+  const labelId = useId();
   return (
     <div>
-      <div className="sb-switcher__section-label" id="sb-color-format-label">
+      <div className="sb-switcher__section-label" id={labelId}>
         Color format
       </div>
-      <div
-        className="sb-switcher__section-body"
-        role="group"
-        aria-labelledby="sb-color-format-label"
-      >
+      <div className="sb-switcher__section-body" role="group" aria-labelledby={labelId}>
         {COLOR_FORMAT_OPTIONS.map((opt) => {
           const isActive = opt.id === active;
           return (
