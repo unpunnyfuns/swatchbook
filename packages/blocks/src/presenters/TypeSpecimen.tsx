@@ -48,19 +48,20 @@ function describeValue(value: TypographyValue): string {
 /**
  * Presenter for `$type: typography` tokens: a spec summary and a sample line
  * styled per R3. Token identity (the path) is the consuming block's
- * responsibility, not this presenter's; see `TypographyScale`. Terrazzo's
- * `generateShorthand` assigns a typography token's base css var the CSS
- * `font` shorthand value (style, weight, size/line-height, family, each a
- * per-subvalue `var()`), so `cssVar` applies directly to the sample's `font`
- * property. That shorthand's grammar has no slot for `letter-spacing`, so
- * the cssVar branch renders without it; the realised branch below applies
- * every field the token carries, `letterSpacing` included.
+ * responsibility, not this presenter's; see `TypographyScale`.
  */
-export function TypeSpecimen({ token, cssVar, options }: TypeSpecimenProps): ReactElement {
+export function TypeSpecimen({ token, cssVar: _cssVar, options }: TypeSpecimenProps): ReactElement {
   const rawSample = options?.['sample'];
   const sample = typeof rawSample === 'string' ? rawSample : DEFAULT_SAMPLE;
   const value = (token.$value ?? {}) as TypographyValue;
-  const sampleStyle: CSSProperties = cssVar ? { font: cssVar } : styleFromValue(value);
+  // Terrazzo emits typography sub-properties (font-family/size/weight/
+  // line-height) as individual custom properties, never a composite `font`
+  // shorthand var. `font: var(--sb-typography-<name>)` references an
+  // undefined variable, and the `font` shorthand is all-or-nothing, so the
+  // whole declaration drops and the sample falls back to base size. Render
+  // from the realised `$value` instead; it stays correct across axis flips
+  // because the block re-resolves and re-renders.
+  const sampleStyle: CSSProperties = styleFromValue(value);
   const specs = describeValue(value);
   return (
     <div className="sb-type-specimen">

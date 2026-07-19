@@ -63,10 +63,11 @@ it('always shows the spec summary (font size included), even when the token has 
   screen.getByText('24px · w700 · lh 1.2');
 });
 
-// Terrazzo's generateShorthand assigns a typography token's base css var the
-// `font` shorthand value (style weight size/line-height family), so cssVar
-// applies directly to the sample's `font` property.
-it('applies cssVar to the sample via the font shorthand', () => {
+// Terrazzo emits typography sub-properties as individual custom properties,
+// never a composite `font` shorthand var, so a `font: var(...)` declaration
+// would reference an undefined variable and drop (the shorthand is
+// all-or-nothing). A `cssVar` prop must not change the sample's sizing.
+it('ignores cssVar and stays sized from the realised value', () => {
   const { container } = render(
     <TypeSpecimen
       path="typography.heading"
@@ -76,6 +77,7 @@ it('applies cssVar to the sample via the font shorthand', () => {
     />,
   );
   const sample = container.querySelector<HTMLElement>('.sb-type-specimen__sample');
-  expect(sample?.style.font).toBe('var(--sb-typography-heading)');
-  expect(sample?.style.fontSize).toBe('');
+  expect(sample?.style.font).toBe('');
+  expect(sample?.style.fontSize).toBe('24px');
+  expect(sample?.style.fontWeight).toBe('700');
 });
