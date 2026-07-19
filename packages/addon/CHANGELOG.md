@@ -1,5 +1,20 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 1.2.0
+
+### Minor Changes
+
+- c44f70754e26ae7251a191eb5bea9b6449745ce1: Add `Config.defaultColorFormat`; blocks own color format, and the global color-format picker is removed from the toolbar (its global key is now internal, not part of the addon's public export surface).
+
+### Patch Changes
+
+- Updated dependencies [c44f707]
+- Updated dependencies [c44f707]
+- Updated dependencies [c44f707]
+  - @unpunnyfuns/swatchbook-switcher@1.2.0
+  - @unpunnyfuns/swatchbook-blocks@1.2.0
+  - @unpunnyfuns/swatchbook-core@1.2.0
+
 ## 1.1.1
 
 ### Patch Changes

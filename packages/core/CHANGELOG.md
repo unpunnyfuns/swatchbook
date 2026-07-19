@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-core
 
+## 1.2.0
+
+### Minor Changes
+
+- c44f70754e26ae7251a191eb5bea9b6449745ce1: Add `Config.defaultColorFormat` to set the starting color format for blocks that display color values.
+
 ## 1.1.1
 
 ### Patch Changes

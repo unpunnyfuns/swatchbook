@@ -1,5 +1,16 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 1.2.0
+
+### Minor Changes
+
+- c44f70754e26ae7251a191eb5bea9b6449745ce1: Blocks default their color format to `Config.defaultColorFormat`, and now accept a `colorFormat` prop that overrides both an outer `ColorFormatContext` and that project default for that block.
+
+### Patch Changes
+
+- Updated dependencies [c44f707]
+  - @unpunnyfuns/swatchbook-core@1.2.0
+
 ## 1.1.1
 
 ### Patch Changes
