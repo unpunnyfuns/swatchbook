@@ -8,7 +8,7 @@ const transitionEnter: RealisedToken<'transition'> = {
 };
 
 const meta = preview.meta({
-  title: 'Internals/Samples/MotionSample',
+  title: 'Presenters/Sample/MotionSample',
   component: MotionSample,
   args: { path: 'transition.enter', token: transitionEnter, colorFormat: 'hex' },
 });

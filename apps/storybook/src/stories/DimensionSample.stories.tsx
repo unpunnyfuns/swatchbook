@@ -16,7 +16,7 @@ const radiusLg: RealisedToken<'dimension'> = {
 };
 
 const meta = preview.meta({
-  title: 'Internals/Samples/DimensionSample',
+  title: 'Presenters/Sample/DimensionSample',
   component: DimensionSample,
   args: { colorFormat: 'hex' },
 });

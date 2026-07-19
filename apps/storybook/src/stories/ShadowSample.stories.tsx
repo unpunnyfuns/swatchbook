@@ -14,7 +14,7 @@ const shadowMd: RealisedToken<'shadow'> = {
 };
 
 const meta = preview.meta({
-  title: 'Internals/Samples/ShadowSample',
+  title: 'Presenters/Sample/ShadowSample',
   component: ShadowSample,
   args: { path: 'shadow.md', token: shadowMd, colorFormat: 'hex' },
 });

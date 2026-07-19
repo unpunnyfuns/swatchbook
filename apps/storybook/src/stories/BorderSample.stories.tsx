@@ -13,7 +13,7 @@ const borderFocus: RealisedToken<'border'> = {
 };
 
 const meta = preview.meta({
-  title: 'Internals/Samples/BorderSample',
+  title: 'Presenters/Sample/BorderSample',
   component: BorderSample,
   args: { colorFormat: 'hex' },
 });
