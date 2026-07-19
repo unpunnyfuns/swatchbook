@@ -9,7 +9,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it } from 'vitest';
-import { ColorTable, SwatchbookProvider, TokenTable } from '#/index.ts';
+import { ColorTable, SwatchbookContext, TokenTable } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import type { VirtualToken } from '#/types.ts';
 
@@ -36,9 +36,9 @@ afterEach(cleanup);
 
 it('TokenTable keeps its search query across a full remount (docs mode)', async () => {
   const view = () => (
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <TokenTable id="persist" />
-    </SwatchbookProvider>
+    </SwatchbookContext.Provider>
   );
   const { unmount } = render(view());
 
@@ -53,9 +53,9 @@ it('TokenTable keeps its search query across a full remount (docs mode)', async 
 
 it('ColorTable keeps its search query across a full remount (docs mode)', async () => {
   const view = () => (
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <ColorTable id="persist" />
-    </SwatchbookProvider>
+    </SwatchbookContext.Provider>
   );
   const { unmount } = render(view());
 

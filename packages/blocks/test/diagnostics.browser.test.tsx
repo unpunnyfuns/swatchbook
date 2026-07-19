@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { Diagnostics, SwatchbookProvider } from '#/index.ts';
+import { Diagnostics, SwatchbookContext } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
@@ -25,16 +25,16 @@ describe('Diagnostics', () => {
 
   it('renders an OK summary when the project carries no diagnostics', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <Diagnostics />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     screen.getByText(/✔ OK · no diagnostics/);
   });
 
   it('auto-expands when there are errors and lists each row', () => {
     render(
-      <SwatchbookProvider
+      <SwatchbookContext.Provider
         value={makeSnapshot([
           {
             severity: 'error',
@@ -47,7 +47,7 @@ describe('Diagnostics', () => {
         ])}
       >
         <Diagnostics />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     // Summary shows the aggregated count.
@@ -64,11 +64,11 @@ describe('Diagnostics', () => {
 
   it('stays collapsed when only info-level diagnostics are present', () => {
     render(
-      <SwatchbookProvider
+      <SwatchbookContext.Provider
         value={makeSnapshot([{ severity: 'info', group: 'parser', message: 'loaded 20 files' }])}
       >
         <Diagnostics />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     const details = screen.getByText(/1 info/).closest('details');
     expect(details?.hasAttribute('open')).toBe(false);
@@ -76,9 +76,9 @@ describe('Diagnostics', () => {
 
   it('honors the caption override', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <Diagnostics caption="Project health" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     screen.getByText('Project health');
   });

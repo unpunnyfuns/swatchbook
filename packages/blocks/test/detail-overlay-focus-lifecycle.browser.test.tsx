@@ -11,7 +11,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
-import { SwatchbookProvider } from '#/provider.tsx';
+import { SwatchbookContext } from '#/contexts.ts';
 import { emptySnapshot, renderOverlay } from './_detail-overlay-helpers.tsx';
 
 afterEach(cleanup);
@@ -30,9 +30,9 @@ it('restores focus to the previously-active element on unmount', () => {
   expect(document.activeElement).toBe(opener);
 
   const { unmount } = render(
-    <SwatchbookProvider value={emptySnapshot()}>
+    <SwatchbookContext.Provider value={emptySnapshot()}>
       <DetailOverlay path="color.accent.bg" onClose={() => {}} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   expect(document.activeElement).not.toBe(opener);
 

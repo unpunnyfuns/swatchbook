@@ -1,7 +1,7 @@
 import { cleanup, render, waitFor } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 import type { RealisedToken } from '@unpunnyfuns/swatchbook-core/token-value-types';
-import { DimensionSample, DimensionScale, SwatchbookProvider } from '#/index.ts';
+import { DimensionSample, DimensionScale, SwatchbookContext } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
@@ -38,9 +38,9 @@ afterEach(() => {
 it('does not cap a 25rem token at a 16px root (400px is under the 480 cap)', () => {
   document.documentElement.style.fontSize = '16px';
   const { container } = render(
-    <SwatchbookProvider value={makeSnapshot()}>
+    <SwatchbookContext.Provider value={makeSnapshot()}>
       <DimensionScale />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   expect(container.querySelector('.sb-dimension-sample__cap')).toBeNull();
 });
@@ -48,9 +48,9 @@ it('does not cap a 25rem token at a 16px root (400px is under the 480 cap)', () 
 it('caps the same 25rem token when the root font-size is 20px (500px exceeds 480)', () => {
   document.documentElement.style.fontSize = '20px';
   const { container } = render(
-    <SwatchbookProvider value={makeSnapshot()}>
+    <SwatchbookContext.Provider value={makeSnapshot()}>
       <DimensionScale />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   expect(container.querySelector('.sb-dimension-sample--capped')?.getAttribute('title')).toContain(
     'capped at 480px',
@@ -63,9 +63,9 @@ it('caps the same 25rem token when the root font-size is 20px (500px exceeds 480
 it('re-evaluates the cap when a responsive breakpoint changes the root font-size', async () => {
   document.documentElement.style.fontSize = '16px';
   const { container } = render(
-    <SwatchbookProvider value={makeSnapshot()}>
+    <SwatchbookContext.Provider value={makeSnapshot()}>
       <DimensionScale />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   expect(container.querySelector('.sb-dimension-sample__cap')).toBeNull();
 

@@ -37,6 +37,7 @@ export { OpacitySwatch, type OpacitySwatchProps } from '#/presenters/OpacitySwat
 export {
   AxesContext,
   ColorFormatContext,
+  SwatchbookContext,
   ThemeContext,
   useActiveAxes,
   useActiveTheme,
@@ -61,6 +62,7 @@ export { formatTokenValue } from '@unpunnyfuns/swatchbook-core/token-value-css';
 export {
   SwatchbookProvider,
   type SwatchbookProviderProps,
+  useSetAxes,
   useSwatchbookData,
 } from '#/provider.tsx';
 export {

@@ -1,6 +1,6 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
-import { SwatchbookProvider, ColorTable } from '#/index.ts';
+import { SwatchbookContext, ColorTable } from '#/index.ts';
 import type { ProjectSnapshot, VirtualToken } from '#/index.ts';
 
 const TOKENS: Record<string, VirtualToken> = {
@@ -49,18 +49,18 @@ function rowFor(path: string) {
 
 it('renders the alias chain indicator in a ColorTable row', () => {
   render(
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <ColorTable />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   expect(within(rowFor('color.primary')).getByTestId('row-indicator-alias-forward')).toBeTruthy();
 });
 
 it('alias refs are informational (plain text, not buttons)', () => {
   render(
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <ColorTable />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   const fwd = within(rowFor('color.primary')).getByTestId('row-indicator-alias-forward');
   const node = within(fwd).getAllByTestId('alias-node')[0] as HTMLElement;
@@ -69,9 +69,9 @@ it('alias refs are informational (plain text, not buttons)', () => {
 
 it('keeps the value-cell gamut warning and shows no gamut badge in the strip', () => {
   render(
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <ColorTable />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   const row = rowFor('color.wide');
   expect(within(row).getByLabelText('out of gamut')).toBeTruthy();
@@ -80,9 +80,9 @@ it('keeps the value-cell gamut warning and shows no gamut badge in the strip', (
 
 it('hides the strip when indicators={false}', () => {
   render(
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <ColorTable indicators={false} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   expect(screen.queryByTestId('row-indicator-deprecated')).toBeNull();
   expect(screen.queryByTestId('row-indicator-alias-forward')).toBeNull();
@@ -90,9 +90,9 @@ it('hides the strip when indicators={false}', () => {
 
 it("strikes through a deprecated color row's name cell", () => {
   render(
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <ColorTable />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   const nameCell = within(rowFor('color.legacy')).getByText('color.legacy').closest('td')!;
   expect(nameCell.getAttribute('data-deprecated')).toBe('true');
@@ -100,9 +100,9 @@ it("strikes through a deprecated color row's name cell", () => {
 
 it('drops the name strikethrough when deprecation is disabled', () => {
   render(
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <ColorTable indicators={{ deprecation: false }} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   const nameCell = within(rowFor('color.legacy')).getByText('color.legacy').closest('td')!;
   expect(nameCell.getAttribute('data-deprecated')).toBeNull();

@@ -1,7 +1,7 @@
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { userEvent } from 'vitest/browser';
-import { ColorTable, SwatchbookProvider } from '#/index.ts';
+import { ColorTable, SwatchbookContext } from '#/index.ts';
 import { makeColorTableSnapshot } from './_color-table-helpers.tsx';
 
 describe('ColorTable — base rendering', () => {
@@ -11,9 +11,9 @@ describe('ColorTable — base rendering', () => {
 
   it('renders only $type: color tokens (skips the dimension row)', () => {
     render(
-      <SwatchbookProvider value={makeColorTableSnapshot()}>
+      <SwatchbookContext.Provider value={makeColorTableSnapshot()}>
         <ColorTable />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const rows = screen.getAllByTestId('color-table-row');
@@ -27,9 +27,9 @@ describe('ColorTable — base rendering', () => {
 
   it('shows the active-format value, CSS var, and alias columns per row', () => {
     render(
-      <SwatchbookProvider value={makeColorTableSnapshot()}>
+      <SwatchbookContext.Provider value={makeColorTableSnapshot()}>
         <ColorTable filter="color.text.default" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const row = screen.getByTestId('color-table-row');
@@ -43,9 +43,9 @@ describe('ColorTable — base rendering', () => {
 
   it('renders no indicator strip for tokens with no alias, variance, or deprecation', () => {
     render(
-      <SwatchbookProvider value={makeColorTableSnapshot()}>
+      <SwatchbookContext.Provider value={makeColorTableSnapshot()}>
         <ColorTable filter="color.surface.**" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     const row = screen.getByTestId('color-table-row');
     expect(row.querySelector('.sb-indicator__indicators')).toBeNull();
@@ -53,9 +53,9 @@ describe('ColorTable — base rendering', () => {
 
   it('fuzzy search narrows rows with out-of-order terms', async () => {
     render(
-      <SwatchbookProvider value={makeColorTableSnapshot()}>
+      <SwatchbookContext.Provider value={makeColorTableSnapshot()}>
         <ColorTable />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const input = screen.getByTestId('color-table-search') as HTMLInputElement;
@@ -72,9 +72,9 @@ describe('ColorTable — base rendering', () => {
 
   it('renders the empty state when the filter matches no colors', () => {
     render(
-      <SwatchbookProvider value={makeColorTableSnapshot()}>
+      <SwatchbookContext.Provider value={makeColorTableSnapshot()}>
         <ColorTable filter="typography.**" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     expect(screen.queryByRole('table')).toBeNull();
     screen.getByText('No color tokens match this filter.');
@@ -82,9 +82,9 @@ describe('ColorTable — base rendering', () => {
 
   it('renders no variant pills when the variants prop is omitted', () => {
     render(
-      <SwatchbookProvider value={makeColorTableSnapshot()}>
+      <SwatchbookContext.Provider value={makeColorTableSnapshot()}>
         <ColorTable />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     expect(screen.queryAllByTestId('color-table-variant').length).toBe(0);
   });
@@ -92,9 +92,9 @@ describe('ColorTable — base rendering', () => {
   it('clicking a copy button does not bubble into the row click', () => {
     const picks: string[] = [];
     render(
-      <SwatchbookProvider value={makeColorTableSnapshot()}>
+      <SwatchbookContext.Provider value={makeColorTableSnapshot()}>
         <ColorTable onSelect={(p) => picks.push(p)} filter="color.surface.**" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     const copy = screen.getAllByLabelText(/Copy value/)[0];
     copy?.click();

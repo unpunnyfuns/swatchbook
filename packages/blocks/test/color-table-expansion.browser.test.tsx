@@ -1,7 +1,7 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { userEvent } from 'vitest/browser';
-import { ColorTable, SwatchbookProvider } from '#/index.ts';
+import { ColorTable, SwatchbookContext } from '#/index.ts';
 import { makeColorTableSnapshot } from './_color-table-helpers.tsx';
 
 describe('ColorTable — expansion', () => {
@@ -22,9 +22,9 @@ describe('ColorTable — expansion', () => {
 
   it('row click toggles inline expansion (no drawer)', async () => {
     render(
-      <SwatchbookProvider value={makeColorTableSnapshot()}>
+      <SwatchbookContext.Provider value={makeColorTableSnapshot()}>
         <ColorTable filter="color.text.default" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     expect(screen.queryByTestId('color-table-detail')).toBeNull();
 
@@ -39,9 +39,9 @@ describe('ColorTable — expansion', () => {
 
   it('expansion surfaces $description and alias chain from the active variant', async () => {
     render(
-      <SwatchbookProvider value={makeColorTableSnapshot()}>
+      <SwatchbookContext.Provider value={makeColorTableSnapshot()}>
         <ColorTable filter="color.text.default" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     await activateRow(screen.getByTestId('color-table-row'));
     const detail = screen.getByTestId('color-table-detail');
@@ -56,9 +56,9 @@ describe('ColorTable — expansion', () => {
       'color.bg.hi-d': { $type: 'color', $value: { hex: '#333333' } },
     });
     render(
-      <SwatchbookProvider value={snap}>
+      <SwatchbookContext.Provider value={snap}>
         <ColorTable filter="color.bg.**" variants={{ hover: 'h', disabled: 'd' }} />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     const row = screen
       .getAllByTestId('color-table-row')
@@ -74,9 +74,9 @@ describe('ColorTable — expansion', () => {
   it('onSelect suppresses expansion and hands the active path to the consumer', () => {
     const picks: string[] = [];
     render(
-      <SwatchbookProvider value={makeColorTableSnapshot()}>
+      <SwatchbookContext.Provider value={makeColorTableSnapshot()}>
         <ColorTable filter="color.text.default" onSelect={(p) => picks.push(p)} />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     const row = screen.getByTestId('color-table-row');
     row.click();
@@ -90,9 +90,9 @@ describe('ColorTable — expansion', () => {
       'color.bg.hi-h': { $type: 'color', $value: { hex: '#222222' } },
     });
     render(
-      <SwatchbookProvider value={snap}>
+      <SwatchbookContext.Provider value={snap}>
         <ColorTable filter="color.bg.**" variants={{ hover: 'h' }} />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
     const row = screen
       .getAllByTestId('color-table-row')

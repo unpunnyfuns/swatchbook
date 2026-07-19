@@ -11,7 +11,7 @@
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from 'vitest/browser';
 import { afterEach, expect, it } from 'vitest';
-import { SwatchbookProvider, TokenNavigator } from '#/index.ts';
+import { SwatchbookContext, TokenNavigator } from '#/index.ts';
 import type { ProjectSnapshot } from '#/index.ts';
 import type { VirtualToken } from '#/types.ts';
 
@@ -55,9 +55,9 @@ it('clicking a forward chain node navigates the tree to that token', async () =>
   // hidden while `color.text.primary` (and its forward-chain indicator) is
   // visible. Clicking the forward node must expand the ancestors and reveal it.
   render(
-    <SwatchbookProvider value={snapshot()}>
+    <SwatchbookContext.Provider value={snapshot()}>
       <TokenNavigator searchable={false} initiallyExpanded={2} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
 
   // Wait for the forward-chain indicator on color.text.primary to appear.
@@ -101,9 +101,9 @@ it('applies a strikethrough flag to a deprecated row', async () => {
   };
   snap.resolveAt = () => deprecated;
   render(
-    <SwatchbookProvider value={snap}>
+    <SwatchbookContext.Provider value={snap}>
       <TokenNavigator searchable={false} />
-    </SwatchbookProvider>,
+    </SwatchbookContext.Provider>,
   );
   const row = await screen.findByTestId('token-navigator-leaf-row');
   expect(row.getAttribute('data-deprecated')).toBe('true');

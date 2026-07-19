@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { ConsumerOutput, SwatchbookProvider } from '#/index.ts';
+import { ConsumerOutput, SwatchbookContext } from '#/index.ts';
 import type { ProjectSnapshot, VirtualTokenListing } from '#/index.ts';
 import { makeResolveAt } from './_snapshot-helpers.ts';
 
@@ -27,9 +27,9 @@ describe('ConsumerOutput', () => {
 
   it('renders Path + CSS rows when no listing is present', () => {
     render(
-      <SwatchbookProvider value={makeSnapshot()}>
+      <SwatchbookContext.Provider value={makeSnapshot()}>
         <ConsumerOutput path="color.accent.bg" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     expect(screen.getByTestId('consumer-output-path').textContent).toBe('color.accent.bg');
@@ -50,9 +50,9 @@ describe('ConsumerOutput', () => {
     } satisfies Record<string, VirtualTokenListing>;
 
     render(
-      <SwatchbookProvider value={makeSnapshot(listing)}>
+      <SwatchbookContext.Provider value={makeSnapshot(listing)}>
         <ConsumerOutput path="color.accent.bg" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     expect(screen.getByTestId('consumer-output-swift').textContent).toBe('Color.accentBg');
@@ -74,9 +74,9 @@ describe('ConsumerOutput', () => {
     } satisfies Record<string, VirtualTokenListing>;
 
     render(
-      <SwatchbookProvider value={makeSnapshot(listing)}>
+      <SwatchbookContext.Provider value={makeSnapshot(listing)}>
         <ConsumerOutput path="color.accent.bg" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     const labels = screen.getAllByText(/^(Android|Js|Sass|Swift)$/).map((el) => el.textContent);
@@ -94,9 +94,9 @@ describe('ConsumerOutput', () => {
     } satisfies Record<string, VirtualTokenListing>;
 
     render(
-      <SwatchbookProvider value={makeSnapshot(listing)}>
+      <SwatchbookContext.Provider value={makeSnapshot(listing)}>
         <ConsumerOutput path="color.accent.bg" />
-      </SwatchbookProvider>,
+      </SwatchbookContext.Provider>,
     );
 
     expect(screen.queryByTestId('consumer-output-swift')).toBeNull();

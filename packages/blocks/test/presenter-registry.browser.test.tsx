@@ -2,16 +2,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 import { SwatchbookProvider } from '#/provider.tsx';
 import { PresenterContext, usePresenter } from '#/presenters/registry.ts';
-import type { ProjectSnapshot } from '#/contexts.ts';
-
-const EMPTY: ProjectSnapshot = {
-  axes: [],
-  activeTheme: '',
-  activeAxes: {},
-  cssVarPrefix: 'sb',
-  diagnostics: [],
-  defaultTuple: {},
-};
+import { makeWireSnapshot } from './_wire-helpers.ts';
 
 function Probe() {
   const P = usePresenter('color');
@@ -29,7 +20,11 @@ afterEach(() => cleanup());
 
 it('a provider presenters override reaches usePresenter', () => {
   render(
-    <SwatchbookProvider value={EMPTY} presenters={{ color: Custom }}>
+    <SwatchbookProvider
+      snapshot={makeWireSnapshot()}
+      defaultAxes={{ mode: 'Light' }}
+      presenters={{ color: Custom }}
+    >
       <PresenterContext.Consumer>{() => <Probe />}</PresenterContext.Consumer>
     </SwatchbookProvider>,
   );
@@ -38,7 +33,11 @@ it('a provider presenters override reaches usePresenter', () => {
 
 it('unlisted types fall through (partial merge)', () => {
   render(
-    <SwatchbookProvider value={EMPTY} presenters={{ color: Custom }}>
+    <SwatchbookProvider
+      snapshot={makeWireSnapshot()}
+      defaultAxes={{ mode: 'Light' }}
+      presenters={{ color: Custom }}
+    >
       <PresenterContext.Consumer>{() => <DimensionProbe />}</PresenterContext.Consumer>
     </SwatchbookProvider>,
   );
