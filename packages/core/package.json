@@ -70,6 +70,10 @@
     "./themes": {
       "types": "./dist/themes.d.mts",
       "import": "./dist/themes.mjs"
+    },
+    "./token-value-types": {
+      "types": "./dist/token-value-types.d.mts",
+      "import": "./dist/token-value-types.mjs"
     }
   },
   "imports": {
@@ -80,7 +84,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsdown src/index.ts src/fuzzy.ts src/token-graph/index.ts src/css-var.ts src/color-formats.ts src/format-color.ts src/data-attr.ts src/snapshot-for-wire.ts src/match-path.ts src/style-element.ts src/themes.ts --format esm --dts --clean --sourcemap",
+    "build": "tsdown src/index.ts src/fuzzy.ts src/token-graph/index.ts src/css-var.ts src/color-formats.ts src/format-color.ts src/data-attr.ts src/snapshot-for-wire.ts src/match-path.ts src/style-element.ts src/themes.ts src/token-value-types.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "coverage": "vitest run --coverage --coverage.provider=v8 --coverage.reporter=text --coverage.include='src/**' --coverage.all",
