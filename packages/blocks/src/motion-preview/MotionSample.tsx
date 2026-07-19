@@ -176,23 +176,27 @@ export function MotionSampleView({ spec, speed, runKey }: MotionSampleViewProps)
 }
 
 /**
- * Connected block: renders a realised motion token's animated sample.
- * `durationMs` always comes from the realised `$value` — the ball's
- * setInterval loop needs a JS-readable number, which an opaque `cssVar`
- * reference can't supply without a synchronous computed-style read. `cssVar`,
- * when given, substitutes for `easing` instead: the one part of the Spec a
- * CSS custom property can stand in for cleanly (`transition-timing-function`
- * accepts a `var()`).
+ * Connected block: renders a realised motion token's animated sample. Both
+ * `durationMs` and `easing` come from the realised `$value`; the ball's
+ * setInterval loop needs a JS-readable duration, and (see the comment below)
+ * `cssVar` cannot stand in for `easing` here. `cssVar` is still accepted, per
+ * the uniform `PresenterProps` contract every presenter shares, but this
+ * View has nowhere safe to apply it.
  */
 export function MotionSample({
   token,
-  cssVar,
+  cssVar: _cssVar,
   speed = 1,
   runKey = 0,
 }: MotionSampleProps): ReactElement {
-  const realised = resolveMotionSpec(token, {});
-  const spec: Spec | null = realised
-    ? { durationMs: realised.durationMs, easing: cssVar ?? realised.easing }
-    : null;
+  // The token's transition CSS var is a full duration+delay+easing
+  // shorthand (e.g. `--sb-transition-enter: 200ms 0ms ease-out`), not an
+  // easing-only value. Substituting it into this sample's
+  // `left ${scaledDuration}ms ${easing}` template would leave two <time>
+  // components in the shorthand, which is invalid at computed-value time:
+  // the declaration falls back to `transition: none` and the ball stops
+  // animating. Render both duration and easing from the realised value
+  // instead; there is no sub-var this View can consume.
+  const spec = resolveMotionSpec(token, {});
   return <MotionSampleView spec={spec} speed={speed} runKey={runKey} />;
 }

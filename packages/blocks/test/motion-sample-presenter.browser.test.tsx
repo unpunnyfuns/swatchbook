@@ -10,30 +10,33 @@ const token: RealisedToken<'transition'> = {
 
 afterEach(() => cleanup());
 
-// Duration always comes from the realised $value (the interval-driven ball
-// needs a JS-readable number); cssVar, when given, substitutes only for the
-// easing portion — see MotionSample's doc comment for why. Read the
-// `transition` shorthand itself, not the `transitionTimingFunction` longhand:
-// once a shorthand contains an unresolved var(), browsers can't decompose it
-// into longhands, so the longhand getter reads back empty regardless.
-it('renders the realised easing (no cssVar) in the transition shorthand', () => {
+function renderBallTransition(cssVar?: string): string | undefined {
   const { container } = render(
-    <MotionSample path="transition.fade" token={token} colorFormat="hex" />,
+    <MotionSample path="transition.fade" token={token} cssVar={cssVar} colorFormat="hex" />,
   );
-  const ball = container.querySelector<HTMLElement>('.sb-motion-sample__ball');
-  expect(ball?.style.transition).not.toBe('');
-  expect(ball?.style.transition).not.toContain('var(');
+  return container.querySelector<HTMLElement>('.sb-motion-sample__ball')?.style.transition;
+}
+
+// Duration always comes from the realised $value (the interval-driven ball
+// needs a JS-readable number). The real Terrazzo-emitted transition cssVar
+// is a full duration+delay+easing shorthand, not an easing-only value, so it
+// cannot be substituted into this sample's `left <dur>ms <easing>` template
+// without leaving two <time> components in the shorthand, which is invalid
+// at computed-value time and collapses the transition to `none`. Read the
+// `transition` shorthand itself, not the `transitionTimingFunction`
+// longhand: once a shorthand contains an unresolved var(), browsers can't
+// decompose it into longhands, so the longhand getter reads back empty
+// regardless.
+it('renders a well-formed transition from the realised value when no cssVar is given', () => {
+  const transition = renderBallTransition();
+  expect(transition).toMatch(/^left \d+ms cubic-bezier\([-\d., ]+\)$/);
+  expect(transition).not.toContain('var(');
 });
 
-it('prefers cssVar for the easing when supplied', () => {
-  const { container } = render(
-    <MotionSample
-      path="transition.fade"
-      token={token}
-      cssVar="var(--sb-transition-fade)"
-      colorFormat="hex"
-    />,
-  );
-  const ball = container.querySelector<HTMLElement>('.sb-motion-sample__ball');
-  expect(ball?.style.transition).toContain('var(--sb-transition-fade)');
+it('renders an identical transition when a cssVar is supplied, proving it is not substituted into the animation', () => {
+  const realised = renderBallTransition();
+  cleanup();
+  const withCssVar = renderBallTransition('var(--sb-transition-fade)');
+  expect(withCssVar).toBe(realised);
+  expect(withCssVar).not.toContain('var(');
 });
