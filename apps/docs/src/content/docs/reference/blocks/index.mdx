@@ -35,16 +35,18 @@ Blocks are pure presentation. Given a `ProjectSnapshot` (the shape the addon int
 
 ```tsx
 import { SwatchbookProvider, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
-import snapshot from './tokens-snapshot.json';
+import wire from './tokens-snapshot.json';
 
 export function TokenDocs() {
   return (
-    <SwatchbookProvider value={snapshot}>
+    <SwatchbookProvider snapshot={wire} defaultAxes={{ mode: 'Light' }}>
       <TokenTable filter='color.*' />
     </SwatchbookProvider>
   );
 }
 ```
+
+`wire` is a `SnapshotForWire` (produced by core's `snapshotForWire(project, css)`), typically written to a JSON file at build time and imported directly. Pass `defaultAxes` and let the provider own the tuple (flip it with `useSetAxes()`), or pass `axes` to drive the tuple from the host's own state.
 
 `SwatchbookProvider` is the canonical entry point.
 

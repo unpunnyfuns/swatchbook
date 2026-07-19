@@ -63,7 +63,7 @@ The eleven per-type blocks in [Overview blocks](/reference/blocks/overview#per-t
 import type { ReactElement } from 'react';
 import type { PresenterProps } from '@unpunnyfuns/swatchbook-blocks';
 import { ColorPalette, SwatchbookProvider } from '@unpunnyfuns/swatchbook-blocks';
-import snapshot from './tokens-snapshot.json';
+import wire from './tokens-snapshot.json';
 
 function MyColorSwatch({ path, token, cssVar }: PresenterProps<'color'>): ReactElement {
   return <div title={path} style={{ background: cssVar ?? String(token.$value) }} />;
@@ -71,7 +71,7 @@ function MyColorSwatch({ path, token, cssVar }: PresenterProps<'color'>): ReactE
 
 export function TokenDocs(): ReactElement {
   return (
-    <SwatchbookProvider value={snapshot} presenters={{ color: MyColorSwatch }}>
+    <SwatchbookProvider snapshot={wire} defaultAxes={{ mode: 'Light' }} presenters={{ color: MyColorSwatch }}>
       <ColorPalette filter="color.**" />
     </SwatchbookProvider>
   );

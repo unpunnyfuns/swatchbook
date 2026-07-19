@@ -36,7 +36,16 @@ interface SwatchbookGlobalsPayload {
  * Call once at preview init, before any block renders, so the initial
  * `setGlobals` broadcast lands in the store before the first read.
  */
+// Guards against a preview HMR re-eval calling `installHostSource` again
+// with the same channel singleton (`addons.getChannel()` is stable across
+// a module reload) and accumulating a second set of listeners. Tracked
+// per-channel rather than as a single flag so distinct channel instances
+// (multiple hosts, test isolation) each still get wired.
+const installedChannels = new WeakSet<HostChannel>();
+
 export function installHostSource(channel: HostChannel): void {
+  if (installedChannels.has(channel)) return;
+  installedChannels.add(channel);
   // Storybook fires `globalsUpdated`, `setGlobals`, and `updateGlobals` for
   // the same logical change (preview init + every toolbar tick):
   // `setGlobals` carries the initial URL-persisted globals, `updateGlobals`

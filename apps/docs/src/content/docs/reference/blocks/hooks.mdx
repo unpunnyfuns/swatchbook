@@ -2,7 +2,7 @@
 title: Hooks
 ---
 
-Context-reading hooks for authoring custom blocks. They read from the nearest `SwatchbookProvider`, mounted automatically by the addon's preview decorator inside Storybook, and are [re-exported from the addon](/reference/blocks) so either import path works. Outside Storybook, wrap the tree in `SwatchbookProvider` and pass a `ProjectSnapshot` so the hooks have something to resolve against.
+Context-reading hooks for authoring custom blocks. They read from the nearest `SwatchbookProvider`, mounted automatically by the addon's preview decorator inside Storybook, and are [re-exported from the addon](/reference/blocks) so either import path works. Outside Storybook, wrap the tree in `SwatchbookProvider` and pass a wire snapshot (`snapshot` prop, plus `axes` or `defaultAxes`) so the hooks have something to resolve against.
 
 ## `useSwatchbookData()`
 
@@ -26,10 +26,10 @@ Returns the active tuple as `Readonly<Record<string, string>>`.
 
 ## `useColorFormat()`
 
-Returns the active color format (`'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw'`) from the context/snapshot/default chain: a `ColorFormatContext` value (a host wrapping a subtree in its own provider), then the Storybook globals channel (`swatchbookColorFormat`, unset unless a story sets it directly), then `Config.defaultColorFormat` from the active project snapshot (the `SwatchbookProvider` a story decorator mounts, or, for blocks embedded directly in MDX with no `<Story/>`, the channel-fed snapshot the addon injects), then `'hex'`.
+Returns the active color format (`'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw'`) from the context/snapshot/source chain: a `ColorFormatContext` value (a host wrapping a subtree in its own provider), then `defaultColorFormat` from whichever project data is actually feeding the render (the `SwatchbookProvider` snapshot a story decorator or a standalone host mounts, or, for blocks embedded directly in MDX with no `<Story/>` and no provider, the ambient source a host pushed into via `@unpunnyfuns/swatchbook-blocks/host`), then `'hex'`. No Storybook globals are involved; blocks carry no Storybook vocabulary of their own.
 
-The full precedence order for a canned block also includes its own `colorFormat` prop, which sits above everything this hook resolves: `colorFormat` prop → `ColorFormatContext` → `Config.defaultColorFormat` → `'hex'`. A block's own prop always wins for that block; when unset, the block falls through to whatever `useColorFormat()` resolves. Pair with `formatColor(value, format)` (also exported) to render colors the same way the built-in blocks do. `hex` falls back to space-separated `rgb()` for out-of-gamut colors, marked with a ⚠ warning.
+The full precedence order for a canned block also includes its own `colorFormat` prop, which sits above everything this hook resolves: `colorFormat` prop → `ColorFormatContext` → active snapshot/source `defaultColorFormat` → `'hex'`. A block's own prop always wins for that block; when unset, the block falls through to whatever `useColorFormat()` resolves. Pair with `formatColor(value, format)` (also exported) to render colors the same way the built-in blocks do. `hex` falls back to space-separated `rgb()` for out-of-gamut colors, marked with a ⚠ warning.
 
 ## Reactivity
 
-Hook consumers re-render on the same Storybook `globalsUpdated` channel event the built-in blocks subscribe to, so the active axis tuple and color format both stay in sync without a story re-render. This works both inside story renders and inside MDX doc blocks (where the preview HooksContext isn't available, so we use the channel directly).
+Hook consumers re-render on the same ambient project source (`@unpunnyfuns/swatchbook-blocks/host`'s `useProjectSource()`) the built-in blocks subscribe to, so the active axis tuple and color format both stay in sync without a story re-render. This works both inside story renders (through the `SwatchbookProvider` a decorator or standalone host mounts) and inside MDX doc blocks (where the preview HooksContext isn't available, so the fallback path reads the ambient source directly). A host (the addon, or any other integration) is what keeps that source current; a standalone render with only a `snapshot` prop and no host has nothing external pushing updates into it beyond `useSetAxes()`.
