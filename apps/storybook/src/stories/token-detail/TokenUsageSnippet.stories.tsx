@@ -3,7 +3,7 @@ import { expect, userEvent, waitFor } from 'storybook/test';
 import preview from '#storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Internals/TokenDetail/TokenUsageSnippet',
+  title: 'Inspector/TokenDetail/TokenUsageSnippet',
   component: TokenUsageSnippet,
   argTypes: {
     path: { control: 'text' },

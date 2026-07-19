@@ -3,7 +3,7 @@ import { expect, waitFor } from 'storybook/test';
 import preview from '#storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Internals/TokenDetail/ConsumerOutput',
+  title: 'Inspector/TokenDetail/ConsumerOutput',
   component: ConsumerOutput,
   argTypes: {
     path: { control: 'text' },

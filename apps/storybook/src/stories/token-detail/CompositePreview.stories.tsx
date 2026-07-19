@@ -3,7 +3,7 @@ import { expect, waitFor } from 'storybook/test';
 import preview from '#storybook/preview.tsx';
 
 const meta = preview.meta({
-  title: 'Internals/TokenDetail/CompositePreview',
+  title: 'Inspector/TokenDetail/CompositePreview',
   component: CompositePreview,
   argTypes: {
     path: { control: 'text' },
