@@ -6,7 +6,7 @@ import type { VirtualToken } from '#/types.ts';
  * Build a literal-only `VirtualTokenGraph` from a flat token map, all under
  * one axis. Mirrors `_snapshot-helpers.ts`'s `makeResolveAt` shape (same
  * tokens, single context) but resolves through the real graph-walker path
- * (`resolveAllWithProvenanceAt`) rather than a constant-returning stub —
+ * (`resolveAllWithProvenanceAt`) rather than a constant-returning stub:
  * for tests exercising `SwatchbookProvider`'s wire-assembly, where
  * `resolveAt` is deliberately left unset.
  */

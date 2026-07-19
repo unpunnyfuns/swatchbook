@@ -53,8 +53,8 @@ function assemble(snapshot: SnapshotForWire, activeAxes: Record<string, string>)
  *
  * The Storybook addon's preview decorator mounts this automatically
  * (`axes` controlled by the toolbar), so story/MDX authors typically never
- * see it. Outside Storybook — unit tests, custom React apps, non-Storybook
- * doc sites — consumers pass a {@link SnapshotForWire} (often imported from
+ * see it. Outside Storybook: unit tests, custom React apps, non-Storybook
+ * doc sites. Consumers pass a {@link SnapshotForWire} (often imported from
  * a JSON file) and either drive `axes` themselves or let the provider own
  * the tuple via `defaultAxes` + {@link useSetAxes}.
  */
@@ -77,7 +77,7 @@ export function SwatchbookProvider({
   // children (the addon wraps a whole story in it), not a single block's
   // own root. `blockWrapperAttrs`'s `.sb-block` chrome (hard-coded light
   // surface/padding/border-radius, see chrome-base.css) is meant for one
-  // block's card, not the whole subtree — applying it here would paint
+  // block's card, not the whole subtree. Applying it here would paint
   // every story in a light card regardless of the active theme axis.
   // Axis data-attributes are still the point: descendant blocks' CSS var
   // reads resolve against the nearest matching `[data-<prefix>-<axis>]`.
