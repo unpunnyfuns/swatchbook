@@ -6,6 +6,7 @@ import { DimensionSample } from '#/dimension-scale/DimensionSample.tsx';
 import { GradientSwatch } from '#/presenters/GradientSwatch.tsx';
 import { MotionSample } from '#/motion-preview/MotionSample.tsx';
 import type { PresenterComponent, PresenterRegistry } from '#/presenters/types.ts';
+import { TypeSpecimen } from '#/presenters/TypeSpecimen.tsx';
 import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
 
 /**
@@ -19,6 +20,7 @@ export const DEFAULT_PRESENTERS: PresenterRegistry = {
   dimension: DimensionSample as PresenterComponent,
   gradient: GradientSwatch as PresenterComponent,
   transition: MotionSample as PresenterComponent,
+  typography: TypeSpecimen as PresenterComponent,
 };
 
 /** Overrides win per `$type`; unlisted types keep the built-in. */

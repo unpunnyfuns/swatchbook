@@ -1,4 +1,4 @@
-.sb-typography-scale__row {
+.sb-type-specimen {
   display: grid;
   grid-template-columns: minmax(160px, 220px) 1fr;
   gap: var(--swatchbook-space-lg);
@@ -7,18 +7,18 @@
   border-bottom: 1px solid var(--swatchbook-border-default);
 }
 
-.sb-typography-scale__meta {
+.sb-type-specimen__meta {
   display: flex;
   flex-direction: column;
   gap: var(--swatchbook-space-3xs);
 }
 
-.sb-typography-scale__path {
+.sb-type-specimen__leaf {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: var(--swatchbook-type-caption);
 }
 
-.sb-typography-scale__specs {
+.sb-type-specimen__description {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: var(--swatchbook-type-micro);
   opacity: var(--swatchbook-opacity-muted);
