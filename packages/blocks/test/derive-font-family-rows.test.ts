@@ -22,13 +22,13 @@ it('produces one row per fontFamily token, excluding other types', () => {
   expect(rows.map((r) => r.path)).toEqual(['font.family.body', 'font.family.mono']);
 });
 
-it('derives the css var from the listing and the stack string from the value', () => {
+it('derives the css var from the listing and carries the realised token', () => {
   const rows = deriveFontFamilyRows(resolved, project, opts);
   const body = rows.find((r) => r.path === 'font.family.body')!;
   expect(body.cssVar).toBe('var(--sb-font-family-body)');
-  expect(body.stack).toBe('Inter');
+  expect(body.token.$value).toBe('Inter');
   const mono = rows.find((r) => r.path === 'font.family.mono')!;
-  expect(mono.stack).toBe('Fira Code, monospace');
+  expect(mono.token.$value).toEqual(['Fira Code', 'monospace']);
 });
 
 it('falls back to a prefix-derived css var when the listing has no entry', () => {

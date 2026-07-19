@@ -3,23 +3,21 @@ import './MotionSample.css';
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
-import { useProject } from '#/internal/use-project.ts';
-import type { ProjectData } from '#/internal/use-project.ts';
+import type { PresenterProps } from '#/presenters/types.ts';
 
 export type MotionSpeed = 0.25 | 0.5 | 1 | 2;
 
-export interface MotionSampleProps {
-  /** Full dot-path of the motion token (`transition`, `duration`, or `cubicBezier`). */
-  path: string;
-  /** Playback speed multiplier. Defaults to `1`. */
-  speed?: MotionSpeed;
-  /**
-   * Change this value to force the animation to restart. Useful when an
-   * outer block exposes a "replay" button that should re-trigger every
-   * sample at once.
-   */
-  runKey?: number;
-}
+/**
+ * Props for the connected {@link MotionSample} block. `token` accepts any
+ * of the three motion `$type`s (`transition`, `duration`, `cubicBezier`) —
+ * looser than a single-type `PresenterProps<'transition'>` because
+ * `resolveMotionSpec` dispatches on the realised `$type` at runtime and
+ * TokenNavigator/MotionPreview feed it all three from one call site.
+ * `options.speed` is the playback speed multiplier (defaults to `1`);
+ * `options.runKey` forces the animation to restart when changed, e.g. from
+ * an outer block's "replay" button re-triggering every sample at once.
+ */
+export type MotionSampleProps = PresenterProps;
 
 const DEFAULT_DURATION_MS = 300;
 const DEFAULT_EASING = 'cubic-bezier(0.2, 0, 0, 1)';
@@ -84,6 +82,13 @@ function asEasing(
   return fallback;
 }
 
+/**
+ * Extracts a duration/easing `Spec` from a token's `$value`, dispatching on
+ * `$type` (`transition` / `duration` / `cubicBezier`). `themeTokens` backs
+ * `{path}`-form sub-value alias resolution for callers still walking a raw
+ * (not-yet-realised) project map; pass `{}` when `token` is already a
+ * realised leaf (no alias strings survive resolution).
+ */
 export function resolveMotionSpec(
   token: { $type?: string | undefined; $value?: unknown } | undefined,
   themeTokens: Record<string, { $value?: unknown }>,
@@ -111,24 +116,6 @@ export function resolveMotionSpec(
     return { durationMs: DEFAULT_DURATION_MS, easing };
   }
   return null;
-}
-
-export interface MotionSampleData {
-  /** Resolved duration/easing for the token at `path`, or `null` when unresolved. */
-  spec: Spec | null;
-}
-
-/**
- * Pure derivation of a single motion token's animation spec from resolved
- * project data. Extracted so it is unit-testable without React or a store.
- */
-export function deriveMotionSample(
-  path: string,
-  project: Pick<ProjectData, 'resolved'>,
-): MotionSampleData {
-  return {
-    spec: resolveMotionSpec(project.resolved[path], project.resolved),
-  };
 }
 
 export interface MotionSampleViewProps {
@@ -182,8 +169,27 @@ export function MotionSampleView({ spec, speed, runKey }: MotionSampleViewProps)
   );
 }
 
-export function MotionSample({ path, speed = 1, runKey = 0 }: MotionSampleProps): ReactElement {
-  const project = useProject();
-  const { spec } = deriveMotionSample(path, project);
+/**
+ * Connected block: renders a realised motion token's animated sample. Both
+ * `durationMs` and `easing` come from the realised `$value`; the ball's
+ * setInterval loop needs a JS-readable duration, and (see the comment below)
+ * `cssVar` cannot stand in for `easing` here. `cssVar` is still accepted, per
+ * the uniform `PresenterProps` contract every presenter shares, but this
+ * View has nowhere safe to apply it.
+ */
+export function MotionSample({ token, cssVar: _cssVar, options }: MotionSampleProps): ReactElement {
+  const rawSpeed = options?.['speed'];
+  const speed = (typeof rawSpeed === 'number' ? rawSpeed : 1) as MotionSpeed;
+  const rawRunKey = options?.['runKey'];
+  const runKey = typeof rawRunKey === 'number' ? rawRunKey : 0;
+  // The token's transition CSS var is a full duration+delay+easing
+  // shorthand (e.g. `--sb-transition-enter: 200ms 0ms ease-out`), not an
+  // easing-only value. Substituting it into this sample's
+  // `left ${scaledDuration}ms ${easing}` template would leave two <time>
+  // components in the shorthand, which is invalid at computed-value time:
+  // the declaration falls back to `transition: none` and the ball stops
+  // animating. Render both duration and easing from the realised value
+  // instead; there is no sub-var this View can consume.
+  const spec = resolveMotionSpec(token, {});
   return <MotionSampleView spec={spec} speed={speed} runKey={runKey} />;
 }

@@ -1,0 +1,100 @@
+---
+title: Presenter registry
+---
+
+A presenter renders one fully-realised DTCG token: no project, no graph, no listing. Every visual in [Sample blocks](/reference/blocks/samples) is a presenter, and each per-type block in [Overview blocks](/reference/blocks/overview#per-type) renders its visual through one. The registry is what lets a consumer swap one `$type`'s visual, a custom color chip say, and have every built-in block that displays a color pick it up, without touching `ColorPalette` or `TokenNavigator` internals.
+
+## `PresenterProps`
+
+Every presenter, built-in or third-party, receives the same shape:
+
+```ts
+import type { ColorFormat } from '@unpunnyfuns/swatchbook-blocks';
+import type { RealisedToken, TokenType } from '@unpunnyfuns/swatchbook-core/token-value-types';
+
+interface PresenterProps<T extends TokenType = TokenType> {
+  path: string;
+  token: RealisedToken<T>;
+  cssVar?: string | undefined;
+  colorFormat: ColorFormat;
+  options?: Record<string, unknown> | undefined;
+}
+```
+
+- `path`: the token's dot-path. Label/provenance; the presenter renders the leaf `token`, not a lookup by path.
+- `token`: a fully-realised token: concrete `$value`, aliases already resolved, nothing left to look up. `$type` narrows the shape `$value` takes.
+- `cssVar`: when the caller has one (a query block reading `listing[path].names.css`, or falling back to `cssVarRef`), the presenter renders the visual from it, so the chip reflects the live custom property in-project. Absent, the presenter derives the visual from `token.$value` directly. Shadow and border build their own `$value → CSS` mapper for that fallback rather than reusing a display formatter, because a display string for those types isn't always a valid CSS property value; motion always renders from the realised value; duration/easing can't be recovered from a shorthand transition var.
+- `colorFormat`: the active color format. Color and gradient presenters use it; the rest receive it for a uniform signature and ignore it.
+- `options`: block-level display hints, described below. Not part of the token; a custom presenter is free to ignore every key.
+
+A presenter is a plain function component: `(props: PresenterProps<T>) => ReactElement`.
+
+## Built-ins
+
+```ts
+type PresenterRegistry = Partial<Record<TokenType, PresenterComponent>>;
+```
+
+`DEFAULT_PRESENTERS` keys one component per `$type`:
+
+| `$type`       | presenter            |
+| ------------- | -------------------- |
+| `color`       | `ColorSwatch`        |
+| `gradient`    | `GradientSwatch`     |
+| `number`      | `OpacitySwatch`      |
+| `shadow`      | `ShadowSample`       |
+| `border`      | `BorderSample`       |
+| `dimension`   | `DimensionSample`    |
+| `strokeStyle` | `StrokeSample`       |
+| `transition`  | `MotionSample`       |
+| `typography`  | `TypeSpecimen`       |
+| `fontFamily`  | `FontFamilySpecimen` |
+| `fontWeight`  | `FontWeightSpecimen` |
+
+`transition` also covers `duration` and `cubicBezier`: `MotionSample` dispatches on the realised `$type` at runtime, so `MotionPreview` and `TokenNavigator` feed all three motion kinds through the one registered key.
+
+The eleven per-type blocks in [Overview blocks](/reference/blocks/overview#per-type) (`ColorPalette`, `GradientPalette`, `OpacityScale`, `ShadowPreview`, `BorderPreview`, `DimensionScale`, `MotionPreview`, `StrokeStylePreview`, `TypographyScale`, `FontFamilyPreview`, `FontWeightScale`) read their visual through `usePresenter(type)` rather than importing the component directly, so a provider override reaches them with no block-level opt-in. `ColorTable`, `TokenNavigator`'s inline leaf preview, and `TokenDetail`'s `CompositePreview` render their own visuals directly and don't consult the registry.
+
+## Overriding a presenter
+
+`presenters?: PresenterRegistry` on `SwatchbookProvider` merges over `DEFAULT_PRESENTERS`, keyed by `$type`; a type left out of the override keeps the built-in.
+
+```tsx
+import type { ReactElement } from 'react';
+import type { PresenterProps } from '@unpunnyfuns/swatchbook-blocks';
+import { ColorPalette, SwatchbookProvider } from '@unpunnyfuns/swatchbook-blocks';
+import snapshot from './tokens-snapshot.json';
+
+function MyColorSwatch({ path, token, cssVar }: PresenterProps<'color'>): ReactElement {
+  return <div title={path} style={{ background: cssVar ?? String(token.$value) }} />;
+}
+
+export function TokenDocs(): ReactElement {
+  return (
+    <SwatchbookProvider value={snapshot} presenters={{ color: MyColorSwatch }}>
+      <ColorPalette filter="color.**" />
+    </SwatchbookProvider>
+  );
+}
+```
+
+`ColorPalette` now renders `MyColorSwatch` for every color row; every other `$type` keeps its built-in. The merge is per-`$type`, not per-block: there's no mechanism to override a presenter for one block while leaving another block's use of that same type on the built-in.
+
+## Options bag
+
+`options?: Record<string, unknown>` carries block-level display hints, RJSF `ui:options`-style: a query block passes its own config through; the presenter it renders reads the keys it understands and ignores the rest. Custom presenters can ignore `options` entirely.
+
+Keys the built-ins read:
+
+- `DimensionSample`: `visual?: 'length' | 'radius' | 'size'` (default `'length'`), set by `DimensionScale`'s own `visual` prop.
+- `MotionSample`: `speed?: MotionSpeed` (default `1`) and `runKey?: number` (forces a restart when it changes), set by `MotionPreview`'s speed pills and replay button.
+- `TypeSpecimen`, `FontFamilySpecimen`, `FontWeightSpecimen`: `sample?: string`, set by `TypographyScale` / `FontFamilyPreview` / `FontWeightScale`'s own `sample` prop.
+- `OpacitySwatch`: `sampleColorVar?: string`, the color painted behind the checkerboard so the chip's alpha reads visually; defaults to the swatchbook accent surface.
+
+A custom `DimensionSample` replacement registered via `presenters={{ dimension: MyDimension }}` still receives `options={{ visual: 'radius' }}` when rendered inside `DimensionScale` with `visual="radius"`; whether it reads that key is up to it.
+
+A custom `transition` presenter can read `options.runKey`, a counter that changes on each replay, to support `MotionPreview`'s replay button the way the built-in `MotionSample` does.
+
+## Realised value vs. listing preview
+
+A presenter shows the realised token it's handed: `token.$value`, run through its own `$value → CSS` mapping (or the `cssVar`, when supplied). That's a different source from the query blocks' table/tree columns, which read `listing[path].previewValue`, the string `@terrazzo/plugin-token-listing` derives from the consumer's plugin-css output (see [`useSwatchbookData`](/reference/blocks/hooks#useswatchbookdata)). The two normally agree; a presenter can diverge from the listing's preview string for a type where the plugin's display format and the presenter's CSS mapping choose different representations of the same value. The visual chip itself still reflects the live CSS var in-project whenever `cssVar` is passed in, independent of which string is shown as text.

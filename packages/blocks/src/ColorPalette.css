@@ -16,39 +16,3 @@
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: var(--swatchbook-space-sm);
 }
-
-.sb-color-palette__card {
-  border: 1px solid var(--swatchbook-border-default);
-  border-radius: var(--swatchbook-radius-xs);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.sb-color-palette__swatch {
-  height: 56px;
-  width: 100%;
-  border-bottom: 1px solid var(--swatchbook-border-default);
-}
-
-.sb-color-palette__meta {
-  padding: var(--swatchbook-space-sm) var(--swatchbook-space-md);
-  display: flex;
-  flex-direction: column;
-  gap: var(--swatchbook-space-3xs);
-}
-
-.sb-color-palette__leaf {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: var(--swatchbook-type-caption);
-}
-
-.sb-color-palette__value {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: var(--swatchbook-type-micro);
-  opacity: var(--swatchbook-opacity-muted);
-}
-
-.sb-color-palette__gamut-warn {
-  margin-left: var(--swatchbook-space-2xs);
-}

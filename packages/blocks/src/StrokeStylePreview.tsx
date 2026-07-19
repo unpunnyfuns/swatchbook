@@ -1,13 +1,17 @@
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './StrokeStylePreview.css';
+import { useColorFormat } from '#/contexts.ts';
+import type { ColorFormat } from '#/format-color.ts';
+import type { RealisedToken } from '#/internal/composite-types.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
-import { resolveCssVar, useProject } from '#/internal/use-project.ts';
-import type { ProjectData } from '#/internal/use-project.ts';
-import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
+import { resolveCssVar, useProject } from '#/internal/use-project.ts';
+import type { ProjectData } from '#/internal/use-project.ts';
+import { usePresenter } from '#/presenters/registry.ts';
+import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface StrokeStylePreviewProps {
   /**
@@ -27,27 +31,12 @@ export interface StrokeStylePreviewProps {
   sortDir?: SortDir;
 }
 
-const STRING_STYLES = new Set([
-  'solid',
-  'dashed',
-  'dotted',
-  'double',
-  'groove',
-  'ridge',
-  'outset',
-  'inset',
-]);
-
 export interface StrokeStyleRow {
   path: string;
   cssVar: string;
   displayValue: string;
-  cssStyle: string | null;
-}
-
-function extractCssStyle(value: unknown): string | null {
-  if (typeof value === 'string' && STRING_STYLES.has(value)) return value;
-  return null;
+  /** Realised token, fed to `StrokeSample` per the presenter contract. */
+  token: RealisedToken<'strokeStyle'>;
 }
 
 export interface DeriveStrokeStyleRowsOptions {
@@ -73,7 +62,7 @@ export function deriveStrokeStyleRows(
     path,
     cssVar: resolveCssVar(path, project),
     displayValue: formatTokenValue(token.$value, token.$type, 'raw', project.listing[path]),
-    cssStyle: extractCssStyle(token.$value),
+    token: token as RealisedToken<'strokeStyle'>,
   }));
 }
 
@@ -82,19 +71,27 @@ export interface StrokeStylePreviewViewProps {
   activeTheme: string;
   cssVarPrefix: string;
   activeAxes: Record<string, string>;
+  /** Forwarded to each row's `StrokeSample` (uniform presenter contract; unused for strokeStyle). */
+  colorFormat: ColorFormat;
   filter?: string | undefined;
   caption?: string | undefined;
 }
 
-/** Pure presentation for the stroke-style preview. Renders from plain props. */
+/**
+ * Pure presentation for the stroke-style preview. Renders from plain props;
+ * composes the connected `StrokeSample` as a child, feeding it this row's
+ * already-resolved `token`/`cssVar` per the presenter contract.
+ */
 export function StrokeStylePreviewView({
   rows,
   activeTheme,
   cssVarPrefix,
   activeAxes,
+  colorFormat,
   filter,
   caption,
 }: StrokeStylePreviewViewProps): ReactElement {
+  const Sample = usePresenter('strokeStyle');
   const captionText =
     caption ??
     `${rows.length} strokeStyle token${rows.length === 1 ? '' : 's'}${filter && filter !== 'strokeStyle' ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -116,18 +113,13 @@ export function StrokeStylePreviewView({
             <span className="sb-stroke-style-sample__path">{row.path}</span>
             <span className="sb-stroke-style-sample__value">{row.displayValue}</span>
           </div>
-          {row.cssStyle ? (
-            <div
-              className="sb-stroke-style-sample__line"
-              style={{
-                borderTopStyle: row.cssStyle as CSSProperties['borderTopStyle'],
-              }}
-              aria-hidden
+          {Sample && (
+            <Sample
+              path={row.path}
+              token={row.token}
+              cssVar={row.cssVar}
+              colorFormat={colorFormat}
             />
-          ) : (
-            <span className="sb-stroke-style-sample__object-fallback">
-              Object-form (dashArray + lineCap) — no pure CSS `border-style` equivalent.
-            </span>
           )}
           <span className="sb-stroke-style-sample__css-var">{row.cssVar}</span>
         </div>
@@ -144,6 +136,7 @@ export function StrokeStylePreview({
 }: StrokeStylePreviewProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+  const colorFormat = useColorFormat();
 
   const rows = useMemo(
     () => deriveStrokeStyleRows(resolved, project, { filter, sortBy, sortDir }),
@@ -156,6 +149,7 @@ export function StrokeStylePreview({
       activeTheme={activeTheme}
       cssVarPrefix={cssVarPrefix}
       activeAxes={activeAxes}
+      colorFormat={colorFormat}
       filter={filter}
       caption={caption}
     />

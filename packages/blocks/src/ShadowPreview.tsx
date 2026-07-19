@@ -5,14 +5,14 @@ import './ShadowPreview.css';
 import { useColorFormat } from '#/contexts.ts';
 import type { ColorFormat } from '#/format-color.ts';
 import { formatDimension, formatSubColor } from '#/internal/composite-sample-format.ts';
-import type { ShadowLayer } from '#/internal/composite-types.ts';
+import type { RealisedToken, ShadowLayer } from '#/internal/composite-types.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import type { ProjectData } from '#/internal/use-project.ts';
+import { usePresenter } from '#/presenters/registry.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
-import { ShadowSample } from '#/shadow-preview/ShadowSample.tsx';
 
 export interface ShadowPreviewProps {
   /**
@@ -50,6 +50,8 @@ export interface ShadowLayerRow {
 export interface ShadowRow {
   path: string;
   cssVar: string;
+  /** Realised token, fed to `ShadowSample` per the presenter contract. */
+  token: RealisedToken<'shadow'>;
   layers: ShadowLayerRow[];
 }
 
@@ -96,6 +98,7 @@ export function deriveShadowRows(
   return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
     path,
     cssVar: resolveCssVar(path, project),
+    token: token as RealisedToken<'shadow'>,
     layers: asLayers(token.$value).map((layer) => formatLayer(layer, colorFormat)),
   }));
 }
@@ -105,23 +108,27 @@ export interface ShadowPreviewViewProps {
   activeTheme: string;
   cssVarPrefix: string;
   activeAxes: Record<string, string>;
+  /** Forwarded to each row's `ShadowSample` for its realised-CSS branch. */
+  colorFormat: ColorFormat;
   filter?: string | undefined;
   caption?: string | undefined;
 }
 
 /**
  * Pure presentation for the shadow preview. Renders from plain props;
- * composes the connected `ShadowSample` as a child (that child reads the
- * project itself).
+ * composes the connected `ShadowSample` as a child, feeding it this row's
+ * already-resolved `token`/`cssVar` per the presenter contract.
  */
 export function ShadowPreviewView({
   rows,
   activeTheme,
   cssVarPrefix,
   activeAxes,
+  colorFormat,
   filter,
   caption,
 }: ShadowPreviewViewProps): ReactElement {
+  const Sample = usePresenter('shadow');
   const captionText =
     caption ??
     `${rows.length} shadow${rows.length === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -144,7 +151,14 @@ export function ShadowPreviewView({
             <span className="sb-shadow-preview__css-var">{row.cssVar}</span>
           </div>
           <div className="sb-shadow-preview__sample-cell">
-            <ShadowSample path={row.path} />
+            {Sample && (
+              <Sample
+                path={row.path}
+                token={row.token}
+                cssVar={row.cssVar}
+                colorFormat={colorFormat}
+              />
+            )}
           </div>
           <div className="sb-shadow-preview__breakdown">
             {row.layers.length === 1
@@ -231,6 +245,7 @@ export function ShadowPreview({
       activeTheme={activeTheme}
       cssVarPrefix={cssVarPrefix}
       activeAxes={activeAxes}
+      colorFormat={format}
       filter={filter}
       caption={caption}
     />

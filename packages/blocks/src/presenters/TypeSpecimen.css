@@ -1,0 +1,12 @@
+.sb-type-specimen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--swatchbook-space-3xs);
+  min-width: 0;
+}
+
+.sb-type-specimen__description {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--swatchbook-type-micro);
+  opacity: var(--swatchbook-opacity-muted);
+}

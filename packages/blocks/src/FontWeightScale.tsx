@@ -1,12 +1,14 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
-import './FontWeightScale.css';
-import { cssVarAsNumber } from '#/internal/css-var-style.ts';
+import { useColorFormat } from '#/contexts.ts';
+import type { ColorFormat } from '#/format-color.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import type { ProjectData } from '#/internal/use-project.ts';
+import { usePresenter } from '#/presenters/registry.ts';
+import type { RealisedToken } from '@unpunnyfuns/swatchbook-core/token-value-types';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface FontWeightScaleProps {
@@ -33,17 +35,8 @@ export interface FontWeightScaleProps {
 export interface FontWeightRow {
   path: string;
   cssVar: string;
-  display: string;
-  weight: number;
-}
-
-function toWeight(raw: unknown): number {
-  if (typeof raw === 'number') return raw;
-  if (typeof raw === 'string') {
-    const n = Number.parseInt(raw, 10);
-    return Number.isFinite(n) ? n : Number.NaN;
-  }
-  return Number.NaN;
+  /** Realised token, fed to `FontWeightSpecimen` per the presenter contract. */
+  token: RealisedToken<'fontWeight'>;
 }
 
 export interface DeriveFontWeightRowsOptions {
@@ -68,8 +61,7 @@ export function deriveFontWeightRows(
   return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
     path,
     cssVar: resolveCssVar(path, project),
-    display: token.$value == null ? '' : String(token.$value),
-    weight: toWeight(token.$value),
+    token: token as RealisedToken<'fontWeight'>,
   }));
 }
 
@@ -79,20 +71,28 @@ export interface FontWeightScaleViewProps {
   cssVarPrefix: string;
   activeAxes: Record<string, string>;
   sample: string;
+  /** Forwarded to each row's `FontWeightSpecimen` (uniform presenter contract; unused for fontWeight). */
+  colorFormat: ColorFormat;
   filter?: string | undefined;
   caption?: string | undefined;
 }
 
-/** Pure presentation for the font-weight scale. Renders from plain props. */
+/**
+ * Pure presentation for the font-weight scale. Renders from plain props;
+ * composes the connected `FontWeightSpecimen` as a child, feeding it this
+ * row's already-resolved `token`/`cssVar` per the presenter contract.
+ */
 export function FontWeightScaleView({
   rows,
   activeTheme,
   cssVarPrefix,
   activeAxes,
   sample,
+  colorFormat,
   filter,
   caption,
 }: FontWeightScaleViewProps): ReactElement {
+  const Specimen = usePresenter('fontWeight');
   const captionText =
     caption ??
     `${rows.length} fontWeight token${rows.length === 1 ? '' : 's'}${filter && filter !== 'fontWeight' ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -108,21 +108,19 @@ export function FontWeightScaleView({
   return (
     <div {...blockWrapperAttrs(cssVarPrefix, activeAxes)}>
       <div className="sb-block__caption">{captionText}</div>
-      {rows.map((row) => (
-        <div key={row.path} className="sb-font-weight-scale__row">
-          <div className="sb-font-weight-scale__meta">
-            <span className="sb-font-weight-scale__path">{row.path}</span>
-            <span className="sb-font-weight-scale__value">{row.display}</span>
-          </div>
-          <div
-            className="sb-font-weight-scale__sample"
-            style={{ fontWeight: cssVarAsNumber(row.cssVar) }}
-          >
-            {sample}
-          </div>
-          <span className="sb-font-weight-scale__css-var">{row.cssVar}</span>
-        </div>
-      ))}
+      {rows.map(
+        (row) =>
+          Specimen && (
+            <Specimen
+              key={row.path}
+              path={row.path}
+              token={row.token}
+              cssVar={row.cssVar}
+              colorFormat={colorFormat}
+              options={{ sample }}
+            />
+          ),
+      )}
     </div>
   );
 }
@@ -136,6 +134,7 @@ export function FontWeightScale({
 }: FontWeightScaleProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+  const colorFormat = useColorFormat();
 
   const rows = useMemo(
     () => deriveFontWeightRows(resolved, project, { filter, sortBy, sortDir }),
@@ -149,6 +148,7 @@ export function FontWeightScale({
       cssVarPrefix={cssVarPrefix}
       activeAxes={activeAxes}
       sample={sample}
+      colorFormat={colorFormat}
       filter={filter}
       caption={caption}
     />

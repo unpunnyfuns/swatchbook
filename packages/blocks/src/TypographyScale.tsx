@@ -1,21 +1,16 @@
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import './TypographyScale.css';
-import type { TypographyValue } from '#/internal/composite-types.ts';
+import { useColorFormat } from '#/contexts.ts';
+import type { ColorFormat } from '#/format-color.ts';
+import type { RealisedToken } from '#/internal/composite-types.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
-import { useProject } from '#/internal/use-project.ts';
+import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import type { ProjectData } from '#/internal/use-project.ts';
+import { usePresenter } from '#/presenters/registry.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
-
-// Dimension sub-values in DTCG 2025.10 use a `{ value, unit }` envelope
-// — narrow once here so the local `asDimension` helper doesn't need
-// to re-validate keys at every read.
-interface DimensionLike {
-  value?: unknown;
-  unit?: unknown;
-}
 
 export interface TypographyScaleProps {
   /**
@@ -39,49 +34,9 @@ export interface TypographyScaleProps {
 
 export interface TypographyRow {
   path: string;
-  sampleStyle: CSSProperties;
-  specs: string;
-}
-
-function asDimension(raw: unknown): string | undefined {
-  if (raw == null) return undefined;
-  if (typeof raw === 'string' || typeof raw === 'number') return String(raw);
-  if (typeof raw === 'object') {
-    const v = raw as DimensionLike;
-    if (v.value !== undefined && v.unit !== undefined) return `${String(v.value)}${String(v.unit)}`;
-  }
-  return undefined;
-}
-
-function asFontFamily(raw: unknown): string | undefined {
-  if (typeof raw === 'string') return raw;
-  if (Array.isArray(raw)) return raw.map(String).join(', ');
-  return undefined;
-}
-
-function buildRow(path: string, composite: TypographyValue): TypographyRow {
-  const fontFamily = asFontFamily(composite.fontFamily);
-  const fontSize = asDimension(composite.fontSize);
-  const fontWeight = composite.fontWeight == null ? undefined : String(composite.fontWeight);
-  const lineHeight = composite.lineHeight == null ? undefined : String(composite.lineHeight);
-  const letterSpacing = asDimension(composite.letterSpacing);
-
-  const sampleStyle: CSSProperties = {};
-  if (fontFamily) sampleStyle.fontFamily = fontFamily;
-  if (fontSize) sampleStyle.fontSize = fontSize;
-  if (fontWeight) sampleStyle.fontWeight = fontWeight as CSSProperties['fontWeight'];
-  if (lineHeight) sampleStyle.lineHeight = lineHeight;
-  if (letterSpacing) sampleStyle.letterSpacing = letterSpacing;
-
-  const parts = [
-    fontSize,
-    fontWeight ? `w${fontWeight}` : undefined,
-    lineHeight ? `lh ${lineHeight}` : undefined,
-  ]
-    .filter(Boolean)
-    .join(' · ');
-
-  return { path, sampleStyle, specs: parts };
+  cssVar: string;
+  /** Realised token, fed to `TypeSpecimen` per the presenter contract. */
+  token: RealisedToken<'typography'>;
 }
 
 export interface DeriveTypographyRowsOptions {
@@ -96,19 +51,18 @@ export interface DeriveTypographyRowsOptions {
  */
 export function deriveTypographyRows(
   resolved: ProjectData['resolved'],
+  project: Pick<ProjectData, 'listing' | 'cssVarPrefix'>,
   { filter, sortBy, sortDir }: DeriveTypographyRowsOptions,
 ): TypographyRow[] {
   const filtered = Object.entries(resolved).filter(([path, token]) => {
     if (token.$type !== 'typography') return false;
     return matchPath(path, filter);
   });
-  return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => {
-    const value = token.$value;
-    if (!value || typeof value !== 'object') {
-      return { path, sampleStyle: {}, specs: '' };
-    }
-    return buildRow(path, value as TypographyValue);
-  });
+  return sortTokens(filtered, { by: sortBy, dir: sortDir }).map(([path, token]) => ({
+    path,
+    cssVar: resolveCssVar(path, project),
+    token: token as RealisedToken<'typography'>,
+  }));
 }
 
 export interface TypographyScaleViewProps {
@@ -117,20 +71,28 @@ export interface TypographyScaleViewProps {
   cssVarPrefix: string;
   activeAxes: Record<string, string>;
   sample: string;
+  /** Forwarded to each row's `TypeSpecimen` (uniform presenter contract; unused for typography). */
+  colorFormat: ColorFormat;
   filter?: string | undefined;
   caption?: string | undefined;
 }
 
-/** Pure presentation for the typography scale. Renders from plain props. */
+/**
+ * Pure presentation for the typography scale. Renders from plain props;
+ * composes the connected `TypeSpecimen` as a child, feeding it this row's
+ * already-resolved `token`/`cssVar` per the presenter contract.
+ */
 export function TypographyScaleView({
   rows,
   activeTheme,
   cssVarPrefix,
   activeAxes,
   sample,
+  colorFormat,
   filter,
   caption,
 }: TypographyScaleViewProps): ReactElement {
+  const Specimen = usePresenter('typography');
   const captionText =
     caption ??
     `${rows.length} typography token${rows.length === 1 ? '' : 's'}${filter && filter !== 'typography' ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -148,11 +110,16 @@ export function TypographyScaleView({
       <div className="sb-block__caption">{captionText}</div>
       {rows.map((row) => (
         <div key={row.path} className="sb-typography-scale__row">
-          <div className="sb-typography-scale__meta">
-            <span className="sb-typography-scale__path">{row.path}</span>
-            {row.specs && <span className="sb-typography-scale__specs">{row.specs}</span>}
-          </div>
-          <div style={row.sampleStyle}>{sample}</div>
+          <span className="sb-typography-scale__path">{row.path}</span>
+          {Specimen && (
+            <Specimen
+              path={row.path}
+              token={row.token}
+              cssVar={row.cssVar}
+              colorFormat={colorFormat}
+              options={{ sample }}
+            />
+          )}
         </div>
       ))}
     </div>
@@ -166,11 +133,13 @@ export function TypographyScale({
   sortBy = 'path',
   sortDir = 'asc',
 }: TypographyScaleProps): ReactElement {
-  const { resolved, activeTheme, activeAxes, cssVarPrefix } = useProject();
+  const project = useProject();
+  const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+  const colorFormat = useColorFormat();
 
   const rows = useMemo(
-    () => deriveTypographyRows(resolved, { filter, sortBy, sortDir }),
-    [resolved, filter, sortBy, sortDir],
+    () => deriveTypographyRows(resolved, project, { filter, sortBy, sortDir }),
+    [resolved, project, filter, sortBy, sortDir],
   );
 
   return (
@@ -180,6 +149,7 @@ export function TypographyScale({
       cssVarPrefix={cssVarPrefix}
       activeAxes={activeAxes}
       sample={sample}
+      colorFormat={colorFormat}
       filter={filter}
       caption={caption}
     />

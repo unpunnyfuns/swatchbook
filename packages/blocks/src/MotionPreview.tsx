@@ -2,13 +2,17 @@ import cx from 'clsx';
 import type { ReactElement } from 'react';
 import { useMemo, useState } from 'react';
 import './MotionPreview.css';
+import { useColorFormat } from '#/contexts.ts';
+import type { ColorFormat } from '#/format-color.ts';
+import type { RealisedToken } from '#/internal/composite-types.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import type { ProjectData } from '#/internal/use-project.ts';
-import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
-import { MotionSample, resolveMotionSpec } from '#/motion-preview/MotionSample.tsx';
+import { resolveMotionSpec } from '#/motion-preview/MotionSample.tsx';
 import type { MotionSpeed } from '#/motion-preview/MotionSample.tsx';
+import { usePresenter } from '#/presenters/registry.ts';
+import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export type { MotionSpeed };
 
@@ -34,6 +38,8 @@ const SPEEDS: MotionSpeed[] = [0.25, 0.5, 1, 2];
 export interface MotionRow {
   path: string;
   cssVar: string;
+  /** Realised token, fed to `MotionSample` per the presenter contract. */
+  token: RealisedToken;
   durationMs: number;
   easing: string;
   kind: 'transition' | 'duration' | 'cubicBezier';
@@ -76,6 +82,7 @@ export function deriveMotionRows(
     collected.push({
       path,
       cssVar: resolveCssVar(path, project),
+      token: token as RealisedToken,
       durationMs: spec.durationMs,
       easing: spec.easing,
       kind,
@@ -93,6 +100,8 @@ export interface MotionPreviewViewProps {
   activeTheme: string;
   cssVarPrefix: string;
   activeAxes: Record<string, string>;
+  /** Forwarded to each row's `MotionSample` (uniform presenter contract; unused for motion). */
+  colorFormat: ColorFormat;
   filter?: string | undefined;
   caption?: string | undefined;
 }
@@ -101,17 +110,19 @@ export interface MotionPreviewViewProps {
  * Pure presentation for the motion preview. Owns the speed/replay controls'
  * local UI state and the `prefers-reduced-motion` read (a browser-environment
  * concern, not project data); renders from the derived `rows` view-model.
- * Composes the connected `MotionSample` as a child (that child reads the
- * project itself).
+ * Composes the connected `MotionSample` as a child, feeding it this row's
+ * already-resolved `token`/`cssVar` per the presenter contract.
  */
 export function MotionPreviewView({
   rows,
   activeTheme,
   cssVarPrefix,
   activeAxes,
+  colorFormat,
   filter,
   caption,
 }: MotionPreviewViewProps): ReactElement {
+  const Sample = usePresenter('transition');
   const [speed, setSpeed] = useState<MotionSpeed>(1);
   const [run, setRun] = useState(0);
   const reducedMotion = usePrefersReducedMotion();
@@ -161,7 +172,15 @@ export function MotionPreviewView({
             <span className="sb-motion-preview__path">{row.path}</span>
             <span className="sb-motion-preview__specs">{formatSpec(row)}</span>
           </div>
-          <MotionSample path={row.path} speed={speed} runKey={run} />
+          {Sample && (
+            <Sample
+              path={row.path}
+              token={row.token}
+              cssVar={row.cssVar}
+              colorFormat={colorFormat}
+              options={{ speed, runKey: run }}
+            />
+          )}
           <span className="sb-motion-preview__css-var">{row.cssVar}</span>
         </div>
       ))}
@@ -172,6 +191,7 @@ export function MotionPreviewView({
 export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactElement {
   const project = useProject();
   const { resolved, activeTheme, activeAxes, cssVarPrefix } = project;
+  const colorFormat = useColorFormat();
 
   const rows = useMemo(
     () => deriveMotionRows(resolved, project, { filter }),
@@ -184,6 +204,7 @@ export function MotionPreview({ filter, caption }: MotionPreviewProps): ReactEle
       activeTheme={activeTheme}
       cssVarPrefix={cssVarPrefix}
       activeAxes={activeAxes}
+      colorFormat={colorFormat}
       filter={filter}
       caption={caption}
     />

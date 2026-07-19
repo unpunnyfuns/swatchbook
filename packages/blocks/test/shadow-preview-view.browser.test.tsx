@@ -1,18 +1,25 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, it } from 'vitest';
+import type { RealisedToken } from '@unpunnyfuns/swatchbook-core/token-value-types';
 import { ShadowPreviewView } from '#/ShadowPreview.tsx';
 import type { ShadowPreviewViewProps, ShadowRow } from '#/ShadowPreview.tsx';
 
 function rows(): ShadowRow[] {
+  const token: RealisedToken<'shadow'> = {
+    $type: 'shadow',
+    $value: { offsetX: '0px', offsetY: '2px', blur: '4px', spread: '0px', color: '#000000' },
+  };
   return [
     {
       path: 'shadow.default',
       cssVar: 'var(--sb-shadow-default)',
+      token,
       layers: [{ offset: '0px 2px', blur: '4px', spread: '0px', color: '#000000' }],
     },
     {
       path: 'shadow.layered',
       cssVar: 'var(--sb-shadow-layered)',
+      token,
       layers: [
         { offset: '0px 1px', blur: '2px', spread: '0px', color: '#000000' },
         { offset: '0px 4px', blur: '8px', spread: '0px', color: '#0066ff', inset: 'true' },
@@ -22,9 +29,8 @@ function rows(): ShadowRow[] {
 }
 
 // The View renders from plain props — no provider, no store. ShadowSample
-// (rendered per-row) is a connected child that reads the project itself; it
-// falls back to an empty snapshot with no provider mounted, which is fine
-// here since only the View's own output is under test.
+// (rendered per-row) is a connected child fed this row's token/cssVar
+// directly, so it needs no provider either.
 function setup(extra: Partial<ShadowPreviewViewProps> = {}) {
   return render(
     <ShadowPreviewView
@@ -32,6 +38,7 @@ function setup(extra: Partial<ShadowPreviewViewProps> = {}) {
       activeTheme="Light"
       cssVarPrefix="sb"
       activeAxes={{ theme: 'Light' }}
+      colorFormat="hex"
       {...extra}
     />,
   );

@@ -20,7 +20,7 @@ const listing = {
 
 const cssVarPrefix = 'sb';
 
-const opts = { sortBy: 'path', sortDir: 'asc', colorFormat: 'hex' } as const;
+const opts = { sortBy: 'path', sortDir: 'asc' } as const;
 
 it('groups color tokens under the derived default groupBy, excluding other types', () => {
   const groups = deriveColorPaletteGroups(resolved, listing, cssVarPrefix, opts);
@@ -30,14 +30,15 @@ it('groups color tokens under the derived default groupBy, excluding other types
     'color.brand.fg',
     'color.text.muted',
   ]);
+  // Group is 'color' (1 segment); leaf is the group-relative remainder.
+  expect(groups[0]?.swatches.map((s) => s.leaf)).toEqual(['brand.bg', 'brand.fg', 'text.muted']);
 });
 
-it('derives the css var from the listing and formats the color value for the given colorFormat', () => {
+it('derives the css var from the listing and carries the realised token for the presenter', () => {
   const groups = deriveColorPaletteGroups(resolved, listing, cssVarPrefix, opts);
   const bg = groups[0]?.swatches.find((s) => s.path === 'color.brand.bg');
   expect(bg?.cssVar).toBe('var(--sb-color-brand-bg)');
-  expect(bg?.value).toBe('#0066ff');
-  expect(bg?.outOfGamut).toBe(false);
+  expect(bg?.token).toEqual(resolved['color.brand.bg']);
 });
 
 it('falls back to a prefix-derived css var when the listing has no entry', () => {
@@ -49,8 +50,8 @@ it('falls back to a prefix-derived css var when the listing has no entry', () =>
 it('applies an explicit groupBy over the derived default', () => {
   const groups = deriveColorPaletteGroups(resolved, listing, cssVarPrefix, { ...opts, groupBy: 2 });
   expect(groups.map((g) => g.group)).toEqual(['color.brand', 'color.text']);
-  expect(groups[0]?.swatches.map((s) => s.leaf)).toEqual(['bg', 'fg']);
-  expect(groups[1]?.swatches.map((s) => s.leaf)).toEqual(['muted']);
+  expect(groups[0]?.swatches.map((s) => s.path)).toEqual(['color.brand.bg', 'color.brand.fg']);
+  expect(groups[1]?.swatches.map((s) => s.path)).toEqual(['color.text.muted']);
 });
 
 it('applies the path filter', () => {
@@ -70,4 +71,25 @@ it('applies sortDir desc within a group', () => {
   });
   const brand = groups.find((g) => g.group === 'color.brand');
   expect(brand?.swatches.map((s) => s.path)).toEqual(['color.brand.fg', 'color.brand.bg']);
+});
+
+it('carries the group-relative remainder as leaf for a deep path under a shallow group', () => {
+  // color.palette.blue.50 has 4 segments; grouping at depth 2 ('color.palette')
+  // must keep 'blue' in the label, not just the last segment ('50').
+  const deepResolved = {
+    'color.palette.blue.50': {
+      $type: 'color',
+      $value: { colorSpace: 'srgb', components: [0.9, 0.95, 1] },
+    },
+    'color.palette.blue.500': {
+      $type: 'color',
+      $value: { colorSpace: 'srgb', components: [0.2, 0.4, 0.9] },
+    },
+  } as unknown as ProjectData['resolved'];
+  const groups = deriveColorPaletteGroups(deepResolved, listing, cssVarPrefix, {
+    ...opts,
+    groupBy: 2,
+  });
+  expect(groups.map((g) => g.group)).toEqual(['color.palette']);
+  expect(groups[0]?.swatches.map((s) => s.leaf)).toEqual(['blue.50', 'blue.500']);
 });

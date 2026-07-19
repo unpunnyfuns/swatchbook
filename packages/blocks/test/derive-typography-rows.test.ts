@@ -20,28 +20,46 @@ const resolved = {
   },
   'color.brand': { $type: 'color', $value: { colorSpace: 'srgb', components: [0, 0.4, 1] } },
 } as unknown as ProjectData['resolved'];
+
+const listing = {
+  'typography.heading': { names: { css: '--sb-typography-heading' } },
+} as unknown as ProjectData['listing'];
+
+const cssVarPrefix = 'sb';
 const opts = { sortBy: 'path', sortDir: 'asc' } as const;
 
 it('produces one row per typography token, excluding other types', () => {
-  const rows = deriveTypographyRows(resolved, opts);
+  const rows = deriveTypographyRows(resolved, { listing, cssVarPrefix }, opts);
   expect(rows.map((r) => r.path)).toEqual(['typography.body', 'typography.heading']);
 });
 
-it('derives the sample style and specs summary from the composite value', () => {
-  const rows = deriveTypographyRows(resolved, opts);
+it('derives the css var from the listing, and the realised token for each row', () => {
+  const rows = deriveTypographyRows(resolved, { listing, cssVarPrefix }, opts);
   const heading = rows.find((r) => r.path === 'typography.heading')!;
-  expect(heading.sampleStyle.fontFamily).toBe('Inter');
-  expect(heading.sampleStyle.fontSize).toBe('24px');
-  expect(heading.sampleStyle.fontWeight).toBe('700');
-  expect(heading.specs).toBe('24px · w700 · lh 1.2');
+  expect(heading.cssVar).toBe('var(--sb-typography-heading)');
+  expect(heading.token.$value).toEqual(resolved['typography.heading']!.$value);
+});
+
+it('falls back to a prefix-derived css var when the listing has no entry', () => {
+  const rows = deriveTypographyRows(resolved, { listing, cssVarPrefix }, opts);
+  const body = rows.find((r) => r.path === 'typography.body');
+  expect(body?.cssVar).toBe('var(--sb-typography-body)');
 });
 
 it('applies the path filter', () => {
-  const rows = deriveTypographyRows(resolved, { ...opts, filter: '*.heading' });
+  const rows = deriveTypographyRows(
+    resolved,
+    { listing, cssVarPrefix },
+    { ...opts, filter: '*.heading' },
+  );
   expect(rows.map((r) => r.path)).toEqual(['typography.heading']);
 });
 
 it('applies sortDir desc', () => {
-  const rows = deriveTypographyRows(resolved, { ...opts, sortDir: 'desc' });
+  const rows = deriveTypographyRows(
+    resolved,
+    { listing, cssVarPrefix },
+    { ...opts, sortDir: 'desc' },
+  );
   expect(rows.map((r) => r.path)).toEqual(['typography.heading', 'typography.body']);
 });

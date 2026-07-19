@@ -6,6 +6,7 @@ import { BorderSample } from '#/border-preview/BorderSample.tsx';
 import { ColorFormatContext, useColorFormat } from '#/contexts.ts';
 import type { ColorFormat } from '#/format-color.ts';
 import { DimensionSample } from '#/dimension-scale/DimensionSample.tsx';
+import type { RealisedToken } from '#/internal/composite-types.ts';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
 import { DetailOverlay } from '#/internal/DetailOverlay.tsx';
 import { formatTokenValue } from '#/internal/format-token-value.ts';
@@ -934,7 +935,13 @@ const LeafPreview = memo(function LeafPreview({ path, token }: LeafPreviewProps)
           {formatTokenValue(token.$value, type, colorFormat, project.listing[path])}
         </span>
         <span className="sb-token-navigator__preview-dimension">
-          <DimensionSample path={path} visual="length" />
+          <DimensionSample
+            path={path}
+            token={token as RealisedToken<'dimension'>}
+            cssVar={resolveCssVar(path, project)}
+            colorFormat={colorFormat}
+            options={{ visual: 'length' }}
+          />
         </span>
       </span>
     );
@@ -943,7 +950,12 @@ const LeafPreview = memo(function LeafPreview({ path, token }: LeafPreviewProps)
     return (
       <span className="sb-token-navigator__preview-box">
         <span className="sb-token-navigator__preview-scaled">
-          <ShadowSample path={path} />
+          <ShadowSample
+            path={path}
+            token={token as RealisedToken<'shadow'>}
+            cssVar={resolveCssVar(path, project)}
+            colorFormat={colorFormat}
+          />
         </span>
       </span>
     );
@@ -952,7 +964,12 @@ const LeafPreview = memo(function LeafPreview({ path, token }: LeafPreviewProps)
     return (
       <span className="sb-token-navigator__preview-box">
         <span className="sb-token-navigator__preview-scaled">
-          <BorderSample path={path} />
+          <BorderSample
+            path={path}
+            token={token as RealisedToken<'border'>}
+            cssVar={resolveCssVar(path, project)}
+            colorFormat={colorFormat}
+          />
         </span>
       </span>
     );
@@ -961,7 +978,12 @@ const LeafPreview = memo(function LeafPreview({ path, token }: LeafPreviewProps)
     return (
       <span className="sb-token-navigator__preview-box">
         <span className="sb-token-navigator__preview-motion">
-          <MotionSample path={path} />
+          <MotionSample
+            path={path}
+            token={token as RealisedToken}
+            cssVar={resolveCssVar(path, project)}
+            colorFormat={colorFormat}
+          />
         </span>
       </span>
     );

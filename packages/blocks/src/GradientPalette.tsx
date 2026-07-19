@@ -6,10 +6,12 @@ import { formatColor } from '#/format-color.ts';
 import type { ColorFormat } from '#/format-color.ts';
 import { parseColor } from '@unpunnyfuns/swatchbook-core/format-color';
 import { blockWrapperAttrs } from '#/internal/data-attr.ts';
+import type { RealisedToken } from '#/internal/composite-types.ts';
 import { sortTokens } from '#/internal/sort-tokens.ts';
 import type { SortBy, SortDir } from '#/internal/sort-tokens.ts';
 import { resolveCssVar, useProject } from '#/internal/use-project.ts';
 import type { ProjectData } from '#/internal/use-project.ts';
+import { usePresenter } from '#/presenters/registry.ts';
 import { matchPath } from '@unpunnyfuns/swatchbook-core/match-path';
 
 export interface GradientPaletteProps {
@@ -55,6 +57,8 @@ export interface GradientRowStop {
 export interface GradientRow {
   path: string;
   cssVar: string;
+  /** Realised token, fed to the `gradient` presenter per the presenter contract. */
+  token: RealisedToken<'gradient'>;
   stops: GradientRowStop[];
 }
 
@@ -104,6 +108,7 @@ export function deriveGradientRows(
     return {
       path,
       cssVar: resolveCssVar(path, projectFields),
+      token: token as RealisedToken<'gradient'>,
       stops: stops.map((stop, i) => ({
         key: stopKey(path, stop, i),
         cssColor: stopCssColor(stop),
@@ -119,19 +124,27 @@ export interface GradientPaletteViewProps {
   activeTheme: string;
   cssVarPrefix: string;
   activeAxes: Record<string, string>;
+  /** Forwarded to each row's `gradient` presenter. */
+  colorFormat: ColorFormat;
   filter?: string | undefined;
   caption?: string | undefined;
 }
 
-/** Pure presentation for the gradient palette. Renders from plain props. */
+/**
+ * Pure presentation for the gradient palette. Renders from plain props;
+ * composes the registry's `gradient` presenter per row, feeding it this
+ * row's already-resolved `token`/`cssVar` per the presenter contract.
+ */
 export function GradientPaletteView({
   rows,
   activeTheme,
   cssVarPrefix,
   activeAxes,
+  colorFormat,
   filter,
   caption,
 }: GradientPaletteViewProps): ReactElement {
+  const Swatch = usePresenter('gradient');
   const captionText =
     caption ??
     `${rows.length} gradient${rows.length === 1 ? '' : 's'}${filter ? ` matching \`${filter}\`` : ''} · ${activeTheme}`;
@@ -153,11 +166,14 @@ export function GradientPaletteView({
             <span className="sb-gradient-palette__path">{row.path}</span>
             <span className="sb-gradient-palette__css-var">{row.cssVar}</span>
           </div>
-          <div
-            className="sb-gradient-palette__sample"
-            style={{ background: `linear-gradient(to right, ${row.cssVar})` }}
-            aria-hidden
-          />
+          {Swatch && (
+            <Swatch
+              path={row.path}
+              token={row.token}
+              cssVar={row.cssVar}
+              colorFormat={colorFormat}
+            />
+          )}
           <div className="sb-gradient-palette__stops">
             {row.stops.map((stop) => (
               <div key={stop.key} className="sb-gradient-palette__stop-row">
@@ -208,6 +224,7 @@ export function GradientPalette({
       activeTheme={activeTheme}
       cssVarPrefix={cssVarPrefix}
       activeAxes={activeAxes}
+      colorFormat={format}
       filter={filter}
       caption={caption}
     />

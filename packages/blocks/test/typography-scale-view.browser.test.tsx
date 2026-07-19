@@ -2,19 +2,19 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, it } from 'vitest';
 import { TypographyScaleView } from '#/TypographyScale.tsx';
 import type { TypographyRow } from '#/TypographyScale.tsx';
+import type { RealisedToken } from '@unpunnyfuns/swatchbook-core/token-value-types';
+
+const token: RealisedToken<'typography'> = {
+  $type: 'typography',
+  $value: { fontFamily: 'Inter', fontSize: { value: 24, unit: 'px' }, fontWeight: 700 },
+};
 
 function rows(): TypographyRow[] {
-  return [
-    {
-      path: 'typography.heading',
-      sampleStyle: { fontFamily: 'Inter', fontSize: '24px' },
-      specs: '24px · w700',
-    },
-  ];
+  return [{ path: 'typography.heading', cssVar: 'var(--sb-typography-heading)', token }];
 }
 
 // The View renders from plain props — no SwatchbookProvider, no store.
-it('renders a row per token with its path, specs, and sample', () => {
+it('renders a row per token with its full path and sample', () => {
   render(
     <TypographyScaleView
       rows={rows()}
@@ -22,10 +22,10 @@ it('renders a row per token with its path, specs, and sample', () => {
       cssVarPrefix="sb"
       activeAxes={{ theme: 'Light' }}
       sample="Hello"
+      colorFormat="hex"
     />,
   );
   screen.getByText('typography.heading');
-  screen.getByText('24px · w700');
   screen.getByText('Hello');
 });
 
@@ -37,6 +37,7 @@ it('honors the caption override', () => {
       cssVarPrefix="sb"
       activeAxes={{}}
       sample="Hello"
+      colorFormat="hex"
       caption="Type scale"
     />,
   );
@@ -51,6 +52,7 @@ it('renders the empty state when there are no rows', () => {
       cssVarPrefix="sb"
       activeAxes={{}}
       sample="Hello"
+      colorFormat="hex"
     />,
   );
   screen.getByText('No typography tokens match this filter.');

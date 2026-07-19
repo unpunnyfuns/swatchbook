@@ -1,4 +1,4 @@
-.sb-font-weight-scale__row {
+.sb-font-weight-specimen__row {
   display: grid;
   grid-template-columns: minmax(160px, 220px) 1fr auto;
   gap: var(--swatchbook-space-lg);
@@ -7,14 +7,14 @@
   border-bottom: 1px solid var(--swatchbook-border-default);
 }
 
-.sb-font-weight-scale__meta {
+.sb-font-weight-specimen__meta {
   display: flex;
   flex-direction: column;
   gap: var(--swatchbook-space-3xs);
   min-width: 0;
 }
 
-.sb-font-weight-scale__path {
+.sb-font-weight-specimen__path {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: var(--swatchbook-type-caption);
   overflow: hidden;
@@ -22,18 +22,18 @@
   white-space: nowrap;
 }
 
-.sb-font-weight-scale__value {
+.sb-font-weight-specimen__value {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: var(--swatchbook-type-micro);
   color: var(--swatchbook-text-muted);
 }
 
-.sb-font-weight-scale__sample {
+.sb-font-weight-specimen__sample {
   font-size: var(--swatchbook-type-sample-lg);
   line-height: var(--swatchbook-leading-none);
 }
 
-.sb-font-weight-scale__css-var {
+.sb-font-weight-specimen__css-var {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: var(--swatchbook-type-micro);
   color: var(--swatchbook-text-muted);
