@@ -27,12 +27,11 @@ export function BorderSampleView({ cssVar }: BorderSampleViewProps): ReactElemen
  * color branch emits a display-only JSON string that the browser would
  * reject as a border color.
  */
-function borderValueToCss(value: unknown, colorFormat: ColorFormat): string {
+function borderValueToCss(value: BorderValue, colorFormat: ColorFormat): string {
   if (!value || typeof value !== 'object') return '';
-  const b = value as BorderValue;
-  const width = formatLength(b.width);
-  const style = typeof b.style === 'string' ? b.style : 'solid';
-  const color = formatColor(b.color, cssColorFormat(colorFormat)).value;
+  const width = formatLength(value.width);
+  const style = typeof value.style === 'string' ? value.style : 'solid';
+  const color = formatColor(value.color, cssColorFormat(colorFormat)).value;
   return [width, style, color].join(' ');
 }
 

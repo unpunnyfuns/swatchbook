@@ -53,7 +53,7 @@ function describeValue(value: TypographyValue): string {
 export function TypeSpecimen({ token, cssVar: _cssVar, options }: TypeSpecimenProps): ReactElement {
   const rawSample = options?.['sample'];
   const sample = typeof rawSample === 'string' ? rawSample : DEFAULT_SAMPLE;
-  const value = (token.$value ?? {}) as TypographyValue;
+  const value = token.$value ?? {};
   // Terrazzo emits typography sub-properties (font-family/size/weight/
   // line-height) as individual custom properties, never a composite `font`
   // shorthand var. `font: var(--sb-typography-<name>)` references an
