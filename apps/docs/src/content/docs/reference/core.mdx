@@ -98,7 +98,7 @@ import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire'
 
 ## Rendering blocks standalone
 
-`snapshotForWire`'s output is what `@unpunnyfuns/swatchbook-blocks`' `SwatchbookProvider` consumes outside Storybook: `loadProject` builds the `Project`, `snapshotForWire(project, css)` reduces it to the JSON-safe wire shape, and that shape is typically written to a file for a standalone consumer to import.
+`snapshotForWire`'s output is what `@unpunnyfuns/swatchbook-blocks`' `SwatchbookProvider` consumes outside Storybook: `loadProject` builds the `Project`, `snapshotForWire(project, css)` reduces it to the JSON-safe wire shape, and that shape is typically written to a file for a standalone consumer to import. [Rendering blocks standalone](/guides/rendering-blocks-standalone) is the task-shaped walkthrough, from build script to axis switching.
 
 ```ts
 import { loadProject, emitAxisProjectedCss } from '@unpunnyfuns/swatchbook-core';
