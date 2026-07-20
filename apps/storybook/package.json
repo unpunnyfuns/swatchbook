@@ -17,7 +17,7 @@
     "chromatic": "chromatic --exit-zero-on-changes --build-script-name=build:storybook",
     "test:storybook": "vitest run",
     "test:storybook:watch": "vitest",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -b",
     "lint": "oxlint --deny-warnings -c ../../.oxlintrc.json src .storybook swatchbook.config.ts",
     "format": "oxfmt -c ../../.oxfmtrc.json src .storybook swatchbook.config.ts",
     "format:check": "oxfmt --check -c ../../.oxfmtrc.json src .storybook swatchbook.config.ts"

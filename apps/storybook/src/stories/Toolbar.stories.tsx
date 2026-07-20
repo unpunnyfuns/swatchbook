@@ -58,6 +58,17 @@ const FIXTURE_DEFAULTS: Record<string, string> = {
   contrast: 'Normal',
 };
 
+// A preset's `axes` is a partial record, so drop unset axes while merging
+// over the defaults; the result stays `Record<string, string>` for the
+// active-tuple state instead of leaking `| undefined`.
+function applyPreset(preset: SwitcherPreset): Record<string, string> {
+  const tuple: Record<string, string> = { ...FIXTURE_DEFAULTS };
+  for (const [axis, value] of Object.entries(preset.axes)) {
+    if (value !== undefined) tuple[axis] = value;
+  }
+  return tuple;
+}
+
 /**
  * Test harness — owns the switcher's state and surfaces it as
  * `data-*` attributes on a sibling probe so play functions can read
@@ -82,7 +93,7 @@ function ToolbarHarness(): ReactElement {
           setLastApplied(null);
         }}
         onPresetApply={(preset) => {
-          setActiveTuple({ ...FIXTURE_DEFAULTS, ...preset.axes });
+          setActiveTuple(applyPreset(preset));
           setLastApplied(preset.name);
         }}
         footer={

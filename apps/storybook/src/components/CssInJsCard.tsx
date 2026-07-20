@@ -20,18 +20,18 @@ export interface CssInJsCardProps {
  * runtime flip-on-toolbar behaviour for free.
  */
 export function CssInJsCard({ title, body }: CssInJsCardProps): ReactElement {
-  const surfaces = color.surface as Record<string, string>;
-  const texts = color.text as Record<string, string>;
-  const accents = color.accent as Record<string, string>;
-  const borders = color.border as Record<string, string>;
+  const surfaces = color['surface'] as Record<string, string>;
+  const texts = color['text'] as Record<string, string>;
+  const accents = color['accent'] as Record<string, string>;
+  const borders = color['border'] as Record<string, string>;
 
   const cardStyle: CSSProperties = {
-    background: surfaces.raised,
-    color: texts.default,
-    border: `1px solid ${borders.default}`,
-    borderRadius: radius.lg,
-    boxShadow: shadow.md,
-    padding: space.lg,
+    background: surfaces['raised'],
+    color: texts['default'],
+    border: `1px solid ${borders['default']}`,
+    borderRadius: radius['lg'],
+    boxShadow: shadow['md'],
+    padding: space['lg'],
     maxWidth: '28rem',
     width: '100%',
     fontFamily: 'inherit',
@@ -39,29 +39,29 @@ export function CssInJsCard({ title, body }: CssInJsCardProps): ReactElement {
 
   const headingStyle: CSSProperties = {
     margin: 0,
-    marginBottom: space.sm,
+    marginBottom: space['sm'],
     fontSize: '1.125rem',
     fontWeight: 600,
   };
 
   const bodyStyle: CSSProperties = {
     margin: 0,
-    color: texts.muted,
+    color: texts['muted'],
     fontSize: '0.875rem',
   };
 
   const buttonRowStyle: CSSProperties = {
     display: 'flex',
-    gap: space.sm,
-    marginTop: space.lg,
+    gap: space['sm'],
+    marginTop: space['lg'],
   };
 
   const primaryStyle: CSSProperties = {
-    background: accents.bg,
-    color: accents.fg,
+    background: accents['bg'],
+    color: accents['fg'],
     border: 0,
-    borderRadius: radius.md,
-    padding: `${space.sm} ${space.md}`,
+    borderRadius: radius['md'],
+    padding: `${space['sm']} ${space['md']}`,
     fontWeight: 500,
     fontFamily: 'inherit',
     cursor: 'pointer',
@@ -69,10 +69,10 @@ export function CssInJsCard({ title, body }: CssInJsCardProps): ReactElement {
 
   const secondaryStyle: CSSProperties = {
     background: 'transparent',
-    color: texts.default,
-    border: `1px solid ${borders.default}`,
-    borderRadius: radius.md,
-    padding: `${space.sm} ${space.md}`,
+    color: texts['default'],
+    border: `1px solid ${borders['default']}`,
+    borderRadius: radius['md'],
+    padding: `${space['sm']} ${space['md']}`,
     fontWeight: 500,
     fontFamily: 'inherit',
     cursor: 'pointer',

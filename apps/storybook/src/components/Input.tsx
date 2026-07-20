@@ -6,6 +6,8 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export function Input({ invalid, className, ...rest }: InputProps) {
-  const cls = [styles.input, invalid ? styles.invalid : '', className].filter(Boolean).join(' ');
+  const cls = [styles['input'], invalid ? styles['invalid'] : '', className]
+    .filter(Boolean)
+    .join(' ');
   return <input className={cls} {...rest} />;
 }
