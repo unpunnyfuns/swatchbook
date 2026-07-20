@@ -36,7 +36,7 @@ function gradientValueToCss(stops: readonly GradientStop[], colorFormat: ColorFo
  * matches the direction the standalone block previously hard-coded.
  */
 export function GradientSwatch({ token, cssVar, colorFormat }: GradientSwatchProps): ReactElement {
-  const stops = Array.isArray(token.$value) ? (token.$value as GradientStop[]) : [];
+  const stops = Array.isArray(token.$value) ? token.$value : [];
   const background = cssVar
     ? `linear-gradient(90deg, ${cssVar})`
     : gradientValueToCss(stops, colorFormat);

@@ -1,10 +1,11 @@
 /**
- * Typed envelopes for DTCG 2025.10 composite `$value` shapes — one per
- * `$type` the packages that render tokens consume. Sub-values stay
- * `unknown` because each may be a primitive (number / string), a
- * sub-value alias (string in `{token.path}` form, post-resolution
- * flattened to a string), or a nested composite. The win over
- * `Record<string, unknown>` isn't value-level narrowing — it's that
+ * Typed envelopes for DTCG 2025.10 composite `$value` shapes, one per
+ * `$type` the packages that render tokens consume. `RealisedToken`'s
+ * top-level `$value` is typed per `$type` via the `TokenValue<T>` mapped
+ * type below; sub-values stay `unknown` because each may be a primitive
+ * (number / string), a sub-value alias (string in `{token.path}` form,
+ * post-resolution flattened to a string), or a nested composite. The win
+ * over `Record<string, unknown>` isn't value-level narrowing: it's that
  * typo-ing a key (`fontFamlly`) becomes a compile error.
  *
  * The DTCG spec is the source of truth for the keys; this file
@@ -60,6 +61,12 @@ export interface GradientStop {
   position?: unknown;
 }
 
+/** `dimension` / `duration` object form per DTCG 2025.10 (`{ value, unit }`). */
+export interface DimensionValue {
+  value?: unknown;
+  unit?: unknown;
+}
+
 /**
  * `color.$value` per DTCG 2025.10 §8.1. Either the explicit
  * `colorSpace + components` form, or the legacy `hex` short-form
@@ -103,13 +110,54 @@ export type TokenType =
   | 'cubicBezier';
 
 /**
- * A fully-realised token: concrete `$value` (aliases already resolved, no
- * graph lookup), plus DTCG metadata a presenter may show. The presenter tier
- * consumes this; resolution is the caller's job.
+ * The realised top-level `$value` shape per `$type`. Narrows the envelope a
+ * presenter reads without re-casting; sub-values stay `unknown` (a sub-value
+ * may be a primitive, a resolved alias string, or a nested composite), same
+ * as the envelopes themselves.
  */
-export interface RealisedToken<T extends TokenType = TokenType> {
-  $type: T;
-  $value: unknown;
-  $description?: string;
-  $deprecated?: string | boolean;
-}
+export type TokenValue<T extends TokenType> = T extends 'color'
+  ? ColorValue
+  : T extends 'gradient'
+    ? GradientStop[]
+    : T extends 'shadow'
+      ? ShadowLayer | ShadowLayer[]
+      : T extends 'border'
+        ? BorderValue
+        : T extends 'transition'
+          ? TransitionValue
+          : T extends 'typography'
+            ? TypographyValue
+            : T extends 'strokeStyle'
+              ? string | DashedStrokeStyleValue
+              : T extends 'fontFamily'
+                ? string | string[]
+                : T extends 'fontWeight'
+                  ? number | string
+                  : T extends 'number'
+                    ? number
+                    : T extends 'cubicBezier'
+                      ? number[]
+                      : T extends 'dimension' | 'duration'
+                        ? string | number | DimensionValue
+                        : unknown;
+
+/**
+ * A fully-realised token: concrete `$value` (aliases already resolved, no
+ * graph lookup), typed per `$type` via `TokenValue<T>`, plus DTCG metadata a
+ * presenter may show. The presenter tier consumes this; resolution is the
+ * caller's job. Typing `$value` per `$type` lets a presenter holding a
+ * concrete `RealisedToken<T>` read the envelope without re-casting, and makes
+ * a wrong-shape literal a compile error.
+ *
+ * Distributive over `T`, so the default `RealisedToken` (T = `TokenType`) is a
+ * discriminated union that couples each `$type` to its own `$value` rather than
+ * pairing an arbitrary `$type` with an arbitrary envelope.
+ */
+export type RealisedToken<T extends TokenType = TokenType> = T extends TokenType
+  ? {
+      $type: T;
+      $value: TokenValue<T>;
+      $description?: string;
+      $deprecated?: string | boolean;
+    }
+  : never;

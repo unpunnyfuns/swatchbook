@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import './MotionSample.css';
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
+import type { TransitionValue } from '#/internal/composite-types.ts';
 import { usePrefersReducedMotion } from '#/internal/prefers-reduced-motion.ts';
 import type { PresenterProps } from '#/presenters/types.ts';
 
@@ -96,10 +97,7 @@ export function resolveMotionSpec(
   if (!token) return null;
   const type = token.$type;
   if (type === 'transition') {
-    const v = (token.$value ?? {}) as {
-      duration?: unknown;
-      timingFunction?: unknown;
-    };
+    const v = (token.$value ?? {}) as TransitionValue;
     return {
       durationMs: asDuration(v.duration, themeTokens, DEFAULT_DURATION_MS),
       easing: asEasing(v.timingFunction, themeTokens, DEFAULT_EASING),
