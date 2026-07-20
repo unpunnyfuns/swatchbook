@@ -1,0 +1,104 @@
+---
+title: Creating custom presenters
+---
+
+The presenter registry maps each DTCG `$type` to the component that draws it. Register your own component for a type and every built-in block that displays that type renders it instead; the blocks themselves are untouched.
+
+## The contract
+
+A presenter is a plain function component receiving `PresenterProps<T>`. It renders the fully-realised token it is handed; it never looks anything up.
+
+The built-ins follow a two-source rule for the visual:
+
+- `cssVar` present: paint from it. In-project the caller passes the token's live custom property, so the visual tracks the active axis tuple.
+- `cssVar` absent: derive a CSS value from `token.$value`. This is the standalone path: tests, hand-fed embeds, snapshots without a CSS build.
+
+Honor both and your presenter works everywhere the built-ins do.
+
+Two more props matter. `colorFormat` is the active color format; respect it for any value text you render (`formatColor` from the same package matches the built-ins). `options` carries block-supplied display hints; ignore keys you don't understand. The [Presenter registry](/reference/blocks/presenters) reference has the full contract and the table of built-ins.
+
+## Build one
+
+A `color` presenter that paints the token over a light and a dark surface side by side, with the formatted value as text:
+
+```tsx
+import type { ReactElement } from 'react';
+import type { PresenterProps } from '@unpunnyfuns/swatchbook-blocks';
+import { formatColor } from '@unpunnyfuns/swatchbook-blocks';
+
+const chip = { width: 48, height: 32, borderRadius: 4 };
+
+export function DualSurfaceSwatch({
+  path,
+  token,
+  cssVar,
+  colorFormat,
+}: PresenterProps<'color'>): ReactElement {
+  const paint = cssVar ?? formatColor(token.$value, 'hex').value;
+  const { value } = formatColor(token.$value, colorFormat);
+  return (
+    <div style={{ display: 'inline-flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ display: 'flex' }}>
+        <div style={{ padding: 8, background: '#ffffff' }}>
+          <div style={{ ...chip, background: paint }} />
+        </div>
+        <div style={{ padding: 8, background: '#16161d' }}>
+          <div style={{ ...chip, background: paint }} />
+        </div>
+      </div>
+      <span style={{ fontFamily: 'monospace', fontSize: 12 }}>
+        {path.split('.').at(-1)}: {value}
+      </span>
+    </div>
+  );
+}
+```
+
+`paint` is the two-source rule: the live custom property when the caller supplies one, otherwise a value computed from `token.$value`. The fallback pins `hex` rather than passing `colorFormat` through, because the paint must be a valid CSS color and the `raw` format produces a JSON debug string; the built-in `ColorSwatch` guards the same way. The value text uses the active `colorFormat` unguarded, `raw` included.
+
+## Register it standalone
+
+Outside Storybook, the provider takes the overrides directly:
+
+```tsx
+import type { ReactElement } from 'react';
+import { ColorPalette, SwatchbookProvider } from '@unpunnyfuns/swatchbook-blocks';
+import wire from './tokens-snapshot.json';
+import { DualSurfaceSwatch } from './DualSurfaceSwatch';
+
+export function TokenDocs(): ReactElement {
+  return (
+    <SwatchbookProvider snapshot={wire} presenters={{ color: DualSurfaceSwatch }}>
+      <ColorPalette filter="color.**" />
+    </SwatchbookProvider>
+  );
+}
+```
+
+The merge is partial and per-`$type`: `color` now renders `DualSurfaceSwatch`, every other type keeps its built-in.
+
+Every per-type block reads its visual through `usePresenter`, so the override reaches `ColorPalette` and the rest of the [per-type blocks](/reference/blocks/overview#per-type) with no opt-in. `ColorTable`, `TokenNavigator`'s inline leaf preview, and `TokenDetail`'s composite preview draw their own visuals and do not consult the registry.
+
+## Register it inside Storybook
+
+The addon mounts `SwatchbookProvider` itself, so there is no `presenters` prop to reach. Wrap the content whose presenters you want to swap in the raw context, inside the story or MDX body:
+
+```tsx
+import { ColorPalette, mergePresenters, PresenterContext } from '@unpunnyfuns/swatchbook-blocks';
+import { DualSurfaceSwatch } from './DualSurfaceSwatch';
+
+<PresenterContext.Provider value={mergePresenters({ color: DualSurfaceSwatch })}>
+  <ColorPalette filter="color.**" />
+</PresenterContext.Provider>;
+```
+
+This is the same context `SwatchbookProvider` populates, and `usePresenter` reads the nearest provider. The wrapper sits under the addon's, so the override applies to everything inside it and nothing outside. `mergePresenters` fills the unlisted types with the built-ins, exactly as the `presenters` prop does.
+
+## Embedding directly
+
+A custom presenter is just a component. You can also render it directly with hand-fed props, no provider and no registry, the same way the built-ins support it; see [Embedding directly](/reference/blocks/presenters#embedding-directly).
+
+## See also
+
+- [Presenter registry](/reference/blocks/presenters): the full contract, the built-ins table, the options bag.
+- [Rendering blocks standalone](/guides/rendering-blocks-standalone): running blocks outside Storybook, where the `presenters` prop lives.

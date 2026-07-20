@@ -71,6 +71,7 @@ export default defineConfig({
             'guides/creating-story-variants',
             'guides/consuming-the-active-theme',
             'guides/rendering-blocks-standalone',
+            'guides/creating-custom-presenters',
             {
               label: 'Integrations',
               items: [

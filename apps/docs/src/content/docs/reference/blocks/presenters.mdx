@@ -98,6 +98,8 @@ export function TokenDocs(): ReactElement {
 
 `ColorPalette` now renders `MyColorSwatch` for every color row; every other `$type` keeps its built-in. The merge is per-`$type`, not per-block: there's no mechanism to override a presenter for one block while leaving another block's use of that same type on the built-in.
 
+The prop is a convenience over two exported pieces. `mergePresenters(overrides?: PresenterRegistry): PresenterRegistry` returns `DEFAULT_PRESENTERS` with the overrides merged in per `$type`, and `PresenterContext` is the React context (`Context<PresenterRegistry>`, defaulting to `DEFAULT_PRESENTERS`) that every `usePresenter` call reads; `SwatchbookProvider` provides the merged result through it. When no provider is yours to configure, inside Storybook where the addon mounts it, wrap the affected subtree in `PresenterContext.Provider` with a merged registry: [Creating custom presenters](/guides/creating-custom-presenters#register-it-inside-storybook) walks through it.
+
 ## Options bag
 
 `options?: Record<string, unknown>` carries block-level display hints, RJSF `ui:options`-style: a query block passes its own config through; the presenter it renders reads the keys it understands and ignores the rest. Custom presenters can ignore `options` entirely.
