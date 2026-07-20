@@ -46,7 +46,7 @@ export function TokenDocs() {
 }
 ```
 
-`wire` is typically written to a JSON file at build time and imported directly. Pass `snapshot` (required) plus either `defaultAxes` and let the provider own the tuple (flip it with `useSetAxes()`), or `axes` to drive the tuple from the host's own state.
+`wire` is typically written to a JSON file at build time and imported directly. Pass `snapshot` (required) plus either `defaultAxes` and let the provider own the tuple (flip it with `useSetAxes()`), or `axes` to drive the tuple from the host's own state. [Rendering blocks standalone](/guides/rendering-blocks-standalone) walks the whole path, from the snapshot build script to axis switching.
 
 `SwatchbookProvider` is the canonical entry point.
 

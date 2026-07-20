@@ -1,0 +1,123 @@
+---
+title: Rendering blocks standalone
+---
+
+The doc blocks render from a serializable snapshot of the token project, so any React tree can host them: a docs site, a design-system portal, a test suite. No Storybook, no addon. The work splits in two: a Node build step produces the snapshot, and the app applies its CSS and mounts the provider.
+
+## Produce the snapshot
+
+Four calls at build time: load the project, emit its CSS, reduce both to the wire shape, write JSON.
+
+```ts title="scripts/tokens-snapshot.mts"
+import { writeFile } from 'node:fs/promises';
+import { loadProject, emitAxisProjectedCss } from '@unpunnyfuns/swatchbook-core';
+import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
+import config from '../swatchbook.config.ts';
+
+const project = await loadProject(config, process.cwd());
+const css = emitAxisProjectedCss(project);
+const wire = snapshotForWire(project, css);
+await writeFile('src/tokens-snapshot.json', JSON.stringify(wire));
+```
+
+`snapshotForWire` strips the parts of `Project` that don't survive `JSON.stringify` and keeps what the blocks read: axes, token graph, listing, diagnostics, and the emitted CSS string. The [core reference](/reference/core#rendering-blocks-standalone) covers the shape.
+
+Wire it in as a pre-step of the app build. Node 24 executes TypeScript directly, so the script runs as-is:
+
+```json title="package.json"
+{
+  "scripts": {
+    "prebuild": "node scripts/tokens-snapshot.mts",
+    "build": "vite build"
+  }
+}
+```
+
+## Mount it
+
+Two steps at runtime, and both matter. First, apply the snapshot's CSS: `SwatchbookProvider` does not mount it. `wire.css` carries the per-tuple custom-property blocks every block visual reads through `var()`; skip this step and those properties are never defined. Core's `ensureStyleElement` is an idempotent injector built for exactly this; call it once at module level.
+
+Second, wrap the blocks in the provider:
+
+```tsx title="src/TokenDocs.tsx"
+import { ColorPalette, SwatchbookProvider, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
+import {
+  ensureStyleElement,
+  SWATCHBOOK_STYLE_ELEMENT_ID,
+} from '@unpunnyfuns/swatchbook-core/style-element';
+import wire from './tokens-snapshot.json';
+
+ensureStyleElement(SWATCHBOOK_STYLE_ELEMENT_ID, wire.css);
+
+export function TokenDocs() {
+  return (
+    <SwatchbookProvider snapshot={wire} defaultAxes={{ mode: 'Light' }}>
+      <ColorPalette filter="color.**" />
+      <TokenTable filter="space.**" />
+    </SwatchbookProvider>
+  );
+}
+```
+
+The provider resolves every token at the active tuple, scopes the axis data attributes to its own wrapper element rather than `<html>` (two providers with different tuples coexist on one page), and merges any `presenters` overrides over the built-in registry. Props and the host seam are in the [Provider reference](/reference/blocks/provider); [Token CSS](/reference/blocks/provider#token-css) covers the stylesheet responsibility in detail.
+
+## Flip axes
+
+### Uncontrolled: `useSetAxes()`
+
+With `defaultAxes`, the provider owns the tuple and descendants flip it through `useSetAxes()`. A minimal switcher reads the project's axes from `useSwatchbookData()` and renders a `<select>` per axis. The setter replaces the whole tuple rather than merging, so spread the current tuple when changing one axis:
+
+```tsx title="src/AxisSelects.tsx"
+import { useSetAxes, useSwatchbookData } from '@unpunnyfuns/swatchbook-blocks';
+
+export function AxisSelects() {
+  const { axes, activeAxes } = useSwatchbookData();
+  const setAxes = useSetAxes();
+  return (
+    <>
+      {axes.map((axis) => (
+        <label key={axis.name}>
+          {axis.name}
+          <select
+            value={activeAxes[axis.name]}
+            onChange={(event) => setAxes({ ...activeAxes, [axis.name]: event.target.value })}
+          >
+            {axis.contexts.map((context) => (
+              <option key={context}>{context}</option>
+            ))}
+          </select>
+        </label>
+      ))}
+    </>
+  );
+}
+```
+
+Render it anywhere inside the provider; every block under the same provider repaints on change.
+
+### Controlled: host-owned state
+
+When the theme selection already lives in the host (a global store, a router param, an existing theme context), pass `axes` instead and re-render the provider on change:
+
+```tsx
+const [axes, setAxes] = useState(wire.defaultTuple);
+
+<SwatchbookProvider snapshot={wire} axes={axes}>
+  <TokenTable filter="color.**" />
+</SwatchbookProvider>;
+```
+
+Under a controlled provider `useSetAxes()` throws: there is no internal state to flip.
+
+### Ready-made switcher
+
+`@unpunnyfuns/swatchbook-switcher` ships `ThemeSwitcher`, the same menu the Storybook toolbar mounts: preset pills, one row per axis, tuple application left to the caller. This docs site uses it as the header theme control. The [Switcher reference](/reference/switcher) has the wiring.
+
+## What you give up
+
+The snapshot is a build artifact. Edits to token files reach the page on the next snapshot regeneration and reload; there is no HMR push. Diagnostics still ship in the snapshot, so the [Diagnostics](/reference/blocks/utility) block works unchanged. Storybook's authoring surface stays behind: autodocs, stories, the toolbar.
+
+## See also
+
+- [Presenter registry](/reference/blocks/presenters): overriding how a `$type` renders inside the blocks.
+- [Consuming the active theme](/guides/consuming-the-active-theme): CSS-variable and DOM-attribute consumption for your own components.
