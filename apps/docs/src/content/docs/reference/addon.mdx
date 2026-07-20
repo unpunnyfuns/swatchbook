@@ -48,6 +48,18 @@ export default definePreview({
 });
 ```
 
+### Factory options
+
+`swatchbookAddon(options?)` accepts a `presenters` option, a `PresenterRegistry` merged over the built-ins per `$type`. One registration reaches every built-in block in both story renders and provider-less MDX doc blocks:
+
+```ts
+export default definePreview({
+  addons: [swatchbookAddon({ presenters: { color: DualSurfaceSwatch } })],
+});
+```
+
+This is distinct from the preset `AddonOptions` passed in `main.ts` (`config` / `configPath` / `integrations`). See [Creating custom presenters](/guides/creating-custom-presenters) for the presenter contract and [Presenter registry](/reference/blocks/presenters#overriding-a-presenter) for the full override precedence.
+
 ## What it registers
 
 - **Preview decorator**: reads the active axis tuple, writes one `data-<prefix>-<axis>="<context>"` attribute per axis on `<html>` + story wrapper, mounts the per-theme CSS, emits `INIT_EVENT` to the manager. The prefix follows `cssVarPrefix` (default `swatch`).

@@ -98,7 +98,18 @@ export function TokenDocs(): ReactElement {
 
 `ColorPalette` now renders `MyColorSwatch` for every color row; every other `$type` keeps its built-in. The merge is per-`$type`, not per-block: there's no mechanism to override a presenter for one block while leaving another block's use of that same type on the built-in.
 
-The prop is a convenience over two exported pieces. `mergePresenters(overrides?: PresenterRegistry): PresenterRegistry` returns `DEFAULT_PRESENTERS` with the overrides merged in per `$type`, and `PresenterContext` is the React context (`Context<PresenterRegistry>`, defaulting to `DEFAULT_PRESENTERS`) that every `usePresenter` call reads; `SwatchbookProvider` provides the merged result through it. When no provider is yours to configure, inside Storybook where the addon mounts it, wrap the affected subtree in `PresenterContext.Provider` with a merged registry: [Creating custom presenters](/guides/creating-custom-presenters#register-it-inside-storybook) walks through it.
+The prop is a convenience over two exported pieces. `mergePresenters(overrides?: PresenterRegistry): PresenterRegistry` returns `DEFAULT_PRESENTERS` with the overrides merged in per `$type`, and `PresenterContext` is the React context (`Context<PresenterRegistry>`, defaulting to `DEFAULT_PRESENTERS`) that every `usePresenter` call reads; `SwatchbookProvider` provides the merged result through it. Inside Storybook the addon mounts the provider, so the primary route is `swatchbookAddon({ presenters })`, which registers the overrides for every block including provider-less MDX doc blocks; to scope an override to one subtree instead, wrap it in `PresenterContext.Provider` with a merged registry. [Creating custom presenters](/guides/creating-custom-presenters#register-it-inside-storybook) walks through both.
+
+### Precedence
+
+`usePresenter` resolves a `$type` against the first registry that supplies it, in this order:
+
+1. `SwatchbookProvider`'s `presenters` prop.
+2. A `PresenterContext.Provider` wrap.
+3. The ambient registry set by `registerPresenters`, host-registered, e.g. via `swatchbookAddon({ presenters })`.
+4. `DEFAULT_PRESENTERS`.
+
+`registerPresenters(overrides?: PresenterRegistry)` lives on `@unpunnyfuns/swatchbook-blocks/host` and is what `swatchbookAddon({ presenters })` calls at preview-init; it seeds the provider-less fallback that MDX doc blocks read, while an explicit provider or context override still wins for its own subtree.
 
 ## Options bag
 

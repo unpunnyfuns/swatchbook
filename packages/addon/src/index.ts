@@ -2,9 +2,22 @@
 // major-bump checklist in CLAUDE.md; the import set is pinned by
 // storybook-internal-surface.test.ts.
 import { definePreviewAddon } from 'storybook/internal/csf';
+import { registerPresenters } from '@unpunnyfuns/swatchbook-blocks/host';
+import type { PresenterRegistry } from '@unpunnyfuns/swatchbook-blocks';
 import * as previewExports from '#/preview.tsx';
 
 export type { AddonOptions } from '#/options.ts';
+
+/** Options for the {@link swatchbookAddon} CSF preview factory. */
+export interface SwatchbookAddonOptions {
+  /**
+   * Presenter overrides applied to every built-in block, in both story
+   * renders and provider-less MDX doc blocks. Merged over the built-ins per
+   * `$type`. A `SwatchbookProvider presenters` prop or a local
+   * `PresenterContext.Provider` still wins for its own subtree.
+   */
+  presenters?: PresenterRegistry;
+}
 
 /**
  * Typed shapes for the `parameters.swatchbook.*` / `globals.swatchbook*`
@@ -48,7 +61,12 @@ export type { ColorFormat } from '@unpunnyfuns/swatchbook-blocks';
  * CSF Next factory. Consumers call this inside
  * `definePreview({ addons: [swatchbookAddon()] })` so the preview annotations
  * (decorator, globalTypes, initialGlobals) are added to the preview bundle.
+ * Pass `{ presenters }` to register presenter overrides for every built-in
+ * block, in both story renders and provider-less MDX doc blocks.
  */
-export default function swatchbookAddon(): ReturnType<typeof definePreviewAddon> {
+export default function swatchbookAddon(
+  options?: SwatchbookAddonOptions,
+): ReturnType<typeof definePreviewAddon> {
+  if (options?.presenters) registerPresenters(options.presenters);
   return definePreviewAddon(previewExports);
 }

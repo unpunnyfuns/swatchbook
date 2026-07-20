@@ -118,3 +118,11 @@ function getServerSnapshot(): ProjectSource {
 export function useProjectSource(): ProjectSource {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
+
+/**
+ * Host adapter API. Register the ambient presenter registry consulted by
+ * provider-less blocks (MDX doc blocks, autodocs). A host calls this once at
+ * preview-init; an explicit `SwatchbookProvider presenters` prop or a local
+ * `PresenterContext.Provider` still wins for its own subtree.
+ */
+export { registerPresenters } from '#/presenters/registry.ts';

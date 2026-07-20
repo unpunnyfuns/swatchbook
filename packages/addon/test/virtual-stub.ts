@@ -23,6 +23,7 @@ export const diagnostics = [] as const;
 export const css = '';
 export const cssVarPrefix = 'sb';
 export const defaultColorFormat = 'hex';
+export const indicators: Record<string, boolean> = {};
 export const listing = {};
 export const defaultTuple: Record<string, string> = { mode: 'Light' };
 export const tokenGraph: TokenGraph = {

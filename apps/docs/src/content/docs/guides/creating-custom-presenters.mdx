@@ -81,7 +81,21 @@ Every per-type block reads its visual through `usePresenter`, so the override re
 
 ## Register it inside Storybook
 
-The addon mounts `SwatchbookProvider` itself, so there is no `presenters` prop to reach. Wrap the content whose presenters you want to swap in the raw context, inside the story or MDX body:
+Pass the overrides to `swatchbookAddon({ presenters })` in the preview config. One registration covers both story renders and provider-less MDX doc blocks: the addon forwards the presenters into the ambient registry that every built-in block consults.
+
+```ts
+import { definePreview } from '@storybook/react-vite';
+import swatchbookAddon from '@unpunnyfuns/swatchbook-addon';
+import { DualSurfaceSwatch } from './DualSurfaceSwatch';
+
+export default definePreview({ addons: [swatchbookAddon({ presenters: { color: DualSurfaceSwatch } })] });
+```
+
+The merge is partial and per-`$type`, matching the `presenters` prop: `color` renders `DualSurfaceSwatch`, every other type keeps its built-in.
+
+### Override within one subtree
+
+To swap presenters for one region of a story or MDX body rather than the whole preview, wrap that region in the raw context:
 
 ```tsx
 import { ColorPalette, mergePresenters, PresenterContext } from '@unpunnyfuns/swatchbook-blocks';
@@ -92,7 +106,7 @@ import { DualSurfaceSwatch } from './DualSurfaceSwatch';
 </PresenterContext.Provider>;
 ```
 
-This is the same context `SwatchbookProvider` populates, and `usePresenter` reads the nearest provider. The wrapper sits under the addon's, so the override applies to everything inside it and nothing outside. `mergePresenters` fills the unlisted types with the built-ins, exactly as the `presenters` prop does.
+This is the same context `SwatchbookProvider` populates, and `usePresenter` reads the nearest provider. The wrapper sits under the addon's, so the override applies to everything inside it and nothing outside, and wins over an ambient registration from the factory. `mergePresenters` fills the unlisted types with the built-ins, exactly as the `presenters` prop does.
 
 ## Embedding directly
 
