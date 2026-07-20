@@ -33,9 +33,10 @@ export function formatSubColor(raw: unknown, format: ColorFormat): string {
 
 /**
  * Single-line display string for any DTCG token `$value`. Prefers
- * plugin-css's `previewValue` from the Token Listing; for color
- * tokens only when the toolbar format is hex (other formats route
- * through local colorjs.io).
+ * plugin-css's `previewValue` from the Token Listing for non-color tokens
+ * (and for color when the toolbar format is hex); other color formats route
+ * through local colorjs.io. A raw primitive `$value` is the fallback only
+ * when no `previewValue` is present.
  */
 export function formatTokenValue(
   value: unknown,
@@ -44,15 +45,16 @@ export function formatTokenValue(
   listing?: SlimListedToken,
 ): string {
   if (value == null) return '';
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-    return String(value);
-  }
 
   const preview = listing?.previewValue;
   if (preview !== undefined) {
     const previewStr = typeof preview === 'string' ? cleanFloatNoise(preview) : String(preview);
     if ($type !== 'color') return previewStr;
     if (colorFormat === 'hex') return previewStr;
+  }
+
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
   }
 
   switch ($type) {
