@@ -39,7 +39,32 @@ export function mergePresenters(overrides?: PresenterRegistry): PresenterRegistr
 /** The active merged registry for the subtree. */
 export const PresenterContext = createContext<PresenterRegistry>(DEFAULT_PRESENTERS);
 
+let ambientPresenters: PresenterRegistry = DEFAULT_PRESENTERS;
+
+/**
+ * Set the ambient presenter registry consulted by blocks that render with
+ * no `SwatchbookProvider` or `PresenterContext.Provider` above them (MDX
+ * doc blocks, autodocs). A host registers this once at preview-init; it is
+ * NOT reactive, so register before first render. Passing no argument (or
+ * `undefined`) resets to the built-ins. An explicit provider/context
+ * override still wins for its subtree; this only fills the provider-less
+ * gap.
+ */
+export function registerPresenters(overrides?: PresenterRegistry): void {
+  ambientPresenters = mergePresenters(overrides);
+}
+
+/** The ambient registry for the provider-less fallback. */
+export function getAmbientPresenters(): PresenterRegistry {
+  return ambientPresenters;
+}
+
 /** The presenter for `type`, or `undefined` if none is registered. */
 export function usePresenter(type: TokenType): PresenterComponent | undefined {
-  return useContext(PresenterContext)[type];
+  const ctx = useContext(PresenterContext);
+  // An explicit provider/context override replaces the default reference, so
+  // identity distinguishes "no override present" (fall to ambient) from
+  // "override present" (honor it).
+  const registry = ctx === DEFAULT_PRESENTERS ? ambientPresenters : ctx;
+  return registry[type];
 }
