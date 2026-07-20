@@ -70,6 +70,7 @@ export default defineConfig({
             'guides/authoring-doc-stories',
             'guides/creating-story-variants',
             'guides/consuming-the-active-theme',
+            'guides/creating-custom-presenters',
             {
               label: 'Integrations',
               items: [
