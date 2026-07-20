@@ -1,6 +1,10 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import type { SnapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
+import {
+  ensureStyleElement,
+  SWATCHBOOK_STYLE_ELEMENT_ID,
+} from '@unpunnyfuns/swatchbook-core/style-element';
 import { tupleToName } from '@unpunnyfuns/swatchbook-core/themes';
 import { SwatchbookContext, useOptionalSwatchbookData } from '#/contexts.ts';
 import type { ProjectSnapshot } from '#/contexts.ts';
@@ -24,6 +28,15 @@ export interface SwatchbookProviderProps {
   defaultAxes?: Record<string, string> | undefined;
   /** Overrides merged over {@link DEFAULT_PRESENTERS} for this subtree. */
   presenters?: PresenterRegistry | undefined;
+  /**
+   * Mount the snapshot's emitted CSS into `document.head` through the shared
+   * managed style element (default `true`). Pass `false` when the host places
+   * the stylesheet itself: SSR frameworks, shadow roots, the Storybook addon
+   * (which injects its own combined stylesheet). The element is shared by ID,
+   * so a page hosting providers with different snapshots should opt out and
+   * manage stylesheets itself; same-snapshot providers are idempotent.
+   */
+  mountCss?: boolean | undefined;
   children: ReactNode;
 }
 
@@ -63,11 +76,19 @@ export function SwatchbookProvider({
   axes,
   defaultAxes,
   presenters,
+  mountCss = true,
   children,
 }: SwatchbookProviderProps): ReactElement {
   const [internalAxes, setInternalAxes] = useState<Record<string, string>>(
     () => defaultAxes ?? snapshot.defaultTuple,
   );
+  // Effect, not render-time, so SSR renders never touch the DOM. The
+  // element is deliberately left in place on unmount: it is shared and
+  // idempotent, matching the host-fed fallback path's semantics.
+  useEffect(() => {
+    if (!mountCss) return;
+    ensureStyleElement(SWATCHBOOK_STYLE_ELEMENT_ID, snapshot.css);
+  }, [mountCss, snapshot.css]);
   const controlled = axes !== undefined;
   const activeAxes = controlled ? axes : internalAxes;
   const value = useMemo(() => assemble(snapshot, activeAxes), [snapshot, activeAxes]);

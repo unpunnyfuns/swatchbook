@@ -6,13 +6,7 @@ title: Provider
 
 ```tsx
 import { SwatchbookProvider, ColorPalette } from '@unpunnyfuns/swatchbook-blocks';
-import {
-  ensureStyleElement,
-  SWATCHBOOK_STYLE_ELEMENT_ID,
-} from '@unpunnyfuns/swatchbook-core/style-element';
 import wire from './tokens-snapshot.json';
-
-ensureStyleElement(SWATCHBOOK_STYLE_ELEMENT_ID, wire.css);
 
 export function TokenDocs() {
   return (
@@ -23,7 +17,7 @@ export function TokenDocs() {
 }
 ```
 
-`wire` is a `SnapshotForWire`, produced by core's `snapshotForWire(project, css)` and typically written to a JSON file at build time; [Rendering blocks standalone](/reference/core#rendering-blocks-standalone) has the full build-script walkthrough. The `ensureStyleElement` line mounts the snapshot's emitted CSS; see [Token CSS](#token-css).
+`wire` is a `SnapshotForWire`, produced by core's `snapshotForWire(project, css)` and typically written to a JSON file at build time; [Rendering blocks standalone](/reference/core#rendering-blocks-standalone) has the full build-script walkthrough.
 
 ## Props
 
@@ -37,6 +31,7 @@ interface SwatchbookProviderProps {
   axes?: Record<string, string>;
   defaultAxes?: Record<string, string>;
   presenters?: PresenterRegistry;
+  mountCss?: boolean;
   children: ReactNode;
 }
 ```
@@ -47,6 +42,7 @@ interface SwatchbookProviderProps {
 | `axes`        | no       | Controlled active tuple. The host owns the selection and re-renders the provider with a new value to flip it. Mutually exclusive with `defaultAxes`; when both are passed, `axes` wins.                                           |
 | `defaultAxes` | no       | Uncontrolled initial tuple. The provider owns the selection from then on; descendants flip it with `useSetAxes()`.                                                                                                                |
 | `presenters`  | no       | Per-`$type` overrides merged over the built-in registry; a type left out keeps the built-in. See [Presenter registry](/reference/blocks/presenters).                                                                              |
+| `mountCss`    | no       | Whether the provider mounts the snapshot's emitted CSS into `document.head` (default `true`). Pass `false` when the host places the stylesheet itself. See [Token CSS](#token-css).                                               |
 
 ## Axis control
 
@@ -69,11 +65,9 @@ The provider wraps its children in a `<div>` carrying one `data-<prefix>-<axis>=
 
 ### Token CSS
 
-The wire snapshot's `css` field carries the emitted stylesheet, but the provider does not mount it. Who does depends on the host:
+The wire snapshot's `css` field carries the emitted stylesheet. The provider mounts it into `document.head` through a managed style element, deduplicated and updated in place, so descendant blocks' `var()` reads resolve without further wiring. `mountCss={false}` opts out for hosts that place the stylesheet themselves: SSR frameworks, shadow roots, or the Storybook addon, which injects its own combined stylesheet into the preview document. Blocks rendered with no provider at all (the [host-fed path](#host-integration)) self-mount the ambient source's CSS through the same managed style element.
 
-- Inside Storybook, the addon injects the stylesheet into the preview document itself.
-- Standalone, apply `wire.css` once yourself. Core's `ensureStyleElement` (from the `/style-element` subpath, as in the example above) is the shared idempotent injector; a plain `<style>` element works too.
-- Blocks rendered with no provider at all (the [host-fed path](#host-integration)) self-mount the ambient source's CSS through the same managed style element, deduplicated and updated in place.
+The managed element is a single shared ID: two providers with different snapshots on one page last-write-wins each other's CSS (same-snapshot providers are fine; the mount is idempotent). A page hosting genuinely different projects should pass `mountCss={false}` and manage stylesheets itself.
 
 Block chrome (the `--swatchbook-*` surface variables and per-block styles) ships in the package's own stylesheet, imported by the bundle entry; it needs no separate wiring.
 
