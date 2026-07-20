@@ -1,0 +1,102 @@
+---
+title: Provider
+---
+
+`SwatchbookProvider` takes core's serializable wire snapshot plus an axis tuple, assembles the resolved project data every block reads, and renders a wrapper element carrying the active tuple's data attributes. It is the entry point for rendering blocks anywhere: inside Storybook the addon's preview decorator mounts it around every story and docs render; outside Storybook you mount it yourself.
+
+```tsx
+import { SwatchbookProvider, ColorPalette } from '@unpunnyfuns/swatchbook-blocks';
+import {
+  ensureStyleElement,
+  SWATCHBOOK_STYLE_ELEMENT_ID,
+} from '@unpunnyfuns/swatchbook-core/style-element';
+import wire from './tokens-snapshot.json';
+
+ensureStyleElement(SWATCHBOOK_STYLE_ELEMENT_ID, wire.css);
+
+export function TokenDocs() {
+  return (
+    <SwatchbookProvider snapshot={wire} defaultAxes={{ mode: 'Light' }}>
+      <ColorPalette filter="color.**" />
+    </SwatchbookProvider>
+  );
+}
+```
+
+`wire` is a `SnapshotForWire`, produced by core's `snapshotForWire(project, css)` and typically written to a JSON file at build time; [Rendering blocks standalone](/reference/core#rendering-blocks-standalone) has the full build-script walkthrough. The `ensureStyleElement` line mounts the snapshot's emitted CSS; see [Token CSS](#token-css).
+
+## Props
+
+```ts
+import type { ReactNode } from 'react';
+import type { SnapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire';
+import type { PresenterRegistry } from '@unpunnyfuns/swatchbook-blocks';
+
+interface SwatchbookProviderProps {
+  snapshot: SnapshotForWire;
+  axes?: Record<string, string>;
+  defaultAxes?: Record<string, string>;
+  presenters?: PresenterRegistry;
+  children: ReactNode;
+}
+```
+
+| Prop          | Required | Purpose                                                                                                                                                                                                                           |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `snapshot`    | yes      | The wire snapshot from core's `snapshotForWire(project, css)` ([Rendering blocks standalone](/reference/core#rendering-blocks-standalone)). Carries the axes, token graph, listing, diagnostics, and emitted CSS the blocks read. |
+| `axes`        | no       | Controlled active tuple. The host owns the selection and re-renders the provider with a new value to flip it. Mutually exclusive with `defaultAxes`; when both are passed, `axes` wins.                                           |
+| `defaultAxes` | no       | Uncontrolled initial tuple. The provider owns the selection from then on; descendants flip it with `useSetAxes()`.                                                                                                                |
+| `presenters`  | no       | Per-`$type` overrides merged over the built-in registry; a type left out keeps the built-in. See [Presenter registry](/reference/blocks/presenters).                                                                              |
+
+## Axis control
+
+Which prop you pass picks the ownership model:
+
+- **Controlled** (`axes`): the host owns the tuple. The provider renders whatever it is given; flipping means re-rendering the provider with a new `axes` value.
+- **Uncontrolled** (`defaultAxes`, or neither axis prop): the provider owns the tuple, starting from `defaultAxes` and falling back to the snapshot's default tuple when that is omitted too. Descendants flip it with `useSetAxes()`.
+
+### `useSetAxes()`
+
+```ts
+function useSetAxes(): (tuple: Record<string, string>) => void;
+```
+
+Returns the tuple setter of the nearest uncontrolled provider. The setter replaces the whole tuple, so include every axis (`{ axisName: contextName }`). Throws when the nearest provider is controlled (the host owns `axes`, so there is no internal state to flip) and when no provider is mounted at all.
+
+## What the provider renders
+
+The provider wraps its children in a `<div>` carrying one `data-<prefix>-<axis>="<context>"` attribute per axis in the active tuple, where `<prefix>` is the snapshot's `cssVarPrefix` (bare `data-<axis>` when the prefix is empty). The emitted CSS's per-context selectors match against these attributes, so descendant blocks' `var()` reads resolve at the provider's own tuple rather than the document root's. The attributes land on the wrapper, not `<html>`: two providers with different tuples coexist on one page, each scoping its own subtree.
+
+### Token CSS
+
+The wire snapshot's `css` field carries the emitted stylesheet, but the provider does not mount it. Who does depends on the host:
+
+- Inside Storybook, the addon injects the stylesheet into the preview document itself.
+- Standalone, apply `wire.css` once yourself. Core's `ensureStyleElement` (from the `/style-element` subpath, as in the example above) is the shared idempotent injector; a plain `<style>` element works too.
+- Blocks rendered with no provider at all (the [host-fed path](#host-integration)) self-mount the ambient source's CSS through the same managed style element, deduplicated and updated in place.
+
+Block chrome (the `--swatchbook-*` surface variables and per-block styles) ships in the package's own stylesheet, imported by the bundle entry; it needs no separate wiring.
+
+## `SwatchbookContext`
+
+Tests and advanced consumers can bypass the wire-snapshot assembly by providing a pre-assembled `ProjectSnapshot` through the raw context:
+
+```tsx
+import { SwatchbookContext } from '@unpunnyfuns/swatchbook-blocks';
+
+<SwatchbookContext.Provider value={snapshot}>{children}</SwatchbookContext.Provider>;
+```
+
+`ProjectSnapshot` is the shape [`useSwatchbookData()`](/reference/blocks/hooks#useswatchbookdata) returns; both the context and the type are exported. `SwatchbookProvider` remains the supported surface: the raw context skips the wrapper's data attributes and the axis-state handling.
+
+## Host integration
+
+`@unpunnyfuns/swatchbook-blocks/host` is the seam for a host that feeds provider-less blocks (MDX embeds with no wrapper):
+
+```ts
+import { registerProjectSource, useProjectSource } from '@unpunnyfuns/swatchbook-blocks/host';
+```
+
+`registerProjectSource(patch)` merges a partial `ProjectSource` into a module-level ambient store; omitted fields keep their current values, so a host can push incremental patches (an axis flip, an HMR token refresh) without re-sending the whole snapshot. `useProjectSource()` subscribes to that store. Blocks fall back to it when no provider is mounted above them; until a host registers a source, they render from empty defaults.
+
+The Storybook addon is the shipped caller: it decodes the preview channel's globals and token-refresh events and pushes the decoded snapshots into this source.

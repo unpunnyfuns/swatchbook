@@ -24,11 +24,55 @@ Returns the current composed theme ID as a string (e.g. `"Dark · Brand A"`).
 
 Returns the active tuple as `Readonly<Record<string, string>>`.
 
+## `useSetAxes()`
+
+Flips the tuple of the nearest uncontrolled `SwatchbookProvider`. Provider-coupled, so it is documented with the provider: see [`useSetAxes`](/reference/blocks/provider#usesetaxes).
+
 ## `useColorFormat()`
 
 Returns the active color format (`'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw'`) from the context/snapshot/source chain: a `ColorFormatContext` value (a host wrapping a subtree in its own provider), then `defaultColorFormat` from whichever project data is actually feeding the render (the `SwatchbookProvider` snapshot a story decorator or a standalone host mounts, or, for blocks embedded directly in MDX with no `<Story/>` and no provider, the ambient source a host pushed into via `@unpunnyfuns/swatchbook-blocks/host`), then `'hex'`. No Storybook globals are involved; blocks carry no Storybook vocabulary of their own.
 
-The full precedence order for a canned block also includes its own `colorFormat` prop, which sits above everything this hook resolves: `colorFormat` prop → `ColorFormatContext` → active snapshot/source `defaultColorFormat` → `'hex'`. A block's own prop always wins for that block; when unset, the block falls through to whatever `useColorFormat()` resolves. Pair with `formatColor(value, format)` (also exported) to render colors the same way the built-in blocks do. `hex` falls back to space-separated `rgb()` for out-of-gamut colors, marked with a ⚠ warning.
+The full precedence order for a canned block also includes its own `colorFormat` prop, which sits above everything this hook resolves: `colorFormat` prop → `ColorFormatContext` → active snapshot/source `defaultColorFormat` → `'hex'`. A block's own prop always wins for that block; when unset, the block falls through to whatever `useColorFormat()` resolves. Pair with [`formatColor`](#color-formatting) to render colors the same way the built-in blocks do.
+
+## Color formatting
+
+The color-rendering blocks (`<ColorPalette>`, `<ColorTable>`, `<TokenDetail>`, sub-color fields in `<ShadowPreview>` / `<BorderPreview>` / `<GradientPalette>`) all route through one helper. The helper plus its types are exported from `@unpunnyfuns/swatchbook-blocks` for custom blocks that need to stringify a color the same way.
+
+```ts
+import {
+  formatColor,
+  COLOR_FORMATS,
+  type ColorFormat,
+  type FormatColorResult,
+  type NormalizedColor,
+} from '@unpunnyfuns/swatchbook-blocks';
+
+type ColorFormat = 'hex' | 'rgb' | 'hsl' | 'oklch' | 'raw';
+
+const COLOR_FORMATS: readonly ColorFormat[];
+
+function formatColor(
+  value: unknown,
+  format: ColorFormat,
+  fallback?: string,
+): FormatColorResult;
+
+interface FormatColorResult {
+  /** Display string, e.g. "rgb(59 132 246)" or "#3b82f6". */
+  value: string;
+  /** True when the requested format can't losslessly represent the color. */
+  outOfGamut: boolean;
+}
+```
+
+- `hex` falls back to space-separated `rgb()` for out-of-gamut colors and marks them `outOfGamut: true`; blocks render a ⚠ glyph beside the value.
+- `oklch` is wide-gamut and never marks `outOfGamut`.
+- `raw` returns a compact JSON of the normalized Terrazzo shape, useful for DTCG authors who want to see exactly what the parser stored.
+- `fallback` defaults to `'—'`; pass a custom string when integrating with surfaces that need a different placeholder.
+
+`COLOR_FORMATS` is the runtime list used to validate stored user choices; reach for it when you need to enumerate the formats (toolbar pills, validation) without duplicating the union.
+
+`NormalizedColor` is the shape `formatColor` accepts: a structural copy of Terrazzo's `ColorValueNormalized` (`colorSpace`, `components` / `channels`, `alpha`, optional `hex`). Use it when typing custom block code that produces or consumes the same payload.
 
 ## Reactivity
 
