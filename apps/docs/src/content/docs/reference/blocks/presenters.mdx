@@ -2,7 +2,7 @@
 title: Presenter registry
 ---
 
-A presenter renders one fully-realised DTCG token: no project, no graph, no listing. Every visual in [Sample blocks](/reference/blocks/samples) is a presenter, and each per-type block in [Overview blocks](/reference/blocks/overview#per-type) renders its visual through one. The registry is what lets a consumer swap one `$type`'s visual, a custom color chip say, and have every built-in block that displays a color pick it up, without touching `ColorPalette` or `TokenNavigator` internals.
+A presenter renders one fully-realised DTCG token: no project, no graph, no listing. Each per-type block in [Overview blocks](/reference/blocks/overview#per-type) renders its visual through one, and every built-in is an exported component you can [embed directly](#embedding-directly). The registry is what lets a consumer swap one `$type`'s visual, a custom color chip say, and have every built-in block that displays a color pick it up, without touching `ColorPalette` or `TokenNavigator` internals.
 
 ## `PresenterProps`
 
@@ -54,6 +54,24 @@ type PresenterRegistry = Partial<Record<TokenType, PresenterComponent>>;
 `transition` also covers `duration` and `cubicBezier`: `MotionSample` dispatches on the realised `$type` at runtime, so `MotionPreview` and `TokenNavigator` feed all three motion kinds through the one registered key.
 
 The eleven per-type blocks in [Overview blocks](/reference/blocks/overview#per-type) (`ColorPalette`, `GradientPalette`, `OpacityScale`, `ShadowPreview`, `BorderPreview`, `DimensionScale`, `MotionPreview`, `StrokeStylePreview`, `TypographyScale`, `FontFamilyPreview`, `FontWeightScale`) read their visual through `usePresenter(type)` rather than importing the component directly, so a provider override reaches them with no block-level opt-in. `ColorTable`, `TokenNavigator`'s inline leaf preview, and `TokenDetail`'s `CompositePreview` render their own visuals directly and don't consult the registry.
+
+## Embedding directly
+
+Every presenter in the table above is exported from `@unpunnyfuns/swatchbook-blocks` and renders on its own: pass the `PresenterProps` shape yourself. A presenter renders the realised token it is handed, it does not look one up by path, so you supply the `token` (and optionally a `cssVar`) from your own resolution. Useful for custom MDX layouts that don't want the full overview chrome, and for placing a single visual next to prose.
+
+```tsx
+<MotionSample path={path} token={token} colorFormat={colorFormat} options={{ speed: 1 }} />
+```
+
+The option keys each built-in reads are listed in [Options bag](#options-bag).
+
+```ts
+import type { MotionSpeed } from '@unpunnyfuns/swatchbook-blocks';
+
+type MotionSpeed = 0.25 | 0.5 | 1 | 2;
+```
+
+`MotionSpeed` is the union of `MotionSample`'s four allowed playback rates, re-exported for hosts that drive the speed externally.
 
 ## Overriding a presenter
 

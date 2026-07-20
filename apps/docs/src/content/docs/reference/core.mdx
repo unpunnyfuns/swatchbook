@@ -98,7 +98,7 @@ import { snapshotForWire } from '@unpunnyfuns/swatchbook-core/snapshot-for-wire'
 
 ## Rendering blocks standalone
 
-`snapshotForWire`'s output is what `@unpunnyfuns/swatchbook-blocks`' `SwatchbookProvider` consumes outside Storybook: `loadProject` builds the `Project`, `snapshotForWire(project, css)` reduces it to the JSON-safe wire shape, and that shape is typically written to a file for a standalone consumer to import.
+`snapshotForWire`'s output is what `@unpunnyfuns/swatchbook-blocks`' `SwatchbookProvider` consumes outside Storybook: `loadProject` builds the `Project`, `snapshotForWire(project, css)` reduces it to the JSON-safe wire shape, and that shape is typically written to a file for a standalone consumer to import. [Rendering blocks standalone](/guides/rendering-blocks-standalone) is the task-shaped walkthrough, from build script to axis switching.
 
 ```ts
 import { loadProject, emitAxisProjectedCss } from '@unpunnyfuns/swatchbook-core';
@@ -121,9 +121,9 @@ import wire from './tokens-snapshot.json';
 </SwatchbookProvider>;
 ```
 
-`axes` (controlled: the host drives the tuple and re-renders the provider on change) and `defaultAxes` (uncontrolled: the provider owns the tuple, flipped through `useSetAxes()`) are mutually exclusive. See [Blocks](/reference/blocks) for the full provider API.
+`axes` (controlled: the host drives the tuple and re-renders the provider on change) and `defaultAxes` (uncontrolled: the provider owns the tuple, flipped through `useSetAxes()`) are mutually exclusive. The provider does not mount the snapshot's CSS; apply `wire.css` once yourself, per [Token CSS](/reference/blocks/provider#token-css). See [Provider](/reference/blocks/provider) for the full provider API.
 
-A Storybook-hosted render doesn't need any of this: the addon's preview decorator assembles the wire snapshot and mounts the provider automatically. The pattern above is for consumers rendering blocks with no addon and no Storybook channel in the page at all. The integration seam for a different host to feed the same blocks is `@unpunnyfuns/swatchbook-blocks/host`'s `registerProjectSource` / `useProjectSource`, which is what the addon itself uses to push Storybook's channel data in.
+A Storybook-hosted render doesn't need any of this: the addon's preview decorator assembles the wire snapshot and mounts the provider automatically. The pattern above is for consumers rendering blocks with no addon and no Storybook channel in the page at all. The integration seam for a different host to feed the same blocks is [`@unpunnyfuns/swatchbook-blocks/host`](/reference/blocks/provider#host-integration)'s `registerProjectSource` / `useProjectSource`, which is what the addon itself uses to push Storybook's channel data in.
 
 ## Graph queries
 

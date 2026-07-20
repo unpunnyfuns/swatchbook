@@ -70,6 +70,7 @@ export default defineConfig({
             'guides/authoring-doc-stories',
             'guides/creating-story-variants',
             'guides/consuming-the-active-theme',
+            'guides/rendering-blocks-standalone',
             'guides/creating-custom-presenters',
             {
               label: 'Integrations',
@@ -99,12 +100,12 @@ export default defineConfig({
               label: 'Blocks',
               items: [
                 'reference/blocks',
+                'reference/blocks/provider',
                 'reference/blocks/overview',
                 'reference/blocks/inspector',
-                'reference/blocks/samples',
                 'reference/blocks/presenters',
-                'reference/blocks/utility',
                 'reference/blocks/hooks',
+                'reference/blocks/utility',
               ],
             },
             'reference/diagnostics',
@@ -135,7 +136,8 @@ export default defineConfig({
   // authoring-doc-stories, concepts/overview and concepts/concepts merged
   // into concepts/index (which also makes '/reference/concepts' above
   // resolve to a real page instead of 404ing), and reference/integrations
-  // cut in favor of the guides/integrations index.
+  // cut in favor of the guides/integrations index. The samples entry
+  // covers the blocks-reference restructure: samples merged into presenters.
   //
   // Destinations carry the `/swatchbook` base by hand: unlike every in-page
   // Starlight link, Astro's static redirect-page generator burns the
@@ -152,5 +154,6 @@ export default defineConfig({
     '/concepts/concepts': '/swatchbook/concepts/',
     '/reference/integrations': '/swatchbook/guides/integrations/',
     '/reference/with-axes': '/swatchbook/guides/creating-story-variants/',
+    '/reference/blocks/samples': '/swatchbook/reference/blocks/presenters/',
   },
 });

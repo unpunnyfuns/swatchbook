@@ -2,21 +2,7 @@
 title: Blocks
 ---
 
-The MDX-embeddable doc blocks for token reference pages live in `@unpunnyfuns/swatchbook-blocks`. Each block reads the active token graph from a `SwatchbookProvider` and re-renders when the toolbar flips an axis.
-
-## Install
-
-```bash
-npm install -D @unpunnyfuns/swatchbook-blocks
-```
-
-Inside Storybook, register `@unpunnyfuns/swatchbook-addon` alongside these blocks; its preview decorator mounts a `SwatchbookProvider` (exported from this package) that the blocks read from. Outside Storybook, wrap your tree in `SwatchbookProvider` and pass a `SnapshotForWire` via the `snapshot` prop directly.
-
-`SwatchbookProvider`, `useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, and the backing contexts (`ThemeContext`, `AxesContext`, `ColorFormatContext`) live in `@unpunnyfuns/swatchbook-blocks`. `@unpunnyfuns/swatchbook-addon` re-exports them verbatim, so either import path works depending on which packages your consumer already pulls in.
-
-## Usage
-
-### Inside Storybook
+The MDX-embeddable doc blocks for token reference pages live in `@unpunnyfuns/swatchbook-blocks`. Each block reads the active token graph from a `SwatchbookProvider` and re-renders when the active axis tuple flips.
 
 ```tsx
 import { ColorPalette, ColorTable, TokenTable, TokenDetail } from '@unpunnyfuns/swatchbook-blocks';
@@ -27,39 +13,26 @@ import { ColorPalette, ColorTable, TokenTable, TokenDetail } from '@unpunnyfuns/
 <TokenDetail path="color.accent.bg" />
 ```
 
-The addon's preview decorator wraps every story and docs render in a `SwatchbookProvider`, so no setup is required on the author's side.
+## Install
 
-### Using blocks outside Storybook
-
-Blocks are pure presentation. Given a `SnapshotForWire` (produced by core's `snapshotForWire(project, css)`), they render in any React tree: unit tests, standalone docs apps, custom tooling.
-
-```tsx
-import { SwatchbookProvider, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
-import wire from './tokens-snapshot.json';
-
-export function TokenDocs() {
-  return (
-    <SwatchbookProvider snapshot={wire} defaultAxes={{ mode: 'Light' }}>
-      <TokenTable filter='color.**' />
-    </SwatchbookProvider>
-  );
-}
+```bash
+npm install -D @unpunnyfuns/swatchbook-blocks
 ```
 
-`wire` is typically written to a JSON file at build time and imported directly. Pass `snapshot` (required) plus either `defaultAxes` and let the provider own the tuple (flip it with `useSetAxes()`), or `axes` to drive the tuple from the host's own state.
+## Two ways to mount
 
-`SwatchbookProvider` is the canonical entry point.
+Inside Storybook, register `@unpunnyfuns/swatchbook-addon`; its preview decorator wraps every story and docs render in a `SwatchbookProvider`, so blocks work with no setup on the author's side. Outside Storybook, mount the provider yourself and pass a wire snapshot; [Provider](/reference/blocks/provider) covers the props, axis control, and the host seam, and [Rendering blocks standalone](/guides/rendering-blocks-standalone) walks the whole path, from the snapshot build script to axis switching.
+
+`SwatchbookProvider`, the hooks, and the backing contexts (`ThemeContext`, `AxesContext`, `ColorFormatContext`) are re-exported verbatim from `@unpunnyfuns/swatchbook-addon`, so either import path works depending on which packages your consumer already pulls in.
 
 ## Groups
 
-Four groups by shape of use, plus a reference for the authoring hooks:
-
+- [**Provider**](/reference/blocks/provider): `SwatchbookProvider` props, axis control, `useSetAxes`, the `/host` seam.
 - [**Overview blocks**](/reference/blocks/overview): survey many tokens at once. `TokenNavigator`, `TokenTable`, `ColorTable`, plus the per-type scales and palettes.
 - [**Inspector blocks**](/reference/blocks/inspector): single-token deep-dive. `TokenDetail` and its subparts.
-- [**Sample blocks**](/reference/blocks/samples): one-token visual atoms you can drop inline.
-- [**Presenter registry**](/reference/blocks/presenters): the `$type`-keyed registry backing every sample and per-type block, and how to override one.
-- [**Utility blocks**](/reference/blocks/utility): `Diagnostics`.
-- [**Hooks**](/reference/blocks/hooks): `useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, for authoring custom blocks against the same provider the built-ins read from.
+- [**Presenters**](/reference/blocks/presenters): the `$type`-keyed registry behind every per-type visual, how to override one, and how to embed a presenter directly.
+- [**Hooks**](/reference/blocks/hooks): `useSwatchbookData`, `useActiveTheme`, `useActiveAxes`, `useColorFormat`, plus color formatting, for authoring custom blocks against the same provider the built-ins read from.
+- [**Diagnostics block**](/reference/blocks/utility): project-load diagnostics as a block.
 
 Most overview blocks take `filter?` (path glob), `sortBy?`, `sortDir?`, and `caption?`; see [Overview blocks](/reference/blocks/overview) for the full prop set.
 
