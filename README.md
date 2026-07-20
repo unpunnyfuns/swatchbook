@@ -8,6 +8,7 @@ If your stories already style with swatchbook's token CSS variables, they pick u
 
 **Documentation** · [unpunnyfuns.github.io/swatchbook](https://unpunnyfuns.github.io/swatchbook/)
 **Live Storybook** · [/storybook](https://unpunnyfuns.github.io/swatchbook/storybook/)
+**Starter project** · [swatchbook-example](https://github.com/unpunnyfuns/swatchbook-example)
 
 ## Install
 
