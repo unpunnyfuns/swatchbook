@@ -148,10 +148,16 @@ export type TokenValue<T extends TokenType> = T extends 'color'
  * caller's job. Typing `$value` per `$type` lets a presenter holding a
  * concrete `RealisedToken<T>` read the envelope without re-casting, and makes
  * a wrong-shape literal a compile error.
+ *
+ * Distributive over `T`, so the default `RealisedToken` (T = `TokenType`) is a
+ * discriminated union that couples each `$type` to its own `$value` rather than
+ * pairing an arbitrary `$type` with an arbitrary envelope.
  */
-export interface RealisedToken<T extends TokenType = TokenType> {
-  $type: T;
-  $value: TokenValue<T>;
-  $description?: string;
-  $deprecated?: string | boolean;
-}
+export type RealisedToken<T extends TokenType = TokenType> = T extends TokenType
+  ? {
+      $type: T;
+      $value: TokenValue<T>;
+      $description?: string;
+      $deprecated?: string | boolean;
+    }
+  : never;
