@@ -1,6 +1,12 @@
 import type { ReactElement } from 'react';
 import preview from '#storybook/preview.tsx';
 import { TailwindCard } from '../components/TailwindCard.tsx';
+import type { TailwindCardProps } from '../components/TailwindCard.tsx';
+
+// Widen to the status union: a narrow literal makes the CSF factory infer a
+// meta-args type its `.story()` overload can't see as covering the union
+// arg, so `meta.story()` and the variant stories' partial args stop resolving.
+const status: TailwindCardProps['status'] = 'default';
 
 const meta = preview.meta({
   title: 'Integrations/Tailwind',
@@ -12,7 +18,7 @@ const meta = preview.meta({
   args: {
     title: 'Release notes',
     body: 'Tailwind utilities render through swatchbook CSS vars, so the theme toolbar flips every utility at once.',
-    status: 'default',
+    status,
   },
   decorators: [
     // Give the component a visible canvas — docs-mode story containers
@@ -34,7 +40,7 @@ const meta = preview.meta({
   },
 });
 
-export const Default = meta.story({});
+export const Default = meta.story();
 export const Success = meta.story({ args: { status: 'success' } });
 export const Warning = meta.story({ args: { status: 'warning' } });
 export const Danger = meta.story({ args: { status: 'danger' } });

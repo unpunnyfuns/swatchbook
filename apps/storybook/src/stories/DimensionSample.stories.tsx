@@ -1,4 +1,5 @@
 import { DimensionSample } from '@unpunnyfuns/swatchbook-blocks';
+import type { ColorFormat } from '@unpunnyfuns/swatchbook-core/color-formats';
 import type { RealisedToken } from '@unpunnyfuns/swatchbook-core/token-value-types';
 import preview from '#storybook/preview.tsx';
 
@@ -15,10 +16,15 @@ const radiusLg: RealisedToken<'dimension'> = {
   $value: { value: 16, unit: 'px' },
 };
 
+// Widen to `ColorFormat`: a narrow literal makes the CSF factory infer a
+// meta-args type its `.story()` overload can't see as covering the union
+// arg, so the stories' partial args stop resolving.
+const colorFormat: ColorFormat = 'hex';
+
 const meta = preview.meta({
   title: 'Presenters/Sample/DimensionSample',
   component: DimensionSample,
-  args: { colorFormat: 'hex' },
+  args: { colorFormat },
 });
 
 export default meta;
