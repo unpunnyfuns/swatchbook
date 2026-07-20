@@ -1,5 +1,30 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 2.0.0
+
+### Major Changes
+
+- 6842ddd151c96d8ded55ab987a20f72b9d471056: Blocks render standalone via SwatchbookProvider snapshot prop; host-adapter exports removed
+- f6dd3b0b76048f39e78da226a2d8c263203ca861: Add an overridable DTCG presenter registry; Sample blocks now take a realised token instead of a path
+
+### Minor Changes
+
+- 1b472f9d2d8c0e37a45d7375419b3b1308088097: swatchbookAddon({ presenters }) registers presenter overrides for stories and MDX blocks alike
+
+### Patch Changes
+
+- 1f5712768454752d7cde2f5af7437ed33bd55cc2: SwatchbookProvider mounts the snapshot's CSS by default; opt out with mountCss={false}
+- 88db385d2f22eb715beef5ad19a6eb5cfe08730a: Generated `.swatchbook/tokens.d.ts` is now a module augmentation, so it no longer shadows the addon's `/hooks` exports (`useToken` and friends) in a consumer's typecheck
+- Updated dependencies [1b472f9]
+- Updated dependencies [6842ddd]
+- Updated dependencies [e95c74b]
+- Updated dependencies [f6dd3b0]
+- Updated dependencies [1f57127]
+- Updated dependencies [876ee1d]
+  - @unpunnyfuns/swatchbook-blocks@2.0.0
+  - @unpunnyfuns/swatchbook-core@2.0.0
+  - @unpunnyfuns/swatchbook-switcher@2.0.0
+
 ## 1.2.0
 
 ### Minor Changes

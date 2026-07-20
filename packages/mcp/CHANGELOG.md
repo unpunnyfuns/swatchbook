@@ -1,5 +1,20 @@
 # @unpunnyfuns/swatchbook-mcp
 
+## 2.0.0
+
+### Major Changes
+
+- 6842ddd151c96d8ded55ab987a20f72b9d471056: Blocks render standalone via SwatchbookProvider snapshot prop; host-adapter exports removed
+- f6dd3b0b76048f39e78da226a2d8c263203ca861: Add an overridable DTCG presenter registry; Sample blocks now take a realised token instead of a path
+
+### Patch Changes
+
+- Updated dependencies [6842ddd]
+- Updated dependencies [e95c74b]
+- Updated dependencies [f6dd3b0]
+- Updated dependencies [876ee1d]
+  - @unpunnyfuns/swatchbook-core@2.0.0
+
 ## 1.2.0
 
 ### Patch Changes

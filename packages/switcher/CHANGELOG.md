@@ -1,5 +1,12 @@
 # @unpunnyfuns/swatchbook-switcher
 
+## 2.0.0
+
+### Major Changes
+
+- 6842ddd151c96d8ded55ab987a20f72b9d471056: Blocks render standalone via SwatchbookProvider snapshot prop; host-adapter exports removed
+- f6dd3b0b76048f39e78da226a2d8c263203ca861: Add an overridable DTCG presenter registry; Sample blocks now take a realised token instead of a path
+
 ## 1.2.0
 
 ### Minor Changes

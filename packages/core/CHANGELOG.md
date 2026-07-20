@@ -1,5 +1,20 @@
 # @unpunnyfuns/swatchbook-core
 
+## 2.0.0
+
+### Major Changes
+
+- 6842ddd151c96d8ded55ab987a20f72b9d471056: Blocks render standalone via SwatchbookProvider snapshot prop; host-adapter exports removed
+- f6dd3b0b76048f39e78da226a2d8c263203ca861: Add an overridable DTCG presenter registry; Sample blocks now take a realised token instead of a path
+
+### Minor Changes
+
+- 876ee1df16bbe9de8e8a3cef37cfcc0edd5a9a4d: RealisedToken<T>['$value'] is now typed per $type via a TokenValue<T> mapped type
+
+### Patch Changes
+
+- e95c74b5c3d83caa134230b0fa2484c8dfca46e5: formatTokenValue now prefers the listing previewValue over the raw primitive for non-color tokens (fontWeight, opacity, string fontFamily)
+
 ## 1.2.0
 
 ### Minor Changes
