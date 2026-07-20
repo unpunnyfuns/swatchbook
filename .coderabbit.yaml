@@ -17,3 +17,14 @@ reviews:
         rewrites markdown-syntax links, not JSX attribute values. Do NOT flag a
         hand-prefixed absolute href in a JSX prop as needing a relative or
         source-slug form.
+    - path: apps/storybook/src/**/*.stories.tsx
+      instructions: >-
+        Storybook story exports (`export const X = meta.story(...)`) are exempt
+        from the "exported constants need a `/** */` doc comment" rule. A story
+        that renders the component with its meta defaults and carries no `play`
+        function or assertions is self-evident from its name and the meta it
+        inherits, so a doc comment would only restate it: do NOT flag such
+        stories (for example a `Default` story) as needing documentation. Only
+        stories that verify non-obvious behavior (a `play` function with
+        assertions) warrant a `/** */` comment, and it should state what the
+        story verifies, not that it renders the component.
