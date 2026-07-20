@@ -35,19 +35,11 @@ Wire it in as a pre-step of the app build. Node 24 executes TypeScript directly,
 
 ## Mount it
 
-Two steps at runtime, and both matter. First, apply the snapshot's CSS: `SwatchbookProvider` does not mount it. `wire.css` carries the per-tuple custom-property blocks every block visual reads through `var()`; skip this step and those properties are never defined. Core's `ensureStyleElement` is an idempotent injector built for exactly this; call it once at module level.
-
-Second, wrap the blocks in the provider:
+Wrap the blocks in the provider; it mounts `wire.css` itself, so the per-tuple custom-property blocks every block visual reads through `var()` are defined with no further wiring ([Token CSS](/reference/blocks/provider#token-css) covers the opt-out).
 
 ```tsx title="src/TokenDocs.tsx"
 import { ColorPalette, SwatchbookProvider, TokenTable } from '@unpunnyfuns/swatchbook-blocks';
-import {
-  ensureStyleElement,
-  SWATCHBOOK_STYLE_ELEMENT_ID,
-} from '@unpunnyfuns/swatchbook-core/style-element';
 import wire from './tokens-snapshot.json';
-
-ensureStyleElement(SWATCHBOOK_STYLE_ELEMENT_ID, wire.css);
 
 export function TokenDocs() {
   return (

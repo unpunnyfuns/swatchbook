@@ -269,8 +269,12 @@ const themedDecorator: Decorator = (Story, context) => {
     [live],
   );
 
+  // `mountCss={false}`: the addon already injects the token CSS plus its
+  // iframe chrome rules through its own style element (`ensureStylesheet`
+  // above); letting the provider mount the snapshot's CSS too would
+  // duplicate every custom-property block.
   return (
-    <SwatchbookProvider snapshot={wire} axes={tuple}>
+    <SwatchbookProvider snapshot={wire} axes={tuple} mountCss={false}>
       <ThemeContext.Provider value={themeName}>
         <AxesContext.Provider value={tuple}>
           <div
