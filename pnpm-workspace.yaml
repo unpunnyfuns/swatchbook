@@ -1,9 +1,24 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - 'apps/*'
+  - 'packages/*'
 
 minimumReleaseAge: 1440
 blockExoticSubdeps: true
+
+# Security patches are exempt from the 24h release-age hold: when we pin a
+# patched version to clear a GHSA advisory (see the overrides block), we want
+# it regardless of how recently it shipped.
+minimumReleaseAgeExclude:
+  - js-yaml
+  - fast-uri
+  - postcss
+  - hono
+  - '@hono/node-server'
+  - body-parser
+  - valibot
+  - shell-quote
+  - ip-address
+  - esbuild
 
 allowBuilds:
   '@swc/core': true
@@ -22,6 +37,21 @@ overrides:
   ip-address: ^10.1.1
   # GHSA-w7jw-789q-3m8p, critical quote() newline-escaping advisory (PR #1131),
   # via @modelcontextprotocol/inspector -> concurrently (MCP devDependency)
-  shell-quote: ^1.8.4
+  shell-quote: ^1.8.5
   # GHSA-g7r4-m6w7-qqqr (PR #1194), via @terrazzo/cli's vite-node -> vite chain
   esbuild: ^0.28.1
+  # The pins below clear the 2026-07 advisory wave (issue #1439). All are
+  # transitive under dev/build tooling or the MCP SDK/inspector, not shipped
+  # runtime code of the published packages.
+  #
+  # js-yaml and fast-uri have newer majors than the fix; stay in the patched
+  # major to avoid a breaking jump for their consumers.
+  js-yaml@4: '>=4.3.0'
+  fast-uri@3: '>=3.1.4'
+  # postcss (astro/storybook build), hono + @hono/node-server + body-parser
+  # (MCP SDK), valibot (storybook): patch bumps within the current major.
+  postcss: '>=8.5.18'
+  hono: '>=4.12.27'
+  '@hono/node-server': '>=2.0.5'
+  body-parser: '>=2.3.0'
+  valibot: '>=1.4.2'

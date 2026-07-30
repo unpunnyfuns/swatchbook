@@ -63,14 +63,14 @@
     "@types/react": "^19.2.14",
     "@unpunnyfuns/swatchbook-core": "workspace:*",
     "@vitejs/plugin-react": "^6.0.1",
-    "@vitest/browser": "^4.1.8",
-    "@vitest/browser-playwright": "^4.1.8",
+    "@vitest/browser": "^4.1.10",
+    "@vitest/browser-playwright": "^4.1.10",
     "playwright": "^1.59.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tsdown": "^0.21.9",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "clsx": "^2.1.1"
