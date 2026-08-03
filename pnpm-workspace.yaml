@@ -38,10 +38,13 @@ overrides:
   # `pnpm audit`): every entry regresses a live advisory when removed. The first
   # three need the explicit pin because natural resolution stays vulnerable even
   # once the fix is allowed through the release-age hold; the rest hold the floor
-  # while their fixes age in (see the minimumReleaseAgeExclude note above).
+  # while their fixes age in (see the minimumReleaseAgeExclude note above). Every
+  # '>=' value carries a major upper bound: an unbounded '>=' resolves to the
+  # highest match across majors and can force a consumer onto a breaking major
+  # (the brace-expansion note below is where this actually bit).
   #
   # via @modelcontextprotocol/sdk -> express-rate-limit; fix floor >=10.3.1.
-  ip-address: '>=10.3.1'
+  ip-address: '>=10.3.1 <11'
   # GHSA-w7jw-789q-3m8p (quote() newline-escaping), via
   # @modelcontextprotocol/inspector -> concurrently.
   shell-quote: ^1.8.5
@@ -49,15 +52,15 @@ overrides:
   esbuild: ^0.28.1
   # js-yaml and fast-uri stay in the patched major (newer majors exist) to avoid
   # a breaking jump for their consumers.
-  js-yaml@4: '>=4.3.0'
-  fast-uri@3: '>=3.1.5'
+  js-yaml@4: '>=4.3.0 <5'
+  fast-uri@3: '>=3.1.5 <4'
   # postcss (astro/storybook build), hono + @hono/node-server + body-parser
   # (MCP SDK), valibot (storybook): patch bumps within the current major.
-  postcss: '>=8.5.18'
-  hono: '>=4.12.34'
-  '@hono/node-server': '>=2.0.5'
-  body-parser: '>=2.3.0'
-  valibot: '>=1.4.2'
+  postcss: '>=8.5.18 <9'
+  hono: '>=4.12.34 <5'
+  '@hono/node-server': '>=2.0.5 <3'
+  body-parser: '>=2.3.0 <3'
+  valibot: '>=1.4.2 <2'
   # brace-expansion ships two live majors: 1.x (CJS, via minimatch@3) and 5.x
   # (ESM). Bound each override to its own major: an open-ended '>=1.1.18' spans
   # majors and silently resolves a CJS consumer up to an ESM 5.x (a latent
