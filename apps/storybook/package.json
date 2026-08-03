@@ -28,11 +28,11 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.2.1",
-    "@storybook/addon-a11y": "^10.4.6",
-    "@storybook/addon-docs": "^10.4.6",
-    "@storybook/addon-mcp": "^0.6.0",
-    "@storybook/addon-vitest": "^10.4.6",
-    "@storybook/react-vite": "^10.4.6",
+    "@storybook/addon-a11y": "^10.5.5",
+    "@storybook/addon-docs": "^10.5.5",
+    "@storybook/addon-mcp": "^0.7.0",
+    "@storybook/addon-vitest": "^10.5.5",
+    "@storybook/react-vite": "^10.5.5",
     "@tailwindcss/vite": "^4.2.4",
     "@terrazzo/plugin-js": "2.4.0",
     "@terrazzo/plugin-sass": "2.4.0",
@@ -46,14 +46,14 @@
     "@unpunnyfuns/swatchbook-integrations": "workspace:*",
     "@unpunnyfuns/swatchbook-tokens": "workspace:*",
     "@vitejs/plugin-react": "^6.0.1",
-    "@vitest/browser-playwright": "^4.1.8",
+    "@vitest/browser-playwright": "^4.1.10",
     "@vitest/coverage-v8": "^4.1.8",
     "chromatic": "^16.6.0",
     "playwright": "^1.59.1",
-    "storybook": "^10.4.6",
+    "storybook": "^10.5.5",
     "tailwindcss": "^4.2.4",
     "typescript": "^6.0.3",
     "vite": "^8.0.4",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.10"
   }
 }

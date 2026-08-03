@@ -101,22 +101,22 @@
     "vite": ">=5"
   },
   "devDependencies": {
-    "@storybook/react-vite": "^10.4.6",
+    "@storybook/react-vite": "^10.5.5",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^25.6.0",
     "@types/picomatch": "^4.0.3",
     "@types/react": "^19.2.14",
     "@unpunnyfuns/swatchbook-tokens": "workspace:*",
     "@vitejs/plugin-react": "^6.0.1",
-    "@vitest/browser": "^4.1.8",
-    "@vitest/browser-playwright": "^4.1.8",
+    "@vitest/browser": "^4.1.10",
+    "@vitest/browser-playwright": "^4.1.10",
     "playwright": "^1.59.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "storybook": "^10.4.6",
+    "storybook": "^10.5.5",
     "tsdown": "^0.21.9",
     "typescript": "^6.0.3",
     "vite": "^8.0.4",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.10"
   }
 }

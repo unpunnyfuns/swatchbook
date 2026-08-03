@@ -1,9 +1,29 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - 'apps/*'
+  - 'packages/*'
 
 minimumReleaseAge: 1440
 blockExoticSubdeps: true
+
+# Security patches are exempt from the 24h release-age hold: when we pin a
+# patched version to clear a GHSA advisory (see the overrides block), we want
+# it regardless of how recently it shipped. For js-yaml/fast-uri/postcss/hono/
+# body-parser/brace-expansion the exclusion is currently the load-bearing part:
+# natural resolution already lands on the safe version, but that version is
+# still inside the 24h window, so without the exemption the tree falls back to
+# a vulnerable one. Those exemptions retire themselves once the fixes age in.
+minimumReleaseAgeExclude:
+  - js-yaml
+  - fast-uri
+  - postcss
+  - hono
+  - '@hono/node-server'
+  - body-parser
+  - valibot
+  - shell-quote
+  - ip-address
+  - esbuild
+  - brace-expansion
 
 allowBuilds:
   '@swc/core': true
@@ -11,17 +31,39 @@ allowBuilds:
   core-js: false
 
 overrides:
-  # Each pin forces a patched version to clear a Dependabot/GHSA advisory
-  # (ref = the PR that added the pin). Verified load-bearing via `pnpm audit`
-  # after the Docusaurus removal (issue #1234): all three are still pulled in
-  # by a live devDependency chain, not by Docusaurus. Removing any regresses
-  # to a vulnerable version.
+  # Each pin forces a patched version to clear a Dependabot/GHSA advisory. All
+  # are transitive under dev/build tooling or the MCP SDK/inspector, never
+  # shipped runtime code of the published packages. Necessity re-verified 2026-08
+  # with the audit-signal method (blank the block, `pnpm install --lockfile-only`,
+  # `pnpm audit`): every entry regresses a live advisory when removed. The first
+  # three need the explicit pin because natural resolution stays vulnerable even
+  # once the fix is allowed through the release-age hold; the rest hold the floor
+  # while their fixes age in (see the minimumReleaseAgeExclude note above). Every
+  # '>=' value carries a major upper bound: an unbounded '>=' resolves to the
+  # highest match across majors and can force a consumer onto a breaking major
+  # (the brace-expansion note below is where this actually bit).
   #
-  # GHSA-v2v4-37r5-5v8g (PR #691), via @modelcontextprotocol/sdk ->
-  # express-rate-limit (the MCP inspector devDependency)
-  ip-address: ^10.1.1
-  # GHSA-w7jw-789q-3m8p, critical quote() newline-escaping advisory (PR #1131),
-  # via @modelcontextprotocol/inspector -> concurrently (MCP devDependency)
-  shell-quote: ^1.8.4
-  # GHSA-g7r4-m6w7-qqqr (PR #1194), via @terrazzo/cli's vite-node -> vite chain
+  # via @modelcontextprotocol/sdk -> express-rate-limit; fix floor >=10.3.1.
+  ip-address: '>=10.3.1 <11'
+  # GHSA-w7jw-789q-3m8p (quote() newline-escaping), via
+  # @modelcontextprotocol/inspector -> concurrently.
+  shell-quote: ^1.8.5
+  # GHSA-g7r4-m6w7-qqqr, via @terrazzo/cli's vite-node -> vite chain.
   esbuild: ^0.28.1
+  # js-yaml and fast-uri stay in the patched major (newer majors exist) to avoid
+  # a breaking jump for their consumers.
+  js-yaml@4: '>=4.3.0 <5'
+  fast-uri@3: '>=3.1.5 <4'
+  # postcss (astro/storybook build), hono + @hono/node-server + body-parser
+  # (MCP SDK), valibot (storybook): patch bumps within the current major.
+  postcss: '>=8.5.18 <9'
+  hono: '>=4.12.34 <5'
+  '@hono/node-server': '>=2.0.5 <3'
+  body-parser: '>=2.3.0 <3'
+  valibot: '>=1.4.2 <2'
+  # brace-expansion ships two live majors: 1.x (CJS, via minimatch@3) and 5.x
+  # (ESM). Bound each override to its own major: an open-ended '>=1.1.18' spans
+  # majors and silently resolves a CJS consumer up to an ESM 5.x (a latent
+  # require()-of-ESM break), so the upper bound is load-bearing, not cosmetic.
+  brace-expansion@1: '>=1.1.18 <2'
+  brace-expansion@5: '>=5.0.9 <6'
