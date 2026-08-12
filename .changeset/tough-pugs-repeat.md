@@ -2,4 +2,4 @@
 '@unpunnyfuns/swatchbook-addon': patch
 ---
 
-stop the preview decorator padding stories; Storybook's `layout` parameter is the only source of spacing again
+The preview decorator no longer pads stories; Storybook's `layout` parameter is the only source of story spacing

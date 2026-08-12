@@ -17,7 +17,7 @@ afterEach(cleanup);
 // Mount the decorator around a fixed-size story inside a host whose height
 // is content-driven, so any box the wrapper contributes shows up as extra
 // height on the host.
-function mount() {
+function mount(parameters: Record<string, unknown> = {}) {
   const host = document.createElement('div');
   host.style.width = '200px';
   document.body.appendChild(host);
@@ -25,7 +25,7 @@ function mount() {
   function Decorated() {
     return themedDecorator(() => <div data-testid="story" style={{ height: '10px' }} />, {
       globals: {},
-      parameters: {},
+      parameters,
     } as never);
   }
 
@@ -46,11 +46,13 @@ it('wraps the story without contributing a box, so the host layout is the only s
   expect(hostBox.height).toBe(storyBox.height);
 });
 
-it('keeps the axis attributes on an ancestor of the story so per-story overrides still scope', () => {
-  const { story } = mount();
+// `parentElement`, not `closest()`: SwatchbookProvider mounts its own
+// attribute div further out carrying the same tuple, so a walk up the tree
+// would still find a match with the decorator's own attributes missing.
+// A non-default context proves the per-story override reaches the wrapper
+// rather than the axis defaulting into place.
+it('puts the axis attributes on the wrapper directly around the story so per-story overrides scope', () => {
+  const { story } = mount({ swatchbook: { axes: { mode: 'Dark' } } });
 
-  const scope = story.closest('[data-sb-mode]');
-
-  expect(scope).not.toBeNull();
-  expect(scope?.getAttribute('data-sb-mode')).toBe('Light');
+  expect(story.parentElement?.getAttribute('data-sb-mode')).toBe('Dark');
 });
