@@ -1,5 +1,15 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 2.0.1
+
+### Patch Changes
+
+- 8a6a6f4656a38fb179339561a79330e8697a539b: The preview decorator no longer pads stories; Storybook's `layout` parameter is the only source of story spacing
+- Updated dependencies [7e5f8b9]
+  - @unpunnyfuns/swatchbook-core@2.0.1
+  - @unpunnyfuns/swatchbook-blocks@2.0.1
+  - @unpunnyfuns/swatchbook-switcher@2.0.1
+
 ## 2.0.0
 
 ### Major Changes
