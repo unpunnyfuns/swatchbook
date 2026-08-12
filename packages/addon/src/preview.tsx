@@ -273,17 +273,19 @@ const themedDecorator: Decorator = (Story, context) => {
   // iframe chrome rules through its own style element (`ensureStylesheet`
   // above); letting the provider mount the snapshot's CSS too would
   // duplicate every custom-property block.
+  //
+  // The attribute wrapper has to exist but must generate no box. It's the only
+  // per-story scope for the axis attributes; <html> can't stand in for it,
+  // holding a single tuple while docs mode renders several stories with
+  // different per-story overrides. Storybook's `layout` parameter owns story
+  // spacing (`.sb-main-padded`, `.sb-main-centered #storybook-root`), and a box
+  // here would stack on top of it rather than replace it. `display: contents`
+  // removes the box without affecting selector matching.
   return (
     <SwatchbookProvider snapshot={wire} axes={tuple} mountCss={false}>
       <ThemeContext.Provider value={themeName}>
         <AxesContext.Provider value={tuple}>
-          <div
-            {...wrapperAttrs}
-            style={{
-              padding: '1rem',
-              minHeight: '100%',
-            }}
-          >
+          <div {...wrapperAttrs} style={{ display: 'contents' }}>
             <Story />
           </div>
           <div role="status" aria-live="polite" style={SR_ONLY_STYLE}>
