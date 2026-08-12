@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-core
 
+## 2.0.1
+
+### Patch Changes
+
+- 7e5f8b976fa3cc94d19d8568b0316180f6ac5684: Terrazzo packages move to 2.6.0 and `@terrazzo/plugin-token-listing` to 0.1.2
+
 ## 2.0.0
 
 ### Major Changes
