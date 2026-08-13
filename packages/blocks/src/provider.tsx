@@ -12,6 +12,7 @@ import { perAxisAttrs } from '#/internal/data-attr.ts';
 import { mergePresenters, PresenterContext } from '#/presenters/registry.ts';
 import type { PresenterRegistry } from '#/presenters/types.ts';
 import '#/internal/chrome-base.css';
+import '#/internal/provider.css';
 import '#/internal/internal-tokens.css';
 import '#/internal/internal-dimensions.css';
 import '#/internal/internal-typography.css';
@@ -102,8 +103,12 @@ export function SwatchbookProvider({
   // every story in a light card regardless of the active theme axis.
   // Axis data-attributes are still the point: descendant blocks' CSS var
   // reads resolve against the nearest matching `[data-<prefix>-<axis>]`.
+  //
+  // The element stays out of layout via `.sb-provider` (`display: contents`):
+  // hosts position the subtree themselves, and a box here would sit between
+  // the host's container and the content it laid out.
   return (
-    <div {...perAxisAttrs(snapshot.cssVarPrefix, activeAxes)}>
+    <div {...perAxisAttrs(snapshot.cssVarPrefix, activeAxes)} className="sb-provider">
       <SwatchbookContext.Provider value={value}>
         <PresenterContext.Provider value={merged}>
           <SetAxesContext.Provider value={setAxes}>{children}</SetAxesContext.Provider>

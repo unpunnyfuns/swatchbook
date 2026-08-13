@@ -229,15 +229,6 @@ const themedDecorator: Decorator = (Story, context) => {
   // mount-time theme.
   const announcement = useThemeAnnouncement(themeName);
 
-  const wrapperAttrs: Record<string, string> = {};
-  for (const axis of virtualAxes) {
-    const value = tuple[axis.name];
-    if (value !== undefined) wrapperAttrs[dataAttr(cssVarPrefix, axis.name)] = value;
-  }
-  forEachPinnedAxis((name, value) => {
-    wrapperAttrs[dataAttr(cssVarPrefix, name)] = value;
-  });
-
   // Read token data from the live ambient project source (seeded from the
   // virtual module at init, updated in place on each dev-time HMR token
   // save) rather than the static virtual-module exports, so blocks
@@ -274,20 +265,16 @@ const themedDecorator: Decorator = (Story, context) => {
   // above); letting the provider mount the snapshot's CSS too would
   // duplicate every custom-property block.
   //
-  // The attribute wrapper has to exist but must generate no box. It's the only
-  // per-story scope for the axis attributes; <html> can't stand in for it,
-  // holding a single tuple while docs mode renders several stories with
-  // different per-story overrides. Storybook's `layout` parameter owns story
-  // spacing (`.sb-main-padded`, `.sb-main-centered #storybook-root`), and a box
-  // here would stack on top of it rather than replace it. `display: contents`
-  // removes the box without affecting selector matching.
+  // The provider's own element carries the per-story axis attributes, so the
+  // decorator adds no element of its own. <html> can't stand in for it: it
+  // holds a single tuple, while docs mode renders several stories with
+  // different per-story overrides. Pinned axes are build-time constants and
+  // stay on <html> alone (`setRootAxes`), since no story can vary them.
   return (
     <SwatchbookProvider snapshot={wire} axes={tuple} mountCss={false}>
       <ThemeContext.Provider value={themeName}>
         <AxesContext.Provider value={tuple}>
-          <div {...wrapperAttrs} style={{ display: 'contents' }}>
-            <Story />
-          </div>
+          <Story />
           <div role="status" aria-live="polite" style={SR_ONLY_STYLE}>
             {announcement}
           </div>
