@@ -61,7 +61,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@unpunnyfuns/swatchbook-core": "workspace:*",
-    "colorjs.io": "^0.6.1",
+    "colorjs.io": "^0.7.1",
     "jiti": "^2.4.0",
     "zod": "^3.23.8"
   },

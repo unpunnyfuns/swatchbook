@@ -51,9 +51,15 @@ overrides:
   # GHSA-g7r4-m6w7-qqqr, via @terrazzo/cli's vite-node -> vite chain.
   esbuild: ^0.28.1
   # js-yaml and fast-uri stay in the patched major (newer majors exist) to avoid
-  # a breaking jump for their consumers.
-  js-yaml@4: '>=4.3.0 <5'
+  # a breaking jump for their consumers. GHSA-5p4m-2wfm-xmqj hits both live
+  # js-yaml majors, so each carries its own floor: 4.3.0 sits one patch below
+  # the fix and still resolved vulnerable.
+  js-yaml@3: '>=3.15.1 <4'
+  js-yaml@4: '>=4.3.1 <5'
   fast-uri@3: '>=3.1.5 <4'
+  # GHSA-2v37-7h3g-55p8 (zero-size custom generators loop), via vite -> postcss.
+  # 3.x only: nanoid 5.x and 6.x are unaffected and must not be pulled in.
+  nanoid@3: '>=3.3.17 <4'
   # postcss (astro/storybook build), hono + @hono/node-server + body-parser
   # (MCP SDK), valibot (storybook): patch bumps within the current major.
   postcss: '>=8.5.18 <9'
@@ -67,3 +73,10 @@ overrides:
   # require()-of-ESM break), so the upper bound is load-bearing, not cosmetic.
   brace-expansion@1: '>=1.1.18 <2'
   brace-expansion@5: '>=5.0.9 <6'
+  # Not an advisory: @terrazzo/plugin-swift's published 0.3.3 still asks for
+  # colorjs.io ^0.6.1, while terrazzo 2.7 moved core to ^0.7.1. Two instances
+  # split colorjs's colour-space registry, and the token listing build fails
+  # with 'No color space found with id = srgb'. Upstream main already has
+  # plugin-swift on the ^0.7.1 catalog entry, so this retires on its next
+  # release. Dev-only: plugin-swift is used by apps/storybook, never shipped.
+  colorjs.io: '>=0.7.1 <0.8'
