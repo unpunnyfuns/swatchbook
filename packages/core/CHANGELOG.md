@@ -1,5 +1,11 @@
 # @unpunnyfuns/swatchbook-core
 
+## 2.1.1
+
+### Patch Changes
+
+- bba7ff38f0aa2a26086176d8ee8eac4518a0a020: Terrazzo packages move to 2.7.1, with colorjs.io on 0.7 to match
+
 ## 2.1.0
 
 ## 2.0.1
