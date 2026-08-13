@@ -1,0 +1,10 @@
+/*
+ * The provider's element exists only to carry the axis data-attributes that
+ * descendant blocks resolve their CSS vars against. `display: contents` keeps
+ * it out of layout: hosts position the subtree themselves, and a box here
+ * would sit between the host's container and the content it laid out.
+ */
+
+.sb-provider {
+  display: contents;
+}
