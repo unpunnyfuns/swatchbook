@@ -23,18 +23,26 @@ export default meta;
  * #storybook-root`). The addon's decorator renders inside that root, so any box
  * it contributes stacks on top rather than replacing it.
  *
- * The assertion is that the probe sits flush against its container and the
- * container is no taller than the probe: true for every `layout` value, because
- * it measures only what the decorator adds, not what Storybook does.
+ * Three assertions, narrowest first: the decorator's own wrapper generates no
+ * box at all, and the chain as a whole adds neither inset nor height. The
+ * latter two also cover `SwatchbookProvider`'s host element, which sits between
+ * the wrapper and the container.
  *
- * Note the play function can't verify `layout` itself. The vitest harness
- * renders into a bare div appended to `body` — no `#storybook-root`, no
- * `sb-main-*` class — so the parameter is inert here. The four stories still
- * differ in the real preview iframe, which is where Chromatic snapshots them.
+ * The play function can't verify `layout` itself. The vitest harness renders
+ * into a bare div appended to `body` — no `#storybook-root`, no `sb-main-*`
+ * class — so the parameter is inert here and the four stories are identical to
+ * it. They diverge only in the real preview iframe, where Chromatic snapshots
+ * them; #1451 tracks asserting that in CI.
  */
 function expectDecoratorAddsNoBox(canvasElement: HTMLElement) {
   const probe = canvasElement.querySelector<HTMLElement>('[data-testid="layout-probe"]');
   if (!probe) throw new Error('layout-probe missing');
+  const wrapper = probe.parentElement;
+  if (!wrapper) throw new Error('decorator wrapper missing');
+
+  expect(wrapper.getClientRects().length, 'the axis-attribute wrapper must generate no box').toBe(
+    0,
+  );
 
   const style = getComputedStyle(canvasElement);
   const box = canvasElement.getBoundingClientRect();
@@ -55,21 +63,25 @@ function expectDecoratorAddsNoBox(canvasElement: HTMLElement) {
   );
 }
 
+/** `padded` puts 1rem on `body`; the decorator must not add a second inset inside the root. */
 export const Padded = meta.story({
   parameters: { layout: 'padded' },
   play: ({ canvasElement }) => expectDecoratorAddsNoBox(canvasElement),
 });
 
+/** `centered` puts 1rem on the story root and centres it with `margin: auto`. */
 export const Centered = meta.story({
   parameters: { layout: 'centered' },
   play: ({ canvasElement }) => expectDecoratorAddsNoBox(canvasElement),
 });
 
+/** `fullscreen` zeroes both, so any box the decorator adds is the only spacing present. */
 export const Fullscreen = meta.story({
   parameters: { layout: 'fullscreen' },
   play: ({ canvasElement }) => expectDecoratorAddsNoBox(canvasElement),
 });
 
+/** No layout class at all: the baseline the other three are measured against. */
 export const NoLayout = meta.story({
   parameters: { layout: 'none' },
   play: ({ canvasElement }) => expectDecoratorAddsNoBox(canvasElement),
