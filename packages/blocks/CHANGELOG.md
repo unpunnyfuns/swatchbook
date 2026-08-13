@@ -1,5 +1,15 @@
 # @unpunnyfuns/swatchbook-blocks
 
+## 2.1.0
+
+### Minor Changes
+
+- 459bfbfbccfa36b5f7338e5188f330172021e1b5: SwatchbookProvider's element generates no layout box, and the preview decorator no longer adds one of its own
+
+### Patch Changes
+
+- @unpunnyfuns/swatchbook-core@2.1.0
+
 ## 2.0.1
 
 ### Patch Changes
