@@ -28,11 +28,14 @@ export default meta;
  * latter two also cover `SwatchbookProvider`'s host element, which sits between
  * the wrapper and the container.
  *
- * The play function can't verify `layout` itself. The vitest harness renders
- * into a bare div appended to `body` — no `#storybook-root`, no `sb-main-*`
- * class — so the parameter is inert here and the four stories are identical to
- * it. They diverge only in the real preview iframe, where Chromatic snapshots
- * them; #1451 tracks asserting that in CI.
+ * These run in two environments with different containers, so every assertion
+ * is computed against `canvasElement`'s *content* box rather than its border
+ * box. Under vitest the container is a bare div appended to `body`, with no
+ * `#storybook-root` and no `sb-main-*` class, so `layout` is inert and padding
+ * is zero. Chromatic runs the same play functions in the real preview iframe,
+ * where the container is the story root and carries Storybook's own padding:
+ * `centered` puts 1rem on it, which a border-box height check reads as 32px of
+ * phantom decorator spacing.
  */
 function expectDecoratorAddsNoBox(canvasElement: HTMLElement) {
   const probe = canvasElement.querySelector<HTMLElement>('[data-testid="layout-probe"]');
@@ -50,6 +53,12 @@ function expectDecoratorAddsNoBox(canvasElement: HTMLElement) {
     box.left + Number.parseFloat(style.paddingLeft) + Number.parseFloat(style.borderLeftWidth);
   const contentTop =
     box.top + Number.parseFloat(style.paddingTop) + Number.parseFloat(style.borderTopWidth);
+  const contentHeight =
+    box.height -
+    Number.parseFloat(style.paddingTop) -
+    Number.parseFloat(style.paddingBottom) -
+    Number.parseFloat(style.borderTopWidth) -
+    Number.parseFloat(style.borderBottomWidth);
 
   const probeBox = probe.getBoundingClientRect();
   expect(probeBox.left, 'decorator must not inset the story horizontally').toBeCloseTo(
@@ -57,7 +66,7 @@ function expectDecoratorAddsNoBox(canvasElement: HTMLElement) {
     1,
   );
   expect(probeBox.top, 'decorator must not inset the story vertically').toBeCloseTo(contentTop, 1);
-  expect(box.height, 'decorator must not add height around the story').toBeCloseTo(
+  expect(contentHeight, 'decorator must not add height around the story').toBeCloseTo(
     probeBox.height,
     1,
   );
