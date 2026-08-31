@@ -107,11 +107,12 @@ export default defineSwatchbookConfig({
 });
 ```
 
-Any change to `sharedCssOptions.legacyHex`, or a new plugin added to `sharedPlugins`, now reaches both the production CLI and swatchbook's Storybook build with one edit. The variable prefix is wired into each side by hand (`variableName` for the CLI, `cssVarPrefix` for swatchbook) from the same shared constant, since swatchbook manages `variableName` internally and won't accept it through `cssOptions`. Three swatchbook config fields receive the shared blocks:
+Any change to `sharedCssOptions.legacyHex`, or a new plugin added to `sharedPlugins`, now reaches both the production CLI and swatchbook's Storybook build with one edit. The variable prefix is wired into each side by hand (`variableName` for the CLI, `cssVarPrefix` for swatchbook) from the same shared constant, since swatchbook manages `variableName` internally and won't accept it through `cssOptions`. Four swatchbook config fields receive the shared blocks:
 
 | Config field                                           | Forwards to                      | Controls                                                                               |
 | ------------------------------------------------------ | -------------------------------- | -------------------------------------------------------------------------------------- |
 | [`cssOptions`](/reference/config#cssoptions)           | `@terrazzo/plugin-css`           | value formatting (hex vs `color()`), transforms, include/exclude globs, utility groups |
+| [`lintOptions`](/reference/config#lintoptions)         | Terrazzo's lint pass             | which lint rules run during swatchbook's internal parse                                |
 | [`listingOptions`](/reference/config#listingoptions)   | `@terrazzo/plugin-token-listing` | per-platform naming, mode metadata, `previewValue` / `subtype` hooks                   |
 | [`terrazzoPlugins`](/reference/config#terrazzoplugins) | additional plugins in the build  | which plugin naming logic is available to the listing                                  |
 
