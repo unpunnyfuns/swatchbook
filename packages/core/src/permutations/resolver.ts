@@ -3,11 +3,13 @@ import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { isAbsolute, resolve as resolvePath } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { defineConfig as defineTerrazzoConfig, loadResolver, parse } from '@terrazzo/parser';
+import { loadResolver, parse } from '@terrazzo/parser';
 import { permutationID } from '#/types.ts';
 import type { Axis, Diagnostic, ParserInput, Permutation, TokenMap } from '#/types.ts';
 import type { BufferedLogger } from '#/diagnostics.ts';
 import { collectGlobbedFiles } from '#/permutations/util.ts';
+import { buildParseConfig } from '#/terrazzo-options.ts';
+import type { TerrazzoLintOptions } from '#/terrazzo-options.ts';
 
 export interface ResolverLoadResult {
   axes: Axis[];
@@ -68,9 +70,14 @@ export async function loadResolverPermutations(
   tokenGlobs: string[] | undefined,
   cwd: string,
   logger: BufferedLogger,
+  lintOptions?: TerrazzoLintOptions,
 ): Promise<ResolverLoadResult> {
   const cwdUrl = pathToFileURL(`${cwd}/`);
-  const terrazzoConfig = defineTerrazzoConfig({}, { logger, cwd: cwdUrl });
+  const terrazzoConfig = buildParseConfig({
+    ...(lintOptions && { lintOptions }),
+    logger,
+    cwd: cwdUrl,
+  });
 
   const tokenFiles = tokenGlobs ? await collectGlobbedFiles(tokenGlobs, cwd) : [];
   const refFiles = new Set<string>();
