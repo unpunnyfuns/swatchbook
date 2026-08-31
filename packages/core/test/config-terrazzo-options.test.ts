@@ -152,4 +152,41 @@ describe('Config terrazzo options plumbing', () => {
     );
     expect(lintDiagnostics(project).some((d) => d.message.includes('object format'))).toBe(true);
   });
+
+  it('resolves a lint rule registered by a terrazzoPlugins entry instead of erroring "Unknown rule"', async () => {
+    // Terrazzo validates lint.rules ids against the plugin set forwarded into
+    // the parse config; a rule id owned by a plugin (rather than Terrazzo
+    // core) only resolves if that plugin's `plugins` entry reaches parse().
+    const project = await loadProject(
+      {
+        tokens: ['base/*.json'],
+        terrazzoPlugins: [
+          {
+            name: 'test/plugin-with-lint',
+            lint() {
+              return { 'test/no-legacy-brand': { create() {} } };
+            },
+          },
+        ],
+        lintOptions: { rules: { 'test/no-legacy-brand': 'off' } },
+      },
+      lintFixtureCwd,
+    );
+    const configDiagnostics = project.diagnostics.filter((d) => d.group === 'config');
+    expect(configDiagnostics.some((d) => d.message.includes('Unknown rule'))).toBe(false);
+  });
+
+  it('honours lintOptions.build.enabled: false by skipping the lint pass entirely', async () => {
+    const project = await loadProject(
+      {
+        tokens: ['base/*.json'],
+        lintOptions: {
+          build: { enabled: false },
+          rules: { 'core/valid-color': ['error', {}] },
+        },
+      },
+      lintFixtureCwd,
+    );
+    expect(lintDiagnostics(project)).toHaveLength(0);
+  });
 });

@@ -234,6 +234,9 @@ interface CommonConfig {
    * `lintOptions: { rules: { 'core/valid-color': ['error', { legacyFormat: true }] } }`
    * here to match.
    *
+   * `rules` replaces Terrazzo's recommended set rather than merging into it —
+   * any rule left out of a supplied `rules` object does not run.
+   *
    * To keep one source of truth, import the Terrazzo config and forward its
    * `lint` field rather than restating rules.
    */

@@ -1,5 +1,5 @@
 import { defineConfig as defineTerrazzoConfig } from '@terrazzo/parser';
-import type { Config as TerrazzoConfig, ConfigInit, Logger } from '@terrazzo/parser';
+import type { Config as TerrazzoConfig, ConfigInit, Logger, Plugin } from '@terrazzo/parser';
 import type { CSSPluginOptions } from '@terrazzo/plugin-css';
 import type { Diagnostic } from '#/types.ts';
 
@@ -55,8 +55,10 @@ export function validateCssOptions(raw: ForwardedCssOptions | undefined): {
  */
 export type TerrazzoLintOptions = NonNullable<TerrazzoConfig['lint']>;
 
+/** Inputs to a single `buildParseConfig` call; one per permutation-loader call site. */
 export interface BuildParseConfigOptions {
   lintOptions?: TerrazzoLintOptions;
+  plugins?: readonly Plugin[];
   logger: Logger;
   cwd: URL;
 }
@@ -68,11 +70,24 @@ export interface BuildParseConfigOptions {
  * and any future forwarded field — is applied once rather than duplicated
  * per call site. Omitting `lintOptions` yields Terrazzo's recommended rules,
  * which is the long-standing default.
+ *
+ * `plugins` is forwarded so `lintOptions.rules` can reference a rule
+ * registered by a `terrazzoPlugins` entry rather than Terrazzo core — Terrazzo
+ * validates rule ids against the loaded plugin set. `parse()` only reads
+ * `config.plugins` for its lint pass, so forwarding them here cannot trigger
+ * a transform or build hook.
  */
 export function buildParseConfig({
   lintOptions,
+  plugins,
   logger,
   cwd,
 }: BuildParseConfigOptions): ConfigInit {
-  return defineTerrazzoConfig(lintOptions ? { lint: lintOptions } : {}, { logger, cwd });
+  return defineTerrazzoConfig(
+    {
+      ...(lintOptions && { lint: lintOptions }),
+      ...(plugins && { plugins: [...plugins] }),
+    },
+    { logger, cwd },
+  );
 }

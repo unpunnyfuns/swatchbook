@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 import { isAbsolute, resolve as resolvePath } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { loadResolver, parse } from '@terrazzo/parser';
+import type { Plugin } from '@terrazzo/parser';
 import { permutationID } from '#/types.ts';
 import type { Axis, Diagnostic, ParserInput, Permutation, TokenMap } from '#/types.ts';
 import type { BufferedLogger } from '#/diagnostics.ts';
@@ -71,13 +72,16 @@ export async function loadResolverPermutations(
   cwd: string,
   logger: BufferedLogger,
   lintOptions?: TerrazzoLintOptions,
+  plugins?: readonly Plugin[],
 ): Promise<ResolverLoadResult> {
   const cwdUrl = pathToFileURL(`${cwd}/`);
   const terrazzoConfig = buildParseConfig({
     ...(lintOptions && { lintOptions }),
+    ...(plugins && { plugins }),
     logger,
     cwd: cwdUrl,
   });
+  const skipLint = terrazzoConfig.lint.build.enabled === false;
 
   const tokenFiles = tokenGlobs ? await collectGlobbedFiles(tokenGlobs, cwd) : [];
   const refFiles = new Set<string>();
@@ -124,6 +128,7 @@ export async function loadResolverPermutations(
       config: terrazzoConfig,
       resolveAliases: true,
       continueOnError: true,
+      skipLint,
     });
     const name = 'default';
     return {

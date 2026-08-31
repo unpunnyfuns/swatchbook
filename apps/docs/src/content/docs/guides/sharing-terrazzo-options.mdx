@@ -223,11 +223,11 @@ The two builds also coexist. Some teams run Terrazzo for CSS + JS targets (becau
 
 ## When you don't need any of this
 
-If you don't run a production token build alongside swatchbook (the tokens exist only for the docs site and Storybook), leave `cssOptions`, `listingOptions`, and `terrazzoPlugins` unset. swatchbook loads `plugin-css` with defaults and `plugin-token-listing` with a single `css` platform. Drift isn't a concern when there's only one pipeline.
+If you don't run a production token build alongside swatchbook (the tokens exist only for the docs site and Storybook), leave `cssOptions`, `lintOptions`, `listingOptions`, and `terrazzoPlugins` unset. swatchbook loads `plugin-css` with defaults and `plugin-token-listing` with a single `css` platform. Drift isn't a concern when there's only one pipeline.
 
 ## See also
 
-- [Config reference: `cssOptions` / `listingOptions` / `terrazzoPlugins`](/reference/config): the prop-by-prop contract.
+- [Config reference: `cssOptions` / `lintOptions` / `listingOptions` / `terrazzoPlugins`](/reference/config): the prop-by-prop contract.
 - [The token pipeline](/concepts/token-pipeline): how swatchbook's virtual module differs from a file-emitting build.
 - [`@terrazzo/plugin-token-listing` source](https://github.com/terrazzoapp/terrazzo/tree/main/packages/plugin-token-listing): the listing format swatchbook consumes.
 - [Style Dictionary docs](https://styledictionary.com/): DTCG support landed in 4.0; alignment-friendly configurations start there.
