@@ -1,8 +1,10 @@
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import { defineConfig as defineTerrazzoConfig, parse } from '@terrazzo/parser';
+import { parse } from '@terrazzo/parser';
 import type { BufferedLogger } from '#/diagnostics.ts';
 import { collectGlobbedFiles } from '#/permutations/util.ts';
+import { buildParseConfig } from '#/terrazzo-options.ts';
+import type { TerrazzoLintOptions } from '#/terrazzo-options.ts';
 import { permutationID } from '#/types.ts';
 import type { Axis, AxisConfig, Diagnostic, Permutation, TokenMap } from '#/types.ts';
 
@@ -35,9 +37,14 @@ export async function loadLayeredPermutations(
   tokenGlobs: string[],
   cwd: string,
   logger: BufferedLogger,
+  lintOptions?: TerrazzoLintOptions,
 ): Promise<LayeredLoadResult> {
   const cwdUrl = pathToFileURL(`${cwd}/`);
-  const terrazzoConfig = defineTerrazzoConfig({}, { logger, cwd: cwdUrl });
+  const terrazzoConfig = buildParseConfig({
+    ...(lintOptions && { lintOptions }),
+    logger,
+    cwd: cwdUrl,
+  });
 
   const baseFiles = await collectGlobbedFiles(tokenGlobs, cwd);
 

@@ -129,4 +129,27 @@ describe('Config terrazzo options plumbing', () => {
     );
     expect(lintDiagnostics(project)).toHaveLength(0);
   });
+
+  it('honours lintOptions on the layered path, where overlays are parsed per tuple', async () => {
+    const project = await loadProject(
+      {
+        tokens: ['base/*.json'],
+        axes: [{ name: 'mode', contexts: { Light: [], Dark: ['modes/dark.json'] }, default: 'Light' }],
+        lintOptions: { rules: { 'core/valid-color': ['error', { legacyFormat: true }] } },
+      },
+      lintFixtureCwd,
+    );
+    expect(lintDiagnostics(project)).toHaveLength(0);
+  });
+
+  it('flags legacy hex colors by default on the layered path', async () => {
+    const project = await loadProject(
+      {
+        tokens: ['base/*.json'],
+        axes: [{ name: 'mode', contexts: { Light: [], Dark: ['modes/dark.json'] }, default: 'Light' }],
+      },
+      lintFixtureCwd,
+    );
+    expect(lintDiagnostics(project).some((d) => d.message.includes('object format'))).toBe(true);
+  });
 });
