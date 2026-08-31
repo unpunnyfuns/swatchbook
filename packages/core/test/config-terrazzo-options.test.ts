@@ -1,7 +1,10 @@
 import { resolverPath, tokensDir } from '@unpunnyfuns/swatchbook-tokens';
 import { dirname } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { BufferedLogger } from '#/diagnostics.ts';
 import { loadProject } from '#/load.ts';
+import { buildParseConfig } from '#/terrazzo-options.ts';
 
 const fixtureCwd = dirname(tokensDir);
 
@@ -78,5 +81,22 @@ describe('Config terrazzo options plumbing', () => {
     // that the listing co-populated rather than crashing.
     expect(calls.length).toBeGreaterThan(0);
     expect(project.listing['color.accent.bg']).toBeDefined();
+  });
+
+  it('buildParseConfig applies Terrazzo recommended lint rules when no lintOptions are given', () => {
+    const config = buildParseConfig({
+      logger: new BufferedLogger({ level: 'warn' }),
+      cwd: pathToFileURL(`${fixtureCwd}/`),
+    });
+    expect(config.lint.rules['core/valid-color']).toEqual(['error', {}]);
+  });
+
+  it('buildParseConfig forwards a supplied lint rule option into the normalized config', () => {
+    const config = buildParseConfig({
+      lintOptions: { rules: { 'core/valid-color': ['error', { legacyFormat: true }] } },
+      logger: new BufferedLogger({ level: 'warn' }),
+      cwd: pathToFileURL(`${fixtureCwd}/`),
+    });
+    expect(config.lint.rules['core/valid-color']).toEqual(['error', { legacyFormat: true }]);
   });
 });

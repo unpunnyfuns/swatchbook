@@ -4,6 +4,7 @@ import type { CSSPluginOptions } from '@terrazzo/plugin-css';
 import type { TokenListingPluginOptions } from '@terrazzo/plugin-token-listing';
 import type { ChromeRole } from '#/chrome.ts';
 import type { ColorFormat } from '#/color-formats.ts';
+import type { TerrazzoLintOptions } from '#/terrazzo-options.ts';
 import type { TokenListingByPath } from '#/token-listing.ts';
 import type { TokenGraph } from '#/token-graph/types.ts';
 
@@ -221,6 +222,22 @@ interface CommonConfig {
    * because they're superseded by permutations in newer plugin-css.
    */
   cssOptions?: Omit<CSSPluginOptions, 'variableName' | 'permutations' | 'filename' | 'skipBuild'>;
+  /**
+   * Terrazzo lint configuration for swatchbook's internal parse pass, in the
+   * same shape as `terrazzo.config.ts`'s `lint` field. Line this up with the
+   * consumer's own lint config so `<Diagnostics />` reports the same pass/fail
+   * state as their `terrazzo build`.
+   *
+   * Omitted, Terrazzo's recommended rules apply — which flag legacy
+   * hex-string colors, among others. A project that allows those in its own
+   * build needs
+   * `lintOptions: { rules: { 'core/valid-color': ['error', { legacyFormat: true }] } }`
+   * here to match.
+   *
+   * To keep one source of truth, import the Terrazzo config and forward its
+   * `lint` field rather than restating rules.
+   */
+  lintOptions?: TerrazzoLintOptions;
   /**
    * Options forwarded to `@terrazzo/plugin-token-listing`. Use
    * `platforms` to register additional platforms beyond `css` (e.g.

@@ -1,3 +1,5 @@
+import { defineConfig as defineTerrazzoConfig } from '@terrazzo/parser';
+import type { Config as TerrazzoConfig, ConfigInit, Logger } from '@terrazzo/parser';
 import type { CSSPluginOptions } from '@terrazzo/plugin-css';
 import type { Diagnostic } from '#/types.ts';
 
@@ -44,4 +46,33 @@ export function validateCssOptions(raw: ForwardedCssOptions | undefined): {
     });
   }
   return { diagnostics };
+}
+
+/**
+ * Terrazzo lint configuration accepted on swatchbook's `Config`. Sourced from
+ * Terrazzo's own `Config['lint']` rather than restated, so an upstream shape
+ * change surfaces at typecheck rather than at runtime.
+ */
+export type TerrazzoLintOptions = NonNullable<TerrazzoConfig['lint']>;
+
+export interface BuildParseConfigOptions {
+  lintOptions?: TerrazzoLintOptions;
+  logger: Logger;
+  cwd: URL;
+}
+
+/**
+ * Build the Terrazzo config for swatchbook's internal `parse()` passes.
+ *
+ * Both permutation loaders route through here so the lint configuration —
+ * and any future forwarded field — is applied once rather than duplicated
+ * per call site. Omitting `lintOptions` yields Terrazzo's recommended rules,
+ * which is the long-standing default.
+ */
+export function buildParseConfig({
+  lintOptions,
+  logger,
+  cwd,
+}: BuildParseConfigOptions): ConfigInit {
+  return defineTerrazzoConfig(lintOptions ? { lint: lintOptions } : {}, { logger, cwd });
 }
