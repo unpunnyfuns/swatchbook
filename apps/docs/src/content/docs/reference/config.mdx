@@ -62,7 +62,7 @@ Exactly three shapes are legal:
 - **Layered** (`LayeredConfig`): `axes: [...]` + `tokens: [...]`. For projects without a resolver document. You declare axes inline; each context names overlay files that layer onto the base `tokens`.
 - **Plain parse** (`PlainConfig`): `tokens: [...]` alone. Single synthetic `theme` axis; every token loaded as one tuple. Useful for smoke-testing a token set before adopting a resolver.
 
-All three variants extend a shared base (`cssVarPrefix`, `presets`, `disabledAxes`, `chrome`, `indicators`, `cssOptions`, `listingOptions`, `terrazzoPlugins`, `maxJointArity`, `default`, `outDir`).
+All three variants extend a shared base (`cssVarPrefix`, `presets`, `disabledAxes`, `chrome`, `indicators`, `cssOptions`, `lintOptions`, `listingOptions`, `terrazzoPlugins`, `maxJointArity`, `default`, `outDir`).
 
 ## Fields
 
@@ -281,6 +281,24 @@ defineSwatchbookConfig({
 ```
 
 See [Aligning with your token build](/guides/sharing-terrazzo-options) for the end-to-end shared-options pattern.
+
+### `lintOptions`
+
+Type: Terrazzo's `Config['lint']` (`{ build?, rules? }`), optional.
+
+Lint configuration for swatchbook's internal parse pass, in the same shape as `terrazzo.config.ts`'s `lint` field. Terrazzo's own `parse()` runs lint as part of loading a project, and swatchbook's internal `loadProject` call is a separate `parse()` invocation with its own config, so the two disagree unless this field lines them up. Omitted, Terrazzo's recommended rules apply.
+
+Forward the production config's `lint` field rather than restating rules, so `<Diagnostics />` reports the same pass/fail state as the project's own `terrazzo build`:
+
+```ts
+// swatchbook.config.ts
+import terrazzo from './terrazzo.config.ts';
+
+export default defineConfig({
+  tokens: ['tokens/**/*.json'],
+  lintOptions: terrazzo.lint,
+});
+```
 
 ### `listingOptions`
 

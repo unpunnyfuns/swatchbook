@@ -22,7 +22,7 @@ interface Diagnostic {
 
 `severity` follows the usual gradient. `error` means something downstream cannot be done correctly (e.g. an alias target that doesn't exist, so the walker has nothing to resolve to). `warn` means the load completed but a piece of input was dropped, partial, or structurally suspect. `info` is informational and rarely fires.
 
-`group` is namespaced by feature area (`swatchbook/<area>`). It's stable across releases, so consumers can filter on it.
+`group` is stable across releases, so consumers can filter on it. Diagnostics originating inside Terrazzo (parsing, linting, resolver, plugin, config problems) pass through with Terrazzo's own bare group name: `config`, `lint`, `parser`, `plugin`, `resolver`. swatchbook's own diagnostics carry a `swatchbook/<area>` prefix, catalogued below.
 
 `filename` / `line` are present when the parser knows the authoring source location. Token-tree diagnostics usually carry them; configuration diagnostics generally don't.
 
