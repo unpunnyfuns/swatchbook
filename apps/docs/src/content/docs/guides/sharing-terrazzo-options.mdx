@@ -42,6 +42,13 @@ export const cssVarPrefix = 'ds';
 export const sharedVariableName = (token: TokenNormalized) =>
   makeCSSVar(String(token.id), { prefix: cssVarPrefix });
 
+/** Lint rules shared by `tz build` and swatchbook's `<Diagnostics />`. */
+export const sharedLintOptions = {
+  rules: {
+    'core/valid-color': ['error', { legacyFormat: true }],
+  },
+} as const;
+
 /** Extra plugins whose naming rules we want reflected in `listing[path].names.*`. */
 export const sharedPlugins: readonly Plugin[] = [
   swiftPlugin({ filename: 'tokens.swift' }),
@@ -66,6 +73,7 @@ import tokenListingPlugin from '@terrazzo/plugin-token-listing';
 import {
   cssPlugin,
   sharedCssOptions,
+  sharedLintOptions,
   sharedListingOptions,
   sharedPlugins,
   sharedVariableName,
@@ -74,6 +82,7 @@ import {
 export default defineConfig({
   tokens: 'tokens/**/*.json',
   outDir: 'dist',
+  lint: sharedLintOptions,
   plugins: [
     cssPlugin({
       ...sharedCssOptions,
@@ -94,6 +103,7 @@ import { defineSwatchbookConfig } from '@unpunnyfuns/swatchbook-core';
 import {
   cssVarPrefix,
   sharedCssOptions,
+  sharedLintOptions,
   sharedListingOptions,
   sharedPlugins,
 } from './shared-terrazzo-options';
@@ -102,6 +112,7 @@ export default defineSwatchbookConfig({
   resolver: 'tokens/resolver.json',
   cssVarPrefix,
   cssOptions: sharedCssOptions,
+  lintOptions: sharedLintOptions,
   listingOptions: sharedListingOptions,
   terrazzoPlugins: sharedPlugins,
 });
@@ -115,6 +126,8 @@ Any change to `sharedCssOptions.legacyHex`, or a new plugin added to `sharedPlug
 | [`lintOptions`](/reference/config#lintoptions)         | Terrazzo's lint pass             | which lint rules run during swatchbook's internal parse                                |
 | [`listingOptions`](/reference/config#listingoptions)   | `@terrazzo/plugin-token-listing` | per-platform naming, mode metadata, `previewValue` / `subtype` hooks                   |
 | [`terrazzoPlugins`](/reference/config#terrazzoplugins) | additional plugins in the build  | which plugin naming logic is available to the listing                                  |
+
+`lintOptions` reaches swatchbook's lint pass on the layered and plain-parse configurations. A `resolver`-backed project, as in the example above, loads through Terrazzo's resolver rather than `parse()`, and no lint pass runs there; see [`lintOptions`](/reference/config#lintoptions). Sharing the block still keeps the two sides from drifting apart once that changes.
 
 The `terrazzo.config.ts` above imports `defineConfig` from `@terrazzo/cli`, the package a `tz build` consumer already has installed. `@terrazzo/parser` also exports a lower-level `defineConfig` that takes a `cwd` option; prefer the cli export in user-facing config files.
 
