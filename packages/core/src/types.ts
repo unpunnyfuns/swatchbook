@@ -346,6 +346,12 @@ export interface Diagnostic {
   severity: DiagnosticSeverity;
   /** Source group from Terrazzo (parser, resolver, plugin, …). */
   group: string;
+  /**
+   * Originating rule or subsystem within `group`. Lint diagnostics carry the
+   * rule id, which is the key `lintOptions.rules` takes, so this is what tells
+   * a reader which rule to configure. Absent when Terrazzo emits no label.
+   */
+  label?: string;
   message: string;
   filename?: string;
   line?: number;

@@ -21,6 +21,26 @@ it('renders rows and auto-expands on errors, from plain props', () => {
   expect(details?.hasAttribute('open')).toBe(true);
 });
 
+it('shows the rule id in the meta line so a reader knows which rule to configure', () => {
+  render(
+    <DiagnosticsView
+      diagnostics={[
+        {
+          severity: 'error',
+          group: 'lint',
+          label: 'core/valid-color',
+          message: 'Migrate to the new object format',
+          filename: '/tokens/color.json',
+          line: 3,
+        },
+      ]}
+      cssVarPrefix="sb"
+      activeAxes={{}}
+    />,
+  );
+  screen.getByText('lint · core/valid-color · /tokens/color.json · :3');
+});
+
 it('honors the caption override', () => {
   render(<DiagnosticsView diagnostics={[]} cssVarPrefix="sb" activeAxes={{}} caption="Health" />);
   screen.getByText('Health');

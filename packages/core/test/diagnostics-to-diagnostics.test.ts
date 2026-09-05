@@ -61,12 +61,25 @@ it('attaches line when the entry carries a node loc', () => {
   expect(diag?.line).toBe(42);
 });
 
-it('omits filename / line when absent', () => {
+it('carries the entry label, which is the lint rule id consumers configure', () => {
+  const logger = new BufferedLogger();
+  logger.error(
+    entry({
+      group: 'lint',
+      label: 'core/valid-color',
+      message: 'Migrate to the new object format',
+    }),
+  );
+  expect(toDiagnostics(logger)[0]?.label).toBe('core/valid-color');
+});
+
+it('omits filename / line / label when absent', () => {
   const logger = new BufferedLogger();
   logger.error(entry({ group: 'g', message: 'bare' }));
   const diag = toDiagnostics(logger)[0];
   expect(diag).not.toHaveProperty('filename');
   expect(diag).not.toHaveProperty('line');
+  expect(diag).not.toHaveProperty('label');
 });
 
 it('returns an empty array when the buffer is empty', () => {
