@@ -116,6 +116,16 @@ Tailwind scale names are keys; each entry is `[tailwindEntryName, dtcgPath]`.
 
 or have the preview decorator mirror a `.dark` class through the [DOM-observation path](/guides/consuming-the-active-theme#dom-observation-for-everything-else).
 
+**A preview that already compiles Tailwind gets two compilations.** The virtual module emits `@import 'tailwindcss'` so it works as a preview's only Tailwind entry point. Where the preview already imports Tailwind against its own `@theme`, the second import compiles Tailwind again: a duplicate preflight, plus a second copy of every utility both passes generate, with source order rather than intent deciding which copy applies.
+
+`skipTailwindImport` emits the `@theme` block on its own:
+
+```ts
+tailwindIntegration({ skipTailwindImport: true });
+```
+
+Layering the second import is not a substitute. A preview that already emits into `@layer theme / base / utilities` puts both copies in the same layers, where source order still decides. `source(none)` does stop the duplicate scan, but it also stops the integration's own `bg-*` / `p-*` scales from generating at all.
+
 ## What this doesn't do
 
 - Doesn't produce production CSS. Run Tailwind's CLI / Vite plugin against your own `@theme` source for that.

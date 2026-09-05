@@ -23,6 +23,17 @@ export interface TailwindIntegrationOptions {
    * `font`. Works for any DTCG project without a configuration step.
    */
   roles?: TailwindRoleMap;
+  /**
+   * Omit the `@import 'tailwindcss'` line, emitting the `@theme` block alone.
+   * Set this when the preview already compiles Tailwind against its own
+   * stylesheet: a second import compiles Tailwind twice in the same preview,
+   * duplicating preflight and any utility both passes generate, where source
+   * order rather than intent decides which copy wins.
+   *
+   * Leave unset when swatchbook's virtual module is the preview's only
+   * Tailwind entry point, which is the common case.
+   */
+  skipTailwindImport?: boolean;
 }
 
 /**
@@ -78,7 +89,10 @@ export default function tailwindIntegration(
     name: 'tailwind',
     virtualModule: {
       virtualId,
-      render: (project) => renderTailwindTheme(project, userRoles ?? deriveRoles(project)),
+      render: (project) =>
+        renderTailwindTheme(project, userRoles ?? deriveRoles(project), {
+          skipTailwindImport: options.skipTailwindImport === true,
+        }),
       // Tailwind's `@theme` block is a global stylesheet — exactly the
       // kind of payload the addon should auto-inject into the preview,
       // so consumers don't hand-write a second `import` line after
@@ -88,7 +102,11 @@ export default function tailwindIntegration(
   };
 }
 
-function renderTailwindTheme(project: Project, roles: TailwindRoleMap): string {
+function renderTailwindTheme(
+  project: Project,
+  roles: TailwindRoleMap,
+  { skipTailwindImport }: { skipTailwindImport: boolean },
+): string {
   const prefix = project.config.cssVarPrefix ?? '';
   const varPrefix = prefix ? `${prefix}-` : '';
 
@@ -108,7 +126,7 @@ function renderTailwindTheme(project: Project, roles: TailwindRoleMap): string {
   return [
     '/* Synthesized by @unpunnyfuns/swatchbook-integrations/tailwind for preview.',
     ' * Served via `virtual:swatchbook/tailwind.css` — rebuilt on token changes. */',
-    "@import 'tailwindcss';",
+    ...(skipTailwindImport ? [] : ["@import 'tailwindcss';"]),
     '',
     '@theme {',
     ...entries,
