@@ -73,9 +73,8 @@ export interface BuildParseConfigOptions {
  *
  * `plugins` is forwarded so `lintOptions.rules` can reference a rule
  * registered by a `terrazzoPlugins` entry rather than Terrazzo core — Terrazzo
- * validates rule ids against the loaded plugin set. `parse()` only reads
- * `config.plugins` for its lint pass, so forwarding them here cannot trigger
- * a transform or build hook.
+ * validates rule ids against the loaded plugin set. Only each plugin's `lint`
+ * hook is forwarded, via `lintContributionOf`.
  */
 export function buildParseConfig({
   lintOptions,
@@ -83,11 +82,20 @@ export function buildParseConfig({
   logger,
   cwd,
 }: BuildParseConfigOptions): ConfigInit {
+  const lintContributors = plugins?.filter((plugin) => typeof plugin.lint === 'function');
   return defineTerrazzoConfig(
     {
       ...(lintOptions && { lint: lintOptions }),
-      ...(plugins && { plugins: [...plugins] }),
+      ...(lintContributors?.length && { plugins: lintContributors.map(lintContributionOf) }),
     },
     { logger, cwd },
   );
+}
+
+// Reduce a consumer plugin to its lint-rule registration. The parse config
+// carries no plugin-css, and peer-checking plugins throw from `config()` when
+// it is absent (`@terrazzo/plugin-sass` asserts it is present), so no hook
+// beyond `lint` may reach this config.
+function lintContributionOf(plugin: Plugin): Plugin {
+  return { name: plugin.name, lint: () => plugin.lint?.() ?? {} };
 }

@@ -176,6 +176,37 @@ describe('Config terrazzo options plumbing', () => {
     expect(configDiagnostics.some((d) => d.message.includes('Unknown rule'))).toBe(false);
   });
 
+  it('does not run a terrazzoPlugins entry’s config() hook against the parse config', async () => {
+    // @terrazzo/plugin-sass throws from config() when plugin-css is absent, and
+    // the parse config never carries it.
+    let configHookRuns = 0;
+    const peerCheckingPlugin = {
+      name: 'test/peer-checking',
+      config(config: { plugins: { name: string }[] }) {
+        configHookRuns += 1;
+        if (!config.plugins.some((p) => p.name === '@terrazzo/plugin-css')) {
+          throw new Error('test/peer-checking relies on @terrazzo/plugin-css.');
+        }
+      },
+      lint() {
+        return { 'test/peer-rule': { create() {} } };
+      },
+    };
+
+    const project = await loadProject(
+      {
+        tokens: ['base/*.json'],
+        terrazzoPlugins: [peerCheckingPlugin],
+        lintOptions: { rules: { 'test/peer-rule': 'off' } },
+      },
+      lintFixtureCwd,
+    );
+
+    expect(project.diagnostics.filter((d) => d.group === 'config')).toHaveLength(0);
+    // Once, in the listing build — never in parse.
+    expect(configHookRuns).toBe(1);
+  });
+
   it('honours lintOptions.build.enabled: false by skipping the lint pass entirely', async () => {
     const project = await loadProject(
       {
