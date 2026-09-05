@@ -2,4 +2,4 @@
 '@unpunnyfuns/swatchbook-integrations': minor
 ---
 
-Add `skipTailwindImport` to the Tailwind integration for previews that already compile Tailwind
+`skipTailwindImport` emits the Tailwind `@theme` block without the integration's own `@import`
