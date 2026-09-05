@@ -57,7 +57,7 @@ Update this section when state genuinely shifts. See GitHub milestones for per-i
   - **Exported functions, constants, objects** get a `/** */` doc comment stating purpose and contract. Don't restate types; strict TS already carries shape, so the comment carries intent and reasoning.
   - **Internal helpers** get a `//` purpose line *only* when intent isn't obvious from name + body. No preamble on short, self-evident helpers. Use `//`, not `/** */`, for everything that isn't exported.
   - **Constants/objects used in two or more places** are described at their definition. Single-use ones only when non-obvious.
-  - **Forward-looking rationale stays; history goes.** Keep "X must precede Y because Z" and "don't reintroduce W, it regressed V." Cut narration of what the code *used to be* — git and `docs/decisions.md` hold that.
+  - **Forward-looking rationale stays; history goes.** Keep "X must precede Y because Z" and "don't reintroduce W, it regressed V." Cut narration of what the code *used to be* — git history holds that.
   - **Length tracks complexity.** A comment is no longer than the thing it explains. Invariants and "someone will bleed on this" gotchas are first-class. No self-narration ("this function cleanly handles…"); state the thing.
 - **Lint/format:** `oxlint` + `oxfmt`. Never `npx biome`.
 - **Tests:** Vitest everywhere. Storybook Test (via `@storybook/addon-vitest`) for story-level interaction tests in `apps/storybook`.
@@ -91,7 +91,7 @@ Four navbar pills: Guides / Reference / Concepts / Developers. Reference sidebar
 - **Preview ↔ manager comms**: Storybook's channel (`addons.getChannel()` + `emit`/`on`). Manager can't import preview-side Vite virtual modules.
 - **CSF Next addons**: default-export a factory that returns `definePreviewAddon(previewExports)` (from `storybook/internal/csf`). Consumers opt in via `definePreview({ addons: [swatchbookAddon()] })`.
 - **MDX doc blocks can't use story hooks**: `useGlobals` / `useArgs` / `useChannel` / `useParameter` from `storybook/preview-api` require the preview HooksContext, which only exists while a story is rendering. From an MDX doc block they throw. Subscribe to `addons.getChannel()` directly and manage state with plain React hooks.
-- **Major-bump checklist** (per the policy in `docs/decisions.md` — one swatchbook major per Storybook major): the version-fragile surface is small and pinned. `storybook/internal/*` imports (unstable across majors) are exactly two — `internal/components` in `manager.tsx` and `internal/csf` in `index.ts` — guarded by `addon/test/storybook-internal-surface.test.ts` (adding one fails the test). The public-but-still-checkable surface is `storybook/manager-api` (manager) and `storybook/preview-api` (preview + blocks). On a Storybook major: update the peer ranges to `^<new-major>`, add the new major to the `storybook-compat` matrix in `ci.yml`, and re-verify those import sites. The floor of the supported range is exercised by the `storybook-compat` CI job.
+- **Major-bump checklist** (per the Storybook version support policy above — one swatchbook major per Storybook major): the version-fragile surface is small and pinned. `storybook/internal/*` imports (unstable across majors) are exactly two — `internal/components` in `manager.tsx` and `internal/csf` in `index.ts` — guarded by `addon/test/storybook-internal-surface.test.ts` (adding one fails the test). The public-but-still-checkable surface is `storybook/manager-api` (manager) and `storybook/preview-api` (preview + blocks). On a Storybook major: update the peer ranges to `^<new-major>`, add the new major to the `storybook-compat` matrix in `ci.yml`, and re-verify those import sites. The floor of the supported range is exercised by the `storybook-compat` CI job.
 
 ## Storybook MCP
 
@@ -115,7 +115,7 @@ claude
 ## Plan governance
 
 - Plan body edits → same PR as the change they reflect.
-- Tactical choices that don't change design intent → append to `docs/decisions.md`.
+- Tactical choices that don't change design intent → the body of the PR or commit that makes them.
 - PR template (`.github/pull_request_template.md`) requires `Milestone:`, `Closes:`, and `Plan impact:` lines.
 - **`Closes #N` must be plain text, one per line.** GitHub's auto-close parser ignores `**Closes:** #N` (bold-wrapped) and `Closes: #N1, #N2` (comma-separated past the first). The template was the original source of the bolded form — it's been corrected; don't re-introduce it.
 - Every PR links an existing GitHub issue. File one first if needed: `gh issue create --milestone "Maintenance" --title "…"`. Merging the PR auto-closes the issue.
