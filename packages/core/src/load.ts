@@ -1,5 +1,5 @@
 import { validateChrome } from '#/chrome.ts';
-import { BufferedLogger, toDiagnostics } from '#/diagnostics.ts';
+import { BufferedLogger, dedupeDiagnostics, toDiagnostics } from '#/diagnostics.ts';
 import { validateDisabledAxes } from '#/disabled-axes.ts';
 import { validatePresets } from '#/presets.ts';
 import { validateCssOptions } from '#/terrazzo-options.ts';
@@ -188,7 +188,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
     sourceFiles: normalized.sourceFiles,
     cwd,
     listing,
-    diagnostics: [
+    diagnostics: dedupeDiagnostics([
       ...toDiagnostics(logger),
       ...normalized.diagnostics,
       ...disabledDiagnostics,
@@ -198,7 +198,7 @@ export async function loadProject(config: Config, cwd: string = process.cwd()): 
       ...cssOptionsDiagnostics,
       ...listingDiagnostics,
       ...tokenGraphResult.diagnostics,
-    ],
+    ]),
   };
 }
 

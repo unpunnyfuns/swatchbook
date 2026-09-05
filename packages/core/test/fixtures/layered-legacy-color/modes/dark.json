@@ -1,0 +1,6 @@
+{
+  "color": {
+    "$type": "color",
+    "brand": { "$value": "#1e40af" }
+  }
+}
