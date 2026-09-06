@@ -1,5 +1,12 @@
 # @unpunnyfuns/swatchbook-core
 
+## 2.2.0
+
+### Minor Changes
+
+- fd496690bdbae63a7d6e6feb3096b12c1835e324: `Diagnostic.label` carries the originating lint rule id, and the Diagnostics block shows it
+- ddfa84fe5ff0bd31a087e29c820be2c9c1c90b76: `lintOptions` forwards the project's Terrazzo lint config, so the internal lint pass matches `terrazzo build`
+
 ## 2.1.1
 
 ### Patch Changes

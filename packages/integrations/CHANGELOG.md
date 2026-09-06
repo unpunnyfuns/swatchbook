@@ -1,5 +1,17 @@
 # @unpunnyfuns/swatchbook-integrations
 
+## 2.2.0
+
+### Minor Changes
+
+- 52882324210506db39b40acfc21d51b59683b1c7: `skipTailwindImport` emits the Tailwind `@theme` block without the integration's own `@import`
+
+### Patch Changes
+
+- Updated dependencies [fd49669]
+- Updated dependencies [ddfa84f]
+  - @unpunnyfuns/swatchbook-core@2.2.0
+
 ## 2.1.1
 
 ### Patch Changes
