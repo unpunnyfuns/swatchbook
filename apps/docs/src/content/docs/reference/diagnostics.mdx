@@ -27,8 +27,6 @@ interface Diagnostic {
 
 `label` narrows the origin within `group`. Lint diagnostics carry the rule id, so a `lint` diagnostic labelled `core/valid-color` names the rule your Terrazzo lint config keys on to configure or switch it off. Other groups carry a subsystem name, and it is absent where Terrazzo emits none.
 
-`label` narrows the origin within `group`. Lint diagnostics carry the rule id, so a `lint` diagnostic labelled `core/valid-color` names the rule your Terrazzo lint config keys on to configure or switch it off. Other groups carry a subsystem name, and it is absent where Terrazzo emits none.
-
 `filename` / `line` are present when the parser knows the authoring source location. Token-tree diagnostics usually carry them; configuration diagnostics generally don't.
 
 ## `swatchbook/token-graph`
