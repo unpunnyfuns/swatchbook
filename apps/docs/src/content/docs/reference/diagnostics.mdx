@@ -14,6 +14,7 @@ swatchbook surfaces load-time and runtime problems as `Diagnostic` entries on `P
 interface Diagnostic {
   severity: 'error' | 'warn' | 'info';
   group: string;
+  label?: string;
   message: string;
   filename?: string;
   line?: number;
@@ -23,6 +24,8 @@ interface Diagnostic {
 `severity` follows the usual gradient. `error` means something downstream cannot be done correctly (e.g. an alias target that doesn't exist, so the walker has nothing to resolve to). `warn` means the load completed but a piece of input was dropped, partial, or structurally suspect. `info` is informational and rarely fires.
 
 `group` is stable across releases, so consumers can filter on it. Diagnostics originating inside Terrazzo (config, linting, parsing, plugin, resolver problems) pass through with Terrazzo's own bare group name: `config`, `lint`, `parser`, `plugin`, `resolver`. swatchbook's own diagnostics carry a `swatchbook/<area>` prefix, catalogued below.
+
+`label` narrows the origin within `group`. Lint diagnostics carry the rule id, so a `lint` diagnostic labelled `core/valid-color` names the rule your Terrazzo lint config keys on to configure or switch it off. Other groups carry a subsystem name, and it is absent where Terrazzo emits none.
 
 `filename` / `line` are present when the parser knows the authoring source location. Token-tree diagnostics usually carry them; configuration diagnostics generally don't.
 

@@ -40,6 +40,7 @@ export function toDiagnostics(logger: BufferedLogger): Diagnostic[] {
       group: entry.group,
       message: entry.message,
     };
+    if (entry.label) diagnostic.label = entry.label;
     if (entry.filename) diagnostic.filename = entry.filename.pathname;
     const loc = entry.node?.loc?.start;
     if (loc) {

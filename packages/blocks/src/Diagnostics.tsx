@@ -101,9 +101,9 @@ export function DiagnosticsView({
                 </span>
                 <div>
                   <div>{d.message}</div>
-                  {(d.group || d.filename) && (
+                  {(d.group || d.label || d.filename) && (
                     <div className="sb-diagnostics__meta">
-                      {[d.group, d.filename, d.line ? `:${d.line}` : '']
+                      {[d.group, d.label, d.filename, d.line ? `:${d.line}` : '']
                         .filter(Boolean)
                         .join(' · ')}
                     </div>
