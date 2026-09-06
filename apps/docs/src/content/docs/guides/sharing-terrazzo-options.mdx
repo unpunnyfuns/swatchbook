@@ -127,8 +127,6 @@ Any change to `sharedCssOptions.legacyHex`, or a new plugin added to `sharedPlug
 | [`listingOptions`](/reference/config#listingoptions)   | `@terrazzo/plugin-token-listing` | per-platform naming, mode metadata, `previewValue` / `subtype` hooks                   |
 | [`terrazzoPlugins`](/reference/config#terrazzoplugins) | additional plugins in the build  | which plugin naming logic is available to the listing                                  |
 
-`lintOptions` reaches swatchbook's lint pass on the layered and plain-parse configurations. A `resolver`-backed project, as in the example above, loads through Terrazzo's resolver rather than `parse()`, and no lint pass runs there; see [`lintOptions`](/reference/config#lintoptions). Sharing the block still keeps the two sides from drifting apart once that changes.
-
 The `terrazzo.config.ts` above imports `defineConfig` from `@terrazzo/cli`, the package a `tz build` consumer already has installed. `@terrazzo/parser` also exports a lower-level `defineConfig` that takes a `cwd` option; prefer the cli export in user-facing config files.
 
 ### Monorepo layouts
