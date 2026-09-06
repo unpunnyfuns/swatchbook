@@ -2,7 +2,7 @@
 title: Diagnostics block
 ---
 
-`<Diagnostics />` renders project-load diagnostics (parser errors, resolver warnings, disabled-axis validation) as a collapsible list. Green **OK** badge when clean; auto-expands with a severity summary when warnings or errors are present.
+`<Diagnostics />` renders project-load diagnostics (parser errors, lint errors, resolver warnings, disabled-axis validation) as a collapsible list. Green **OK** badge when clean; auto-expands with a severity summary when warnings or errors are present. See [`lintOptions`](/reference/config#lintoptions) to line the lint pass up with the project's own Terrazzo config.
 
 ```tsx
 <Diagnostics />

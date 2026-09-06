@@ -1,3 +1,5 @@
+import { defineConfig as defineTerrazzoConfig } from '@terrazzo/parser';
+import type { Config as TerrazzoConfig, ConfigInit, Logger, Plugin } from '@terrazzo/parser';
 import type { CSSPluginOptions } from '@terrazzo/plugin-css';
 import type { Diagnostic } from '#/types.ts';
 
@@ -44,4 +46,56 @@ export function validateCssOptions(raw: ForwardedCssOptions | undefined): {
     });
   }
   return { diagnostics };
+}
+
+/**
+ * Terrazzo lint configuration accepted on swatchbook's `Config`. Sourced from
+ * Terrazzo's own `Config['lint']` rather than restated, so an upstream shape
+ * change surfaces at typecheck rather than at runtime.
+ */
+export type TerrazzoLintOptions = NonNullable<TerrazzoConfig['lint']>;
+
+/** Inputs to a single `buildParseConfig` call; one per permutation-loader call site. */
+export interface BuildParseConfigOptions {
+  lintOptions?: TerrazzoLintOptions;
+  plugins?: readonly Plugin[];
+  logger: Logger;
+  cwd: URL;
+}
+
+/**
+ * Build the Terrazzo config for swatchbook's internal `parse()` passes.
+ *
+ * Both permutation loaders route through here so the lint configuration —
+ * and any future forwarded field — is applied once rather than duplicated
+ * per call site. Omitting `lintOptions` yields Terrazzo's recommended rules,
+ * which is the long-standing default.
+ *
+ * `plugins` is forwarded so `lintOptions.rules` can reference a rule
+ * registered by a `terrazzoPlugins` entry rather than Terrazzo core — Terrazzo
+ * validates rule ids against the loaded plugin set. Only each plugin's `lint`
+ * hook is forwarded, via `lintContributionOf`.
+ */
+export function buildParseConfig({
+  lintOptions,
+  plugins,
+  logger,
+  cwd,
+}: BuildParseConfigOptions): ConfigInit {
+  const lintContributors = plugins?.filter((plugin) => typeof plugin.lint === 'function');
+  return defineTerrazzoConfig(
+    {
+      ...(lintOptions && { lint: lintOptions }),
+      ...(lintContributors?.length && { plugins: lintContributors.map(lintContributionOf) }),
+    },
+    { logger, cwd },
+  );
+}
+
+// Reduce a consumer plugin to its lint-rule registration. The parse config
+// carries no plugin-css, and peer-checking plugins throw from `config()` when
+// it is absent (`@terrazzo/plugin-sass` asserts it is present), so no hook
+// beyond `lint` may reach this config.
+function lintContributionOf(plugin: Plugin): Plugin {
+  return { name: plugin.name, lint: () => plugin.lint?.() ?? {} };
 }
