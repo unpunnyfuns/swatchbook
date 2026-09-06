@@ -19,6 +19,11 @@ export default defineSwatchbookConfig({
   // compound selectors, and the Design Tokens panel shows a pinned indicator.
   // disabledAxes: ['a11y'],
   cssVarPrefix: 'sb',
+  // Terrazzo's recommended `core/consistent-naming` wants kebab-case, which the
+  // DTCG `$type` roots it also recommends organising by cannot satisfy:
+  // `cubicBezier`, `fontFamily`, `fontWeight` and `strokeStyle` are camelCase in
+  // the spec. The reference tokens follow the $type organisation.
+  lintOptions: { rules: { 'core/consistent-naming': 'off' } },
   // Dogfood: wire block chrome to the reference tokens. Without this
   // map, chrome falls back to the hard-coded `light-dark()` defaults
   // in `DEFAULT_CHROME_MAP` — readable, but deaf to our ACME /
