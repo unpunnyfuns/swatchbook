@@ -22,6 +22,12 @@ function render(p: Project, options?: Parameters<typeof tailwindIntegration>[0])
   return out;
 }
 
+const themeEntriesOf = (css: string) =>
+  css
+    .split('\n')
+    .filter((line) => line.startsWith('  --'))
+    .join('\n');
+
 it('integration exposes virtual:swatchbook/tailwind.css by default', () => {
   const integration = tailwindIntegration();
   expect(integration.name).toBe('tailwind');
@@ -49,6 +55,20 @@ it('drops the dash when cssVarPrefix is empty', async () => {
   const css = render(bare);
   expect(css).toContain('--color-surface-default: var(--color-surface-default);');
   expect(css).not.toContain('--sb-');
+});
+
+it('omits the tailwindcss import under skipTailwindImport, keeping the theme intact', () => {
+  const css = render(project, { skipTailwindImport: true });
+  expect(css).not.toContain('tailwindcss');
+  expect(css).toMatch(/^\/\* Synthesized by @unpunnyfuns\/swatchbook-integrations\/tailwind/);
+  expect(css).toContain('@theme {');
+  expect(css).toContain('--color-sb-surface-default: var(--sb-color-surface-default);');
+});
+
+it('emits identical theme entries with and without the import', () => {
+  expect(themeEntriesOf(render(project, { skipTailwindImport: true }))).toBe(
+    themeEntriesOf(render(project)),
+  );
 });
 
 it('accepts a custom role map replacing the derived default', () => {
