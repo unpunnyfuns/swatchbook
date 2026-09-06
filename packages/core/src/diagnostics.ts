@@ -50,6 +50,33 @@ export function toDiagnostics(logger: BufferedLogger): Diagnostic[] {
   });
 }
 
+/**
+ * Collapse diagnostics identical in every field, preserving first-seen order.
+ *
+ * Multi-tuple loads parse once per singleton tuple against one shared logger,
+ * so a single malformed token is reported once per tuple and the count scales
+ * with axis cardinality. Diagnostics that differ in source location stay
+ * distinct: `filename` and `line` are part of the key.
+ */
+export function dedupeDiagnostics(diagnostics: readonly Diagnostic[]): Diagnostic[] {
+  const seen = new Set<string>();
+  const unique: Diagnostic[] = [];
+  for (const diagnostic of diagnostics) {
+    const key = JSON.stringify([
+      diagnostic.severity,
+      diagnostic.group,
+      diagnostic.label,
+      diagnostic.message,
+      diagnostic.filename,
+      diagnostic.line,
+    ]);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(diagnostic);
+  }
+  return unique;
+}
+
 function normalizeSeverity(severity: LogSeverity): DiagnosticSeverity {
   return severity === 'debug' ? 'info' : severity;
 }
