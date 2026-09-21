@@ -180,14 +180,21 @@ jobs:
           retention-days: 7
 
   storybook-compat:
-    # Guard the *floor* of the supported Storybook range. The `build` job
-    # above exercises the lockfile's latest; this re-pins the lockstep
-    # `@storybook/*` core packages to the lowest supported 10.x minor and
-    # re-runs the version-sensitive surface (addon + blocks browser tests,
-    # the reference Storybook's interaction tests, a full Storybook build)
-    # so a consumer trailing a few minors isn't silently broken. The floor
-    # matches the `^10.1.0` peer range `addon` declares. When Storybook 11
-    # ships, add its prerelease to the matrix here for early warning.
+    # Guard both ends of the Storybook range the `build` job doesn't reach.
+    # That job exercises the lockfile's latest; this re-pins the lockstep
+    # `@storybook/*` core packages per matrix entry and re-runs the
+    # version-sensitive surface (addon + blocks browser tests, the reference
+    # Storybook's interaction tests, a full Storybook build).
+    #
+    # The `~10.1.0` entry is the floor: it matches the `^10.1.0` peer range
+    # `addon` declares, so a consumer trailing a few minors isn't silently
+    # broken. The `next` entry is the forward canary for the next major,
+    # giving early warning before the peer ranges ever move.
+    #
+    # Neither entry is a required check in the `main` ruleset, so a red
+    # canary reports without blocking a merge. Don't add
+    # `continue-on-error` to buy that: it reports failure as success and
+    # the signal stops being readable.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     container:
@@ -214,6 +221,15 @@ jobs:
           # release whose peer range covers 10.1.
           - storybook: '~10.1.0'
             addon-mcp: '^0.7.0'
+          # Forward canary for the next major. A moving tag rather than a
+          # pinned alpha: a pin goes stale silently, which is the failure
+          # that matters here, since it stays green while testing a version
+          # nobody runs. `minimumReleaseAge: 1440` already holds back
+          # anything published in the last 24h, so the churn stays bounded.
+          # addon-mcp ships on the lockstep line above 10.6, so it tracks
+          # the same tag.
+          - storybook: 'next'
+            addon-mcp: 'next'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
