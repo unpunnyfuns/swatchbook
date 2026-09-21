@@ -5,6 +5,9 @@ import { loadProject } from '#/load.ts';
 import { fixtureCwd, loadWithPrefix } from './_helpers.ts';
 
 const typographyAliasCwd = fileURLToPath(new URL('./fixtures/typography-alias', import.meta.url));
+const corruptPreviewCwd = fileURLToPath(
+  new URL('./fixtures/listing-corrupt-preview', import.meta.url),
+);
 
 describe('Token Listing integration', () => {
   it('populates project.listing for resolver-backed projects', async () => {
@@ -54,6 +57,27 @@ describe('Token Listing integration', () => {
     expect(project.listing['color.ink']?.$extensions['app.terrazzo.listing'].previewValue).toBe(
       '#1a1a1a',
     );
+  });
+
+  it('names the token whose preview string came back corrupted', async () => {
+    // `space.md` is a dimension in the legacy string form. token-tools reads
+    // `.value` / `.unit` off it, finds neither, and interpolates the pair as
+    // `undefinedundefined`. Blocks forward previewValue verbatim, so without
+    // this warning the first sign is a table cell reading `undefinedundefined`.
+    const project = await loadProject({ tokens: ['tokens/**/*.json'] }, corruptPreviewCwd);
+    const corrupt = project.diagnostics.filter((d) => d.label === 'preview-value');
+    expect(corrupt).toHaveLength(1);
+    expect(corrupt[0]?.severity).toBe('warn');
+    expect(corrupt[0]?.group).toBe('swatchbook/listing');
+    expect(corrupt[0]?.message).toContain('space.md');
+  });
+
+  it('stays quiet on a project whose previews are all intact', async () => {
+    // Guards against matching too broadly. The reference token set is large
+    // and varied, so a check that keys off anything looser than the literal
+    // `undefined` interpolation would light up here.
+    const project = await loadWithPrefix('sb');
+    expect(project.diagnostics.filter((d) => d.label === 'preview-value')).toHaveLength(0);
   });
 
   it('surfaces a swatchbook/listing warn diagnostic when a terrazzoPlugin throws', async () => {

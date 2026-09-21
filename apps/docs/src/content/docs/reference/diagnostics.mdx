@@ -53,7 +53,15 @@ Token Listing build problems. Fires when `loadProject` runs the in-memory `@terr
 | The listing build wrote no `tokens.listing.json` output file.        | The plugin's configuration. The listing plugin needs to be installed and present in the internal plugin set.                                                                       |
 | The listing JSON had no `data` array.                                | The plugin version. swatchbook pins `@terrazzo/plugin-token-listing` at `0.1.1`; an incompatible version change in the plugin's output shape can produce this.                     |
 
-`<TokenTable>` and `<ColorTable>` previews fall back to raw values; they remain readable, but per-platform name columns are blank.
+The first three fall back to raw values: `<TokenTable>` and `<ColorTable>` previews remain readable, but per-platform name columns are blank.
+
+### `preview-value`
+
+A single token's preview string came back containing `undefined`. Carries the token path in the message and `preview-value` on `label`.
+
+The listing itself is fine here; one entry's `previewValue` is not. Blocks forward `previewValue` verbatim, so the string reaches the user as a table cell reading `undefinedundefined` unless the token is corrected.
+
+The usual cause is a `$value` written in a form the CSS stringifier can't read: a dimension as a bare string (`"1rem"`) or number (`0`) rather than `{ value, unit }`. It reaches composites too, so a typography token's `fontSize` or `letterSpacing`, a shadow offset, or a border width in that form all produce it.
 
 ## `swatchbook/css-options`
 
