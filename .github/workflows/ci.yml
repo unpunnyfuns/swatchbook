@@ -186,10 +186,8 @@ jobs:
     # re-runs the version-sensitive surface (addon + blocks browser tests,
     # the reference Storybook's interaction tests, a full Storybook build)
     # so a consumer trailing a few minors isn't silently broken. The floor
-    # matches the `^10.1.0` peer range on `addon` / `blocks` — 10.1 is the
-    # lowest where our own Storybook devDeps agree (@chromatic-com/storybook
-    # needs >=10.1). When Storybook 11 ships, add its prerelease to the
-    # matrix here for early warning.
+    # matches the `^10.1.0` peer range `addon` declares. When Storybook 11
+    # ships, add its prerelease to the matrix here for early warning.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     container:
@@ -204,9 +202,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Override spec (not a fixed patch): `~10.1.0` tracks the latest
-        # 10.1.x so the floor guard follows patch releases of that minor.
-        storybook: ['~10.1.0']
+        include:
+          # Override spec (not a fixed patch): `~10.1.0` tracks the latest
+          # 10.1.x so the floor guard follows patch releases of that minor.
+          #
+          # `@storybook/addon-mcp` carries its own spec because it only
+          # joined the lockstep line at 10.6.0 and has no 10.1.x release.
+          # Its 10.6 build imports `storybook/internal/skills`, a subpath
+          # that doesn't exist on the floor, so leaving it at the lockfile's
+          # version fails preset loading outright. `^0.7.0` is its last
+          # release whose peer range covers 10.1.
+          - storybook: '~10.1.0'
+            addon-mcp: '^0.7.0'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -233,6 +240,7 @@ jobs:
         # recommended pattern for referencing contexts in `run:` blocks.
         env:
           SB_VERSION: ${{ matrix.storybook }}
+          SB_ADDON_MCP: ${{ matrix['addon-mcp'] }}
         shell: bash
         run: |
           {
@@ -241,6 +249,7 @@ jobs:
             echo "  '@storybook/addon-a11y': '$SB_VERSION'"
             echo "  '@storybook/addon-docs': '$SB_VERSION'"
             echo "  '@storybook/addon-vitest': '$SB_VERSION'"
+            echo "  '@storybook/addon-mcp': '$SB_ADDON_MCP'"
           } >> pnpm-workspace.yaml
 
       - run: pnpm install --no-frozen-lockfile
