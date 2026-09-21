@@ -114,10 +114,31 @@ export async function computeTokenListing(
     for (const entry of parsed.data) {
       byPath[entry.$name] = entry;
     }
-    return { listing: byPath, diagnostics: [] };
+    return { listing: byPath, diagnostics: corruptPreviewDiagnostics(parsed.data) };
   } catch (error) {
     return { listing: {}, diagnostics: [crashedListingDiagnostic(error)] };
   }
+}
+
+// `previewValue` is upstream-controlled and blocks forward it verbatim, so a
+// stringifier that interpolated a missing field reaches the user as a table
+// cell reading `undefinedundefined`. Name the token here instead, at build
+// time, where the path is still in hand.
+function corruptPreviewDiagnostics(entries: readonly ListedToken[]): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  for (const entry of entries) {
+    const preview = entry.$extensions['app.terrazzo.listing'].previewValue;
+    if (typeof preview !== 'string' || !preview.includes('undefined')) {
+      continue;
+    }
+    diagnostics.push({
+      severity: 'warn',
+      group: 'swatchbook/listing',
+      label: 'preview-value',
+      message: `Token \`${entry.$name}\` has a corrupted preview value (\`${preview}\`). Its \`$value\` is likely written in a form the CSS stringifier can't read — a dimension as a bare string or number rather than \`{ value, unit }\`. Blocks display this string as-is.`,
+    });
+  }
+  return diagnostics;
 }
 
 function crashedListingDiagnostic(err: unknown): Diagnostic {
