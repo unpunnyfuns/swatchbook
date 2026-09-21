@@ -17,6 +17,7 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
+    "@unpunnyfuns/swatchbook-docs",
     "@unpunnyfuns/swatchbook-storybook",
     "@unpunnyfuns/swatchbook-tokens"
   ]
