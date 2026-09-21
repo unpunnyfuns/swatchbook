@@ -17,10 +17,11 @@
     "gen:logo": "node scripts/gen-logo.mjs"
   },
   "dependencies": {
-    "@astrojs/react": "^6.0.2",
-    "@astrojs/starlight": "^0.41.5",
+    "@astrojs/markdown-remark": "^7.3.1",
+    "@astrojs/react": "^6.0.6",
+    "@astrojs/starlight": "^0.42.2",
     "@unpunnyfuns/swatchbook-switcher": "workspace:*",
-    "astro": "^7.1.6",
+    "astro": "^7.3.3",
     "clsx": "^2.1.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
