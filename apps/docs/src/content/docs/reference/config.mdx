@@ -288,7 +288,7 @@ Type: Terrazzo's `Config['lint']`, optional.
 
 Lint configuration for swatchbook's internal parse pass, in the same shape as `terrazzo.config.ts`'s `lint` field (`{ build?, rules? }`). Omitted, Terrazzo's recommended rules apply; a supplied `rules` object replaces that set rather than merging into it, so any rule left out of it does not run.
 
-Plain-parse (`tokens` alone) and layered (`axes` + `tokens`) projects load through Terrazzo's `parse()`, which runs the lint pass this field configures. Resolver-backed projects (`resolver` set) load through `loadResolver`, which doesn't run linting; `lintOptions` has no effect there.
+All three config shapes lint. Plain-parse and layered projects lint through Terrazzo's `parse()`; resolver-backed projects load through `loadResolver`, which does not lint, so swatchbook runs the pass itself against the baseline token set. Set `build: { enabled: false }` to skip linting entirely, matching how the Terrazzo CLI reads the same field.
 
 Forward the production config's `lint` field rather than restating rules, so `<Diagnostics />` reports the same pass/fail state as the project's own `terrazzo build`:
 

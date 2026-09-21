@@ -81,13 +81,19 @@ jobs:
           # workspace packages to their built `dist/` (gitignored). So a
           # change in a package's `src/` (component or CSS), or in the
           # dogfood token data, never maps to a story and would be
-          # silently skipped, freezing a stale baseline. List those paths
-          # as externals so any change there forces a full re-snapshot;
-          # TurboSnap's savings still apply to docs / story / config-only
-          # diffs.
+          # silently skipped, freezing a stale baseline. The same holds
+          # for the two build-time configs: `.storybook/main.ts` and
+          # `swatchbook.config.ts` are read by Node (the latter via the
+          # addon preset's jiti import) and are absent from the preview
+          # graph, yet they decide what every story renders — the token
+          # snapshot, the axes, the diagnostics. List those paths as
+          # externals so any change there forces a full re-snapshot;
+          # TurboSnap's savings still apply to docs / story-only diffs.
           externals: |
             packages/*/src/**
             packages/tokens/tokens/**
+            apps/storybook/.storybook/**
+            apps/storybook/swatchbook.config.ts
           # Return as soon as the upload is done; Chromatic's GitHub
           # integration reports the visual-diff status asynchronously via
           # a check, so blocking on server-side comparison just makes the

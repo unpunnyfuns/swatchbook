@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { isAbsolute, resolve as resolvePath } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { loadResolver, parse } from '@terrazzo/parser';
+import { lintRunner, loadResolver, parse } from '@terrazzo/parser';
 import type { Plugin } from '@terrazzo/parser';
 import { permutationID } from '#/types.ts';
 import type { Axis, Diagnostic, ParserInput, Permutation, TokenMap } from '#/types.ts';
@@ -146,6 +146,19 @@ export async function loadResolverPermutations(
   }
 
   const { resolver, tokens: baseTokens, sources: parsedSources } = loaded;
+
+  // `loadResolver` resolves without linting; only `parse()` runs the lint pass,
+  // and the resolver path never reaches it. Run it here so a resolver-backed
+  // project reports the same lint state as its `terrazzo build`. Once, against
+  // the baseline token set, rather than per tuple.
+  if (!skipLint) {
+    await lintRunner({
+      tokens: baseTokens,
+      sources: parsedSources,
+      config: terrazzoConfig,
+      logger,
+    });
+  }
 
   const diagnostics: Diagnostic[] = [];
   const axes: Axis[] = Object.entries(resolver.source.modifiers ?? {}).map(([name, modifier]) => {

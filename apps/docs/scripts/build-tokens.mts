@@ -26,6 +26,18 @@ const project = await loadProject(
     resolver: 'tokens/resolver.json',
     default: { mode: 'Light', brand: 'Default', typography: 'Sans', a11y: 'Normal' },
     cssVarPrefix: 'sb',
+    lintOptions: {
+      rules: {
+        // `size.base` is a percentage the a11y overlay bumps to 108%, which the
+        // DTCG dimension type has no unit for. The value is a scale factor
+        // consumed as `font-size: <n>%` on the root, not a length.
+        'core/valid-dimension': 'off',
+        // Path roots follow DTCG `$type` names, so the camelCase types
+        // (`cubicBezier`, `fontFamily`, `fontWeight`, `strokeStyle`) cannot
+        // satisfy a kebab-case rule.
+        'core/consistent-naming': 'off',
+      },
+    },
   },
   docsRoot,
 );
