@@ -46,7 +46,7 @@
     "@unpunnyfuns/swatchbook-integrations": "workspace:*",
     "@unpunnyfuns/swatchbook-tokens": "workspace:*",
     "@vitejs/plugin-react": "^6.0.1",
-    "@vitest/browser-playwright": "^4.1.10",
+    "@vitest/browser-playwright": "^4.1.11",
     "@vitest/coverage-v8": "^4.1.8",
     "chromatic": "^16.6.0",
     "playwright": "^1.59.1",
@@ -54,6 +54,6 @@
     "tailwindcss": "^4.2.4",
     "typescript": "^6.0.3",
     "vite": "^8.0.4",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   }
 }

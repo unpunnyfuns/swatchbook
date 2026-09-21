@@ -50,20 +50,22 @@ overrides:
   shell-quote: ^1.8.5
   # GHSA-g7r4-m6w7-qqqr, via @terrazzo/cli's vite-node -> vite chain.
   esbuild: ^0.28.1
-  # js-yaml and fast-uri stay in the patched major (newer majors exist) to avoid
-  # a breaking jump for their consumers. GHSA-5p4m-2wfm-xmqj hits both live
-  # js-yaml majors, so each carries its own floor: 4.3.0 sits one patch below
-  # the fix and still resolved vulnerable.
-  js-yaml@3: '>=3.15.1 <4'
-  js-yaml@4: '>=4.3.1 <5'
-  fast-uri@3: '>=3.1.5 <4'
+  # js-yaml and fast-uri stay in the patched major (newer majors exist — js-yaml
+  # 5.x, fast-uri 4.x) to avoid a breaking jump for their consumers. Both carry
+  # floors raised by a second advisory wave: GHSA-2883-xcg3-v3hh hits both live
+  # js-yaml majors, and fast-uri needs >=3.1.6 for GHSA-jqff-g426-hqxp and three
+  # siblings. js-yaml reaches us via @changesets/cli and the astro chain,
+  # fast-uri via @astrojs/check and the MCP SDK/inspector.
+  js-yaml@3: '>=3.15.2 <4'
+  js-yaml@4: '>=4.3.2 <5'
+  fast-uri@3: '>=3.1.6 <4'
   # GHSA-2v37-7h3g-55p8 (zero-size custom generators loop), via vite -> postcss.
   # 3.x only: nanoid 5.x and 6.x are unaffected and must not be pulled in.
   nanoid@3: '>=3.3.17 <4'
   # postcss (astro/storybook build), hono + @hono/node-server + body-parser
   # (MCP SDK), valibot (storybook): patch bumps within the current major.
   postcss: '>=8.5.18 <9'
-  hono: '>=4.12.34 <5'
+  hono: '>=4.13.5 <5'
   '@hono/node-server': '>=2.0.5 <3'
   body-parser: '>=2.3.0 <3'
   valibot: '>=1.4.2 <2'
@@ -80,3 +82,16 @@ overrides:
   # plugin-swift on the ^0.7.1 catalog entry, so this retires on its next
   # release. Dev-only: plugin-swift is used by apps/storybook, never shipped.
   colorjs.io: '>=0.7.1 <0.8'
+  # 2026-09 wave. Each reaches us only through a build-time chain, and each
+  # has no direct dependant we can bump to pull the fix in: astro and the
+  # vitest family were already moved to patched releases first, and these are
+  # what remained.
+  #
+  # svgo + devalue via astro (starlight's image and serialisation paths).
+  # browserslist + baseline-browser-mapping via @astrojs/react and
+  # @storybook/react-vite. qs via the MCP SDK/inspector.
+  svgo: '>=4.1.0 <5'
+  devalue: '>=5.9.1 <6'
+  browserslist: '>=4.28.7 <5'
+  baseline-browser-mapping: '>=2.11.0 <3'
+  qs: '>=6.16.0 <7'
