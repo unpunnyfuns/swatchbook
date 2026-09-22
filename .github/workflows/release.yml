@@ -39,7 +39,7 @@ jobs:
         with:
           fetch-depth: 0
           # Don't write a token into .git/config. changesets/action below
-          # authenticates via the GITHUB_TOKEN env var, and `gh pr edit` /
+          # authenticates via its `github-token` input, and `gh pr edit` /
           # `gh pr close` use GH_TOKEN. Closes zizmor's `artipacked` finding.
           persist-credentials: false
 
@@ -106,25 +106,32 @@ jobs:
         id: changesets
         uses: changesets/action@8488615a623b1b9c987934bb89eae8af6a946ac1 # v2.1.1
         with:
-          # `version` only — NO `publish:` input. This job is structurally
-          # incapable of publishing; that is the gated `publish` job's job.
-          # `pnpm run version` → `changeset version`.
-          version: pnpm run version
-          commit: 'chore(release): version packages'
-          title: 'chore(release): version packages'
-        env:
+          # `version-script` only — NO `publish-script:` input. This job is
+          # structurally incapable of publishing; that is the gated `publish`
+          # job's job. `pnpm run version` → `changeset version`.
+          version-script: pnpm run version
+          commit-message: 'chore(release): version packages'
+          pr-title: 'chore(release): version packages'
+          # Belt-and-braces against the same structural guarantee: both default
+          # to `true` on the action and only fire on a publish, which this job
+          # never performs. Pinned off so a future default change can't hand
+          # this ungated job the ability to tag or cut releases.
+          create-github-releases: false
+          push-git-tags: false
           # App-installation token (not the default GITHUB_TOKEN) so the push
           # to `changeset-release/main` triggers the VP PR's required checks.
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          # v2 takes this as an input; the v1-era GITHUB_TOKEN env var is no
+          # longer read.
+          github-token: ${{ steps.app-token.outputs.token }}
 
       # The action opens the VP PR with a static title and a boilerplate-led
       # body. Retitle with the computed next version and trim the boilerplate
       # so the PR (and its eventual squash-merge commit) reads informatively.
       - name: Polish Version Packages PR title + body
-        if: steps.changesets.outputs.pullRequestNumber
+        if: steps.changesets.outputs.pr-number
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          PR_NUMBER: ${{ steps.changesets.outputs.pullRequestNumber }}
+          PR_NUMBER: ${{ steps.changesets.outputs.pr-number }}
         run: |
           set -e
           git fetch origin changeset-release/main
