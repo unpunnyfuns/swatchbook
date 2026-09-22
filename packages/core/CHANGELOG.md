@@ -1,5 +1,18 @@
 # @unpunnyfuns/swatchbook-core
 
+## 2.2.0
+
+### Minor Changes
+
+- fd496690bdbae63a7d6e6feb3096b12c1835e324: `Diagnostic.label` carries the originating lint rule id, and the Diagnostics block shows it
+- ddfa84fe5ff0bd31a087e29c820be2c9c1c90b76: `lintOptions` forwards the project's Terrazzo lint config, so the internal lint pass matches `terrazzo build`
+- e010d923a953bd644a66188f2859566071a493e8: Warn at load time when a token's listing preview value comes back corrupted, naming the token path
+- 70b482ab74c0969c4b4bb0e4f6f0eeeb5f92f846: Resolver-backed projects now lint, so `<Diagnostics />` matches `terrazzo build` on every config shape
+
+### Patch Changes
+
+- a4a89792f0ef2cd1d5c1af6ba0565c73ec4f1b9e: Identical diagnostics collapse to one, so a problem reports once rather than once per axis tuple
+
 ## 2.1.1
 
 ### Patch Changes
