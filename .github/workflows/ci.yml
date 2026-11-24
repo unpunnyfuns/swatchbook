@@ -180,18 +180,21 @@ jobs:
           retention-days: 7
 
   storybook-compat:
-    # Guard both ends of the Storybook range the `build` job doesn't reach.
-    # That job exercises the lockfile's latest; this re-pins the lockstep
+    # Cover the parts of the supported Storybook range the `build` job
+    # doesn't reach. That job exercises the lockfile's version, which sits
+    # on the newest supported major; this re-pins the lockstep
     # `@storybook/*` core packages per matrix entry and re-runs the
     # version-sensitive surface (addon + blocks browser tests, the reference
     # Storybook's interaction tests, a full Storybook build).
     #
-    # The `~10.1.0` entry is the floor: it matches the `^10.1.0` peer range
-    # `addon` declares, so a consumer trailing a few minors isn't silently
-    # broken. The `next` entry is the forward canary for the next major,
-    # giving early warning before the peer ranges ever move.
+    # `addon` declares `^10.1.0 || ^11.0.0-rc.0`. The `~10.1.0` entry is
+    # the floor, so a consumer trailing a few minors isn't silently broken.
+    # The `^10.6.0` entry is the top of the older major, which the lockfile
+    # no longer exercises. The `next` entry is the newest prerelease: the
+    # 11 release candidates today, the forward canary for 12 once its
+    # prereleases appear.
     #
-    # Neither entry is a required check in the `main` ruleset, so a red
+    # No entry is a required check in the `main` ruleset, so a red
     # canary reports without blocking a merge. Don't add
     # `continue-on-error` to buy that: it reports failure as success and
     # the signal stops being readable.
@@ -221,11 +224,15 @@ jobs:
           # release whose peer range covers 10.1.
           - storybook: '~10.1.0'
             addon-mcp: '^0.7.0'
-          # Forward canary for the next major. A moving tag rather than a
-          # pinned alpha: a pin goes stale silently, which is the failure
-          # that matters here, since it stays green while testing a version
-          # nobody runs. `minimumReleaseAge: 1440` already holds back
-          # anything published in the last 24h, so the churn stays bounded.
+          # Latest 10.x. A range rather than a pin so it follows 10's
+          # remaining minors and patches.
+          - storybook: '^10.6.0'
+            addon-mcp: '^10.6.0'
+          # Newest prerelease. A moving tag rather than a pin: a pin goes
+          # stale silently, which is the failure that matters here, since it
+          # stays green while testing a version nobody runs.
+          # `minimumReleaseAge: 1440` already holds back anything published
+          # in the last 24h, so the churn stays bounded.
           # addon-mcp ships on the lockstep line above 10.6, so it tracks
           # the same tag.
           - storybook: 'next'
@@ -276,7 +283,7 @@ jobs:
           mkdir -p "$HOME/.cache/ms-playwright"
           cp -RL --update=none /ms-playwright/. "$HOME/.cache/ms-playwright/" || true
 
-      - name: Build + version-sensitive tests against the floor
+      - name: Build + version-sensitive tests against ${{ matrix.storybook }}
         shell: bash
         run: |
           set -o pipefail
