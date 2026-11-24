@@ -1,6 +1,6 @@
 # swatchbook-addon
 
-Storybook 10 addon for documenting DTCG design tokens.
+Storybook addon for documenting DTCG design tokens.
 
 Loads your token files, resolves the alias graph, and adds a toolbar that flips the active theme tuple (e.g. `mode × brand × contrast`, or whatever axes your resolver declares). Every story and MDX doc block re-renders against the new tuple without per-story wiring, so component stories and the token reference share one source of truth.
 

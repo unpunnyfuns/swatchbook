@@ -8,7 +8,7 @@ import type { ReactElement } from 'react';
 // Storybook-internal surface (fragile across Storybook MAJORS). See the
 // major-bump checklist in CLAUDE.md; the import set is pinned by
 // storybook-internal-surface.test.ts.
-import { Button, ToggleButton, WithTooltip } from 'storybook/internal/components';
+import { Button, PopoverProvider, ToggleButton } from 'storybook/internal/components';
 import { addons, types, useGlobals, useStorybookApi } from 'storybook/manager-api';
 import type {
   InitPayload,
@@ -157,9 +157,7 @@ function AxesToolbar(): ReactElement {
     return () => document.removeEventListener('keydown', onDocKey);
   }, [open]);
 
-  // `WithTooltip`'s built-in `closeOnOutsideClick` misses some cases
-  // (portaled popover + manager iframe boundaries). Belt-and-suspenders:
-  // close when the user mouses down anywhere that isn't the trigger wrapper
+  // Close when the user mouses down anywhere that isn't the trigger wrapper
   // or the popover body.
   useEffect(() => {
     if (!open) return;
@@ -200,32 +198,30 @@ function AxesToolbar(): ReactElement {
   const summary = axes.map((a) => activeTuple[a.name] ?? a.default).join(' · ');
   const label = `Swatchbook · ${summary}`;
 
-  const button = h(
+  // Typed as the loose `JSX.Element` because `PopoverProvider` declares its
+  // trigger as an intrinsic element, which `createElement`'s precise return
+  // type for a component fails. At runtime it needs a ref-forwarding child
+  // that spreads DOM props, which `ToggleButton` is.
+  const button: React.JSX.Element = h(
     ToggleButton,
     {
       key: TOOL_ID,
       ariaLabel: label,
       tooltip: label,
       pressed: open,
-      onClick: () => setOpen((prev) => !prev),
-      // Screen-reader disclosure semantics for the popover trigger. We
-      // don't set `aria-controls` because the popover is portaled by
-      // Storybook's `WithTooltip` with a dynamically-generated id we
-      // don't have a stable handle on; `aria-haspopup` + `aria-expanded`
-      // is the practical subset of the disclosure pattern.
+      // No `onClick`: `PopoverProvider` owns the press and toggles through
+      // `onVisibleChange`; a second toggle here would cancel it. It also
+      // supplies `aria-expanded` / `aria-controls`.
       //
-      // `aria-haspopup="true"` (generic) rather than `"dialog"`: the
-      // switcher body is `role="group"` (it's a settings panel of
-      // independent controls, not a modal dialog), so promising
-      // `"dialog"` would misalign the trigger with what AT finds when
-      // focus enters the popover.
-      'aria-haspopup': true as const,
-      'aria-expanded': open,
+      // The popover it renders is a dialog. Storybook 11 stamps
+      // `aria-haspopup="dialog"` on the trigger itself; 10.x doesn't, so
+      // set it here to keep the trigger honest on both.
+      'aria-haspopup': 'dialog' as const,
     },
     h(SwatchbookIcon),
   );
 
-  const tooltipBody = h(ThemeSwitcher, {
+  const popoverBody = h(ThemeSwitcher, {
     axes,
     presets,
     activeTuple,
@@ -239,13 +235,12 @@ function AxesToolbar(): ReactElement {
   return h(
     'span',
     { ref: bodyRef, style: { display: 'inline-flex', alignItems: 'center' } },
-    h(WithTooltip, {
+    h(PopoverProvider, {
+      ariaLabel: 'Swatchbook theme',
       placement: 'bottom',
-      trigger: 'click',
       visible: open,
-      onVisibleChange: (next: boolean) => setOpen(next),
-      closeOnOutsideClick: true,
-      tooltip: tooltipBody,
+      onVisibleChange: setOpen,
+      popover: popoverBody,
       children: button,
     }),
   );
@@ -255,7 +250,10 @@ addons.register(ADDON_ID, () => {
   addons.add(TOOL_ID, {
     type: types.TOOL,
     title: 'Swatchbook theme',
-    match: ({ viewMode, tabId }) => !tabId && (viewMode === 'story' || viewMode === 'docs'),
+    // Storybook 10 passes `tabId` while an addon TAB view is showing; 11
+    // dropped the TAB type and the field with it.
+    match: (data) =>
+      !('tabId' in data && data.tabId) && (data.viewMode === 'story' || data.viewMode === 'docs'),
     render: () => h(AxesToolbar),
   });
 });
