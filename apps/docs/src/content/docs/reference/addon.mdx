@@ -12,7 +12,7 @@ npm install -D @unpunnyfuns/swatchbook-addon @unpunnyfuns/swatchbook-core
 
 This gives you the toolbar, preview decorator, and the `useToken()` hook. The addon depends on `@unpunnyfuns/swatchbook-blocks` and re-exports its full surface (`TokenTable`, `ColorPalette`, `TokenDetail`, `TokenNavigator`, `Diagnostics`, `SwatchbookProvider`, block-side hooks), so no separate install is needed inside a Storybook that already registers the addon; import from either package's name for the same re-exported surface. Install `@unpunnyfuns/swatchbook-blocks` directly only for a non-Storybook consumer of the blocks. See the [authoring guide](/guides/authoring-doc-stories) for MDX composition patterns.
 
-Peer requirements: Storybook 10.1+ on the Vite builder, React 18+.
+Peer requirements: Storybook 10.1+ or 11 on the Vite builder, React 18+.
 
 ## Registration
 

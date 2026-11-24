@@ -22,7 +22,7 @@ One package pulls the whole React surface: toolbar, preview decorator, MDX doc b
 
 | Package | Purpose |
 | --- | --- |
-| [`@unpunnyfuns/swatchbook-addon`](./packages/addon) | Storybook 10 addon. Re-exports the blocks + switcher React surface. |
+| [`@unpunnyfuns/swatchbook-addon`](./packages/addon) | Storybook addon. Re-exports the blocks + switcher React surface. |
 | [`@unpunnyfuns/swatchbook-core`](./packages/core) | Framework-free DTCG loader. |
 | [`@unpunnyfuns/swatchbook-blocks`](./packages/blocks) | MDX doc blocks. |
 | [`@unpunnyfuns/swatchbook-switcher`](./packages/switcher) | Framework-agnostic axis / preset popover UI. |
