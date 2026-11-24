@@ -31,6 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should-publish: ${{ steps.detect.outputs.should-publish }}
+      needs-artifacts: ${{ steps.detect.outputs.needs-artifacts }}
     permissions:
       contents: write
       pull-requests: write
@@ -94,12 +95,26 @@ jobs:
           fi
           on_npm=$(npm view "@unpunnyfuns/swatchbook-core@$version" version \
             --registry https://registry.npmjs.org 2>/dev/null || true)
-          if [ "$on_npm" = "$version" ]; then
-            echo "core@$version already on npm — no publish due."
-            echo "should-publish=false" >> "$GITHUB_OUTPUT"
-          else
+          # "On npm" and "released" are not the same state. Publishing is only
+          # the first half; the tags, GitHub releases and docs dispatch come
+          # after it, and a failure in between leaves the version shipped but
+          # unreleased. Deciding on npm alone made that state unrecoverable:
+          # the next run saw the version published, skipped the whole job, and
+          # reported success while the tags stayed missing (v2.2.0).
+          tag="@unpunnyfuns/swatchbook-core@$version"
+          tagged=$(git tag -l "$tag")
+          if [ "$on_npm" != "$version" ]; then
             echo "core@$version not on npm — a publish is due (gated)."
             echo "should-publish=true" >> "$GITHUB_OUTPUT"
+            echo "needs-artifacts=false" >> "$GITHUB_OUTPUT"
+          elif [ -z "$tagged" ]; then
+            echo "core@$version on npm but untagged — release artifacts are due (gated)."
+            echo "should-publish=false" >> "$GITHUB_OUTPUT"
+            echo "needs-artifacts=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "core@$version on npm and tagged — nothing due."
+            echo "should-publish=false" >> "$GITHUB_OUTPUT"
+            echo "needs-artifacts=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Open or update the Version Packages PR
@@ -179,14 +194,19 @@ jobs:
           fi
 
   # ── Publish ──────────────────────────────────────────────────────────────
-  # Runs ONLY when `prepare` determined a version is bumped-but-unpublished,
-  # and ALWAYS behind the `release` environment's approval gate — regardless
-  # of which commit triggered the run. This is the fix for the old
+  # Runs when `prepare` determined the release for the committed version is
+  # incomplete — either unpublished, or published but missing its tags — and
+  # ALWAYS behind the `release` environment's approval gate, regardless of
+  # which commit triggered the run. This is the fix for the old
   # commit-message-conditioned gate: there is now exactly one publish path and
   # it is unconditionally gated, so no push can route a publish around it.
+  #
+  # Every step below is idempotent, which is what makes the artifacts-only
+  # entry safe: the build/publish step is skipped outright, the tag loop skips
+  # releases that already exist, and the docs dispatch is a rebuild.
   publish:
     needs: prepare
-    if: needs.prepare.outputs.should-publish == 'true'
+    if: needs.prepare.outputs.should-publish == 'true' || needs.prepare.outputs.needs-artifacts == 'true'
     runs-on: ubuntu-latest
     # Requires human approval (repo Settings → Environments → release).
     # Defends against the compromised-maintainer scenario: a malicious commit
@@ -243,7 +263,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # Skipped on an artifacts-only run: the packages are already on npm, and
+      # `changeset publish` would be a no-op reached through a full build with
+      # the OIDC token live. Don't hold that token open for nothing.
       - name: Build + publish
+        if: needs.prepare.outputs.should-publish == 'true'
         run: pnpm run release
         env:
           NPM_CONFIG_PROVENANCE: true
@@ -267,8 +291,14 @@ jobs:
           echo "Verifying fixed group at v$version on npm…"
 
           missing=()
-          # npm propagates new versions through its CDN within a few seconds
-          # but not always instantly; retry each lookup before declaring a miss.
+          # npm's read-after-write is not immediate, and publishing six scoped
+          # packages in a burst makes it slower still. The v2.2.0 release lost
+          # this race on a 5×5s budget: five of the six reported missing after
+          # burning the full retry loop while the publish had in fact succeeded
+          # — a genuine 404 answers fast, so a slow miss means propagation, not
+          # absence. Three minutes per package is far past anything observed.
+          # This gate is worth keeping strict: a partial fixed-group publish
+          # must not get tagged. Only the budget was wrong.
           for pkg in \
             @unpunnyfuns/swatchbook-core \
             @unpunnyfuns/swatchbook-addon \
@@ -277,14 +307,14 @@ jobs:
             @unpunnyfuns/swatchbook-integrations \
             @unpunnyfuns/swatchbook-mcp; do
             ok=""
-            for attempt in 1 2 3 4 5; do
+            for attempt in $(seq 1 18); do
               published=$(npm view "$pkg@$version" version --registry "$NPM_REGISTRY" 2>/dev/null || true)
               if [ "$published" = "$version" ]; then
                 ok="yes"
-                echo "  ✓ $pkg@$version"
+                echo "  ✓ $pkg@$version (attempt $attempt)"
                 break
               fi
-              sleep 5
+              sleep 10
             done
             if [ -z "$ok" ]; then
               echo "  ✗ $pkg@$version not found on npm"
@@ -299,7 +329,14 @@ jobs:
               echo "  - $pkg@$version"
             done
             echo ""
-            echo "Re-running the release workflow will re-attempt publish for any package not yet on npm (idempotent for already-shipped versions)."
+            echo "Check npm directly before treating this as a failed publish — a slow"
+            echo "miss here can mean propagation rather than absence."
+            echo ""
+            echo "If the packages are in fact on npm, re-run the release workflow: the"
+            echo "committed version is published but untagged, so \`prepare\` routes back"
+            echo "into this job to finish the tags, releases and docs."
+            echo "If some are genuinely missing, re-running re-attempts the publish for"
+            echo "those (idempotent for already-shipped versions)."
             exit 1
           fi
 
