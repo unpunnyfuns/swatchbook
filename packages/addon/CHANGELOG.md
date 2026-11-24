@@ -1,5 +1,17 @@
 # @unpunnyfuns/swatchbook-addon
 
+## 2.3.0
+
+### Minor Changes
+
+- dfb4e2dfad905392b3031b1eca3829b3469f195c: Support Storybook 11 alongside 10: widen the peer range to `^10.1.0 || ^11.0.0-rc.0` and move the toolbar popover to `PopoverProvider`.
+
+### Patch Changes
+
+- @unpunnyfuns/swatchbook-blocks@2.3.0
+  - @unpunnyfuns/swatchbook-core@2.3.0
+  - @unpunnyfuns/swatchbook-switcher@2.3.0
+
 ## 2.2.0
 
 ### Patch Changes
